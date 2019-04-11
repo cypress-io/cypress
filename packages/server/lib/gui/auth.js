@@ -1,10 +1,11 @@
+const _ = require('lodash')
 const bodyParser = require('body-parser')
 const debug = require('debug')('cypress:server:auth')
 const express = require('express')
 const Promise = require('bluebird')
 const { shell } = require('electron')
+const url = require('url')
 
-const konfig = require('../konfig')
 const random = require('../util/random')
 const windows = require('./windows')
 const user = require('../user')
@@ -16,41 +17,41 @@ let authCallback
 let authState
 let server
 
-const getDashboardOrigin = () => {
-  return konfig('dashboard_url')
+const getOriginFromUrl = (originalUrl) => {
+  const parsedUrl = url.parse(originalUrl)
+
+  return url.format(_.pick(parsedUrl, ['protocol', 'slashes', 'hostname', 'port']))
 }
 
-const getDashboardAuthUrl = () => {
-  return user.getLoginUrl()
-  .then((url) => {
-    const { port } = server.address()
+const buildFullLoginUrl = (baseLoginUrl) => {
+  const { port } = server.address()
 
-    authState = random.id(32)
-    const authUrl = `${url}?port=${port}&state=${authState}`
+  authState = random.id(32)
+  const authUrl = `${baseLoginUrl}?port=${port}&state=${authState}`
 
-    return authUrl
-  })
+  return authUrl
 }
 
 /**
- * @returns a promise that is resolved with auth info when auth is complete or rejected when it fails
+ * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
 const start = () => {
-  return launchServer()
-  .then(getDashboardAuthUrl)
-  .then((url) => {
-    debug('Trying to open native auth to URL ', url)
+  return user.getBaseLoginUrl()
+  .tap(launchServer)
+  .then(buildFullLoginUrl)
+  .then((loginUrl) => {
+    debug('Trying to open native auth to URL ', loginUrl)
 
-    return launchNativeAuth(url)
+    return launchNativeAuth(loginUrl)
     .catch((e) => {
       debug('Failed to launch native auth, falling back to Electron:', e.message)
 
-      return launchElectronAuth(url)
+      return launchElectronAuth(loginUrl)
     })
   })
   .then(() => {
-    return new Promise((resolve) => {
-      authCallback = resolve
+    return Promise.fromCallback((cb) => {
+      authCallback = cb
     })
   })
   .tap(stopServer)
@@ -59,15 +60,17 @@ const start = () => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const launchServer = () => {
+const launchServer = (baseLoginUrl) => {
   if (!server) {
-    debug('Launching auth server')
+    const origin = getOriginFromUrl(baseLoginUrl)
+
+    debug('Launching auth server expecting origin', origin)
     app = express()
 
     app.use(bodyParser.json())
 
     app.use('/auth', (req, res, next) => {
-      res.header('Access-Control-Allow-Origin', getDashboardOrigin())
+      res.header('Access-Control-Allow-Origin', origin)
       res.header('Access-Control-Allow-Headers', '*')
       res.header('Access-Control-Allow-Methods', 'POST')
       next()
@@ -77,9 +80,9 @@ const launchServer = () => {
       debug('Received POST to /auth with body %o', req.body)
 
       if (req.body.code && req.body.state === authState) {
-        return user.logInFromCode(req.body.code, getDashboardOrigin())
+        return user.logInFromCode(req.body.code, origin)
         .then((user) => {
-          authCallback(user)
+          authCallback(undefined, user)
           res.json({ success: true })
         })
         .catch(() => {
@@ -90,8 +93,8 @@ const launchServer = () => {
       res.json({ success: false })
     })
 
-    return new Promise((resolve) => {
-      server = app.listen(0, '127.0.0.1', resolve)
+    return new Promise.fromCallback((cb) => {
+      server = app.listen(0, '127.0.0.1', cb)
     })
   }
 
@@ -107,12 +110,12 @@ const stopServer = () => {
   server = undefined
 }
 
-const launchNativeAuth = (url) => {
+const launchNativeAuth = (loginUrl) => {
   // launch an express server to listen for the auth redirect
-  return openExternalAsync(url, {})
+  return openExternalAsync(loginUrl, {})
 }
 
-const launchElectronAuth = (url) => {
+const launchElectronAuth = (loginUrl) => {
   debug('Opening Electron auth')
 
   return windows.open({
@@ -123,7 +126,7 @@ const launchElectronAuth = (url) => {
     preload: false,
     title: 'Login',
     type: 'DASHBOARD_LOGIN',
-    url,
+    url: loginUrl,
   })
 }
 

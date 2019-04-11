@@ -49,11 +49,11 @@ describe "lib/user", ->
       user.logOut().catch ->
         expect(cache.removeUser).to.be.calledOnce
 
-  context ".getLoginUrl", ->
-    it "calls api.getLoginUrl", ->
-      sinon.stub(api, "getLoginUrl").resolves("https://github.com/login")
+  context ".getBaseLoginUrl", ->
+    it "calls api.getBaseLoginUrl", ->
+      sinon.stub(api, "getBaseLoginUrl").resolves("https://github.com/login")
 
-      user.getLoginUrl().then (url) ->
+      user.getBaseLoginUrl().then (url) ->
         expect(url).to.eq("https://github.com/login")
 
   context ".ensureAuthToken", ->

@@ -10,7 +10,7 @@ module.exports = {
   set: (user) ->
     cache.setUser(user)
 
-  getLoginUrl: ->
+  getBaseLoginUrl: ->
     api.getAuthUrls()
     .get('dashboardAuthUrl')
 

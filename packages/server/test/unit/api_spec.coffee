@@ -622,7 +622,7 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.isApiError).to.be.true
 
-  context ".getLoginUrl", ->
+  context ".getBaseLoginUrl", ->
     it "GET /auth + returns the url", ->
       nock("http://localhost:1234")
       .matchHeader("x-os-name", "linux")
@@ -632,7 +632,7 @@ describe "lib/api", ->
         url: "https://github.com/authorize"
       })
 
-      api.getLoginUrl().then (url) ->
+      api.getBaseLoginUrl().then (url) ->
         expect(url).to.eq("https://github.com/authorize")
 
     it "tags errors", ->
@@ -642,7 +642,7 @@ describe "lib/api", ->
       .get("/auth")
       .reply(500, {})
 
-      api.getLoginUrl()
+      api.getBaseLoginUrl()
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->

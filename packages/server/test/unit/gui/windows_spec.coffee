@@ -80,7 +80,7 @@ describe "lib/gui/windows", ->
         type: "DASHBOARD_LOGIN"
       }
 
-      sinon.stub(user, "getLoginUrl").resolves("about:blank")
+      sinon.stub(user, "getBaseLoginUrl").resolves("about:blank")
       @win.loadURL.throws()
 
       Windows.open("/path/to/project", options).catch =>
@@ -96,7 +96,7 @@ describe "lib/gui/windows", ->
       url = "https://github.com/login"
       url2 = "https://github.com?code=code123"
 
-      sinon.stub(user, "getLoginUrl").resolves(url)
+      sinon.stub(user, "getBaseLoginUrl").resolves(url)
 
       sinon.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
 
@@ -114,7 +114,7 @@ describe "lib/gui/windows", ->
       url = "https://github.com/login"
       url2 = "https://github.com?code=code123"
 
-      sinon.stub(user, "getLoginUrl").resolves(url)
+      sinon.stub(user, "getBaseLoginUrl").resolves(url)
 
       sinon.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
 
