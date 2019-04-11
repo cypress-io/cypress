@@ -126,7 +126,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set(obj)
 
-      if aliasObj = cy.getAlias(selector)
+      ## We want to strip everything after the first '.'
+      ## only when it is potentially a number or 'all'
+      if selector.slice(1) in _.keys(cy.state("aliases"))
+         toSelect = selector
+      else
+         toSelect = selector.split(".")[0]
+
+      if aliasObj = cy.getAlias(toSelect)
         {subject, alias, command} = aliasObj
 
         return do resolveAlias = ->
