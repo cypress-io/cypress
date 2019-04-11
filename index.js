@@ -169,7 +169,6 @@ module.exports = {
         'react/jsx-equals-spacing': 'error',
         'react/jsx-filename-extension': 'error',
         'react/jsx-no-duplicate-props': 'error',
-        'react/jsx-no-target-blank': 'error',
         'react/jsx-no-undef': 'error',
         'react/jsx-pascal-case': 'error',
         'react/jsx-uses-react': 'error',
