@@ -866,7 +866,7 @@ describe "src/cy/commands/connectors", ->
 
           cy.wrap({ foo: null }).its("foo")
 
-        it "throws the exitedEarlyErr as precedence when property does not exist even if the additional assertions fail", (done) ->
+        it "throws the traversalErr as precedence when property does not exist even if the additional assertions fail", (done) ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
@@ -884,7 +884,7 @@ describe "src/cy/commands/connectors", ->
 
           cy.wrap({ a: "a" }).its("b").should("be.true")
 
-        it "throws the exitedEarlyErr as precedence when property value is undefined even if the additional assertions fail", (done) ->
+        it "throws the traversalErr as precedence when property value is undefined even if the additional assertions fail", (done) ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 

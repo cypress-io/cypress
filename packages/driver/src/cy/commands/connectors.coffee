@@ -134,7 +134,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     message = getMessage()
 
-    exitedEarlyErr = null
+    traversalErr = null
 
     options._log = Cypress.log
       message: message
@@ -209,9 +209,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if prop and valIsNullOrUndefined
         if index is 0
-          exitedEarlyErr = subjectNullOrUndefinedErr(prop, acc)
+          traversalErr = subjectNullOrUndefinedErr(prop, acc)
         else
-          exitedEarlyErr = propertyNotOnPreviousNullOrUndefinedValueErr(prop, acc, previousProp)
+          traversalErr = propertyNotOnPreviousNullOrUndefinedValueErr(prop, acc, previousProp)
 
         return acc
 
@@ -219,18 +219,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## then return the final traversed accumulator here
       if not prop
         if valIsNullOrUndefined
-          exitedEarlyErr = propertyValueNullOrUndefinedErr(previousProp, acc)
+          traversalErr = propertyValueNullOrUndefinedErr(previousProp, acc)
 
         return acc
 
       ## attempt to lookup this property on the acc
       ## if our property does not exist then allow
-      ## undefined to pass through but set the exitedEarlyErr
+      ## undefined to pass through but set the traversalErr
       ## since if we don't have any assertions we want to
       ## provide a very specific error message and not the
       ## generic existence one
       if (prop not of primitiveToObject(acc))
-        exitedEarlyErr = propertyNotOnSubjectErr(prop)
+        traversalErr = propertyNotOnSubjectErr(prop)
 
         return undefined
 
@@ -238,7 +238,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       return traverseObjectAtPath(acc[prop], pathsArray, index + 1)
 
     getValue = ->
-      exitedEarlyErr = null
+      ## reset this on each go around so previous errors
+      ## don't leak into new failures or upcoming assertion errors
+      traversalErr = null
 
       remoteSubject = cy.getRemotejQueryInstance(subject)
 
@@ -306,8 +308,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## if we failed our upcoming assertions and also
             ## exited early out of getting the value of our
             ## subject then reset the error to this one
-            if exitedEarlyErr
-              return options.error = exitedEarlyErr
+            if traversalErr
+              return options.error = traversalErr
         })
 
   Commands.addAll({ prevSubject: true }, {
