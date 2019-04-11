@@ -63,7 +63,10 @@ rp = request.defaults (params = {}, callback) ->
   )
 
   waitForTokenIfRefreshing(params)
-  .then ->
+  .then (authToken) ->
+    if authToken
+      params.auth.bearer = authToken
+
     request[method](params, callback)
     .promise()
     .tap (resp) ->
@@ -101,18 +104,17 @@ getCachedResponse = (params) ->
 refreshingTokenPromise = null
 
 waitForTokenIfRefreshing = (params) ->
-  if refreshingTokenPromise and _.get(params.auth, 'bearer')
+  ## if a token refresh is in process and this request requires auth, wait for it to complete before continuing
+  if refreshingTokenPromise and params.auth
     return refreshingTokenPromise
-    .then (authToken) ->
-      params.auth.bearer = authToken
 
   Promise.resolve()
 
-## ensure that we only have one refresh request in-flight at once
 refreshTokenOrWait = () ->
+  ## ensure that we only have one refresh request in-flight at once
   ## directly using cache here because including `user` would cause a circular dependency
   ## TODO: refactor
-  if !refreshingTokenPromise
+  if not refreshingTokenPromise
     refreshingTokenPromise = cache.getUser()
     .then (user) ->
       getTokenFromRefresh(user.refreshToken)
