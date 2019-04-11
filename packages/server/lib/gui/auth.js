@@ -54,7 +54,7 @@ const start = () => {
       authCallback = cb
     })
   })
-  .tap(stopServer)
+  .finally(stopServer)
 }
 
 /**
@@ -85,7 +85,8 @@ const launchServer = (baseLoginUrl) => {
           authCallback(undefined, user)
           res.json({ success: true })
         })
-        .catch(() => {
+        .catch((err) => {
+          authCallback(err)
           res.json({ success: false })
         })
       }

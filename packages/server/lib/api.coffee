@@ -6,27 +6,25 @@ request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 humanInterval = require("human-interval")
+semaphore  = require("semaphore")
 agent      = require("@packages/network").agent
 pkg        = require("@packages/root")
 routes     = require("./util/routes")
 system     = require("./util/system")
-
-## TODO: improve this, dont just use
-## requests because its way too verbose
-# if debug.enabled
-#   request.debug = true
+cache      = require("./cache")
 
 THIRTY_SECONDS = humanInterval("30 seconds")
 SIXTY_SECONDS = humanInterval("60 seconds")
 TWO_MINUTES = humanInterval("2 minutes")
 
-RESPONSE_CACHE = {}
 
 DELAYS = [
   THIRTY_SECONDS
   SIXTY_SECONDS
   TWO_MINUTES
 ]
+
+responseCache = {}
 
 if intervals = process.env.API_RETRY_INTERVALS
   DELAYS = _
@@ -36,9 +34,9 @@ if intervals = process.env.API_RETRY_INTERVALS
   .value()
 
 rp = request.defaults (params = {}, callback) ->
-  if params.cacheable and RESPONSE_CACHE[params.url]
+  if params.cacheable and resp = getCachedResponse(params)
     debug("resolving with cached response for ", params.url)
-    return Promise.resolve(RESPONSE_CACHE[params.url])
+    return Promise.resolve(resp)
 
   _.defaults(params, {
     agent: agent
@@ -58,19 +56,75 @@ rp = request.defaults (params = {}, callback) ->
 
   # use %j argument to ensure deep nested properties are serialized
   debug(
-    "request to url: %s with params: %j",
+    "request to url: %s with params: %j and token: %s",
     "#{params.method} #{params.url}",
-    _.pick(params, "body", "headers")
+    _.pick(params, "body", "headers"),
+    params.auth && params.auth.bearer
   )
 
-  request[method](params, callback)
-  .promise()
-  .tap (resp) ->
-    if params.cacheable
-      debug("caching response for ", params.url)
-      RESPONSE_CACHE[params.url] = resp
+  waitForTokenIfRefreshing(params)
+  .then ->
+    request[method](params, callback)
+    .promise()
+    .tap (resp) ->
+      if params.cacheable
+        debug("caching response for ", params.url)
+        cacheResponse(resp, params)
 
-    debug("response %o", resp)
+      debug("response %o", resp)
+    .catch { statusCode: 401 }, (err) ->
+      if not params.auth.bearer
+        debug("received 401 but request was not sent with token, not retrying")
+        throw err
+
+      if params.retryingAfterRefresh
+        debug("received second 401 error, not retrying")
+        throw err
+
+      debug("received 401 status code from api for %s, refreshing token once and retrying: ", params.url, err.message)
+
+      refreshTokenOrWait()
+      .then (authToken) ->
+        debug("new token received", authToken)
+        # retry request with new token
+        params.method = method
+        params.auth.bearer = authToken
+        params.retryingAfterRefresh = true
+        rp(params)
+
+cacheResponse = (resp, params) ->
+  responseCache[params.url] = resp
+
+getCachedResponse = (params) ->
+  responseCache[params.url]
+
+refreshingTokenPromise = null
+
+waitForTokenIfRefreshing = (params) ->
+  if refreshingTokenPromise and _.get(params.auth, 'bearer')
+    return refreshingTokenPromise
+    .then (authToken) ->
+      params.auth.bearer = authToken
+
+  Promise.resolve()
+
+## ensure that we only have one refresh request in-flight at once
+refreshTokenOrWait = () ->
+  ## directly using cache here because including `user` would cause a circular dependency
+  ## TODO: refactor
+  if !refreshingTokenPromise
+    refreshingTokenPromise = cache.getUser()
+    .then (user) ->
+      getTokenFromRefresh(user.refreshToken)
+      .then (tokens) ->
+        user.authToken = tokens.access_token
+        user.refreshToken = tokens.refresh_token
+        cache.setUser(user)
+        user.authToken
+    .finally ->
+      refreshingTokenPromise = null
+
+  refreshingTokenPromise
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -97,6 +151,30 @@ isRetriableError = (err) ->
   (500 <= err.statusCode < 600) or
   not err.statusCode?
 
+getAuthUrls = ->
+  rp.get({
+    url: routes.auth(),
+    json: true
+    cacheable: true
+    headers: {
+      "x-route-version": "2"
+    }
+  })
+  .catch(tagError)
+
+getTokenFromRefresh = (refreshToken) ->
+  getAuthUrls()
+  .get('refreshEndpointUrl')
+  .then (refreshEndpointUrl) ->
+    rp.post({
+      url: refreshEndpointUrl
+      json: true
+      body: {
+        refresh_token: refreshToken
+      }
+    })
+  .catch(tagError)
+
 module.exports = {
   rp
 
@@ -114,7 +192,7 @@ module.exports = {
     })
 
   getTokenFromCode: (code, redirectUri) ->
-    @getAuthUrls()
+    getAuthUrls()
     .get('tokenEndpointUrl')
     .then (tokenEndpointUrl) ->
       rp.post({
@@ -127,18 +205,9 @@ module.exports = {
       })
     .catch(tagError)
 
-  getTokenFromRefresh: (refreshToken) ->
-    @getAuthUrls()
-    .get('refreshEndpointUrl')
-    .then (refreshEndpointUrl) ->
-      rp.post({
-        url: refreshEndpointUrl
-        json: true
-        body: {
-          refresh_token: refreshToken
-        }
-      })
-    .catch(tagError)
+  getTokenFromRefresh
+
+  getAuthUrls
 
   getOrgs: (authToken) ->
     rp.get({
@@ -335,17 +404,6 @@ module.exports = {
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
-
-  getAuthUrls: ->
-    rp.get({
-      url: routes.auth(),
-      json: true
-      cacheable: true
-      headers: {
-        "x-route-version": "2"
-      }
-    })
     .catch(tagError)
 
   _projectToken: (method, projectId, authToken) ->
