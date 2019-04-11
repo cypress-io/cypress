@@ -569,7 +569,7 @@ describe "src/cy/commands/connectors", ->
             done()
           cy.noop({foo: "bar"}).its("fizz.buzz")
 
-    context.only "#its", ->
+    context "#its", ->
       beforeEach ->
         @remoteWindow = cy.state("window")
 
@@ -611,6 +611,15 @@ describe "src/cy/commands/connectors", ->
         }
 
         cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
+
+      it "does not invoke a function and can assert it throws", ->
+        err = new Error("nope cant access me")
+
+        obj = {
+          foo:  -> throw err
+        }
+
+        cy.wrap(obj).its("foo").should("throw", err)
 
       it "returns property", ->
         cy.noop({baz: "baz"}).its("baz").then (num) ->
