@@ -123,29 +123,22 @@ setTestTimings = (test, name, obj) ->
 setWallClockDuration = (test) ->
   test.wallClockDuration = new Date() - test.wallClockStartedAt
 
-reduceProps = (obj, props) ->
-  _.reduce props, (memo, prop) ->
-    if _.has(obj, prop) or (obj[prop] isnt undefined)
-      memo[prop] = obj[prop]
-    memo
-  , {}
-
 wrap = (runnable) ->
   ## we need to optimize wrap by converting
   ## tests to an id-based object which prevents
   ## us from recursively iterating through every
   ## parent since we could just return the found test
-  reduceProps(runnable, RUNNABLE_PROPS)
+  $utils.reduceProps(runnable, RUNNABLE_PROPS)
 
 wrapAll = (runnable) ->
   _.extend(
     {},
-    reduceProps(runnable, RUNNABLE_PROPS),
-    reduceProps(runnable, RUNNABLE_LOGS)
+    $utils.reduceProps(runnable, RUNNABLE_PROPS),
+    $utils.reduceProps(runnable, RUNNABLE_LOGS)
   )
 
 wrapErr = (err) ->
-  reduceProps(err, ERROR_PROPS)
+  $utils.reduceProps(err, ERROR_PROPS)
 
 getHookName = (hook) ->
   ## find the name of the hook by parsing its

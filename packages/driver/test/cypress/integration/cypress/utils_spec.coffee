@@ -2,6 +2,17 @@ _ = Cypress._
 $utils = Cypress.utils
 
 describe "driver/src/cypress/utils", ->
+  context ".reduceProps", ->
+    it "reduces obj to only include props in props", ->
+      obj = {
+        foo: 'foo',
+        bar: 'bar',
+        baz: 'baz'
+      }
+
+      obj = $utils.reduceProps(obj, ['foo', 'bar'])
+      expect(obj).to.deep.eq {foo: 'foo', bar: 'bar'}
+
   context ".filterOutOptions", ->
     it "returns new obj based on the delta from the filter", ->
       obj = $utils.filterOutOptions {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}

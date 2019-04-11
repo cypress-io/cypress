@@ -49,6 +49,15 @@ module.exports = _.extend(errUtils, {
     keys = _.keys(casesObj)
     throw new Error("The switch/case value: '#{value}' did not match any cases: #{keys.join(', ')}.")
 
+  reduceProps: (obj, props = []) ->
+    return null if not obj
+
+    _.reduce props, (memo, prop) ->
+      if _.has(obj, prop) or (obj[prop] isnt undefined)
+        memo[prop] = obj[prop]
+      memo
+    , {}
+
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'
     ## property so we have to normalize that

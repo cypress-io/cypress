@@ -2,8 +2,10 @@ const _ = require('lodash')
 const { codeFrameColumns } = require('@babel/code-frame')
 
 const $errorMessages = require('./error_messages')
-const twoOrMoreNewLinesRe = /\n{2,}/
 
+const ERROR_PROPS = 'message mdMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl'.split(' ')
+
+const twoOrMoreNewLinesRe = /\n{2,}/
 const mdReplacements = [
   ['`', '\\`'],
 ]
@@ -258,6 +260,7 @@ const getObjValueByPath = (obj, keyPath) => {
 }
 
 module.exports = {
+  ERROR_PROPS,
   modifyErrMsg,
   appendErrMsg,
   makeErrFromObj,
