@@ -11,6 +11,7 @@ import events from './lib/events'
 import runnablesStore from './runnables/runnables-store'
 import scroller from './lib/scroller'
 import statsStore from './header/stats-store'
+import shortcuts from './lib/shortcuts'
 
 import Header from './header/header'
 import Runnables from './runnables/runnables'
@@ -74,7 +75,11 @@ class Reporter extends Component {
   }
 
   componentDidMount () {
+    shortcuts.start()
     EQ.init()
+  }
+  componentWillUnmount () {
+    shortcuts.stop()
   }
 }
 
