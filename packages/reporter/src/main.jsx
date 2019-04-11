@@ -75,7 +75,7 @@ class Reporter extends Component {
   }
 
   componentDidMount () {
-    shortcuts.start()
+    shortcuts.start(this.props.appState)
     EQ.init()
   }
   componentWillUnmount () {
