@@ -5,6 +5,7 @@ const $errorMessages = require('./error_messages')
 
 const ERROR_PROPS = 'message mdMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl'.split(' ')
 
+const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
 const mdReplacements = [
   ['`', '\\`'],
@@ -207,6 +208,20 @@ const getErrMessage = (err) => {
   return err
 }
 
+const getErrStack = (err) => {
+  // if cypress or assertion error
+  // don't return the stack
+  if (CypressErrorRe.test(err.name)) {
+    if (_.isString(err)) {
+      return err.toString()
+    }
+
+    return err.message.toString()
+  }
+
+  return err.stack
+}
+
 //# TODO: This isn't in use for the reporter,
 //# but we may want this for stdout in run mode
 const getCodeFrame = (source, path, lineNumber, columnNumber) => {
@@ -273,6 +288,7 @@ module.exports = {
   getErrMsgWithObjByPath,
   getErrMessage,
   errMsgByPath,
+  getErrStack,
   getCodeFrame,
   escapeErrMarkdown,
   getObjValueByPath,

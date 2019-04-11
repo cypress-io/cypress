@@ -10,7 +10,6 @@ $errUtils = require("./error_utils")
 
 ## adds class methods for command, route, and agent logging
 ## including the intermediate $Log interface
-CypressErrorRe  = /(AssertionError|CypressError)/
 groupsOrTableRe = /^(groups|table)$/
 parentOrChildRe = /parent|child/
 SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
@@ -309,12 +308,7 @@ Log = (state, config, obj) ->
       return @
 
     getError: (err) ->
-      ## dont log stack traces on cypress errors
-      ## or assertion errors
-      if CypressErrorRe.test(err.name)
-        err.toString()
-      else
-        err.stack
+      $errUtils.getErrStack(err)
 
     setElAttrs: ->
       $el = @get("$el")
