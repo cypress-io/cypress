@@ -71,7 +71,7 @@ const isWercker = () => {
  */
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
-  azure: isAzureCi,
+  'azure': isAzureCi,
   'bamboo': 'bamboo.buildNumber',
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
