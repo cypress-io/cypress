@@ -26,16 +26,18 @@ const extract = (envKeys) => {
  * Returns true if running on TeamFoundation server.
  * @see https://technet.microsoft.com/en-us/hh850448(v=vs.92)
  */
-const isTeamFoundation = () =>
-  process.env.TF_BUILD && process.env.TF_BUILD_BUILDNUMBER
+const isTeamFoundation = () => {
+  return process.env.TF_BUILD && process.env.TF_BUILD_BUILDNUMBER
+}
 
 /**
  * Returns true if running on Azure CI pipeline.
  * See environment variables in the issue #3657
  * @see https://github.com/cypress-io/cypress/issues/3657
 */
-const isAzureCi = () =>
-  process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
+const isAzureCi = () => {
+  return process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
+}
 
 const isCodeshipBasic = () => {
   return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
@@ -123,7 +125,7 @@ const _providerCiParams = () => {
       'BUILD_BUILDID',
       'BUILD_BUILDNUMBER',
       'BUILD_CONTAINERID',
-      'BUILD_REPOSITORY_URI'
+      'BUILD_REPOSITORY_URI',
     ]),
     bamboo: extract([
       'bamboo.resultsUrl',
@@ -292,7 +294,7 @@ const _providerCommitParams = function () {
       branch: env.BUILD_SOURCEBRANCHNAME,
       message: env.BUILD_SOURCEVERSIONMESSAGE,
       authorName: env.BUILD_SOURCEVERSIONAUTHOR,
-      authorEmail: env.BUILD_REQUESTEDFOREMAIL
+      authorEmail: env.BUILD_REQUESTEDFOREMAIL,
     },
     bamboo: {
       // sha: ???
