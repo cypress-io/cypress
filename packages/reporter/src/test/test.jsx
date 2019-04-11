@@ -55,12 +55,6 @@ class Test extends Component {
           </div>
         </div>
         {this._contents()}
-        <FlashOnClick
-          message='Printed output to your console'
-          onClick={this._onErrorClick}
-        >
-          <pre className='test-error'>{model.err.displayMessage}</pre>
-        </FlashOnClick>
       </div>
     )
   }

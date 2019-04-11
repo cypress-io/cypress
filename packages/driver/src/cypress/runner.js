@@ -258,12 +258,14 @@ const onFirstTest = function (suite, fn) {
 const getAllSiblingTests = function (suite, getTestById) {
   const tests = []
 
-  suite.eachTest((test) => {
+  suite.eachTest((testRunnable) => {
     //# iterate through each of our suites tests.
     //# this will iterate through all nested tests
     //# as well.  and then we add it only if its
     //# in our grepp'd tests array
-    if (getTestById(test.id)) {
+    const test = getTestById(testRunnable.id)
+
+    if (test) {
       return tests.push(test)
     }
   })
@@ -353,16 +355,16 @@ const lastTestThatWillRunInSuite = (test, tests) => {
 }
 
 const isLastTest = (test, tests) => {
-  return test === _.last(tests)
+  return test.id === _.get(_.last(tests), 'id')
 }
 
 const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
-const testCanRetry = (test) => {
-  return test._currentRetry < test._retries
-}
+// const testCanRetry = (test) => {
+//   return test._currentRetry < test._retries
+// }
 
 const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, setTest, getTests) {
   //# bail if our _runner doesnt have a hook.
@@ -381,31 +383,21 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
 
     const allTests = getTests()
 
-    const changeFnToRunAfterHooks = (hookName) => {
+    const changeFnToRunAfterHooks = () => {
       const originalFn = fn
 
       const test = getTest()
 
       fn = function (...args) {
 
-        if (hookName === 'afterEach') {
-
-          const testWillRetry = test.state === 'failed' && testCanRetry(test)
-          const siblings = getAllSiblingTests(test.parent, getTestById)
-          const afterAllWillFire = (test === _.last(siblings) || test === _.last(allTests)) && !testWillRetry
-
-          // we now know if another hook is coming after this one.
-          // don't call testAfterRun if another hook is coming
-          if (afterAllWillFire) {
-            return originalFn.apply(this, args)
-          }
-        }
-
         setTest(null)
 
-        if (test.state === 'passed') {
-          Cypress.action('runner:pass', wrap(test))
+        if (test.final !== false) {
           test.final = true
+          if (test.state === 'passed') {
+            Cypress.action('runner:pass', wrap(test))
+          }
+
         }
 
         testAfterRun(test, Cypress)
@@ -427,10 +419,14 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         //# the same parent suite as our current test
         // const tests = getAllSiblingTests(t_1.parent, getTestById)
 
-        //# make sure this test isnt the last test overall but also
-        //# isnt the last test in our grep'd parent suite's tests array
-        if (this.suite.root && ((t !== _.last(allTests)) && (t !== _.last(tests)) || testCanRetry(t))) {
-          changeFnToRunAfterHooks('afterEach')
+        if (this.suite.root) {
+
+          //# make sure this test isnt the last test overall but also
+          //# isnt the last test in our grep'd parent suite's tests array
+          if (t.final === false || (t !== _.last(allTests)) && (t !== _.last(tests))) {
+            changeFnToRunAfterHooks()
+          }
+
         }
 
         break
@@ -457,7 +453,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
               (isRootSuite(this.suite.parent) && lastTestThatWillRunInSuite(t, siblings)) ||
               (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
           ) {
-            changeFnToRunAfterHooks('afterAll')
+            changeFnToRunAfterHooks()
           }
         }
 
@@ -710,6 +706,8 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     return Cypress.action('runner:suite:start', wrap(suite))
   })
 
+  _runner.bufferSuiteEnd = []
+
   _runner.on('suite end', (suite) => {
     //# cleanup our suite + its hooks
     forceGc(suite)
@@ -721,7 +719,8 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
 
     _emissions.ended[suite.id] = true
 
-    return Cypress.action('runner:suite:end', wrap(suite))
+    // _runner.bufferSuiteEnd.push([wrap(suite)])
+    Cypress.action('runner:suite:end', wrap(suite))
   })
 
   _runner.on('hook', (hook) => {
@@ -914,20 +913,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
     }
 
     // first time seeing a retried test
+    // that hasn't already replaced our test
     if (test._currentRetry > 0 && _testsById[test.id] !== test) {
-
-      const prevAttempt = _testsById[test.id]
-
-      const prevAttempts = prevAttempt.prevAttempts || []
-
-      const newPrevAttempts = prevAttempts.concat([prevAttempt])
-
-      delete prevAttempt.prevAttempts
-
-      test.prevAttempts = newPrevAttempts
-
-      replaceRunnable(test, test.id)
-
+      replacePreviousAttemptWith(test)
     }
 
     //# closure for calculating the actual
@@ -1241,6 +1229,19 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
+  const replacePreviousAttemptWith = (test) => {
+    const prevAttempt = _testsById[test.id]
+
+    const prevAttempts = prevAttempt.prevAttempts || []
+
+    const newPrevAttempts = prevAttempts.concat([prevAttempt])
+
+    delete prevAttempt.prevAttempts
+
+    test.prevAttempts = newPrevAttempts
+
+    replaceRunnable(test, test.id)
+  }
   const onNextError = (runnable, next, err) => {
 
     const r = runnable
@@ -1261,22 +1262,18 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     if (err) {
 
-      if (!willRetry) {
-        test.final = true
-      }
-
       if (willRetry) {
         test.state = 'failed'
+        test.final = false
       }
 
       if (willRetry && isBeforeEachHook) {
         test.err = undefined
         test.trueFn = test.fn
+        setHookFailureProps(test, runnable, err)
         test.fn = function () {
           throw err
         }
-
-        setHookFailureProps(test, r, err)
 
         return noFail()
       }
@@ -1287,9 +1284,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
         const newTest = test.clone()
 
-        newTest._currentRetry = test._currentRetry + 1
+        test._retries = -1
 
-        replaceRunnable(newTest, test.id)
+        newTest._currentRetry = test._currentRetry + 1
 
         test.parent.testsQueue.unshift(newTest)
 

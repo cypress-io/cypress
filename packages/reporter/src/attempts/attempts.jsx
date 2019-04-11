@@ -36,7 +36,7 @@ const AttemptHeader = ({ index, isOpen }) => (
 @observer
 class AttemptContent extends Component {
   render () {
-    const { isOpen, model } = this.props
+    const { isOpen, model, isLast } = this.props
 
     // performance optimization - don't render contents if not open
     if (!isOpen) return null
@@ -58,7 +58,7 @@ class AttemptContent extends Component {
             message='Printed output to your console'
             onClick={onErrorClick}
           >
-            <pre className='attempt-error'>{model.err.displayMessage}</pre>
+            <pre className={cs('attempt-error', { 'test-error': isLast })}>{model.err.displayMessage}</pre>
           </FlashOnClick>
         </div>
       </Fragment>
@@ -112,7 +112,7 @@ class Attempt extends Component {
   }
 
   render () {
-    const { index, model } = this.props
+    const { index, model, isLast } = this.props
 
     return (
       <li
@@ -130,6 +130,7 @@ class Attempt extends Component {
           <AttemptContent
             isOpen={this._shouldBeOpen}
             model={model}
+            isLast={isLast}
           />
         </Collapsible>
       </li>

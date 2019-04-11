@@ -151,8 +151,6 @@ const overrideRunnableRun = (runnable, onRunnableRun) => {
 
     ret.id = this.id
 
-    delete ret.err
-
     return ret
   }
 }

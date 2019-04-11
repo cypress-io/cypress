@@ -65,6 +65,7 @@
     "_currentRetry": 2,
     "id": "r3",
     "state": "passed",
+    "title": "passed with retries",
     "agents": [
       {
         "callCount": 0,

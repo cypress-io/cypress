@@ -1,3 +1,269 @@
+exports['fail in [afterEach] reporter results'] = {
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "skipped": 0,
+    "failures": 1,
+    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
+    "wallClockEndedAt": "1970-01-01T00:00:00.000Z",
+    "wallClockDuration": 0
+  },
+  "reporter": "spec",
+  "reporterStats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "match.date",
+    "end": "match.date",
+    "duration": "match.number"
+  },
+  "hooks": [
+    {
+      "hookId": "h1",
+      "hookName": "after each",
+      "title": [
+        "\"after each\" hook"
+      ],
+      "body": "[body]"
+    }
+  ],
+  "tests": [
+    {
+      "testId": "r3",
+      "title": [
+        "suite 1",
+        "test 1"
+      ],
+      "state": "failed",
+      "body": "[body]",
+      "stack": null,
+      "error": null,
+      "timings": {
+        "lifecycle": 1,
+        "test": {
+          "fnDuration": 1,
+          "afterFnDuration": 1
+        },
+        "after each": [
+          {
+            "hookId": "h1",
+            "fnDuration": 1,
+            "afterFnDuration": 1
+          }
+        ]
+      },
+      "failedFromHookId": "h1",
+      "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
+      "wallClockDuration": 1,
+      "videoTimestamp": null
+    }
+  ]
+}
+
+exports['fail in [afterEach] runner emit'] = [
+  [
+    "start",
+    null
+  ],
+  [
+    "suite",
+    "{Suite}"
+  ],
+  [
+    "suite",
+    "{Suite}"
+  ],
+  [
+    "test",
+    "{Test}"
+  ],
+  [
+    "test:before:run",
+    "{Test}"
+  ],
+  [
+    "test end",
+    "{Test}"
+  ],
+  [
+    "hook",
+    "{Object 52}"
+  ],
+  [
+    "fail",
+    "{Object 52}",
+    "{Object 6}"
+  ],
+  [
+    "test:after:run",
+    "{Test}"
+  ],
+  [
+    "suite end",
+    "{Suite}"
+  ],
+  [
+    "suite end",
+    "{Suite}"
+  ],
+  [
+    "end",
+    null
+  ]
+]
+
+exports['fail in [afterEach] stdout'] = `
+
+
+  suite 1
+\r    1) "after each" hook for "test 1"
+
+
+  0 passing 
+  1 failing
+
+  1) suite 1 "after each" hook for "test 1":
+     
+  
+
+
+
+
+`
+
+exports['fail in [beforeEach] reporter results'] = {
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "skipped": 0,
+    "failures": 1,
+    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
+    "wallClockEndedAt": "1970-01-01T00:00:00.000Z",
+    "wallClockDuration": 0
+  },
+  "reporter": "spec",
+  "reporterStats": {
+    "suites": 1,
+    "tests": 0,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "match.date",
+    "end": "match.date",
+    "duration": "match.number"
+  },
+  "hooks": [
+    {
+      "hookId": "h1",
+      "hookName": "before each",
+      "title": [
+        "\"before each\" hook"
+      ],
+      "body": "[body]"
+    }
+  ],
+  "tests": [
+    {
+      "testId": "r3",
+      "title": [
+        "suite 1",
+        "test 1"
+      ],
+      "state": "failed",
+      "body": "[body]",
+      "stack": null,
+      "error": null,
+      "timings": {
+        "lifecycle": 1,
+        "before each": [
+          {
+            "hookId": "h1",
+            "fnDuration": 1,
+            "afterFnDuration": 1
+          }
+        ]
+      },
+      "failedFromHookId": "h1",
+      "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
+      "wallClockDuration": 1,
+      "videoTimestamp": null
+    }
+  ]
+}
+
+exports['fail in [beforeEach] runner emit'] = [
+  [
+    "start",
+    null
+  ],
+  [
+    "suite",
+    "{Suite}"
+  ],
+  [
+    "suite",
+    "{Suite}"
+  ],
+  [
+    "test",
+    "{Test}"
+  ],
+  [
+    "hook",
+    "{Object 50}"
+  ],
+  [
+    "test:before:run",
+    "{Test}"
+  ],
+  [
+    "fail",
+    "{Object 51}",
+    "{Object 6}"
+  ],
+  [
+    "test:after:run",
+    "{Test}"
+  ],
+  [
+    "suite end",
+    "{Suite}"
+  ],
+  [
+    "suite end",
+    "{Suite}"
+  ],
+  [
+    "end",
+    null
+  ]
+]
+
+exports['fail in [beforeEach] stdout'] = `
+
+
+  suite 1
+\r    1) "before each" hook for "test 1"
+
+
+  0 passing 
+  1 failing
+
+  1) suite 1 "before each" hook for "test 1":
+     
+  
+
+
+
+
+`
+
 exports['retry [afterEach] reporter results'] = {
   "stats": {
     "suites": 3,
@@ -168,7 +434,7 @@ exports['retry [afterEach] reporter results'] = {
               }
             ]
           },
-          "failedFromHookId": "h4",
+          "failedFromHookId": "h5",
           "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
           "wallClockDuration": 1,
           "videoTimestamp": null
@@ -295,6 +561,11 @@ exports['retry [afterEach] reporter results'] = {
             "hookId": "h7",
             "fnDuration": 1,
             "afterFnDuration": 1
+          },
+          {
+            "hookId": "h5",
+            "fnDuration": 1,
+            "afterFnDuration": 1
           }
         ]
       },
@@ -318,6 +589,11 @@ exports['retry [afterEach] reporter results'] = {
                 "hookId": "h7",
                 "fnDuration": 1,
                 "afterFnDuration": 1
+              },
+              {
+                "hookId": "h5",
+                "fnDuration": 1,
+                "afterFnDuration": 1
               }
             ]
           },
@@ -339,6 +615,11 @@ exports['retry [afterEach] reporter results'] = {
             "after each": [
               {
                 "hookId": "h7",
+                "fnDuration": 1,
+                "afterFnDuration": 1
+              },
+              {
+                "hookId": "h5",
                 "fnDuration": 1,
                 "afterFnDuration": 1
               }
@@ -366,7 +647,14 @@ exports['retry [afterEach] reporter results'] = {
         "test": {
           "fnDuration": 1,
           "afterFnDuration": 1
-        }
+        },
+        "after each": [
+          {
+            "hookId": "h5",
+            "fnDuration": 1,
+            "afterFnDuration": 1
+          }
+        ]
       },
       "failedFromHookId": null,
       "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
@@ -374,868 +662,6 @@ exports['retry [afterEach] reporter results'] = {
       "videoTimestamp": null
     }
   ]
-}
-
-exports['retry [afterEach] runnables'] = {
-  "r3": {
-    "title": "test 1",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r3",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "before each": [
-        {
-          "hookId": "h2"
-        },
-        {
-          "hookId": "h3"
-        }
-      ],
-      "test": {},
-      "after each": [
-        {
-          "hookId": "h4"
-        },
-        {
-          "hookId": "h5"
-        }
-      ]
-    },
-    "prevAttempts": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "failed",
-        "parent": "{Suite}",
-        "id": "r3",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before all": [
-            {
-              "hookId": "h1"
-            }
-          ],
-          "before each": [
-            {
-              "hookId": "h2"
-            },
-            {
-              "hookId": "h3"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h4"
-            },
-            {
-              "hookId": "h5"
-            }
-          ]
-        },
-        "hookName": "after each",
-        "err": "{Object 5}",
-        "failedFromHookId": "h4"
-      }
-    ],
-    "final": true,
-    "speed": "fast"
-  },
-  "r4": {
-    "title": "test 2",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r4",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "before each": [
-        {
-          "hookId": "h2"
-        },
-        {
-          "hookId": "h3"
-        }
-      ],
-      "test": {},
-      "after each": [
-        {
-          "hookId": "h4"
-        },
-        {
-          "hookId": "h5"
-        }
-      ]
-    },
-    "final": true,
-    "speed": "fast"
-  },
-  "r5": {
-    "title": "test 3",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r5",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "before each": [
-        {
-          "hookId": "h2"
-        },
-        {
-          "hookId": "h3"
-        }
-      ],
-      "test": {},
-      "after each": [
-        {
-          "hookId": "h4"
-        },
-        {
-          "hookId": "h5"
-        }
-      ],
-      "after all": [
-        {
-          "hookId": "h6"
-        }
-      ]
-    },
-    "final": true,
-    "speed": "fast"
-  },
-  "r2": {
-    "title": "suite 1",
-    "ctx": {},
-    "suites": [],
-    "tests": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r3",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before each": [
-            {
-              "hookId": "h2"
-            },
-            {
-              "hookId": "h3"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h4"
-            },
-            {
-              "hookId": "h5"
-            }
-          ]
-        },
-        "prevAttempts": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "failed",
-            "parent": "{Suite}",
-            "id": "r3",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before all": [
-                {
-                  "hookId": "h1"
-                }
-              ],
-              "before each": [
-                {
-                  "hookId": "h2"
-                },
-                {
-                  "hookId": "h3"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h4"
-                },
-                {
-                  "hookId": "h5"
-                }
-              ]
-            },
-            "hookName": "after each",
-            "err": "{Object 5}",
-            "failedFromHookId": "h4"
-          }
-        ],
-        "final": true,
-        "speed": "fast"
-      },
-      {
-        "title": "test 2",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r4",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before each": [
-            {
-              "hookId": "h2"
-            },
-            {
-              "hookId": "h3"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h4"
-            },
-            {
-              "hookId": "h5"
-            }
-          ]
-        },
-        "final": true,
-        "speed": "fast"
-      },
-      {
-        "title": "test 3",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r5",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before each": [
-            {
-              "hookId": "h2"
-            },
-            {
-              "hookId": "h3"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h4"
-            },
-            {
-              "hookId": "h5"
-            }
-          ],
-          "after all": [
-            {
-              "hookId": "h6"
-            }
-          ]
-        },
-        "final": true,
-        "speed": "fast"
-      }
-    ],
-    "pending": false,
-    "root": false,
-    "delayed": false,
-    "parent": "{Suite}",
-    "id": "r2",
-    "type": "suite"
-  },
-  "r7": {
-    "title": "test 1",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r7",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "test": {},
-      "after each": [
-        {
-          "hookId": "h7"
-        }
-      ]
-    },
-    "prevAttempts": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "failed",
-        "parent": "{Suite}",
-        "id": "r7",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h7"
-            }
-          ]
-        },
-        "hookName": "after each",
-        "err": "{Object 5}",
-        "failedFromHookId": "h7"
-      },
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "failed",
-        "parent": "{Suite}",
-        "id": "r7",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h7"
-            }
-          ]
-        },
-        "hookName": "after each",
-        "err": "{Object 5}",
-        "failedFromHookId": "h7"
-      }
-    ],
-    "final": true,
-    "speed": "fast"
-  },
-  "r6": {
-    "title": "suite 2",
-    "ctx": {},
-    "suites": [],
-    "tests": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r7",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h7"
-            }
-          ]
-        },
-        "prevAttempts": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "failed",
-            "parent": "{Suite}",
-            "id": "r7",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h7"
-                }
-              ]
-            },
-            "hookName": "after each",
-            "err": "{Object 5}",
-            "failedFromHookId": "h7"
-          },
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "failed",
-            "parent": "{Suite}",
-            "id": "r7",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h7"
-                }
-              ]
-            },
-            "hookName": "after each",
-            "err": "{Object 5}",
-            "failedFromHookId": "h7"
-          }
-        ],
-        "final": true,
-        "speed": "fast"
-      }
-    ],
-    "pending": false,
-    "root": false,
-    "delayed": false,
-    "parent": "{Suite}",
-    "id": "r6",
-    "type": "suite"
-  },
-  "r9": {
-    "title": "test 1",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r9",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "test": {}
-    },
-    "final": true,
-    "speed": "fast"
-  },
-  "r8": {
-    "title": "suite 3",
-    "ctx": {},
-    "suites": [],
-    "tests": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r9",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "test": {}
-        },
-        "final": true,
-        "speed": "fast"
-      }
-    ],
-    "pending": false,
-    "root": false,
-    "delayed": false,
-    "parent": "{Suite}",
-    "id": "r8",
-    "type": "suite"
-  },
-  "r1": {
-    "title": "",
-    "ctx": {},
-    "suites": [
-      {
-        "title": "suite 1",
-        "ctx": {},
-        "suites": [],
-        "tests": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r3",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before each": [
-                {
-                  "hookId": "h2"
-                },
-                {
-                  "hookId": "h3"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h4"
-                },
-                {
-                  "hookId": "h5"
-                }
-              ]
-            },
-            "prevAttempts": [
-              {
-                "title": "test 1",
-                "fn": "[Function fn]",
-                "_trace": {},
-                "pending": false,
-                "type": "test",
-                "body": "[body]",
-                "state": "failed",
-                "parent": "{Suite}",
-                "id": "r3",
-                "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-                "timings": {
-                  "lifecycle": 1,
-                  "before all": [
-                    {
-                      "hookId": "h1"
-                    }
-                  ],
-                  "before each": [
-                    {
-                      "hookId": "h2"
-                    },
-                    {
-                      "hookId": "h3"
-                    }
-                  ],
-                  "test": {},
-                  "after each": [
-                    {
-                      "hookId": "h4"
-                    },
-                    {
-                      "hookId": "h5"
-                    }
-                  ]
-                },
-                "hookName": "after each",
-                "err": "{Object 5}",
-                "failedFromHookId": "h4"
-              }
-            ],
-            "final": true,
-            "speed": "fast"
-          },
-          {
-            "title": "test 2",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r4",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before each": [
-                {
-                  "hookId": "h2"
-                },
-                {
-                  "hookId": "h3"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h4"
-                },
-                {
-                  "hookId": "h5"
-                }
-              ]
-            },
-            "final": true,
-            "speed": "fast"
-          },
-          {
-            "title": "test 3",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r5",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before each": [
-                {
-                  "hookId": "h2"
-                },
-                {
-                  "hookId": "h3"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h4"
-                },
-                {
-                  "hookId": "h5"
-                }
-              ],
-              "after all": [
-                {
-                  "hookId": "h6"
-                }
-              ]
-            },
-            "final": true,
-            "speed": "fast"
-          }
-        ],
-        "pending": false,
-        "root": false,
-        "delayed": false,
-        "parent": "{Suite}",
-        "id": "r2",
-        "type": "suite"
-      },
-      {
-        "title": "suite 2",
-        "ctx": {},
-        "suites": [],
-        "tests": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r7",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h7"
-                }
-              ]
-            },
-            "prevAttempts": [
-              {
-                "title": "test 1",
-                "fn": "[Function fn]",
-                "_trace": {},
-                "pending": false,
-                "type": "test",
-                "body": "[body]",
-                "state": "failed",
-                "parent": "{Suite}",
-                "id": "r7",
-                "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-                "timings": {
-                  "lifecycle": 1,
-                  "test": {},
-                  "after each": [
-                    {
-                      "hookId": "h7"
-                    }
-                  ]
-                },
-                "hookName": "after each",
-                "err": "{Object 5}",
-                "failedFromHookId": "h7"
-              },
-              {
-                "title": "test 1",
-                "fn": "[Function fn]",
-                "_trace": {},
-                "pending": false,
-                "type": "test",
-                "body": "[body]",
-                "state": "failed",
-                "parent": "{Suite}",
-                "id": "r7",
-                "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-                "timings": {
-                  "lifecycle": 1,
-                  "test": {},
-                  "after each": [
-                    {
-                      "hookId": "h7"
-                    }
-                  ]
-                },
-                "hookName": "after each",
-                "err": "{Object 5}",
-                "failedFromHookId": "h7"
-              }
-            ],
-            "final": true,
-            "speed": "fast"
-          }
-        ],
-        "pending": false,
-        "root": false,
-        "delayed": false,
-        "parent": "{Suite}",
-        "id": "r6",
-        "type": "suite"
-      },
-      {
-        "title": "suite 3",
-        "ctx": {},
-        "suites": [],
-        "tests": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r9",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "test": {}
-            },
-            "final": true,
-            "speed": "fast"
-          }
-        ],
-        "pending": false,
-        "root": false,
-        "delayed": false,
-        "parent": "{Suite}",
-        "id": "r8",
-        "type": "suite"
-      }
-    ],
-    "tests": [],
-    "pending": false,
-    "root": true,
-    "delayed": false,
-    "id": "r1",
-    "type": "suite"
-  },
-  "h1": {
-    "hookId": "h1",
-    "type": "hook",
-    "title": "\"before all\" hook",
-    "body": "[body]",
-    "hookName": "before all"
-  },
-  "h2": {
-    "hookId": "h2",
-    "type": "hook",
-    "title": "\"before each\" hook",
-    "body": "[body]",
-    "hookName": "before each"
-  },
-  "h3": {
-    "hookId": "h3",
-    "type": "hook",
-    "title": "\"before each\" hook",
-    "body": "[body]",
-    "hookName": "before each"
-  },
-  "h4": {
-    "hookId": "h4",
-    "type": "hook",
-    "title": "\"after each\" hook",
-    "body": "[body]",
-    "hookName": "after each"
-  },
-  "h5": {
-    "hookId": "h5",
-    "type": "hook",
-    "title": "\"after each\" hook",
-    "body": "[body]",
-    "hookName": "after each"
-  },
-  "h6": {
-    "hookId": "h6",
-    "type": "hook",
-    "title": "\"after all\" hook",
-    "body": "[body]",
-    "hookName": "after all"
-  },
-  "h7": {
-    "hookId": "h7",
-    "type": "hook",
-    "title": "\"after each\" hook",
-    "body": "[body]",
-    "hookName": "after each"
-  }
 }
 
 exports['retry [afterEach] runner emit'] = [
@@ -1293,7 +719,7 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook end",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "hook",
@@ -1301,7 +727,7 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook end",
-    "{Object 52}"
+    "{Object 53}"
   ],
   [
     "test:after:run",
@@ -1309,7 +735,7 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 55}"
+    "{Object 56}"
   ],
   [
     "test:before:run",
@@ -1317,15 +743,7 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook end",
-    "{Object 54}"
-  ],
-  [
-    "hook",
-    "{Object 54}"
-  ],
-  [
-    "hook end",
-    "{Object 54}"
+    "{Object 55}"
   ],
   [
     "hook",
@@ -1337,11 +755,19 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 54}"
+    "{Object 55}"
   ],
   [
     "hook end",
-    "{Object 54}"
+    "{Object 55}"
+  ],
+  [
+    "hook",
+    "{Object 56}"
+  ],
+  [
+    "hook end",
+    "{Object 56}"
   ],
   [
     "pass",
@@ -1381,19 +807,19 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "hook end",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "hook",
-    "{Object 52}"
+    "{Object 53}"
   ],
   [
     "hook end",
-    "{Object 52}"
+    "{Object 53}"
   ],
   [
     "pass",
@@ -1433,19 +859,19 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "hook end",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "hook",
-    "{Object 52}"
+    "{Object 53}"
   ],
   [
     "hook end",
-    "{Object 52}"
+    "{Object 53}"
   ],
   [
     "hook",
@@ -1492,6 +918,14 @@ exports['retry [afterEach] runner emit'] = [
     "{Object 53}"
   ],
   [
+    "hook",
+    "{Object 53}"
+  ],
+  [
+    "hook end",
+    "{Object 53}"
+  ],
+  [
     "test:after:run",
     "{Test}"
   ],
@@ -1501,11 +935,19 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 55}"
+    "{Object 56}"
   ],
   [
     "hook end",
-    "{Object 55}"
+    "{Object 56}"
+  ],
+  [
+    "hook",
+    "{Object 56}"
+  ],
+  [
+    "hook end",
+    "{Object 56}"
   ],
   [
     "test:after:run",
@@ -1517,11 +959,19 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 55}"
+    "{Object 56}"
   ],
   [
     "hook end",
-    "{Object 55}"
+    "{Object 56}"
+  ],
+  [
+    "hook",
+    "{Object 56}"
+  ],
+  [
+    "hook end",
+    "{Object 56}"
   ],
   [
     "pass",
@@ -1550,6 +1000,14 @@ exports['retry [afterEach] runner emit'] = [
   [
     "test end",
     "{Test}"
+  ],
+  [
+    "hook",
+    "{Object 53}"
+  ],
+  [
+    "hook end",
+    "{Object 53}"
   ],
   [
     "pass",
@@ -1577,15 +1035,15 @@ exports['retry [afterEach] stdout'] = `
 
 
   suite 1
-    \u2713 test 1
-    \u2713 test 2
-    \u2713 test 3
+\r    \u2713 test 1
+\r    \u2713 test 2
+\r    \u2713 test 3
 
   suite 2
-    \u2713 test 1
+\r    \u2713 test 1
 
   suite 3
-    \u2713 test 1
+\r    \u2713 test 1
 
 
   5 passing 
@@ -1760,308 +1218,6 @@ exports['retry [beforeEach] reporter results'] = {
   ]
 }
 
-exports['retry [beforeEach] runnables'] = {
-  "r3": {
-    "title": "test 1",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r3",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "before each": [
-        {
-          "hookId": "h2"
-        },
-        {
-          "hookId": "h3"
-        },
-        {
-          "hookId": "h4"
-        }
-      ],
-      "test": {},
-      "after each": [
-        {
-          "hookId": "h5"
-        }
-      ],
-      "after all": [
-        {
-          "hookId": "h6"
-        }
-      ]
-    },
-    "prevAttempts": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "failed",
-        "parent": "{Suite}",
-        "id": "r3",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before all": [
-            {
-              "hookId": "h1"
-            }
-          ],
-          "before each": [
-            {
-              "hookId": "h2"
-            },
-            {
-              "hookId": "h3"
-            }
-          ],
-          "test": {}
-        },
-        "hookName": "before each",
-        "err": "{Object 6}",
-        "failedFromHookId": "h3"
-      }
-    ],
-    "final": true,
-    "speed": "fast"
-  },
-  "r2": {
-    "title": "suite 1",
-    "ctx": {},
-    "suites": [],
-    "tests": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r3",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before each": [
-            {
-              "hookId": "h2"
-            },
-            {
-              "hookId": "h3"
-            },
-            {
-              "hookId": "h4"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h5"
-            }
-          ],
-          "after all": [
-            {
-              "hookId": "h6"
-            }
-          ]
-        },
-        "prevAttempts": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "failed",
-            "parent": "{Suite}",
-            "id": "r3",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before all": [
-                {
-                  "hookId": "h1"
-                }
-              ],
-              "before each": [
-                {
-                  "hookId": "h2"
-                },
-                {
-                  "hookId": "h3"
-                }
-              ],
-              "test": {}
-            },
-            "hookName": "before each",
-            "err": "{Object 6}",
-            "failedFromHookId": "h3"
-          }
-        ],
-        "final": true,
-        "speed": "fast"
-      }
-    ],
-    "pending": false,
-    "root": false,
-    "delayed": false,
-    "parent": "{Suite}",
-    "id": "r2",
-    "type": "suite"
-  },
-  "r1": {
-    "title": "",
-    "ctx": {},
-    "suites": [
-      {
-        "title": "suite 1",
-        "ctx": {},
-        "suites": [],
-        "tests": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r3",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before each": [
-                {
-                  "hookId": "h2"
-                },
-                {
-                  "hookId": "h3"
-                },
-                {
-                  "hookId": "h4"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h5"
-                }
-              ],
-              "after all": [
-                {
-                  "hookId": "h6"
-                }
-              ]
-            },
-            "prevAttempts": [
-              {
-                "title": "test 1",
-                "fn": "[Function fn]",
-                "_trace": {},
-                "pending": false,
-                "type": "test",
-                "body": "[body]",
-                "state": "failed",
-                "parent": "{Suite}",
-                "id": "r3",
-                "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-                "timings": {
-                  "lifecycle": 1,
-                  "before all": [
-                    {
-                      "hookId": "h1"
-                    }
-                  ],
-                  "before each": [
-                    {
-                      "hookId": "h2"
-                    },
-                    {
-                      "hookId": "h3"
-                    }
-                  ],
-                  "test": {}
-                },
-                "hookName": "before each",
-                "err": "{Object 6}",
-                "failedFromHookId": "h3"
-              }
-            ],
-            "final": true,
-            "speed": "fast"
-          }
-        ],
-        "pending": false,
-        "root": false,
-        "delayed": false,
-        "parent": "{Suite}",
-        "id": "r2",
-        "type": "suite"
-      }
-    ],
-    "tests": [],
-    "pending": false,
-    "root": true,
-    "delayed": false,
-    "id": "r1",
-    "type": "suite"
-  },
-  "h1": {
-    "hookId": "h1",
-    "type": "hook",
-    "title": "\"before all\" hook",
-    "body": "[body]",
-    "hookName": "before all"
-  },
-  "h2": {
-    "hookId": "h2",
-    "type": "hook",
-    "title": "\"before each\" hook",
-    "body": "[body]",
-    "hookName": "before each"
-  },
-  "h3": {
-    "hookId": "h3",
-    "type": "hook",
-    "title": "\"before each\" hook",
-    "body": "[body]",
-    "hookName": "before each"
-  },
-  "h4": {
-    "hookId": "h4",
-    "type": "hook",
-    "title": "\"before each\" hook",
-    "body": "[body]",
-    "hookName": "before each"
-  },
-  "h5": {
-    "hookId": "h5",
-    "type": "hook",
-    "title": "\"after each\" hook",
-    "body": "[body]",
-    "hookName": "after each"
-  },
-  "h6": {
-    "hookId": "h6",
-    "type": "hook",
-    "title": "\"after all\" hook",
-    "body": "[body]",
-    "hookName": "after all"
-  }
-}
-
 exports['retry [beforeEach] runner emit'] = [
   [
     "start",
@@ -2129,7 +1285,7 @@ exports['retry [beforeEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 55}"
+    "{Object 56}"
   ],
   [
     "test:before:run",
@@ -2137,7 +1293,15 @@ exports['retry [beforeEach] runner emit'] = [
   ],
   [
     "hook end",
-    "{Object 54}"
+    "{Object 55}"
+  ],
+  [
+    "hook",
+    "{Object 56}"
+  ],
+  [
+    "hook end",
+    "{Object 56}"
   ],
   [
     "hook",
@@ -2146,14 +1310,6 @@ exports['retry [beforeEach] runner emit'] = [
   [
     "hook end",
     "{Object 55}"
-  ],
-  [
-    "hook",
-    "{Object 54}"
-  ],
-  [
-    "hook end",
-    "{Object 54}"
   ],
   [
     "test end",
@@ -2161,23 +1317,19 @@ exports['retry [beforeEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 54}"
+    "{Object 55}"
   ],
   [
     "hook end",
-    "{Object 54}"
+    "{Object 55}"
   ],
   [
     "hook",
-    "{Object 54}"
+    "{Object 55}"
   ],
   [
     "hook end",
-    "{Object 54}"
-  ],
-  [
-    "suite end",
-    "{Suite}"
+    "{Object 55}"
   ],
   [
     "pass",
@@ -2186,6 +1338,10 @@ exports['retry [beforeEach] runner emit'] = [
   [
     "test:after:run",
     "{Test}"
+  ],
+  [
+    "suite end",
+    "{Suite}"
   ],
   [
     "suite end",
@@ -2201,8 +1357,8 @@ exports['retry [beforeEach] stdout'] = `
 
 
   suite 1
+\r    \u2713 test 1
 
-  \u2713 test 1
 
   1 passing 
 
@@ -2259,101 +1415,6 @@ exports['simple_single_test reporter results'] = {
   ]
 }
 
-exports['simple_single_test runnables'] = {
-  "r3": {
-    "title": "test 1",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r3",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "test": {}
-    },
-    "final": true,
-    "speed": "fast"
-  },
-  "r2": {
-    "title": "suite 1",
-    "ctx": {},
-    "suites": [],
-    "tests": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r3",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "test": {}
-        },
-        "final": true,
-        "speed": "fast"
-      }
-    ],
-    "pending": false,
-    "root": false,
-    "delayed": false,
-    "parent": "{Suite}",
-    "id": "r2",
-    "type": "suite"
-  },
-  "r1": {
-    "title": "",
-    "ctx": {},
-    "suites": [
-      {
-        "title": "suite 1",
-        "ctx": {},
-        "suites": [],
-        "tests": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r3",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "test": {}
-            },
-            "final": true,
-            "speed": "fast"
-          }
-        ],
-        "pending": false,
-        "root": false,
-        "delayed": false,
-        "parent": "{Suite}",
-        "id": "r2",
-        "type": "suite"
-      }
-    ],
-    "tests": [],
-    "pending": false,
-    "root": true,
-    "delayed": false,
-    "id": "r1",
-    "type": "suite"
-  }
-}
-
 exports['simple_single_test runner emit'] = [
   [
     "start",
@@ -2400,6 +1461,18 @@ exports['simple_single_test runner emit'] = [
     null
   ]
 ]
+
+exports['simple_single_test stdout'] = `
+
+
+  suite 1
+\r    \u2713 test 1
+
+
+  1 passing 
+
+
+`
 
 exports['three tests with retry reporter results'] = {
   "stats": {
@@ -2646,525 +1719,6 @@ exports['three tests with retry reporter results'] = {
   ]
 }
 
-exports['three tests with retry runnables'] = {
-  "r3": {
-    "title": "test 1",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r3",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "before all": [
-        {
-          "hookId": "h1"
-        }
-      ],
-      "before each": [
-        {
-          "hookId": "h2"
-        }
-      ],
-      "test": {},
-      "after each": [
-        {
-          "hookId": "h3"
-        }
-      ]
-    },
-    "final": true,
-    "speed": "fast"
-  },
-  "r4": {
-    "title": "test 2",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r4",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "before each": [
-        {
-          "hookId": "h2"
-        }
-      ],
-      "test": {},
-      "after each": [
-        {
-          "hookId": "h3"
-        }
-      ]
-    },
-    "prevAttempts": [
-      {
-        "title": "test 2",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "failed",
-        "parent": "{Suite}",
-        "id": "r4",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "err": "{Object 6}",
-        "timings": {
-          "lifecycle": 1,
-          "before each": [
-            {
-              "hookId": "h2"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h3"
-            }
-          ]
-        }
-      },
-      {
-        "title": "test 2",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "failed",
-        "parent": "{Suite}",
-        "id": "r4",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before each": [
-            {
-              "hookId": "h2"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h3"
-            }
-          ]
-        },
-        "err": "{Object 6}"
-      }
-    ],
-    "final": true,
-    "speed": "fast"
-  },
-  "r5": {
-    "title": "test 3",
-    "fn": "[Function fn]",
-    "_trace": {},
-    "pending": false,
-    "type": "test",
-    "body": "[body]",
-    "state": "passed",
-    "parent": "{Suite}",
-    "id": "r5",
-    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-    "timings": {
-      "lifecycle": 1,
-      "before each": [
-        {
-          "hookId": "h2"
-        }
-      ],
-      "test": {},
-      "after each": [
-        {
-          "hookId": "h3"
-        }
-      ],
-      "after all": [
-        {
-          "hookId": "h4"
-        }
-      ]
-    },
-    "final": true,
-    "speed": "fast"
-  },
-  "r2": {
-    "title": "suite 1",
-    "ctx": {},
-    "suites": [],
-    "tests": [
-      {
-        "title": "test 1",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r3",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before all": [
-            {
-              "hookId": "h1"
-            }
-          ],
-          "before each": [
-            {
-              "hookId": "h2"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h3"
-            }
-          ]
-        },
-        "final": true,
-        "speed": "fast"
-      },
-      {
-        "title": "test 2",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r4",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before each": [
-            {
-              "hookId": "h2"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h3"
-            }
-          ]
-        },
-        "prevAttempts": [
-          {
-            "title": "test 2",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "failed",
-            "parent": "{Suite}",
-            "id": "r4",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "err": "{Object 6}",
-            "timings": {
-              "lifecycle": 1,
-              "before each": [
-                {
-                  "hookId": "h2"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h3"
-                }
-              ]
-            }
-          },
-          {
-            "title": "test 2",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "failed",
-            "parent": "{Suite}",
-            "id": "r4",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before each": [
-                {
-                  "hookId": "h2"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h3"
-                }
-              ]
-            },
-            "err": "{Object 6}"
-          }
-        ],
-        "final": true,
-        "speed": "fast"
-      },
-      {
-        "title": "test 3",
-        "fn": "[Function fn]",
-        "_trace": {},
-        "pending": false,
-        "type": "test",
-        "body": "[body]",
-        "state": "passed",
-        "parent": "{Suite}",
-        "id": "r5",
-        "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 1,
-          "before each": [
-            {
-              "hookId": "h2"
-            }
-          ],
-          "test": {},
-          "after each": [
-            {
-              "hookId": "h3"
-            }
-          ],
-          "after all": [
-            {
-              "hookId": "h4"
-            }
-          ]
-        },
-        "final": true,
-        "speed": "fast"
-      }
-    ],
-    "pending": false,
-    "root": false,
-    "delayed": false,
-    "parent": "{Suite}",
-    "id": "r2",
-    "type": "suite"
-  },
-  "r1": {
-    "title": "",
-    "ctx": {},
-    "suites": [
-      {
-        "title": "suite 1",
-        "ctx": {},
-        "suites": [],
-        "tests": [
-          {
-            "title": "test 1",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r3",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before all": [
-                {
-                  "hookId": "h1"
-                }
-              ],
-              "before each": [
-                {
-                  "hookId": "h2"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h3"
-                }
-              ]
-            },
-            "final": true,
-            "speed": "fast"
-          },
-          {
-            "title": "test 2",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r4",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before each": [
-                {
-                  "hookId": "h2"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h3"
-                }
-              ]
-            },
-            "prevAttempts": [
-              {
-                "title": "test 2",
-                "fn": "[Function fn]",
-                "_trace": {},
-                "pending": false,
-                "type": "test",
-                "body": "[body]",
-                "state": "failed",
-                "parent": "{Suite}",
-                "id": "r4",
-                "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-                "err": "{Object 6}",
-                "timings": {
-                  "lifecycle": 1,
-                  "before each": [
-                    {
-                      "hookId": "h2"
-                    }
-                  ],
-                  "test": {},
-                  "after each": [
-                    {
-                      "hookId": "h3"
-                    }
-                  ]
-                }
-              },
-              {
-                "title": "test 2",
-                "fn": "[Function fn]",
-                "_trace": {},
-                "pending": false,
-                "type": "test",
-                "body": "[body]",
-                "state": "failed",
-                "parent": "{Suite}",
-                "id": "r4",
-                "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-                "timings": {
-                  "lifecycle": 1,
-                  "before each": [
-                    {
-                      "hookId": "h2"
-                    }
-                  ],
-                  "test": {},
-                  "after each": [
-                    {
-                      "hookId": "h3"
-                    }
-                  ]
-                },
-                "err": "{Object 6}"
-              }
-            ],
-            "final": true,
-            "speed": "fast"
-          },
-          {
-            "title": "test 3",
-            "fn": "[Function fn]",
-            "_trace": {},
-            "pending": false,
-            "type": "test",
-            "body": "[body]",
-            "state": "passed",
-            "parent": "{Suite}",
-            "id": "r5",
-            "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-            "timings": {
-              "lifecycle": 1,
-              "before each": [
-                {
-                  "hookId": "h2"
-                }
-              ],
-              "test": {},
-              "after each": [
-                {
-                  "hookId": "h3"
-                }
-              ],
-              "after all": [
-                {
-                  "hookId": "h4"
-                }
-              ]
-            },
-            "final": true,
-            "speed": "fast"
-          }
-        ],
-        "pending": false,
-        "root": false,
-        "delayed": false,
-        "parent": "{Suite}",
-        "id": "r2",
-        "type": "suite"
-      }
-    ],
-    "tests": [],
-    "pending": false,
-    "root": true,
-    "delayed": false,
-    "id": "r1",
-    "type": "suite"
-  },
-  "h1": {
-    "hookId": "h1",
-    "type": "hook",
-    "title": "\"before all\" hook",
-    "body": "[body]",
-    "hookName": "before all"
-  },
-  "h2": {
-    "hookId": "h2",
-    "type": "hook",
-    "title": "\"before each\" hook",
-    "body": "[body]",
-    "hookName": "before each"
-  },
-  "h3": {
-    "hookId": "h3",
-    "type": "hook",
-    "title": "\"after each\" hook",
-    "body": "[body]",
-    "hookName": "after each"
-  },
-  "h4": {
-    "hookId": "h4",
-    "type": "hook",
-    "title": "\"after all\" hook",
-    "body": "[body]",
-    "hookName": "after all"
-  }
-}
-
 exports['three tests with retry runner emit'] = [
   [
     "start",
@@ -3252,30 +1806,6 @@ exports['three tests with retry runner emit'] = [
   ],
   [
     "hook",
-    "{Object 54}"
-  ],
-  [
-    "test:before:run",
-    "{Test}"
-  ],
-  [
-    "hook end",
-    "{Object 54}"
-  ],
-  [
-    "hook",
-    "{Object 54}"
-  ],
-  [
-    "hook end",
-    "{Object 54}"
-  ],
-  [
-    "test:after:run",
-    "{Test}"
-  ],
-  [
-    "hook",
     "{Object 55}"
   ],
   [
@@ -3284,7 +1814,31 @@ exports['three tests with retry runner emit'] = [
   ],
   [
     "hook end",
-    "{Object 54}"
+    "{Object 55}"
+  ],
+  [
+    "hook",
+    "{Object 55}"
+  ],
+  [
+    "hook end",
+    "{Object 55}"
+  ],
+  [
+    "test:after:run",
+    "{Test}"
+  ],
+  [
+    "hook",
+    "{Object 56}"
+  ],
+  [
+    "test:before:run",
+    "{Test}"
+  ],
+  [
+    "hook end",
+    "{Object 55}"
   ],
   [
     "test end",
@@ -3292,11 +1846,11 @@ exports['three tests with retry runner emit'] = [
   ],
   [
     "hook",
-    "{Object 54}"
+    "{Object 55}"
   ],
   [
     "hook end",
-    "{Object 54}"
+    "{Object 55}"
   ],
   [
     "pass",
@@ -3363,3 +1917,17 @@ exports['three tests with retry runner emit'] = [
     null
   ]
 ]
+
+exports['three tests with retry stdout'] = `
+
+
+  suite 1
+\r    \u2713 test 1
+\r    \u2713 test 2
+\r    \u2713 test 3
+
+
+  3 passing 
+
+
+`

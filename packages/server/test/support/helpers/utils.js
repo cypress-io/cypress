@@ -2,6 +2,7 @@ const _write = process.stdout.write
 const _ = require('lodash')
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')('utils')
+const chalk = require('chalk')
 
 const stdout = {
   capture () {
@@ -16,7 +17,7 @@ const stdout = {
       const args = (args) => {
         debug.extend('stdout')(...args)
 
-        return _.map(args, stripAnsi)
+        return _.map(_.map(args, stripAnsi), (v) => _.isString(v) && chalk.rgb(160, 100, 160)(v))
 
       }
 

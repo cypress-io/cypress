@@ -264,9 +264,6 @@ describe('src/cypress/runner', () => {
       it('simple 1 test', () => {
         createCypress(simpleSingleTest)
         .then(shouldHaveTestResults(1, 0))
-        .then(() => {
-          expect(formatEvents(allStubs)).to.matchSnapshot({ ...eventCleanseMap, wallClockStartedAt: match.date })
-        })
       })
 
       it('simple 3 tests', function () {
@@ -276,9 +273,6 @@ describe('src/cypress/runner', () => {
           },
         })
         .then(shouldHaveTestResults(3, 0))
-        .then(() => {
-          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-        })
       })
 
       it('simple fail', function () {
@@ -296,10 +290,9 @@ describe('src/cypress/runner', () => {
         })
         .then(shouldHaveTestResults(0, 1))
         .then(() => {
-          cy.contains('header .failed', '1')
-        })
-        .then(() => {
-          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
+          // render exactly one error
+          cy.get('pre:contains(AssertionError)').should('have.length', 1)
+          .should('have.class', 'test-error')
         })
       })
 
@@ -327,10 +320,6 @@ describe('src/cypress/runner', () => {
           },
         })
         .then(shouldHaveTestResults(2, 2))
-        .then(() => {
-
-          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-        })
       })
 
       it('fail pass', function () {
@@ -348,17 +337,13 @@ describe('src/cypress/runner', () => {
           },
         })
         .then(shouldHaveTestResults(1, 1))
-        .then(() => {
-          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-        })
+
       })
 
       it('no tests', function () {
         createCypress({})
         .then(shouldHaveTestResults(0, 0))
-        .then(() => {
-          expect(formatEvents(allStubs)).to.matchSnapshot()
-        })
+
         cy.contains('No tests found in your file').should('be.visible')
         cy.get('.error-message p').invoke('text').should('eq', 'We could not detect any tests in the above file. Write some tests and re-run.')
       })
@@ -375,8 +360,6 @@ describe('src/cypress/runner', () => {
           },
         }, { config: { retries: 1 } })
         .then(shouldHaveTestResults(3, 0))
-        .then(() => {
-        })
       })
 
       it('simple fail, catch cy.on(fail)', () => {
@@ -404,9 +387,6 @@ describe('src/cypress/runner', () => {
           },
         })
         .then(shouldHaveTestResults(1, 0))
-        .then(() => {
-          expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-        })
       })
 
       describe('hook failures', () => {
@@ -426,10 +406,9 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
-            cy.get('.test-error:visible').invoke('text').should('matchSnapshot')
+            cy.get('.test-error:visible').invoke('text').then((text) => expect(text).to.matchSnapshot())
           })
           .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
             snapshotEvents(snapshots.FAIL_IN_BEFORE)
           })
         })
@@ -450,7 +429,6 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
             snapshotEvents(snapshots.FAIL_IN_BEFOREEACH)
           })
         })
@@ -471,7 +449,6 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
             snapshotEvents(snapshots.FAIL_IN_AFTEREACH)
           })
         })
@@ -492,7 +469,7 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(1, 1))
           .then(() => {
-            cy.get('.test-error:visible').invoke('text').should('matchSnapshot')
+            cy.get('.test-error:visible').invoke('text').then((text) => expect(text).to.matchSnapshot())
           })
           .then(() => {
             snapshotEvents(snapshots.FAIL_IN_AFTER)
@@ -517,9 +494,6 @@ describe('src/cypress/runner', () => {
             },
           })
           .then(shouldHaveTestResults(1, 1))
-          .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-          })
         })
 
         it('fail with [after]', () => {
@@ -532,9 +506,6 @@ describe('src/cypress/runner', () => {
             },
           })
           .then(shouldHaveTestResults(1, 1))
-          .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-          })
         })
 
         it('fail with all hooks', () => {
@@ -547,9 +518,6 @@ describe('src/cypress/runner', () => {
             },
           })
           .then(shouldHaveTestResults(0, 1))
-          .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-          })
         })
       })
 
@@ -569,7 +537,6 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
             snapshotEvents(snapshots.FAIL_WITH_ONLY)
           })
         })
@@ -588,7 +555,6 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(1, 0))
           .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
             snapshotEvents(snapshots.PASS_WITH_ONLY)
           })
         })
@@ -654,8 +620,6 @@ describe('src/cypress/runner', () => {
           .then(shouldHaveTestResults(1, 0))
           .then(() => {
 
-            expect(formatEvents(allStubs)).matchSnapshot(eventCleanseMap)
-
             cy.contains('test')
             cy.contains('after all')
           })
@@ -676,10 +640,6 @@ describe('src/cypress/runner', () => {
             },
           }, { config: { retries: 1 } })
           .then(shouldHaveTestResults(1, 0))
-          .then(() => {
-
-            expect(formatEvents(allStubs)).matchSnapshot(eventCleanseMap)
-          })
         })
 
         it('test retry with many hooks', () => {
@@ -702,9 +662,6 @@ describe('src/cypress/runner', () => {
             },
           }, { config: { retries: 1 } })
           .then(shouldHaveTestResults(3, 0))
-          .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
-          })
 
         })
 
@@ -732,20 +689,19 @@ describe('src/cypress/runner', () => {
           })
           .then(() => {
 
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
             snapshotEvents(snapshots.RETRY_PASS_IN_BEFOREEACH)
           })
 
         })
         it('can retry from [afterEach]', () => {
           createCypress({
+            hooks: [{ type: 'afterEach', fail: 1 }],
             suites: {
               'suite 1': {
                 hooks: [
                   'before',
                   'beforeEach',
                   'beforeEach',
-                  { type: 'afterEach', fail: 1 },
                   'afterEach',
                   'after',
                 ],
@@ -769,7 +725,6 @@ describe('src/cypress/runner', () => {
           })
           .then(() => {
 
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
             snapshotEvents(snapshots.RETRY_PASS_IN_AFTEREACH)
           })
 
@@ -797,9 +752,6 @@ describe('src/cypress/runner', () => {
             cy.contains('Although you have test retries')
             cy.contains('AssertionError').click()
             cy.get('@console_log').its('lastCall').should('be.calledWithMatch', 'Error')
-          })
-          .then(() => {
-            expect(formatEvents(allStubs)).to.matchSnapshot(eventCleanseMap)
           })
 
         })
@@ -1108,22 +1060,22 @@ const cleanseRunStateMap = {
   'err.stack': '[err stack]',
 }
 
-const formatEvents = (stub) => {
-  return _.flatMap(stub.args, (args) => {
-    args = args.slice(1)
-    if (['mocha', 'automation:request', 'log:changed'].includes(args[0])) {
-      return []
-    }
+// const formatEvents = (stub) => {
+//   return _.flatMap(stub.args, (args) => {
+//     args = args.slice(1)
+//     if (['mocha', 'automation:request', 'log:changed'].includes(args[0])) {
+//       return []
+//     }
 
-    let ret = [args[0]]
+//     let ret = [args[0]]
 
-    if (args[1] != null) {
-      ret = ret.concat([args[1]])
-    }
+//     if (args[1] != null) {
+//       ret = ret.concat([args[1]])
+//     }
 
-    return [ret]
-  })
-}
+//     return [ret]
+//   })
+// }
 
 const shouldHaveTestResults = (passed, failed) => (exitCode) => {
   expect(exitCode, 'resolve with failure count').eq(exitCode)

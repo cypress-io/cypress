@@ -8,4 +8,6 @@ describe "e2e async timeouts", ->
       spec: "async_timeouts_spec.coffee"
       snapshot: true
       expectedExitCode: 1
+      # browser: "chrome"
+      # exit: false
     })

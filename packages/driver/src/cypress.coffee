@@ -241,9 +241,8 @@ class $Cypress
           @emit("mocha", "test end", args...)
 
       when "runner:pass"
-        return
-        ## test has passed, including afterEach hooks
-        ## slightly different than mocha
+        ## delayed mocha pass event after
+        ## all afterEach hooks have ran
         if @config("isTextTerminal")
           @emit("mocha", "pass", args...)
 

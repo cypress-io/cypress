@@ -95,8 +95,6 @@ mergeRunnable = (eventName) ->
 safelyMergeRunnable = (hookProps, runnables) ->
   { hookId, title, hookName, body, type } = hookProps
 
-  debug('safelyMergeRunnable')
-
   if not runnable = runnables[hookId]
     runnables[hookId] = {
       hookId
@@ -108,9 +106,10 @@ safelyMergeRunnable = (hookProps, runnables) ->
 
   _.extend({}, runnables[hookProps.id], hookProps)
 
-mergeErr = (runnable, runnables, stats) ->
+mergeErr = (runnable, err, runnables, stats) ->
   ## this will always be a test because
   ## we reset hook id's to match tests
+  debug('runnable:mergeErr', runnable, 'this.\n', @runnables, '\n.', runnables, stats)
   test = runnables[runnable.id]
   test.err = runnable.err
   test.state = "failed"
@@ -242,11 +241,9 @@ class Reporter
     return runnable
 
   emit: (event, args...) ->
-    if pArgs = @parseArgs(event, args)
-      ## send the mocha 'pass' event at the end of the test
-      ret = @runner?.emit.apply(@runner, pArgs)
-      debug('emit', event, pArgs)
-      ret
+    pArgs = @parseArgs(event, args)
+    if pArgs
+      @runner?.emit.apply(@runner, pArgs)
 
   parseArgs: (event, args) ->
     ## make sure this event is in our events hash

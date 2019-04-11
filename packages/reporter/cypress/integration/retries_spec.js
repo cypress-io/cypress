@@ -276,7 +276,7 @@ describe('retries', function () {
 
     this.start(tests)
     this.data.attempt.state = 'active'
-    this.data.attempt.attemptIndex = 2
+    this.data.attempt._currentRetry = 2
     this.addAttempt(this.data.attempt)
     this.data.command.state = null
     this.data.command.testCurrentRetry = 2

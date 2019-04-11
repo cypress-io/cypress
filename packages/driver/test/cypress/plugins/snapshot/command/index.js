@@ -29,11 +29,10 @@ const registerInCypress = () => {
     snapshotIndex[testName] = (snapshotIndex[testName] || 1)
     const exactSpecName = snapshotName || `${testName} #${snapshotIndex[testName]}`
 
-    return cy.now('task',
-      'getSnapshot', {
-        file,
-        exactSpecName,
-      }, { log: false })
+    return cy.task('getSnapshot', {
+      file,
+      exactSpecName,
+    }, { log: false })
     .then((exp) => {
       try {
         const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
@@ -66,7 +65,7 @@ const registerInCypress = () => {
             },
           })
 
-          return cy.now('task', 'saveSnapshot', {
+          return cy.task('saveSnapshot', {
             file,
             what: e.act,
             exactSpecName,
@@ -75,7 +74,7 @@ const registerInCypress = () => {
 
         Cypress.log({
           name: 'assert',
-          message: `**snapshot failed match**: ${e.message}`,
+          message: `**snapshot failed match**: ${exactSpecName}`,
           state: 'failed',
           consoleProps: () => {
             return {
@@ -183,12 +182,8 @@ const matchDeep = function (matchers, exp, optsArg) {
 
   const match = opts.sinon.match
   const isAnsi = !opts.Cypress
-  // const isSnapshot = opts.isSnapshot
 
   const act = this._obj
-
-  // let act = this._obj
-  // console.log(act)
 
   m = _.map(m, (val, key) => {
     return [key.split('.'), val]
@@ -196,20 +191,17 @@ const matchDeep = function (matchers, exp, optsArg) {
 
   const diffStr = withMatchers(m, match, opts.expectedOnly)(exp, act)
 
-  // console.log(diffStr.act)
   if (diffStr.changed) {
 
     let e = _.extend(new Error(), { act: diffStr.act })
-
-    // e.act[1][1].somefoo = undefined
 
     e.message = isAnsi ? `\n${diffStr.text}` : stripAnsi(diffStr.text)
 
     if (_.isString(act)) {
       e.message = `\n${stripIndent`
         SnapshotError: Failed to match snapshot
-        Expected:\n---\n${printVar(act)}\n---
-        Actual:\n---\n${printVar(exp)}\n---
+        Expected:\n---\n${printVar(exp)}\n---
+        Actual:\n---\n${printVar(diffStr.act)}\n---
         `}`
     }
 

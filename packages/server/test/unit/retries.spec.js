@@ -23,7 +23,11 @@ const getSnapshot = (snapshotName) => {
   return _.mapValues(snapshotName, (v) => parseSnapshot(events[v]))
 }
 
+let stdoutStub
+
 function createReporter ({ setRunnables, mocha }) {
+
+  stdoutStub = stdout.capture()
 
   const reporter = Reporter()
 
@@ -58,76 +62,62 @@ module.exports = {
 
 describe('reporter retries', () => {
 
-  /**@type{sinon.SinonStub} */
-  let console_log
-
   const snapshot = (name) => {
     if (!name) throw new Error('snapshot name cannot be empty')
 
-    expect(currentReporter.runnables).to.matchSnapshot({
-      parent: stringifyShort,
-      'addListener': undefined,
-      'clearTimeout': undefined,
-      'clone': undefined,
-      'currentRetry': undefined,
-      'emit': undefined,
-      'enableTimeouts': undefined,
-      'eventNames': undefined,
-      'fullTitle': undefined,
-      'getMaxListeners': undefined,
-      'globals': undefined,
-      'inspect': undefined,
-      'listenerCount': undefined,
-      'listeners': undefined,
-      'on': undefined,
-      'once': undefined,
-      'prependListener': undefined,
-      'prependOnceListener': undefined,
-      'removeAllListeners': undefined,
-      'removeListener': undefined,
-      'resetTimeout': undefined,
-      'retries': undefined,
-      'run': undefined,
-      'setMaxListeners': undefined,
-      'skip': undefined,
-      'slow': undefined,
-      'timeout': undefined,
-      'titlePath': undefined,
-      'addSuite': undefined,
-      'addTest': undefined,
-      'afterAll': undefined,
-      'afterEach': undefined,
-      'bail': undefined,
-      'beforeAll': undefined,
-      'beforeEach': undefined,
-      'eachTest': undefined,
-      'total': undefined,
-    }, `${name} runnables`)
+    /*
+      expect(currentReporter.runnables).to.matchSnapshot({
+        parent: stringifyShort,
+        'addListener': undefined,
+        'clearTimeout': undefined,
+        'clone': undefined,
+        'currentRetry': undefined,
+        'emit': undefined,
+        'enableTimeouts': undefined,
+        'eventNames': undefined,
+        'fullTitle': undefined,
+        'getMaxListeners': undefined,
+        'globals': undefined,
+        'inspect': undefined,
+        'listenerCount': undefined,
+        'listeners': undefined,
+        'on': undefined,
+        'once': undefined,
+        'prependListener': undefined,
+        'prependOnceListener': undefined,
+        'removeAllListeners': undefined,
+        'removeListener': undefined,
+        'resetTimeout': undefined,
+        'retries': undefined,
+        'run': undefined,
+        'setMaxListeners': undefined,
+        'skip': undefined,
+        'slow': undefined,
+        'timeout': undefined,
+        'titlePath': undefined,
+        'addSuite': undefined,
+        'addTest': undefined,
+        'afterAll': undefined,
+        'afterEach': undefined,
+        'bail': undefined,
+        'beforeAll': undefined,
+        'beforeEach': undefined,
+        'eachTest': undefined,
+        'total': undefined,
+        'speed': undefined,
+      }, `${name} runnables`)
+    */
     expect(currentStubs.runnerEmit.args).to.matchSnapshot(runnerEmitCleanseMap, `${name} runner emit`)
     expect(currentReporter.results()).to.matchSnapshot({
       'reporterStats.end': match.date,
       'reporterStats.start': match.date,
       'reporterStats.duration': match.number,
     }, `${name} reporter results`)
+    expect(stdoutStub.toString())
+
+    expect(stdoutStub.toString())
+    .matchSnapshot({ '^': (v) => v.replace(/\(\d+ms\)/g, '') }, `${name} stdout`)
   }
-
-  beforeEach(function () {
-
-    console_log = stdout.capture()
-
-    // console_log = spyOn(process, 'stdout', debug.extend('console:log'))
-
-    // console_log = spyOn(console, 'log', (...args) => {
-    //   debug.extend('console:log')(...args)
-    //   debugger
-
-    //   if (_.isString(args && args[1]) && args[1].includes(currentTestTitle)) {
-    //     return
-    //   }
-
-    //   return args.map(stripAnsi)
-    // })
-  })
 
   afterEach(() => {
     stdout.restore()
@@ -193,9 +183,6 @@ describe('reporter retries', () => {
       ],
     })
 
-    expect(console_log.toString())
-    .matchSnapshot({ '^': (v) => v.replace(/\(\d+ms\)/g, '') }, 'retry [afterEach] stdout')
-
     snapshot('retry [afterEach]')
 
   })
@@ -230,14 +217,19 @@ describe('reporter retries', () => {
       ],
     })
 
-    expect(console_log.toString())
-    .matchSnapshot(
-      { '^': (v) => v.replace(/\(\d+ms\)/g, '') },
-      'retry [beforeEach] stdout'
-    )
-
     snapshot('retry [beforeEach]')
 
+  })
+
+  it('fail [afterEach]', () => {
+    createReporter(getSnapshot(EventSnapshots.FAIL_IN_AFTEREACH))
+
+    snapshot('fail in [afterEach]')
+  })
+  it('fail [beforeEach]', () => {
+    createReporter(getSnapshot(EventSnapshots.FAIL_IN_BEFOREEACH))
+
+    snapshot('fail in [beforeEach]')
   })
 
 })
