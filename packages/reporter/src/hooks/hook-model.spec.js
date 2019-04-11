@@ -107,4 +107,25 @@ describe('Hook model', () => {
       expect(hook.commandMatchingErr({ message: 'matching error message' })).to.be.undefined
     })
   })
+
+  context('#aliasesWithDuplicates', () => {
+    it('returns duplicates marked with hasDuplicates and those that appear mulitple times in the commands array', () => {
+      hook.addCommand({ isMatchingEvent: () => {
+        return false
+      }, alias: 'foo' })
+      hook.addCommand({ isMatchingEvent: () => {
+        return false
+      }, alias: 'bar' })
+      hook.addCommand({ isMatchingEvent: () => {
+        return false
+      }, alias: 'foo' })
+      hook.addCommand({ isMatchingEvent: () => {
+        return false
+      }, alias: 'baz', hasDuplicates: true })
+
+      expect(hook.aliasesWithDuplicates).to.include('foo')
+      expect(hook.aliasesWithDuplicates).to.include('baz')
+      expect(hook.aliasesWithDuplicates).to.not.include('bar')
+    })
+  })
 })
