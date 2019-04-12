@@ -62,6 +62,9 @@ module.exports = {
     ## else hide all windows
     _.invoke windows, "hide"
 
+  focusMainWindow: ->
+    windows['INDEX'].show()
+
   getByWebContents: (webContents) ->
     BrowserWindow.fromWebContents(webContents)
 

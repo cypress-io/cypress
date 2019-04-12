@@ -55,6 +55,7 @@ const start = () => {
     })
   })
   .finally(stopServer)
+  .finally(windows.focusMainWindow)
 }
 
 /**
