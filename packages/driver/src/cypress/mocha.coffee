@@ -176,6 +176,8 @@ create = (specWindow, Cypress, reporter) ->
 
   _runner = getRunner(_mocha)
 
+  _mocha.suite.file = Cypress.spec.relative
+
   return {
     _mocha
 
