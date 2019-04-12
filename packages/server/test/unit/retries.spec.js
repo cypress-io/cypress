@@ -48,7 +48,7 @@ function createReporter ({ setRunnables, mocha }) {
   stubs.runnerEmit = spyOn(reporter.runner, 'emit', debug.extend('runner:emit'))
 
   _.each(mochaEvents, (event) => {
-    reporter.emit(...event.slice(1))
+    reporter.emit(...event.slice(1, 3))
   })
 
   stdout.restore()

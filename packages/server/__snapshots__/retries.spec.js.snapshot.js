@@ -120,7 +120,7 @@ exports['fail in [afterEach] stdout'] = `
 
 
   suite 1
-\r    1) "after each" hook for "test 1"
+    1) "after each" hook for "test 1"
 
 
   0 passing 
@@ -249,7 +249,7 @@ exports['fail in [beforeEach] stdout'] = `
 
 
   suite 1
-\r    1) "before each" hook for "test 1"
+    1) "before each" hook for "test 1"
 
 
   0 passing 
@@ -1035,15 +1035,15 @@ exports['retry [afterEach] stdout'] = `
 
 
   suite 1
-\r    \u2713 test 1
-\r    \u2713 test 2
-\r    \u2713 test 3
+    \u2713 test 1
+    \u2713 test 2
+    \u2713 test 3
 
   suite 2
-\r    \u2713 test 1
+    \u2713 test 1
 
   suite 3
-\r    \u2713 test 1
+    \u2713 test 1
 
 
   5 passing 
@@ -1357,7 +1357,7 @@ exports['retry [beforeEach] stdout'] = `
 
 
   suite 1
-\r    \u2713 test 1
+    \u2713 test 1
 
 
   1 passing 
@@ -1466,7 +1466,7 @@ exports['simple_single_test stdout'] = `
 
 
   suite 1
-\r    \u2713 test 1
+    \u2713 test 1
 
 
   1 passing 
@@ -1922,9 +1922,9 @@ exports['three tests with retry stdout'] = `
 
 
   suite 1
-\r    \u2713 test 1
-\r    \u2713 test 2
-\r    \u2713 test 3
+    \u2713 test 1
+    \u2713 test 2
+    \u2713 test 3
 
 
   3 passing 
