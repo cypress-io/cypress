@@ -44,8 +44,7 @@ class LoginForm extends Component {
 
     return (
       <span>
-        <i className='fa fa-github'></i>{' '}
-          Log In with GitHub
+          Log In to Dashboard
       </span>
     )
 

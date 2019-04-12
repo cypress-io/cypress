@@ -175,7 +175,7 @@ describe "Settings", ->
           @ipc.getRecordKeys.onCall(1).resolves(@keys)
 
           cy.get(".empty-well button").click()
-          cy.contains("Log In with GitHub").click().should =>
+          cy.contains("Log In to Dashboard").click().should =>
             expect(@ipc.getRecordKeys).to.be.calledTwice
           cy.get(".settings-record-key")
             .contains("cypress run --record --key #{@keys[0].id}")

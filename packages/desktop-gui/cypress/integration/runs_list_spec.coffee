@@ -256,8 +256,8 @@ describe "Runs List", ->
       it "shows login message", ->
         cy.get(".login h1").should("contain", "Log in")
 
-      it "clicking 'Log In with GitHub' opens login", ->
-        cy.contains("button", "Log In with GitHub").click().then ->
+      it "clicking 'Log In to Dashboard' opens login", ->
+        cy.contains("button", "Log In to Dashboard").click().then ->
           expect(@ipc.windowOpen).to.be.called
           expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("DASHBOARD_LOGIN")
 
@@ -479,8 +479,8 @@ describe "Runs List", ->
               it "shows login message", ->
                 cy.get(".empty h4").should("contain", "Log in")
 
-              it "clicking 'Log In with GitHub' opens login", ->
-                cy.contains("button", "Log In with GitHub").click().then ->
+              it "clicking 'Log In to Dashboard' opens login", ->
+                cy.contains("button", "Log In to Dashboard").click().then ->
                   expect(@ipc.windowOpen).to.be.called
                   expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("DASHBOARD_LOGIN")
 

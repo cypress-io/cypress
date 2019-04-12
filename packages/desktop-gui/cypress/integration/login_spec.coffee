@@ -39,17 +39,17 @@ describe "Login", ->
       @pingApiServer.resolve()
 
     it "has Github Login button", ->
-      cy.get(".login").contains("button", "Log In with GitHub")
+      cy.get(".login").contains("button", "Log In to Dashboard")
 
     it "opens dashboard on clicking 'Cypress Dashboard'", ->
       cy.contains("Cypress Dashboard").click().then ->
         expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard")
 
-    describe "click 'Log In with GitHub'", ->
+    describe "click 'Log In to Dashboard'", ->
       beforeEach ->
         cy
           .get(".login")
-            .contains("button", "Log In with GitHub").as("loginBtn")
+            .contains("button", "Log In to Dashboard").as("loginBtn")
             .click()
 
       it "triggers ipc 'window:open' on click", ->
@@ -126,7 +126,7 @@ describe "Login", ->
               cy.get(".login button").eq(1)
                 .should("not.be.disabled")
                 .invoke("text")
-                .should("include", "Log In with GitHub")
+                .should("include", "Log In to Dashboard")
 
         describe "on ipc 'log:in' error", ->
           beforeEach ->
@@ -148,7 +148,7 @@ describe "Login", ->
 
         it "no longer shows logging in spinner", ->
           cy.get(".login-content .alert").should("not.exist")
-          cy.contains("button", "Log In with GitHub").should("not.be.disabled")
+          cy.contains("button", "Log In to Dashboard").should("not.be.disabled")
 
     describe "Dashboard link in message", ->
       it "opens link to Dashboard Service on click", ->
@@ -197,7 +197,7 @@ describe "Login", ->
 
       it "shows login on success", ->
         @pingApiServerAgain.resolve()
-        cy.get(".login").contains("button", "Log In with GitHub")
+        cy.get(".login").contains("button", "Log In to Dashboard")
 
     describe "api help link", ->
       it "goes to external api help link", ->
@@ -211,4 +211,4 @@ describe "Login", ->
       it "shows log in if connected and opened again", ->
         @pingApiServerAgain.resolve()
         cy.contains("Log In").click()
-        cy.get(".login").contains("button", "Log In with GitHub")
+        cy.get(".login").contains("button", "Log In to Dashboard")
