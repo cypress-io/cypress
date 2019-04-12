@@ -15,13 +15,7 @@ let authCallback
 let authState
 let server
 
-const getOriginFromUrl = (originalUrl) => {
-  const parsedUrl = url.parse(originalUrl)
-
-  return url.format(_.pick(parsedUrl, ['protocol', 'slashes', 'hostname', 'port']))
-}
-
-const buildFullLoginUrl = (baseLoginUrl) => {
+const _buildFullLoginUrl = (baseLoginUrl, server) => {
   const { port } = server.address()
 
   authState = random.id(32)
@@ -30,21 +24,29 @@ const buildFullLoginUrl = (baseLoginUrl) => {
   return authUrl
 }
 
+const _getOriginFromUrl = (originalUrl) => {
+  const parsedUrl = url.parse(originalUrl)
+
+  return url.format(_.pick(parsedUrl, ['protocol', 'slashes', 'hostname', 'port']))
+}
+
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
 const start = () => {
   return user.getBaseLoginUrl()
-  .tap(launchServer)
-  .then(buildFullLoginUrl)
+  .tap(_launchServer)
+  .then((baseLoginUrl) => {
+    return _buildFullLoginUrl(baseLoginUrl, server)
+  })
   .then((loginUrl) => {
     debug('Trying to open native auth to URL ', loginUrl)
 
-    return launchNativeAuth(loginUrl)
+    return _launchNativeAuth(loginUrl)
     .catch((e) => {
       debug('Failed to launch native auth, falling back to Electron:', e)
 
-      return launchElectronAuth(loginUrl)
+      return _launchElectronAuth(loginUrl)
     })
   })
   .then(() => {
@@ -53,7 +55,7 @@ const start = () => {
     })
   })
   .finally(() => {
-    stopServer()
+    _stopServer()
     windows.focusMainWindow()
     windows.closeLoginWindow()
   })
@@ -62,10 +64,10 @@ const start = () => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const launchServer = (baseLoginUrl) => {
+const _launchServer = (baseLoginUrl) => {
   if (!server) {
     // launch an express server to listen for the auth callback from dashboard
-    const origin = getOriginFromUrl(baseLoginUrl)
+    const origin = _getOriginFromUrl(baseLoginUrl)
 
     debug('Launching auth server expecting origin', origin)
     app = express()
@@ -105,7 +107,7 @@ const launchServer = (baseLoginUrl) => {
   return Promise.resolve()
 }
 
-const stopServer = () => {
+const _stopServer = () => {
   debug('Closing auth server')
   server.close()
   app = undefined
@@ -114,14 +116,14 @@ const stopServer = () => {
   server = undefined
 }
 
-const launchNativeAuth = (loginUrl) => {
+const _launchNativeAuth = (loginUrl) => {
   // wrap openExternal here in case `electron.shell` is not available (during tests)
   return Promise.fromCallback((cb) => {
     shell.openExternal(loginUrl, {}, cb)
   })
 }
 
-const launchElectronAuth = (loginUrl) => {
+const _launchElectronAuth = (loginUrl) => {
   debug('Opening Electron auth')
 
   return windows.open(null, {
@@ -137,5 +139,11 @@ const launchElectronAuth = (loginUrl) => {
 }
 
 module.exports = {
+  _buildFullLoginUrl,
+  _getOriginFromUrl,
+  _launchServer,
+  _launchElectronAuth,
+  _launchNativeAuth,
+  _stopServer,
   start,
 }
