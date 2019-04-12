@@ -117,7 +117,7 @@ const stopServer = () => {
 const launchNativeAuth = (loginUrl) => {
   // wrap openExternal here in case `electron.shell` is not available (during tests)
   return Promise.fromCallback((cb) => {
-    shell.openExternal(loginUrl, cb)
+    shell.openExternal(loginUrl, {}, cb)
   })
 }
 
