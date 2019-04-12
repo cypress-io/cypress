@@ -398,6 +398,14 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
             Cypress.action('runner:pass', wrap(test))
           }
 
+          Cypress.action('runner:test:end', wrap(test))
+
+          _runner._shouldBufferSuiteEnd = false
+          _runner._onTestAfterRun.map((fn) => {
+            return fn()
+          })
+          _runner._onTestAfterRun = []
+
         }
 
         testAfterRun(test, Cypress)
@@ -420,6 +428,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         // const tests = getAllSiblingTests(t_1.parent, getTestById)
 
         if (this.suite.root) {
+          _runner._shouldBufferSuiteEnd = true
 
           //# make sure this test isnt the last test overall but also
           //# isnt the last test in our grep'd parent suite's tests array
@@ -706,21 +715,33 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     return Cypress.action('runner:suite:start', wrap(suite))
   })
 
-  _runner.bufferSuiteEnd = []
+  _runner._shouldBufferSuiteEnd = false
+  _runner._onTestAfterRun = []
 
   _runner.on('suite end', (suite) => {
-    //# cleanup our suite + its hooks
-    forceGc(suite)
-    eachHookInSuite(suite, forceGc)
+    const handleSuiteEnd = () => {
+      //# cleanup our suite + its hooks
+      forceGc(suite)
 
-    if (_emissions.ended[suite.id]) {
+      eachHookInSuite(suite, forceGc)
+
+      if (_emissions.ended[suite.id]) {
+        return
+      }
+
+      _emissions.ended[suite.id] = true
+
+      Cypress.action('runner:suite:end', wrap(suite))
+    }
+
+    if (_runner._shouldBufferSuiteEnd) {
+      _runner._onTestAfterRun = _runner._onTestAfterRun.concat([handleSuiteEnd])
+
       return
     }
 
-    _emissions.ended[suite.id] = true
+    return handleSuiteEnd()
 
-    // _runner.bufferSuiteEnd.push([wrap(suite)])
-    Cypress.action('runner:suite:end', wrap(suite))
   })
 
   _runner.on('hook', (hook) => {
@@ -780,7 +801,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
 
     _emissions.ended[test.id] = true
 
-    return Cypress.action('runner:test:end', wrap(test))
+    // return Cypress.action('runner:test:end', wrap(test))
   })
 
   /**

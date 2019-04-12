@@ -26,6 +26,10 @@ export default class Attempt {
     this._state = props.state
     this.err.update(props.err)
 
+    if (this.id > 0) {
+      this.isOpen = true
+    }
+
     _.each(props.agents, this.addLog)
     _.each(props.commands, this.addLog)
     _.each(props.routes, this.addLog)

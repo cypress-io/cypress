@@ -235,8 +235,8 @@ describe "e2e spec_isolation", ->
       snapshot: false
       expectedExitCode: 5
       config: {retries: 1}
-      browser: 'chrome'
-      exit: false
+      # browser: 'chrome'
+      # exit: false
     })
     .then ->
       ## now what we want to do is read in the outputPath

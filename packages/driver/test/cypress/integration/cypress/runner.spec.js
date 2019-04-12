@@ -992,6 +992,34 @@ describe('src/cypress/runner', () => {
         })
         .then(shouldHaveTestResults(0, 1))
       })
+
+      it('mocha suite:end fire before test:pass event', () => {
+        createCypress({
+          suites: {
+            'suite 1': {
+              suites: {
+                'suite 1-1': {
+                  tests: ['test 1', 'test 2'],
+                },
+              },
+            },
+          },
+        }).then(() => {
+
+          const getOrderFired = (eventProps) => {
+            const event = _.find(mochaStubs.args, eventProps)
+
+            expect(event).ok
+
+            return _.indexOf(mochaStubs.args, event)
+          }
+
+          expect(getOrderFired({ 1: 'pass', 2: { title: 'test 2' } }))
+          .to.be.lt(getOrderFired({ 1: 'suite end', 2: { title: 'suite 1-1' } }))
+
+        })
+
+      })
     })
     describe('mocha events', () => {
 

@@ -55,7 +55,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "pass",
     {
       "id": "r3",
       "title": "test 1",
@@ -71,13 +71,14 @@ exports['FAIL_IN_AFTER.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
+      "final": true,
       "_currentRetry": 0,
       "_retries": 0
     }
   ],
   [
     "mocha",
-    "pass",
+    "test end",
     {
       "id": "r3",
       "title": "test 1",
@@ -149,35 +150,6 @@ exports['FAIL_IN_AFTER.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r4",
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 0
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r4",
@@ -212,6 +184,39 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r4",
+      "title": "test 2",
+      "hookName": "after all",
+      "err": "{Object 6}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 0
     }
   ],
   [
@@ -379,35 +384,6 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 0
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r3",
@@ -442,6 +418,39 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "title": "test 1",
+      "hookName": "after each",
+      "err": "{Object 6}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 0
     }
   ],
   [
@@ -623,6 +632,35 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "title": "test 1",
+      "hookName": "before all",
+      "err": "{Object 6}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 0
     }
   ],
   [
@@ -812,6 +850,35 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "title": "test 1",
+      "hookName": "before each",
+      "err": "{Object 6}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 0
     }
   ],
   [
@@ -1119,6 +1186,64 @@ exports['FAIL_WITH_ONLY.mocha'] = [
   ],
   [
     "mocha",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
     "test end",
     {
       "id": "r3",
@@ -1164,66 +1289,9 @@ exports['FAIL_WITH_ONLY.mocha'] = [
           }
         ]
       },
+      "final": true,
       "_currentRetry": 0,
       "_retries": 0
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
     }
   ],
   [
@@ -1496,56 +1564,6 @@ exports['PASS_WITH_ONLY.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 0
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r3",
@@ -1605,6 +1623,57 @@ exports['PASS_WITH_ONLY.mocha'] = [
   [
     "mocha",
     "pass",
+    {
+      "id": "r3",
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "after all": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 0
+    }
+  ],
+  [
+    "mocha",
+    "test end",
     {
       "id": "r3",
       "title": "test 2",
@@ -1954,59 +2023,6 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h5",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 2
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r3",
@@ -2306,6 +2322,53 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h5",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 1,
+      "_retries": 2
+    }
+  ],
+  [
+    "mocha",
     "test:after:run",
     {
       "id": "r3",
@@ -2439,52 +2502,6 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r4",
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h5",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 2
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r4",
@@ -2548,6 +2565,53 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   [
     "mocha",
     "pass",
+    {
+      "id": "r4",
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h5",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 2
+    }
+  ],
+  [
+    "mocha",
+    "test end",
     {
       "id": "r4",
       "title": "test 2",
@@ -2727,59 +2791,6 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r5",
-      "title": "test 3",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h5",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h6",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 2
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r5",
@@ -2872,6 +2883,60 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   [
     "mocha",
     "pass",
+    {
+      "id": "r5",
+      "title": "test 3",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h5",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "after all": [
+          {
+            "hookId": "h6",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 2
+    }
+  ],
+  [
+    "mocha",
+    "test end",
     {
       "id": "r5",
       "title": "test 3",
@@ -3027,40 +3092,6 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r7",
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h7",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h5",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 2
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r7",
@@ -3356,6 +3387,41 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   [
     "mocha",
     "pass",
+    {
+      "id": "r7",
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h7",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h5",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 2,
+      "_retries": 2
+    }
+  ],
+  [
+    "mocha",
+    "test end",
     {
       "id": "r7",
       "title": "test 1",
@@ -3473,35 +3539,6 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r9",
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h5",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 2
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r9",
@@ -3535,6 +3572,36 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   [
     "mocha",
     "pass",
+    {
+      "id": "r9",
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h5",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 2
+    }
+  ],
+  [
+    "mocha",
+    "test end",
     {
       "id": "r9",
       "title": "test 1",
@@ -4089,59 +4156,6 @@ exports['RETRY_PASS_IN_BEFOREEACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h5",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h6",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 1,
-      "_retries": 1
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r3",
@@ -4201,6 +4215,60 @@ exports['RETRY_PASS_IN_BEFOREEACH.mocha'] = [
   [
     "mocha",
     "pass",
+    {
+      "id": "r3",
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h5",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "after all": [
+          {
+            "hookId": "h6",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 1,
+      "_retries": 1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
     {
       "id": "r3",
       "title": "test 1",
@@ -4430,7 +4498,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "pass",
     {
       "id": "r3",
       "title": "test 1",
@@ -4446,13 +4514,14 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
+      "final": true,
       "_currentRetry": 0,
       "_retries": 0
     }
   ],
   [
     "mocha",
-    "pass",
+    "test end",
     {
       "id": "r3",
       "title": "test 1",
@@ -4707,7 +4776,36 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
     {
       "id": "r3",
       "title": "test 1",
@@ -4744,42 +4842,14 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
+      "final": true,
       "_currentRetry": 0,
       "_retries": 0
     }
   ],
   [
     "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "pass",
+    "test end",
     {
       "id": "r3",
       "title": "test 1",
@@ -4923,42 +4993,6 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r4",
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 0,
-      "_retries": 0
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r4",
@@ -4990,6 +5024,43 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
   [
     "mocha",
     "pass",
+    {
+      "id": "r4",
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 0,
+      "_retries": 0
+    }
+  ],
+  [
+    "mocha",
+    "test end",
     {
       "id": "r4",
       "title": "test 2",
@@ -5119,7 +5190,66 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
     {
       "id": "r5",
       "title": "test 3",
@@ -5156,72 +5286,14 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
+      "final": true,
       "_currentRetry": 0,
       "_retries": 0
     }
   ],
   [
     "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "pass",
+    "test end",
     {
       "id": "r5",
       "title": "test 3",
@@ -5534,7 +5606,36 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
     {
       "id": "r3",
       "title": "test 1",
@@ -5571,42 +5672,14 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
           }
         ]
       },
+      "final": true,
       "_currentRetry": 0,
       "_retries": 2
     }
   ],
   [
     "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "pass",
+    "test end",
     {
       "id": "r3",
       "title": "test 1",
@@ -5974,42 +6047,6 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
-    {
-      "id": "r4",
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "_currentRetry": 2,
-      "_retries": 2
-    }
-  ],
-  [
-    "mocha",
     "hook",
     {
       "id": "r4",
@@ -6041,6 +6078,43 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
   [
     "mocha",
     "pass",
+    {
+      "id": "r4",
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "final": true,
+      "_currentRetry": 2,
+      "_retries": 2
+    }
+  ],
+  [
+    "mocha",
+    "test end",
     {
       "id": "r4",
       "title": "test 2",
@@ -6170,7 +6244,66 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "_currentRetry": 0,
+      "_retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
     {
       "id": "r5",
       "title": "test 3",
@@ -6207,72 +6340,14 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
           }
         ]
       },
+      "final": true,
       "_currentRetry": 0,
       "_retries": 2
     }
   ],
   [
     "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "_currentRetry": 0,
-      "_retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "pass",
+    "test end",
     {
       "id": "r5",
       "title": "test 3",

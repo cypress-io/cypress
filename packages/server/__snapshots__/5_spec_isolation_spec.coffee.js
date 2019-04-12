@@ -25,7 +25,7 @@ exports['e2e spec_isolation failing 1'] = {
       "reporterStats": {
         "suites": 5,
         "tests": 4,
-        "passes": 3,
+        "passes": 1,
         "pending": 1,
         "failures": 3,
         "start": "2018-02-01T20:14:19.323Z",
