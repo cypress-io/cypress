@@ -58,7 +58,7 @@ class Test extends Component {
   }
 
   render () {
-    const { events, model } = this.props
+    const { model } = this.props
 
     if (!model.shouldRender) return null
 
