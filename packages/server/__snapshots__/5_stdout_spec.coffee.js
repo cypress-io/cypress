@@ -47,7 +47,7 @@ The internal Cypress web server responded with:
 
   > 404: Not Found
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'failing hook'
       at stack trace line
       at stack trace line
       at stack trace line
