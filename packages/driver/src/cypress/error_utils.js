@@ -212,11 +212,7 @@ const getErrStack = (err) => {
   // if cypress or assertion error
   // don't return the stack
   if (CypressErrorRe.test(err.name)) {
-    if (_.isString(err)) {
-      return err.toString()
-    }
-
-    return err.message.toString()
+    return err.toString()
   }
 
   return err.stack
