@@ -107,7 +107,7 @@ exports['e2e visit low response timeout fails when network connection immediatel
 
 http://localhost:16795/
 
-We attempted to make an http request to this URL but the request failed without a response.
+We attempted to make an http request to this url but the request failed without a response.
 
 We received this error at the network level:
 
@@ -219,9 +219,9 @@ The response we received from your web server was:
 
   > 500: Server Error
 
-This was considered a failure because the status code was not '2xx'.
+This was considered a failure because the status code was not \`2xx\`.
 
-If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
       at stack trace line
       at stack trace line
       at stack trace line
@@ -407,11 +407,11 @@ exports['e2e visit low response timeout fails when content type isnt html 1'] = 
 
 /static/hello.txt
 
-The content-type of the response we received from this local file was:
+The \`content-type\` of the response we received from this local file was:
 
-  > text/plain
+  > \`text/plain\`
 
-This was considered a failure because responses must have content-type: 'text/html'
+This was considered a failure because responses must have \`content-type: 'text/html'\`
 
 However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
@@ -502,15 +502,15 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
   2 failing
 
   1) when visit times out fails timeout exceeds pageLoadTimeout:
-     CypressError: Timed out after waiting '1000ms' for your remote page to load.
+     CypressError: Timed out after waiting \`1000ms\` for your remote page to load.
 
-Your page did not fire its 'load' event within '1000ms'.
+Your page did not fire its \`load\` event within \`1000ms\`.
 
-You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
-Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
-When this 'load' event occurs, Cypress will continue running commands.
+When this \`load\` event occurs, Cypress will continue running commands.
       at stack trace line
       at stack trace line
       at stack trace line
@@ -528,15 +528,15 @@ When this 'load' event occurs, Cypress will continue running commands.
       at stack trace line
 
   2) when visit times out fails timeout exceeds timeout option:
-     CypressError: Timed out after waiting '500ms' for your remote page to load.
+     CypressError: Timed out after waiting \`500ms\` for your remote page to load.
 
-Your page did not fire its 'load' event within '500ms'.
+Your page did not fire its \`load\` event within \`500ms\`.
 
-You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
-Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
-When this 'load' event occurs, Cypress will continue running commands.
+When this \`load\` event occurs, Cypress will continue running commands.
       at stack trace line
       at stack trace line
       at stack trace line

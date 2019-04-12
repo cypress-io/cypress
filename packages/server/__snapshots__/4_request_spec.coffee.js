@@ -234,9 +234,9 @@ The response we received from your web server was:
 
   > 503: Service Unavailable
 
-This was considered a failure because the status code was not '2xx' or '3xx'.
+This was considered a failure because the status code was not \`2xx\` or \`3xx\`.
 
-If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
 
 -----------------------------------------------------------
 

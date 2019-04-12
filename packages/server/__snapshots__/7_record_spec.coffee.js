@@ -76,7 +76,7 @@ Fix the error in your code and re-run your tests.
   1) record fails "before each" hook for "fails 1":
      Error: foo
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'record fails'
       at stack trace line
 
 
@@ -999,7 +999,7 @@ Fix the error in your code and re-run your tests.
   1) record fails "before each" hook for "fails 1":
      Error: foo
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'record fails'
       at stack trace line
 
 

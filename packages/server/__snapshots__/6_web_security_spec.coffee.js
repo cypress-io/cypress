@@ -38,9 +38,9 @@ A cross origin error happens when your application navigates to a new superdomai
 
 This typically happens in one of three ways:
 
-1. You clicked an <a> that routed you outside of your application
-2. You submitted a form and your server redirected you outside of your application
-3. You used a javascript redirect to a page outside of your application
+1. You clicked an \`<a>\` that routed you outside of your application
+2. You submitted a \`form\` and your server redirected you outside of your application
+3. You used a JavaScript redirect to a page outside of your application
 
 Cypress does not allow you to change superdomains within a single test.
 
@@ -69,9 +69,9 @@ A cross origin error happens when your application navigates to a new superdomai
 
 This typically happens in one of three ways:
 
-1. You clicked an <a> that routed you outside of your application
-2. You submitted a form and your server redirected you outside of your application
-3. You used a javascript redirect to a page outside of your application
+1. You clicked an \`<a>\` that routed you outside of your application
+2. You submitted a \`form\` and your server redirected you outside of your application
+3. You used a JavaScript redirect to a page outside of your application
 
 Cypress does not allow you to change superdomains within a single test.
 
@@ -100,9 +100,9 @@ A cross origin error happens when your application navigates to a new superdomai
 
 This typically happens in one of three ways:
 
-1. You clicked an <a> that routed you outside of your application
-2. You submitted a form and your server redirected you outside of your application
-3. You used a javascript redirect to a page outside of your application
+1. You clicked an \`<a>\` that routed you outside of your application
+2. You submitted a \`form\` and your server redirected you outside of your application
+3. You used a JavaScript redirect to a page outside of your application
 
 Cypress does not allow you to change superdomains within a single test.
 
