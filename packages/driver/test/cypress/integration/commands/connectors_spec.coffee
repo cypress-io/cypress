@@ -249,7 +249,7 @@ describe "src/cy/commands/connectors", ->
         beforeEach ->
           delete @remoteWindow.$.fn.foo
 
-          Cypress.config("defaultCommandTimeout", 50)
+          Cypress.config("defaultCommandTimeout", 100)
 
           @logs = []
 
@@ -341,7 +341,7 @@ describe "src/cy/commands/connectors", ->
           cy.noop(@obj).invoke("bar", 1, 2).then (num) ->
             expect(num).to.eq 3
 
-        it "changes subject to undefined", ->
+        it "changes subject to undefined without throwing default assertion existence", ->
           obj = {
             bar: -> undefined
           }
@@ -365,6 +365,26 @@ describe "src/cy/commands/connectors", ->
 
           cy.noop(num).invoke("valueOf").then (num) ->
             expect(num).to.eq 10
+
+        it "retries until function exists on the subject", ->
+          obj = {}
+
+          cy.on "command:retry", _.after 3, ->
+            obj.foo = -> "bar"
+
+          cy.wrap(obj).invoke("foo").then (val) ->
+            expect(val).to.eq("bar")
+
+        it "retries until property is a function", ->
+          obj = {
+            foo: ""
+          }
+
+          cy.on "command:retry", _.after 3, ->
+            obj.foo = -> "bar"
+
+          cy.wrap(obj).invoke("foo").then (val) ->
+            expect(val).to.eq("bar")
 
         describe "errors", ->
           beforeEach ->
@@ -459,7 +479,7 @@ describe "src/cy/commands/connectors", ->
               Command:  "invoke"
               Function: ".attr(numbers, [1, 2, 3])"
               "With Arguments": ["numbers", [1,2,3]]
-              On:       @obj
+              Subject: @obj
               Yielded: {numbers: [1,2,3]}
             }
 
@@ -468,7 +488,7 @@ describe "src/cy/commands/connectors", ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Command:  "invoke"
               Function: ".bar()"
-              On:       @obj
+              Subject: @obj
               Yielded: "bar"
             }
 
@@ -478,7 +498,7 @@ describe "src/cy/commands/connectors", ->
               Command:  "invoke"
               Function: ".sum(1, 2, 3)"
               "With Arguments": [1,2,3]
-              On:       @obj
+              Subject: @obj
               Yielded: 6
             }
 
@@ -488,7 +508,7 @@ describe "src/cy/commands/connectors", ->
               Command:  "invoke"
               Function: ".math.sum(1, 2, 3)"
               "With Arguments": [1,2,3]
-              On:       @obj
+              Subject: @obj
               Yielded: 6
             }
 
@@ -498,7 +518,7 @@ describe "src/cy/commands/connectors", ->
             expect(consoleProps).to.deep.eq {
               Command: "invoke"
               Function: ".hide()"
-              On: $btn.get(0)
+              Subject: $btn.get(0)
               Yielded: $btn.get(0)
             }
 
@@ -558,16 +578,6 @@ describe "src/cy/commands/connectors", ->
             done()
 
           cy.noop(undefined).its("attr")
-
-        it "consoleProps subject", (done) ->
-          cy.on "fail", (err) =>
-            expect(@lastLog.invoke("consoleProps")).to.deep.eq {
-              Command: "its"
-              Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'fizz' returned a 'undefined' value. You cannot access any properties such as 'buzz' on a 'undefined' value."
-              Subject: {foo: "bar"}
-            }
-            done()
-          cy.noop({foo: "bar"}).its("fizz.buzz")
 
     context "#its", ->
       beforeEach ->
@@ -806,7 +816,7 @@ describe "src/cy/commands/connectors", ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Command:  "its"
               Property: ".num"
-              On:       @obj
+              Subject:       @obj
               Yielded: 123
             }
 
@@ -1032,6 +1042,27 @@ describe "src/cy/commands/connectors", ->
             }
 
           cy.noop(obj).its("foo.bar").should("eq", "baz")
+
+        it "consoleProps subject", (done) ->
+          cy.on "fail", (err) =>
+            expect(@lastLog.invoke("consoleProps")).to.deep.eq {
+              Command: "its"
+              Property: ".fizz.buzz"
+              Error: """
+              CypressError: Timed out retrying: cy.its() errored because the property: 'fizz' does not exist on your subject.
+
+              By default, Cypress automatically retries and waits for properties to exist on your subject.
+
+              If you would like to test that this property should not exist on your subject, then add an assertion such as:
+
+              cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')
+              """
+              Subject: {foo: "bar"}
+              Yielded: undefined
+            }
+            done()
+
+          cy.noop({foo: "bar"}).its("fizz.buzz")
 
   describe "without jquery", ->
     before ->

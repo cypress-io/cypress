@@ -258,7 +258,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             else
               $utils.throwErrByPath("invoke.invalid_type", {
                 onFail: options._log
-                args: { prop: fn }
+                args: { prop: str }
               })
 
       getFormattedElement = ($el) ->
@@ -270,7 +270,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       value = invoke()
 
       if options._log
-        options._log.set
+        options._log.set({
           consoleProps: ->
             obj = {}
 
@@ -280,13 +280,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             else
               obj["Property"] = message
 
-            _.extend obj,
-              On:       getFormattedElement(actualSubject)
+            _.extend(obj, {
+              Subject: getFormattedElement(actualSubject)
               Yielded: getFormattedElement(value)
+            })
 
-            obj
+            return obj
+        })
 
       return value
+
+    ## by default we want to only add the default assertion
+    ## of ensuring existence for cy.its() not cy.invoke() because
+    ## invoking a function can legitimately return null or undefined
+    ensureExistenceFor = if name is "its" then "subject" else false
 
     ## wrap retrying into its own
     ## separate function
@@ -302,7 +309,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .try(retryValue)
       .then (value) ->
         cy.verifyUpcomingAssertions(value, options, {
-          ensureExistenceFor: "subject"
+          ensureExistenceFor
           onRetry: resolveValue
           onFail: (err, isDefaultAssertionErr, assertionLogs) ->
             ## if we failed our upcoming assertions and also
