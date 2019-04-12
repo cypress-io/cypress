@@ -233,7 +233,7 @@ describe "driver/src/cypress/error_utils", ->
             catch e
               expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
       
-      context "error is function", ->
+      context "error is function that returns a string", ->
         describe "when no args are provided for the error", ->
           it "has an err.name of CypressError", ->
             try

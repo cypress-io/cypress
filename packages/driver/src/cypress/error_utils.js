@@ -148,7 +148,7 @@ const formatErrMsg = (errMessage, args) => {
 }
 
 const errObjByPath = (errLookupObj, errPath, args) => {
-  const errObjStrOrFn = getObjValueByPath(errLookupObj, errPath)
+  let errObjStrOrFn = getObjValueByPath(errLookupObj, errPath)
 
   if (!errObjStrOrFn) {
     throw new Error(`Error message path: '${errPath}' does not exist`)
@@ -156,24 +156,14 @@ const errObjByPath = (errLookupObj, errPath, args) => {
 
   let errObj = errObjStrOrFn
 
-  if (_.isString(errObjStrOrFn)) {
-    // normalize into object if given string
-    errObj = {
-      message: errObjStrOrFn,
-    }
+  if (_.isFunction(errObjStrOrFn)) {
+    errObj = errObjStrOrFn(args)
   }
 
-  if (_.isFunction(errObjStrOrFn)) {
-    // if function returns string
-    if (_.isString(errObjStrOrFn(args))) {
-      errObj = {
-        message: errObjStrOrFn(args),
-      }
-    }
-
-    if (_.isObject(errObjStrOrFn(args))) {
-      // if function returns obj already
-      errObj = errObjStrOrFn(args)
+  if (_.isString(errObj)) {
+    // normalize into object if given string
+    errObj = {
+      message: errObj,
     }
   }
 
