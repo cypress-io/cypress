@@ -77,7 +77,7 @@ const shortNpmVersion = getJustVersion(npm)
 
 console.log('short NPM version', shortNpmVersion)
 
-let subject = `Testing new ${platform} Cypress version ${shortNpmVersion}`
+let subject = `Testing new ${platform} ${arch} Cypress version ${shortNpmVersion}`
 const commitInfo = getShortCommit()
 
 if (commitInfo) {
