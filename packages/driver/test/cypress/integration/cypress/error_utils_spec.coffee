@@ -21,6 +21,19 @@ describe "driver/src/cypress/error_utils", ->
       expect(appendMsg1.name).to.eq("FooError")
       expect(appendMsg1.message).to.eq("simple bar message simple foo message")
 
+    it "modifies err that is objects with err that is string", ->
+      errObj1 = $errUtils.cypressErr('simple foo message')
+
+      errStr2 = 'simple bar message'
+
+      $errUtils.modifyErrMsg(errObj1, errStr2, (msg1, msg2) ->
+        return "#{msg2} #{msg1}"
+      )
+
+      expect(errObj1.name).to.eq("CypressError")
+      expect(errObj1.message).to.eq("simple bar message simple foo message")
+      expect(errObj1.stack).to.include("CypressError: simple bar message simple foo message")
+
     it "modifies errs that are strings", ->
       errStr1 = 'simple foo message'
       errStr2 = 'simple bar message'

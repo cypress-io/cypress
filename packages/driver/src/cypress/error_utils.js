@@ -11,42 +11,47 @@ const mdReplacements = [
   ['`', '\\`'],
 ]
 
-const modifyErrMsg = (err, messageOrObj, cb) => {
+const modifyErrMsg = (origErr, newErrMsgOrObj, cb) => {
   // preserve stack
   // this is the critical part
   // because the browser has a cached
   // dynamic stack getter that will
   // not be evaluated later
-  const { stack } = err
+  const { stack } = origErr
 
-  let message = messageOrObj
+  let newErrMsg = newErrMsgOrObj
 
-  // if our message is an obj w/ multiple props...
-  if (_.isObject(messageOrObj)) {
+  // if our new error message is an obj w/ multiple props...
+  if (_.isObject(newErrMsgOrObj)) {
     // then extract the actual 'message' (the string)
-    // and merge the other props into the existing err
-    _.defaults(err, _.omit(messageOrObj, 'message'));
-    ({ message } = messageOrObj)
+    // and merge the other props into the existing origErr
+    _.defaults(origErr, _.omit(newErrMsgOrObj, 'message'))
+
+    newErrMsg = newErrMsgOrObj.message
   }
 
+  // preserve message
+  const originalErrMsg = origErr.message
+
   // if our original err is an object
-  if (_.isObject(err)) {
+  if (_.isObject(origErr)) {
     // modify message
-    err.message = cb(err.message, message)
+    origErr.message = cb(origErr.message, newErrMsg)
 
     if (stack) {
       // reset stack by replacing the original
       // first line with the new one
-      err.stack = stack.replace(err.message, err.toString())
+      origErr.stack = stack.replace(originalErrMsg, origErr.message)
     }
+
   }
 
   // if our original err is a string
-  if (_.isString(err)) {
-    err = cb(err, message)
+  if (_.isString(origErr)) {
+    origErr = cb(origErr, newErrMsg)
   }
 
-  return err
+  return origErr
 }
 
 const appendErrMsg = (err, messageOrObj) => {
@@ -119,8 +124,9 @@ const internalErr = (err) => {
   return err
 }
 
-const cypressErr = (err) => {
-  err = new Error(err)
+const cypressErr = (msg) => {
+  const err = new Error(msg)
+
   err.name = 'CypressError'
 
   return err
