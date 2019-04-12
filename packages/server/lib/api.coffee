@@ -6,7 +6,6 @@ request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 humanInterval = require("human-interval")
-semaphore  = require("semaphore")
 agent      = require("@packages/network").agent
 pkg        = require("@packages/root")
 routes     = require("./util/routes")
