@@ -118,7 +118,7 @@ refreshTokenOrWait = () ->
     .then (user) ->
       getTokenFromRefresh(user.refreshToken)
       .then (tokens) ->
-        user.authToken = tokens.access_token
+        user.authToken = tokens.id_token
         user.refreshToken = tokens.refresh_token
         cache.setUser(user)
         user.authToken

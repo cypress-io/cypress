@@ -10,8 +10,6 @@ const random = require('../util/random')
 const windows = require('./windows')
 const user = require('../user')
 
-const openExternalAsync = Promise.promisify(shell.openExternal)
-
 let app
 let authCallback
 let authState
@@ -117,7 +115,10 @@ const stopServer = () => {
 }
 
 const launchNativeAuth = (loginUrl) => {
-  return openExternalAsync(loginUrl, {})
+  // wrap openExternal here in case `electron.shell` is not available (during tests)
+  return Promise.fromCallback((cb) => {
+    shell.openExternal(loginUrl, cb)
+  })
 }
 
 const launchElectronAuth = (loginUrl) => {
