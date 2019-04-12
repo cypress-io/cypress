@@ -19,7 +19,7 @@ module.exports = {
     api.getTokenFromCode(code, redirectUri)
     .then (res) =>
       debug("received token %o for code", res)
-      @syncProfile(res.access_token, res.refresh_token)
+      @syncProfile(res.id_token, res.refresh_token)
     .catch (err) =>
       debug("error logging in from code: ", err.message)
       throw err
@@ -38,7 +38,7 @@ module.exports = {
       api.getTokenFromRefresh(user.refreshToken)
       .then (res) =>
         debug("refreshed token, got %o", res)
-        @syncProfile(res.access_token, res.refresh_token)
+        @syncProfile(res.id_token, res.refresh_token)
 
   syncProfile: (authToken, refreshToken) ->
     debug("synchronizing user profile")

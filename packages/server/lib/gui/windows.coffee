@@ -63,7 +63,11 @@ module.exports = {
     _.invoke windows, "hide"
 
   focusMainWindow: ->
-    windows['INDEX'].show()
+    getByType('INDEX').show()
+
+  closeLoginWindow: ->
+    if win = getByType('DASHBOARD_LOGIN')
+      win.close()
 
   getByWebContents: (webContents) ->
     BrowserWindow.fromWebContents(webContents)
@@ -235,10 +239,6 @@ module.exports = {
     win
 
   open: (projectRoot, options = {}) ->
-    if _.isObject(projectRoot) and not options
-      options = projectRoot
-      projectRoot = undefined
-
     ## if we already have a window open based
     ## on that type then just show + focus it!
     if win = getByType(options.type)
@@ -257,11 +257,13 @@ module.exports = {
       width:  600
       height: 500
       show:   true
-      url:    options.url || getUrl(options.type)
       webPreferences: {
         preload: cwd("lib", "ipc", "ipc.js")
       }
     })
+
+    if not options.url
+      options.url = getUrl(options.type)
 
     win = @create(projectRoot, options)
 

@@ -44,7 +44,7 @@ const start = () => {
 
     return launchNativeAuth(loginUrl)
     .catch((e) => {
-      debug('Failed to launch native auth, falling back to Electron:', e.message)
+      debug('Failed to launch native auth, falling back to Electron:', e)
 
       return launchElectronAuth(loginUrl)
     })
@@ -54,8 +54,11 @@ const start = () => {
       authCallback = cb
     })
   })
-  .finally(stopServer)
-  .finally(windows.focusMainWindow)
+  .finally(() => {
+    stopServer()
+    windows.focusMainWindow()
+    windows.closeLoginWindow()
+  })
 }
 
 /**
@@ -63,6 +66,7 @@ const start = () => {
  */
 const launchServer = (baseLoginUrl) => {
   if (!server) {
+    // launch an express server to listen for the auth callback from dashboard
     const origin = getOriginFromUrl(baseLoginUrl)
 
     debug('Launching auth server expecting origin', origin)
@@ -72,7 +76,7 @@ const launchServer = (baseLoginUrl) => {
 
     app.use('/auth', (req, res, next) => {
       res.header('Access-Control-Allow-Origin', origin)
-      res.header('Access-Control-Allow-Headers', '*')
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
       res.header('Access-Control-Allow-Methods', 'POST')
       next()
     })
@@ -113,14 +117,13 @@ const stopServer = () => {
 }
 
 const launchNativeAuth = (loginUrl) => {
-  // launch an express server to listen for the auth redirect
   return openExternalAsync(loginUrl, {})
 }
 
 const launchElectronAuth = (loginUrl) => {
   debug('Opening Electron auth')
 
-  return windows.open({
+  return windows.open(null, {
     position: 'center',
     focus: true,
     width: 1000,
