@@ -81,7 +81,8 @@ expectRunsToHaveCorrectStats = (runs = []) ->
 
     ## grab all the wallclock durations for all tests
     ## because our duration should be at least this
-    wallClocks = _.sumBy(run.tests, "wallClockDuration")
+    attempts = _.flatMap(run.tests, (test) => _.compact([test].concat(test.prevAttempts)))
+    wallClocks = _.sumBy(attempts, "wallClockDuration")
 
     ## ensure each run's duration is around the sum
     ## of all tests wallclock duration
@@ -109,7 +110,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
 
     ## now make sure that each tests wallclock duration
     ## is around the sum of all of its timings
-    run.tests.forEach (test) ->
+    attempts.forEach (test) ->
       ## cannot sum an object, must use array of values
       timings = _.sumBy _.values(test.timings), (val) ->
         switch
@@ -126,7 +127,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
         test,
         "wallClockDuration",
         timings,
-        timings + 50, ## add 50ms to account for padding
+        timings + 80, ## add 80ms to account for padding
         1234
       )
 

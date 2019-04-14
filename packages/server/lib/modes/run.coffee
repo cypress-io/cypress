@@ -704,6 +704,8 @@ module.exports = {
 
       { tests, stats } = obj
 
+      attempts = _.flatMap(tests, (test) -> _.compact([test].concat(test.prevAttempts)))
+
       failingTests = _.filter(tests, { state: "failed" })
 
       hasFailingTests = _.get(stats, 'failures') > 0
@@ -711,7 +713,7 @@ module.exports = {
       ## if we have a video recording
       if started and tests and tests.length
         ## always set the video timestamp on tests
-        obj.tests = Reporter.setVideoTimestamp(started, tests)
+        Reporter.setVideoTimestamp(started, attempts)
 
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures and have started the video

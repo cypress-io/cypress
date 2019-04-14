@@ -36,10 +36,10 @@ const AttemptHeader = ({ index, isOpen }) => (
 @observer
 class AttemptContent extends Component {
   render () {
-    const { isOpen, model, isLast } = this.props
+    const { model } = this.props
 
     // performance optimization - don't render contents if not open
-    if (!isOpen) return null
+    if (!model.isOpen) return null
 
     const onErrorClick = (e) => {
       e.stopPropagation()
@@ -58,7 +58,7 @@ class AttemptContent extends Component {
             message='Printed output to your console'
             onClick={onErrorClick}
           >
-            <pre className={cs('attempt-error', { 'test-error': isLast })}>{model.err.displayMessage}</pre>
+            <pre className={cs('attempt-error', { 'test-error': model.isLast })}>{model.err.displayMessage}</pre>
           </FlashOnClick>
         </div>
       </Fragment>
@@ -68,28 +68,10 @@ class AttemptContent extends Component {
 
 @observer
 class Attempt extends Component {
-  @observable isOpen = null
 
   static defaultProps = {
     appState,
     scroller,
-  }
-
-  @computed get _shouldBeOpen () {
-    const { model, isSingle, isLast } = this.props
-
-    // if there are no retries, the 'Attempt #' header will not be
-    // shown and it will not be collapsible, so it should always be open
-    if (isSingle) return true
-
-    // if this.isOpen is non-null, prefer that since the user has
-    // explicity chosen to open or close the test
-    if (this.isOpen !== null) return this.isOpen
-
-    // otherwise, look at reasons to auto-open the test
-    return model.isOpen
-           || model.isLongRunning
-           || isLast
   }
 
   componentDidMount () {
@@ -112,7 +94,7 @@ class Attempt extends Component {
   }
 
   render () {
-    const { index, model, isLast } = this.props
+    const { index, model } = this.props
 
     return (
       <li
@@ -122,28 +104,19 @@ class Attempt extends Component {
         })}
       >
         <Collapsible
-          header={<AttemptHeader index={index} isOpen={this._shouldBeOpen} />}
+          header={<AttemptHeader index={index} isOpen={model.isOpen} />}
           headerClass='attempt-name'
-          isOpen={this._shouldBeOpen}
-          onToggle={this._toggleOpen}
+          isOpen={model.isOpen}
+          onToggle={model.toggleOpen}
         >
           <AttemptContent
-            isOpen={this._shouldBeOpen}
             model={model}
-            isLast={isLast}
           />
         </Collapsible>
       </li>
     )
   }
 
-  @action _toggleOpen = () => {
-    if (this.isOpen === null) {
-      this.isOpen = !this._shouldBeOpen
-    } else {
-      this.isOpen = !this.isOpen
-    }
-  }
 }
 
 const Attempts = observer(({ test }) => (
@@ -155,8 +128,6 @@ const Attempts = observer(({ test }) => (
         <Attempt
           key={attempt.id}
           index={index}
-          isSingle={!test.hasMultipleAttempts}
-          isLast={test.isLastAttempt(attempt)}
           model={attempt}
         />
       )

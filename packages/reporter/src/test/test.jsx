@@ -17,22 +17,6 @@ class Test extends Component {
     runnablesStore,
   }
 
-  @observable isOpen = null
-
-  @computed get _shouldBeOpen () {
-    // if this.isOpen is non-null, prefer that since the user has
-    // explicity chosen to open or close the test
-    if (this.isOpen !== null) return this.isOpen
-
-    const { model, runnablesStore } = this.props
-
-    // otherwise, look at reasons to auto-open the test
-    return model.state === 'failed'
-           || model.isOpen
-           || model.isLongRunning
-           || runnablesStore.hasSingleTest
-  }
-
   render () {
     const { model } = this.props
 
@@ -40,8 +24,8 @@ class Test extends Component {
 
     return (
       <div
-        className={cs('runnable-wrapper', { 'is-open': this._shouldBeOpen })}
-        onClick={this._toggleOpen}
+        className={cs('runnable-wrapper', { 'is-open': model.isOpen })}
+        onClick={model.toggleOpen}
         style={{ paddingLeft: indent(model.level) }}
       >
         <div className='runnable-content-region'>
@@ -60,7 +44,7 @@ class Test extends Component {
 
   _contents () {
     // performance optimization - don't render contents if not open
-    if (!this._shouldBeOpen) return null
+    if (!this.props.model.isOpen) return null
 
     return (
       <div
@@ -70,14 +54,6 @@ class Test extends Component {
         <Attempts test={this.props.model} />
       </div>
     )
-  }
-
-  @action _toggleOpen = () => {
-    if (this.isOpen === null) {
-      this.isOpen = !this._shouldBeOpen
-    } else {
-      this.isOpen = !this.isOpen
-    }
   }
 
   _onErrorClick = (e) => {

@@ -68,7 +68,7 @@ class RunnablesStore {
   }
 
   _createTest (props, level) {
-    const test = new Test(props, level)
+    const test = new Test(props, level, this)
 
     this._runnablesQueue.push(test)
     this._tests[test.id] = test

@@ -7,14 +7,22 @@ import Runnable from '../runnables/runnable-model'
 
 export default class Test extends Runnable {
   @observable attempts = []
-  @observable isOpen = false
+  @observable _isOpen = null
   @observable _isFinished = false
+
+  _store
 
   _attempts = {}
   type = 'test'
 
-  constructor (props, level) {
+  constructor (props, level, store) {
     super(props, level)
+
+    this._store = store
+
+    _.defaults(props, {
+      _currentRetry: 0,
+    })
 
     _.each(props.prevAttempts, this._addAttempt)
 
@@ -25,6 +33,16 @@ export default class Test extends Runnable {
     return _.some(this.attempts, (attempt) => {
       return attempt.isLongRunning
     })
+  }
+
+  @computed get isOpen () {
+    if (this._isOpen === null) {
+      return this.state === 'failed'
+      || this.isLongRunning
+      || this._store && this._store.hasSingleTest
+    }
+
+    return this._isOpen
   }
 
   @computed get state () {
@@ -75,19 +93,23 @@ export default class Test extends Runnable {
     }
 
     attempt.start()
+
+  }
+
+  @action toggleOpen = () => {
+    this._isOpen = !this.isOpen
   }
 
   // this is called to sync up the command log UI for the sake of
   // screenshots, so we only ever need to open the last attempt
   setIsOpen (isOpen, cb) {
-    this.isOpen = isOpen
-
-    const isAlreadyOpen = !this.attempts.length
-      || ((this.attempts.length === 1 || this._lastAttempt.isLongRunning) === isOpen)
-
-    if (isAlreadyOpen) return cb()
+    if (this.isOpen === isOpen) {
+      return this._lastAttempt.setIsOpen(isOpen, cb)
+    }
 
     this._lastAttempt.setIsOpen(isOpen, cb)
+    this._isOpen = isOpen
+
   }
 
   @action finish (props) {
@@ -111,7 +133,7 @@ export default class Test extends Runnable {
   }
 
   _addAttempt = (props) => {
-    const attempt = new Attempt(props)
+    const attempt = new Attempt(props, this)
 
     this._attempts[attempt.id] = attempt
     this.attempts.push(attempt)

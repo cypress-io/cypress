@@ -9,8 +9,8 @@ const eventsStub = () => ({
   emit: sinon.spy(),
 })
 
-const model = (props) => {
-  return _.extend({
+const createModel = (props) => {
+  return {
     commands: [],
     err: {},
     id: 't1',
@@ -20,81 +20,58 @@ const model = (props) => {
     type: 'test',
     shouldRender: true,
     title: 'some title',
-  }, props)
+    ...props,
+  }
 }
 
 describe('<Test />', () => {
   it('does not render when it should not render', () => {
-    const component = shallow(<Test model={model({ shouldRender: false })} />)
+    const component = shallow(<Test model={createModel({ shouldRender: false })} />)
 
     expect(component).to.be.empty
   })
 
   context('open/closed', () => {
     it('renders without is-open class by default', () => {
-      const component = shallow(<Test model={model()} />)
+      const component = shallow(<Test model={createModel()} />)
 
       expect(component).not.to.have.className('is-open')
     })
 
-    it('renders with is-open class when the model state is failed', () => {
-      const component = shallow(<Test model={model({ state: 'failed' })} />)
-
-      expect(component).to.have.className('is-open')
-    })
-
-    it('renders with is-open class when the model is long running', () => {
-      const component = shallow(<Test model={model({ isLongRunning: true })} />)
-
-      expect(component).to.have.className('is-open')
-    })
-
-    it('renders with is-open class when there is only one test', () => {
-      const component = shallow(<Test model={model({ isLongRunning: true })} />)
+    it('renders with is-open class when the model is open', () => {
+      const component = shallow(<Test model={createModel({ isOpen: true })} />)
 
       expect(component).to.have.className('is-open')
     })
 
     context('toggling', () => {
-      it('renders without is-open class when already open', () => {
-        const component = shallow(<Test model={model({ state: 'failed' })} />)
+
+      it('calls toggleMethod on test model', () => {
+        const model = createModel({ toggleOpen: sinon.stub() })
+        const component = shallow(<Test model={model} />)
 
         component.simulate('click')
-        expect(component).not.to.have.className('is-open')
+        expect(model.toggleOpen).to.calledOnce
       })
 
-      it('renders with is-open class when not already open', () => {
-        const component = shallow(<Test model={model()} />)
-
-        component.simulate('click')
-        expect(component).to.have.className('is-open')
-      })
-
-      it('renders without is-open class when toggled again', () => {
-        const component = shallow(<Test model={model()} />)
-
-        component.simulate('click')
-        component.simulate('click')
-        expect(component).not.to.have.className('is-open')
-      })
     })
   })
 
   context('contents', () => {
     it('does not render the contents if not open', () => {
-      const component = shallow(<Test model={model()} />)
+      const component = shallow(<Test model={createModel()} />)
 
       expect(component.find('.runnable-instruments')).not.to.exist
     })
 
     it('renders the contents if open', () => {
-      const component = shallow(<Test model={model({ state: 'failed' })} />)
+      const component = shallow(<Test model={createModel({ isOpen: 'failed' })} />)
 
       expect(component.find('.runnable-instruments')).to.exist
     })
 
     it('stops propagation when clicked', () => {
-      const component = shallow(<Test model={model({ state: 'failed' })} />)
+      const component = shallow(<Test model={createModel({ isOpen: true })} />)
       const e = { stopPropagation: sinon.spy() }
 
       component.find('.runnable-instruments').simulate('click', e)

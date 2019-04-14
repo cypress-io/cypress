@@ -14,21 +14,18 @@ export default class Attempt {
   @observable err = new Err({})
   @observable hooks = []
   @observable isActive = null
-  @observable isOpen = false
+  @observable _isOpen = null
   @observable routes = []
   @observable _state = null
 
   _logs = {}
 
-  constructor (props) {
+  constructor (props, test) {
     this.testId = props.id
     this.id = props._currentRetry
+    this.test = test
     this._state = props.state
     this.err.update(props.err)
-
-    if (this.id > 0) {
-      this.isOpen = true
-    }
 
     _.each(props.agents, this.addLog)
     _.each(props.commands, this.addLog)
@@ -51,6 +48,18 @@ export default class Attempt {
 
   @computed get state () {
     return this._state || (this.isActive ? 'active' : 'processing')
+  }
+
+  @computed get isLast () {
+    return this === this.test._lastAttempt
+  }
+
+  @computed get isOpen () {
+    if (this._isOpen === null) {
+      return this.isLongRunning || this.isLast
+    }
+
+    return this._isOpen
   }
 
   addLog = (props) => {
@@ -107,10 +116,21 @@ export default class Attempt {
     }
   }
 
+  @action toggleOpen = () => {
+    this._isOpen = !this.isOpen
+  }
+
   @action setIsOpen (isOpen, cb) {
     // if isOpen is not changing at all, callback immediately
     // because there won't be a re-render to trigger it
-    if (this.isOpen === isOpen) {
+
+    if (!this.test.isOpen && !isOpen) {
+      cb()
+
+      return
+    }
+
+    if (this.test.isOpen && this.isOpen && isOpen) {
       cb()
 
       return
@@ -119,7 +139,7 @@ export default class Attempt {
     // changing isOpen will trigger a re-render and the callback will
     // be called by attempts.jsx Attempt#componentDidUpdate
     this._callbackAfterUpdate = cb
-    this.isOpen = isOpen
+    this._isOpen = isOpen
   }
 
   callbackAfterUpdate () {

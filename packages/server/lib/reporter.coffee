@@ -134,35 +134,35 @@ setDate = (obj, runnables, stats) ->
   return null
 
 normalizeTest = (test = {}) ->
-    get = (prop) ->
-      _.get(test, prop, null)
+  get = (prop) ->
+    _.get(test, prop, null)
 
-    ## use this or null
-    if wcs = get("wallClockStartedAt")
-      ## convert to actual date object
-      wcs = new Date(wcs)
+  ## use this or null
+  if wcs = get("wallClockStartedAt")
+    ## convert to actual date object
+    wcs = new Date(wcs)
 
-    ## wallClockDuration:
-    ## this is the 'real' duration of wall clock time that the
-    ## user 'felt' when the test run. it includes everything
-    ## from hooks, to the test itself, to lifecycle, and event
-    ## async browser compute time. this number is likely higher
-    ## than summing the durations of the timings.
-    ##
-    {
-      testId:         get("id")
-      title:          getParentTitle(test)
-      state:          get("state")
-      body:           get("body")
-      stack:          get("err.stack")
-      error:          get("err.message")
-      timings:        get("timings")
-      failedFromHookId: get("failedFromHookId")
-      wallClockStartedAt: wcs
-      wallClockDuration: get("wallClockDuration")
-      videoTimestamp: null ## always start this as null
-      prevAttempts: get("prevAttempts")?.map(normalizePrevAttemptTest)
-    }
+  ## wallClockDuration:
+  ## this is the 'real' duration of wall clock time that the
+  ## user 'felt' when the test run. it includes everything
+  ## from hooks, to the test itself, to lifecycle, and event
+  ## async browser compute time. this number is likely higher
+  ## than summing the durations of the timings.
+  ##
+  {
+    testId:         get("id")
+    title:          getParentTitle(test)
+    state:          get("state")
+    body:           get("body")
+    stack:          get("err.stack")
+    error:          get("err.message")
+    timings:        get("timings")
+    failedFromHookId: get("failedFromHookId")
+    wallClockStartedAt: wcs
+    wallClockDuration: get("wallClockDuration")
+    videoTimestamp: null ## always start this as null
+    prevAttempts: get("prevAttempts")?.map(normalizePrevAttemptTest)
+  }
 
 normalizePrevAttemptTest = (test = {}) ->
   _.omit normalizeTest(test), [

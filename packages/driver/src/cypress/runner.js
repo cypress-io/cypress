@@ -1031,10 +1031,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
         default: break
       }
 
-      if (err) {
-        return onNextError(runnable, _next, err)
-      }
-
       return _next.call(runnable, err)
     }
 
@@ -1054,6 +1050,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
         runnable.err = wrapErr(err)
       }
+
+      err = maybeHandleRetry(runnable, err)
 
       return runnableAfterRunAsync(runnable, Cypress)
       .then(() => {
@@ -1263,7 +1261,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     replaceRunnable(test, test.id)
   }
-  const onNextError = (runnable, next, err) => {
+  const maybeHandleRetry = (runnable, err) => {
 
     const r = runnable
     const isHook = r.type === 'hook'
@@ -1275,10 +1273,10 @@ const create = function (specWindow, mocha, Cypress, cy) {
     const willRetry = (test._currentRetry < test._retries) && retryAbleRunnable
 
     const fail = function () {
-      return next(err)
+      return err
     }
     const noFail = function () {
-      return next()
+      return
     }
 
     if (err) {
@@ -1289,7 +1287,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
       }
 
       if (willRetry && isBeforeEachHook) {
-        test.err = undefined
+        delete runnable.err
         test.trueFn = test.fn
         setHookFailureProps(test, runnable, err)
         test.fn = function () {

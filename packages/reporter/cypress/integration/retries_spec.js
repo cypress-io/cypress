@@ -298,6 +298,8 @@ describe('retries', function () {
     this.addAttempt(this.data.attempt)
     addLog(this.runner, this.data.command)
 
+    const stub = cy.stub()
+
     cy
     .contains('visit')
     .should('not.be.visible')
@@ -305,9 +307,12 @@ describe('retries', function () {
       this.runner.emit('test:set:state', {
         id: 'r3',
         isOpen: true,
-      })
+      }, stub)
 
-      cy.contains('visit').should('be.visible')
+    })
+    cy.contains('visit').should('be.visible')
+    .then(() => {
+      expect(stub).calledOnce
     })
   })
 
