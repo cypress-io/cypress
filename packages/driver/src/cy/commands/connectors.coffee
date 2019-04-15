@@ -141,6 +141,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## name could be invoke or its!
     name = state("current").get("name")
 
+    isCmdIts = name is "its"
+    isCmdInvoke = name is "invoke"
+
     message = getMessage()
 
     traversalErr = null
@@ -157,7 +160,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         args: { cmd: name }
       })
 
-    if name is "its" and args.length > 0
+    if isCmdIts and args.length > 0
       $utils.throwErrByPath("invoke_its.invalid_num_of_args", {
         onFail: options._log
         args: { cmd: name }
@@ -174,8 +177,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       )
 
     propertyValueNullOrUndefinedErr = (prop, value) ->
+      errMessagePath = if isCmdIts then "its" else "invoke"
+
       $utils.cypressErr(
-        $utils.errMessageByPath("invoke_its.null_or_undefined_prop_value", {
+        $utils.errMessageByPath("#{errMessagePath}.null_or_undefined_prop_value", {
           prop,
           value,
           cmd: name
@@ -183,8 +188,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       )
 
     subjectNullOrUndefinedErr = (prop, value) ->
+      errMessagePath = if isCmdIts then "its" else "invoke"
+
       $utils.cypressErr(
-        $utils.errMessageByPath("invoke_its.subject_null_or_undefined", {
+        $utils.errMessageByPath("#{errMessagePath}.subject_null_or_undefined", {
           prop,
           value,
           cmd: name
@@ -205,22 +212,28 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## traverse at this depth
       prop = pathsArray[index]
       previousProp = pathsArray[index - 1]
-      valIsNullOrUndefined = _.isNull(acc) or _.isUndefined(acc)
+      valIsNullOrUndefined = _.isNil(acc)
 
+      ## if we're attempting to tunnel into
+      ## a null or undefined object...
       if prop and valIsNullOrUndefined
         if index is 0
+          ## give an error stating the current subject is nil
           traversalErr = subjectNullOrUndefinedErr(prop, acc)
         else
+          ## else refer to the previous property so users know which prop
+          ## caused us to hit this dead end
           traversalErr = propertyNotOnPreviousNullOrUndefinedValueErr(prop, acc, previousProp)
 
         return acc
 
       ## if we have no more properties to traverse
-      ## then return the final traversed accumulator here
       if not prop
         if valIsNullOrUndefined
+          ## set traversal error that the final value is null or undefined
           traversalErr = propertyValueNullOrUndefinedErr(previousProp, acc)
 
+        ## finally return the reduced traversed accumulator here
         return acc
 
       ## attempt to lookup this property on the acc
@@ -237,6 +250,36 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if we succeeded then continue to traverse
       return traverseObjectAtPath(acc[prop], pathsArray, index + 1)
 
+    getSettledValue = (value, subject, propAtLastPath) ->
+      if isCmdIts
+        return value
+
+      if _.isFunction(value)
+        return value.apply(subject, args)
+
+      ## TODO: this logic should likely be part of
+      ## traverseObjectAtPath(...) rather be further
+      ## away from the handling of traversals. this
+      ## causes us to need to separately handle
+      ## the 'propAtLastPath' argument since we're
+      ## outside of the reduced accumulator.
+
+      ## if we're not a function and we have a traversal
+      ## error then throw it now - since that provide a
+      ## more specific error regarding non-existant
+      ## properties or null or undefined values
+      if traversalErr
+        throw traversalErr
+
+      ## else throw that prop isn't a function
+      $utils.throwErrByPath("invoke.prop_not_a_function", {
+        onFail: options._log
+        args: {
+          prop: propAtLastPath
+          type: $utils.stringifyFriendlyTypeof(value)
+        }
+      })
+
     getValue = ->
       ## reset this on each go around so previous errors
       ## don't leak into new failures or upcoming assertion errors
@@ -246,35 +289,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       actualSubject = remoteSubject or subject
 
-      prop = traverseObjectAtPath(actualSubject, str.split("."))
+      paths = str.split(".")
 
-      invoke = ->
-        switch name
-          when "its"
-            prop
-          when "invoke"
-            if _.isFunction(prop)
-              prop.apply(actualSubject, args)
-            else
-              $utils.throwErrByPath("invoke.invalid_type", {
-                onFail: options._log
-                args: { prop: str }
-              })
+      prop = traverseObjectAtPath(actualSubject, paths)
 
-      getFormattedElement = ($el) ->
-        if $dom.isElement($el)
-          $dom.getElements($el)
-        else
-          $el
-
-      value = invoke()
+      value = getSettledValue(prop, actualSubject, _.last(paths))
 
       if options._log
         options._log.set({
           consoleProps: ->
             obj = {}
 
-            if name is "invoke"
+            if isCmdInvoke
               obj["Function"] = message
               obj["With Arguments"] = args if args.length
             else
@@ -293,7 +319,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## by default we want to only add the default assertion
     ## of ensuring existence for cy.its() not cy.invoke() because
     ## invoking a function can legitimately return null or undefined
-    ensureExistenceFor = if name is "its" then "subject" else false
+    ensureExistenceFor = if isCmdIts then "subject" else false
 
     ## wrap retrying into its own
     ## separate function
