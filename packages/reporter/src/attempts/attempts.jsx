@@ -12,6 +12,7 @@ import Collapsible from '../collapsible/collapsible'
 import FlashOnClick from '../lib/flash-on-click'
 import Hooks from '../hooks/hooks'
 import Routes from '../routes/routes'
+import TestError from '../errors/test-error'
 
 const NoCommands = () => (
   <ul className='hooks-container'>
@@ -40,11 +41,6 @@ class AttemptContent extends Component {
     // performance optimization - don't render contents if not open
     if (!model.isOpen) return null
 
-    const onErrorClick = (e) => {
-      e.stopPropagation()
-      events.emit('show:error', model.testId, model.id)
-    }
-
     return (
       <Fragment>
         <Agents model={model} />
@@ -52,13 +48,9 @@ class AttemptContent extends Component {
         <div ref='commands' className='runnable-commands-region'>
           {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
         </div>
+
         <div className='attempt-error-region'>
-          <FlashOnClick
-            message='Printed output to your console'
-            onClick={onErrorClick}
-          >
-            <pre className={cs('attempt-error', { 'test-error': model.isLast })}>{model.err.displayMessage}</pre>
-          </FlashOnClick>
+          <TestError events={events} model={model} />
         </div>
       </Fragment>
     )

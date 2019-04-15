@@ -25,7 +25,7 @@ const isWindows = () => {
 }
 
 if (!run) {
-  return exitErr(`
+  exitErr(`
     Error: A path to a spec file must be specified!
 
     It should look something like this:
@@ -38,6 +38,7 @@ if (!run) {
       $ npm run test-integration
       $ npm run test-e2e
   `)
+  process.exit(1)
 }
 
 const commandAndArguments = {

@@ -1,21 +1,21 @@
+import cs from 'classnames'
 import React from 'react'
 import FlashOnClick from '../lib/flash-on-click'
 
 function TestError (props) {
+  const { model, events } = props
+
   function _onErrorClick (e) {
     e.stopPropagation()
-
-    props.events.emit('show:error', props.model.id)
+    events.emit('show:error', model.testId, model.id)
   }
-
-  const { displayMessage } = props.model.err
 
   return (
     <FlashOnClick
       message='Printed output to your console'
       onClick={_onErrorClick}
     >
-      <pre className='test-error'>{displayMessage}</pre>
+      <pre className={cs('attempt-error', { 'test-error': model.isLast })}>{model.err.displayMessage}</pre>
     </FlashOnClick>
   )
 }
