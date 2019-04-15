@@ -18,10 +18,9 @@ describe "lib/user", ->
       obj = {access_token: "abc-123", refresh_token: "def-456"}
 
       sinon.stub(api, "getTokenFromCode").withArgs("abc-123", "http://foo.invalid").resolves(obj)
+      sinon.stub(user, "syncProfile").resolves()
 
-      sinon.spy(user, "syncProfile")
-
-      user.logInFromCode("abc-123", "http://foo-invalid").then (ret) ->
+      user.logInFromCode("abc-123", "http://foo.invalid").then (ret) ->
         expect(api.getTokenFromCode).to.be.calledOnce
         expect(user.syncProfile).to.be.calledWith("abc-123", "def-456")
 
@@ -52,7 +51,36 @@ describe "lib/user", ->
         expect(cache.removeUser).to.be.calledOnce
 
   context ".refreshToken", ->
-    it "loads the user from cache then called api.getTokenFromRefresh"
+    it "loads the user from cache then calls api.getTokenFromRefresh and syncs result", ->
+      sinon.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123", refreshToken: "def-456"})
+      sinon.stub(api, "getTokenFromRefresh").withArgs("def-456").resolves({
+        access_token: 'ghj-123'
+        refresh_token: 'jkl-456'
+      })
+      sinon.stub(user, "syncProfile").resolves()
+
+      user.refreshToken().then ->
+        expect(cache.getUser).to.be.calledOnce
+        expect(api.getTokenFromRefresh).to.be.calledWith("def-456")
+        expect(user.syncProfile).to.be.calledWith("ghj-123", "jkl-456")
+
+  context ".syncProfile", ->
+    it "calls api.getMe then saves user to cache", ->
+      sinon.stub(api, "getMe").resolves({
+        name: 'foo'
+        email: 'bar@baz'
+      })
+      sinon.stub(cache, "setUser").resolves()
+
+      user.syncProfile("foo-123", "bar-456")
+      .then ->
+        expect(api.getMe).to.be.calledWith("foo-123")
+        expect(cache.setUser).to.be.calledWith({
+          authToken: "foo-123"
+          refreshToken: "bar-456"
+          name: "foo"
+          email: "bar@baz"
+        })
 
   context ".getBaseLoginUrl", ->
     it "calls api.getAuthUrls", ->

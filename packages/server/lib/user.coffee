@@ -33,7 +33,7 @@ module.exports = {
           api.createSignout(authToken)
 
   refreshToken: ->
-    @get().then (user) ->
+    @get().then (user) =>
       debug("refreshing token for user %o", user)
       api.getTokenFromRefresh(user.refreshToken)
       .then (res) =>
