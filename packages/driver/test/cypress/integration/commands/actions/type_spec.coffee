@@ -1731,6 +1731,108 @@ describe "src/cy/commands/actions/type", ->
             expect($div.get(0).textContent).to.eql("foobabaquuxzr")
             expect($div.get(0).innerHTML).to.eql("fooba<div>ba</div><div>quuxzr</div>")
 
+      context "{insert}", ->
+        it "sets which and keyCode to 45 and does not fire keypress events", (done) ->
+          cy.$$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 45
+            expect(e.keyCode).to.eq 45
+            expect(e.key).to.eq "Insert"
+            done()
+
+          cy.get(":text:first").invoke("val", "ab").type("{insert}")
+
+        it "does not fire textInput event", (done) ->
+          cy.$$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{insert}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{insert}").then -> done()
+
+        it "can prevent default insert movement", (done) ->
+          cy.$$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 45
+              e.preventDefault()
+
+          cy.get(":text:first").invoke("val", "foo").type("d{insert}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
+      context "{pageup}", ->
+        it "sets which and keyCode to 33 and does not fire keypress events", (done) ->
+          cy.$$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 33
+            expect(e.keyCode).to.eq 33
+            expect(e.key).to.eq "PageUp"
+            done()
+
+          cy.get(":text:first").invoke("val", "ab").type("{pageup}")
+
+        it "does not fire textInput event", (done) ->
+          cy.$$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
+
+        it "can prevent default pageup movement", (done) ->
+          cy.$$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 33
+              e.preventDefault()
+
+          cy.get(":text:first").invoke("val", "foo").type("d{pageup}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
+      context "{pagedown}", ->
+        it "sets which and keyCode to 34 and does not fire keypress events", (done) ->
+          cy.$$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 34
+            expect(e.keyCode).to.eq 34
+            expect(e.key).to.eq "PageDown"
+            done()
+
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}")
+
+        it "does not fire textInput event", (done) ->
+          cy.$$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then -> done()
+
+        it "can prevent default pagedown movement", (done) ->
+          cy.$$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 34
+              e.preventDefault()
+
+          cy.get(":text:first").invoke("val", "foo").type("d{pagedown}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
     describe "modifiers", ->
 
       describe "activating modifiers", ->

@@ -40,9 +40,12 @@ describe('lib/tasks/cache', () => {
   describe('.clear', () => {
     it('deletes cache folder and everything inside it', () => {
       return cache.clear()
-      .then(() =>
-        fs.pathExistsAsync('/.cache/Cypress')
-        .then((exists) => expect(exists).to.eql(false))
+      .then(() => {
+        return fs.pathExistsAsync('/.cache/Cypress')
+        .then((exists) => {
+          return expect(exists).to.eql(false)
+        })
+      }
       )
     })
   })
