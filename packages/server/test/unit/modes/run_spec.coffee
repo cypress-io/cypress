@@ -16,9 +16,18 @@ random = require("#{root}../lib/util/random")
 system = require("#{root}../lib/util/system")
 specsUtil = require("#{root}../lib/util/specs")
 
+{ spyOn, stdout, spyStdout } = require("../../support/helpers/utils.js")
+
 describe "lib/modes/run", ->
   beforeEach ->
     @projectInstance = Project("/_test-output/path/to/project")
+
+    spyStdout runMode, [
+      'run'
+      # 'waitForTestsToFinishRunning'
+      # 'waitForBrowserToConnect'
+    ]
+
 
   context ".getProjectId", ->
     it "resolves if id", ->
@@ -295,7 +304,7 @@ describe "lib/modes/run", ->
       cfg = {}
       end = ->
       results = {
-        tests: [4,5,6]
+        tests: [1,2,3]
         stats: {
           tests: 1
           passes: 2
@@ -305,9 +314,7 @@ describe "lib/modes/run", ->
         }
       }
 
-      sinon.stub(Reporter, "setVideoTimestamp")
-      .withArgs(started, results.tests)
-      .returns([1,2,3])
+      setVideoTimestamp = sinon.stub(Reporter, "setVideoTimestamp")
 
       sinon.stub(runMode, "postProcessRecording").resolves()
       sinon.spy(runMode,  "displayResults")
@@ -356,6 +363,9 @@ describe "lib/modes/run", ->
           }
         })
 
+        expect(setVideoTimestamp).calledWithMatch(started, results.tests)
+
+
     it "exitEarlyWithErr event resolves with no tests, and error", ->
       clock = sinon.useFakeTimers()
 
@@ -363,7 +373,7 @@ describe "lib/modes/run", ->
       started = new Date
       wallClock = new Date()
       screenshots = [{}, {}, {}]
-      end = ->
+    end = ->
 
       sinon.stub(runMode, "postProcessRecording").resolves()
       sinon.spy(runMode,  "displayResults")

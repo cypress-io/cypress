@@ -4,6 +4,19 @@ const stripAnsi = require('strip-ansi')
 const debug = require('debug')('utils')
 const chalk = require('chalk')
 
+const spyStdout = (obj, props) =>
+  spyOn(obj, props, () => stdout.capture(), (ret) => {
+    if (ret && ret.isPending) {
+      return ret.tap(() => {
+        stdout.restore()
+      })
+    }
+
+    stdout.restore()
+
+    return
+  })
+
 const stdout = {
   capture () {
     const logs = []
@@ -38,24 +51,45 @@ const stdout = {
   },
 }
 
-const spyOn = (obj, prop, fn) => {
-  const _fn = obj[prop]
+const spyOn = (obj, props, fn, fn2) => {
+  if (_.isString(props)) {
+    props = [props]
+  }
 
-  const stub = sinon.stub(obj, prop)
-  .callsFake(function () {
+  const rets = _.map(props, (prop) => {
 
-    const args = fn.apply(this, arguments)
+    const _fn = obj[prop]
 
-    let ret = _fn.apply(this, args || arguments)
+    const stub = obj[prop] = sinon.stub()
+    .callsFake(function () {
 
-    return ret
+      fn && fn.apply(this, arguments)
 
+      let ret = _fn.apply(this, arguments)
+
+      if (fn2) {
+        const fn2_ret = fn2.apply(this, [ret])
+
+        if (!_.isUndefined(fn2_ret)) {
+          ret = fn2_ret
+        }
+      }
+
+      return ret
+
+    })
+
+    return stub
   })
 
-  return stub
+  if (rets.length === 1) return rets[0]
+
+  return rets
+
 }
 
 module.exports = {
   spyOn,
   stdout,
+  spyStdout,
 }

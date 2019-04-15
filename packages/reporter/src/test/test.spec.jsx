@@ -1,13 +1,8 @@
-import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Test from './test'
-
-const eventsStub = () => ({
-  emit: sinon.spy(),
-})
 
 const createModel = (props) => {
   return {

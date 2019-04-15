@@ -86,17 +86,17 @@ exports['fail in [afterEach] runner emit'] = [
     "{Test}"
   ],
   [
-    "test end",
-    "{Test}"
-  ],
-  [
     "hook",
-    "{Object 52}"
+    "{Object 51}"
   ],
   [
     "fail",
-    "{Object 52}",
+    "{Object 51}",
     "{Object 6}"
+  ],
+  [
+    "test end",
+    "{Test}"
   ],
   [
     "test:after:run",
@@ -150,7 +150,7 @@ exports['fail in [beforeEach] reporter results'] = {
   "reporter": "spec",
   "reporterStats": {
     "suites": 1,
-    "tests": 0,
+    "tests": 1,
     "passes": 0,
     "pending": 0,
     "failures": 1,
@@ -226,6 +226,10 @@ exports['fail in [beforeEach] runner emit'] = [
     "fail",
     "{Object 51}",
     "{Object 6}"
+  ],
+  [
+    "test end",
+    "{Test}"
   ],
   [
     "test:after:run",
@@ -710,10 +714,6 @@ exports['retry [afterEach] runner emit'] = [
     "{Object 52}"
   ],
   [
-    "test end",
-    "{Test}"
-  ],
-  [
     "hook",
     "{Object 52}"
   ],
@@ -771,6 +771,10 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [
@@ -802,8 +806,12 @@ exports['retry [afterEach] runner emit'] = [
     "{Object 51}"
   ],
   [
-    "test end",
-    "{Test}"
+    "hook",
+    "{Object 51}"
+  ],
+  [
+    "hook end",
+    "{Object 51}"
   ],
   [
     "hook",
@@ -812,17 +820,13 @@ exports['retry [afterEach] runner emit'] = [
   [
     "hook end",
     "{Object 52}"
-  ],
-  [
-    "hook",
-    "{Object 53}"
-  ],
-  [
-    "hook end",
-    "{Object 53}"
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [
@@ -854,8 +858,12 @@ exports['retry [afterEach] runner emit'] = [
     "{Object 51}"
   ],
   [
-    "test end",
-    "{Test}"
+    "hook",
+    "{Object 51}"
+  ],
+  [
+    "hook end",
+    "{Object 51}"
   ],
   [
     "hook",
@@ -867,22 +875,18 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 53}"
+    "{Object 51}"
   ],
   [
     "hook end",
-    "{Object 53}"
-  ],
-  [
-    "hook",
-    "{Object 52}"
-  ],
-  [
-    "hook end",
-    "{Object 52}"
+    "{Object 51}"
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [
@@ -906,8 +910,12 @@ exports['retry [afterEach] runner emit'] = [
     "{Test}"
   ],
   [
-    "test end",
-    "{Test}"
+    "hook",
+    "{Object 51}"
+  ],
+  [
+    "hook end",
+    "{Object 52}"
   ],
   [
     "hook",
@@ -915,15 +923,7 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "hook end",
-    "{Object 53}"
-  ],
-  [
-    "hook",
-    "{Object 53}"
-  ],
-  [
-    "hook end",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "test:after:run",
@@ -975,6 +975,10 @@ exports['retry [afterEach] runner emit'] = [
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [
@@ -998,19 +1002,19 @@ exports['retry [afterEach] runner emit'] = [
     "{Test}"
   ],
   [
-    "test end",
-    "{Test}"
-  ],
-  [
     "hook",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "hook end",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [
@@ -1312,10 +1316,6 @@ exports['retry [beforeEach] runner emit'] = [
     "{Object 55}"
   ],
   [
-    "test end",
-    "{Test}"
-  ],
-  [
     "hook",
     "{Object 55}"
   ],
@@ -1333,6 +1333,10 @@ exports['retry [beforeEach] runner emit'] = [
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [
@@ -1437,11 +1441,11 @@ exports['simple_single_test runner emit'] = [
     "{Test}"
   ],
   [
-    "test end",
+    "pass",
     "{Test}"
   ],
   [
-    "pass",
+    "test end",
     "{Test}"
   ],
   [
@@ -1757,10 +1761,6 @@ exports['three tests with retry runner emit'] = [
     "{Object 52}"
   ],
   [
-    "test end",
-    "{Test}"
-  ],
-  [
     "hook",
     "{Object 52}"
   ],
@@ -1770,6 +1770,10 @@ exports['three tests with retry runner emit'] = [
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [
@@ -1841,10 +1845,6 @@ exports['three tests with retry runner emit'] = [
     "{Object 55}"
   ],
   [
-    "test end",
-    "{Test}"
-  ],
-  [
     "hook",
     "{Object 55}"
   ],
@@ -1854,6 +1854,10 @@ exports['three tests with retry runner emit'] = [
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [
@@ -1877,27 +1881,27 @@ exports['three tests with retry runner emit'] = [
     "{Object 51}"
   ],
   [
-    "test end",
-    "{Test}"
-  ],
-  [
     "hook",
-    "{Object 52}"
+    "{Object 51}"
   ],
   [
     "hook end",
-    "{Object 52}"
+    "{Object 51}"
   ],
   [
     "hook",
-    "{Object 52}"
+    "{Object 51}"
   ],
   [
     "hook end",
-    "{Object 52}"
+    "{Object 51}"
   ],
   [
     "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
     "{Test}"
   ],
   [

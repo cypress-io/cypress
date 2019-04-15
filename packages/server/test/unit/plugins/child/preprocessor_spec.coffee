@@ -74,7 +74,7 @@ describe "lib/plugins/child/preprocessor", ->
     @ipc.on.withArgs("preprocessor:close").yield(@file.filePath)
     files = preprocessor._getFiles()
     expect(Object.keys(files).length).to.equal(1)
-    expect(files[@file2.path]).to.be.defined
+    expect(files[@file2.path]).to.be.undefined
     expect(files[@file.path]).to.be.undefined
 
   it "deletes all stored file objects on close()", ->

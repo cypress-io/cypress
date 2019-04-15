@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import { action, computed, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'

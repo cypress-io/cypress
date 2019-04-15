@@ -615,7 +615,249 @@ exports['e2e spec_isolation failing 1'] = {
   "config": {}
 }
 
-exports['e2e spec_isolation failing with retries enabled 1'] = {
+exports['e2e spec_isolation failing with retries enabled 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      4 found (simple_failing_hook_spec.coffee, simple_failing_spec.coffee, simple_hook… │
+  │ Searched:   cypress/integration/simple_passing_spec.coffee, cypress/integration/simple_hooks_… │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_failing_hook_spec.coffee...                                              (1 of 4) 
+
+
+  simple failing hook spec
+    beforeEach hooks
+      1) "before each" hook for "never gets here"
+    pending
+      - is pending
+    afterEach hooks
+      2) "after each" hook for "runs this"
+    after hooks
+      ✓ runs this
+      3) "after all" hook for "fails on this"
+
+
+  1 passing
+  1 pending
+  3 failing
+
+  1) simple failing hook spec beforeEach hooks "before each" hook for "never gets here":
+     Error: fail1
+
+Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
+      at stack trace line
+
+  2) simple failing hook spec afterEach hooks "after each" hook for "runs this":
+     Error: fail2
+
+Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
+      at stack trace line
+
+  3) simple failing hook spec after hooks "after all" hook for "fails on this":
+     Error: fail3
+
+Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
+
+Although you have test retries enabled, we do not retry 'before all' or 'after all' hooks
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌───────────────────────────────────────────────┐
+  │ Tests:        6                               │
+  │ Passing:      1                               │
+  │ Failing:      3                               │
+  │ Pending:      1                               │
+  │ Skipped:      1                               │
+  │ Screenshots:  5                               │
+  │ Video:        true                            │
+  │ Duration:     X seconds                       │
+  │ Spec Ran:     simple_failing_hook_spec.coffee │
+  └───────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (1).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_failing_spec.coffee...                                                   (2 of 4) 
+
+
+  simple failing spec
+    1) fails1
+    2) fails2
+
+
+  0 passing
+  2 failing
+
+  1) simple failing spec fails1:
+     CypressError: Timed out retrying: expected true to be false
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+  2) simple failing spec fails2:
+     Error: fails2
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────┐
+  │ Tests:        2                          │
+  │ Passing:      0                          │
+  │ Failing:      2                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  4                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     simple_failing_spec.coffee │
+  └──────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed) (1).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed) (1).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_hooks_spec.coffee...                                                     (3 of 4) 
+
+
+  simple hooks spec
+    ✓ t1
+    ✓ t2
+    ✓ t3
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────┐
+  │ Tests:        3                        │
+  │ Passing:      3                        │
+  │ Failing:      0                        │
+  │ Pending:      0                        │
+  │ Skipped:      0                        │
+  │ Screenshots:  0                        │
+  │ Video:        true                     │
+  │ Duration:     X seconds                │
+  │ Spec Ran:     simple_hooks_spec.coffee │
+  └────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_passing_spec.coffee...                                                   (4 of 4) 
+
+
+  simple passing spec
+    ✓ passes
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────┐
+  │ Tests:        1                          │
+  │ Passing:      1                          │
+  │ Failing:      0                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  0                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     simple_passing_spec.coffee │
+  └──────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ simple_failing_hook_spec.coffee           XX:XX        6        1        3        1        1 │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖ simple_failing_spec.coffee                XX:XX        2        -        2        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔ simple_hooks_spec.coffee                  XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    2 of 4 failed (50%)                         XX:XX       12        5        5        1        1  
+
+
+`
+
+exports['e2e spec_isolation failing with retries enabled 2'] = {
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,

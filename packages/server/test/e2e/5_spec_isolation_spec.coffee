@@ -90,7 +90,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       run,
       "stats.wallClockDuration",
       wallClocks,
-      wallClocks + 150, ## add 150ms to account for padding
+      wallClocks + 180, ## add 180ms to account for padding
       1234
     )
 
@@ -98,7 +98,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       run,
       "reporterStats.duration",
       wallClocks,
-      wallClocks + 150, ## add 150ms to account for padding
+      wallClocks + 180, ## add 180ms to account for padding
       1234
     )
 
@@ -233,7 +233,7 @@ describe "e2e spec_isolation", ->
     e2e.exec(@, {
       spec: specs
       outputPath: outputPath
-      snapshot: false
+      snapshot: true
       expectedExitCode: 5
       config: {retries: 1}
       # browser: 'chrome'

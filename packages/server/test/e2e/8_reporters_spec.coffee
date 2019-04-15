@@ -105,5 +105,5 @@ describe "e2e reporters", ->
               expect(json.stats).to.be.an('object')
               expect(json.stats.passes).to.eq(1)
               expect(json.stats.failures).to.eq(3)
-              expect(json.stats.skipped).to.eq(3)
+              expect(json.stats.skipped).to.eq(1)
               expect(json.stats.other).to.eq(0)
