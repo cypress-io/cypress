@@ -18,6 +18,7 @@ describe('exec run', function () {
       const args = run.processRunOptions({
         browser: 'test browser',
       })
+
       snapshot(args)
     })
 
@@ -25,6 +26,7 @@ describe('exec run', function () {
       const args = run.processRunOptions({
         record: 'my record id',
       })
+
       snapshot(args)
     })
 
@@ -33,6 +35,7 @@ describe('exec run', function () {
         record: 'foo',
         browser: 'test browser',
       })
+
       snapshot(args)
     })
   })

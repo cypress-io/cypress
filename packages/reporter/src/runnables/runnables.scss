@@ -39,6 +39,10 @@
       word-break: break-word;
       user-select: initial;
 
+      a {
+        text-decoration: underline;
+      }
+
       &:empty {
         display: none;
       }

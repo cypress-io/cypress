@@ -1,3 +1,4 @@
+_ = require("lodash")
 path = require("path")
 awspublish = require('gulp-awspublish')
 human = require("human-interval")
@@ -100,7 +101,7 @@ purgeDesktopAppFromCache = ({version, platform, zipName}) ->
   la(check.extension("zip", zipName),
     "zip filename should end with .zip", zipName)
 
-  osName = getUploadNameByOs(platform)
+  osName = getUploadNameByOsAndArch(platform)
   la(check.unemptyString(osName), "missing osName", osName)
   url = getDestktopUrl(version, osName, zipName)
   purgeCache(url)
@@ -116,15 +117,25 @@ purgeDesktopAppAllPlatforms = (version, zipName) ->
   Promise.mapSeries platforms, (platform) ->
     purgeDesktopAppFromCache({version, platform, zipName})
 
-getUploadNameByOs = (osName = os.platform()) ->
+getUploadNameByOsAndArch = (platform) ->
+  ## just hard code for now...
+  arch = os.arch()
+
   uploadNames = {
-    darwin: "osx64"
-    linux:  "linux64"
-    win32:  "win64"
+    darwin: {
+      "x64": "osx64"
+    },
+    linux: {
+      "x64": "linux64"
+    },
+    win32: {
+      "x64": "win64",
+      "ia32": "win32"
+    }
   }
-  name = uploadNames[osName]
+  name = _.get(uploadNames[platform], arch)
   if not name
-    throw new Error("Cannot find upload name for OS #{osName}")
+    throw new Error("Cannot find upload name for OS: '#{platform}' with arch: '#{arch}'")
   name
 
 saveUrl = (filename) -> (url) ->
@@ -141,7 +152,7 @@ module.exports = {
   purgeCache,
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
-  getUploadNameByOs,
+  getUploadNameByOsAndArch,
   saveUrl,
   formHashFromEnvironment
 }
