@@ -13,7 +13,8 @@ const model = (props) => {
   return _.extend({
     commands: [],
     err: {},
-    id: 't1',
+    testId: 't1',
+    id: 0,
     isActive: true,
     level: 1,
     state: 'passed',
@@ -33,7 +34,7 @@ describe('<TestError />', () => {
       }
 
       component.find('FlashOnClick').simulate('click', e)
-      expect(events.emit).to.have.been.calledWith('show:error', 't1')
+      expect(events.emit).to.have.been.calledWith('show:error', 't1', 0)
       expect(e.stopPropagation).to.have.been.called
     })
   })

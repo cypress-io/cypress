@@ -30,7 +30,7 @@ class Test extends Component {
         <div className='runnable-content-region'>
           <i aria-hidden="true" className='runnable-state fa'></i>
           <span
-            aria-expanded={this._shouldBeOpen() === true}
+            aria-expanded={model.isOpen}
             className='runnable-title'
             onKeyPress={onEnterOrSpace(this._toggleOpen)}
             role='button'
