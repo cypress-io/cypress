@@ -1265,7 +1265,7 @@ exports['retry [beforeEach] runner emit'] = [
   ],
   [
     "hook end",
-    "{Object 53}"
+    "{Object 52}"
   ],
   [
     "hook",
@@ -1301,11 +1301,11 @@ exports['retry [beforeEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 56}"
+    "{Object 55}"
   ],
   [
     "hook end",
-    "{Object 56}"
+    "{Object 55}"
   ],
   [
     "hook",
