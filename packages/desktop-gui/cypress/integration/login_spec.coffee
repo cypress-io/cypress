@@ -21,11 +21,8 @@ describe "Login", ->
       @pingApiServer = @util.deferred()
       cy.stub(@ipc, "pingApiServer").returns(@pingApiServer.promise)
 
-      @openWindow = @util.deferred()
-      cy.stub(@ipc, "windowOpen").returns(@openWindow.promise)
-
-      @login = @util.deferred()
-      cy.stub(@ipc, "logIn").returns(@login.promise)
+      @beginAuth = @util.deferred()
+      cy.stub(@ipc, "beginAuth").returns(@beginAuth.promise)
 
       start()
       cy.contains("Log In").click()
@@ -38,7 +35,7 @@ describe "Login", ->
     beforeEach ->
       @pingApiServer.resolve()
 
-    it "has Github Login button", ->
+    it "has dashboard login button", ->
       cy.get(".login").contains("button", "Log In to Dashboard")
 
     it "opens dashboard on clicking 'Cypress Dashboard'", ->
@@ -52,18 +49,10 @@ describe "Login", ->
             .contains("button", "Log In to Dashboard").as("loginBtn")
             .click()
 
-      it "triggers ipc 'window:open' on click", ->
+      it "triggers ipc 'begin:auth' on click", ->
         cy
           .then ->
-            expect(@ipc.windowOpen).to.be.calledWithExactly({
-              position: "center"
-              focus: true
-              width: 1000
-              height: 635
-              preload: false
-              title: "Login"
-              type: "DASHBOARD_LOGIN"
-            })
+            expect(@ipc.beginAuth).to.be.calledOnce
 
       it "disables login button", ->
         cy.get("@loginBtn").should("be.disabled")
@@ -71,20 +60,16 @@ describe "Login", ->
       it "shows spinner with 'Logging In'", ->
         cy.get("@loginBtn").invoke("text").should("contain", "Logging in...")
 
-      context "on 'window:open' ipc response", ->
+      context "on 'begin:auth'", ->
         beforeEach ->
-          cy.get("@loginBtn").then ->
-            @openWindow.resolve("code-123")
-
-        it "triggers ipc 'log:in'", ->
-          cy.wrap(@ipc.logIn).should("be.calledWith", "code-123")
+          cy.get("@loginBtn")
 
         it "displays spinner with 'Logging in...' and disables button", ->
           cy.contains("Logging in...").should("be.disabled")
 
-        describe "on ipc log:in success", ->
+        describe "on ipc begin:auth success", ->
           beforeEach ->
-            @login.resolve(@user)
+            @beginAuth.resolve(@user)
 
           it "goes to previous view", ->
             cy.shouldBeOnIntro()
@@ -128,9 +113,9 @@ describe "Login", ->
                 .invoke("text")
                 .should("include", "Log In to Dashboard")
 
-        describe "on ipc 'log:in' error", ->
+        describe "on ipc 'begin:auth' error", ->
           beforeEach ->
-            @login.reject({name: "foo", message: "There's an error"})
+            @beginAuth.reject({name: "foo", message: "There's an error"})
 
           it "displays error in ui", ->
             cy
@@ -141,14 +126,6 @@ describe "Login", ->
           it "login button should be enabled", ->
             cy
               .get("@loginBtn").should("not.be.disabled")
-
-      describe "when user closes window before logging in", ->
-        beforeEach ->
-          @openWindow.reject({windowClosed: true, name: "foo", message: "There's an error"})
-
-        it "no longer shows logging in spinner", ->
-          cy.get(".login-content .alert").should("not.exist")
-          cy.contains("button", "Log In to Dashboard").should("not.be.disabled")
 
     describe "Dashboard link in message", ->
       it "opens link to Dashboard Service on click", ->

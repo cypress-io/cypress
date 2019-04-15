@@ -30,7 +30,7 @@ describe "Runs List", ->
       cy.stub(@ipc, "requestAccess")
       cy.stub(@ipc, "setupDashboardProject")
       cy.stub(@ipc, "externalOpen")
-      cy.stub(@ipc, "windowOpen").resolves()
+      cy.stub(@ipc, "beginAuth").resolves()
 
       @openProject = @util.deferred()
       cy.stub(@ipc, "openProject").returns(@openProject.promise)
@@ -258,8 +258,7 @@ describe "Runs List", ->
 
       it "clicking 'Log In to Dashboard' opens login", ->
         cy.contains("button", "Log In to Dashboard").click().then ->
-          expect(@ipc.windowOpen).to.be.called
-          expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("DASHBOARD_LOGIN")
+          expect(@ipc.beginAuth).to.be.called
 
   describe "polling runs", ->
     beforeEach ->
@@ -481,8 +480,7 @@ describe "Runs List", ->
 
               it "clicking 'Log In to Dashboard' opens login", ->
                 cy.contains("button", "Log In to Dashboard").click().then ->
-                  expect(@ipc.windowOpen).to.be.called
-                  expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("DASHBOARD_LOGIN")
+                  expect(@ipc.beginAuth).to.be.called
 
     describe "timed out error", ->
       beforeEach ->

@@ -87,9 +87,6 @@ class LoginForm extends Component {
     .then(() => {
       this.props.onSuccess()
     })
-    .catch({ windowClosed: true }, () => {
-      this.setState({ isLoggingIn: false })
-    })
     .catch((error) => {
       this.setState({
         isLoggingIn: false,

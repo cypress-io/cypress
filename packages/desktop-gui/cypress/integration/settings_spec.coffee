@@ -170,8 +170,7 @@ describe "Settings", ->
           cy.get(".login")
 
         it "re-loads and shows the record key when user logs in", ->
-          cy.stub(@ipc, "windowOpen").resolves("code-123")
-          cy.stub(@ipc, "logIn").resolves(@user)
+          cy.stub(@ipc, "beginAuth").resolves(@user)
           @ipc.getRecordKeys.onCall(1).resolves(@keys)
 
           cy.get(".empty-well button").click()

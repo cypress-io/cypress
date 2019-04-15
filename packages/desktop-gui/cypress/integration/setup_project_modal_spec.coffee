@@ -341,8 +341,7 @@ describe "Set Up Project", ->
 
     describe "when login succeeds", ->
       beforeEach ->
-        cy.stub(@ipc, "windowOpen").resolves()
-        cy.stub(@ipc, "logIn").resolves(@user)
+        cy.stub(@ipc, "beginAuth").resolves(@user)
         cy.contains("button", "Log In to Dashboard").click()
 
       it "shows setup", ->
