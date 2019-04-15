@@ -130,6 +130,15 @@ describe('polyfill programmatic blur events', () => {
   const oldHasFocus = window.top.document.hasFocus
   let oldActiveElement = null
 
+  const setActiveElement = (el) => {
+    Object.defineProperty(cy.state('document'), 'activeElement', {
+      get () {
+        return el
+      },
+      configurable: true,
+    })
+  }
+
   beforeEach(() => {
     oldActiveElement = Object.getOwnPropertyDescriptor(window.Document.prototype, 'activeElement')
 
@@ -171,30 +180,43 @@ describe('polyfill programmatic blur events', () => {
 
       $one.get(0).focus()
       // a hack here becuase we nuked the real .focus
-      Object.defineProperty(cy.state('document'), 'activeElement', {
-        get () {
-          return $one.get(0)
-        },
-      })
+      setActiveElement($one.get(0))
 
       $two.get(0).focus()
       // cy.get('#two').click()
 
+      const getEvent = (n) => {
+        return stub.getCall(n).args[0].originalEvent
+      }
+
       cy.then(() => {
-        expect(_.toPlainObject(stub.getCall(0).args[0])).to.containSubset({
+        expect(getEvent(0)).to.containSubset({
           type: 'focus',
           target: $one.get(0),
+          isTrusted: false,
         })
 
-        expect(_.toPlainObject(stub.getCall(1).args[0])).to.containSubset({
+        expect(getEvent(1)).to.containSubset({
           type: 'blur',
           target: $one.get(0),
+          isTrusted: false,
         })
 
-        expect(_.toPlainObject(stub.getCall(2).args[0])).to.containSubset({
+        expect(getEvent(2)).to.containSubset({
           type: 'focus',
           target: $two.get(0),
+          isTrusted: false,
         })
+      })
+      .then(() => {
+
+        stub.reset()
+
+        setActiveElement($two.get(0))
+
+        $two.get(0).focus()
+
+        expect(stub, 'should not send focus if already focused el').not.called
       })
     })
   }
@@ -219,26 +241,37 @@ describe('polyfill programmatic blur events', () => {
 
       $one.get(0).focus()
       // a hack here becuase we nuked the real .focus
-      Object.defineProperty(cy.state('document'), 'activeElement', {
-        get () {
-          return $one.get(0)
-        },
-      })
 
       $one.get(0).blur()
 
       cy.then(() => {
 
-        expect(_.toPlainObject(stub.getCall(0).args[0])).to.containSubset({
+        expect(stub).calledTwice
+
+        expect(_.toPlainObject(stub.getCall(0).args[0].originalEvent)).to.containSubset({
           type: 'focus',
           target: $one.get(0),
+          isTrusted: false,
         })
 
-        expect(_.toPlainObject(stub.getCall(1).args[0])).to.containSubset({
+        expect(_.toPlainObject(stub.getCall(1).args[0].originalEvent)).to.containSubset({
           type: 'blur',
           target: $one.get(0),
+          isTrusted: false,
         })
       })
+
+      .then(() => {
+
+        stub.reset()
+
+        setActiveElement(cy.$$('body').get(0))
+
+        $one.get(0).blur()
+
+        expect(stub, 'should not send blur if not focused el').not.called
+      })
+
     })
   }
   )
@@ -279,11 +312,7 @@ describe('polyfill programmatic blur events', () => {
         })
 
         $one.get(0).focus()
-        Object.defineProperty(cy.state('document'), 'activeElement', {
-          get () {
-            return $one.get(0)
-          },
-        })
+        setActiveElement($one.get(0))
 
         expect(cy.state('needsForceFocus')).to.eq($one.get(0))
         expect(events).to.be.empty
@@ -328,11 +357,7 @@ describe('polyfill programmatic blur events', () => {
         })
 
         $input.get(0).focus()
-        Object.defineProperty(cy.state('document'), 'activeElement', {
-          get () {
-            return $input.get(0)
-          },
-        })
+        setActiveElement($input.get(0))
 
         expect(cy.state('needsForceFocus')).to.eq($input.get(0))
         expect(events).to.be.empty
