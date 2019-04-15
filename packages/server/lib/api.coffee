@@ -75,7 +75,7 @@ rp = request.defaults (params = {}, callback) ->
 
       debug("response %o", resp)
     .catch { statusCode: 401 }, (err) ->
-      if not params.auth.bearer
+      if not params.auth
         debug("received 401 but request was not sent with token, not retrying")
         throw err
 
@@ -118,7 +118,7 @@ refreshTokenOrWait = () ->
     .then (user) ->
       getTokenFromRefresh(user.refreshToken)
       .then (tokens) ->
-        user.authToken = tokens.id_token
+        user.authToken = tokens.access_token
         user.refreshToken = tokens.refresh_token
         cache.setUser(user)
         user.authToken
@@ -459,4 +459,6 @@ module.exports = {
           debug("retry ##{retryIndex} after #{delay}ms")
           attempt(retryIndex)
 
+  clearCache: () ->
+    responseCache = {}
 }
