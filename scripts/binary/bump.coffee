@@ -226,7 +226,7 @@ module.exports = {
           state: 'pending',
           targetUrl
           description: "#{owner}/#{repo}",
-          context: "#{repo} #{os.platform()}-#{os.arch()}"
+          context: "#{os.platform()}-#{os.arch()} #{repo}"
         }
 
         console.log('creating commit status check',
