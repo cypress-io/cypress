@@ -6,6 +6,7 @@ tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
+agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 Cookies    = require("./automation/cookies")
 
@@ -132,7 +133,13 @@ createCookieString = (c) ->
 module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout ? 20000
-    # forever: true
+    agent: agent
+    ## send keep-alive with requests since Chrome won't send it in proxy mode
+    ## https://github.com/cypress-io/cypress/pull/3531#issuecomment-476269041
+    headers: {
+      "Connection": "keep-alive"
+    }
+    proxy: null ## upstream proxying is handled by CombinedAgent
   }
 
   r  = r.defaults(defaults)

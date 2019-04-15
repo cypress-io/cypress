@@ -22,6 +22,10 @@
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 
+// load ambient declaration for "cypress" NPM module
+// hmm, how to load it better?
+/// <reference path="./cypress-npm-api.d.ts" />
+
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
 declare const assert: Chai.AssertStatic
@@ -766,7 +770,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/hash
      */
-    hash(options?: Partial<Loggable>): Chainable<string>
+    hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
      * Invoke a function on the previously yielded subject.
@@ -1462,19 +1466,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      * Custom events... If the following were `.triggerCustom`,
@@ -1484,7 +1488,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      * Custom events... If the following were `.triggerCustom`,
@@ -1504,7 +1508,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
 
     /**
      * Type into a DOM element.
