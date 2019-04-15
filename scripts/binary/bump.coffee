@@ -215,22 +215,23 @@ module.exports = {
         message
       }
 
-      createTestCommitStatus = ->
+      createTestCommitStatus = ({ sha }) ->
         return unless status
 
+        targetUrl = "https://github.com/#{owner}/#{repo}/commit/#{sha}"
         commitStatusOptions = {
           owner: status.owner,
           repo: status.repo,
           sha: status.sha,
           state: 'pending',
-          # targetUrl
+          targetUrl
           description: "#{owner}/#{repo}",
-          context: "#{os.platform()}-#{os.arch()}"
+          context: "#{repo} #{os.platform()}-#{os.arch()}"
         }
 
         console.log('creating commit status check',
           commitStatusOptions.description,
-          commitStatusOptions.contenxt)
+          commitStatusOptions.context)
         setCommitStatus(commitStatusOptions)
 
       if not version
