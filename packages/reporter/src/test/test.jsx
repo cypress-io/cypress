@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import events from '../lib/events'
-import { indent } from '../lib/util'
+import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
 
 import Attempts from '../attempts/attempts'
@@ -28,8 +28,17 @@ class Test extends Component {
         style={{ paddingLeft: indent(model.level) }}
       >
         <div className='runnable-content-region'>
-          <i className='runnable-state fa'></i>
-          <span className='runnable-title'>{model.title}</span>
+          <i aria-hidden="true" className='runnable-state fa'></i>
+          <span
+            aria-expanded={this._shouldBeOpen() === true}
+            className='runnable-title'
+            onKeyPress={onEnterOrSpace(this._toggleOpen)}
+            role='button'
+            tabIndex='0'
+          >
+            {model.title}
+            <span className="visually-hidden">{model.state}</span>
+          </span>
           <div className='runnable-controls'>
             <Tooltip placement='top' title='One or more commands failed'>
               <i className='fa fa-warning'></i>

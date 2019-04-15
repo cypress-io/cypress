@@ -276,6 +276,12 @@ create = (Cypress, state, queue, retryFn) ->
         cmd.skip()
 
     assertions = (memo, fn, i) =>
+      ## HACK: bluebird .reduce will not call the callback
+      ## if given an undefined initial value, so in order to
+      ## support undefined subjects, we wrap the initial value
+      ## in an Array and unwrap it if index = 0
+      if i is 0
+        memo = memo[0]
       fn(memo).then (subject) ->
         subjects[i] = subject
 
@@ -291,7 +297,7 @@ create = (Cypress, state, queue, retryFn) ->
     state("overrideAssert", overrideAssert)
 
     Promise
-    .reduce(fns, assertions, subject)
+    .reduce(fns, assertions, [subject])
     .then ->
       restore()
 

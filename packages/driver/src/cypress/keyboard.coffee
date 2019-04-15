@@ -20,6 +20,8 @@ keyStandardMap = {
   "{leftarrow}": "ArrowLeft",
   "{rightarrow}": "ArrowRight",
   "{uparrow}": "ArrowUp",
+  "{home}": "Home",
+  "{end}": "End",
   "{alt}": "Alt",
   "{ctrl}": "Control",
   "{meta}": "Meta",
@@ -126,7 +128,7 @@ $Keyboard = {
 
         return
 
-  
+
     ## charCode = 27
     ## no keyPress
     ## no textInput
@@ -211,6 +213,32 @@ $Keyboard = {
       options.setKey    = "{downarrow}"
       @ensureKey el, null, options, ->
         $selection.moveCursorDown(el)
+
+    ## charCode = 36
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{home}": (el, options) ->
+      options.charCode  = 36
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{home}"
+      @ensureKey el, null, options, ->
+        $selection.moveCursorToLineStart(el)
+
+    ## charCode = 35
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{end}": (el, options) ->
+      options.charCode  = 35
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{end}"
+      @ensureKey el, null, options, ->
+        $selection.moveCursorToLineEnd(el)
   }
 
   modifierChars: {
@@ -455,7 +483,7 @@ $Keyboard = {
 
           if $elements.isInput(el) or $elements.isTextarea(el)
             ml = el.maxLength
-  
+
           ## maxlength is -1 by default when omitted
           ## but could also be null or undefined :-/
           ## only cafe if we are trying to type a key
@@ -472,7 +500,7 @@ $Keyboard = {
     @simulateKey(el, "keyup", key, options)
 
   isSpecialChar: (chars) ->
-    !!@specialChars[chars]
+    chars in _.keys(@specialChars)
 
   handleSpecialChars: (el, chars, options) ->
     options.key = chars
@@ -486,7 +514,7 @@ $Keyboard = {
   }
 
   isModifier: (chars) ->
-    !!@modifierChars[chars]
+    chars in _.keys(@modifierChars)
 
   handleModifier: (el, chars, options) ->
     modifier = @modifierChars[chars]

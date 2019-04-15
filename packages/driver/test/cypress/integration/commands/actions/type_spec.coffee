@@ -1403,6 +1403,106 @@ describe "src/cy/commands/actions/type", ->
             expect($input).to.have.value("fodo")
             done()
 
+      context "{home}", ->
+        it "sets which and keyCode to 36 and does not fire keypress events", (done) ->
+          cy.$$("#comments").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$("#comments").on "keydown", (e) ->
+            expect(e.which).to.eq 36
+            expect(e.keyCode).to.eq 36
+            expect(e.key).to.eq "Home"
+            done()
+
+          cy.get("#comments").type("{home}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          cy.$$("#comments").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get("#comments").type("{home}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$("#comments").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get("#comments").type("{home}").then -> done()
+
+        it "can move the cursor to input start", ->
+          cy.get(":text:first").invoke("val", "bar").type("{home}n").then ($input) ->
+            expect($input).to.have.value("nbar")
+
+        it "does not move the cursor if already at bounds 0", ->
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}{home}n").then ($input) ->
+            expect($input).to.have.value("nbar")
+
+        it "should move the cursor to the start of each line in textarea", ->
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+
+          cy.get("textarea:first")
+          .type("{home}11{uparrow}{home}22{uparrow}{home}33").should('have.value', "33foo\n22bar\n11baz")
+
+        it "should move cursor to the start of each line in contenteditable", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML =
+            '<div>foo</div>' +
+            '<div>bar</div>' +
+            '<div>baz</div>'
+
+          cy.get("[contenteditable]:first")
+          .type("{home}11{uparrow}{home}22{uparrow}{home}33").then ($div) ->
+            expect($div.get(0).innerText).to.eql("33foo\n22bar\n11baz\n")
+
+      context "{end}", ->
+        it "sets which and keyCode to 35 and does not fire keypress events", (done) ->
+          cy.$$("#comments").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$("#comments").on "keydown", (e) ->
+            expect(e.which).to.eq 35
+            expect(e.keyCode).to.eq 35
+            expect(e.key).to.eq "End"
+            done()
+
+          cy.get("#comments").type("{end}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          cy.$$("#comments").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get("#comments").type("{end}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$("#comments").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get("#comments").type("{end}").then -> done()
+
+        it "can move the cursor to input end", ->
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}{end}n").then ($input) ->
+            expect($input).to.have.value("barn")
+
+        it "does not move the cursor if already at end of bounds", ->
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}{end}n").then ($input) ->
+            expect($input).to.have.value("barn")
+
+        it "should move the cursor to the end of each line in textarea", ->
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+
+          cy.get("textarea:first")
+          .type("{end}11{uparrow}{end}22{uparrow}{end}33").should('have.value', "foo33\nbar22\nbaz11")
+
+        it "should move cursor to the end of each line in contenteditable", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML =
+            '<div>foo</div>' +
+            '<div>bar</div>' +
+            '<div>baz</div>'
+
+          cy.get("[contenteditable]:first")
+          .type("{end}11{uparrow}{end}22{uparrow}{end}33").then ($div) ->
+            expect($div.get(0).innerText).to.eql("foo33\nbar22\nbaz11\n")
+
       context "{uparrow}", ->
         beforeEach ->
           cy.$$("#comments").val("foo\nbar\nbaz")
@@ -2779,6 +2879,31 @@ describe "src/cy/commands/actions/type", ->
         cy
           .get(":text:first").type(" ")
           .should("have.value", " ")
+
+      it "allows typing special characters", ->
+        cy
+            .get(":text:first").type("{esc}")
+            .should("have.value", "")
+            
+      _.each ["toString", "toLocaleString", "hasOwnProperty", "valueOf"
+         "undefined", "null", "true", "false", "True", "False"], (val) =>
+       it "allows typing reserved Javscript word (#{val})", ->
+         cy
+           .get(":text:first").type(val)
+           .should("have.value", val)
+
+      _.each ["Ω≈ç√∫˜µ≤≥÷", "2.2250738585072011e-308", "田中さんにあげて下さい",
+         "<foo val=`bar' />", "⁰⁴⁵₀₁₂", "🐵 🙈 🙉 🙊",
+         "<script>alert(123)</script>", "$USER"], (val) =>
+       it "allows typing some naughtly strings (#{val})", ->
+         cy
+           .get(":text:first").type(val)
+           .should("have.value", val)
+
+      it "allows typing special characters", ->
+        cy
+            .get(":text:first").type("{esc}")
+            .should("have.value", "")
 
       it "can type into input with invalid type attribute", ->
         cy.get(':text:first')

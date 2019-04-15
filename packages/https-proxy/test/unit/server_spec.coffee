@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+EE      = require("events")
 Promise = require("bluebird")
 proxy   = require("../helpers/proxy")
 Server  = require("../../lib/server")
@@ -35,7 +36,7 @@ describe "lib/server", ->
 
     it "calls options.onError with err and port", (done) ->
       onError = @sandbox.stub()
-      socket = {}
+      socket = new EE()
       head = {}
 
       @setup({onError: onError})
@@ -46,7 +47,9 @@ describe "lib/server", ->
           err = onError.getCall(0).args[0]
           expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:8444")
 
-          expect(onError).to.be.calledWithMatch(err, socket, head, 8444)
+          expect(onError.getCall(0).args[1]).to.eq(socket)
+          expect(onError.getCall(0).args[2]).to.eq(head)
+          expect(onError.getCall(0).args[3]).to.eq("8444")
 
           done()
       return

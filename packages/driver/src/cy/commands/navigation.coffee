@@ -13,6 +13,9 @@ hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
+REQUEST_URL_OPTS = ["auth", "failOnStatusCode", "method", "body", "headers"]
+VISIT_OPTS = ["url", "log", "onBeforeLoad", "onLoad", "timeout"].concat(REQUEST_URL_OPTS)
+
 reset = (test = {}) ->
   knownCommandCausedInstability = false
 
@@ -265,7 +268,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, "auth", "failOnStatusCode", "method", "body", "headers")
+      _.pick(options, REQUEST_URL_OPTS)
     )
     .then (resp = {}) ->
       switch
@@ -472,6 +475,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
+      consoleProps = {}
+
+      if not _.isEmpty(options)
+        consoleProps["Options"] = _.pick(options, VISIT_OPTS)
+
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
@@ -489,8 +497,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if not _.isObject(options.headers)
         $utils.throwErrByPath("visit.invalid_headers")
-
-      consoleProps = {}
 
       if options.log
         message = url
