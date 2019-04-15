@@ -20,7 +20,7 @@ class App extends Component {
     appApi.listenForMenuClicks()
 
     ipc.getOptions().then((options = {}) => {
-      appStore.set(_.pick(options, 'cypressEnv', 'os', 'projectRoot', 'version'))
+      appStore.set(_.pick(options, 'cypressEnv', 'os', 'projectRoot', 'version', 'proxySource', 'proxyServer', 'proxyBypassList'))
       viewStore.showApp()
     })
 
@@ -40,7 +40,7 @@ class App extends Component {
       default:
         return (
           <Layout>
-            <Project project={viewStore.currentView.project} />
+            <Project project={viewStore.currentView.project} app={appStore}/>
           </Layout>
         )
     }
