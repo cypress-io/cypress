@@ -277,9 +277,12 @@ module.exports = {
 
   hover:
     not_implemented: """
-      #{cmd('hover')} is not currently implemented.\n
-      However it is usually easy to workaround.\n
-      Read the following document for a detailed explanation.\n
+      #{cmd('hover')} is not currently implemented.
+
+      However it is usually easy to workaround.
+
+      Read the following document for a detailed explanation.
+
       https://on.cypress.io/hover
     """
 
@@ -357,13 +360,18 @@ module.exports = {
     invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
     invalid_num_of_args:
       """
-      #{cmd('{{cmd}}')} only accepts a single argument.\n
+      #{cmd('{{cmd}}')} only accepts a single argument.
+
       If you want to invoke a function with arguments, use cy.invoke().
       """
-    timed_out: """
-      #{cmd('{{cmd}}')} timed out after waiting '{{timeout}}ms'.\n
-      Your callback function returned a promise which never resolved.\n
-      The callback function was:\n
+    timed_out:
+      """
+      #{cmd('{{cmd}}')} timed out after waiting '{{timeout}}ms'.
+
+      Your callback function returned a promise which never resolved.
+
+      The callback function was:
+
       {{func}}
     """
 

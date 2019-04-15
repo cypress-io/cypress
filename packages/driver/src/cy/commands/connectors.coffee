@@ -27,6 +27,12 @@ primitiveToObject = (memo) ->
     else
       memo
 
+getFormattedElement = ($el) ->
+  if $dom.isElement($el)
+    $dom.getElements($el)
+  else
+    $el
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   ## thens can return more "thenables" which are not resolved
   ## until they're 'really' resolved, so naturally this API
@@ -132,17 +138,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   invokeFn = (subject, str, args...) ->
     options = {}
 
-    getMessage = ->
-      if name is "invoke"
-        ".#{str}(" + $utils.stringify(args) + ")"
-      else
-        ".#{str}"
-
     ## name could be invoke or its!
     name = state("current").get("name")
 
     isCmdIts = name is "its"
     isCmdInvoke = name is "invoke"
+
+    getMessage = ->
+      if isCmdIts
+        return ".#{str}"
+
+      return ".#{str}(" + $utils.stringify(args) + ")"
 
     message = getMessage()
 

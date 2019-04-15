@@ -47,7 +47,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getFocused = ->
         focused = cy.getFocused()
         log(focused)
-        
+
         return focused
 
       do resolveFocused = (failedByNonAssertion = false) ->
