@@ -161,7 +161,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         $selection.interceptSelect.call(this)
 
       contentWindow.document.hasFocus = ->
-        top.document.hasFocus()
+        focused.documentHasFocus.call(@)
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing

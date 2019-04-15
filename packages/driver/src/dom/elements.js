@@ -197,6 +197,7 @@ const nativeMethods = {
   setSelectionRange: _nativeSetSelectionRange,
   modify: window.Selection.prototype.modify,
   focus: _nativeFocus,
+  hasFocus: window.document.hasFocus,
   blur: _nativeBlur,
   select: _nativeSelect,
 }

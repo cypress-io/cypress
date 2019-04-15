@@ -4,12 +4,19 @@ $elements = require("../dom/elements")
 $actionability = require("./actionability")
 
 create = (state) ->
+
+  documentHasFocus = () ->
+    ## hardcode document has focus as true
+    ## since the test should assume the window
+    ## is in focus the entire time
+    return true
+
   fireBlur = (el) ->
     win = $window.getWindowByElement(el)
 
     hasBlurred = false
 
-    hasFocus = top.document.hasFocus()
+    hasFocus = $elements.callNativeMethod(top.document, 'hasFocus')
 
     ## if our document does not have focus
     ## then that means that we need to attempt to
@@ -87,7 +94,7 @@ create = (state) ->
 
     hasFocused = false
 
-    hasFocus = top.document.hasFocus()
+    hasFocus = $elements.callNativeMethod(top.document, 'hasFocus')
 
     ## if our document does not have focus
     ## then that means that we need to attempt to
@@ -237,7 +244,9 @@ create = (state) ->
 
     interceptFocus
 
-    interceptBlur
+    interceptBlur,
+
+    documentHasFocus,
   }
 
 module.exports = {

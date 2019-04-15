@@ -52,8 +52,6 @@ it('blur the activeElement when clicking the body', () => {
 
     const doc = cy.state('document')
 
-    const hasFocus = doc.hasFocus()
-
     // programmatically focus the first, then second input element
     const $body = cy.$$('body')
     const $one = cy.$$('#one')
@@ -72,9 +70,7 @@ it('blur the activeElement when clicking the body', () => {
     $one.get(0).focus()
     $two.get(0).focus()
 
-    cy
-    .log('top.document.hasFocus()', hasFocus)
-    .then(() => {
+    cy.then(() => {
     // if we currently have focus it means
     // that the browser should fire the
     // native event immediately
@@ -105,9 +101,7 @@ it('blur the activeElement when clicking the body', () => {
       expect(doc.activeElement).to.eq($body.get(0))
     })
 
-    cy
-    .log('top.document.hasFocus()', hasFocus)
-    .then(() => {
+    cy.then(() => {
     // if we had focus then no additional
     // focus event is necessary
       expect(events).to.have.length(4)
@@ -274,8 +268,14 @@ describe('polyfill programmatic blur events', () => {
       })
 
     })
-  }
-  )
+  })
+
+  it('document.hasFocus() always returns true', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html')
+    cy.document().then((doc) => {
+      expect(doc.hasFocus(), 'hasFocus returns true').eq(true)
+    })
+  })
 })
 
 // https://github.com/cypress-io/cypress/issues/3001
@@ -342,3 +342,4 @@ describe('skip actionability if already focused', () => {
     cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
   })
 })
+
