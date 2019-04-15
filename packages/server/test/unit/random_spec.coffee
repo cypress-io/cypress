@@ -18,7 +18,7 @@ context ".id", ->
   it "passes the length parameter if supplied", ->
     sinon.spy(randomstring, "generate")
 
-    id = random.id()
+    id = random.id(32)
     expect(id.length).to.eq(32)
 
     expect(randomstring.generate).to.be.calledWith({

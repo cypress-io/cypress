@@ -13,15 +13,17 @@ describe "lib/user", ->
       user.get().then (user) ->
         expect(user).to.deep.eq({name: "brian"})
 
-  context ".logIn", ->
-    it "sets user to cache + returns user", ->
-      obj = {name: "brian"}
-      sinon.stub(api, "createSignin").withArgs("abc-123").resolves(obj)
-      sinon.spy(cache, "setUser")
+  context ".logInFromCode", ->
+    it "calls api.getTokenFromCode and then calls syncProfile with the tokens", ->
+      obj = {access_token: "abc-123", refresh_token: "def-456"}
 
-      user.logIn("abc-123").then (ret) ->
-        expect(ret).to.deep.eq(obj)
-        expect(cache.setUser).to.be.calledWith(obj)
+      sinon.stub(api, "getTokenFromCode").withArgs("abc-123", "http://foo.invalid").resolves(obj)
+
+      sinon.spy(user, "syncProfile")
+
+      user.logInFromCode("abc-123", "http://foo-invalid").then (ret) ->
+        expect(api.getTokenFromCode).to.be.calledOnce
+        expect(user.syncProfile).to.be.calledWith("abc-123", "def-456")
 
   context ".logOut", ->
     it "calls api.createSignout + removes the session from cache", ->
@@ -49,9 +51,14 @@ describe "lib/user", ->
       user.logOut().catch ->
         expect(cache.removeUser).to.be.calledOnce
 
+  context ".refreshToken", ->
+    it "loads the user from cache then called api.getTokenFromRefresh"
+
   context ".getBaseLoginUrl", ->
-    it "calls api.getBaseLoginUrl", ->
-      sinon.stub(api, "getBaseLoginUrl").resolves("https://github.com/login")
+    it "calls api.getAuthUrls", ->
+      sinon.stub(api, "getAuthUrls").resolves({
+        "dashboardAuthUrl": "https://github.com/login"
+      })
 
       user.getBaseLoginUrl().then (url) ->
         expect(url).to.eq("https://github.com/login")
