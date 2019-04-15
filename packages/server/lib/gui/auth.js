@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const bodyParser = require('body-parser')
 const debug = require('debug')('cypress:server:auth')
 const express = require('express')
 const Promise = require('bluebird')
@@ -69,34 +68,29 @@ const _launchServer = (baseLoginUrl) => {
     // launch an express server to listen for the auth callback from dashboard
     const origin = _getOriginFromUrl(baseLoginUrl)
 
-    debug('Launching auth server expecting origin', origin)
+    debug('Launching auth server with origin', origin)
     app = express()
 
-    app.use(bodyParser.json())
-
-    app.use('/auth', (req, res, next) => {
-      res.header('Access-Control-Allow-Origin', origin)
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-      res.header('Access-Control-Allow-Methods', 'POST')
-      next()
-    })
-
-    app.post('/auth', (req, res) => {
+    app.get('/auth', (req, res) => {
       debug('Received POST to /auth with body %o', req.body)
 
-      if (req.body.code && req.body.state === authState) {
-        return user.logInFromCode(req.body.code, origin)
+      const redirectToStatus = (status) => {
+        res.redirect(`${baseLoginUrl}?status=${status}`)
+      }
+
+      if (req.query.code && req.query.state === authState) {
+        return user.logInFromCode(req.query.code, origin)
         .then((user) => {
           authCallback(undefined, user)
-          res.json({ success: true })
+          redirectToStatus('success')
         })
         .catch((err) => {
           authCallback(err)
-          res.json({ success: false })
+          redirectToStatus('error')
         })
       }
 
-      res.json({ success: false })
+      redirectToStatus('error')
     })
 
     return new Promise.fromCallback((cb) => {
