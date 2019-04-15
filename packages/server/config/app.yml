@@ -6,16 +6,13 @@ default:
   chromium_manifest_url: https://download.cypress.io/chromium.json
 
 development: &development
-  dashboard_url: "http://localhost:3000"
   api_url: "http://localhost:1234/"
 
 test:
   <<: *development
 
 staging:
-  dashboard_url: "http://dashboard-staging.cypress.io"
   api_url: "https://api-staging.cypress.io/"
 
 production:
-  dashboard_url: "http://dashboard.cypress.io"
   api_url: "https://api.cypress.io/"
