@@ -9,7 +9,6 @@ import scroller from '../lib/scroller'
 
 import Agents from '../agents/agents'
 import Collapsible from '../collapsible/collapsible'
-import FlashOnClick from '../lib/flash-on-click'
 import Hooks from '../hooks/hooks'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
