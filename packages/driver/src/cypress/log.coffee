@@ -155,7 +155,7 @@ defaults = (state, config, obj) ->
     instrument:       "command"
     url:              state("url")
     hookName:         state("hookName")
-    testId:           state("runnable").id
+    testId:           state("runnable")?.id
     testCurrentRetry: getTestAttemptFromRunnable(state("runnable"))
     viewportWidth:    state("viewportWidth")
     viewportHeight:   state("viewportHeight")

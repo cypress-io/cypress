@@ -122,6 +122,46 @@
       &.primitive {
         background-color: darken(#FFE0DE, 3%);
       }
+
+      &.show-count {
+        border-radius: 10px 0 0 10px;
+      }
+    }
+
+    // ensures alias & number of duplicates don't break if reporter
+    // width is narrow
+    .alias-container {
+      white-space: nowrap;
+
+      > {
+        display: inline-block;
+      }
+    }
+
+    .num-duplicates,
+    .command-alias-count {
+      border-radius: 5px;
+      color: #777;
+      font-size: 90%;
+      font-style: normal;
+      line-height: 1;
+      margin-left: 0;
+    }
+
+    .num-duplicates.has-alias,
+    .command-alias-count {
+      border-radius: 0 10px 10px 0;
+      padding: 0px 6px 1px 4px;
+    }
+
+    .num-duplicates,
+    .command-alias-count {
+      background-color: lighten(#ffdf9c, 8%);
+    }
+
+    .command-alias-count {
+      display: inline;
+      padding: 2px 6px 2px 4px;
     }
   }
 
@@ -205,6 +245,7 @@
 
   .command-message-text {
     display: block;
+    flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -438,6 +479,10 @@
 
     .num-duplicates {
       display: none;
+    }
+
+    .command-alias {
+      border-radius: 10px !important;
     }
   }
 

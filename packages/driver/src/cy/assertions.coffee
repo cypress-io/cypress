@@ -111,6 +111,10 @@ create = (Cypress, state, queue, retryFn) ->
 
     state("upcomingAssertions", cmds)
 
+    ## we're applying the default assertion in the
+    ## case where there are no upcoming assertion commands
+    isDefaultAssertionErr = cmds.length is 0
+
     options.assertions ?= []
 
     _.defaults callbacks, {
@@ -156,7 +160,8 @@ create = (Cypress, state, queue, retryFn) ->
 
       options.error = err
 
-      throw err if err.retry is false
+      if err.retry is false
+        throw err
 
       onFail  = callbacks.onFail
       onRetry = callbacks.onRetry
@@ -168,14 +173,18 @@ create = (Cypress, state, queue, retryFn) ->
       ## and finish the assertions and then throw
       ## it again
       try
-        onFail.call(@, err) if _.isFunction(onFail)
+        if _.isFunction(onFail)
+          ## pass in the err and the upcoming assertion commands
+          onFail.call(@, err, isDefaultAssertionErr, cmds)
       catch e3
         finishAssertions(options.assertions)
         throw e3
 
-      retryFn(onRetry, options) if _.isFunction(onRetry)
+      if _.isFunction(onRetry)
+        retryFn(onRetry, options)
 
-    ## bail if we have no assertions
+    ## bail if we have no assertions and apply
+    ## the default assertions if applicable
     if not cmds.length
       return Promise
         .try(ensureExistence)
