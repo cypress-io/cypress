@@ -215,7 +215,7 @@ const start = (options = {}) => {
 
     logger.log()
     logger.log(stripIndent`
-      Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
+      Cypress ${chalk.green(binaryVersion)} is installed in ${chalk.cyan(installDir)}
       `)
     logger.log()
 

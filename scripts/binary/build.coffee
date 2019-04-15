@@ -13,13 +13,12 @@ gulpTypeScript = require("gulp-typescript")
 pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
+execa = require("execa")
 electron = require("@packages/electron")
-signOsxApp = require("electron-osx-sign")
 debug = require("debug")("cypress:binary")
 R = require("ramda")
 la = require("lazy-ass")
 check = require("check-more-types")
-execa = require("execa")
 
 meta = require("./meta")
 smoke = require("./smoke")
@@ -29,11 +28,12 @@ linkPackages = require('../link-packages')
 
 rootPackage = require("@packages/root")
 
-sign  = Promise.promisify(signOsxApp)
 fs = Promise.promisifyAll(fse)
 
 logger = (msg, platform) ->
-  console.log(chalk.yellow(msg), chalk.bgWhite(chalk.black(platform)))
+  time = new Date()
+  timeStamp = time.toLocaleTimeString()
+  console.log(timeStamp, chalk.yellow(msg), chalk.blue(platform))
 
 logBuiltAllPackages = () ->
   console.log("built all packages")
@@ -116,20 +116,10 @@ buildCypressApp = (platform, version, options = {}) ->
   npmInstallPackages = ->
     log("#npmInstallPackages")
 
-    packages.npmInstallAll(distDir("packages", "*"))
-    .then () ->
-      if os.platform() != "win32"
-        return
-      # on windows include both versions of FFMPEG
-      console.log("installing FFMPEG win32-x64")
-      serverFolder = distDir("packages", "server")
-      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-x64")
-      .then () ->
-        console.log("installing FFMPEG win32-ia32")
-        packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-ia32")
+    packages.npmInstallAll(distDir("packages", "*"), options)
 
   createRootPackage = ->
-    log("#createRootPackage", platform, version)
+    log("#createRootPackage #{platform} #{version}")
 
     fs.outputJsonAsync(distDir("package.json"), {
       name: "cypress"
@@ -166,7 +156,7 @@ buildCypressApp = (platform, version, options = {}) ->
     ## remove the .ts files in our packages
     log("#removeTypeScript")
     del([
-      ## include coffee files of packages
+      ## include ts files of packages
       distDir("**", "*.ts")
 
       ## except those in node_modules
@@ -257,18 +247,14 @@ buildCypressApp = (platform, version, options = {}) ->
       return Promise.resolve()
 
     appFolder = meta.zipDir(platform)
-    log("#codeSign", appFolder)
-    sign({
-      app: appFolder
-      platform
-      verbose: true
-    })
+    log("#codeSign #{appFolder}")
+    execa('build', ["--publish", "never", "--prepackaged", appFolder], {stdio: "inherit"})
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()
 
     appFolder = meta.zipDir(platform)
-    log("#verifyAppCanOpen", appFolder)
+    log("#verifyAppCanOpen #{appFolder}")
     new Promise (resolve, reject) =>
       args = ["-a", "-vvvv", appFolder]
       debug("cmd: spctl #{args.join(' ')}")

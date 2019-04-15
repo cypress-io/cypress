@@ -1,15 +1,8 @@
 import { log } from '../log'
 import { trim, tap } from 'ramda'
-import { FoundBrowser, Browser, NotInstalledError } from '../types'
-import * as execa from 'execa'
-
-const notInstalledErr = (name: string) => {
-  const err: NotInstalledError = new Error(
-    `Browser not installed: ${name}`
-  ) as NotInstalledError
-  err.notInstalled = true
-  throw err
-}
+import { FoundBrowser, Browser } from '../types'
+import { notInstalledErr } from '../errors'
+import execa from 'execa'
 
 function getLinuxBrowser(
   name: string,
@@ -26,20 +19,19 @@ function getLinuxBrowser(
       stdout,
       versionRegex
     )
-    return notInstalledErr(binary)
+    throw notInstalledErr(binary)
   }
 
-  const returnError = (err: Error) => {
-    log('Could not detect browser %s', err.message)
-    return notInstalledErr(binary)
+  const logAndThrowError = (err: Error) => {
+    log(
+      'Received error detecting browser binary: "%s" with error:',
+      binary,
+      err.message
+    )
+    throw notInstalledErr(binary)
   }
 
-  const cmd = `${binary} --version`
-  log('looking using command "%s"', cmd)
-  return execa
-    .shell(cmd)
-    .then(result => result.stdout)
-    .then(trim)
+  return getVersionString(binary)
     .then(tap(log))
     .then(getVersion)
     .then((version: string) => {
@@ -47,11 +39,24 @@ function getLinuxBrowser(
         name,
         version,
         path: binary
-      }
+      } as FoundBrowser
     })
-    .catch(returnError)
+    .catch(logAndThrowError)
 }
 
-export function detectBrowserLinux(browser: Browser) {
-  return getLinuxBrowser(browser.name, browser.binary, browser.versionRegex)
+export function getVersionString(path: string) {
+  const cmd = `${path} --version`
+  log('finding version string using command "%s"', cmd)
+  return execa
+    .shell(cmd)
+    .then(result => result.stdout)
+    .then(trim)
+}
+
+export function detect(browser: Browser) {
+  return getLinuxBrowser(
+    browser.name,
+    browser.binary as string,
+    browser.versionRegex
+  )
 }

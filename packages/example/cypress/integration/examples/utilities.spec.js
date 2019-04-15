@@ -7,7 +7,7 @@ context('Utilities', () => {
 
   it('Cypress._ - call a lodash method', () => {
     // https://on.cypress.io/_
-    cy.request('https://jsonplaceholder.typicode.com/users')
+    cy.request('https://jsonplaceholder.cypress.io/users')
       .then((response) => {
         let ids = Cypress._.chain(response.body).map('id').take(3).value()
 
@@ -34,6 +34,7 @@ context('Utilities', () => {
       .then((dataUrl) => {
         // create an <img> element and set its src to the dataUrl
         let img = Cypress.$('<img />', { src: dataUrl })
+
         // need to explicitly return cy here since we are initially returning
         // the Cypress.Blob.imgSrcToDataURL promise to our test
         // append the image
@@ -49,23 +50,24 @@ context('Utilities', () => {
     let matching = Cypress.minimatch('/users/1/comments', '/users/*/comments', {
       matchBase: true,
     })
+
     expect(matching, 'matching wildcard').to.be.true
 
-    matching = Cypress.minimatch("/users/1/comments/2", "/users/*/comments", {
-      matchBase: true
+    matching = Cypress.minimatch('/users/1/comments/2', '/users/*/comments', {
+      matchBase: true,
     })
     expect(matching, 'comments').to.be.false
 
     // ** matches against all downstream path segments
-    matching = Cypress.minimatch("/foo/bar/baz/123/quux?a=b&c=2", "/foo/**", {
-      matchBase: true
+    matching = Cypress.minimatch('/foo/bar/baz/123/quux?a=b&c=2', '/foo/**', {
+      matchBase: true,
     })
     expect(matching, 'comments').to.be.true
 
     // whereas * matches only the next path segment
 
-    matching = Cypress.minimatch("/foo/bar/baz/123/quux?a=b&c=2", "/foo/*", {
-      matchBase: false
+    matching = Cypress.minimatch('/foo/bar/baz/123/quux?a=b&c=2', '/foo/*', {
+      matchBase: false,
     })
     expect(matching, 'comments').to.be.false
   })
@@ -74,6 +76,7 @@ context('Utilities', () => {
   it('Cypress.moment() - format or parse dates using a moment method', () => {
     // https://on.cypress.io/moment
     const time = Cypress.moment().utc('2014-04-25T19:38:53.196Z').format('h:mm A')
+
     expect(time).to.be.a('string')
 
     cy.get('.utility-moment').contains('3:38 PM')

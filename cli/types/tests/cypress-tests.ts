@@ -112,18 +112,37 @@ cy.wrap(['bar', 'baz'])
     first // $ExpectType any
   })
 
-cy.wrap({ foo: 'bar' })
-  .then(s => {
-    s // $ExpectType { foo: string; }
-    return s
+describe('then', () => {
+  it('should have the correct type signature', () => {
+    cy.wrap({ foo: 'bar' })
+      .then(s => {
+        s // $ExpectType { foo: string; }
+        return s
+      })
+      .then(s => {
+        s // $ExpectType { foo: string; }
+      })
+      .then(s => s.foo)
+      .then(s => {
+        s // $ExpectType string
+      })
   })
-  .then(s => {
-    s // $ExpectType { foo: string; }
+
+  it('should have the correct type signature with options', () => {
+    cy.wrap({ foo: 'bar' })
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType { foo: string; }
+        return s
+      })
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType { foo: string; }
+      })
+      .then({ timeout: 5000 }, s => s.foo)
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType string
+      })
   })
-  .then(s => s.foo)
-  .then(s => {
-    s // $ExpectType string
-  })
+})
 
 cy.wait(['@foo', '@bar'])
   .then(([first, second]) => {
@@ -236,3 +255,19 @@ cy.screenshot('example', {
   log: true,
   blackout: []
 })
+
+namespace CypressTriggerTests {
+  cy.get('something')
+    .trigger('click') // .trigger(eventName)
+    .trigger('click', 'center') // .trigger(eventName, position)
+    .trigger('click', { // .trigger(eventName, options)
+      arbitraryProperty: 0
+    })
+    .trigger('click', 0, 0) // .trigger(eventName, x, y)
+    .trigger('click', 'center', { // .trigger(eventName, position, options)
+      arbitraryProperty: 0
+    })
+    .trigger('click', 0, 0, { // .trigger(eventName, x, y, options)
+      arbitraryProperty: 0
+    })
+}
