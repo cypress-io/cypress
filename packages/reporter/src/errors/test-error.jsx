@@ -3,7 +3,7 @@ import React from 'react'
 import FlashOnClick from '../lib/flash-on-click'
 
 function TestError (props) {
-  const { model, events } = props
+  const { model, events, isTestError, displayMessage } = props
 
   function _onErrorClick (e) {
     e.stopPropagation()
@@ -15,7 +15,7 @@ function TestError (props) {
       message='Printed output to your console'
       onClick={_onErrorClick}
     >
-      <pre className={cs('attempt-error', { 'test-error': model.isLast })}>{model.err.displayMessage}</pre>
+      <pre className={cs('attempt-error', { 'test-error': isTestError })}>{displayMessage}</pre>
     </FlashOnClick>
   )
 }

@@ -50,7 +50,7 @@ class AttemptContent extends Component {
         </div>
 
         <div className='attempt-error-region'>
-          <TestError events={events} model={model} />
+          <TestError events={events} model={model} isTestError={model.isLast} displayMessage={model.err.displayMessage}/>
         </div>
       </Fragment>
     )

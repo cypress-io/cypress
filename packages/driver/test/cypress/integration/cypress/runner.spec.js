@@ -1109,8 +1109,8 @@ const shouldHaveTestResults = (passed, failed) => (exitCode) => {
   expect(exitCode, 'resolve with failure count').eq(exitCode)
   passed = passed || '--'
   failed = failed || '--'
-  cy.get('header .passed').should('have.text', `${passed}`)
-  cy.get('header .failed').should('have.text', `${failed}`)
+  cy.get('header .passed .num').should('have.text', `${passed}`)
+  cy.get('header .failed .num').should('have.text', `${failed}`)
 }
 
 const spyOn = (obj, prop, fn) => {

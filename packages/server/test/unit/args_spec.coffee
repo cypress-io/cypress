@@ -342,7 +342,7 @@ describe "lib/util/args", ->
         sinon.stub(os, "platform").returns("win32")
         process.env.HTTP_PROXY = override
         options = @setup()
-        expect(getWindowsProxyUtil.getWindowsProxy).to.not.beCalled
+        expect(getWindowsProxyUtil.getWindowsProxy).to.not.called
         expect(options.proxySource).to.be.undefined
         expect(options.proxyServer).to.be.undefined
         expect(options.proxyBypassList).to.be.undefined
