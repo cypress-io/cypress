@@ -161,20 +161,29 @@ create = (state) ->
     ## events if the window is not in focus
     ## so we fire fake events to act as if the window
     ## is always in focus
-    fireFocus(el)
 
-    ## el.focus() always returns undefined
-    return undefined
+    $focused = getFocused()
+
+    if !$focused || $focused[0] isnt el
+      fireFocus(el)
+      return
+
+    $elements.callNativeMethod(el, 'focus')
+    return
 
   interceptBlur = (el) ->
     ## normally programmatic blur calls cause "primed" focus/blur
     ## events if the window is not in focus
     ## so we fire fake events to act as if the window
     ## is always in focus.
-    fireBlur(el)
+    $focused = getFocused()
+    if $focused && $focused[0] is el
+      fireBlur(el)
+      return
 
-    ## el.blur() always returns undefined
-    return undefined
+    $elements.callNativeMethod(el, 'blur')
+    return
+
 
   needsFocus = ($elToFocus, $previouslyFocusedEl) ->
     $focused = getFocused()

@@ -78,7 +78,6 @@ it('blur the activeElement when clicking the body', () => {
     // if we currently have focus it means
     // that the browser should fire the
     // native event immediately
-      expect(cy.state('needsForceFocus')).to.be.undefined
       expect(events).to.have.length(3)
 
       expect(_.toPlainObject(events[0])).to.include({
@@ -240,7 +239,9 @@ describe('polyfill programmatic blur events', () => {
       })
 
       $one.get(0).focus()
+
       // a hack here becuase we nuked the real .focus
+      setActiveElement($one.get())
 
       $one.get(0).blur()
 
@@ -275,108 +276,6 @@ describe('polyfill programmatic blur events', () => {
     })
   }
   )
-
-  describe('when cy.state(\'actAsIfWindowHasFocus\') = false', () => {
-    beforeEach(() => {
-      cy.state('actAsIfWindowHasFocus', false)
-    })
-
-    it('sends delayed blur when programmatically invoked during action commands', () => {
-      cy
-      .visit('http://localhost:3500/fixtures/active-elements.html')
-      .then(() => {
-        const events = []
-
-        expect(cy.getFocused()).to.be.null
-
-        // programmatically focus the first input element
-        const $one = cy.$$('#one')
-        const $two = cy.$$('#two')
-
-        ;['focus', 'blur'].forEach((evt) => {
-          $one.on(evt, (e) => {
-            events.push(e.originalEvent)
-          })
-
-          $two.on(evt, (e) => {
-            events.push(e.originalEvent)
-          })
-        })
-
-        // when we mousedown on the input
-        // prevent default so that we can test
-        // that the force focus event is set ahead
-        // of time
-        $two.on('mousedown', (e) => {
-          e.preventDefault()
-        })
-
-        $one.get(0).focus()
-        setActiveElement($one.get(0))
-
-        expect(cy.state('needsForceFocus')).to.eq($one.get(0))
-        expect(events).to.be.empty
-
-        expect(cy.getFocused().get(0)).to.eq($one.get(0))
-
-        cy
-        .get('#one').click()
-        .then(() => {
-          expect(cy.state('needsForceFocus')).to.be.null
-
-          // we polyfill the focus event manually
-          expect(events).to.have.length(1)
-
-          expect(events[0].isTrusted).to.be.false
-        })
-      })
-    }
-    )
-
-    it('sends delayed focus when programmatically invoked during action commands', () => {
-      cy
-      .visit('http://localhost:3500/fixtures/active-elements.html')
-      .then(() => {
-        const events = []
-
-        expect(cy.getFocused()).to.be.null
-
-        // programmatically focus the first input element
-        const $input = cy.$$('input:first')
-
-        $input.on('focus', (e) => {
-          events.push(e.originalEvent)
-        })
-
-        // when we mousedown on the input
-        // prevent default so that we can test
-        // that the force focus event is set ahead
-        // of time
-        $input.on('mousedown', (e) => {
-          e.preventDefault()
-        })
-
-        $input.get(0).focus()
-        setActiveElement($input.get(0))
-
-        expect(cy.state('needsForceFocus')).to.eq($input.get(0))
-        expect(events).to.be.empty
-
-        expect(cy.getFocused().get(0)).to.eq($input.get(0))
-
-        cy
-        .get('input:first').click().then(() => {
-          expect(cy.state('needsForceFocus')).to.be.null
-
-          // we polyfill the focus event manually
-          expect(events).to.have.length(1)
-
-          expect(events[0].isTrusted).to.be.false
-        })
-      })
-    }
-    )
-  })
 })
 
 // https://github.com/cypress-io/cypress/issues/3001
