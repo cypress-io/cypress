@@ -1886,6 +1886,10 @@ describe "src/cy/commands/xhr", ->
 
         cy.wrap(null).should ->
           expect(log.get("state")).to.eq("failed")
+          expect(log.invoke("renderProps")).to.deep.eq({
+            message: "GET (aborted) /timeout?ms=999",
+            indicator: 'aborted',
+          })
           expect(xhr.aborted).to.be.true
 
     ## https://github.com/cypress-io/cypress/issues/3008
