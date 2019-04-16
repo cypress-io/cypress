@@ -23,6 +23,12 @@
       display: inline-block;
       font-size: 11px;
 
+      // TODO: plz fix this it looks
+      // weird with it on there...
+      // &:focus {
+      //   outline: 1px dotted;
+      // }
+
       &:hover {
         border-bottom: 1px dotted #959595;
         color: #333;

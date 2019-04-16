@@ -153,6 +153,14 @@
       }
     }
 
+    &.suite > div > .runnable-wrapper:focus {
+      outline: 0;
+
+      .runnable-title {
+        outline: 1px dotted;
+      }
+    }
+
     &.runnable-passed > .runnable-wrapper {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
@@ -184,6 +192,10 @@
 
   .runnable-title {
     font-size: 12.5px;
+
+    &:focus {
+      outline: 1px dotted;
+    }
   }
 
   .runnable-content-region {
