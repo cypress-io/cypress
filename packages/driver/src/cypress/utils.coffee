@@ -150,6 +150,10 @@ module.exports = {
     err = new Error(err)
     err.name = "CypressError"
     err
+  
+  parseErr: (errString) ->
+    JSON.parse(errString.slice("Uncaught Error: ".length))
+    
 
   errMessageByPath: (errPath, args) ->
     if not errMessage = @getObjValueByPath($errorMessages, errPath)

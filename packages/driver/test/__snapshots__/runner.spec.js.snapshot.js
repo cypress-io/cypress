@@ -14,7 +14,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -25,7 +25,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -37,7 +37,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -50,7 +50,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -73,7 +73,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -96,7 +96,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -120,7 +120,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -132,7 +132,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -145,7 +145,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -216,7 +216,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -250,7 +250,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -261,7 +261,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -272,7 +272,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -292,7 +292,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -300,7 +300,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 0,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -308,7 +308,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             },
             {
               "id": "r4",
@@ -316,7 +316,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             }
           ],
           "suites": []
@@ -343,7 +343,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -354,7 +354,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -366,7 +366,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -379,7 +379,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -450,7 +450,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -484,7 +484,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -495,7 +495,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -506,7 +506,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -526,7 +526,7 @@ exports['FAIL_IN_AFTEREACH.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -534,7 +534,7 @@ exports['FAIL_IN_AFTEREACH.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 0,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -542,7 +542,7 @@ exports['FAIL_IN_AFTEREACH.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             }
           ],
           "suites": []
@@ -569,7 +569,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -580,7 +580,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -607,7 +607,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -660,7 +660,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -690,7 +690,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -701,7 +701,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -712,7 +712,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -732,7 +732,7 @@ exports['FAIL_IN_BEFORE.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -740,7 +740,7 @@ exports['FAIL_IN_BEFORE.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 0,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -748,7 +748,7 @@ exports['FAIL_IN_BEFORE.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             }
           ],
           "suites": []
@@ -775,7 +775,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -786,7 +786,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -798,7 +798,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -825,7 +825,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -878,7 +878,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -908,7 +908,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -919,7 +919,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -930,7 +930,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -950,7 +950,7 @@ exports['FAIL_IN_BEFOREEACH.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -958,7 +958,7 @@ exports['FAIL_IN_BEFOREEACH.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 0,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -966,7 +966,7 @@ exports['FAIL_IN_BEFOREEACH.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             }
           ],
           "suites": []
@@ -993,7 +993,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1004,7 +1004,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1031,7 +1031,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1094,7 +1094,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
         ]
       },
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1174,7 +1174,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
         ]
       },
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     },
     {
       "message": "[error message]",
@@ -1291,7 +1291,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1344,7 +1344,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1355,7 +1355,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1366,7 +1366,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1386,7 +1386,7 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -1394,7 +1394,7 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 0,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -1402,7 +1402,7 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             }
           ],
           "suites": []
@@ -1429,7 +1429,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1440,7 +1440,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1467,7 +1467,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1530,7 +1530,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
         ]
       },
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1668,7 +1668,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1719,7 +1719,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1771,7 +1771,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1782,7 +1782,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1793,7 +1793,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -1813,7 +1813,7 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -1821,7 +1821,7 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 0,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -1829,7 +1829,7 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             }
           ],
           "suites": []
@@ -1856,7 +1856,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -1867,7 +1867,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -2135,7 +2135,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       },
       "final": false,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 2
     }
   ],
   [
@@ -3051,7 +3051,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -3062,7 +3062,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "suite 2",
       "root": false,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -3188,7 +3188,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       },
       "final": false,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 2
     }
   ],
   [
@@ -3304,7 +3304,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       },
       "final": false,
       "_currentRetry": 1,
-      "_retries": -1
+      "_retries": 2
     }
   ],
   [
@@ -3498,7 +3498,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "suite 2",
       "root": false,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -3509,7 +3509,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "suite 3",
       "root": false,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -3668,7 +3668,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "suite 3",
       "root": false,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -3679,7 +3679,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -3699,7 +3699,7 @@ exports['RETRY_PASS_IN_AFTEREACH.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 2,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -3707,7 +3707,7 @@ exports['RETRY_PASS_IN_AFTEREACH.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 2,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -3741,7 +3741,7 @@ exports['RETRY_PASS_IN_AFTEREACH.setRunnables'] = [
           "title": "suite 2",
           "root": false,
           "type": "suite",
-          "_retries": 2,
+          "_retries": -1,
           "tests": [
             {
               "id": "r7",
@@ -3759,7 +3759,7 @@ exports['RETRY_PASS_IN_AFTEREACH.setRunnables'] = [
           "title": "suite 3",
           "root": false,
           "type": "suite",
-          "_retries": 2,
+          "_retries": -1,
           "tests": [
             {
               "id": "r9",
@@ -3794,7 +3794,7 @@ exports['RETRY_PASS_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 1
+      "_retries": -1
     }
   ],
   [
@@ -3805,7 +3805,7 @@ exports['RETRY_PASS_IN_BEFOREEACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 1
+      "_retries": -1
     }
   ],
   [
@@ -4380,7 +4380,7 @@ exports['RETRY_PASS_IN_BEFOREEACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 1
+      "_retries": -1
     }
   ],
   [
@@ -4391,7 +4391,7 @@ exports['RETRY_PASS_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 1
+      "_retries": -1
     }
   ],
   [
@@ -4411,7 +4411,7 @@ exports['RETRY_PASS_IN_BEFOREEACH.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 1,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -4419,7 +4419,7 @@ exports['RETRY_PASS_IN_BEFOREEACH.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 1,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -4454,7 +4454,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4465,7 +4465,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4477,7 +4477,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4490,7 +4490,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4513,7 +4513,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4536,7 +4536,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4560,7 +4560,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4571,7 +4571,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4582,7 +4582,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4602,7 +4602,7 @@ exports['SIMPLE_SINGLE_TEST.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -4610,7 +4610,7 @@ exports['SIMPLE_SINGLE_TEST.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 0,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -4618,7 +4618,7 @@ exports['SIMPLE_SINGLE_TEST.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             }
           ],
           "suites": []
@@ -4645,7 +4645,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4656,7 +4656,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4683,7 +4683,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4739,7 +4739,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
         ]
       },
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4841,7 +4841,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4885,7 +4885,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4930,7 +4930,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4942,7 +4942,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -4970,7 +4970,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5052,7 +5052,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5089,7 +5089,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5127,7 +5127,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5139,7 +5139,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5167,7 +5167,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5285,7 +5285,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5329,7 +5329,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5374,7 +5374,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5385,7 +5385,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5396,7 +5396,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0
+      "_retries": -1
     }
   ],
   [
@@ -5416,7 +5416,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 0,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -5424,7 +5424,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 0,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",
@@ -5432,7 +5432,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             },
             {
               "id": "r4",
@@ -5440,7 +5440,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             },
             {
               "id": "r5",
@@ -5448,7 +5448,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": 0
+              "_retries": -1
             }
           ],
           "suites": []
@@ -5475,7 +5475,7 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -5486,7 +5486,7 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -6439,7 +6439,7 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -6450,7 +6450,7 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 2
+      "_retries": -1
     }
   ],
   [
@@ -6470,7 +6470,7 @@ exports['THREE_TESTS_WITH_RETRY.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "_retries": 2,
+      "_retries": -1,
       "tests": [],
       "suites": [
         {
@@ -6478,7 +6478,7 @@ exports['THREE_TESTS_WITH_RETRY.setRunnables'] = [
           "title": "suite 1",
           "root": false,
           "type": "suite",
-          "_retries": 2,
+          "_retries": -1,
           "tests": [
             {
               "id": "r3",

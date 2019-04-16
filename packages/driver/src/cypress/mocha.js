@@ -7,6 +7,8 @@ const mocha = require('mocha')
 /** @type {typeof mocha} */
 const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha
 const { Test } = Mocha
+const { Hook } = Mocha
+const { Suite } = Mocha
 const { Runner } = Mocha
 const { Runnable } = Mocha
 
@@ -14,9 +16,13 @@ const SUITE_RUNNABLE_PROPS = ['_beforeAll', '_beforeEach', '_afterEach', '_after
 
 const testClone = Test.prototype.clone
 const runnerRun = Runner.prototype.run
+const suiteAddTest = Suite.prototype.addTest
 const runnableRun = Runnable.prototype.run
 const runnableClearTimeout = Runnable.prototype.clearTimeout
 const runnableResetTimeout = Runnable.prototype.resetTimeout
+const testRetries = Test.prototype.retries
+const suiteRetries = Suite.prototype.retries
+const hookRetries = Hook.prototype.retries
 
 //# don't let mocha polute the global namespace
 delete window.mocha
@@ -129,6 +135,43 @@ const overrideRunnerFail = (runner) => {
   }
 }
 
+const restoreSuiteRetries = () => {
+  Suite.prototype.retries = suiteRetries
+}
+
+const patchSuiteRetries = () => {
+  Suite.prototype.retries = function (...args) {
+
+    if (args[0] != null && args[0] > -1) {
+
+      const err = $utils.cypressErr($utils.errMessageByPath('mocha.manually_set_retries_suite', {}))
+
+      throw new Error(JSON.stringify({ name: err.name, message: err.message }))
+    }
+
+    return suiteRetries.apply(this, args)
+  }
+
+}
+const restoreHookRetries = () => {
+  Hook.prototype.retries = hookRetries
+}
+
+const patchHookRetries = () => {
+  Hook.prototype.retries = function (...args) {
+
+    if (args[0] != null && args[0] > -1) {
+
+      const err = new Error($utils.errMessageByPath('mocha.manually_set_retries_test', {}))
+
+      throw err
+    }
+
+    return hookRetries.apply(this, args)
+  }
+
+}
+
 const overrideRunnableRun = (runnable, onRunnableRun) => {
   runnable.run = function (...args) {
 
@@ -153,6 +196,7 @@ const overrideRunnableRun = (runnable, onRunnableRun) => {
 
     return ret
   }
+
 }
 
 const overrideRunnerRunSuite = (runner, onRunnableRun) => {
@@ -250,12 +294,16 @@ const patchRunnableResetTimeout = () => {
 
 const restore = function () {
   restoreRunnableClearTimeout()
+  restoreSuiteRetries()
+  restoreHookRetries()
 
   return restoreRunnableResetTimeout()
 }
 
 const patch = function () {
   patchRunnableClearTimeout()
+  patchSuiteRetries()
+  patchHookRetries()
 
   return patchRunnableResetTimeout()
 }
@@ -280,6 +328,43 @@ const create = function (specWindow, reporter) {
 
     onRunnableRun (onRunnableRun) {
       return overrideRunnerRunSuite(_runner, onRunnableRun)
+    },
+
+    onCypress (Cypress) {
+
+      Mocha.Suite.prototype.addTest = function (...args) {
+
+        const test = args[0]
+
+        const ret = suiteAddTest.apply(this, args)
+
+        if (Cypress.config('isTextTerminal') || Cypress.config('enableTestRetriesInOpenMode')) {
+          let retries = Cypress.config('numTestRetries')
+
+          if (retries == null) {
+            retries = -1
+          }
+
+          test._retries = retries
+
+        }
+
+        test.retries = function (...args) {
+
+          if (args[0] !== undefined && args[0] > -1) {
+
+            const err = new Error($utils.cypressErr($utils.errMessageByPath('mocha.manually_set_retries_test', {})))
+
+            throw err
+          }
+
+          return testRetries.apply(this, args)
+
+        }
+
+        return ret
+      }
+
     },
 
     createRootTest (title, fn) {

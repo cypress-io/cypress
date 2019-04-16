@@ -115,11 +115,17 @@ const createTests = (win, tests = []) => {
 
 const createSuites = (win, suites = {}) => {
   _.each(suites, (obj, suiteName) => {
-    win.describe(suiteName, () => {
+    let fn = () => {
       createHooks(win, obj.hooks)
       createTests(win, obj.tests)
       createSuites(win, obj.suites)
-    })
+    }
+
+    if (_.isFunction(obj)) {
+      fn = evalFn(win, obj)
+    }
+
+    win.describe(suiteName, fn)
   })
 }
 
@@ -137,4 +143,8 @@ module.exports = {
   getFirstSubjectByName,
 
   generateMochaTestsForWin,
+}
+
+const evalFn = (win, fn) => function () {
+  return win.eval(`(${fn.toString()})`).call(this)
 }

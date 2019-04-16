@@ -358,7 +358,7 @@ describe('src/cypress/runner', () => {
                 },
               } },
           },
-        }, { config: { retries: 1 } })
+        }, { config: { numTestRetries: 1 } })
         .then(shouldHaveTestResults(3, 0))
       })
 
@@ -563,9 +563,9 @@ describe('src/cypress/runner', () => {
       describe('retries', () => {
 
         it('can set retry config', () => {
-          createCypress({}, { config: { retries: 1 } })
+          createCypress({}, { config: { numTestRetries: 1 } })
           .then(() => {
-            expect(autCypress.config()).to.has.property('retries', 1)
+            expect(autCypress.config()).to.has.property('numTestRetries', 1)
           })
         })
 
@@ -581,7 +581,7 @@ describe('src/cypress/runner', () => {
                   ],
                 },
               },
-            }, { config: { retries: 1, isTextTerminal: false } })
+            }, { config: { numTestRetries: 1, isTextTerminal: false, enableTestRetriesInOpenMode: true } })
             .then(shouldHaveTestResults(2, 1))
           })
 
@@ -616,7 +616,7 @@ describe('src/cypress/runner', () => {
                 tests: [{ name: 'test 1', fail: 1 }],
               },
             },
-          }, { config: { retries: 1 } })
+          }, { config: { numTestRetries: 1 } })
           .then(shouldHaveTestResults(1, 0))
           .then(() => {
 
@@ -638,7 +638,7 @@ describe('src/cypress/runner', () => {
                 ],
               },
             },
-          }, { config: { retries: 1 } })
+          }, { config: { numTestRetries: 1 } })
           .then(shouldHaveTestResults(1, 0))
         })
 
@@ -660,7 +660,7 @@ describe('src/cypress/runner', () => {
                 ],
               },
             },
-          }, { config: { retries: 1 } })
+          }, { config: { numTestRetries: 1 } })
           .then(shouldHaveTestResults(3, 0))
 
         })
@@ -680,7 +680,7 @@ describe('src/cypress/runner', () => {
                 tests: [{ name: 'test 1' }],
               },
             },
-          }, { config: { retries: 1 } })
+          }, { config: { numTestRetries: 1 } })
           .then(shouldHaveTestResults(1, 0))
           .then(() => {
             cy.contains('Attempt 1').click()
@@ -715,7 +715,7 @@ describe('src/cypress/runner', () => {
                 tests: ['test 1'],
               },
             },
-          }, { config: { retries: 2 } })
+          }, { config: { numTestRetries: 2 } })
           .then(shouldHaveTestResults(5, 0))
           .then(() => {
             cy.contains('test 1').click()
@@ -745,7 +745,7 @@ describe('src/cypress/runner', () => {
                 tests: [{ name: 'test 1' }],
               },
             },
-          }, { config: { retries: 1, isTextTerminal: false } })
+          }, { config: { numTestRetries: 1, isTextTerminal: false, enableTestRetriesInOpenMode: true } })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             // cy.contains('Attempt 1').click()
@@ -771,12 +771,92 @@ describe('src/cypress/runner', () => {
                 tests: [{ name: 'test 1' }],
               },
             },
-          }, { config: { retries: 1, isTextTerminal: false } })
+          }, { config: { numTestRetries: 1, isTextTerminal: false, enableTestRetriesInOpenMode: true } })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             cy.contains('Although you have test retries')
             cy.contains('AssertionError').click()
             cy.get('@console_log').its('lastCall').should('be.calledWithMatch', 'Error')
+          })
+        })
+
+        describe('can configure retries', () => {
+          const getAttemptTag = (sel) => {
+            return cy.get(`.runnable-wrapper:contains${sel} .attempt-tag`)
+          }
+
+          it('via config value', () => {
+            createCypress({
+              suites: {
+                'suite 1': () => {
+                  Cypress.config('numTestRetries', 0)
+                  it('no retry', () => assert(false))
+                  Cypress.config('numTestRetries', 1)
+                  it('1 retry', () => assert(false))
+                  Cypress.config('numTestRetries', 2)
+                  it('2 retries', () => assert(false))
+                  Cypress.config('isTextTerminal', false)
+                  it('open mode, no retry', () => assert(false))
+                  Cypress.config('enableTestRetriesInOpenMode', true)
+                  it('open mode, 2 retries', () => assert(false))
+                },
+              },
+            })
+            .then(shouldHaveTestResults(0, 5))
+            .then(() => {
+              getAttemptTag('(no retry):first').should('not.be.visible')
+              getAttemptTag('(1 retry)').should('have.length', 2)
+              getAttemptTag('(2 retries):first').should('have.length', 3)
+              getAttemptTag('(open mode, no retry)').should('not.be.visible')
+              getAttemptTag('(open mode, 2 retries)').should('have.length', 3)
+            })
+
+          })
+          it('throws when set via this.retries in test', () => {
+            createCypress({
+              suites: {
+                'suite 1' () {
+                  it('test 1', function () {
+                    this.retries(0)
+                  })
+                },
+              },
+            })
+            .then(shouldHaveTestResults(0, 1))
+            .then(() => {
+              cy.get('.test-error').should('contain', 'numTestRetries')
+            })
+          })
+          it('throws when set via this.retries in hook', () => {
+            createCypress({
+              suites: {
+                'suite 1' () {
+                  beforeEach(function () {
+                    this.retries(0)
+                  })
+                  it('foo', () => {})
+                },
+              },
+            })
+            .then(shouldHaveTestResults(0, 1))
+            .then(() => {
+              cy.get('.test-error').should('contain', 'numTestRetries')
+            })
+          })
+          it('throws when set via this.retries in suite', () => {
+            createCypress({
+              suites: {
+                'suite 1' () {
+                  this.retries(0)
+                  it('test 1', function () {
+                  })
+                },
+              },
+            })
+            .then(shouldHaveTestResults(0, 1))
+            .then(() => {
+              cy.get('.test-error').should('contain', 'numTestRetries')
+            })
           })
         })
 
@@ -825,7 +905,7 @@ describe('src/cypress/runner', () => {
                   ],
                 },
               },
-            }, { config: { retries: 1 } },
+            }, { config: { numTestRetries: 1 } },
           ]
 
           it('serialize state', () => {
@@ -897,7 +977,7 @@ describe('src/cypress/runner', () => {
                   ],
                 },
               },
-            }, { config: { retries: 1 } },
+            }, { config: { numTestRetries: 1 } },
           ]
 
           it('serialize state', () => {
@@ -1020,30 +1100,26 @@ describe('src/cypress/runner', () => {
         })
 
       })
+
     })
     describe('mocha events', () => {
 
       it('simple single test', () => {
 
-        createCypress(simpleSingleTest, { config: {
-          isTextTerminal: true,
-        } })
+        createCypress(simpleSingleTest)
         .then(() => {
           snapshotEvents(snapshots.SIMPLE_SINGLE_TEST)
         })
       })
       it('simple three tests', () => {
-        createCypress(threeTestsWithHooks, { config: {
-          isTextTerminal: true,
-        } })
+        createCypress(threeTestsWithHooks)
         .then(() => {
           snapshotEvents(snapshots.THREE_TESTS_WITH_HOOKS)
         })
       })
       it('three tests with retry', () => {
         createCypress(threeTestsWithRetry, { config: {
-          isTextTerminal: true,
-          retries: 2,
+          numTestRetries: 2,
         } })
         .then(() => {
           snapshotEvents(snapshots.THREE_TESTS_WITH_RETRY)

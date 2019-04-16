@@ -81,7 +81,8 @@ defaults = {
   defaultCommandTimeout:         4000
   requestTimeout:                5000
   responseTimeout:               30000
-  retries:                       0
+  numTestRetries:                0
+  enableTestRetriesInOpenMode:   false
   pageLoadTimeout:               60000
   execTimeout:                   60000
   taskTimeout:                   60000
@@ -131,7 +132,8 @@ validationRules = {
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
-  retries: v.isNumber
+  numTestRetries: v.isNumber
+  enableTestRetriesInOpenMode: v.isBoolean
   testFiles: v.isString
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber

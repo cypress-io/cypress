@@ -91,10 +91,6 @@ const testBeforeRunAsync = (test, Cypress) => {
   })
 }
 
-const getDefaultRetries = (Cypress) => {
-  return Cypress.config('retries')
-}
-
 const runnableAfterRunAsync = (runnable, Cypress) => {
   return Promise.try(() => {
 
@@ -912,6 +908,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   _runner.suite = mocha.getRootSuite()
 
+  mocha.onCypress(Cypress)
+
   mocha.onRunnableRun(function (run, runnable, args) {
 
     if (!runnable.id) {
@@ -1123,32 +1121,47 @@ const create = function (specWindow, mocha, Cypress, cy) {
   })
 
   specWindow.onerror = function (...args) {
-    let err = cy.onSpecWindowUncaughtException(...args)
+    // if is cypressError, don't throw uncaught error
+    let parsedErr
 
-    //# err will not be returned if cy can associate this
-    //# uncaught exception to an existing runnable
-    if (!err) {
-      return true
+    try {
+      parsedErr = $utils.parseErr(args[0])
+    } catch (e) {
+      null
     }
 
-    const todoMsg = function () {
-      if (!Cypress.config('isTextTerminal')) {
-        return 'Check your console for the stack trace or click this message to see where it originated from.'
+    let err
+
+    if (parsedErr && parsedErr.name === 'CypressError') {
+      err = new Error(parsedErr.message)
+    } else {
+      err = cy.onSpecWindowUncaughtException(...args)
+
+      //# err will not be returned if cy can associate this
+      //# uncaught exception to an existing runnable
+      if (!err) {
+        return true
       }
-    }
 
-    const append = () => {
-      return _.chain([
-        'Cypress could not associate this error to any specific test.',
-        'We dynamically generated a new test to display this failure.',
-        todoMsg(),
-      ])
-      .compact()
-      .join('\n\n')
-    }
+      const todoMsg = function () {
+        if (!Cypress.config('isTextTerminal')) {
+          return 'Check your console for the stack trace or click this message to see where it originated from.'
+        }
+      }
 
-    //# else  do the same thing as mocha here
-    err = $utils.appendErrMsg(err, append())
+      const append = () => {
+        return _.chain([
+          'Cypress could not associate this error to any specific test.',
+          'We dynamically generated a new test to display this failure.',
+          todoMsg(),
+        ])
+        .compact()
+        .join('\n\n')
+      }
+
+      //# else  do the same thing as mocha here
+      err = $utils.appendErrMsg(err, append())
+    }
 
     const throwErr = function () {
       throw err
@@ -1202,10 +1215,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   const onRunnable = (r) => {
     // set defualt retries at onRunnable time instead of onRunnableRun
-    if (r._retries === -1) {
-      r._retries = getDefaultRetries(Cypress)
-    }
-
     return _runnables.push(r)
   }
 
@@ -1302,8 +1311,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
         setHookFailureProps(test, runnable, err)
 
         const newTest = test.clone()
-
-        test._retries = -1
 
         newTest._currentRetry = test._currentRetry + 1
 

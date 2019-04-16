@@ -543,6 +543,24 @@ module.exports = {
     async_timed_out: "Timed out after '{{ms}}ms'. The done() callback was never invoked!"
     invalid_interface: "Invalid mocha interface '{{name}}'"
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
+    manually_set_retries_test: """Cannot set number of test retries at test run-time.
+    use
+    > Cypress.config('numTestRetries', n)
+    instead.
+
+
+    https://on.cypress.io/test-retries
+
+    """
+    manually_set_retries_suite: """Cannot set number of test retries directly on the mocha Suite.
+    use
+    > Cypress.config('numTestRetries', n)
+    instead.
+
+
+    https://on.cypress.io/test-retries
+
+    """
 
   navigation:
     cross_origin: """

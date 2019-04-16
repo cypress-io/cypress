@@ -146,6 +146,7 @@ defaults = (state, config, obj) ->
     return r.ctx.currentTest || r
 
   getTestAttemptFromRunnable = (runnable) =>
+    return if not runnable
     t = getTestFromRunnable(runnable)
     t._currentRetry || 0
 
