@@ -14,16 +14,6 @@ module.exports = {
     api.getAuthUrls()
     .get('dashboardAuthUrl')
 
-  logInFromCode: (code, redirectUri) ->
-    debug("requesting token from code %s and redirect_uri %s", code, redirectUri)
-    api.getTokenFromCode(code, redirectUri)
-    .then (res) =>
-      debug("received token %o for code", res)
-      @syncProfile(res.access_token, res.refresh_token)
-    .catch (err) =>
-      debug("error logging in from code: ", err.message)
-      throw err
-
   logOut: ->
     @get().then (user) ->
       authToken = user and user.authToken

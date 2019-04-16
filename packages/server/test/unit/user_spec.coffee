@@ -13,17 +13,6 @@ describe "lib/user", ->
       user.get().then (user) ->
         expect(user).to.deep.eq({name: "brian"})
 
-  context ".logInFromCode", ->
-    it "calls api.getTokenFromCode and then calls syncProfile with the tokens", ->
-      obj = {access_token: "abc-123", refresh_token: "def-456"}
-
-      sinon.stub(api, "getTokenFromCode").withArgs("abc-123", "http://foo.invalid").resolves(obj)
-      sinon.stub(user, "syncProfile").resolves()
-
-      user.logInFromCode("abc-123", "http://foo.invalid").then (ret) ->
-        expect(api.getTokenFromCode).to.be.calledOnce
-        expect(user.syncProfile).to.be.calledWith("abc-123", "def-456")
-
   context ".logOut", ->
     it "calls api.createSignout + removes the session from cache", ->
       sinon.stub(api, "createSignout").withArgs("abc-123").resolves()
