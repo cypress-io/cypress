@@ -10,6 +10,7 @@ addLog = (runner, log) ->
     renderProps: {}
     state: "passed"
     testId: "r3"
+    testCurrentRetry: 0
     type: "parent"
     url: "http://example.com"
   }

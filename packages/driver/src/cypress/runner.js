@@ -162,7 +162,7 @@ const reduceProps = (obj, props) => {
 
     return memo
   }
-    , {})
+  , {})
 }
 
 //# we need to optimize wrap by converting
@@ -331,7 +331,7 @@ const isLastSuite = function (suite, tests) {
 
     return memo
   }
-    , [])
+  , [])
 
   //# intersect them with our parent suites and see if the last one is us
   return _
@@ -627,7 +627,7 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
 
       return memo
     }
-      , [])
+    , [])
 
     //# and go through the suites
     obj.suites = _.reduce(runnable.suites != null ? runnable.suites : [], (memo, suite) => {
@@ -654,7 +654,7 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
 
       return memo
     }
-      , [])
+    , [])
   }
 
   return obj

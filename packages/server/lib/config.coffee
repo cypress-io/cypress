@@ -40,15 +40,15 @@ configKeys = toWords """
   numTestsKeptInMemory            supportFile
   port                            supportFolder
   reporter                        videosFolder
-  reporterOptions                 retries
+  reporterOptions
   testFiles                       defaultCommandTimeout
   trashAssetsBeforeRuns           execTimeout
   blacklistHosts                  pageLoadTimeout
   userAgent                       requestTimeout
   viewportWidth                   responseTimeout
   viewportHeight                  taskTimeout
-  video
-  videoCompression
+  video                           numTestRetries
+  videoCompression                enableTestRetriesInOpenMode
   videoUploadOnPasses
   watchForFileChanges
   waitForAnimations

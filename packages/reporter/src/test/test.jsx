@@ -32,7 +32,7 @@ class Test extends Component {
           <span
             aria-expanded={model.isOpen}
             className='runnable-title'
-            onKeyPress={onEnterOrSpace(this._toggleOpen)}
+            onKeyPress={onEnterOrSpace(model.toggleOpen)}
             role='button'
             tabIndex='0'
           >
