@@ -122,7 +122,12 @@ module.exports = {
               shell.openExternal("https://on.cypress.io")
           }
           {
-            label: "Report an Issue.."
+            label: "Chromium Downloads"
+            click: ->
+              shell.openExternal("https://on.cypress.io/chromium-downloads")
+          }
+          {
+            label: "Report an Issue"
             click: ->
               shell.openExternal("https://on.cypress.io/new-issue")
           }
