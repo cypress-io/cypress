@@ -761,7 +761,7 @@ describe "lib/config", ->
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" }
             numTestRetries:             { value: 0, from: "default"}
-            enableTestRetriesInOpenMode:{ value: 0, from: "default"}
+            enableTestRetriesInOpenMode:{ value: false, from: "default"}
           })
 
       it "sets config, envFile and env", ->
@@ -821,8 +821,8 @@ describe "lib/config", ->
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" }
-            enableTestRetriesInOpenMode:{ value: false, from: "default" }
             numTestRetries:             { value: 0, from: "default" }
+            enableTestRetriesInOpenMode:{ value: false, from: "default" }
             env: {
               foo: {
                 value: "foo"

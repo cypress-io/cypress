@@ -37,7 +37,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -50,7 +50,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -73,7 +73,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -96,7 +96,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -120,7 +120,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -132,7 +132,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -145,7 +145,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -216,7 +216,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -250,7 +250,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -308,7 +308,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             },
             {
               "id": "r4",
@@ -316,7 +316,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             }
           ],
           "suites": []
@@ -366,7 +366,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -379,7 +379,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -450,7 +450,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -484,7 +484,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -542,7 +542,7 @@ exports['FAIL_IN_AFTEREACH.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             }
           ],
           "suites": []
@@ -607,7 +607,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -660,7 +660,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -690,7 +690,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -748,7 +748,7 @@ exports['FAIL_IN_BEFORE.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             }
           ],
           "suites": []
@@ -798,7 +798,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -825,7 +825,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -878,7 +878,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -908,7 +908,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -966,7 +966,7 @@ exports['FAIL_IN_BEFOREEACH.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             }
           ],
           "suites": []
@@ -1031,7 +1031,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1094,7 +1094,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
         ]
       },
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1174,7 +1174,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
         ]
       },
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     },
     {
       "message": "[error message]",
@@ -1291,7 +1291,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1344,7 +1344,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1402,7 +1402,7 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             }
           ],
           "suites": []
@@ -1467,7 +1467,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1530,7 +1530,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
         ]
       },
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1668,7 +1668,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1719,7 +1719,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1771,7 +1771,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -1829,7 +1829,7 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             }
           ],
           "suites": []
@@ -4477,7 +4477,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4490,7 +4490,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4513,7 +4513,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4536,7 +4536,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4560,7 +4560,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4618,7 +4618,7 @@ exports['SIMPLE_SINGLE_TEST.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             }
           ],
           "suites": []
@@ -4683,7 +4683,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4739,7 +4739,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
         ]
       },
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4841,7 +4841,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4885,7 +4885,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4930,7 +4930,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4942,7 +4942,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -4970,7 +4970,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5052,7 +5052,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5089,7 +5089,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5127,7 +5127,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5139,7 +5139,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "test",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5167,7 +5167,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5285,7 +5285,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5329,7 +5329,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5374,7 +5374,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       },
       "final": true,
       "_currentRetry": 0,
-      "_retries": -1
+      "_retries": 0
     }
   ],
   [
@@ -5432,7 +5432,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             },
             {
               "id": "r4",
@@ -5440,7 +5440,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             },
             {
               "id": "r5",
@@ -5448,7 +5448,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "_currentRetry": 0,
-              "_retries": -1
+              "_retries": 0
             }
           ],
           "suites": []
