@@ -72,16 +72,25 @@ const _launchServer = (baseLoginUrl) => {
     app = express()
 
     app.get('/auth', (req, res) => {
-      debug('Received POST to /auth with body %o', req.body)
+      debug('Received GET to /auth with query params %o', req.query)
 
       const redirectToStatus = (status) => {
         res.redirect(`${baseLoginUrl}?status=${status}`)
       }
 
-      if (req.query.code && req.query.state === authState) {
-        return user.logInFromCode(req.query.code, origin)
-        .then((user) => {
-          authCallback(undefined, user)
+      const { state, name, email, access_token, refresh_token } = req.query
+
+      if (state === authState && access_token && refresh_token) {
+        const userObj = {
+          name,
+          email,
+          authToken: access_token,
+          refreshToken: refresh_token,
+        }
+
+        return user.set(userObj)
+        .then(() => {
+          authCallback(undefined, userObj)
           redirectToStatus('success')
         })
         .catch((err) => {

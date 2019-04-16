@@ -23,7 +23,6 @@ describe "lib/api", ->
     .reply(200, {
       "dashboardAuthUrl": "http://localhost:3000/test-runner.html"
       "refreshEndpointUrl": "http://localhost:1234/auth/refresh"
-      "tokenEndpointUrl": "http://localhost:1234/auth/token"
     })
 
     nock(API_BASEURL)
@@ -685,7 +684,6 @@ describe "lib/api", ->
       api.getAuthUrls().then (urls) ->
         expect(urls.dashboardAuthUrl).to.eq("http://localhost:3000/test-runner.html")
         expect(urls.refreshEndpointUrl).to.eq("http://localhost:1234/auth/refresh")
-        expect(urls.tokenEndpointUrl).to.eq("http://localhost:1234/auth/token")
 
     it "tags errors", ->
       nock.cleanAll()
@@ -710,7 +708,6 @@ describe "lib/api", ->
       .then (urls) ->
         expect(urls.dashboardAuthUrl).to.eq("http://localhost:3000/test-runner.html")
         expect(urls.refreshEndpointUrl).to.eq("http://localhost:1234/auth/refresh")
-        expect(urls.tokenEndpointUrl).to.eq("http://localhost:1234/auth/token")
 
   context ".createSignout", ->
     it "POSTs /signout", ->

@@ -192,20 +192,6 @@ module.exports = {
       }
     })
 
-  getTokenFromCode: (code, redirectUri) ->
-    getAuthUrls()
-    .get('tokenEndpointUrl')
-    .then (tokenEndpointUrl) ->
-      rp.post({
-        url: tokenEndpointUrl
-        json: true
-        body: {
-          code
-          redirect_uri: redirectUri
-        }
-      })
-    .catch(tagError)
-
   getTokenFromRefresh
 
   getAuthUrls
