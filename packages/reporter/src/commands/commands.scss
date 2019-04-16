@@ -22,17 +22,20 @@
       color: #959595;
       display: inline-block;
       font-size: 11px;
-
-      // TODO: plz fix this it looks
-      // weird with it on there...
-      // &:focus {
-      //   outline: 1px dotted;
-      // }
+      cursor: pointer;
+      
+      &:focus {
+        outline: 1px dotted #6c6c6c;
+      }
 
       &:hover {
         border-bottom: 1px dotted #959595;
         color: #333;
-        cursor: pointer;
+      }
+
+      &:hover:focus {
+        border-bottom: 1px dotted #959595;
+        color: #333;
       }
 
       .hook-failed-message {

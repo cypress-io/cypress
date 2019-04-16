@@ -24,7 +24,7 @@
     overflow: auto;
     line-height: 18px;
     padding-left: 0;
-
+  
     pre {
       background-color: darken($yellow-lightest, 5%);
       border-left: 5px solid $fail;
@@ -60,9 +60,13 @@
       > .runnable-wrapper .runnable-controls i.fa-repeat {
         visibility: visible !important;
       }
-
     }
 
+    &:focus {
+      outline: 1px dotted #6c6c6c;
+      outline-offset: -1px;
+    }
+    
     &.runnable-active {
       .runnable-state {
         @extend .#{$fa-css-prefix}-refresh;
@@ -194,13 +198,18 @@
     font-size: 12.5px;
 
     &:focus {
-      outline: 1px dotted;
+      outline: 1px dotted #6c6c6c;
     }
   }
 
   .runnable-content-region {
     overflow: auto;
     position: relative;
+
+    &:focus {
+      outline: 1px dotted #6c6c6c;
+      outline-offset: 3px;
+    }
   }
 
   .suite > div > .runnable-wrapper,
