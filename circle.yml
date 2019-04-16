@@ -787,7 +787,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - create-test-status
         requires:
           - build
     - build-binary:
@@ -795,7 +794,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - create-test-status
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -803,7 +801,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - create-test-status
         requires:
           - build-npm-package
           - build-binary
