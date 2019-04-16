@@ -38,6 +38,7 @@ hasOnly = false
 
     backup.apply(@, arguments)
 
+originalEnv = process.env
 env = _.clone(process.env)
 
 sinon.usingPromise(Promise)
@@ -78,6 +79,8 @@ before ->
   appData.ensure()
 
 beforeEach ->
+  @originalEnv = originalEnv
+
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
 
