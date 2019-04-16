@@ -457,7 +457,6 @@ create = (options = {}) ->
           ## catch synchronous errors caused
           ## by the onreadystatechange function
           try
-            debugger
             if isAbortedThroughUnload(xhr)
               server.abortXhr(xhr)
 
