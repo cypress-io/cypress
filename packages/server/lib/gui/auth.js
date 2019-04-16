@@ -78,6 +78,11 @@ const _launchServer = (baseLoginUrl) => {
         res.redirect(`${baseLoginUrl}?status=${status}`)
       }
 
+      if (_.get(req.query, 'status') === 'error') {
+        authCallback(new Error('There was an error authenticating to the Cypress dashboard.'))
+        redirectToStatus('error')
+      }
+
       const { state, name, email, access_token, refresh_token } = req.query
 
       if (state === authState && access_token && refresh_token) {
