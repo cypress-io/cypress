@@ -32,6 +32,10 @@ describe('linux browser detection', () => {
       .resolves({
         stdout: 'foo-browser v100.1.2.3'
       })
+    shell.withArgs('"/Applications/My Shiny New Browser.app" --version')
+      .resolves({
+        stdout: 'foo-browser v100.1.2.3'
+      })
     shell.withArgs('foo-bar-browser --version')
       .resolves({
         stdout: 'foo-browser v100.1.2.3'
@@ -130,6 +134,22 @@ describe('linux browser detection', () => {
             version: '9001.1.2.3',
             majorVersion: '9001',
             path: '/foo/bar/browser'
+          })
+        )
+      })
+    })
+
+    it('works with spaces in the path', () => {
+      return detectByPath('/Applications/My Shiny New Browser.app', goalBrowsers)
+      .then(browser => {
+        return expect(browser).to.deep.equal(
+          Object.assign({}, goalBrowsers.find(gb => gb.name === 'foo-browser'), {
+            displayName: 'Custom Foo Browser',
+            info: 'Loaded from /Applications/My Shiny New Browser.app',
+            custom: true,
+            version: '9001.1.2.3',
+            majorVersion: '9001',
+            path: '/Applications/My Shiny New Browser.app'
           })
         )
       })
