@@ -88,7 +88,7 @@
     "react": "15.6.2",
     "repl.history": "0.1.4",
     "run-sequence": "1.2.2",
-    "snap-shot-it": "6.2.9",
+    "snap-shot-it": "6.3.3",
     "ssestream": "1.0.1",
     "stream-to-promise": "1.1.1",
     "supertest": "0.15.0",
