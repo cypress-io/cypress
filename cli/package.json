@@ -98,7 +98,7 @@
     "proxyquire": "2.0.1",
     "shelljs": "0.7.8",
     "sinon": "7.2.2",
-    "snap-shot-it": "6.3.0"
+    "snap-shot-it": "6.3.3"
   },
   "files": [
     "bin",
