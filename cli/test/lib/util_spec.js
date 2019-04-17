@@ -58,7 +58,7 @@ describe('util', () => {
         foo: 'bar',
       }
 
-      snapshot('others_unchanged', normalizeModuleOptions(options))
+      snapshot('others_unchanged 1', normalizeModuleOptions(options))
     })
 
     it('passes string env unchanged', () => {
@@ -66,7 +66,7 @@ describe('util', () => {
         env: 'foo=bar',
       }
 
-      snapshot('env_as_string', normalizeModuleOptions(options))
+      snapshot('env_as_string 1', normalizeModuleOptions(options))
     })
 
     it('converts environment object', () => {
@@ -78,7 +78,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('env_as_object', normalizeModuleOptions(options))
+      snapshot('env_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts config object', () => {
@@ -89,7 +89,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('config_as_object', normalizeModuleOptions(options))
+      snapshot('config_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts reporterOptions object', () => {
@@ -100,7 +100,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('reporter_options_as_object', normalizeModuleOptions(options))
+      snapshot('reporter_options_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts specs array', () => {
@@ -110,7 +110,7 @@ describe('util', () => {
         ],
       }
 
-      snapshot('spec_as_array', normalizeModuleOptions(options))
+      snapshot('spec_as_array 1', normalizeModuleOptions(options))
     })
 
     it('does not convert spec when string', () => {
@@ -118,7 +118,7 @@ describe('util', () => {
         spec: 'x,y,z',
       }
 
-      snapshot('spec_as_string', normalizeModuleOptions(options))
+      snapshot('spec_as_string 1', normalizeModuleOptions(options))
     })
   })
 

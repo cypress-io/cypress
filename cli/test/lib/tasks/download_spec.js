@@ -52,13 +52,13 @@ describe('lib/tasks/download', function () {
     it('returns latest desktop url', () => {
       const url = download.getUrl()
 
-      snapshot('latest desktop url', normalize(url))
+      snapshot('latest desktop url 1', normalize(url))
     })
 
     it('returns specific desktop version url', () => {
       const url = download.getUrl('0.20.2')
 
-      snapshot('specific version desktop url', normalize(url))
+      snapshot('specific version desktop url 1', normalize(url))
     })
 
     it('returns input if it is already an https link', () => {
@@ -81,28 +81,28 @@ describe('lib/tasks/download', function () {
       process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com'
       const url = download.getUrl('0.20.2')
 
-      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR', normalize(url))
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR 1', normalize(url))
     })
 
     it('env var with trailing slash', () => {
       process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/'
       const url = download.getUrl('0.20.2')
 
-      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with trailing slash', normalize(url))
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with trailing slash 1', normalize(url))
     })
 
     it('env var with subdirectory', () => {
       process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/example'
       const url = download.getUrl('0.20.2')
 
-      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory', normalize(url))
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory 1', normalize(url))
     })
 
     it('env var with subdirectory and trailing slash', () => {
       process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/example/'
       const url = download.getUrl('0.20.2')
 
-      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory and trailing slash', normalize(url))
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory and trailing slash 1', normalize(url))
     })
   })
 
@@ -200,7 +200,7 @@ describe('lib/tasks/download', function () {
     .catch((err) => {
       logger.error(err)
 
-      return snapshot('download status errors', normalize(ctx.stdout.toString()))
+      return snapshot('download status errors 1', normalize(ctx.stdout.toString()))
     })
   })
 })
