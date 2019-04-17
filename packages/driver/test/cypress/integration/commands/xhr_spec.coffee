@@ -1843,6 +1843,9 @@ describe "src/cy/commands/xhr", ->
   context "abort", ->
     xhrs = []
 
+    beforeEach ->
+      cy.visit("/fixtures/jquery.html")
+
     it "does not abort xhr's between tests", ->
       cy.window().then (win) ->
         _.times 2, ->

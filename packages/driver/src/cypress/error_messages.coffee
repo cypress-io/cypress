@@ -283,23 +283,92 @@ module.exports = {
         Read the following document for a detailed explanation.\n
       """
       docsUrl: "https://on.cypress.io/hover"
-
   invoke:
-    invalid_type: "Cannot call #{cmd('invoke')} because `{{prop}}` is not a function. You probably want to use #{cmd('its', '\'{{prop}}\'')}."
+    prop_not_a_function:
+      """
+      #{cmd('invoke')} errored because the property: `{{prop}}` returned a `{{type}}` value instead of a function. #{cmd('invoke')} can only be used on properties that return callable functions.
+
+      #{cmd('invoke')} waited for the specified property `{{prop}}` to return a function, but it never did.
+
+      If you want to assert on the property's value, then switch to use #{cmd('its')} and add an assertion such as:
+
+      `cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')`
+      """
+    subject_null_or_undefined:
+      """
+      #{cmd('invoke')} errored because your subject is: `{{value}}`. You cannot invoke any functions such as `{{prop}}` on a `{{value}}` value.
+
+      If you expect your subject to be `{{value}}`, then add an assertion such as:
+
+      `cy.wrap({{value}}).should('be.{{value}}')`
+      """
+    null_or_undefined_prop_value:
+      """
+      #{cmd('invoke')} errored because the property: `{{prop}}` is not a function, and instead returned a `{{value}}` value.
+
+      #{cmd('invoke')} waited for the specified property `{{prop}}` to become a callable function, but it never did.
+
+      If you expect the property `{{prop}}` to be `{{value}}`, then switch to use #{cmd('its')} and add an assertion such as:
+
+      `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
+      """
+
+  its:
+    subject_null_or_undefined:
+      """
+      #{cmd('its')} errored because your subject is: `{{value}}`. You cannot access any properties such as `{{prop}}` on a `{{value}}` value.
+
+      If you expect your subject to be `{{value}}`, then add an assertion such as:
+
+      `cy.wrap({{value}}).should('be.{{value}}')`
+      """
+    null_or_undefined_prop_value:
+      """
+      #{cmd('its')} errored because the property: `{{prop}}` returned a `{{value}}` value.
+
+      #{cmd('its')} waited for the specified property `{{prop}}` to become accessible, but it never did.
+
+      If you expect the property `{{prop}}` to be `{{value}}`, then add an assertion such as:
+
+      `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
+      """
 
   invoke_its:
-    current_prop_nonexistent: "#{cmd('{{cmd}}')} errored because your subject is currently: `{{value}}`. You cannot call any properties such as `{{prop}}` on a `{{value}}` value."
+    nonexistent_prop:
+      """
+      #{cmd('{{cmd}}')} errored because the property: `{{prop}}` does not exist on your subject.
+
+      #{cmd('{{cmd}}')} waited for the specified property `{{prop}}` to exist, but it never did.
+
+      If you do not expect the property `{{prop}}` to exist, then add an assertion such as:
+
+      `cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`
+      """
+    previous_prop_null_or_undefined:
+      """
+      #{cmd('{{cmd}}')} errored because the property: `{{previousProp}}` returned a `{{value}}` value. The property: `{{prop}}` does not exist on a `{{value}}` value.
+
+      #{cmd('{{cmd}}')} waited for the specified property `{{prop}}` to become accessible, but it never did.
+
+      If you do not expect the property `{{prop}}` to exist, then add an assertion such as:
+
+      `cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')`
+      """
     invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
-    invalid_num_of_args:  """
-      #{cmd('{{cmd}}')} only accepts a single argument.\n
-      If you want to invoke a function with arguments, use `cy.invoke()`.
-    """
-    invalid_property: "#{cmd('{{cmd}}')} errored because the property: `{{prop}}` does not exist on your subject."
-    previous_prop_nonexistent: "#{cmd('{{cmd}}')} errored because the property: `{{previousProp}}` returned a `{{value}}` value. You cannot access any properties such as `{{currentProp}}` on a `{{value}}` value."
-    timed_out: """
-      #{cmd('{{cmd}}')} timed out after waiting `{{timeout}}ms`.\n
-      Your callback function returned a promise which never resolved.\n
-      The callback function was:\n
+    invalid_num_of_args:
+      """
+      #{cmd('{{cmd}}')} only accepts a single argument.
+
+      If you want to invoke a function with arguments, use `.invoke()`.
+      """
+    timed_out:
+      """
+      #{cmd('{{cmd}}')} timed out after waiting `{{timeout}}ms`.
+
+      Your callback function returned a promise which never resolved.
+
+      The callback function was:
+
       {{func}}
     """
 
