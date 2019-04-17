@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const tty = require('tty')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
 
