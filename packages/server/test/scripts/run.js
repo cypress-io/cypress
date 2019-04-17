@@ -8,7 +8,7 @@ const os = require('os')
 
 const options = minimist(process.argv.slice(2))
 
-let run = options._[0]
+let run = _.join(options._, ' ')
 
 if (run && run.includes('--inspect-brk')) {
   run = options._[1]
