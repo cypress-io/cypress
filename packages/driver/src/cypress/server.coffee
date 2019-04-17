@@ -272,6 +272,7 @@ create = (options = {}) ->
         testStr(fullyQualifiedUrl, options.stripOrigin(fullyQualifiedUrl))
 
     xhrMatchesRoute: (xhr, route) ->
+      return route.matcher(xhr, route) if _.isFunction(route.matcher)
       server.methodsMatch(route.method, xhr.method) and server.urlsMatch(route.url, xhr.url)
 
     add: (xhr, attrs = {}) ->
