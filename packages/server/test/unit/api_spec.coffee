@@ -22,16 +22,6 @@ describe "lib/api", ->
     .get("/auth")
     .reply(200, {
       "dashboardAuthUrl": "http://localhost:3000/test-runner.html"
-      "refreshEndpointUrl": "http://localhost:1234/auth/refresh"
-    })
-
-    nock(API_BASEURL)
-    .post("/auth/refresh", {
-      refresh_token: 'refresh-token-foo'
-    })
-    .reply(200, {
-      "access_token": "auth-token-123"
-      "refresh_token": "refresh-token-baz"
     })
 
     api.clearCache()
@@ -41,7 +31,6 @@ describe "lib/api", ->
       name: 'foo bar'
       email: 'foo@bar'
       #authToken: 'auth-token-123'
-      refreshToken: 'refresh-token-foo'
     })
 
   context ".rp", ->
@@ -78,32 +67,6 @@ describe "lib/api", ->
 
       afterEach ->
         process.env = @oldEnv
-
-    it "refreshes token if a 401 is received, but will just rethrow on second 401", ->
-      nock.disableNetConnect()
-
-      sinon.spy(cache, 'setUser')
-
-      nock(API_BASEURL)
-      .matchHeader("authorization", "Bearer auth-token-456")
-      .get("/organizations")
-      .reply(401)
-
-      nock(API_BASEURL)
-      .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/organizations")
-      .reply(401)
-
-      api.getOrgs("auth-token-456")
-      .then ->
-        throw new Error("should not reach")
-      .catch { statusCode: 401 }, ->
-        expect(cache.setUser).to.be.calledWith({
-          name: 'foo bar'
-          email: 'foo@bar'
-          authToken: 'auth-token-123'
-          refreshToken: 'refresh-token-baz'
-        })
 
   context ".getOrgs", ->
     it "GET /orgs + returns orgs", ->
@@ -683,7 +646,6 @@ describe "lib/api", ->
     it "GET /auth + returns the urls", ->
       api.getAuthUrls().then (urls) ->
         expect(urls.dashboardAuthUrl).to.eq("http://localhost:3000/test-runner.html")
-        expect(urls.refreshEndpointUrl).to.eq("http://localhost:1234/auth/refresh")
 
     it "tags errors", ->
       nock.cleanAll()
@@ -707,7 +669,6 @@ describe "lib/api", ->
         api.getAuthUrls()
       .then (urls) ->
         expect(urls.dashboardAuthUrl).to.eq("http://localhost:3000/test-runner.html")
-        expect(urls.refreshEndpointUrl).to.eq("http://localhost:1234/auth/refresh")
 
   context ".createSignout", ->
     it "POSTs /signout", ->

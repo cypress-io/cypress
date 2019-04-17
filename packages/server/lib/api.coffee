@@ -61,71 +61,20 @@ rp = request.defaults (params = {}, callback) ->
     params.auth && params.auth.bearer
   )
 
-  waitForTokenIfRefreshing(params)
-  .then (authToken) ->
-    if authToken
-      params.auth.bearer = authToken
+  request[method](params, callback)
+  .promise()
+  .tap (resp) ->
+    if params.cacheable
+      debug("caching response for ", params.url)
+      cacheResponse(resp, params)
 
-    request[method](params, callback)
-    .promise()
-    .tap (resp) ->
-      if params.cacheable
-        debug("caching response for ", params.url)
-        cacheResponse(resp, params)
-
-      debug("response %o", resp)
-    .catch { statusCode: 401 }, (err) ->
-      if not params.auth
-        debug("received 401 but request was not sent with token, not retrying")
-        throw err
-
-      if params.retryingAfterRefresh
-        debug("received second 401 error, not retrying")
-        throw err
-
-      debug("received 401 status code from api for %s, refreshing token once and retrying: ", params.url, err.message)
-
-      refreshTokenOrWait()
-      .then (authToken) ->
-        debug("new token received", authToken)
-        # retry request with new token
-        params.method = method
-        params.auth.bearer = authToken
-        params.retryingAfterRefresh = true
-        rp(params)
+    debug("response %o", resp)
 
 cacheResponse = (resp, params) ->
   responseCache[params.url] = resp
 
 getCachedResponse = (params) ->
   responseCache[params.url]
-
-refreshingTokenPromise = null
-
-waitForTokenIfRefreshing = (params) ->
-  ## if a token refresh is in process and this request requires auth, wait for it to complete before continuing
-  if refreshingTokenPromise and params.auth
-    return refreshingTokenPromise
-
-  Promise.resolve()
-
-refreshTokenOrWait = () ->
-  ## ensure that we only have one refresh request in-flight at once
-  ## directly using cache here because including `user` would cause a circular dependency
-  ## TODO: refactor
-  if not refreshingTokenPromise
-    refreshingTokenPromise = cache.getUser()
-    .then (user) ->
-      getTokenFromRefresh(user.refreshToken)
-      .then (tokens) ->
-        user.authToken = tokens.access_token
-        user.refreshToken = tokens.refresh_token
-        cache.setUser(user)
-        user.authToken
-    .finally ->
-      refreshingTokenPromise = null
-
-  refreshingTokenPromise
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -152,30 +101,6 @@ isRetriableError = (err) ->
   (500 <= err.statusCode < 600) or
   not err.statusCode?
 
-getAuthUrls = ->
-  rp.get({
-    url: routes.auth(),
-    json: true
-    cacheable: true
-    headers: {
-      "x-route-version": "2"
-    }
-  })
-  .catch(tagError)
-
-getTokenFromRefresh = (refreshToken) ->
-  getAuthUrls()
-  .get('refreshEndpointUrl')
-  .then (refreshEndpointUrl) ->
-    rp.post({
-      url: refreshEndpointUrl
-      json: true
-      body: {
-        refresh_token: refreshToken
-      }
-    })
-  .catch(tagError)
-
 module.exports = {
   rp
 
@@ -192,9 +117,16 @@ module.exports = {
       }
     })
 
-  getTokenFromRefresh
-
-  getAuthUrls
+  getAuthUrls: ->
+    rp.get({
+      url: routes.auth(),
+      json: true
+      cacheable: true
+      headers: {
+        "x-route-version": "2"
+      }
+    })
+    .catch(tagError)
 
   getOrgs: (authToken) ->
     rp.get({

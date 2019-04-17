@@ -83,14 +83,13 @@ const _launchServer = (baseLoginUrl) => {
         redirectToStatus('error')
       }
 
-      const { state, name, email, access_token, refresh_token } = req.query
+      const { state, name, email, access_token } = req.query
 
-      if (state === authState && access_token && refresh_token) {
+      if (state === authState && access_token) {
         const userObj = {
           name,
           email,
           authToken: access_token,
-          refreshToken: refresh_token,
         }
 
         return user.set(userObj)

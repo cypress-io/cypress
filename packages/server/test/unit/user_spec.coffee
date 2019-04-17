@@ -39,20 +39,6 @@ describe "lib/user", ->
       user.logOut().catch ->
         expect(cache.removeUser).to.be.calledOnce
 
-  context ".refreshToken", ->
-    it "loads the user from cache then calls api.getTokenFromRefresh and syncs result", ->
-      sinon.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123", refreshToken: "def-456"})
-      sinon.stub(api, "getTokenFromRefresh").withArgs("def-456").resolves({
-        access_token: 'ghj-123'
-        refresh_token: 'jkl-456'
-      })
-      sinon.stub(user, "syncProfile").resolves()
-
-      user.refreshToken().then ->
-        expect(cache.getUser).to.be.calledOnce
-        expect(api.getTokenFromRefresh).to.be.calledWith("def-456")
-        expect(user.syncProfile).to.be.calledWith("ghj-123", "jkl-456")
-
   context ".syncProfile", ->
     it "calls api.getMe then saves user to cache", ->
       sinon.stub(api, "getMe").resolves({
@@ -66,7 +52,6 @@ describe "lib/user", ->
         expect(api.getMe).to.be.calledWith("foo-123")
         expect(cache.setUser).to.be.calledWith({
           authToken: "foo-123"
-          refreshToken: "bar-456"
           name: "foo"
           email: "bar@baz"
         })

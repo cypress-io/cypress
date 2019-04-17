@@ -22,22 +22,13 @@ module.exports = {
         if authToken
           api.createSignout(authToken)
 
-  refreshToken: ->
-    @get().then (user) =>
-      debug("refreshing token for user %o", user)
-      api.getTokenFromRefresh(user.refreshToken)
-      .then (res) =>
-        debug("refreshed token, got %o", res)
-        @syncProfile(res.access_token, res.refresh_token)
-
-  syncProfile: (authToken, refreshToken) ->
+  syncProfile: (authToken) ->
     debug("synchronizing user profile")
     api.getMe(authToken)
     .then (res) =>
       debug("received /me %o", res)
       user = {
         authToken
-        refreshToken
         name: res.name
         email: res.email
       }
