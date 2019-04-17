@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const os = require('os')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const { errors, formErrorText } = require(`${lib}/errors`)
 const util = require(`${lib}/util`)
 
