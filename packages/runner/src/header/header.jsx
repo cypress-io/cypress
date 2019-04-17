@@ -65,7 +65,7 @@ export default class Header extends Component {
 }`}
               </pre>{/* eslint-enable indent */}
               <p>
-                <a href='https://on.cypress.io/viewport' target='_blank' rel="noopener noreferrer">
+                <a href='https://on.cypress.io/viewport' target='_blank'>
                   <i className='fa fa-info-circle'></i>
                   Read more about viewport here.
                 </a>
