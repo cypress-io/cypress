@@ -1,3 +1,5 @@
+/// <reference path="../../../../../../cli/types/index.d.ts" />
+
 /**
   * in all browsers...
   *
@@ -157,7 +159,7 @@ describe('polyfill programmatic blur events', () => {
     .visit('http://localhost:3500/fixtures/active-elements.html')
     .then(() => {
 
-    // programmatically focus the first, then second input element
+      // programmatically focus the first, then second input element
       const $one = cy.$$('#one')
       const $two = cy.$$('#two')
 
@@ -275,6 +277,31 @@ describe('polyfill programmatic blur events', () => {
     cy.document().then((doc) => {
       expect(doc.hasFocus(), 'hasFocus returns true').eq(true)
     })
+  })
+
+  it('does not send focus events for non-focusable elements', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html')
+    .then(() => {
+
+      cy.$$('<div id="no-focus">clearly not a focusable element</div>')
+      .appendTo(cy.$$('body'))
+
+      const stub = cy.stub()
+      const el1 = cy.$$('#no-focus')
+      const win = cy.$$(cy.state('window'))
+
+      win.on('focus', stub)
+      el1.on('focus', stub)
+      el1[0].focus()
+
+      expect(stub).not.called
+
+      win[0].focus()
+
+      expect(stub).to.calledOnce
+
+    })
+
   })
 })
 
