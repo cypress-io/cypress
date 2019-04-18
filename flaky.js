@@ -8,6 +8,7 @@ const run = () => {
       video: false,
     },
   })
+  .timeout(5 * 60 * 1000)
   .then((res) => {
     if (res.totalFailed === 0) {
       return run()
