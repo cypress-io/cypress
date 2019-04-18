@@ -266,16 +266,16 @@ buildCypressApp = (platform, version, options = {}) ->
     ## try to build and if we timeout in 5 minutes
     ## then try again - which sometimes happens in
     ## circle CI
-    cp = execaBuild()
+    b = execaBuild()
 
-    cp
+    b
     .timeout(fiveMinutes)
     .catch Promise.TimeoutError, (err) ->
       console.log(
         chalk.red("timed out signing binary after #{fiveMinutes}ms. retrying...")
       )
 
-      cp.cancel()
+      b.cancel()
 
       execaBuild()
 
