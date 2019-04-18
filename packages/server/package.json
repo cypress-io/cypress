@@ -126,7 +126,7 @@
     "data-uri-to-buffer": "0.0.4",
     "debug": "2.6.9",
     "dependency-tree": "6.5.0",
-    "electron-context-menu": "0.11.0",
+    "electron-context-menu": "0.12.0",
     "electron-positioner": "3.0.1",
     "errorhandler": "1.5.0",
     "evil-dns": "0.2.0",
