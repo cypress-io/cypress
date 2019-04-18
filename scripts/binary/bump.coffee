@@ -175,38 +175,37 @@ module.exports = {
   # triggers test projects on multiple CIs
   # the test projects will exercise the new version of
   # the Cypress test runner we just built
-  runTestProjects: (status, message, providerName, version) ->
+  runTestProjects: (getStatusAndMessage, providerName, version) ->
     # status is {owner, repo, sha}
 
     projectFilter = getFilterByProvider(providerName)
 
-    if not message
-      message =
-        """
-        Testing new Cypress version #{version}
-
-        """
-      if process.env.CIRCLE_BUILD_URL
-        message += "\n"
-        message += "Circle CI build url #{process.env.CIRCLE_BUILD_URL}"
-
-      if process.env.APPVEYOR
-        slug = process.env.APPVEYOR_PROJECT_SLUG
-        build = process.env.APPVEYOR_BUILD_ID
-        message += "\n"
-        message += "AppVeyor CI #{slug} #{build}"
-
     makeCommit = (project, provider, creds) ->
-      # instead of triggering CI via API
-      # car.runProject(project, provider)
-      # make empty commit to trigger CIs
-
-      # project is owner/repo string like cypress-io/cypress-test-tiny
-
+      ## make empty commit to trigger CIs
+      ## project is owner/repo string like cypress-io/cypress-test-tiny
       console.log("making commit to project", project)
+
       parsedRepo = parse(project)
       owner = parsedRepo[0]
       repo = parsedRepo[1]
+
+      { status, message } = getStatusAndMessage(repo)
+
+      if not message
+        message =
+          """
+          Testing new Cypress version #{version}
+
+          """
+        if process.env.CIRCLE_BUILD_URL
+          message += "\n"
+          message += "Circle CI build url #{process.env.CIRCLE_BUILD_URL}"
+
+        if process.env.APPVEYOR
+          slug = process.env.APPVEYOR_PROJECT_SLUG
+          build = process.env.APPVEYOR_BUILD_ID
+          message += "\n"
+          message += "AppVeyor CI #{slug} #{build}"
 
       defaultOptions = {
         owner,
@@ -224,9 +223,9 @@ module.exports = {
           owner: status.owner,
           repo: status.repo,
           sha: status.sha,
+          context: status.context,
           state: 'pending',
           description: "#{owner}/#{repo}",
-          context: "[#{os.platform()}-#{os.arch()}] #{repo}"
         }
 
         console.log(
@@ -234,7 +233,7 @@ module.exports = {
           commitStatusOptions.description,
           commitStatusOptions.context
         )
-  
+
         setCommitStatus(commitStatusOptions)
 
       if not version
