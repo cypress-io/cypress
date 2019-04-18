@@ -68,42 +68,6 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
   }
 }
 
-export const ensureReqHasHandle = (req: http.ClientRequest, options: http.RequestOptions, agent: http.Agent) => {
-
-  debug('hit null handler for %o', {
-    href: options.href,
-    freeSocketCount: _.keys(agent.freeSockets).length,
-    requestCount: _.keys(agent.requests).length,
-    socketCount: _.keys(agent.sockets).length,
-    freeSockets: _.keys(agent.freeSockets),
-    requests: _.keys(agent.requests),
-    sockets: _.keys(agent.sockets)
-  })
-  // get all the TCP handles for the free sockets
-  const hasNullHandle = _
-  .chain(agent.freeSockets)
-  .values()
-  .flatten()
-  .find((socket) => {
-    return !socket._handle
-  })
-  .value()
-
-  // if any of our freeSockets have a null handle
-  // then immediately return on nextTick to prevent
-  // a node 8.2.1 bug where socket._handle is null
-  // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
-  // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
-  if (hasNullHandle) {
-    debug('request has null handle, waiting')
-    return process.nextTick(() => {
-      ensureReqHasHandle(req, options, agent)
-    })
-  }
-
-  return agent.addRequest(req, options)
-}
-
 const getFirstWorkingFamily = (
   { port, host }: http.RequestOptions,
   familyCache: FamilyCache,
@@ -176,7 +140,7 @@ export class CombinedAgent {
 
       const agent = isHttps ? this.httpsAgent : this.httpAgent
 
-      return ensureReqHasHandle(req, options, agent)
+      agent.addRequest(req, options)
     })
   }
 }
