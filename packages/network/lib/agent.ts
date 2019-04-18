@@ -107,7 +107,12 @@ const getFirstWorkingFamily = (
 const addRequest = http.Agent.prototype.addRequest
 
 http.Agent.prototype.addRequest = function (req, options) {
-  debug(`hit null handle addreq for ${options.href}`)
+  debug(`hit null handle addreq `, {
+    href: options.href,
+    freeSocketCount: (<any> agent).freeSockets.length,
+    requestCount: (<any> agent).requests.length,
+    socketCount: (<any> agent).sockets.length
+  })
   // get all the TCP handles for the free sockets
   const hasNullHandle = _
   .chain(this.freeSockets)
@@ -124,7 +129,12 @@ http.Agent.prototype.addRequest = function (req, options) {
   // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
   // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
   if (hasNullHandle) {
-    debug('HAS NULL HANDLE', options.href, options)
+    debug('HAS NULL HANDLE %o', {
+      href: options.href,
+      freeSocketCount: (<any> agent).freeSockets.length,
+      requestCount: (<any> agent).requests.length,
+      socketCount: (<any> agent).sockets.length
+    })
     return process.nextTick(() => {
       this.addRequest(req, options)
     })

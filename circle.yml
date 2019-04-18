@@ -546,6 +546,7 @@ jobs:
           command: npm start
           working_directory: /tmp/repo
           background: true
+      - run: mkdir /tmp/artifacts
       - run:
           name: Run flake test forever
           environment:
@@ -553,7 +554,9 @@ jobs:
           command: |
             CYPRESS_ENV=staging \
             CYPRESS_video=false \
-            node flaky.js
+            node flaky.js &> /tmp/artifacts/output.txt
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "test-against-staging":
     <<: *defaults
