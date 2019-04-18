@@ -555,7 +555,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_video=false \
             CY_NET_PROFILE=1 \
-            node flaky.js &> /tmp/artifacts/output.txt
+            node flaky.js 2>&1 | tee /tmp/artifacts/output.txt
       - run: mv /tmp/net-profiler-* /tmp/artifacts/
       - store_artifacts:
           path: /tmp/artifacts
