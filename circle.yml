@@ -529,6 +529,32 @@ jobs:
             CYPRESS_video=false \
             npm run cypress:run -- --project /tmp/repo --record
 
+  "run-flaky-network-tests-until-fail":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - run:
+          name: Install prod dependencies
+          command: npm install --production
+          working_directory: /tmp/repo
+      - run:
+          name: Example server
+          command: npm start
+          working_directory: /tmp/repo
+          background: true
+      - run:
+          name: Run flake test forever
+          environment:
+            DEBUG: cypress:*
+          command: |
+            CYPRESS_ENV=staging \
+            CYPRESS_video=false \
+            node flaky.js
+
   "test-against-staging":
     <<: *defaults
     steps:
@@ -781,6 +807,13 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build
+    - run-flaky-network-tests-until-fail:
+        filters:
+          branches:
+            only:
+              - debug-proxy-flake
+        requires:
+          - build
     - test-kitchensink-against-staging:
         filters:
           branches:
@@ -879,6 +912,14 @@ mac-workflow: &mac-workflow
         requires:
           - Mac NPM package
           - Mac binary
+
+    - run-flaky-network-tests-until-fail:
+        filters:
+          branches:
+            only:
+              - debug-proxy-flake
+        requires:
+          - build
 
     - test-binary-against-staging:
         name: Test Mac binary against staging
