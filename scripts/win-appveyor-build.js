@@ -21,7 +21,7 @@ shell.set('-e') // any error is fatal
 const isRightBranch = () => {
   const branch = process.env.APPVEYOR_REPO_BRANCH
 
-  return branch === 'issue-3996' || branch === 'issue-716-ffmpeg-packaging'
+  return branch === 'develop' || branch === 'issue-716-ffmpeg-packaging'
 }
 
 const isForkedPullRequest = () => {
