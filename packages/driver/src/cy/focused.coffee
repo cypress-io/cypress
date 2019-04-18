@@ -173,7 +173,6 @@ create = (state) ->
 
     if $elements.isFocusable($dom.wrap(el)) && (!$focused || $focused[0] isnt el)
       fireFocus(el)
-      return
 
     $elements.callNativeMethod(el, 'focus')
     return
@@ -186,7 +185,6 @@ create = (state) ->
     $focused = getFocused()
     if $focused && $focused[0] is el
       fireBlur(el)
-      return
 
     $elements.callNativeMethod(el, 'blur')
     return
