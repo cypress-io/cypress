@@ -145,5 +145,5 @@ const onError = (e) => {
 }
 
 bump
-.runTestProjects(message, cliOptions.provider, shortNpmVersion)
+.runTestProjects(status, message, cliOptions.provider, shortNpmVersion)
 .catch(onError)

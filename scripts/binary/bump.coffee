@@ -7,9 +7,11 @@ path      = require("path")
 la        = require('lazy-ass')
 check     = require('check-more-types')
 R         = require("ramda")
+os        = require("os")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
 makeEmptyGithubCommit = require("make-empty-github-commit")
 parse = require("parse-github-repo-url")
+{setCommitStatus} = require("@cypress/set-commit-status")
 
 fs = Promise.promisifyAll(fs)
 
@@ -173,7 +175,9 @@ module.exports = {
   # triggers test projects on multiple CIs
   # the test projects will exercise the new version of
   # the Cypress test runner we just built
-  runTestProjects: (message, providerName, version) ->
+  runTestProjects: (status, message, providerName, version) ->
+    # status is {owner, repo, sha}
+
     projectFilter = getFilterByProvider(providerName)
 
     if not message
@@ -197,32 +201,60 @@ module.exports = {
       # car.runProject(project, provider)
       # make empty commit to trigger CIs
 
-      parsedRepo = parse(project)
+      # project is owner/repo string like cypress-io/cypress-test-tiny
+
       console.log("making commit to project", project)
+      parsedRepo = parse(project)
+      owner = parsedRepo[0]
+      repo = parsedRepo[1]
 
       defaultOptions = {
-        owner: parsedRepo[0],
-        repo: parsedRepo[1],
+        owner,
+        repo,
+        message,
         token: creds.githubToken,
-        message
       }
 
+      createGithubCommitStatusCheck = ({ sha }) ->
+        return if not status
+
+        targetUrl = "https://github.com/#{owner}/#{repo}/commit/#{sha}"
+        commitStatusOptions = {
+          targetUrl,
+          owner: status.owner,
+          repo: status.repo,
+          sha: status.sha,
+          state: 'pending',
+          description: "#{owner}/#{repo}",
+          context: "[#{os.platform()}-#{os.arch()}] #{repo}"
+        }
+
+        console.log(
+          'creating commit status check',
+          commitStatusOptions.description,
+          commitStatusOptions.context
+        )
+  
+        setCommitStatus(commitStatusOptions)
+
       if not version
-        return makeEmptyGithubCommit(defaultOptions)
+        return makeEmptyGithubCommit(defaultOptions).then(createGithubCommitStatusCheck)
 
       # first try to commit to branch for next upcoming version
       specificBranchOptions = {
-        owner: parsedRepo[0],
-        repo: parsedRepo[1],
+        owner: owner,
+        repo: repo,
         token: creds.githubToken,
         message,
         branch: version
       }
+
       makeEmptyGithubCommit(specificBranchOptions)
       .catch () ->
         # maybe there is no branch for next version
         # try default branch
         makeEmptyGithubCommit(defaultOptions)
+      .then(createGithubCommitStatusCheck)
 
     awaitEachProjectAndProvider(PROJECTS, makeCommit, projectFilter)
 }
