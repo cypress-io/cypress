@@ -919,7 +919,7 @@ mac-workflow: &mac-workflow
             only:
               - debug-proxy-flake
         requires:
-          - build
+          - Mac build
 
     - test-binary-against-staging:
         name: Test Mac binary against staging
