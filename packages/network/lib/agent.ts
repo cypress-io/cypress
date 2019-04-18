@@ -69,7 +69,12 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
 }
 
 export const ensureReqHasHandle = (req: http.ClientRequest, options: http.RequestOptions, agent: http.Agent) => {
-  debug(`hit null handle addreq for ${options.href}`)
+  debug('hit null handler for %o', {
+    href: options.href,
+    freeSocketCount: (<any> agent).freeSockets.length,
+    requestCount: (<any> agent).requests.length,
+    socketCount: (<any> agent).sockets.length
+  })
   // get all the TCP handles for the free sockets
   const hasNullHandle = _
   .chain(agent.freeSockets)
@@ -86,7 +91,7 @@ export const ensureReqHasHandle = (req: http.ClientRequest, options: http.Reques
   // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
   // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
   if (hasNullHandle) {
-    debug('request for "%s% has null handle, waiting', options.href)
+    debug('request has null handle, waiting')
     return process.nextTick(() => {
       ensureReqHasHandle(req, options, agent)
     })
