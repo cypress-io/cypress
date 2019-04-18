@@ -705,7 +705,7 @@ jobs:
           background: true
       - run:
           working_directory: /tmp/kitchensink
-          command: npm run e2e
+          command: DEBUG=cypress:* npm run e2e
 
 linux-workflow: &linux-workflow
   jobs:
