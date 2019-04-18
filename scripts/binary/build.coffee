@@ -248,7 +248,7 @@ buildCypressApp = (platform, version, options = {}) ->
       return
 
     appFolder = meta.zipDir(platform)
-    fiveMinutes = humanInterval("5 seconds")
+    fiveMinutes = humanInterval("5 minutes")
 
     execaBuild = Promise.method ->
       log("#codeSign #{appFolder}")
