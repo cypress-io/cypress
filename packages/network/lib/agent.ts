@@ -69,11 +69,15 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
 }
 
 export const ensureReqHasHandle = (req: http.ClientRequest, options: http.RequestOptions, agent: http.Agent) => {
+
   debug('hit null handler for %o', {
     href: options.href,
-    freeSocketCount: (<any> agent).freeSockets.length,
-    requestCount: (<any> agent).requests.length,
-    socketCount: (<any> agent).sockets.length
+    freeSocketCount: _.keys(agent.freeSockets).length,
+    requestCount: _.keys(agent.requests).length,
+    socketCount: _.keys(agent.sockets).length,
+    freeSockets: _.keys(agent.freeSockets),
+    requests: _.keys(agent.requests),
+    sockets: _.keys(agent.sockets)
   })
   // get all the TCP handles for the free sockets
   const hasNullHandle = _
