@@ -109,9 +109,9 @@ const addRequest = http.Agent.prototype.addRequest
 http.Agent.prototype.addRequest = function (req, options) {
   debug(`hit null handle addreq `, {
     href: options.href,
-    freeSocketCount: (<any> agent).freeSockets.length,
-    requestCount: (<any> agent).requests.length,
-    socketCount: (<any> agent).sockets.length
+    freeSocketCount: (<any> this).freeSockets.length,
+    requestCount: (<any> this).requests.length,
+    socketCount: (<any> this).sockets.length
   })
   // get all the TCP handles for the free sockets
   const hasNullHandle = _
@@ -131,9 +131,9 @@ http.Agent.prototype.addRequest = function (req, options) {
   if (hasNullHandle) {
     debug('HAS NULL HANDLE %o', {
       href: options.href,
-      freeSocketCount: (<any> agent).freeSockets.length,
-      requestCount: (<any> agent).requests.length,
-      socketCount: (<any> agent).sockets.length
+      freeSocketCount: (<any> this).freeSockets.length,
+      requestCount: (<any> this).requests.length,
+      socketCount: (<any> this).sockets.length
     })
     return process.nextTick(() => {
       this.addRequest(req, options)
