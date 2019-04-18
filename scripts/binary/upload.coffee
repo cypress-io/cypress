@@ -30,7 +30,7 @@ module.exports = {
     uploadUtils.getS3Credentials()
 
   # store uploaded application in subfolders by platform and version
-  # something like desktop/0.20.1/osx64/
+  # something like desktop/0.20.1/darwin-x64/
   getUploadDirName: ({version, platform}) ->
     aws = @getAwsObj()
     platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
@@ -50,16 +50,21 @@ module.exports = {
       packages: {
         ## keep these for compatibility purposes
         ## although they are now deprecated
-        mac: getUrl("osx64")
-        win: getUrl("win64")
-        linux64: getUrl("linux64")
+        mac: getUrl("darwin-x64")
+        win: getUrl("win32-ia32")
+        linux64: getUrl("linux-x64")
 
         ## start adding the new ones
         ## using node's platform
-        darwin: getUrl("osx64")
-        win32: getUrl("win32")
-        win64: getUrl("win64")
-        linux: getUrl("linux64")
+        darwin: getUrl("darwin-x64")
+        win32: getUrl("win32-ia32")
+        linux: getUrl("linux-x64")
+
+        ## the new-new names that use arch and platform
+        "darwin-x64": getUrl("darwin-x64")
+        "linux-x64": getUrl("linux-x64")
+        "win32-ia32": getUrl("win32-ia32")
+        "win32-x64": getUrl("win32-x64")
       }
     }
 

@@ -123,14 +123,14 @@ getUploadNameByOsAndArch = (platform) ->
 
   uploadNames = {
     darwin: {
-      "x64": "osx64"
+      "x64": "darwin-x64"
     },
     linux: {
-      "x64": "linux64"
+      "x64": "linux-x64"
     },
     win32: {
-      "x64": "win64",
-      "ia32": "win32"
+      "x64": "win32-x64",
+      "ia32": "win32-ia32"
     }
   }
   name = _.get(uploadNames[platform], arch)

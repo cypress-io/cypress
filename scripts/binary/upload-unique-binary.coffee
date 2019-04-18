@@ -20,7 +20,7 @@ uploadFileName = "cypress.zip"
 isBinaryFile = check.extension(binaryExtension)
 
 # wonder if our CDN url would just work
-# https://cdn.cypress.io/desktop/0.20.1/osx64/cypress.zip
+# https://cdn.cypress.io/desktop/0.20.1/darwin-x64/cypress.zip
 # in our case something like this
 # https://cdn.cypress.io/desktop/binary/0.20.2/<platform>/<some unique version info>/cypress.tgz
 rootFolder = "beta"
