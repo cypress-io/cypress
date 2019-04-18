@@ -209,33 +209,36 @@ module.exports = {
       repo = parsedRepo[1]
 
       defaultOptions = {
-        owner: owner,
-        repo: repo,
+        owner,
+        repo,
+        message,
         token: creds.githubToken,
-        message
       }
 
-      createTestCommitStatus = ({ sha }) ->
-        return unless status
+      createGithubCommitStatusCheck = ({ sha }) ->
+        return if not status
 
         targetUrl = "https://github.com/#{owner}/#{repo}/commit/#{sha}"
         commitStatusOptions = {
+          targetUrl,
           owner: status.owner,
           repo: status.repo,
           sha: status.sha,
           state: 'pending',
-          targetUrl
           description: "#{owner}/#{repo}",
-          context: "#{os.platform()}-#{os.arch()} #{repo}"
+          context: "[#{os.platform()}-#{os.arch()}] #{repo}"
         }
 
-        console.log('creating commit status check',
+        console.log(
+          'creating commit status check',
           commitStatusOptions.description,
-          commitStatusOptions.context)
+          commitStatusOptions.context
+        )
+  
         setCommitStatus(commitStatusOptions)
 
       if not version
-        return makeEmptyGithubCommit(defaultOptions).then(createTestCommitStatus)
+        return makeEmptyGithubCommit(defaultOptions).then(createGithubCommitStatusCheck)
 
       # first try to commit to branch for next upcoming version
       specificBranchOptions = {
@@ -245,12 +248,13 @@ module.exports = {
         message,
         branch: version
       }
+
       makeEmptyGithubCommit(specificBranchOptions)
       .catch () ->
         # maybe there is no branch for next version
         # try default branch
         makeEmptyGithubCommit(defaultOptions)
-      .then createTestCommitStatus
+      .then(createGithubCommitStatusCheck)
 
     awaitEachProjectAndProvider(PROJECTS, makeCommit, projectFilter)
 }
