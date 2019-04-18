@@ -95,6 +95,7 @@ const getFirstWorkingFamily = (
 
   return getAddress(port, host)
   .then((firstWorkingAddress: net.Address) => {
+    debug('successfully got first working family')
     familyCache[host] = firstWorkingAddress.family
     return cb(firstWorkingAddress.family)
   })
@@ -106,6 +107,7 @@ const getFirstWorkingFamily = (
 const addRequest = http.Agent.prototype.addRequest
 
 http.Agent.prototype.addRequest = function (req, options) {
+  debug(`hit null handle addreq for ${options.href}`)
   // get all the TCP handles for the free sockets
   const hasNullHandle = _
   .chain(this.freeSockets)
@@ -122,6 +124,7 @@ http.Agent.prototype.addRequest = function (req, options) {
   // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
   // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
   if (hasNullHandle) {
+    debug('HAS NULL HANDLE', options.href, options)
     return process.nextTick(() => {
       this.addRequest(req, options)
     })
@@ -184,6 +187,7 @@ class HttpAgent extends http.Agent {
   }
 
   createSocket (req: http.ClientRequest, options: http.RequestOptions, cb: http.SocketCallback) {
+    debug('createsocket with opts.href %s', options.href)
     if (process.env.HTTP_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
