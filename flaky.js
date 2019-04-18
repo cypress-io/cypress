@@ -2,7 +2,7 @@ const cypress = require('./cli')
 
 const run = () => {
   return cypress.run({
-    project: '../example-kitchensink',
+    project: '/tmp/repo',
     dev: true,
     config: {
       video: false,
