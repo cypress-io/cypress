@@ -296,10 +296,6 @@ describe('polyfill programmatic blur events', () => {
 
       expect(stub).not.called
 
-      win[0].focus()
-
-      expect(stub).to.calledOnce
-
     })
 
   })
