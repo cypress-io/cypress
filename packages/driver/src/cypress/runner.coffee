@@ -644,8 +644,9 @@ create = (specWindow, mocha, Cypress, cy) ->
       ])
       .compact()
       .join("\n\n")
+      .value()
 
-    ## else  do the same thing as mocha here
+    ## else do the same thing as mocha here
     err = $errUtils.appendErrMsg(err, append())
 
     throwErr = ->
