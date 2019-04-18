@@ -778,35 +778,35 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - build
     - test-kitchensink-against-staging:
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - build
     - build-npm-package:
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - build
     - build-binary:
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - build-npm-package
           - build-binary
@@ -814,7 +814,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - build-npm-package
           - build-binary
@@ -822,7 +822,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - build-npm-package
           - build-binary
@@ -830,7 +830,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - build-npm-package
           - build-binary
@@ -854,7 +854,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - Mac build
 
@@ -865,7 +865,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - Mac build
 
@@ -875,7 +875,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - Mac NPM package
           - Mac binary
@@ -886,7 +886,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-3996
         requires:
           - Mac NPM package
           - Mac binary
