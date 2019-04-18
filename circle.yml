@@ -384,6 +384,8 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
+          environment:
+            DEBUG: cypress:*
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -518,6 +520,8 @@ jobs:
           background: true
       - run:
           name: Run Kitchensink example project
+          environment:
+            DEBUG: cypress:*
           command: |
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
@@ -705,6 +709,8 @@ jobs:
           background: true
       - run:
           working_directory: /tmp/kitchensink
+          environment:
+            DEBUG: cypress:*
           command: npm run e2e
 
 linux-workflow: &linux-workflow
