@@ -68,33 +68,6 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
   }
 }
 
-export const ensureReqHasHandle = (req: http.ClientRequest, options: http.RequestOptions, agent: http.Agent) => {
-  debug(`hit null handle addreq for ${options.href}`)
-  // get all the TCP handles for the free sockets
-  const hasNullHandle = _
-  .chain(agent.freeSockets)
-  .values()
-  .flatten()
-  .find((socket) => {
-    return !socket._handle
-  })
-  .value()
-
-  // if any of our freeSockets have a null handle
-  // then immediately return on nextTick to prevent
-  // a node 8.2.1 bug where socket._handle is null
-  // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
-  // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
-  if (hasNullHandle) {
-    debug('request for "%s% has null handle, waiting', options.href)
-    return process.nextTick(() => {
-      ensureReqHasHandle(req, options, agent)
-    })
-  }
-
-  return agent.addRequest(req, options)
-}
-
 const getFirstWorkingFamily = (
   { port, host }: http.RequestOptions,
   familyCache: FamilyCache,
@@ -131,6 +104,35 @@ const getFirstWorkingFamily = (
   })
 }
 
+const addRequest = http.Agent.prototype.addRequest
+
+http.Agent.prototype.addRequest = function (req, options) {
+  debug(`hit null handle addreq for ${options.href}`)
+  // get all the TCP handles for the free sockets
+  const hasNullHandle = _
+  .chain(this.freeSockets)
+  .values()
+  .flatten()
+  .find((socket) => {
+    return !socket._handle
+  })
+  .value()
+
+  // if any of our freeSockets have a null handle
+  // then immediately return on nextTick to prevent
+  // a node 8.2.1 bug where socket._handle is null
+  // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
+  // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
+  if (hasNullHandle) {
+    debug('HAS NULL HANDLE', options.href, options)
+    return process.nextTick(() => {
+      this.addRequest(req, options)
+    })
+  }
+
+  return addRequest.call(this, req, options)
+}
+
 export class CombinedAgent {
   httpAgent: HttpAgent
   httpsAgent: HttpsAgent
@@ -165,9 +167,11 @@ export class CombinedAgent {
     return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
       options.family = family
 
-      const agent = isHttps ? this.httpsAgent : this.httpAgent
+      if (isHttps) {
+        return this.httpsAgent.addRequest(req, options)
+      }
 
-      return ensureReqHasHandle(req, options, agent)
+      this.httpAgent.addRequest(req, options)
     })
   }
 }
