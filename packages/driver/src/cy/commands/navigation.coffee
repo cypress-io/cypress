@@ -13,6 +13,9 @@ hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
+REQUEST_URL_OPTS = ["auth", "failOnStatusCode", "method", "body", "headers"]
+VISIT_OPTS = ["url", "log", "onBeforeLoad", "onLoad", "timeout"].concat(REQUEST_URL_OPTS)
+
 reset = (test = {}) ->
   knownCommandCausedInstability = false
 
@@ -27,6 +30,11 @@ reset = (test = {}) ->
   currentlyVisitingAboutBlank = false
 
   id = test.id
+
+VALID_VISIT_METHODS = ['GET', 'POST']
+
+isValidVisitMethod = (method) ->
+  _.includes(VALID_VISIT_METHODS, method)
 
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
@@ -260,7 +268,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, "failOnStatusCode", "auth")
+      _.pick(options, REQUEST_URL_OPTS)
     )
     .then (resp = {}) ->
       switch
@@ -456,22 +464,48 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
+      if options.url and url
+        $utils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: options.url, url: url }})
+
+      if _.isObject(url) and _.isEqual(options, {})
+        ## options specified as only argument
+        options = url
+        url = options.url
+
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
+
+      consoleProps = {}
+
+      if not _.isEmpty(options)
+        consoleProps["Options"] = _.pick(options, VISIT_OPTS)
 
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
+        method: 'GET'
+        body: null
+        headers: {}
         log: true
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
       })
 
-      consoleProps = {}
+      if not isValidVisitMethod(options.method)
+        $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
+
+      if not _.isObject(options.headers)
+        $utils.throwErrByPath("visit.invalid_headers")
 
       if options.log
+        message = url
+
+        if options.method != 'GET'
+          message = "#{options.method} #{message}"
+
         options._log = Cypress.log({
+          message: message
           consoleProps: -> consoleProps
         })
 
@@ -598,11 +632,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if url isnt originalUrl
               consoleProps["Original Url"] = originalUrl
 
-          if options.log and redirects and redirects.length
-            indicateRedirects = ->
-              [originalUrl].concat(redirects).join(" -> ")
+          if options.log
+            message = options._log.get('message')
 
-            options._log.set({message: indicateRedirects()})
+            if redirects and redirects.length
+              message = [message].concat(redirects).join(" -> ")
+
+            options._log.set({message: message})
 
           consoleProps["Resolved Url"]  = url
           consoleProps["Redirects"]     = redirects

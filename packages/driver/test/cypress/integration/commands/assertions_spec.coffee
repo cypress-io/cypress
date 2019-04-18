@@ -840,6 +840,11 @@ describe "src/cy/commands/assertions", ->
       it "calls super when not DOM element", ->
         cy.noop("foobar").should("contain", "oob")
 
+      ## https://github.com/cypress-io/cypress/issues/3549
+      it "is true when DOM el and not jQuery el contains text", ->
+        cy.get("div").then ($el) ->
+          cy.wrap($el[1]).should("contain", "Nested Find")
+
       it "escapes quotes", ->
         $span = "<span id=\"escape-quotes\">shouldn't and can\"t</span>"
 

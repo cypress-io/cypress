@@ -14,7 +14,7 @@ $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
 $Mouse = require("../cy/mouse")
-$Keyboard = require("../cy/keyboard")
+$Keyboard = require("../cy/keyboard").default
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -85,7 +85,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
-  keyboard = $Keyboard.create(state)
+  keyboard = new $Keyboard(state)
   mouse = $Mouse.create(state, focused)
   timers = $Timers.create()
 
@@ -159,13 +159,19 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         })
 
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.HTMLElement.prototype.blur = ->
         focused.interceptBlur(this)
 
+      contentWindow.HTMLElement.prototype.blur = ->
+        focused.interceptBlur(this)
+
+      contentWindow.HTMLInputElement.prototype.select = ->
+        $selection.interceptSelect.call(this)
+
       contentWindow.document.hasFocus = ->
-        top.document.hasFocus()
+        focused.documentHasFocus.call(@)
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -632,7 +638,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## focused sync methods
     getFocused: focused.getFocused
-    needsForceFocus: focused.needsForceFocus
     needsFocus: focused.needsFocus
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur

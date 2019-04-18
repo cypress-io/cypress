@@ -8,16 +8,6 @@ const $actionability = require('../../actionability')
 module.exports = (Commands, Cypress, cy, state, config) => {
   const mouse = cy.internal.mouse
 
-  // should never be called unless actAsIfWindowHasFocus = false
-  const flushPrimedFocusEvents = () => {
-    const ElNeedingForceFocus = cy.needsForceFocus()
-
-    if (ElNeedingForceFocus) {
-      cy.fireFocus(ElNeedingForceFocus)
-    }
-
-  }
-
   return Commands.addAll({ prevSubject: 'element' }, {
     click (subject, positionOrX, y, options = {}) {
     //# TODO handle pointer-events: none
@@ -142,8 +132,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           },
 
           onReady: ($elToClick, coords) => {
-
-            flushPrimedFocusEvents()
 
             const { fromWindow, fromViewport } = coords
 
@@ -322,8 +310,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           onReady: ($elToClick, coords) => {
 
-            flushPrimedFocusEvents()
-
             const { fromWindow, fromViewport } = coords
             const forceEl = options.force && $elToClick.get(0)
             const moveEvents = mouse.mouseMove(fromViewport, forceEl)
@@ -494,8 +480,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           },
 
           onReady: ($elToClick, coords) => {
-
-            flushPrimedFocusEvents()
 
             const { fromWindow, fromViewport } = coords
             const forceEl = options.force && $elToClick.get(0)

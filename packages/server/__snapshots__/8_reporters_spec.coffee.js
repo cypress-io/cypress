@@ -10,7 +10,7 @@ The error we received was:
 
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 
-Learn more at stack trace line
+Learn more at https://on.cypress.io/reporters
 
 `
 
@@ -694,6 +694,6 @@ Error: this reporter threw an error
     at stack trace line
     at stack trace line
 
-Learn more at stack trace line
+Learn more at https://on.cypress.io/reporters
 
 `

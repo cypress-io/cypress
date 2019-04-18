@@ -22,6 +22,23 @@ const extract = (envKeys) => {
   return _.transform(envKeys, toCamelObject, {})
 }
 
+/**
+ * Returns true if running on TeamFoundation server.
+ * @see https://technet.microsoft.com/en-us/hh850448(v=vs.92)
+ */
+const isTeamFoundation = () => {
+  return process.env.TF_BUILD && process.env.TF_BUILD_BUILDNUMBER
+}
+
+/**
+ * Returns true if running on Azure CI pipeline.
+ * See environment variables in the issue #3657
+ * @see https://github.com/cypress-io/cypress/issues/3657
+*/
+const isAzureCi = () => {
+  return process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
+}
+
 const isCodeshipBasic = () => {
   return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
 }
@@ -46,10 +63,17 @@ const isWercker = () => {
   return process.env.WERCKER || process.env.WERCKER_MAIN_PIPELINE_STARTED
 }
 
-// top level detection of CI providers by environment variable
-// or a predicate function
+/**
+ * We detect CI providers by detecting an environment variable
+ * unique to the provider, or by calling a function that returns true
+ * for that provider.
+ *
+ * For example, AppVeyor CI has environment the
+ * variable "APPVEYOR" set during run
+ */
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
+  'azure': isAzureCi,
   'bamboo': 'bamboo.buildNumber',
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
@@ -63,7 +87,7 @@ const CI_PROVIDERS = {
   'shippable': 'SHIPPABLE',
   'snap': 'SNAP_CI',
   'teamcity': 'TEAMCITY_VERSION',
-  'teamfoundation': 'TF_BUILD',
+  'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
   'wercker': isWercker,
 }
@@ -96,6 +120,12 @@ const _providerCiParams = () => {
       'APPVEYOR_BUILD_VERSION',
       'APPVEYOR_PULL_REQUEST_NUMBER',
       'APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH',
+    ]),
+    azure: extract([
+      'BUILD_BUILDID',
+      'BUILD_BUILDNUMBER',
+      'BUILD_CONTAINERID',
+      'BUILD_REPOSITORY_URI',
     ]),
     bamboo: extract([
       'bamboo.resultsUrl',
@@ -259,6 +289,13 @@ const _providerCommitParams = function () {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
+    azure: {
+      sha: env.BUILD_SOURCEVERSION,
+      branch: env.BUILD_SOURCEBRANCHNAME,
+      message: env.BUILD_SOURCEVERSIONMESSAGE,
+      authorName: env.BUILD_SOURCEVERSIONAUTHOR,
+      authorEmail: env.BUILD_REQUESTEDFOREMAIL,
+    },
     bamboo: {
       // sha: ???
       branch: env['bamboo.planRepository.branch'],
@@ -408,9 +445,11 @@ const commitDefaults = function (existingInfo) {
   debug(existingInfo)
 
   const providerName = provider()
+
   debug('detected provider name: %s', providerName)
 
   let commitParamsObj = commitParams()
+
   if (!commitParamsObj) {
     debug('could not get commit param object, using empty one')
     commitParamsObj = {}

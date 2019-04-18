@@ -16,6 +16,7 @@ const _ = require('lodash')
 const $jquery = require('./jquery')
 const $document = require('./document')
 const $elements = require('./elements')
+
 const $coordinates = require('./coordinates')
 
 const fixedOrAbsoluteRe = /(fixed|absolute)/

@@ -1,3 +1,6 @@
+/* eslint-disable
+    no-cond-assign,
+*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -8,6 +11,7 @@
  */
 const $document = require('./document')
 const $elements = require('./elements')
+const $dom = require('../dom')
 
 const INTERNAL_STATE = '__Cypress_state__'
 
@@ -19,6 +23,8 @@ const _getSelectionBoundsFromTextarea = (el) => {
 }
 
 const _getSelectionBoundsFromInput = function (el) {
+  let internalState
+
   if ($elements.canSetSelectionRangeElement(el)) {
     return {
       start: $elements.getNativeProp(el, 'selectionStart'),
@@ -26,9 +32,7 @@ const _getSelectionBoundsFromInput = function (el) {
     }
   }
 
-  const internalState = el[INTERNAL_STATE]
-
-  if (internalState) {
+  if ((internalState = el[INTERNAL_STATE])) {
     return {
       start: internalState.start,
       end: internalState.end,
@@ -147,19 +151,34 @@ const getHostContenteditable = function (el) {
   return curEl
 }
 
-const _getInnerLastChild = function (el) {
-  while (el.lastChild) {
-    el = el.lastChild
-  }
+// const _getInnerLastChild = function (el) {
+//   while (el.lastChild) {
+//     el = el.lastChild
+//   }
 
-  return el
-}
+//   return el
+// }
 
+/**
+ *
+ * @param {HTMLElement} el
+ * @returns {Selection}
+ */
 const _getSelectionByEl = function (el) {
   const doc = $document.getDocumentFromElement(el)
 
   return doc.getSelection()
 }
+
+// const _getSelectionRangeByEl = function (el) {
+//   const sel = _getSelectionByEl(el)
+
+//   if (sel.rangeCount > 0) {
+//     return sel.getRangeAt(0)
+//   }
+
+//   throw new Error('No selection in document')
+// }
 
 const deleteSelectionContents = function (el) {
   if ($elements.isContentEditable(el)) {
@@ -175,22 +194,16 @@ const deleteSelectionContents = function (el) {
 }
 
 const setSelectionRange = function (el, start, end) {
-
-  if ($elements.canSetSelectionRangeElement(el)) {
-    $elements.callNativeMethod(el, 'setSelectionRange', start, end)
-
-    return
-  }
+  $elements.callNativeMethod(el, 'setSelectionRange', start, end)
 
   //# NOTE: Some input elements have mobile implementations
   //# and thus may not always have a cursor, so calling setSelectionRange will throw.
   //# we are assuming desktop here, so we store our own internal state.
 
-  el[INTERNAL_STATE] = {
-    start,
-    end,
-  }
-
+  // el[INTERNAL_STATE] = {
+  //   start,
+  //   end,
+  // }
 }
 
 const deleteRightOfCursor = function (el) {
@@ -212,7 +225,13 @@ const deleteRightOfCursor = function (el) {
   if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    $elements.callNativeMethod(selection, 'modify', 'extend', 'forward', 'character')
+    $elements.callNativeMethod(
+      selection,
+      'modify',
+      'extend',
+      'forward',
+      'character'
+    )
 
     if ($elements.getNativeProp(selection, 'isCollapsed')) {
       //# there's nothing to delete
@@ -246,7 +265,13 @@ const deleteLeftOfCursor = function (el) {
     //# there is no 'backwardDelete' command for execCommand, so use the Selection API
     const selection = _getSelectionByEl(el)
 
-    $elements.callNativeMethod(selection, 'modify', 'extend', 'backward', 'character')
+    $elements.callNativeMethod(
+      selection,
+      'modify',
+      'extend',
+      'backward',
+      'character'
+    )
 
     if (selection.isCollapsed) {
       //# there's nothing to delete
@@ -283,19 +308,15 @@ const moveCursorLeft = function (el) {
   if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    return $elements.callNativeMethod(selection, 'modify', 'move', 'backward', 'character')
+    return $elements.callNativeMethod(
+      selection,
+      'modify',
+      'move',
+      'backward',
+      'character'
+    )
   }
 }
-
-// const _getSelectionRangeByEl = function (el) {
-//   const sel = _getSelectionByEl(el)
-
-//   if (sel.rangeCount > 0) {
-//     return sel.getRangeAt(0)
-//   }
-
-//   throw new Error('No selection in document')
-// }
 
 //# Keeping around native implementation
 //# for same reasons as listed below
@@ -325,7 +346,13 @@ const moveCursorRight = function (el) {
   if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    return $elements.callNativeMethod(selection, 'modify', 'move', 'forward', 'character')
+    return $elements.callNativeMethod(
+      selection,
+      'modify',
+      'move',
+      'forward',
+      'character'
+    )
   }
 }
 
@@ -339,9 +366,9 @@ const moveCursorDown = (el) => {
 
 const _moveCursorUpOrDown = function (el, up) {
   if ($elements.isInput(el)) {
-  //# on an input, instead of moving the cursor
-  //# we want to perform the native browser action
-  //# which is to increment the step/interval
+    //# on an input, instead of moving the cursor
+    //# we want to perform the native browser action
+    //# which is to increment the step/interval
     if ($elements.isType(el, 'number')) {
       if (up) {
         if (typeof el.stepUp === 'function') {
@@ -360,11 +387,31 @@ const _moveCursorUpOrDown = function (el, up) {
   if ($elements.isTextarea(el) || $elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    return $elements.callNativeMethod(selection, 'modify',
+    return $elements.callNativeMethod(
+      selection,
+      'modify',
       'move',
       up ? 'backward' : 'forward',
       'line'
     )
+  }
+}
+
+const moveCursorToLineStart = (el) => {
+  return _moveCursorToLineStartOrEnd(el, true)
+}
+
+const moveCursorToLineEnd = (el) => {
+  return _moveCursorToLineStartOrEnd(el, false)
+}
+
+const _moveCursorToLineStartOrEnd = function (el, toStart) {
+  if ($elements.isContentEditable(el) || $elements.isInput(el) || $elements.isTextarea(el)) {
+    const selection = _getSelectionByEl(el)
+
+    // the selection.modify API is non-standard, may work differently in other browsers, and is not in IE11.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Selection/modify
+    return $elements.callNativeMethod(selection, 'modify', 'move', toStart ? 'backward' : 'forward', 'lineboundary')
   }
 }
 
@@ -382,18 +429,24 @@ const isCollapsed = function (el) {
   }
 }
 
-const selectAll = function (el) {
-  if ($elements.isTextarea(el) || $elements.isInput(el)) {
+const selectAll = function () {
+  const el = _getActive()
+
+  if ($elements.canSetSelectionRangeElement(el)) {
     setSelectionRange(el, 0, $elements.getNativeProp(el, 'value').length)
 
     return
   }
 
-  if ($elements.isContentEditable(el)) {
-    const doc = $document.getDocumentFromElement(el)
+  const doc = $document.getDocumentFromElement(el)
 
-    return $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
-  }
+  return $elements.callNativeMethod(
+    doc,
+    'execCommand',
+    'selectAll',
+    false,
+    null
+  )
 }
 //# Keeping around native implementation
 //# for same reasons as listed below
@@ -424,38 +477,76 @@ const getSelectionBounds = function (el) {
   }
 }
 
-const moveSelectionToEnd = function (el) {
-  let length
+const moveSelectionToEnd = () => {
+  return _moveSelectionTo(false)
+}
 
-  if ($elements.isInput(el) || $elements.isTextarea(el)) {
-    ({ length } = $elements.getNativeProp(el, 'value'))
+const moveSelectionToStart = () => {
+  return _moveSelectionTo(true)
+}
 
-    return setSelectionRange(el, length, length)
+const _moveSelectionTo = function (toStart) {
+  const el = _getActive()
 
-  }
+  if ($elements.canSetSelectionRangeElement(el)) {
+    let cursorPosition
 
-  if ($elements.isContentEditable(el)) {
-    //# NOTE: can't use execCommand API here because we would have
-    //# to selectAll and then collapse so we use the Selection API
-    const doc = $document.getDocumentFromElement(el)
-    const range = $elements.callNativeMethod(doc, 'createRange')
-    const hostContenteditable = getHostContenteditable(el)
-    let lastTextNode = _getInnerLastChild(hostContenteditable)
-
-    if (lastTextNode.tagName === 'BR') {
-      lastTextNode = lastTextNode.parentNode
+    if (toStart) {
+      cursorPosition = 0
+    } else {
+      cursorPosition = $elements.getNativeProp(el, 'value').length
     }
 
-    range.setStart(lastTextNode, lastTextNode.length)
-    range.setEnd(lastTextNode, lastTextNode.length)
+    setSelectionRange(el, cursorPosition, cursorPosition)
 
-    const sel = $elements.callNativeMethod(doc, 'getSelection')
-
-    $elements.callNativeMethod(sel, 'removeAllRanges')
-
-    return $elements.callNativeMethod(sel, 'addRange', range)
+    return
   }
+
+  // if (el) {
+  /**
+   * @type {HTMLDocument}
+   */
+  const doc = $document.getDocumentFromElement(el)
+
+  $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
+  const selection = doc.getSelection()
+
+  // collapsing the range doesn't work on input/textareas, since the range contains more than the input element
+  // However, IE can always* set selection range, so only modern browsers (with the selection API) will need this
+  const direction = toStart ? 'backward' : 'forward'
+
+  selection.modify('move', direction, 'line')
+
+  // if (selection.rangeCount > 0) {
+  // const range = selection.getRangeAt(0)
+  // range.collapse(toStart)
+  // doc.getSelection().removeAllRanges()
+  // selection.addRange(range)
+  // }
+  // }
 }
+
+// if $elements.isInput(el) || $elements.isTextarea(el)
+//   length = $elements.getNativeProp(el, "value").length
+//   setSelectionRange(el, length, length)
+
+// else if $elements.isContentEditable(el)
+//   ## NOTE: can't use execCommand API here because we would have
+//   ## to selectAll and then collapse so we use the Selection API
+//   # doc = $document.getDocumentFromElement(el)
+//   # range = $elements.callNativeMethod(doc, "createRange")
+//   # hostContenteditable = _getHostContenteditable(el)
+//   # lastTextNode = _getInnerLastChild(hostContenteditable)
+
+//   # if lastTextNode.tagName is "BR"
+//   #   lastTextNode = lastTextNode.parentNode
+
+//   # range.setStart(lastTextNode, lastTextNode.length)
+//   # range.setEnd(lastTextNode, lastTextNode.length)
+
+//   # sel = $elements.callNativeMethod(doc, "getSelection")
+//   # $elements.callNativeMethod(sel, "removeAllRanges")
+//   # $elements.callNativeMethod(sel, "addRange", range)
 
 //# TODO: think about renaming this
 const replaceSelectionContents = function (el, key) {
@@ -478,7 +569,7 @@ const replaceSelectionContents = function (el, key) {
 const getCaretPosition = function (el) {
   const bounds = getSelectionBounds(el)
 
-  if ((bounds.start == null)) {
+  if (bounds.start == null) {
     //# no selection
     return null
   }
@@ -496,6 +587,42 @@ const interceptSelect = function () {
   }
 
   return $elements.callNativeMethod(this, 'select')
+}
+
+const _getActive = function () {
+  // TODO: remove this state access
+  // eslint-disable-next-line
+  const doc = cy.state('document')
+  const activeEl = $elements.getNativeProp(doc, 'activeElement')
+
+  return activeEl
+}
+
+// const getFirstFocusable = (el) => {
+//   if ($elements.isContentEditable(el)) {
+//     const hostContenteditable = _getHostContenteditable(el)
+
+//     return hostContenteditable
+//   }
+
+//   return el
+// }
+
+const focusCursor = function (el) {
+
+  const elToFocus = $elements.getFirstFocusableEl($dom.wrap(el)).get(0)
+
+  const prevFocused = _getActive()
+
+  elToFocus.focus()
+
+  if ($elements.isInput(elToFocus) || $elements.isTextarea(elToFocus)) {
+    moveSelectionToEnd()
+  }
+
+  if ($elements.isContentEditable(elToFocus) && prevFocused !== elToFocus) {
+    moveSelectionToEnd()
+  }
 }
 
 //# Selection API implementation of insert newline.
@@ -580,13 +707,17 @@ module.exports = {
   selectAll,
   deleteSelectionContents,
   moveSelectionToEnd,
+  moveSelectionToStart,
   getCaretPosition,
   getHostContenteditable,
   moveCursorLeft,
   moveCursorRight,
   moveCursorUp,
   moveCursorDown,
+  moveCursorToLineStart,
+  moveCursorToLineEnd,
   replaceSelectionContents,
   isCollapsed,
   interceptSelect,
+  focusCursor,
 }

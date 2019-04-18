@@ -324,12 +324,6 @@ const create = (state, focused) => {
         return mouseDownEvents
       }
 
-      if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
-        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
-          $selection.moveSelectionToEnd(el)
-        }
-      }
-
       //# retrieve the first focusable $el in our parent chain
       const $elToFocus = $elements.getFirstFocusableEl($(el))
 
@@ -337,10 +331,8 @@ const create = (state, focused) => {
         focused.fireFocus($elToFocus.get(0))
 
         //# if we are currently trying to focus
-        //# the body then calling body.focus()
-        //# is a noop, and it will not blur the
-        //# current element, which is all so wrong
-        if ($elToFocus.is('body')) {
+        //# the window, blur currently focused el
+        if ($dom.isWindow($elToFocus)) {
           const $focused = focused.getFocused()
 
           //# if the current focused element hasn't changed
@@ -348,6 +340,14 @@ const create = (state, focused) => {
           if ($elements.isSame($focused, $previouslyFocused)) {
             focused.fireBlur($focused.get(0))
           }
+        }
+      }
+
+      const successfulFocus = $elements.isSame($elToFocus, focused.getFocused())
+
+      if (successfulFocus && $elements.isTextLike($elToFocus.get(0))) {
+        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
+          $selection.moveSelectionToEnd()
         }
       }
 

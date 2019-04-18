@@ -19,7 +19,7 @@ const moment = require('moment')
 const $dom = require('../../../dom')
 const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
-const $Keyboard = require('../../keyboard')
+// const $Keyboard = require('../../keyboard')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
 
@@ -93,7 +93,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
           return memo
         }
-          , {})
+        , {})
       }
 
       options._log = Cypress.log({
@@ -126,7 +126,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const $el = $dom.wrap(el)
       const numElements = $el.length
       const isBody = $el.is('body')
-      const isTextLike = $dom.isTextLike($el)
+      const isTextLike = $dom.isTextLike($el.get(0))
       const isDate = $dom.isType($el, 'date')
       const isTime = $dom.isType($el, 'time')
       const isMonth = $dom.isType($el, 'month')
@@ -554,11 +554,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         onReady ($elToClick) {
           const $focused = cy.getFocused()
-          let el = cy.needsForceFocus()
-
-          if (el) {
-            cy.fireFocus(el)
-          }
 
           //# if we dont have a focused element
           //# or if we do and its not ourselves
@@ -584,8 +579,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               return type()
 
               // BEOW DOES NOT APPLY
-            // cannot just call .focus, since children of contenteditable will not receive cursor
-            // with .focus()
+              // cannot just call .focus, since children of contenteditable will not receive cursor
+              // with .focus()
 
             // focusCursor calls focus on first focusable
             // then moves cursor to end if in textarea, input, or contenteditable
@@ -651,7 +646,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       const node = $dom.stringify($el)
 
-      if (!$dom.isTextLike($el)) {
+      if (!$dom.isTextLike($el.get(0))) {
         const word = $utils.plural(subject, 'contains', 'is')
 
         $utils.throwErrByPath('clear.invalid_element', {
@@ -693,7 +688,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   }
 
   Cypress.on('test:before:run', () => {
-    return $Keyboard.resetModifiers(state('document'), state('window'))
+    return keyboard.resetModifiers(state('document'), state('window'))
   })
 
   return Commands.addAll(

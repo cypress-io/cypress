@@ -1,3 +1,4 @@
+/// <reference path="../../../../../../../cli/types/index.d.ts"/>
 /* eslint arrow-body-style:0 arrow-parens:0 */
 
 const $ = Cypress.$.bind(Cypress)
@@ -235,7 +236,6 @@ describe('src/cy/commands/actions/click', function () {
     })
 
     it('will send all events even mousedown is defaultPrevented', () => {
-
       const $btn = cy.$$('#button')
 
       $btn.get(0).addEventListener('mousedown', (e) => {
@@ -404,7 +404,7 @@ describe('src/cy/commands/actions/click', function () {
       cy.get('button:first').click()
 
       cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(stub => {
-        expect(stub).to.be.calledWithMatch({
+        expect(stub.args[0][0]).to.matchEql({
           shiftKey: true,
           ctrlKey: true,
           metaKey: false,
@@ -503,7 +503,7 @@ describe('src/cy/commands/actions/click', function () {
 
           done()
         }
-          , 100)
+        , 100)
       })
 
       cy.get('#sequential-clicks a').click({ multiple: true })
@@ -1136,7 +1136,7 @@ describe('src/cy/commands/actions/click', function () {
           _.delay(() => {
             $(this).addClass('clicked')
           }
-            , 50)
+          , 50)
 
           return false
         })
@@ -1156,7 +1156,7 @@ describe('src/cy/commands/actions/click', function () {
           _.delay(() => {
             $(this).addClass('clicked')
           }
-            , 50)
+          , 50)
 
           return false
         })
@@ -1449,12 +1449,39 @@ describe('src/cy/commands/actions/click', function () {
         .focused().should('have.id', 'button-covered-in-span')
       })
 
+      it('focus window', () => {
+        const stub = cy.stub()
+        .callsFake(() => {
+          // debugger
+        })
+        // const win = cy.state('window')
+        const win = cy.$$('*')
+
+        cy.$$(cy.state('window')).on('focus', cy.stub().as('win'))
+
+        cy.$$(cy.state('document')).on('focus', cy.stub().as('doc'))
+
+        // $(win).on('focus', stub)
+        win.on('focus', stub)
+
+        cy.get('li').first().then(el => el.focus().focus().focus())
+
+        // win.focus()
+        // win.focus()
+        // win.focus()
+      })
+
       it('will not fire focus events when nothing can receive focus', () => {
         const onFocus = cy.stub()
+        .callsFake(() => {
+          debugger
+        })
 
         const win = cy.state('window')
         const $body = cy.$$('body')
         const $div = cy.$$('#nested-find')
+
+        // win.focus()
 
         $(win).on('focus', onFocus)
         $body.on('focus', onFocus)
@@ -2408,7 +2435,7 @@ describe('src/cy/commands/actions/click', function () {
 
           done()
         }
-          , 200)
+        , 200)
       })
 
       cy.get('#sequential-clicks a').dblclick()

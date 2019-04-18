@@ -4,13 +4,27 @@ $elements = require("../dom/elements")
 $actionability = require("./actionability")
 
 create = (state) ->
+
+  documentHasFocus = () ->
+    ## hardcode document has focus as true
+    ## since the test should assume the window
+    ## is in focus the entire time
+    return true
+
   fireBlur = (el) ->
     win = $window.getWindowByElement(el)
 
     hasBlurred = false
 
-    hasFocus = top.document.hasFocus()
+    hasFocus = $elements.callNativeMethod(top.document, 'hasFocus')
 
+    ## if our document does not have focus
+    ## then that means that we need to attempt to
+    ## bring our window into focus, and then figure
+    ## out if the browser fires the native focus
+    ## event - and if it doesn't, to flag this
+    ## element as needing focus on the next action
+    ## command
     if not hasFocus
       win.focus()
 
@@ -43,7 +57,7 @@ create = (state) ->
     ## to simulate the focus + focusin
     if not hasBlurred
       simulateBlurEvent(el, win)
-  
+
   simulateBlurEvent = (el, win) ->
     ## todo handle relatedTarget's per the spec
     focusoutEvt = new FocusEvent "focusout", {
@@ -73,6 +87,9 @@ create = (state) ->
     $actionability.dispatchPrimedChangeEvents(state)
 
     win = $window.getWindowByElement(el)
+    
+    if el is win
+      return
 
     ## store the current focused element
     ## since when we call .focus() it will change
@@ -80,8 +97,15 @@ create = (state) ->
 
     hasFocused = false
 
-    hasFocus = top.document.hasFocus()
-    
+    hasFocus = $elements.callNativeMethod(top.document, 'hasFocus')
+
+    ## if our document does not have focus
+    ## then that means that we need to attempt to
+    ## bring our window into focus, and then figure
+    ## out if the browser fires the native focus
+    ## event - and if it doesn't, to flag this
+    ## element as needing focus on the next action
+    ## command
     if not hasFocus
       win.focus()
 
@@ -132,8 +156,6 @@ create = (state) ->
     focusEvt = new FocusEvent "focus", {
       view: win
       relatedTarget: null
-      isTrusted: false
-
     }
 
     ## not fired in the correct order per w3c spec
@@ -144,70 +166,32 @@ create = (state) ->
     el.dispatchEvent(focusEvt)
     el.dispatchEvent(focusinEvt)
 
-
   interceptFocus = (el, contentWindow, focusOption) ->
     ## normally programmatic focus calls cause "primed" focus/blur
     ## events if the window is not in focus
     ## so we fire fake events to act as if the window
-    ## is in focus. The primed events will fire when the user returns however
-    ## actAsIfWindowHasFocus is true by default
-    if (state('actAsIfWindowHasFocus'))
+    ## is always in focus
+
+    $focused = getFocused()
+
+    if $elements.isFocusable($dom.wrap(el)) && (!$focused || $focused[0] isnt el)
       fireFocus(el)
-      return
-      
-    ## if our document does not have focus
-    ## then that means that we need to attempt to
-    ## bring our window into focus, and then figure
-    ## out if the browser fires the native focus
-    ## event - and if it doesn't, to flag this
-    ## element as needing focus on the next action
-    ## command
-    hasFocus = top.document.hasFocus()
 
-    if not hasFocus
-      contentWindow.focus()
-
-      didReceiveFocus = false
-
-      onFocus = ->
-        didReceiveFocus = true
-
-      $elements.callNativeMethod(el, "addEventListener", "focus", onFocus)
-
-    evt = $elements.callNativeMethod(el, "focus", focusOption)
-
-    ## always unbind if added listener
-    if onFocus
-      $elements.callNativeMethod(el, "removeEventListener", "focus", onFocus)
-
-      ## if we didn't receive focus
-      if not didReceiveFocus
-        ## then store this element as needing
-        ## force'd focus later on
-        state("needsForceFocus", el)
-
-    return evt
+    $elements.callNativeMethod(el, 'focus')
+    return
 
   interceptBlur = (el) ->
-    ## normally programmatic focus calls cause "primed" focus/blur
+    ## normally programmatic blur calls cause "primed" focus/blur
     ## events if the window is not in focus
     ## so we fire fake events to act as if the window
-    ## is in focus. The primed events will fire when the user returns however
-    ## actAsIfWindowHasFocus is true by default
-    if (state('actAsIfWindowHasFocus'))
+    ## is always in focus.
+    $focused = getFocused()
+    if $focused && $focused[0] is el
       fireBlur(el)
-      return
-    
-    return $elements.callNativeMethod(el, 'blur')
 
-  needsForceFocus = ->
-    ## if we have a primed focus event then
-    if needsForceFocus = state("needsForceFocus")
-      ## always reset it
-      state("needsForceFocus", null)
+    $elements.callNativeMethod(el, 'blur')
+    return
 
-    ## and return whatever needs force focus
-    return needsForceFocus
 
   needsFocus = ($elToFocus, $previouslyFocusedEl) ->
     $focused = getFocused()
@@ -253,9 +237,9 @@ create = (state) ->
 
     interceptFocus
 
-    interceptBlur
+    interceptBlur,
 
-    needsForceFocus
+    documentHasFocus,
   }
 
 module.exports = {

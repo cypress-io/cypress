@@ -40,7 +40,7 @@ module.exports = {
 
       allowDestroy(srv)
 
-      srv.listen ->
+      srv.listen 0, '127.0.0.1', ->
         resolve({
           port: ->
             srv.address().port
@@ -50,5 +50,5 @@ module.exports = {
 
           close: ->
             srv.destroyAsync()
-      })
+        })
 }
