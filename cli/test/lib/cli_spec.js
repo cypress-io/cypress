@@ -9,7 +9,7 @@ const open = require(`${lib}/exec/open`)
 const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const execa = require('execa-wrap')
 
 describe('cli', () => {

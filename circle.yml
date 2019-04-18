@@ -384,6 +384,8 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
+          environment:
+            DEBUG: cypress:*
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -518,6 +520,8 @@ jobs:
           background: true
       - run:
           name: Run Kitchensink example project
+          environment:
+            DEBUG: cypress:*
           command: |
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
@@ -586,7 +590,7 @@ jobs:
             - npm-package-url.json
             - cypress.tgz
 
-  "test-next-version":
+  "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -620,7 +624,7 @@ jobs:
               --binary /tmp/urls/binary-url.json \
               --provider circle
 
-  "test-next-version-locally":
+  "test-npm-module-and-verify-binary":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -705,6 +709,8 @@ jobs:
           background: true
       - run:
           working_directory: /tmp/kitchensink
+          environment:
+            DEBUG: cypress:*
           command: npm run e2e
 
 linux-workflow: &linux-workflow
@@ -796,7 +802,7 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build
-    - test-next-version:
+    - test-binary-and-npm-against-other-projects:
         filters:
           branches:
             only:
@@ -804,7 +810,7 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
           - build-binary
-    - test-next-version-locally:
+    - test-npm-module-and-verify-binary:
         filters:
           branches:
             only:
@@ -860,7 +866,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - fix-typescript-binary-building
         requires:
           - Mac build
 

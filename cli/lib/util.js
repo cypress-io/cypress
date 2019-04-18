@@ -9,7 +9,6 @@ const getos = require('getos')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const cachedir = require('cachedir')
-const getWindowsProxy = require('@cypress/get-windows-proxy')
 const executable = require('executable')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
@@ -86,30 +85,6 @@ const util = {
       FORCE_COLOR: sc,
       DEBUG_COLORS: sc,
       MOCHA_COLORS: sc ? true : undefined,
-    }
-  },
-
-  _getWindowsProxy () {
-    return getWindowsProxy()
-  },
-
-  loadSystemProxySettings () {
-    // load user's OS-specific proxy settings in to environment vars
-    if (!_.isUndefined(process.env.HTTP_PROXY) || !_.isUndefined(process.env.http_proxy)) {
-      // user has set proxy explicitly in environment vars, don't mess with it
-      return
-    }
-
-    if (os.platform() === 'win32') {
-      const proxy = this._getWindowsProxy()
-
-      if (proxy) {
-        // environment variables are the only way to make request lib use NO_PROXY
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = proxy.httpProxy
-        process.env.NO_PROXY = process.env.NO_PROXY || proxy.noProxy
-      }
-
-      return 'win32'
     }
   },
 
