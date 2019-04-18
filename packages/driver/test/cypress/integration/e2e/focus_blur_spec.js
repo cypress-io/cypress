@@ -237,7 +237,7 @@ describe('polyfill programmatic blur events', () => {
       $one.get(0).focus()
 
       // a hack here becuase we nuked the real .focus
-      setActiveElement($one.get())
+      setActiveElement($one.get(0))
 
       $one.get(0).blur()
 
