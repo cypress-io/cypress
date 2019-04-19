@@ -1,4 +1,11 @@
+/* eslint-disable no-console */
+
+const Promise = require('bluebird')
+const humanInterval = require('human-interval')
 const cypress = require('./cli')
+
+const oneHour = humanInterval('1 hour')
+const threeMinutes = humanInterval('3 minutes')
 
 const run = () => {
   return cypress.run({
@@ -8,7 +15,7 @@ const run = () => {
       video: false,
     },
   })
-  .timeout(5 * 60 * 1000)
+  .timeout(threeMinutes)
   .then((res) => {
     if (res.totalFailed === 0) {
       return run()
@@ -18,7 +25,13 @@ const run = () => {
   })
 }
 
+// run for a maximum of 1 hour
+// and then stop
 run()
-.then((res) => {
-  console.log(res)
+.timeout(oneHour)
+.then(console.log)
+.catch(Promise.TimeoutError, (err) => {
+  console.log('exiting due to timeout', err.message)
+
+  process.exit(1)
 })

@@ -140,6 +140,17 @@ export class CombinedAgent {
 
       const agent = isHttps ? this.httpsAgent : this.httpAgent
 
+      debug('agent addRequest %o', {
+        isHttps,
+        href: options.href,
+        freeSocketCount: _.keys(agent.freeSockets).length,
+        requestCount: _.keys(agent.requests).length,
+        socketCount: _.keys(agent.sockets).length,
+        freeSockets: _.keys(agent.freeSockets),
+        requests: _.keys(agent.requests),
+        sockets: _.keys(agent.sockets)
+      })
+
       agent.addRequest(req, options)
     })
   }
