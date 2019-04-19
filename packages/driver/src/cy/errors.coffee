@@ -51,11 +51,10 @@ create = (state, config, log) ->
 
     uncaughtErr = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
     
-    uncaughtErr.name = "Uncaught " + err.name
-    uncaughtErr.stack = err.stack
+    err.name = "Uncaught " + err.name
 
-    uncaughtErr = $errUtils.modifyErrMsg(uncaughtErr, err, (msg1, msg2) ->
-      return "#{msg2}\n\n#{msg1}"
+    uncaughtErr = $errUtils.modifyErrMsg(err, uncaughtErr, (msg1, msg2) ->
+      return "#{msg1}\n\n#{msg2}"
     )
 
     uncaughtErr.onFail = ->
