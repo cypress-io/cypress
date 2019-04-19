@@ -39,7 +39,9 @@ create = (state, config, log) ->
       msg = $errUtils.errMsgByPath("uncaught.cross_origin_script")
 
     createErrFromMsg = ->
-      new Error $errUtils.errObjByPath($errorMessages, "uncaught.error", { msg, source, lineno })
+      new Error $errUtils.errMsgByPath("uncaught.error", { 
+        msg, source, lineno 
+      })
 
     ## if we have the 5th argument it means we're in a super
     ## modern browser making this super simple to work with.
