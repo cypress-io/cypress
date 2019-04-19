@@ -59,7 +59,7 @@ class PermissionMessage extends Component {
           <i className='fa fa-paper-plane'></i>{' '}
           Request access
         </span>
-        <i className='fa fa-spinner fa-spin'></i>
+        <i className='fa fa-spinner fa-pulse'></i>
       </button>
     )
   }

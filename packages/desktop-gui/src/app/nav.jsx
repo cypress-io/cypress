@@ -70,7 +70,7 @@ export default class Nav extends Component {
       return (
         <li>
           <div>
-            <i className='fa fa-user' /> <i className='fa fa-spinner fa-spin' />
+            <i className='fa fa-user' /> <i className='fa fa-spinner fa-pulse' />
           </div>
         </li>
       )
