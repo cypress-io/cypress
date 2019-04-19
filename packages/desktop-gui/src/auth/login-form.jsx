@@ -36,7 +36,7 @@ class LoginForm extends Component {
     if (this.state.isLoggingIn) {
       return (
         <span>
-          <i className='fa fa-spinner fa-spin'></i>{' '}
+          <i className='fa fa-spinner fa-pulse'></i>{' '}
           Logging in...
         </span>
       )
