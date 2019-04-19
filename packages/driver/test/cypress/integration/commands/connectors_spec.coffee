@@ -632,9 +632,9 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.eq("Timed out retrying: expected `foo` to equal `bar`")
+            expect(err.message).to.eq("Timed out retrying: expected 'foo' to equal 'bar'")
 
-            expect(lastLog.get("error").message).to.eq("expected `foo` to equal `bar`")
+            expect(lastLog.get("error").message).to.eq("expected 'foo' to equal 'bar'")
 
             done()
 
@@ -660,13 +660,13 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "Timed out retrying: cy.invoke() errored because the property: 'foo' is not a function, and instead returned a 'undefined' value."
+            expect(err.message).to.include "Timed out retrying: `cy.invoke()` errored because the property: `foo` is not a function, and instead returned a `undefined` value."
 
-            expect(err.message).to.include "cy.invoke() waited for the specified property 'foo' to become a callable function, but it never did."
+            expect(err.message).to.include "`cy.invoke()` waited for the specified property `foo` to become a callable function, but it never did."
 
-            expect(err.message).to.include "If you expect the property 'foo' to be 'undefined', then switch to use cy.its() and add an assertion such as:"
+            expect(err.message).to.include "If you expect the property `foo` to be `undefined`, then switch to use `cy.its()` and add an assertion such as:"
 
-            expect(err.message).to.include "cy.wrap({ foo: undefined }).its('foo').should('be.undefined')"
+            expect(err.message).to.include "`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`"
 
             expect(lastLog.get("error").message).to.include(err.message)
 
@@ -678,7 +678,7 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include("Timed out retrying: cy.invoke() errored because the property: 'baz' does not exist on your subject.")
+            expect(err.message).to.include("Timed out retrying: `cy.invoke()` errored because the property: `baz` does not exist on your subject.")
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -957,13 +957,10 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'foo' does not exist on your subject."
-
-            expect(err.message).to.include "cy.its() waited for the specified property 'foo' to exist, but it never did."
-
-            expect(err.message).to.include "If you do not expect the property 'foo' to exist, then add an assertion such as:"
-
-            expect(err.message).to.include "cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')"
+            expect(err.message).to.include "Timed out retrying: `cy.its()` errored because the property: `foo` does not exist on your subject."
+            expect(err.message).to.include "`cy.its()` waited for the specified property `foo` to exist, but it never did."
+            expect(err.message).to.include "If you do not expect the property `foo` to exist, then add an assertion such as:"
+            expect(err.message).to.include "`cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`"
 
             expect(lastLog.get("error").message).to.include(err.message)
 
@@ -975,13 +972,10 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'foo' returned a 'undefined' value."
-
-            expect(err.message).to.include "cy.its() waited for the specified property 'foo' to become accessible, but it never did."
-
-            expect(err.message).to.include "If you expect the property 'foo' to be 'undefined', then add an assertion such as:"
-
-            expect(err.message).to.include "cy.wrap({ foo: undefined }).its('foo').should('be.undefined')"
+            expect(err.message).to.include "Timed out retrying: `cy.its()` errored because the property: `foo` returned a `undefined` value."
+            expect(err.message).to.include "`cy.its()` waited for the specified property `foo` to become accessible, but it never did."
+            expect(err.message).to.include "If you expect the property `foo` to be `undefined`, then add an assertion such as:"
+            expect(err.message).to.include "`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`"
 
             expect(lastLog.get("error").message).to.include(err.message)
 
@@ -993,13 +987,10 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'foo' returned a 'null' value."
-
-            expect(err.message).to.include "cy.its() waited for the specified property 'foo' to become accessible, but it never did."
-
-            expect(err.message).to.include "If you expect the property 'foo' to be 'null', then add an assertion such as:"
-
-            expect(err.message).to.include "cy.wrap({ foo: null }).its('foo').should('be.null')"
+            expect(err.message).to.include "Timed out retrying: `cy.its()` errored because the property: `foo` returned a `null` value."
+            expect(err.message).to.include "`cy.its()` waited for the specified property `foo` to become accessible, but it never did."
+            expect(err.message).to.include "If you expect the property `foo` to be `null`, then add an assertion such as:"
+            expect(err.message).to.include "`cy.wrap({ foo: null }).its('foo').should('be.null')`"
 
             expect(lastLog.get("error").message).to.include(err.message)
 
@@ -1011,13 +1002,10 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'b' does not exist on your subject."
-
-            expect(err.message).to.include "cy.its() waited for the specified property 'b' to exist, but it never did."
-
-            expect(err.message).to.include "If you do not expect the property 'b' to exist, then add an assertion such as:"
-
-            expect(err.message).to.include "cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')"
+            expect(err.message).to.include "Timed out retrying: `cy.its()` errored because the property: `b` does not exist on your subject."
+            expect(err.message).to.include "`cy.its()` waited for the specified property `b` to exist, but it never did."
+            expect(err.message).to.include "If you do not expect the property `b` to exist, then add an assertion such as:"
+            expect(err.message).to.include "`cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`"
 
             expect(lastLog.get("error").message).to.include(err.message)
 
@@ -1029,13 +1017,10 @@ describe "src/cy/commands/connectors", ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "Timed out retrying: cy.its() errored because the property: 'a' returned a 'undefined' value."
-
-            expect(err.message).to.include "cy.its() waited for the specified property 'a' to become accessible, but it never did."
-
-            expect(err.message).to.include "If you expect the property 'a' to be 'undefined', then add an assertion such as:"
-
-            expect(err.message).to.include "cy.wrap({ foo: undefined }).its('foo').should('be.undefined')"
+            expect(err.message).to.include "Timed out retrying: `cy.its()` errored because the property: `a` returned a `undefined` value."
+            expect(err.message).to.include "`cy.its()` waited for the specified property `a` to become accessible, but it never did."
+            expect(err.message).to.include "If you expect the property `a` to be `undefined`, then add an assertion such as:"
+            expect(err.message).to.include "`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`"
 
             expect(lastLog.get("error").message).to.include(err.message)
 
@@ -1097,13 +1082,10 @@ describe "src/cy/commands/connectors", ->
         [null, undefined].forEach (val) ->
           it "throws on traversed '#{val}' subject", (done) ->
             cy.on "fail", (err) ->
-              expect(err.message).to.include("Timed out retrying: cy.its() errored because the property: 'a' returned a '#{val}' value. The property: 'b' does not exist on a '#{val}' value.")
-
-              expect(err.message).to.include("cy.its() waited for the specified property 'b' to become accessible, but it never did.")
-
-              expect(err.message).to.include("If you do not expect the property 'b' to exist, then add an assertion such as:")
-
-              expect(err.message).to.include("cy.wrap({ foo: #{val} }).its('foo.baz').should('not.exist')")
+              expect(err.message).to.include("Timed out retrying: `cy.its()` errored because the property: `a` returned a `#{val}` value. The property: `b` does not exist on a `#{val}` value.")
+              expect(err.message).to.include("`cy.its()` waited for the specified property `b` to become accessible, but it never did.")
+              expect(err.message).to.include("If you do not expect the property `b` to exist, then add an assertion such as:")
+              expect(err.message).to.include("`cy.wrap({ foo: #{val} }).its('foo.baz').should('not.exist')`")
 
               done()
 
@@ -1112,9 +1094,7 @@ describe "src/cy/commands/connectors", ->
           it "throws on initial '#{val}' subject", (done) ->
             cy.on "fail", (err) ->
               expect(err.message).to.include("Timed out retrying: `cy.its()` errored because your subject is: `#{val}`. You cannot access any properties such as `foo` on a `#{val}` value.")
-
               expect(err.message).to.include("If you expect your subject to be `#{val}`, then add an assertion such as:")
-
               expect(err.message).to.include("`cy.wrap(#{val}).should('be.#{val}')`")
 
               done()
@@ -1160,13 +1140,13 @@ describe "src/cy/commands/connectors", ->
               Command: "its"
               Property: ".fizz.buzz"
               Error: """
-              CypressError: Timed out retrying: cy.its() errored because the property: 'fizz' does not exist on your subject.
+              CypressError: Timed out retrying: `cy.its()` errored because the property: `fizz` does not exist on your subject.
 
-              cy.its() waited for the specified property 'fizz' to exist, but it never did.
+              `cy.its()` waited for the specified property `fizz` to exist, but it never did.
 
-              If you do not expect the property 'fizz' to exist, then add an assertion such as:
+              If you do not expect the property `fizz` to exist, then add an assertion such as:
 
-              cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')
+              `cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`
               """
               Subject: {foo: "bar"}
               Yielded: undefined
