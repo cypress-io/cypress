@@ -68,8 +68,8 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "failed",
           "body": "function () {}",
-          "stack": "Error: fail1\n\nBecause this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'\n    at stack trace line",
-          "error": "fail1\n\nBecause this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'",
+          "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'\n    at stack trace line",
+          "error": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'",
           "timings": {
             "lifecycle": 100,
             "before each": [
@@ -111,8 +111,8 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "failed",
           "body": "function () {}",
-          "stack": "Error: fail2\n\nBecause this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'\n    at stack trace line",
-          "error": "fail2\n\nBecause this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'",
+          "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: 'afterEach hooks'\n    at stack trace line",
+          "error": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: 'afterEach hooks'",
           "timings": {
             "lifecycle": 100,
             "test": {
@@ -181,8 +181,8 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "failed",
           "body": "function () {}",
-          "stack": "Error: fail3\n\nBecause this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'\n    at stack trace line",
-          "error": "fail3\n\nBecause this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'",
+          "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: 'after hooks'\n    at stack trace line",
+          "error": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: 'after hooks'",
           "timings": {
             "lifecycle": 100,
             "test": {
