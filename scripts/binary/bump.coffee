@@ -176,7 +176,6 @@ module.exports = {
   # the test projects will exercise the new version of
   # the Cypress test runner we just built
   runTestProjects: (getStatusAndMessage, providerName, version) ->
-    # status is {owner, repo, sha}
 
     projectFilter = getFilterByProvider(providerName)
 
@@ -216,6 +215,18 @@ module.exports = {
 
       createGithubCommitStatusCheck = ({ sha }) ->
         return if not status
+
+        # status is {owner, repo, sha} and maybe a few other properties
+        isStatus = check.schema({
+          owner: check.unemptyString,
+          repo: check.unemptyString,
+          sha: check.commitId,
+          context: check.unemptyString,
+          platform: check.unemptyString,
+          arch: check.unemptyString
+        })
+        if not isStatus(status)
+          console.error("Invalid status object %o", status)
 
         targetUrl = "https://github.com/#{owner}/#{repo}/commit/#{sha}"
         commitStatusOptions = {
