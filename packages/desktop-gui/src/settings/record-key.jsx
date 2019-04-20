@@ -107,7 +107,7 @@ class RecordKey extends Component {
     if (this.isLoading) {
       return (
         <p className='loading-record-keys'>
-          <i className='fa fa-spinner fa-pulse'></i>{' '}
+          <i className='fa fa-spinner fa-spin'></i>{' '}
           Loading Keys...
         </p>
       )
