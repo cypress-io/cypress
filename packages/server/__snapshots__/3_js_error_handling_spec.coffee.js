@@ -82,7 +82,7 @@ We cannot provide you the stack trace, line number, or file where this error occ
 
 Check your Developer Tools Console for the actual error - it should be printed there.
 
-It's possible to enable debugging these scripts by adding the 'crossorigin' attribute and setting a CORS header.
+It's possible to enable debugging these scripts by adding the \`crossorigin\` attribute and setting a CORS header.
 
 https://on.cypress.io/cross-origin-script-error
 
