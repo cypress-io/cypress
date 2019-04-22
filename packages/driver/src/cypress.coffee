@@ -456,6 +456,10 @@ class $Cypress
   addUtilityCommand: (key, fn) ->
     throwPrivateCommandInterface("addUtilityCommand")
 
+
+
+  _.extend($dom, { $Keyboard })
+
   $: jqueryProxyFn
 
   ## attach to $Cypress to access

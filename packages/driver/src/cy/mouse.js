@@ -4,7 +4,8 @@ const $ = require('jquery')
 const _ = require('lodash')
 const $Keyboard = require('./keyboard')
 const $selection = require('../dom/selection')
-
+const Debug = require('debug')
+const debug = Debug('driver:mouse:1')
 /**
  * @typedef Coords
  * @property {number} x
@@ -347,7 +348,8 @@ const create = (state, focused) => {
 
       if (successfulFocus && $elements.isTextLike($elToFocus.get(0))) {
         if (!$elements.isNeedSingleValueChangeInputElement(el)) {
-          $selection.moveSelectionToEnd()
+          debug('moveSelectionToEnd')
+          $selection.moveSelectionToEnd($dom.getDocumentFromElement(el))
         }
       }
 

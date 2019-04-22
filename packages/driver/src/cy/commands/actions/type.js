@@ -19,9 +19,10 @@ const moment = require('moment')
 const $dom = require('../../../dom')
 const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
-// const $Keyboard = require('../../keyboard')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
+const Debug = require('debug')
+const debug = Debug('driver:command:type')
 
 const inputEvents = 'textInput input'.split(' ')
 
@@ -33,8 +34,10 @@ const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.internal
+  const $Keyboard = Cypress.dom.$Keyboard
 
   function type (subject, chars, options = {}) {
+    debug('type:', chars)
     let updateTable
 
     options = _.clone(options)
@@ -62,7 +65,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          const modifiers = keyboard.modifiersToString(keyboard.getActiveModifiers(state))
+          const modifiers = $Keyboard.modifiersToString($Keyboard.getActiveModifiers(state))
 
           if (modifiers) {
             obj.modifiers = modifiers
@@ -122,136 +125,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       options._log.snapshot('before', { next: 'after' })
     }
 
-    const validateTyping = (el, chars) => {
-      const $el = $dom.wrap(el)
-      const numElements = $el.length
-      const isBody = $el.is('body')
-      const isTextLike = $dom.isTextLike($el.get(0))
-      const isDate = $dom.isType($el, 'date')
-      const isTime = $dom.isType($el, 'time')
-      const isMonth = $dom.isType($el, 'month')
-      const isWeek = $dom.isType($el, 'week')
-      const isDateTime =
-        $dom.isType($el, 'datetime') || $dom.isType($el, 'datetime-local')
-      const hasTabIndex = $dom.isSelector($el, '[tabindex]')
-
-      const isEmptyChars = _.isEmpty(chars)
-      const isClearChars = _.startsWith(_.lowerCase(chars), '{selectall}{del}')
-      //# TODO: tabindex can't be -1
-      //# TODO: can't be readonly
-
-      const isTypeableButNotAnInput = isBody || (hasTabIndex && !isTextLike)
-
-      if (!isBody && !isTextLike && !hasTabIndex) {
-        const node = $dom.stringify($el)
-
-        $utils.throwErrByPath('type.not_on_typeable_element', {
-          onFail: options._log,
-          args: { node },
-        })
-      }
-
-      if (numElements > 1) {
-        $utils.throwErrByPath('type.multiple_elements', {
-          onFail: options._log,
-          args: { num: numElements },
-        })
-      }
-
-      if (!(_.isString(chars) || _.isFinite(chars))) {
-        $utils.throwErrByPath('type.wrong_type', {
-          onFail: options._log,
-          args: { chars },
-        })
-      }
-
-      if (isEmptyChars) {
-        $utils.throwErrByPath('type.empty_string', { onFail: options._log })
-      }
-
-      if (isClearChars) {
-        return '{selectall}{del}'.length
-      }
-
-      if (isDate) {
-        let dateChars
-
-        if (
-          _.isString(chars) &&
-          (dateChars = dateRegex.exec(chars)) !== null &&
-          moment(dateChars[0]).isValid()
-        ) {
-          return _getEndIndex(chars, dateChars[0])
-        }
-
-        $utils.throwErrByPath('type.invalid_date', {
-          onFail: options._log,
-          // set matched date or entire char string
-          args: { chars: dateChars ? dateChars[0] : chars },
-        })
-      }
-
-      if (isMonth) {
-        let monthChars
-
-        if (
-          _.isString(chars) &&
-          (monthChars = monthRegex.exec(chars)) !== null
-        ) {
-          return _getEndIndex(chars, monthChars[0])
-        }
-
-        $utils.throwErrByPath('type.invalid_month', {
-          onFail: options._log,
-          args: { chars },
-        })
-      }
-
-      if (isWeek) {
-        let weekChars
-
-        if (_.isString(chars) && (weekChars = weekRegex.exec(chars)) !== null) {
-          return _getEndIndex(chars, weekChars[0])
-        }
-
-        $utils.throwErrByPath('type.invalid_week', {
-          onFail: options._log,
-          args: { chars },
-        })
-      }
-
-      if (isTime) {
-        let timeChars
-
-        if (_.isString(chars) && (timeChars = timeRegex.exec(chars)) !== null) {
-          return _getEndIndex(chars, timeChars[0])
-        }
-
-        $utils.throwErrByPath('type.invalid_time', {
-          onFail: options._log,
-          args: { chars },
-        })
-      }
-
-      if (isDateTime) {
-        let dateTimeChars
-
-        if (
-          _.isString(chars) &&
-          (dateTimeChars = dateTimeRegex.exec(chars)) !== null
-        ) {
-          return _getEndIndex(chars, dateTimeChars[0])
-        }
-
-        $utils.throwErrByPath('type.invalid_dateTime', {
-          onFail: options._log,
-          args: { chars },
-        })
-      }
-
-      return chars.length + 1
-    }
-
     let charsNeedingType
 
     function _setCharsNeedingType (value) {
@@ -259,10 +132,11 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       charsNeedingType = `${value}`
     }
 
-    const lastIndexToType = validateTyping(options.$el, chars)
-    const [charsToType, nextChars] = _splitChars(`${chars}`, lastIndexToType)
+    chars = `${chars}`
 
-    _setCharsNeedingType(nextChars)
+    const charsToType = `${chars}`
+
+    // _setCharsNeedingType(nextChars)
 
     // options.chars = `${charsToType}`
 
@@ -367,7 +241,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const isTextarea = $elements.isTextarea(options.$el.get(0))
 
       const isSimulated = (el) => {
-        return needSingleValueChange(el) || options.force
+        return options.force
       }
 
       return keyboard.type({
@@ -377,6 +251,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         release: options.release,
         window: win,
         simulated: isSimulated(options.$el[0]),
+        force: options.force,
 
         updateValue (el, key, charsToType) {
           // in these cases, the value must only be set after all
@@ -393,32 +268,35 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
         },
 
-        onFocusChange (el, chars) {
-          const lastIndexToType = validateTyping(el, chars)
-          const [charsToType, nextChars] = _splitChars(
-            `${chars}`,
-            lastIndexToType
-          )
+        // onFocusChange (el, chars) {
+        //   const lastIndexToType = validateTyping(el, chars)
+        //   const [charsToType, nextChars] = _splitChars(
+        //     `${chars}`,
+        //     lastIndexToType
+        //   )
 
-          _setCharsNeedingType(nextChars)
+        //   _setCharsNeedingType(nextChars)
 
-          return charsToType
-        },
+        //   return charsToType
+        // },
 
         onAfterType (el) {
-          if (charsNeedingType) {
-            const lastIndexToType = validateTyping(el, charsNeedingType)
-            const [charsToType, nextChars] = _splitChars(
-              charsNeedingType,
-              lastIndexToType
-            )
-
-            _setCharsNeedingType(nextChars)
-
-            return charsToType
+          if (options.release === true) {
+            state('keyboardModifiers', null)
           }
+          // if (charsNeedingType) {
+          //   const lastIndexToType = validateTyping(el, charsNeedingType)
+          //   const [charsToType, nextChars] = _splitChars(
+          //     charsNeedingType,
+          //     lastIndexToType
+          //   )
 
-          return false
+          //   _setCharsNeedingType(nextChars)
+
+          //   return charsToType
+          // }
+
+          // return false
         },
 
         onBeforeType (totalKeys) {
@@ -520,6 +398,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     }
 
     const handleFocused = function () {
+
       //# if it's the body, don't need to worry about focus
       const isBody = options.$el.is('body')
 
@@ -544,7 +423,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       if (elToCheckCurrentlyFocused && (elToCheckCurrentlyFocused === $focused)) {
-        return type()
+        options.ensure = { receivability: true }
       }
 
       return $actionability.verify(cy, options.$el, options, {
@@ -686,10 +565,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       })()
     })
   }
-
-  Cypress.on('test:before:run', () => {
-    return keyboard.resetModifiers(state('document'), state('window'))
-  })
 
   return Commands.addAll(
     { prevSubject: 'element' },

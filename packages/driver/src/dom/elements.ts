@@ -348,7 +348,7 @@ const getTagName = (el) => {
 // should be true for elements:
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
-const isContentEditable = (el: HTMLElement): el is HTMLContentEditableElement => {
+const isContentEditable = (el: any): el is HTMLContentEditableElement => {
   return getNativeProp(el, 'isContentEditable')
 }
 
@@ -402,7 +402,7 @@ const isFocused = (el) => {
   }
 }
 
-const getFocusedByDocument = (doc: Document): HTMLElement | null => {
+const getActiveElByDocument = (doc: Document): HTMLElement | null => {
   const activeElement = getNativeProp(doc, 'activeElement')
 
   if (isFocused(activeElement)) {
@@ -423,9 +423,11 @@ const isElement = function(obj): obj is HTMLElement | JQuery<HTMLElement> {
   }
 }
 
-// focusable elements can also recieve keyboard events
+/**
+ * The element can be activeElement, recieve focus events, and also recieve keyboard events
+ */
 const isFocusable = ($el: JQuery<Element>) => {
-  return _.some(focusable, (sel) => $el.is(sel))
+  return _.some(focusable, (sel) => $el.is(sel)) || (isElement($el[0]) && isContentEditable($el[0]))
 }
 
 const isType = function(el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
@@ -551,7 +553,7 @@ const isSame = function($el1, $el2) {
 
 export interface HTMLContentEditableElement extends HTMLElement {}
 
-export interface HTMLTextLikeInputElement extends HTMLElement {
+export interface HTMLTextLikeInputElement extends HTMLInputElement {
   type:
     | 'text'
     | 'password'
@@ -566,7 +568,7 @@ export interface HTMLTextLikeInputElement extends HTMLElement {
     | 'search'
     | 'url'
     | 'tel'
-  setSelectionRange: HTMLInputElement['setSelectionRange'] | ThrowStatement
+  setSelectionRange: HTMLInputElement['setSelectionRange']
 }
 
 export interface HTMLElementCanSetSelectionRange extends HTMLElement {
@@ -582,11 +584,14 @@ const isTextLike = function(el: HTMLElement): el is HTMLTextLikeElement {
   }
   const type = (type) => {
     if (isInput(el)) {
-      isType(el, type)
+      return isType(el, type)
     }
+    return false
   }
 
   const isContentEditableElement = isContentEditable(el)
+
+  if (isContentEditableElement) return true
 
   return _.some([
     isContentEditableElement,
@@ -921,7 +926,7 @@ export {
   getElements,
   getFromDocCoords,
   getFirstFocusableEl,
-  getFocusedByDocument,
+  getActiveElByDocument,
   getContainsSelector,
   getFirstDeepestElement,
   getFirstCommonAncestor,

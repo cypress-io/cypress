@@ -205,6 +205,16 @@ ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 
 verify = (cy, $el, options, callbacks) ->
+
+  _.defaults(options, {
+    ensure: {
+      position: true,
+      visibility: true,
+      receivability: true,
+      notAnimatingOrCovered: true,
+    }
+  })
+
   win = $dom.getWindowByElement($el.get(0))
 
   { _log, force, position } = options
@@ -216,7 +226,7 @@ verify = (cy, $el, options, callbacks) ->
 
   ## if we have a position we must validate
   ## this ahead of time else bail early
-  if position
+  if position and options.ensure.position
     try
       cy.ensureValidPosition(position, _log)
     catch err
@@ -227,7 +237,12 @@ verify = (cy, $el, options, callbacks) ->
     coordsHistory = []
 
     runAllChecks = ->
+
       if force isnt true
+
+        ## ensure its 'receivable'
+        if (options.ensure.receivability) then cy.ensureReceivability($el, _log)
+
         ## scroll the element into view
         $el.get(0).scrollIntoView()
 
@@ -235,17 +250,14 @@ verify = (cy, $el, options, callbacks) ->
           onScroll($el, "element")
 
         ## ensure its visible
-        cy.ensureVisibility($el, _log)
-
-        ## ensure its 'receivable'
-        cy.ensureReceivability($el, _log)
+        if (options.ensure.visibility) then cy.ensureVisibility($el, _log)
 
       ## now go get all the coords for this element
       coords = getCoordinatesForEl(cy, $el, options)
 
       ## if force is true OR waitForAnimations is false
       ## then do not perform these additional ensures...
-      if (force isnt true) and (options.waitForAnimations isnt false)
+      if (options.ensure.notAnimatingOrCovered) and (force isnt true) and (options.waitForAnimations isnt false)
         ## store the coords that were absolute
         ## from the window or from the viewport for sticky elements
         ## (see https://github.com/cypress-io/cypress/pull/1478)

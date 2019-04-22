@@ -1,10 +1,12 @@
-Promise = require("bluebird")
+const Promise = require('bluebird')
 
 Promise.config({
   cancellation: true,
   longStackTraces: true,
   monitoring: true,
   warnings: {
-    wForgottenReturn: true
-  }
+    wForgottenReturn: true,
+  },
 })
+
+module.exports = Promise

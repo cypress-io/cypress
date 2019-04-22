@@ -6,12 +6,12 @@ const $visibility = require('./visibility')
 const $coordinates = require('./coordinates')
 
 const { isWindow, getWindowByElement } = $window
-const { isDocument } = $document
+const { isDocument, getDocumentFromElement } = $document
 const { wrap, unwrap, isJquery, query } = $jquery
 const { isVisible, isHidden, getReasonIsHidden } = $visibility
 const { isType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent } = $elements
 const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
-
+const { getHostContenteditable, getSelectionBounds } = require('./selection')
 const isDom = (obj) => {
   return isElement(obj) || isWindow(obj) || isDocument(obj)
 }
@@ -22,6 +22,7 @@ const isDom = (obj) => {
 // purposes or for overriding. Everything else
 // can be tucked away behind these interfaces.
 module.exports = {
+
   wrap,
 
   query,
@@ -87,5 +88,11 @@ module.exports = {
   getElementCoordinatesByPosition,
 
   getElementCoordinatesByPositionRelativeToXY,
+
+  getHostContenteditable,
+
+  getSelectionBounds,
+
+  getDocumentFromElement,
 
 }

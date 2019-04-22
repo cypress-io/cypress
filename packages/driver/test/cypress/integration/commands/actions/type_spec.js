@@ -1,7 +1,14 @@
+/* eslint arrow-body-style: "off" */
+
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
-const $selection = require('../../../../../src/dom/selection')
+
+const chaiSubset = require('chai-subset')
+
+chai.use(chaiSubset)
+
+const events = ['keydown', 'keyup', 'keypress', 'textInput', 'input', 'focus', 'focusin']
 
 //# trim new lines at the end of innerText
 //# due to changing browser versions implementing
@@ -224,21 +231,33 @@ describe('src/cy/commands/actions/type', function () {
         })
       })
 
+      it('can force type on element', () => {
+        cy.get('input:first').should((input) => {
+          attachKeyListeners({ input })
+        })
+        .type('f', { force: true })
+
+        cy.getAll('input', 'textInput').each(shouldBeCalledWithMatch({ data: 'f' }))
+      })
+
       it('can forcibly type even when element is invisible', () => {
         const $txt = cy.$$(':text:first').hide()
 
         expect($txt).not.to.have.value('foo')
 
-        let clicked = false
+        const click = cy.stub().as('click')
+        const keydown = cy.stub().as('keydown')
+        const textInput = cy.stub().as('textInput')
 
-        $txt.on('keydown', () => {
-          return clicked = true
-        })
+        $txt.on('click', click)
+        $txt.on('textInput', textInput)
+        $txt.on('keydown', keydown)
 
         cy.get(':text:first').type('foo', { force: true }).then(($input) => {
           expect($input).to.have.value('foo')
 
-          expect(clicked).to.be.true
+          expect(click).to.be.calledOnce
+          expect(keydown).callCount(3)
         })
       })
 
@@ -593,8 +612,7 @@ describe('src/cy/commands/actions/type', function () {
             done()
           }
           , 50)
-        }
-        )
+        })
 
         cy.get(':text:first').type('foo{enter}bar{leftarrow}')
       })
@@ -607,7 +625,7 @@ describe('src/cy/commands/actions/type', function () {
         const keydown = cy.spy((e) => {
           const obj = _.pick(e.originalEvent, 'altKey', 'bubbles', 'cancelable', 'charCode', 'ctrlKey', 'detail', 'keyCode', 'view', 'layerX', 'layerY', 'location', 'metaKey', 'pageX', 'pageY', 'repeat', 'shiftKey', 'type', 'which', 'key')
 
-          expect(obj).to.deep.eq({
+          expect(obj).to.containSubset({
             altKey: false,
             bubbles: true,
             cancelable: true,
@@ -1574,11 +1592,17 @@ describe('src/cy/commands/actions/type', function () {
 
           //# type text into iframe
           cy.get('#generic-iframe')
-          .then(($iframe) => {
+          .should(($iframe) => {
             $iframe[0].contentDocument.designMode = 'on'
+          })
+          .then(($iframe) => {
             const iframe = $iframe.contents()
 
             return cy.wrap(iframe.find('html')).first()
+            .should(($el) => {
+              // $el.find('body').append(cy.$$('<input/>'))
+            })
+            // .type('foo')
             .type('{selectall}{del} foo bar baz{enter}ac{leftarrow}b')
           })
 
@@ -3035,7 +3059,7 @@ describe('src/cy/commands/actions/type', function () {
         const hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3043,7 +3067,7 @@ describe('src/cy/commands/actions/type', function () {
         const hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3051,7 +3075,7 @@ describe('src/cy/commands/actions/type', function () {
         const hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3059,13 +3083,13 @@ describe('src/cy/commands/actions/type', function () {
         const hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
       it('accurately returns same el with no falsey contenteditable="false" attr', () => {
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0])
         })
       })
 
@@ -3073,7 +3097,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get('input:first').invoke('attr', 'maxlength', '5').type('foobar{leftarrow}')
 
         cy.window().then(() => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 4, end: 4 })
         }
         )
@@ -3083,7 +3107,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
 
         cy.window().then(() => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         }
         )
@@ -3093,7 +3117,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get('input:first').type(`oo{leftarrow}{leftarrow}{leftarrow}f${'{leftarrow}'.repeat(5)}`)
 
         cy.window().then(() => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 0, end: 0 })
         }
         )
@@ -3103,7 +3127,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get('[contenteditable]:first').type('foobar')
 
         cy.window().then(() => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         }
         )
@@ -3117,7 +3141,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get('[contenteditable]:first').type('bar')
 
         cy.window().then(() => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         }
         )
@@ -3127,7 +3151,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
 
         cy.window().then(() => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 1, end: 1 })
         }
         )
@@ -3143,7 +3167,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get(':text:first').type('foobar')
 
         cy.window().then(() => {
-          expect($selection.getSelectionBounds(Cypress.$(':text:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$(':text:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         }
         )
@@ -3153,7 +3177,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get('#comments').type('foobar')
 
         cy.window().then(() => {
-          expect($selection.getSelectionBounds(Cypress.$('#comments').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('#comments').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         }
         )
@@ -4691,3 +4715,57 @@ describe('src/cy/commands/actions/type', function () {
     })
   })
 })
+
+const attachListeners = (listenerArr) => {
+  return (els) => {
+    _.each(els, (el, elName) => {
+      return listenerArr.forEach((evtName) => {
+        el[0].addEventListener(evtName, cy.stub().as(`${elName}:${evtName}`))
+      })
+    })
+  }
+}
+const attachKeyListeners = attachListeners(events)
+
+const getAllFn = (...aliases) => {
+  if (aliases.length > 1) {
+    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => {
+      return `@${aliases[0]}:${alias}`
+    }).join(' '))
+  }
+
+  return Cypress.Promise.all(
+    aliases[0].split(' ').map((alias) => {
+      return cy.now('get', alias)
+    }))
+}
+
+Cypress.Commands.add('getAll', getAllFn)
+
+const _wrapLogFalse = (obj) => {
+  return cy.wrap(obj, { log: false })
+}
+const shouldBeCalled = (stub) => {
+  return _wrapLogFalse(stub).should('be.called')
+}
+const shouldBeCalledOnce = (stub) => {
+  return _wrapLogFalse(stub).should('be.calledOnce')
+}
+const shouldBeCalledNth = (num) => {
+  return (stub) => {
+    return _wrapLogFalse(stub).should('have.callCount', num)
+  }
+}
+const shouldNotBeCalled = (stub) => {
+  return _wrapLogFalse(stub).should('not.be.called')
+}
+
+const shouldBeCalledWithMatch = (exp) => (stub) => {
+  return expect(stub).calledWithMatch(exp)
+}
+
+/*
+
+copy(cy.$$('.test.runnable-failed .runnable-title', window.top.document).contents().filter((i,e)=>e.nodeType===3).map((i,e)=>e.nodeValue).toArray().join('\n'))
+
+*/

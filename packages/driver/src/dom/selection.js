@@ -429,16 +429,14 @@ const isCollapsed = function (el) {
   }
 }
 
-const selectAll = function () {
-  const el = _getActive()
+const selectAll = function (doc) {
+  const el = _getActive(doc)
 
   if ($elements.canSetSelectionRangeElement(el)) {
     setSelectionRange(el, 0, $elements.getNativeProp(el, 'value').length)
 
     return
   }
-
-  const doc = $document.getDocumentFromElement(el)
 
   return $elements.callNativeMethod(
     doc,
@@ -477,16 +475,16 @@ const getSelectionBounds = function (el) {
   }
 }
 
-const moveSelectionToEnd = () => {
-  return _moveSelectionTo(false)
+const moveSelectionToEnd = (doc) => {
+  return _moveSelectionTo(false, doc)
 }
 
-const moveSelectionToStart = () => {
-  return _moveSelectionTo(true)
+const moveSelectionToStart = (doc) => {
+  return _moveSelectionTo(true, doc)
 }
 
-const _moveSelectionTo = function (toStart) {
-  const el = _getActive()
+const _moveSelectionTo = function (toStart, doc) {
+  const el = _getActive(doc)
 
   if ($elements.canSetSelectionRangeElement(el)) {
     let cursorPosition
@@ -501,12 +499,6 @@ const _moveSelectionTo = function (toStart) {
 
     return
   }
-
-  // if (el) {
-  /**
-   * @type {HTMLDocument}
-   */
-  const doc = $document.getDocumentFromElement(el)
 
   $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
   const selection = doc.getSelection()
@@ -581,18 +573,9 @@ const getCaretPosition = function (el) {
   return null
 }
 
-const interceptSelect = function () {
-  if ($elements.isInput(this) && !$elements.canSetSelectionRangeElement(this)) {
-    setSelectionRange(this, 0, $elements.getNativeProp(this, 'value').length)
-  }
-
-  return $elements.callNativeMethod(this, 'select')
-}
-
-const _getActive = function () {
+const _getActive = function (doc) {
   // TODO: remove this state access
   // eslint-disable-next-line
-  const doc = cy.state('document')
   const activeEl = $elements.getNativeProp(doc, 'activeElement')
 
   return activeEl
@@ -608,11 +591,11 @@ const _getActive = function () {
 //   return el
 // }
 
-const focusCursor = function (el) {
+const focusCursor = function (el, doc) {
 
   const elToFocus = $elements.getFirstFocusableEl($dom.wrap(el)).get(0)
 
-  const prevFocused = _getActive()
+  const prevFocused = _getActive(doc)
 
   elToFocus.focus()
 
@@ -718,6 +701,5 @@ module.exports = {
   moveCursorToLineEnd,
   replaceSelectionContents,
   isCollapsed,
-  interceptSelect,
   focusCursor,
 }
