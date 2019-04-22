@@ -25,6 +25,9 @@ getOriginalHeaders = (req = {}) ->
   ## original headers
   req.req?.headers ? req.headers
 
+isRetriableError = (err) ->
+  ['ECONNREFUSED', 'ECONNRESET', 'EPIPE'].includes(err.code)
+
 pick = (resp = {}) ->
   req = resp.request ? {}
 
@@ -265,10 +268,11 @@ module.exports = (options = {}) ->
         ## values which need to be set in order
         Promise.each(store.cookies, setCookie)
 
-    sendStream: (headers, automationFn, options = {}) ->
+    sendStream: (headers, automationFn, options = {}, cb) ->
       _.defaults options, {
         headers: {}
         jar: true
+        retry: false
       }
 
       if ua = headers["user-agent"]
@@ -310,12 +314,35 @@ module.exports = (options = {}) ->
 
           followRedirect.call(req, incomingRes)
 
-      send = =>
+      createAndRetry = (iteration = 0) =>
+        newReq = @create(options)
+        newReq.getJar = -> options.jar
+        newReq
+        .on "error", (err) ->
+          if not isRetriableError(err)
+            return cb(err)
+
+          debug("caught request error in sendstream #{err.code} #{err} %o", err)
+
+          if iteration >= 2
+            debug("retried 3x and still network error, not retrying")
+            return cb(err)
+
+          debug("retry %o", {
+            iteration
+            delay: options.timeout
+          })
+
+          Promise.delay(options.timeout)
+          .then ->
+            createAndRetry(iteration + 1)
+        .on "response", (socket) ->
+          cb(null, newReq)
+
+      send = ->
         debug("sending request as stream %o", _.omit(options, "jar"))
 
-        str = @create(options)
-        str.getJar = -> options.jar
-        str
+        createAndRetry()
 
       automationFn("get:cookies", {url: options.url, includeHostOnly: true})
       .then(convertToJarCookie)
@@ -410,7 +437,25 @@ module.exports = (options = {}) ->
             ## so we can build an array of responses
             return true
 
-        @create(options, true)
+        createAndRetry = (iteration = 0, originalErr = null) ->
+          @create(options, true)
+          .catch(err) ->
+            if not isRetriableError(err)
+              throw err
+
+            debug("caught request error in send #{err.code} #{err}")
+
+            originalErr ?= err
+
+            if iteration >= 3
+              debug("retried 3x and still network error, not retrying")
+              throw originalErr
+
+            Promise.delay(options.timeout)
+            .then ->
+              createAndRetry(iteration + 1, originalErr)
+
+        createAndRetry()
         .then(@normalizeResponse.bind(@, push))
         .then (resp) =>
           ## TODO: move duration somewhere...?
