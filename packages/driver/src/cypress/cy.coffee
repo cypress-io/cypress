@@ -63,7 +63,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   warnMixingPromisesAndCommands = ->
     title = state("runnable").fullTitle()
 
-    msg = $errUtils.errMsgByPath("miscellaneous.mixing_promises_and_commands", title)
+    msg = $errUtils.errMsgByPath("miscellaneous.mixing_promises_and_commands", {
+      args: { 
+        title 
+      }
+    })
 
     $utils.warning(msg)
 
@@ -1026,7 +1030,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               $utils.stringify(ret)
 
             $errUtils.throwErrByPath("miscellaneous.returned_value_and_commands", {
-              args: ret
+              args: {
+                returned: ret
+              }
             })
 
           ## if we attached a done callback

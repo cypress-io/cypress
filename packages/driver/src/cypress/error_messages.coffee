@@ -412,13 +412,13 @@ module.exports = {
 
         https://on.cypress.io/returning-value-and-commands-in-custom-command
       """
-    returned_value_and_commands: (ret) ->
+    returned_value_and_commands: (obj) ->
       """
         Cypress detected that you invoked one or more cy commands but returned a different value.
 
         The return value was:
 
-          > #{ret}
+          > #{obj.returned}
 
         Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 
@@ -448,13 +448,13 @@ module.exports = {
 
         https://on.cypress.io/returning-promise-and-commands-in-another-command
       """
-    mixing_promises_and_commands: (title) ->
+    mixing_promises_and_commands: (obj) ->
       """
         Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
 
         The test title was:
 
-          > #{title}
+          > #{obj.title}
 
         While this works in practice, it's often indicative of an anti-pattern. You almost never need to return both a promise and also invoke cy commands.
 
