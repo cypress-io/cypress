@@ -6,6 +6,7 @@ Pending = require("mocha/lib/pending")
 $Log = require("./log")
 $utils = require("./utils")
 $errUtils = require("./error_utils")
+$errorMessages = require('./error_messages')
 
 defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
@@ -588,7 +589,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
       ## we're skipping the remaining tests in this suite
       err = $errUtils.appendErrMsg(
         err,
-        $errUtils.errMsgByPath("uncaught.error_in_hook", {
+        $errUtils.errObjByPath($errorMessages, "uncaught.error_in_hook", {
           parentTitle,
           hookName
         })
