@@ -3,7 +3,7 @@ We could not identify a known browser at the path you provided: \`/this/aint/gon
 
 The output from the command we ran was:
 
- Command failed: /bin/sh -c /this/aint/gonna/be/found --version
+ Command failed: /bin/sh -c "/this/aint/gonna/be/found" --version
 /bin/sh: 1: /this/aint/gonna/be/found: not found
 
 
