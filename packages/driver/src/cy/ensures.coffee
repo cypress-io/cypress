@@ -70,7 +70,9 @@ create = (state, expect) ->
 
       if types.length > 1
         ## append a nice error message telling the user this
-        err = $errUtils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
+        errProps = $errUtils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
+
+        $errUtils.extendErr(err, errProps)
 
       throw err
 

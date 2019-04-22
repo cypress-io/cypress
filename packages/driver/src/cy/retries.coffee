@@ -54,14 +54,15 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
 
         prependMsg = $errUtils.errMsgByPath("miscellaneous.retry_timed_out")
 
-        retryErr = $errUtils.modifyErrMsg(err, prependMsg, (msg1, msg2) ->
+        retryErrProps = $errUtils.modifyErrMsg(err, prependMsg, (msg1, msg2) ->
           return "#{msg2}#{msg1}"
         )
+
+        retryErr = $errUtils.mergeErrProps(err, retryErrProps)
 
         $errUtils.throwErr(retryErr, {
           onFail: onFail or log
         })
-          
 
       runnableHasChanged = ->
         ## if we've changed runnables don't retry!

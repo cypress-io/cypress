@@ -587,7 +587,7 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
       ## we're skipping the remaining tests in this suite
       err = $errUtils.appendErrMsg(
         err,
-        $errUtils.errObjByPath($errorMessages, "uncaught.error_in_hook", {
+        $errUtils.errMsgByPath("uncaught.error_in_hook", {
           parentTitle,
           hookName
         })

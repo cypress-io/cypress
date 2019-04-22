@@ -1,3 +1,4 @@
+_ = require("lodash")
 $dom = require("../dom")
 $utils = require("../cypress/utils")
 $errUtils = require("../cypress/error_utils")
@@ -51,13 +52,16 @@ create = (state, config, log) ->
       when "app" then "uncaught.fromApp"
       when "spec" then "uncaught.fromSpec"
 
-    uncaughtErr = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
+    uncaughtErrObj = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
     
     err.name = "Uncaught " + err.name
 
-    uncaughtErr = $errUtils.modifyErrMsg(err, uncaughtErr, (msg1, msg2) ->
+    uncaughtErrProps = $errUtils.modifyErrMsg(err, uncaughtErrObj.message, (msg1, msg2) ->
       return "#{msg1}\n\n#{msg2}"
     )
+    _.defaults(uncaughtErrProps, uncaughtErrObj)
+
+    uncaughtErr = $errUtils.mergeErrProps(err, uncaughtErrProps)
 
     uncaughtErr.onFail = ->
       if l = current and current.getLastLog()

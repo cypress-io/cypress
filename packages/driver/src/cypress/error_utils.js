@@ -4,7 +4,7 @@ const { codeFrameColumns } = require('@babel/code-frame')
 const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
 
-const ERROR_PROPS = 'message mdMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl'.split(' ')
+const ERROR_PROPS = 'message renderMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl'.split(' ')
 
 const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
@@ -12,53 +12,45 @@ const mdReplacements = [
   ['`', '\\`'],
 ]
 
-const modifyErrMsg = (origErr, newErrMsgOrObj, cb) => {
 const wrapErr = (err) => {
   if (!err) return
 
   return $utils.reduceProps(err, ERROR_PROPS)
 }
 
+const mergeErrProps = (origErr, newProps) => {
+  return _.extend(origErr, newProps)
+}
+
+const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
   // preserve stack
   // this is the critical part
   // because the browser has a cached
   // dynamic stack getter that will
   // not be evaluated later
-  const { stack } = origErr
-
-  let newErrMsg = newErrMsgOrObj
-
-  // if our new error message is an obj w/ multiple props...
-  if (_.isObject(newErrMsgOrObj)) {
-    // then extract the actual 'message' (the string)
-    // and merge the other props into the existing origErr
-    _.defaults(origErr, _.omit(newErrMsgOrObj, 'message'))
-
-    newErrMsg = newErrMsgOrObj.message
-  }
+  let { stack, message, renderMessage } = origErrObj
 
   // preserve message
-  const originalErrMsg = origErr.message
+  const originalErrMsg = message
 
-  // if our original err is an object
-  if (_.isObject(origErr)) {
-    // modify message
-    origErr.message = cb(origErr.message, newErrMsg)
+  // modify message
+  message = cb(originalErrMsg, newErrMsg)
 
-    if (stack && originalErrMsg) {
-      // reset stack by replacing the original
-      // first line with the new one
-      origErr.stack = stack.replace(originalErrMsg, origErr.message)
-    }
-
+  if (renderMessage) {
+    renderMessage = cb(renderMessage, newErrMsg)
   }
 
-  // if our original err is a string
-  if (_.isString(origErr)) {
-    origErr = cb(origErr, newErrMsg)
+  if (stack) {
+    // reset stack by replacing the original
+    // first line with the new one
+    stack = stack.replace(originalErrMsg, message)
   }
 
-  return origErr
+  return {
+    renderMessage,
+    message,
+    stack,
+  }
 }
 
 const appendErrMsg = (err, messageOrObj) => {
@@ -156,7 +148,7 @@ const normalizeMsgNewLines = (message) => {
   .value()
 }
 
-const formatErrMsg = (errMessage, args) => {
+const replaceErrMsgTokens = (errMessage, args) => {
   const getMsg = function (args = {}) {
     return _.reduce(args, (message, argValue, argKey) => {
       return message.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
@@ -186,11 +178,16 @@ const errObjByPath = (errLookupObj, errPath, args) => {
     }
   }
 
-  // Return obj with message and message with escaped markdown
   const escapedArgs = _.mapValues(args, escapeErrMarkdown)
 
-  errObj.mdMessage = formatErrMsg(errObj.message, escapedArgs)
-  errObj.message = formatErrMsg(errObj.message, args)
+  errObj.renderMessage = replaceErrMsgTokens(errObj.message, escapedArgs)
+  errObj.message = replaceErrMsgTokens(errObj.message, args)
+
+  if (errObj.docsUrl) {
+    const errProps = appendErrMsg(errObj, errObj.docsUrl)
+
+    mergeErrProps(errObj, errProps)
+  }
 
   return errObj
 }
@@ -280,8 +277,9 @@ const getObjValueByPath = (obj, keyPath) => {
 }
 
 module.exports = {
-  ERROR_PROPS,
+  wrapErr,
   modifyErrMsg,
+  mergeErrProps,
   appendErrMsg,
   makeErrFromObj,
   throwErr,
