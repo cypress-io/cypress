@@ -64,9 +64,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     title = state("runnable").fullTitle()
 
     msg = $errUtils.errMsgByPath("miscellaneous.mixing_promises_and_commands", {
-      args: { 
-        title 
-      }
+      title: title 
     })
 
     $utils.warning(msg)
