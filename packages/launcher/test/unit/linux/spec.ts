@@ -24,11 +24,11 @@ const goalBrowsers = [
 describe('linux browser detection', () => {
   beforeEach(function stubShell () {
     const shell = sinon.stub(execa, 'shell')
-    shell.withArgs('test-browser --version')
+    shell.withArgs('"test-browser" --version')
       .resolves({
         stdout: 'test-browser v100.1.2.3'
       })
-    shell.withArgs('foo-browser --version')
+    shell.withArgs('"foo-browser" --version')
       .resolves({
         stdout: 'foo-browser v100.1.2.3'
       })
@@ -36,19 +36,19 @@ describe('linux browser detection', () => {
       .resolves({
         stdout: 'foo-browser v100.1.2.3'
       })
-    shell.withArgs('foo-bar-browser --version')
+    shell.withArgs('"foo-bar-browser" --version')
       .resolves({
         stdout: 'foo-browser v100.1.2.3'
       })
-    shell.withArgs('/foo/bar/browser --version')
+    shell.withArgs('"/foo/bar/browser" --version')
       .resolves({
         stdout: 'foo-browser v9001.1.2.3'
       })
-    shell.withArgs('/not/a/browser --version')
+    shell.withArgs('"/not/a/browser" --version')
       .resolves({
         stdout: 'not a browser version string'
       })
-    shell.withArgs('/not/a/real/path --version')
+    shell.withArgs('"/not/a/real/path" --version')
       .rejects()
   })
 
@@ -147,8 +147,8 @@ describe('linux browser detection', () => {
             displayName: 'Custom Foo Browser',
             info: 'Loaded from /Applications/My Shiny New Browser.app',
             custom: true,
-            version: '9001.1.2.3',
-            majorVersion: '9001',
+            version: '100.1.2.3',
+            majorVersion: '100',
             path: '/Applications/My Shiny New Browser.app'
           })
         )

@@ -4,6 +4,14 @@ import { FoundBrowser, Browser } from '../types'
 import { notInstalledErr } from '../errors'
 import execa from 'execa'
 
+const specialCharactersRe = /(["'$`\\])/g
+
+function escapeShellPath(path: string) {
+  // https://github.com/cypress-io/cypress/issues/3979
+  // wrap the string in quotes and escape any special chars
+  return `"${path.replace(specialCharactersRe, '\\$1')}"`
+}
+
 function getLinuxBrowser(
   name: string,
   binary: string,
@@ -45,7 +53,8 @@ function getLinuxBrowser(
 }
 
 export function getVersionString(path: string) {
-  const cmd = `${path} --version`
+  const escapedPath = escapeShellPath(path)
+  const cmd = `${escapedPath} --version`
   log('finding version string using command "%s"', cmd)
   return execa
     .shell(cmd)
