@@ -492,7 +492,7 @@ module.exports = {
       message: """
         Cypress cannot execute commands outside a running test.
 
-        This usually happens when you accidentally write commands outside an `'it(...)'` test.
+        This usually happens when you accidentally write commands outside an `it(...)` test.
 
         If that is the case, just move these commands inside an `it(...)` test.
 

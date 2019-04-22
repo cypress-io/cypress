@@ -3,7 +3,6 @@ _ = require("lodash")
 methods = require("methods")
 moment = require("moment")
 
-errUtils = require("./error_utils")
 $jquery = require("../dom/jquery")
 $Location = require("./location")
 
@@ -45,7 +44,7 @@ USER_FRIENDLY_TYPE_DETECTORS = _.map([
   return [fn, _.constant(type)]
 )
 
-module.exports = _.extend(errUtils, {
+module.exports = {
   warning: (msg) ->
     console.warn("Cypress Warning: " + msg)
 
@@ -237,4 +236,4 @@ module.exports = _.extend(errUtils, {
     deltaY = point1.y - point2.y
 
     Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-})
+}

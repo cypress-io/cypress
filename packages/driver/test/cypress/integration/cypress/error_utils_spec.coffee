@@ -2,7 +2,7 @@ $errUtils = require("../../../../src/cypress/error_utils.js")
 $errorMessages = require("../../../../src/cypress/error_messages")
 
 describe "driver/src/cypress/error_utils", ->
-  context ".modifyErrMsg", ->
+  context.skip ".modifyErrMsg", ->
     it "modifies errs that are objects", ->
       errObj1 = {
         name: 'FooError',
@@ -355,7 +355,7 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(normalizedMsg).to.eq("one new line\ntwo new lines\n\nthree new lines\n\nend")
 
-  context ".errObjByPath", ->
+  context.skip ".errObjByPath", ->
     beforeEach -> 
       @errMsgs = {
         command: {
