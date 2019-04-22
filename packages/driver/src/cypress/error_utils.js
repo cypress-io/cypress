@@ -38,7 +38,7 @@ const modifyErrMsg = (origErr, newErrMsgOrObj, cb) => {
     // modify message
     origErr.message = cb(origErr.message, newErrMsg)
 
-    if (stack) {
+    if (stack && originalErrMsg) {
       // reset stack by replacing the original
       // first line with the new one
       origErr.stack = stack.replace(originalErrMsg, origErr.message)
@@ -56,6 +56,12 @@ const modifyErrMsg = (origErr, newErrMsgOrObj, cb) => {
 
 const appendErrMsg = (err, messageOrObj) => {
   return modifyErrMsg(err, messageOrObj, (msg1, msg2) => {
+    // we don't want to just throw in extra
+    // new lines if there isn't even a msg
+    if (!msg1) return msg2
+
+    if (!msg2) return msg1
+
     return `${msg1}\n\n${msg2}`
   })
 }
