@@ -189,7 +189,7 @@ Log = (state, config, obj) ->
       .omit("error")
       .omitBy(_.isFunction)
       .extend({
-        err: $utils.reduceProps(@get("error"), $errUtils.ERROR_PROPS)
+        err: $errUtils.wrapErr(@get("error"))
         consoleProps: @invoke("consoleProps")
         renderProps: @invoke("renderProps")
       })

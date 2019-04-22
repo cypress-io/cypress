@@ -2,6 +2,7 @@ const _ = require('lodash')
 const { codeFrameColumns } = require('@babel/code-frame')
 
 const $errorMessages = require('./error_messages')
+const $utils = require('./utils')
 
 const ERROR_PROPS = 'message mdMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl'.split(' ')
 
@@ -12,6 +13,12 @@ const mdReplacements = [
 ]
 
 const modifyErrMsg = (origErr, newErrMsgOrObj, cb) => {
+const wrapErr = (err) => {
+  if (!err) return
+
+  return $utils.reduceProps(err, ERROR_PROPS)
+}
+
   // preserve stack
   // this is the critical part
   // because the browser has a cached

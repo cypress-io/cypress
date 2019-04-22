@@ -16,7 +16,6 @@ HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
 TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
 TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
-ERROR_PROPS      = "message mdMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
 RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings".split(" ")
 
@@ -138,8 +137,7 @@ wrapAll = (runnable) ->
     $utils.reduceProps(runnable, RUNNABLE_LOGS)
   )
 
-wrapErr = (err) ->
-  $utils.reduceProps(err, ERROR_PROPS)
+wrapErr = $errUtils.wrapErr
 
 getHookName = (hook) ->
   ## find the name of the hook by parsing its
