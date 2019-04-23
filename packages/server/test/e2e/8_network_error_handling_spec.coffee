@@ -15,8 +15,7 @@ start = Number(new Date())
 getElapsed = ->
   Math.round((Number(new Date()) - start)/1000)
 
-retryTimeout = null
-retryTimeoutCallback = null
+onVisit = null
 
 counts = {
   immediateReset: 0
@@ -44,16 +43,6 @@ launchBrowser = (url) ->
 
     launcher.launch(browser, url, args)
 
-clearRetryTimeout = () ->
-  clearTimeout(retryTimeout)
-
-resetRetryTimeout = (timeout = 65000) ->
-  clearRetryTimeout()
-  retryTimeout = setTimeout () ->
-    debug("retry timeout reached")
-    retryTimeoutCallback()
-  , timeout
-
 onServer = (app) ->
   app.get "/works-third-time", (req, res) ->
     id = req.params.id
@@ -72,7 +61,10 @@ describe "e2e network error handling", ->
               counts: counts,
               elapsedTime: getElapsed(),
             })
-            resetRetryTimeout()
+
+            if onVisit
+              onVisit()
+
             next()
 
           app.get "/immediate-reset", (req, res) ->
@@ -107,39 +99,36 @@ describe "e2e network error handling", ->
     @timeout(240000)
 
     afterEach ->
-      clearRetryTimeout()
-      retryTimeoutCallback = null
+      onVisit = null
 
     it "retries 3+ times with immediate reset", ->
       launchBrowser("http://127.0.0.1:#{PORT}/immediate-reset")
       .then (proc) ->
         Promise.fromCallback (cb) ->
-          retryTimeoutCallback = cb
-        .timeout(180000)
-        .catchReturn(Promise.TimeoutError)
+          onVisit = ->
+            if counts.immediateReset >= 3
+              cb()
         .then ->
           proc.kill(9)
-          expect(counts.immediateReset).to.eq(7)
+          expect(counts.immediateReset).to.be.at.least(3)
 
     it "retries 3+ times with reset after headers", ->
       launchBrowser("http://localhost:#{PORT}/after-headers-reset")
       .then (proc) ->
         Promise.fromCallback (cb) ->
-          retryTimeoutCallback = cb
-        .timeout(180000)
-        .catchReturn(Promise.TimeoutError)
+          onVisit = ->
+            if counts.afterHeadersReset >= 3
+              cb()
         .then ->
           proc.kill(9)
-          expect(counts.immediateReset).to.be(7)
+          expect(counts.afterHeadersReset).to.be.at.least(3)
 
     it "does not retry if reset during body", ->
       launchBrowser("http://localhost:#{PORT}/during-body-reset")
+      .delay(5000)
       .then (proc) ->
-        Promise.fromCallback (cb) ->
-          retryTimeoutCallback = cb
-        .then ->
-          proc.kill(9)
-          expect(counts.duringBodyReset).to.eq(1)
+        proc.kill(9)
+        expect(counts.duringBodyReset).to.eq(1)
 
   # it "fails", ->
   #   e2e.exec(@, {
