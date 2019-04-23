@@ -1161,6 +1161,7 @@ describe "src/cy/commands/actions/click", ->
           ## get + click logs
           expect(@logs.length).eq(2)
           expect(err.message).to.include("`cy.click()` failed because this element is `disabled`:\n")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/element-cannot-be-interacted-with")
           done()
 
         cy.get("#button").click()
@@ -1184,6 +1185,7 @@ describe "src/cy/commands/actions/click", ->
           expect(lastLog.get("snapshots")[1].name).to.eq("after")
           expect(err.message).to.include "`cy.click()` failed because this element"
           expect(err.message).to.include "is being covered by another element"
+          expect(err.docsUrl).to.eq "https://on.cypress.io/element-cannot-be-interacted-with"
 
           clickLog = @logs[1]
           expect(clickLog.get("name")).to.eq("click")
@@ -1251,6 +1253,7 @@ describe "src/cy/commands/actions/click", ->
           expect(err.message).to.include ">button ...</button>"
           expect(err.message).to.include "`<button#button-covered-in-span>` is not visible because it has CSS property: `position: fixed` and its being covered"
           expect(err.message).to.include ">span on...</span>"
+          expect(err.docsUrl).to.eq "https://on.cypress.io/element-cannot-be-interacted-with"
 
           console = lastLog.invoke("consoleProps")
           expect(console["Tried to Click"]).to.be.undefined
@@ -1270,6 +1273,7 @@ describe "src/cy/commands/actions/click", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.click()` failed because the center of this element is hidden from view:"
           expect(err.message).to.include "<li>quux</li>"
+          expect(err.docsUrl).to.eq "https://on.cypress.io/element-cannot-be-interacted-with"
           done()
 
         cy.get("#overflow-auto-container").contains("quux").click()

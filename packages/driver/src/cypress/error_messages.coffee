@@ -147,7 +147,7 @@ module.exports = {
     timed_out: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
 
   dom:
-    animating: 
+    animating: {
       message: """
         #{cmd('{{cmd}}')} could not be issued because this element is currently animating:
 
@@ -159,55 +159,59 @@ module.exports = {
           - Passing `{animationDistanceThreshold: 20}` which decreases the sensitivity
       """
       docsUrl: "https://on.cypress.io/element-is-animating"
+    }
     animation_check_failed: "Not enough coord points provided to calculate distance."
-    center_hidden: """
-      #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:
+    center_hidden: {
+      message: """
+        #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:
 
-      `{{node}}`
+        `{{node}}`
 
-      Fix this problem, or use `{force: true}` to disable error checking.
-
-      https://on.cypress.io/element-cannot-be-interacted-with
-    """
-    covered: (obj) ->
+        Fix this problem, or use `{force: true}` to disable error checking.
       """
-      #{cmd(obj.cmd)} failed because this element:
+      docsUrl: "https://on.cypress.io/element-cannot-be-interacted-with"
+    }
+    covered: (obj) -> {
+      message: """
+        #{cmd(obj.cmd)} failed because this element:
 
-      `#{obj.element1}`
+        `#{obj.element1}`
 
-      is being covered by another element:
+        is being covered by another element:
 
-      `#{obj.element2}`
+        `#{obj.element2}`
 
-      Fix this problem, or use `{force: true}` to disable error checking.
+        Fix this problem, or use `{force: true}` to disable error checking.
+        """
+      docsUrl: "https://on.cypress.io/element-cannot-be-interacted-with"
+    }
+    disabled: {
+      message: """
+        #{cmd('{{cmd}}')} failed because this element is `disabled`:
 
-      https://on.cypress.io/element-cannot-be-interacted-with
+        `{{node}}`
+
+        Fix this problem, or use `{force: true}` to disable error checking.
       """
-    disabled: """
-      #{cmd('{{cmd}}')} failed because this element is `disabled`:
-
-      `{{node}}`
-
-      Fix this problem, or use `{force: true}` to disable error checking.
-
-      https://on.cypress.io/element-cannot-be-interacted-with
-    """
+      docsUrl: "https://on.cypress.io/element-cannot-be-interacted-with"
+    }
     invalid_position_argument: "Invalid position argument: `{{position}}`. Position may only be {{validPositions}}."
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
       `{{node}}`\n
     """
-    not_visible: """
-      #{cmd('{{cmd}}')} failed because this element is not visible:
+    not_visible: {
+      message: """
+        #{cmd('{{cmd}}')} failed because this element is not visible:
 
-      `{{node}}`
+        `{{node}}`
 
-      {{reason}}
+        {{reason}}
 
-      Fix this problem, or use `{force: true}` to disable error checking.
-
-      https://on.cypress.io/element-cannot-be-interacted-with
-    """
+        Fix this problem, or use `{force: true}` to disable error checking.
+      """
+      docsUrl: "https://on.cypress.io/element-cannot-be-interacted-with"
+    }
 
   each:
     invalid_argument: "#{cmd('each')} must be passed a callback function."
@@ -276,13 +280,14 @@ module.exports = {
     invalid_number: "#{cmd('go')} cannot accept `0`. The number must be greater or less than `0`."
 
   hover:
-    not_implemented: 
+    not_implemented: {
       message: """
         #{cmd('hover')} is not currently implemented.\n
         However it is usually easy to workaround.\n
         Read the following document for a detailed explanation.\n
       """
       docsUrl: "https://on.cypress.io/hover"
+    }
   invoke:
     prop_not_a_function:
       """
@@ -376,24 +381,24 @@ module.exports = {
     invalid_key: "Location object does not have key: `{{key}}`"
 
   miscellaneous:
-    custom_command_interface_changed: (obj) ->
-      """
-      Cypress.#{obj.method}(...) has been removed and replaced by:
+    custom_command_interface_changed: (obj) -> {
+      message: """
+        Cypress.#{obj.method}(...) has been removed and replaced by:
 
-      `Cypress.Commands.add(...)`
+        `Cypress.Commands.add(...)`
 
-      Instead of indicating `parent`, `child`, or `dual` commands, you pass an `options` object
-      to describe the requirements around the previous subject. You can also enforce specific
-      subject types such as requiring the subject to be a DOM element.
+        Instead of indicating `parent`, `child`, or `dual` commands, you pass an `options` object
+        to describe the requirements around the previous subject. You can also enforce specific
+        subject types such as requiring the subject to be a DOM element.
 
-      To rewrite this custom command you'd likely write:
+        To rewrite this custom command you'd likely write:
 
-      `Cypress.Commands.add(#{obj.signature})`
-
-      https://on.cypress.io/custom-command-interface-changed
-      """
-    returned_value_and_commands_from_custom_command: (obj) ->
-      """
+        `Cypress.Commands.add(#{obj.signature})`
+        """
+      docsUrl: "https://on.cypress.io/custom-command-interface-changed"
+    }
+    returned_value_and_commands_from_custom_command: (obj) -> {
+      message: """
         Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
 
         The custom command was:
@@ -409,11 +414,11 @@ module.exports = {
         For convenience, you can also simply omit any return value or return `undefined` and Cypress will not error.
 
         In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
-
-        https://on.cypress.io/returning-value-and-commands-in-custom-command
       """
-    returned_value_and_commands: (obj) ->
-      """
+      docsUrl: "https://on.cypress.io/returning-value-and-commands-in-custom-command"
+    }
+    returned_value_and_commands: (obj) -> {
+      message: """
         Cypress detected that you invoked one or more cy commands but returned a different value.
 
         The return value was:
@@ -425,11 +430,11 @@ module.exports = {
         For convenience, you can also simply omit any return value or return `undefined` and Cypress will not error.
 
         In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
-
-        https://on.cypress.io/returning-value-and-commands-in-test
       """
-    command_returned_promise_and_commands: (obj) ->
-      """
+      docsUrl: "https://on.cypress.io/returning-value-and-commands-in-test"
+    }
+    command_returned_promise_and_commands: (obj) -> {
+      message: """
         Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.
 
         The command that returned the promise was:
@@ -445,9 +450,9 @@ module.exports = {
         Cypress will resolve your command with whatever the final Cypress command yields.
 
         The reason this is an error instead of a warning is because Cypress internally queues commands serially whereas Promises execute as soon as they are invoked. Attempting to reconcile this would prevent Cypress from ever resolving.
-
-        https://on.cypress.io/returning-promise-and-commands-in-another-command
       """
+      docsUrl: "https://on.cypress.io/returning-promise-and-commands-in-another-command"
+    }
     mixing_promises_and_commands: (obj) ->
       """
         Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
@@ -484,11 +489,10 @@ module.exports = {
       cy
         .get('button') // parent command must come first
         .click()       // then child command comes second
-
       """
     no_cy: "`Cypress.cy` is `undefined`. You may be trying to query outside of a running test. Cannot call `Cypress.$()`"
     no_runner: "Cannot call `Cypress#run` without a runner instance."
-    outside_test: 
+    outside_test: {
       message: """
         Cypress cannot execute commands outside a running test.
 
@@ -499,6 +503,7 @@ module.exports = {
         Check your test file for errors.
       """
       docsUrl: "https://on.cypress.io/cannot-execute-commands-outside-test"
+    }
     outside_test_with_cmd: """
       Cannot call #{cmd('{{cmd}}')} outside a running test.
 
@@ -527,7 +532,7 @@ module.exports = {
     timed_out: "Cypress command timeout of `{{ms}}ms` exceeded."
 
   navigation:
-    cross_origin: 
+    cross_origin: {
       message: """
         Cypress detected a cross origin error happened on page load:
 
@@ -549,6 +554,7 @@ module.exports = {
         You may need to restructure some of your test code to avoid this problem.
       """
       docsUrl: "https://on.cypress.io/cross-origin-violation"
+    }
     timed_out: """
       Timed out after waiting `{{ms}}ms` for your remote page to load.
 
@@ -873,7 +879,7 @@ module.exports = {
 
       msg + if source and lineno then " (#{source}:#{lineno})" else ""
 
-    fromApp: 
+    fromApp: {
       message: """
         This error originated from your application code, not from Cypress.
 
@@ -882,7 +888,7 @@ module.exports = {
         This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.
       """
       docsUrl: "https://on.cypress.io/uncaught-exception-from-application"
-
+    }
     fromSpec: 
       message: """
         This error originated from your test code, not from Cypress.
@@ -907,7 +913,7 @@ module.exports = {
       `url` from the `options` object: {{optionsUrl}}
       `url` from the `url` parameter: {{url}}
     """
-    cannot_visit_2nd_domain: 
+    cannot_visit_2nd_domain: {
       message: """
         #{cmd('visit')} failed because you are attempting to visit a second unique domain.
 
@@ -922,6 +928,7 @@ module.exports = {
         You may need to restructure some of your code to prevent this from happening.
       """
       docsUrl: "https://on.cypress.io/cannot-visit-second-unique-domain"
+    }
     loading_network_failed: """
       #{cmd('visit')} failed trying to load:
 
