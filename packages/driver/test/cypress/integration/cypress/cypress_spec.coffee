@@ -53,3 +53,44 @@ describe "driver/src/cypress/index", ->
         Cypress.Log.command({})
 
       expect(fn).to.throw(/has been renamed to Cypress.log/)
+
+  context "DeprecatedCommanInterface", ->
+    it "throws when using Cypress.add...Command", ->
+      fn = ->
+        Cypress.addParentCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("Cypress.addParentCommand(...) has been removed and replaced")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/custom-command-interface-changed")
+      
+      fn = ->
+        Cypress.addChildCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("Cypress.addChildCommand(...) has been removed and replaced")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/custom-command-interface-changed")
+      
+      fn = ->
+        Cypress.addDualCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("Cypress.addDualCommand(...) has been removed and replaced")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/custom-command-interface-changed")
+
+  context "PrivateCommandInterface", ->
+    it "throws when using addAssertionCommand or addUtilityCommand", ->
+      fn = ->
+        Cypress.addAssertionCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("You cannot use the undocumented private command interface: `addAssertionCommand`")
+      
+      fn = ->
+        Cypress.addUtilityCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("You cannot use the undocumented private command interface: `addUtilityCommand`")
+
