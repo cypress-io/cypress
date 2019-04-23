@@ -46,7 +46,7 @@ _.extend(jqueryProxyFn, $)
 $Log.command = ->
   $errUtils.throwErrByPath("miscellaneous.command_log_renamed")
 
-throwDeprecatedCommandInterface = (key, method) ->
+throwDeprecatedCommandInterface = (key = "commandName", method) ->
   signature = switch method
     when "addParentCommand"
       "'#{key}', function(){...}"
