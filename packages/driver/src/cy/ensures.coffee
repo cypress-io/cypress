@@ -72,7 +72,7 @@ create = (state, expect) ->
         ## append a nice error message telling the user this
         errProps = $errUtils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
 
-        $errUtils.extendErr(err, errProps)
+        $errUtils.mergeErrProps(err, errProps)
 
       throw err
 
