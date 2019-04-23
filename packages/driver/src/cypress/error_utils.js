@@ -178,11 +178,13 @@ const errObjByPath = (errLookupObj, errPath, args) => {
   errObj.renderMessage = replaceErrMsgTokens(errObj.message, escapedArgs)
   errObj.message = replaceErrMsgTokens(errObj.message, args)
 
-  if (errObj.docsUrl) {
-    const errProps = appendErrMsg(errObj, errObj.docsUrl)
+  // THIS ends up being called on every retry,
+  // so it appends a LOT of docs links to the message
+  // if (errObj.docsUrl) {
+  //   const errProps = appendErrMsg(errObj, errObj.docsUrl)
 
-    mergeErrProps(errObj, errProps)
-  }
+  //   mergeErrProps(errObj, errProps)
+  // }
 
   return errObj
 }
