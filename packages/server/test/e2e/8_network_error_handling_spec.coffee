@@ -1,8 +1,6 @@
 _        = require("lodash")
 debug    = require("debug")("network-error-handling-spec")
 DebugProxy = require("@cypress/debugging-proxy")
-moment   = require("moment")
-parser   = require("cookie-parser")
 Promise  = require("bluebird")
 chrome   = require("../../lib/browsers/chrome")
 e2e      = require("../support/helpers/e2e")
@@ -10,7 +8,6 @@ launcher = require("@packages/launcher")
 random   = require("../../lib/util/random")
 
 PORT = 13370
-PROXY_PORT = 13371
 
 start = Number(new Date())
 
@@ -38,8 +35,8 @@ launchBrowser = (url, opts = {}) ->
         "--enable-automation"
       ].includes(arg)
 
-    if opts.useProxy
-      args.push("--proxy-server=http://localhost:#{PROXY_PORT}")
+    if opts.withProxy
+      args.push("--proxy-server=http://localhost:#{PORT}")
 
     launcher.launch(browser, url, args)
 
@@ -51,6 +48,44 @@ onServer = (app) ->
       return res.send('ok')
     req.socket.destroy()
 
+controllers = {
+  immediateReset: (req, res) ->
+    count++
+    req.socket.destroy()
+
+  afterHeadersReset: (req, res) ->
+    count++
+    res.writeHead(200)
+    res.write('')
+    setTimeout ->
+      req.socket.destroy()
+    , 1000
+
+  duringBodyReset: (req, res) ->
+    count++
+    res.writeHead(200)
+    res.write('<html>')
+    setTimeout ->
+      req.socket.destroy()
+    , 1000
+
+  proxyInternalServerError: (req, res) ->
+    count++
+    res.sendStatus(500)
+
+  proxyBadGateway: (req, res) ->
+    count++
+    ## https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.3
+    ## "The server, while acting as a gateway or proxy, received an invalid response"
+    res.sendStatus(502)
+
+  proxyServiceUnavailable: (req, res) ->
+    count++
+    ## https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4
+    ## "The implication is that this is a temporary condition which will be alleviated after some delay."
+    res.sendStatus(503)
+}
+
 describe "e2e network error handling", ->
   @timeout(240000)
 
@@ -60,8 +95,9 @@ describe "e2e network error handling", ->
         onServer: (app) ->
           app.use (req, res, next) ->
             debug('received request %o', {
-              counts: counts,
-              elapsedTime: getElapsed(),
+              count
+              elapsedTime: getElapsed()
+              reqUrl: req.url
             })
 
             if onVisit
@@ -69,71 +105,121 @@ describe "e2e network error handling", ->
 
             next()
 
-          app.get "/immediate-reset", (req, res) ->
-            count++
-            req.socket.destroy()
+          app.get "/immediate-reset", controllers.immediateReset
 
-          app.get "/after-headers-reset", (req, res) ->
-            count++
-            res.writeHead(200)
-            res.write('')
-            setTimeout ->
-              req.socket.destroy()
-            , 1000
+          app.get "/after-headers-reset", controllers.afterHeadersReset
 
-          app.get "/during-body-reset", (req, res) ->
-            count++
-            res.writeHead(200)
-            res.write('<html>')
-            setTimeout ->
-              req.socket.destroy()
-            , 1000
+          app.get "/during-body-reset", controllers.duringBodyReset
+
+          app.get "*", (req, res) ->
+            ## pretending we're a http proxy
+            controller = ({
+              "http://immediate-reset.invalid/": controllers.immediateReset
+              "http://after-headers-reset.invalid/": controllers.afterHeadersReset
+              "http://during-body-reset.invalid/": controllers.duringBodyReset
+              "http://proxy-internal-server-error.invalid/": controllers.proxyInternalServerError
+              "http://proxy-bad-gateway.invalid/": controllers.proxyBadGateway
+              "http://proxy-service-unavailable.invalid/": controllers.proxyServiceUnavailable
+            })[req.url]
+
+            if controller
+              debug('got controller for request')
+              return controller(req, res)
+
+            res.sendStatus(404)
 
         port: PORT
       }
     ],
     settings: {
-      baseUrl: "http://localhost:13370/"
+      baseUrl: "http://localhost:#{PORT}/"
     }
   })
-
-  before ->
-    @proxy = new DebugProxy()
-    @proxy.start(PROXY_PORT)
 
   afterEach ->
     onVisit = null
     count = 0
 
-  context "in Chrome", ->
-    it "retries 3+ times with immediate reset", ->
+  context "Google Chrome", ->
+    it "retries 3+ times when receiving immediate reset", ->
       launchBrowser("http://127.0.0.1:#{PORT}/immediate-reset")
       .then (proc) ->
         Promise.fromCallback (cb) ->
           onVisit = ->
-            if counts.immediateReset >= 3
+            if count >= 3
               cb()
         .then ->
           proc.kill(9)
-          expect(counts.immediateReset).to.be.at.least(3)
+          expect(count).to.be.at.least(3)
 
-    it "retries 3+ times with reset after headers", ->
+    it "retries 3+ times when receiving reset after headers", ->
       launchBrowser("http://localhost:#{PORT}/after-headers-reset")
       .then (proc) ->
         Promise.fromCallback (cb) ->
           onVisit = ->
-            if counts.afterHeadersReset >= 3
+            if count >= 3
               cb()
         .then ->
           proc.kill(9)
-          expect(counts.afterHeadersReset).to.be.at.least(3)
+          expect(count).to.be.at.least(3)
 
     it "does not retry if reset during body", ->
       launchBrowser("http://localhost:#{PORT}/during-body-reset")
-      .delay(5000)
+      .delay(6000)
       .then (proc) ->
         proc.kill(9)
-        expect(counts.duringBodyReset).to.eq(1)
+        expect(count).to.eq(1)
+
+    context "behind a proxy server", ->
+      it "retries 3+ times when receiving immediate reset", ->
+        launchBrowser("http://immediate-reset.invalid/", { withProxy: true })
+        .then (proc) ->
+          Promise.fromCallback (cb) ->
+            onVisit = ->
+              if count >= 3
+                cb()
+          .then ->
+            proc.kill(9)
+            expect(count).to.be.at.least(3)
+
+      it "retries 3+ times when receiving reset after headers", ->
+        launchBrowser("http://after-headers-reset.invalid/", { withProxy: true })
+        .then (proc) ->
+          Promise.fromCallback (cb) ->
+            onVisit = ->
+              if count >= 3
+                cb()
+          .then ->
+            proc.kill(9)
+            expect(count).to.be.at.least(3)
+
+      it "does not retry if reset during body", ->
+        launchBrowser("http://during-body-reset.invalid/", { withProxy: true })
+        .delay(6000)
+        .then (proc) ->
+          proc.kill(9)
+          expect(count).to.eq(1)
+
+      it "does not retry on '500 Internal Server Error'", ->
+        launchBrowser("http://proxy-internal-server-error.invalid/", { withProxy: true })
+        .delay(6000)
+        .then (proc) ->
+          proc.kill(9)
+          expect(count).to.eq(1)
+
+      it "does not retry on '502 Bad Gateway'", ->
+        launchBrowser("http://proxy-bad-gateway.invalid/", { withProxy: true })
+        .delay(6000)
+        .then (proc) ->
+          proc.kill(9)
+          expect(count).to.eq(1)
+
+      it "does not retry on '503 Service Unavailable'", ->
+        launchBrowser("http://proxy-service-unavailable.invalid/", { withProxy: true })
+        .delay(6000)
+        .then (proc) ->
+          proc.kill(9)
+          expect(count).to.eq(1)
 
   # it "fails", ->
   #   e2e.exec(@, {
