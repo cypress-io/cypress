@@ -23,11 +23,6 @@ const mergeErrProps = (origErr, newProps) => {
 }
 
 const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
-  // preserve stack
-  // this is the critical part
-  // because the browser has a cached
-  // dynamic stack getter that will
-  // not be evaluated later
   let { stack, message, renderMessage } = origErrObj
 
   // preserve message

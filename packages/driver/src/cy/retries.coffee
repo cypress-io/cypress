@@ -50,15 +50,13 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
         
         { error, onFail } = options
 
-        err = $errUtils.cypressErr(error.message)
-
         prependMsg = $errUtils.errMsgByPath("miscellaneous.retry_timed_out")
 
-        retryErrProps = $errUtils.modifyErrMsg(err, prependMsg, (msg1, msg2) ->
+        retryErrProps = $errUtils.modifyErrMsg(error, prependMsg, (msg1, msg2) ->
           return "#{msg2}#{msg1}"
         )
 
-        retryErr = $errUtils.mergeErrProps(err, retryErrProps)
+        retryErr = $errUtils.mergeErrProps(error, retryErrProps)
 
         $errUtils.throwErr(retryErr, {
           onFail: onFail or log
