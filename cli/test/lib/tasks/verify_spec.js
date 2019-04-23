@@ -3,7 +3,6 @@ require('../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const mockfs = require('mock-fs')
-const _snapshot = require('snap-shot-it')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
 
@@ -15,6 +14,7 @@ const verify = require(`${lib}/tasks/verify`)
 
 const Stdout = require('../../support/stdout')
 const normalize = require('../../support/normalize')
+const snapshot = require('../../support/snapshot')
 
 const packageVersion = '1.2.3'
 const cacheDir = '/cache/Cypress'
@@ -25,11 +25,6 @@ let stdout
 let spawnedProcess
 
 /* eslint-disable no-octal */
-
-const snapshot = (...args) => {
-  mockfs.restore()
-  _snapshot(...args)
-}
 
 context('lib/tasks/verify', () => {
   require('mocha-banner').register()
@@ -67,7 +62,6 @@ context('lib/tasks/verify', () => {
   })
 
   it('logs error and exits when no version of Cypress is installed', () => {
-    mockfs({})
 
     return verify
     .start()

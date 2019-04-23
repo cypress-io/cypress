@@ -1887,6 +1887,10 @@ describe "src/cy/commands/xhr", ->
 
         cy.wrap(null).should ->
           expect(log.get("state")).to.eq("failed")
+          expect(log.invoke("renderProps")).to.deep.eq({
+            message: "GET (aborted) /timeout?ms=999",
+            indicator: 'aborted',
+          })
           expect(xhr.aborted).to.be.true
 
     ## https://github.com/cypress-io/cypress/issues/3008
@@ -1943,19 +1947,22 @@ describe "src/cy/commands/xhr", ->
           expect(log.get("state")).to.eq("passed")
 
   context "Cypress.on(window:unload)", ->
-    it "aborts all open XHR's", ->
+    it "cancels all open XHR's", ->
       xhrs = []
 
-      cy.window().then (win) ->
+      cy
+      .window()
+      .then (win) ->
         _.times 2, ->
           xhr = new win.XMLHttpRequest
-          xhr.open("GET", "/timeout?ms=100")
+          xhr.open("GET", "/timeout?ms=200")
           xhr.send()
 
           xhrs.push(xhr)
-      .reload().then ->
+      .reload()
+      .then ->
         _.each xhrs, (xhr) ->
-          expect(xhr.aborted).to.be.true
+          expect(xhr.canceled).to.be.true
 
   context "Cypress.on(window:before:load)", ->
     it "reapplies server + route automatically before window:load", ->
