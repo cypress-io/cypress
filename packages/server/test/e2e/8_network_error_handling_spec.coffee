@@ -1,5 +1,6 @@
 _        = require("lodash")
 debug    = require("debug")("network-error-handling-spec")
+DebugProxy = require("@cypress/debugging-proxy")
 moment   = require("moment")
 parser   = require("cookie-parser")
 Promise  = require("bluebird")
@@ -9,6 +10,7 @@ launcher = require("@packages/launcher")
 random   = require("../../lib/util/random")
 
 PORT = 13370
+PROXY_PORT = 13371
 
 start = Number(new Date())
 
@@ -16,14 +18,9 @@ getElapsed = ->
   Math.round((Number(new Date()) - start)/1000)
 
 onVisit = null
+count = 0
 
-counts = {
-  immediateReset: 0
-  afterHeadersReset: 0
-  duringBodyReset: 0
-}
-
-launchBrowser = (url) ->
+launchBrowser = (url, opts = {}) ->
   launcher.detect().then (browsers) ->
     browser = _.find(browsers, { name: 'chrome' })
 
@@ -41,6 +38,9 @@ launchBrowser = (url) ->
         "--enable-automation"
       ].includes(arg)
 
+    if opts.useProxy
+      args.push("--proxy-server=http://localhost:#{PROXY_PORT}")
+
     launcher.launch(browser, url, args)
 
 onServer = (app) ->
@@ -52,6 +52,8 @@ onServer = (app) ->
     req.socket.destroy()
 
 describe "e2e network error handling", ->
+  @timeout(240000)
+
   e2e.setup({
     servers: [
       {
@@ -68,11 +70,11 @@ describe "e2e network error handling", ->
             next()
 
           app.get "/immediate-reset", (req, res) ->
-            counts.immediateReset++
+            count++
             req.socket.destroy()
 
           app.get "/after-headers-reset", (req, res) ->
-            counts.afterHeadersReset++
+            count++
             res.writeHead(200)
             res.write('')
             setTimeout ->
@@ -80,7 +82,7 @@ describe "e2e network error handling", ->
             , 1000
 
           app.get "/during-body-reset", (req, res) ->
-            counts.duringBodyReset++
+            count++
             res.writeHead(200)
             res.write('<html>')
             setTimeout ->
@@ -95,12 +97,15 @@ describe "e2e network error handling", ->
     }
   })
 
+  before ->
+    @proxy = new DebugProxy()
+    @proxy.start(PROXY_PORT)
+
+  afterEach ->
+    onVisit = null
+    count = 0
+
   context "in Chrome", ->
-    @timeout(240000)
-
-    afterEach ->
-      onVisit = null
-
     it "retries 3+ times with immediate reset", ->
       launchBrowser("http://127.0.0.1:#{PORT}/immediate-reset")
       .then (proc) ->
