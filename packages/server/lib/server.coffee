@@ -363,89 +363,86 @@ class Server
 
           reject(err)
 
-        handleReqStream = (str) =>
-          pt = str
-          .on("error", error)
-          .on "response", (incomingRes) =>
-            debug(
-              "got resolve:url response %o",
-              _.pick(incomingRes, "headers", "statusCode")
-            )
+        handleReqStream = (str, incomingRes) =>
+          debug(
+            "got resolve:url response %o",
+            _.pick(incomingRes, "headers", "statusCode")
+          )
 
-            str.removeListener("error", error)
-            str.on "error", (err) ->
-              ## if we have listeners on our
-              ## passthru stream just emit error
-              if pt.listeners("error").length
-                pt.emit("error", err)
-              else
-                ## else store the error for later
-                pt.error = err
+          pt = str.pipe(stream.PassThrough()).on("error", error)
 
-            jar = str.getJar()
+          str.on "error", (err) ->
+            ## if we have listeners on our
+            ## passthru stream just emit error
+            if pt.listeners("error").length
+              pt.emit("error", err)
+            else
+              ## else store the error for later
+              pt.error = err
 
-            request.setJarCookies(jar, automationRequest)
-            .then (c) =>
-              @_remoteVisitingUrl = false
+          jar = str.getJar()
 
-              newUrl ?= urlStr
+          request.setJarCookies(jar, automationRequest)
+          .then (c) =>
+            @_remoteVisitingUrl = false
 
-              statusIs2xxOrAllowedFailure = ->
-                ## is our status code in the 2xx range, or have we disabled failing
-                ## on status code?
-                statusCode.isOk(incomingRes.statusCode) or (options.failOnStatusCode is false)
+            newUrl ?= urlStr
 
-              isOk        = statusIs2xxOrAllowedFailure()
-              contentType = headersUtil.getContentType(incomingRes)
-              isHtml      = contentType is "text/html"
+            statusIs2xxOrAllowedFailure = ->
+              ## is our status code in the 2xx range, or have we disabled failing
+              ## on status code?
+              statusCode.isOk(incomingRes.statusCode) or (options.failOnStatusCode is false)
 
-              details = {
-                isOkStatusCode: isOk
-                isHtml: isHtml
-                contentType: contentType
+            isOk        = statusIs2xxOrAllowedFailure()
+            contentType = headersUtil.getContentType(incomingRes)
+            isHtml      = contentType is "text/html"
+
+            details = {
+              isOkStatusCode: isOk
+              isHtml: isHtml
+              contentType: contentType
+              url: newUrl
+              status: incomingRes.statusCode
+              cookies: c
+              statusText: statusCode.getText(incomingRes.statusCode)
+              redirects: redirects
+              originalUrl: originalUrl
+            }
+
+            ## does this response have this cypress header?
+            if fp = incomingRes.headers["x-cypress-file-path"]
+              ## if so we know this is a local file request
+              details.filePath = fp
+
+            debug("setting details resolving url %o", details)
+
+            ## TODO: think about moving this logic back into the
+            ## frontend so that the driver can be in control of
+            ## when the server should cache the request buffer
+            ## and set the domain vs not
+            if isOk and isHtml
+              ## reset the domain to the new url if we're not
+              ## handling a local file
+              @_onDomainSet(newUrl, options) if not handlingLocalFile
+
+              debug("setting buffer for url:", newUrl)
+
+              buffers.set({
                 url: newUrl
-                status: incomingRes.statusCode
-                cookies: c
-                statusText: statusCode.getText(incomingRes.statusCode)
-                redirects: redirects
+                jar: jar
+                stream: pt
+                details: details
                 originalUrl: originalUrl
-              }
+                response: incomingRes
+              })
+            else
+              ## TODO: move this logic to the driver too for
+              ## the same reasons listed above
+              restorePreviousState()
 
-              ## does this response have this cypress header?
-              if fp = incomingRes.headers["x-cypress-file-path"]
-                ## if so we know this is a local file request
-                details.filePath = fp
+            resolve(details)
 
-              debug("setting details resolving url %o", details)
-
-              ## TODO: think about moving this logic back into the
-              ## frontend so that the driver can be in control of
-              ## when the server should cache the request buffer
-              ## and set the domain vs not
-              if isOk and isHtml
-                ## reset the domain to the new url if we're not
-                ## handling a local file
-                @_onDomainSet(newUrl, options) if not handlingLocalFile
-
-                debug("setting buffer for url:", newUrl)
-
-                buffers.set({
-                  url: newUrl
-                  jar: jar
-                  stream: pt
-                  details: details
-                  originalUrl: originalUrl
-                  response: incomingRes
-                })
-              else
-                ## TODO: move this logic to the driver too for
-                ## the same reasons listed above
-                restorePreviousState()
-
-              resolve(details)
-
-            .catch(error)
-          .pipe(stream.PassThrough())
+          .catch(error)
 
         restorePreviousState = =>
           @_remoteAuth         = previousState.auth
@@ -484,8 +481,13 @@ class Server
 
         debug('sending request with options %o', options)
 
-        request.sendStream(headers, automationRequest, options)
-        .then(handleReqStream)
+        options.retry = true
+
+        request.sendStream headers, automationRequest, options, (err, reqStream, incomingRes) ->
+          if err
+            return error(err)
+
+          return handleReqStream(reqStream, incomingRes)
         .catch(error)
 
   _onDomainSet: (fullyQualifiedUrl, options = {}) ->

@@ -6,6 +6,7 @@ tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
+stream     = require("stream")
 agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 Cookies    = require("./automation/cookies")
@@ -317,12 +318,20 @@ module.exports = (options = {}) ->
       createAndRetry = (iteration = 0) =>
         newReq = @create(options)
         newReq.getJar = -> options.jar
-        newReq
-        .on "error", (err) ->
+
+        onError = (err) ->
+          debug("caught request error in sendstream #{err.code} #{err} %o", err)
+
+          newReq.on "error", (newErr) ->
+            # sockets can/do emit multiple errors depending on how they're closed
+            # listen for these extra errors so that the whole process doesn't crash
+            debug("received error on already-errored request stream: %o", {
+              originalError: err,
+              lastError: newErr
+            })
+
           if not isRetriableError(err)
             return cb(err)
-
-          debug("caught request error in sendstream #{err.code} #{err} %o", err)
 
           if iteration >= 2
             debug("retried 3x and still network error, not retrying")
@@ -333,11 +342,16 @@ module.exports = (options = {}) ->
             delay: options.timeout
           })
 
-          Promise.delay(options.timeout)
-          .then ->
+          setTimeout ->
             createAndRetry(iteration + 1)
-        .on "response", (socket) ->
-          cb(null, newReq)
+          , options.timeout || 0
+
+        newReq
+        .once "error", onError
+        .once "response", (incomingRes) ->
+          debug('received response event')
+          newReq.removeListener("error", onError)
+          cb(null, newReq, incomingRes)
 
       send = ->
         debug("sending request as stream %o", _.omit(options, "jar"))

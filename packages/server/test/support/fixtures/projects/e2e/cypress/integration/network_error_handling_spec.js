@@ -1,8 +1,8 @@
 describe('network error handling', function () {
   context('retries', function () {
-    it('retries 3x to visit unreachable port', function () {
+    it('retries 3x', function () {
       cy.visit({
-        url: 'http://localhost:13371/',
+        url: '/immediate-reset',
       })
     })
 

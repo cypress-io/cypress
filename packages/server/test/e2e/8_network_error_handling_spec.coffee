@@ -16,6 +16,7 @@ getElapsed = ->
 
 onVisit = null
 count = 0
+e2eCount = 0
 
 launchBrowser = (url, opts = {}) ->
   launcher.detect().then (browsers) ->
@@ -40,14 +41,6 @@ launchBrowser = (url, opts = {}) ->
 
     launcher.launch(browser, url, args)
 
-onServer = (app) ->
-  app.get "/works-third-time", (req, res) ->
-    id = req.params.id
-    count += 1
-    if count == 3
-      return res.send('ok')
-    req.socket.destroy()
-
 controllers = {
   immediateReset: (req, res) ->
     count++
@@ -68,6 +61,12 @@ controllers = {
     setTimeout ->
       req.socket.destroy()
     , 1000
+
+  worksThirdTime: (req, res) ->
+    e2eCount++
+    if e2eCount == 3
+      return res.send('ok')
+    req.socket.destroy()
 
   proxyInternalServerError: (req, res) ->
     count++
@@ -110,6 +109,8 @@ describe "e2e network error handling", ->
           app.get "/after-headers-reset", controllers.afterHeadersReset
 
           app.get "/during-body-reset", controllers.duringBodyReset
+
+          app.get "/works-third-time", controllers.worksThirdTime
 
           app.get "*", (req, res) ->
             ## pretending we're a http proxy
@@ -221,9 +222,13 @@ describe "e2e network error handling", ->
           proc.kill(9)
           expect(count).to.eq(1)
 
-  # it "fails", ->
-  #   e2e.exec(@, {
-  #     spec: "network_error_handling_spec.js"
-  #     snapshot: true
-  #     expectedExitCode: 1
-  #   })
+  it "Cypress tests run as expected", ->
+    e2e.exec(@, {
+      spec: "network_error_handling_spec.js"
+      snapshot: true
+      # exit: false
+      # browser: "chrome"
+      video: false
+      expectedExitCode: 1
+    }).then () ->
+      expect(e2eCount).to.eq(3)
