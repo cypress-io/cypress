@@ -313,7 +313,6 @@ const create = (state, focused) => {
     },
 
     mouseDown (coords, force, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
-
       const $previouslyFocused = focused.getFocused()
 
       const mouseDownEvents = mouse._mouseDownEvents(coords, force, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
@@ -321,12 +320,16 @@ const create = (state, focused) => {
       // el we just send pointerdown
       const el = mouseDownEvents.pointerdownProps.el
 
+      debug('mousedown', el)
+
       if (mouseDownEvents.pointerdownProps.preventedDefault || mouseDownEvents.mousedownProps.preventedDefault || !$elements.isAttachedEl(el)) {
         return mouseDownEvents
       }
 
       //# retrieve the first focusable $el in our parent chain
       const $elToFocus = $elements.getFirstFocusableEl($(el))
+
+      debug('mousedown firstFocusableEl:', $elToFocus[0])
 
       if (focused.needsFocus($elToFocus, $previouslyFocused)) {
         focused.fireFocus($elToFocus.get(0))

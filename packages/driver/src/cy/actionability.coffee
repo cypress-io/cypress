@@ -212,6 +212,8 @@ verify = (cy, $el, options, callbacks) ->
       visibility: true,
       receivability: true,
       notAnimatingOrCovered: true,
+      notReadonly: false,
+      custom: false
     }
   })
 
@@ -238,6 +240,7 @@ verify = (cy, $el, options, callbacks) ->
 
     runAllChecks = ->
 
+
       if force isnt true
 
         ## ensure its 'receivable'
@@ -251,6 +254,12 @@ verify = (cy, $el, options, callbacks) ->
 
         ## ensure its visible
         if (options.ensure.visibility) then cy.ensureVisibility($el, _log)
+
+        if options.ensure.notReadonly
+          cy.ensureNotReadonly($el, _log)
+
+        if _.isFunction(options.custom)
+          options.custom($el, _log)
 
       ## now go get all the coords for this element
       coords = getCoordinatesForEl(cy, $el, options)

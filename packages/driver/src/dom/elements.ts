@@ -39,6 +39,18 @@ const focusable = [
   '[tabindex]',
   '[contentEditable]',
 ]
+const focusableWhenNotDisabled = [
+  'a[href]',
+  'area[href]',
+  'input',
+  'select',
+  'textarea',
+  'button',
+  'iframe',
+  '[tabindex]',
+  '[contentEditable]',
+]
+
 
 const isTextInputable = (el: HTMLElement) => {
   if (isTextLike(el)) {
@@ -352,6 +364,8 @@ const isContentEditable = (el: any): el is HTMLContentEditableElement => {
   return getNativeProp(el, 'isContentEditable')
 }
 
+
+
 const isTextarea = (el): el is HTMLTextAreaElement => {
   return getTagName(el) === 'textarea'
 }
@@ -427,7 +441,15 @@ const isElement = function(obj): obj is HTMLElement | JQuery<HTMLElement> {
  * The element can be activeElement, recieve focus events, and also recieve keyboard events
  */
 const isFocusable = ($el: JQuery<Element>) => {
-  return _.some(focusable, (sel) => $el.is(sel)) || (isElement($el[0]) && isContentEditable($el[0]))
+  return _.some(focusable, (sel) => $el.is(sel)) || (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
+}
+
+/**
+ * The element can be activeElement, recieve focus events, and also recieve keyboard events
+ * OR, it is a disabled element that would have been focusable
+ */
+const isFocusableWhenNotDisabled = ($el: JQuery<Element>) => {
+  return _.some(focusableWhenNotDisabled, (sel) => $el.is(sel)) || (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
 }
 
 const isType = function(el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
@@ -901,6 +923,7 @@ export {
   isSelector,
   isScrollOrAuto,
   isFocusable,
+  isFocusableWhenNotDisabled,
   isAttached,
   isDetached,
   isAttachedEl,

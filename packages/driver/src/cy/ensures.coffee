@@ -111,6 +111,18 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
+  ensureNotReadonly = (subject, onFail) ->
+    cmd = state("current").get("name")
+
+    if subject.prop("readonly")
+      node = $dom.stringify(subject)
+
+      $utils.throwErrByPath("dom.readonly", {
+        onFail
+        args: { cmd, node }
+      })
+
+
   ensureVisibility = (subject, onFail) ->
     cmd = state("current").get("name")
 
@@ -278,6 +290,8 @@ create = (state, expect) ->
     ensureValidPosition
 
     ensureScrollability
+
+    ensureNotReadonly
   }
 
 module.exports = {

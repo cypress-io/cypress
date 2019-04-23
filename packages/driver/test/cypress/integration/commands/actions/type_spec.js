@@ -807,67 +807,60 @@ describe('src/cy/commands/actions/type', function () {
       })
 
       it('does not fire input event when value does not change', () => {
-        let fired = false
+        const input = cy.stub().as('input event')
 
-        cy.$$(':text:first').on('input', () => {
-          return fired = true
-        })
+        cy.$$(':text:first').on('input', input)
 
-        fired = false
         cy.get(':text:first')
         .invoke('val', 'bar')
-        .type('{selectAll}{rightarrow}{del}')
+        // .wait(6000)
+        .type('{selectAll}')//{rightarrow}{del}')
         .then(() => {
-          expect(fired).to.eq(false)
+          expect(input).not.called
         })
 
-        fired = false
+        input.reset()
         cy.get(':text:first')
         .invoke('val', 'bar')
         .type('{selectAll}{leftarrow}{backspace}')
         .then(() => {
-          expect(fired).to.eq(false)
+          expect(input).not.called
         })
 
-        cy.$$('textarea:first').on('input', () => {
-          return fired = true
-        })
+        cy.$$('textarea:first').on('input', input)
 
-        fired = false
+        input.reset()
         cy.get('textarea:first')
         .invoke('val', 'bar')
         .type('{selectAll}{rightarrow}{del}')
         .then(() => {
-          expect(fired).to.eq(false)
+          expect(input).not.called
         })
 
-        fired = false
+        input.reset()
         cy.get('textarea:first')
         .invoke('val', 'bar')
         .type('{selectAll}{leftarrow}{backspace}')
         .then(() => {
-          expect(fired).to.eq(false)
+          expect(input).not.called
         })
 
-        cy.$$('[contenteditable]:first').on('input', () => {
-          return fired = true
-        })
+        cy.$$('[contenteditable]:first').on('input', input)
 
-        fired = false
+        input.reset()
         cy.get('[contenteditable]:first')
         .invoke('html', 'foobar')
         .type('{selectAll}{rightarrow}{del}')
         .then(() => {
-          expect(fired).to.eq(false)
+          expect(input).not.called
         })
 
-        fired = false
-
+        input.reset()
         cy.get('[contenteditable]:first')
         .invoke('html', 'foobar')
         .type('{selectAll}{leftarrow}{backspace}')
         .then(() => {
-          expect(fired).to.eq(false)
+          expect(input).not.called
         })
       })
     })
@@ -1066,7 +1059,7 @@ describe('src/cy/commands/actions/type', function () {
         })
       })
 
-      it('automatically moves the caret to the end if value is changed manually', () => {
+      it('automatically moves the caret to the end if value is changed', () => {
         cy.$$('#input-without-value').keypress((e) => {
           e.preventDefault()
 
@@ -1085,7 +1078,7 @@ describe('src/cy/commands/actions/type', function () {
         })
       })
 
-      it('automatically moves the caret to the end if value is changed manually asynchronously', () => {
+      it('automatically moves the caret to the end if value is changed asynchronously', () => {
         cy.$$('#input-without-value').keypress((e) => {
 
           const $input = $(e.target)
@@ -1369,7 +1362,7 @@ describe('src/cy/commands/actions/type', function () {
                 return select(e)
               case 'n':
                 return e.target.setSelectionRange(0, 1)
-              default: throw new Error('should never happen')
+              default:
             }
           })
 
@@ -1525,7 +1518,8 @@ describe('src/cy/commands/actions/type', function () {
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>foo</div>'
 
           cy.get('[contenteditable]:first')
-          .type('bar').then(($div) => {
+          .type('bar')
+          .then(($div) => {
             expect(trimInnerText($div)).to.eql('foobar')
             expect($div.get(0).textContent).to.eql('foobar')
 
@@ -2509,13 +2503,14 @@ describe('src/cy/commands/actions/type', function () {
           const $input = cy.$$('input:text:first')
           const events = []
 
-          $input.on('keyup', (e) => {
+          $input.on('keyup', cy.stub().callsFake((e) => {
             events.push(e)
-          })
+
+          }))
 
           cy
           .get('input:text:first')
-          .type('{alt}{ctrl}{meta}{shift}ok')
+          .type('{alt}{ctrl}{meta}{shift}ok', { force: true })
           .then(() => {
             // first keyups should be for the chars typed, "ok"
             expect(events[0].which).to.equal(79)
@@ -2531,6 +2526,7 @@ describe('src/cy/commands/actions/type', function () {
             done()
           })
         })
+
       })
 
       describe('release: false', () => {
@@ -2850,19 +2846,17 @@ describe('src/cy/commands/actions/type', function () {
       })
 
       it('does not fire at all between clear/type/click', () => {
-        let changed = 0
+        const change = cy.stub().as('change')
 
-        cy.$$(':text:first').change(() => {
-          return changed += 1
-        })
+        cy.$$(':text:first').on('change', change)
 
         cy.get(':text:first').invoke('val', 'foo').clear().type('o').click().then(($el) => {
-          expect(changed).to.eq(0)
+          expect(change).callCount(0)
 
           return $el
         }).blur()
         .then(() => {
-          expect(changed).to.eq(1)
+          expect(change).callCount(1)
         })
       })
 
@@ -3918,13 +3912,16 @@ describe('src/cy/commands/actions/type', function () {
       })
 
       it('throws when not textarea or text-like', (done) => {
-        cy.get('form').type('foo')
+        cy.get('form')
+        // .first()
+        // .click()
+        .type('foo')
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
           expect(err.message).to.include('The element typed into was:')
           expect(err.message).to.include('<form id="by-id">...</form>')
-          expect(err.message).to.include('Cypress considers the \'body\', \'textarea\', any \'element\' with a \'tabindex\' or \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid typeable elements.')
+          expect(err.message).to.include('Cypress considers the \'body\', \'textarea\', any \'element\' with a \'tabindex\' or \'contenteditable\' attribute, any focusable element, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid typeable elements.')
 
           done()
         })

@@ -84,6 +84,17 @@ const keypress = (keyInfo) => {
   })
 }
 
+const keydown = (keyInfo) => {
+  return init().then(() => {
+    return keyDown(keyInfo)
+  })
+}
+const keyup = (keyInfo) => {
+  return init().then(() => {
+    return keyUp(keyInfo)
+  })
+}
+
 function keypressAll (keyInfoArray) {
   return init().then(() => {
     return Promise.all(
@@ -134,6 +145,8 @@ module.exports = {
   mouseDown,
   mouseUp,
   click,
+  keydown,
+  keyup,
   keypress,
   keypressAll,
   init,

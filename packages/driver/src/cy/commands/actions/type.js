@@ -406,6 +406,15 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         return type()
       }
 
+      if (!$elements.isFocusableWhenNotDisabled(options.$el)) {
+        const node = $dom.stringify(options.$el)
+
+        $utils.throwErrByPath('type.not_on_typeable_element', {
+          onFail: options._log,
+          args: { node },
+        })
+      }
+
       let elToCheckCurrentlyFocused
       //# if the subject is already the focused element, start typing
       //# we handle contenteditable children by getting the host contenteditable,
@@ -422,8 +431,19 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
       }
 
+      options.ensure = {
+        position: true,
+        visibility: true,
+        receivability: true,
+        notAnimatingOrCovered: true,
+        notReadonly: true,
+      }
+
       if (elToCheckCurrentlyFocused && (elToCheckCurrentlyFocused === $focused)) {
-        options.ensure = { receivability: true }
+        options.ensure = {
+          receivability: true,
+          notReadonly: true,
+        }
       }
 
       return $actionability.verify(cy, options.$el, options, {

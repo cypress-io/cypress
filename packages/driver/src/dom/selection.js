@@ -243,6 +243,8 @@ const deleteRightOfCursor = function (el) {
     //# successful delete
     return true
   }
+
+  return false
 }
 
 const deleteLeftOfCursor = function (el) {
@@ -284,6 +286,8 @@ const deleteLeftOfCursor = function (el) {
     //# successful delete
     return true
   }
+
+  return false
 }
 
 const _collapseInputOrTextArea = (el, toIndex) => {

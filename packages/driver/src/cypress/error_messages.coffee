@@ -192,6 +192,15 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
     """
+    readonly: """
+      #{cmd('{{cmd}}')} failed because this element is readonly:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+    """
     invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
@@ -861,7 +870,7 @@ module.exports = {
 
         > {{node}}
 
-      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex', any focusable element, or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
+      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, any focusable element, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
     """
     not_actionable_textlike: """
       #{cmd('type')} failed because it targeted a disabled element.
