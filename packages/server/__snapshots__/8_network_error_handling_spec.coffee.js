@@ -1,4 +1,4 @@
-exports['e2e network error handling fails 1'] = `
+exports['e2e network error handling Cypress tests run as expected 1'] = `
 
 ====================================================================================================
 

@@ -222,13 +222,14 @@ describe "e2e network error handling", ->
           proc.kill(9)
           expect(count).to.eq(1)
 
-  it "Cypress tests run as expected", ->
-    e2e.exec(@, {
-      spec: "network_error_handling_spec.js"
-      snapshot: true
-      # exit: false
-      # browser: "chrome"
-      video: false
-      expectedExitCode: 1
-    }).then () ->
-      expect(e2eCount).to.eq(3)
+  context "Cypress", ->
+    it "tests run as expected", ->
+      e2e.exec(@, {
+        spec: "network_error_handling_spec.js"
+        snapshot: true
+        # exit: false
+        # browser: "chrome"
+        video: false
+        expectedExitCode: 1
+      }).then () ->
+        expect(e2eCount).to.eq(3)
