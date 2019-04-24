@@ -1,6 +1,6 @@
 import { action, computed, observable } from 'mobx'
 
-import Err from '../lib/err-model'
+import Err from '../errors/err-model'
 import Instrument from '../instruments/instrument-model'
 
 const LONG_RUNNING_THRESHOLD = 1000

@@ -1,7 +1,7 @@
 _ = require("lodash")
 
 $Clock = require("../../cypress/clock")
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 ## create a global clock
 clock = null
@@ -46,10 +46,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         methods = undefined
 
       if now? and !_.isNumber(now)
-        $utils.throwErrByPath("clock.invalid_1st_arg", {args: {arg: JSON.stringify(now)}})
+        $errUtils.throwErrByPath("clock.invalid_1st_arg", {args: {arg: JSON.stringify(now)}})
 
       if methods? and not (_.isArray(methods) and _.every(methods, _.isString))
-        $utils.throwErrByPath("clock.invalid_2nd_arg", {args: {arg: JSON.stringify(methods)}})
+        $errUtils.throwErrByPath("clock.invalid_2nd_arg", {args: {arg: JSON.stringify(methods)}})
 
       _.defaults options, {
         log: true
@@ -82,7 +82,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       clock.tick = (ms) ->
         if ms? and not _.isNumber(ms)
-          $utils.throwErrByPath("tick.invalid_argument", {args: {arg: JSON.stringify(ms)}})
+          $errUtils.throwErrByPath("tick.invalid_argument", {args: {arg: JSON.stringify(ms)}})
 
         ms ?= 0
 
@@ -125,7 +125,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     tick: (subject, ms) ->
       if not clock
-        $utils.throwErrByPath("tick.no_clock")
+        $errUtils.throwErrByPath("tick.no_clock")
 
       clock.tick(ms)
 

@@ -42,9 +42,8 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
-This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
-
 https://on.cypress.io/uncaught-exception-from-application
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
       at stack trace line
       at stack trace line
       at stack trace line
@@ -64,9 +63,8 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
-This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
-
 https://on.cypress.io/uncaught-exception-from-application
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
       at stack trace line
       at stack trace line
       at stack trace line
@@ -84,7 +82,7 @@ We cannot provide you the stack trace, line number, or file where this error occ
 
 Check your Developer Tools Console for the actual error - it should be printed there.
 
-It's possible to enable debugging these scripts by adding the 'crossorigin' attribute and setting a CORS header.
+It's possible to enable debugging these scripts by adding the \`crossorigin\` attribute and setting a CORS header.
 
 https://on.cypress.io/cross-origin-script-error
 
@@ -92,9 +90,8 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
-This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
-
 https://on.cypress.io/uncaught-exception-from-application
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
       at stack trace line
       at stack trace line
       at stack trace line

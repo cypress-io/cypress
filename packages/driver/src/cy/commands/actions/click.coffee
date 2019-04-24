@@ -5,6 +5,7 @@ $Mouse = require("../../../cypress/mouse")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$errUtils = require("../../../cypress/error_utils")
 $elements = require("../../../dom/elements")
 $selection = require("../../../dom/selection")
 $actionability = require("../../actionability")
@@ -34,7 +35,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## throw if we're trying to click multiple elements
       ## and we did not pass the multiple flag
       if options.multiple is false and options.$el.length > 1
-        $utils.throwErrByPath("click.multiple_elements", {
+        $errUtils.throwErrByPath("click.multiple_elements", {
           args: { num: options.$el.length }
         })
 
@@ -58,7 +59,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           options._log.snapshot("before", {next: "after"})
 
         if options.errorOnSelect and $el.is("select")
-          $utils.throwErrByPath "click.on_select_element", { onFail: options._log }
+          $errUtils.throwErrByPath "click.on_select_element", { onFail: options._log }
 
         afterMouseDown = ($elToClick, coords) ->
           ## we need to use both of these
@@ -195,7 +196,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           ## if we give up on waiting for actionability then
           ## lets throw this error and log the command
-          $utils.throwErr(err, { onFail: options._log })
+          $errUtils.throwErr(err, { onFail: options._log })
 
       Promise
       .each(options.$el.toArray(), click)

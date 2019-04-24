@@ -1,60 +1,81 @@
 _ = Cypress._
 $utils = Cypress.utils
-Promise = Cypress.Promise
 
 describe "driver/src/cypress/utils", ->
-  context ".cloneErr", ->
-    it "copies properies, message, stack", ->
+  context ".reduceProps", ->
+    it "reduces obj to only include props in props", ->
       obj = {
-        stack: "stack"
-        message: "message"
-        name: "Foo"
-        code: 123
+        foo: 'foo',
+        bar: 'bar',
+        baz: 'baz'
       }
 
-      err = $utils.cloneErr(obj)
+      obj = $utils.reduceProps(obj, ['foo', 'bar'])
+      expect(obj).to.deep.eq {foo: 'foo', bar: 'bar'}
 
-      expect(err).to.be.instanceof(top.Error)
+  context ".filterOutOptions", ->
+    it "returns new obj based on the delta from the filter", ->
+      obj = $utils.filterOutOptions {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}
+      expect(obj).to.deep.eq {visible: true}
 
-      for key, val of obj
-        expect(err[key], "key: #{key}").to.eq(obj[key])
+    it "returns undefined if nothing is different", ->
+      obj = $utils.filterOutOptions {foo: "foo", bar: "bar"}, {foo: "foo"}
+      expect(obj).to.be.undefined
 
-  context ".appendErrMsg", ->
-    it "appends error message", ->
-      err = new Error("foo")
+    it "normalizes objects with length property", ->
+      obj = $utils.filterOutOptions {exist: true}, {visible: null, exist: false, length: null}
+      expect(obj).to.deep.eq {exist: true}
 
-      expect(err.message).to.eq("foo")
-      expect(err.name).to.eq("Error")
+  context ".stringify", ->
+    beforeEach ->
+      @str = (str) ->
+        $utils.stringify(str)
 
-      stack = err.stack.split("\n").slice(1).join("\n")
+    context "Values", ->
+      it "string", ->
+        expect(@str("foo bar baz")).to.eq "foo bar baz"
 
-      err2 = $utils.appendErrMsg(err, "bar")
-      expect(err2.message).to.eq("foo\n\nbar")
+      it "number", ->
+        expect(@str(1234)).to.eq "1234"
 
-      expect(err2.stack).to.eq("Error: foo\n\nbar\n" + stack)
+      it "null", ->
+        expect(@str(null)).to.eq "null"
 
-    it "handles error messages matching first stack", ->
-      err = new Error("r")
+      ## QUESTION: is this really the behavior we want? wouldn't 'undefined' be better?
+      it "undefined", ->
+        expect(@str(undefined)).to.eq ""
 
-      expect(err.message).to.eq("r")
-      expect(err.name).to.eq("Error")
+      it "symbol", ->
+        expect(@str(Symbol.iterator)).to.eq("Symbol")
 
-      stack = err.stack.split("\n").slice(1).join("\n")
+    context "Arrays", ->
+      it "length <= 3", ->
+        a = [["one", 2, "three"]]
+        expect(@str(a)).to.eq "[one, 2, three]"
 
-      err2 = $utils.appendErrMsg(err, "bar")
-      expect(err2.message).to.eq("r\n\nbar")
+      it "length > 3", ->
+        a = [[1,2,3,4,5]]
+        expect(@str(a)).to.eq "Array[5]"
 
-      expect(err2.stack).to.eq("Error: r\n\nbar\n" + stack)
+    context "Objects", ->
+      it "keys <= 2", ->
+        o = {visible: null, exists: true}
+        expect(@str(o)).to.eq "{visible: null, exists: true}"
 
-    it "handles empty error messages", ->
-      err = new Error()
+      it "keys > 2", ->
+        o = {foo: "foo", bar: "baz", baz: "baz"}
+        expect(@str(o)).to.eq "Object{3}"
 
-      expect(err.message).to.eq("")
-      expect(err.name).to.eq("Error")
+      it "can have length property", ->
+        o = {length: 10, foo: "bar"}
+        expect(@str(o)).to.eq "{foo: bar, length: 10}"
 
-      stack = err.stack.split("\n").slice(1).join("\n")
+    context "Functions", ->
+      it "function(){}", ->
+        o = (foo, bar, baz) ->
+        expect(@str(o)).to.eq "function(){}"
 
-      err2 = $utils.appendErrMsg(err, "bar")
-      expect(err2.message).to.eq("\n\nbar")
-
-      expect(err2.stack).to.eq("Error: \n\nbar\n" + stack)
+    # context "Elements", ->
+    #   it "stringifyElement", ->
+    #     o = $("div:first")
+    #     expect(@str(o)).to.eq "<div#mocha>"

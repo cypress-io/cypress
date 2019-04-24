@@ -2,6 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 $Location = require("../../cypress/location")
 
 isOptional = (memo, val, key) ->
@@ -100,15 +101,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options.followRedirect = options.followRedirects
 
       if not $utils.isValidHttpMethod(options.method)
-        $utils.throwErrByPath("request.invalid_method", {
+        $errUtils.throwErrByPath("request.invalid_method", {
           args: { method: o.method }
         })
 
       if not options.url
-        $utils.throwErrByPath("request.url_missing")
+        $errUtils.throwErrByPath("request.url_missing")
 
       if not _.isString(options.url)
-        $utils.throwErrByPath("request.url_wrong_type")
+        $errUtils.throwErrByPath("request.url_wrong_type")
 
       ## normalize the url by prepending it with our current origin
       ## or the baseUrl
@@ -123,7 +124,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
-        $utils.throwErrByPath("request.url_invalid")
+        $errUtils.throwErrByPath("request.url_invalid")
 
       ## if a user has `x-www-form-urlencoded` content-type set
       ## with an object body, they meant to add 'form: true'
@@ -141,20 +142,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if a = options.auth
         if not _.isObject(a)
-          $utils.throwErrByPath("request.auth_invalid")
+          $errUtils.throwErrByPath("request.auth_invalid")
 
       if h = options.headers
         if _.isObject(h)
           options.headers = h
         else
-          $utils.throwErrByPath("request.headers_invalid")
+          $errUtils.throwErrByPath("request.headers_invalid")
 
       if not _.isBoolean(options.gzip)
-        $utils.throwErrByPath("request.gzip_invalid")
+        $errUtils.throwErrByPath("request.gzip_invalid")
 
       if f = options.form
         if not _.isBoolean(f)
-          $utils.throwErrByPath("request.form_invalid")
+          $errUtils.throwErrByPath("request.form_invalid")
 
       ## clone the requestOpts and reduce them down
       ## to the bare minimum to send to lib/request
@@ -207,7 +208,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         ## bomb if we should fail on non okay status code
         if options.failOnStatusCode and response.isOkStatusCode isnt true
-          $utils.throwErrByPath("request.status_invalid", {
+          $errUtils.throwErrByPath("request.status_invalid", {
             onFail: options._log
             args: {
               method:          requestOpts.method
@@ -224,7 +225,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         return response
       .catch Promise.TimeoutError, (err) =>
-        $utils.throwErrByPath "request.timed_out", {
+        $errUtils.throwErrByPath "request.timed_out", {
           onFail: options._log
           args: {
             url:     requestOpts.url
@@ -233,7 +234,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           }
         }
       .catch { backend: true }, (err) ->
-        $utils.throwErrByPath("request.loading_failed", {
+        $errUtils.throwErrByPath("request.loading_failed", {
           onFail: options._log
           args: {
             error:   err.message

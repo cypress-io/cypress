@@ -58,7 +58,7 @@ class Test extends Component {
   }
 
   render () {
-    const { events, model } = this.props
+    const { model } = this.props
 
     if (!model.shouldRender) return null
 
@@ -88,7 +88,6 @@ class Test extends Component {
           </div>
         </div>
         {this._contents()}
-        <TestError events={events} model={model} />
       </div>
     )
   }
@@ -111,6 +110,7 @@ class Test extends Component {
         <div className='runnable-commands-region'>
           {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
         </div>
+        <TestError events={events} model={model} />
       </div>
     )
   }
@@ -134,7 +134,6 @@ class Test extends Component {
       this.isOpen = !this.isOpen
     }
   }
-
 }
 
 export { NoCommands }

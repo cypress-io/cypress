@@ -2,16 +2,13 @@ $ = require("jquery")
 _ = require("lodash")
 methods = require("methods")
 moment = require("moment")
-Promise = require("bluebird")
 
 $jquery = require("../dom/jquery")
 $Location = require("./location")
-$errorMessages = require("./error_messages")
 
 tagOpen     = /\[([a-z\s='"-]+)\]/g
 tagClosed   = /\[\/([a-z]+)\]/g
 quotesRe    = /('|")/g
-twoOrMoreNewLinesRe = /\n{2,}/
 
 defaultOptions = {
   delay: 10
@@ -54,9 +51,6 @@ module.exports = {
   log: (msgs...) ->
     console.log(msgs...)
 
-  logInfo: (msgs...) ->
-    console.info(msgs...)
-
   unwrapFirst: (val) ->
     ## this method returns the first item in an array
     ## and if its still a jquery object, then we return
@@ -78,99 +72,14 @@ module.exports = {
     keys = _.keys(casesObj)
     throw new Error("The switch/case value: '#{value}' did not match any cases: #{keys.join(', ')}.")
 
-  appendErrMsg: (err, message) ->
-    ## preserve stack
-    ## this is the critical part
-    ## because the browser has a cached
-    ## dynamic stack getter that will
-    ## not be evaluated later
-    stack = err.stack
+  reduceProps: (obj, props = []) ->
+    return null if not obj
 
-    ## preserve message
-    ## and toString
-    msg = err.message
-    str = err.toString()
-
-    ## append message
-    msg += "\n\n" + message
-
-    ## set message
-    err.message = msg
-
-    ## reset stack by replacing the original first line
-    ## with the new one
-    err.stack = stack.replace(str, err.toString())
-
-    return err
-
-  cloneErr: (obj) ->
-    err2 = new Error(obj.message)
-    err2.name = obj.name
-    err2.stack = obj.stack
-
-    for own prop, val of obj
-      if not err2[prop]
-        err2[prop] = val
-
-    return err2
-
-  throwErr: (err, options = {}) ->
-    if _.isString(err)
-      err = @cypressErr(err)
-
-    onFail = options.onFail
-    ## assume onFail is a command if
-    ## onFail is present and isnt a function
-    if onFail and not _.isFunction(onFail)
-      command = onFail
-
-      ## redefine onFail and automatically
-      ## hook this into our command
-      onFail = (err) ->
-        command.error(err)
-
-    err.onFail = onFail if onFail
-
-    throw err
-
-  throwErrByPath: (errPath, options = {}) ->
-    err = try
-      @errMessageByPath errPath, options.args
-    catch e
-      err = @internalErr e
-
-    @throwErr(err, options)
-
-  internalErr: (err) ->
-    err = new Error(err)
-    err.name = "InternalError"
-    err
-
-  cypressErr: (err) ->
-    err = new Error(err)
-    err.name = "CypressError"
-    err
-
-  errMessageByPath: (errPath, args) ->
-    if not errMessage = @getObjValueByPath($errorMessages, errPath)
-      throw new Error "Error message path '#{errPath}' does not exist"
-
-    getMsg = ->
-      if _.isFunction(errMessage)
-        errMessage(args)
-      else
-        _.reduce args, (message, argValue, argKey) ->
-          message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
-        , errMessage
-
-    ## normalize two or more new lines
-    ## into only exactly two new lines
-    _
-    .chain(getMsg())
-    .split(twoOrMoreNewLinesRe)
-    .compact()
-    .join('\n\n')
-    .value()
+    _.reduce props, (memo, prop) ->
+      if _.has(obj, prop) or (obj[prop] isnt undefined)
+        memo[prop] = obj[prop]
+      memo
+    , {}
 
   normalizeObjWithLength: (obj) ->
     ## lodash shits the bed if our object has a 'length'
@@ -298,25 +207,6 @@ module.exports = {
     ## return num if this isNaN else return parsed
     if _.isNaN(parsed) then num else parsed
 
-  getObjValueByPath: (obj, keyPath) ->
-    if not _.isObject obj
-      throw new Error "The first parameter to utils.getObjValueByPath() must be an object"
-    if not _.isString keyPath
-      throw new Error "The second parameter to utils.getObjValueByPath() must be a string"
-    keys = keyPath.split '.'
-    val = obj
-    for key in keys
-      val = val[key]
-      break unless val
-    val
-
-  isCommandFromThenable: (cmd) ->
-    args = cmd.get("args")
-
-    cmd.get("name") is "then" and
-      args.length is 3 and
-        _.every(args, _.isFunction)
-
   isValidHttpMethod: (str) ->
     _.isString(str) and _.includes(methods, str.toLowerCase())
 
@@ -329,8 +219,8 @@ module.exports = {
   locHref: (url, win) ->
     win.location.href = url
 
-  locReplace: (win, url) ->
-    win.location.replace(url)
+  # locReplace: (win, url) ->
+  #   win.location.replace(url)
 
   locToString: (win) ->
     win.location.toString()
@@ -346,21 +236,4 @@ module.exports = {
     deltaY = point1.y - point2.y
 
     Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-
-  runSerially: (fns) ->
-    values = []
-
-    run = (index) ->
-      Promise
-      .try ->
-        fns[index]()
-      .then (value) ->
-        values.push(value)
-        index++
-        if fns[index]
-          run(index)
-        else
-          values
-
-    run(0)
 }

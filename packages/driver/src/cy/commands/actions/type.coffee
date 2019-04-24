@@ -7,6 +7,7 @@ $elements = require("../../../dom/elements")
 $selection = require("../../../dom/selection")
 $Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
+$errUtils = require("../../../cypress/error_utils")
 $actionability = require("../../actionability")
 
 inputEvents = "textInput input".split(" ")
@@ -96,25 +97,25 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if not isBody and not isTextLike and not hasTabIndex
         node = $dom.stringify(options.$el)
-        $utils.throwErrByPath("type.not_on_typeable_element", {
+        $errUtils.throwErrByPath("type.not_on_typeable_element", {
           onFail: options._log
           args: { node }
         })
 
       if (num = options.$el.length) and num > 1
-        $utils.throwErrByPath("type.multiple_elements", {
+        $errUtils.throwErrByPath("type.multiple_elements", {
           onFail: options._log
           args: { num }
         })
 
       if not (_.isString(chars) or _.isFinite(chars))
-        $utils.throwErrByPath("type.wrong_type", {
+        $errUtils.throwErrByPath("type.wrong_type", {
           onFail: options._log
           args: { chars }
         })
 
       if chars is ""
-        $utils.throwErrByPath("type.empty_string", { onFail: options._log })
+        $errUtils.throwErrByPath("type.empty_string", { onFail: options._log })
 
       if !(chars == "{selectall}{del}")
         if isDate and (
@@ -122,7 +123,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           not dateRegex.test(chars) or
           not moment(chars).isValid()
         )
-          $utils.throwErrByPath("type.invalid_date", {
+          $errUtils.throwErrByPath("type.invalid_date", {
             onFail: options._log
             args: { chars }
           })
@@ -131,7 +132,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           not _.isString(chars) or
           not monthRegex.test(chars)
         )
-          $utils.throwErrByPath("type.invalid_month", {
+          $errUtils.throwErrByPath("type.invalid_month", {
             onFail: options._log
             args: { chars }
           })
@@ -140,7 +141,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           not _.isString(chars) or
           not weekRegex.test(chars)
         )
-          $utils.throwErrByPath("type.invalid_week", {
+          $errUtils.throwErrByPath("type.invalid_week", {
             onFail: options._log
             args: { chars }
           })
@@ -149,7 +150,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           not _.isString(chars) or
           not timeRegex.test(chars)
         )
-          $utils.throwErrByPath("type.invalid_time", {
+          $errUtils.throwErrByPath("type.invalid_time", {
             onFail: options._log
             args: { chars }
           })
@@ -315,9 +316,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           onNoMatchingSpecialChars: (chars, allChars) ->
             if chars is "{tab}"
-              $utils.throwErrByPath("type.tab", { onFail: options._log })
+              $errUtils.throwErrByPath("type.tab", { onFail: options._log })
             else
-              $utils.throwErrByPath("type.invalid", {
+              $errUtils.throwErrByPath("type.invalid", {
                 onFail: options._log
                 args: { chars, allChars }
               })
@@ -406,7 +407,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         if not $dom.isTextLike($el)
           word = $utils.plural(subject, "contains", "is")
-          $utils.throwErrByPath "clear.invalid_element", {
+          $errUtils.throwErrByPath "clear.invalid_element", {
             onFail: options._log
             args: { word, node }
           }

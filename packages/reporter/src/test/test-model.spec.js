@@ -154,13 +154,13 @@ describe('Test model', () => {
 
   context('#commandMatchingErr', () => {
     it('returns last command matching the error', () => {
-      const test = new Test({ err: { name: 'SomeError' } })
+      const test = new Test({ err: { message: 'SomeError' } })
 
-      test.addCommand(new Command({ err: { name: 'SomeError' } }), 'some hook')
+      test.addCommand(new Command({ err: { message: 'SomeError' } }), 'some hook')
       test.addCommand(new Command({ err: {} }), 'some hook')
-      test.addCommand(new Command({ err: { name: 'SomeError' } }), 'some hook')
+      test.addCommand(new Command({ err: { message: 'SomeError' } }), 'some hook')
       test.addCommand(new Command({ err: {} }), 'another hook')
-      test.addCommand(new Command({ name: 'The One', err: { name: 'SomeError' } }), 'another hook')
+      test.addCommand(new Command({ name: 'The One', err: { message: 'SomeError' } }), 'another hook')
       expect(test.commandMatchingErr().name).to.equal('The One')
     })
 

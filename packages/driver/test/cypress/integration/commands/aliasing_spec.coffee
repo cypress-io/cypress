@@ -111,21 +111,21 @@ describe "src/cy/commands/aliasing", ->
       _.each [null, undefined, {}, [], 123], (value) =>
         it "throws if when passed: #{value}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.as() can only accept a string."
+            expect(err.message).to.eq "`cy.as()` can only accept a string."
             done()
 
           cy.get("div:first").as(value)
 
       it "throws on blank string", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.as() cannot be passed an empty string."
+          expect(err.message).to.eq "`cy.as()` cannot be passed an empty string."
           done()
 
         cy.get("div:first").as("")
 
       it "throws on alias starting with @ char", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "'@myAlias' cannot be named starting with the '@' symbol. Try renaming the alias to 'myAlias', or something else that does not start with the '@' symbol."
+          expect(err.message).to.eq "`@myAlias` cannot be named starting with the `@` symbol. Try renaming the alias to `myAlias`, or something else that does not start with the `@` symbol."
           done()
 
         cy.get("div:first").as("@myAlias")
@@ -137,7 +137,7 @@ describe "src/cy/commands/aliasing", ->
       _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
         it "throws on a blacklisted word: #{blacklist}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved."
+            expect(err.message).to.eq "`cy.as()` cannot be aliased as: `#{blacklist}`. This word is reserved."
             done()
 
           cy.get("div:first").as(blacklist)
@@ -342,7 +342,7 @@ describe "src/cy/commands/aliasing", ->
     describe "errors", ->
       it "throws when an alias cannot be found", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.get() could not find a registered alias for: '@lastDiv'.\nAvailable aliases are: 'b, firstInput'."
+          expect(err.message).to.include "`cy.get()` could not find a registered alias for: `@lastDiv`.\nAvailable aliases are: `b, firstInput`."
           done()
 
         cy
@@ -352,7 +352,7 @@ describe "src/cy/commands/aliasing", ->
 
       it "throws when alias is missing '@' but matches an available alias", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "Invalid alias: 'getAny'.\nYou forgot the '@'. It should be written as: '@getAny'."
+          expect(err.message).to.eq "Invalid alias: `getAny`.\nYou forgot the `@`. It should be written as: `@getAny`."
           done()
 
         cy

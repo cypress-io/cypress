@@ -86,10 +86,11 @@ safelyMergeRunnable = (hookProps, runnables) ->
   _.extend({}, runnables[hookProps.id], hookProps)
 
 mergeErr = (runnable, runnables, stats) ->
+  { err } = runnable.err
   ## this will always be a test because
   ## we reset hook id's to match tests
   test = runnables[runnable.id]
-  test.err = runnable.err
+  test.err = err
   test.state = "failed"
   test.duration ?= test.duration
 

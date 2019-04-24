@@ -5,6 +5,8 @@ Pending = require("mocha/lib/pending")
 
 $Log = require("./log")
 $utils = require("./utils")
+$errUtils = require("./error_utils")
+$errorMessages = require('./error_messages')
 
 defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
@@ -14,7 +16,6 @@ HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
 TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
 TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
-ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
 RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings".split(" ")
 
@@ -122,29 +123,21 @@ setTestTimings = (test, name, obj) ->
 setWallClockDuration = (test) ->
   test.wallClockDuration = new Date() - test.wallClockStartedAt
 
-reduceProps = (obj, props) ->
-  _.reduce props, (memo, prop) ->
-    if _.has(obj, prop) or (obj[prop] isnt undefined)
-      memo[prop] = obj[prop]
-    memo
-  , {}
-
 wrap = (runnable) ->
   ## we need to optimize wrap by converting
   ## tests to an id-based object which prevents
   ## us from recursively iterating through every
   ## parent since we could just return the found test
-  reduceProps(runnable, RUNNABLE_PROPS)
+  $utils.reduceProps(runnable, RUNNABLE_PROPS)
 
 wrapAll = (runnable) ->
   _.extend(
     {},
-    reduceProps(runnable, RUNNABLE_PROPS),
-    reduceProps(runnable, RUNNABLE_LOGS)
+    $utils.reduceProps(runnable, RUNNABLE_PROPS),
+    $utils.reduceProps(runnable, RUNNABLE_LOGS)
   )
 
-wrapErr = (err) ->
-  reduceProps(err, ERROR_PROPS)
+wrapErr = $errUtils.wrapErr
 
 getHookName = (hook) ->
   ## find the name of the hook by parsing its
@@ -592,9 +585,9 @@ _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest,
 
       ## append a friendly message to the error indicating
       ## we're skipping the remaining tests in this suite
-      err = $utils.appendErrMsg(
+      err = $errUtils.appendErrMsg(
         err,
-        $utils.errMessageByPath("uncaught.error_in_hook", {
+        $errUtils.errMsgByPath("uncaught.error_in_hook", {
           parentTitle,
           hookName
         })
@@ -650,9 +643,10 @@ create = (specWindow, mocha, Cypress, cy) ->
       ])
       .compact()
       .join("\n\n")
+      .value()
 
-    ## else  do the same thing as mocha here
-    err = $utils.appendErrMsg(err, append())
+    ## else do the same thing as mocha here
+    err = $errUtils.appendErrMsg(err, append())
 
     throwErr = ->
       throw err

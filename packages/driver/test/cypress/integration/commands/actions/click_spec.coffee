@@ -1109,7 +1109,7 @@ describe "src/cy/commands/actions/click", ->
         num = cy.$$("button").length
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 15 elements. Pass { multiple: true } if you want to serially click each element."
+          expect(err.message).to.eq "`cy.click()` can only be called on a single element. Your subject contained 15 elements. Pass `{ multiple: true }` if you want to serially click each element."
           done()
 
         cy.get("button").click()
@@ -1124,7 +1124,7 @@ describe "src/cy/commands/actions/click", ->
 
         cy.on "fail", (err) ->
           expect(clicked).to.eq 1
-          expect(err.message).to.include "cy.click() failed because this element"
+          expect(err.message).to.include "`cy.click()` failed because this element"
           done()
 
         cy.get(":checkbox:first").click().click()
@@ -1149,7 +1149,7 @@ describe "src/cy/commands/actions/click", ->
 
           expect(@logs.length).to.eq(4)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.click() failed because this element is not visible"
+          expect(err.message).to.include "`cy.click()` failed because this element is not visible"
           done()
 
         cy.get("#three-buttons button").click({ multiple: true })
@@ -1160,7 +1160,8 @@ describe "src/cy/commands/actions/click", ->
         cy.on "fail", (err) =>
           ## get + click logs
           expect(@logs.length).eq(2)
-          expect(err.message).to.include("cy.click() failed because this element is disabled:\n")
+          expect(err.message).to.include("`cy.click()` failed because this element is `disabled`:\n")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/element-cannot-be-interacted-with")
           done()
 
         cy.get("#button").click()
@@ -1182,8 +1183,9 @@ describe "src/cy/commands/actions/click", ->
           expect(lastLog.get("snapshots")[0].name).to.eq("before")
           expect(lastLog.get("snapshots")[1]).to.be.an("object")
           expect(lastLog.get("snapshots")[1].name).to.eq("after")
-          expect(err.message).to.include "cy.click() failed because this element"
+          expect(err.message).to.include "`cy.click()` failed because this element"
           expect(err.message).to.include "is being covered by another element"
+          expect(err.docsUrl).to.eq "https://on.cypress.io/element-cannot-be-interacted-with"
 
           clickLog = @logs[1]
           expect(clickLog.get("name")).to.eq("click")
@@ -1213,7 +1215,7 @@ describe "src/cy/commands/actions/click", ->
           expect(lastLog.get("snapshots")[0].name).to.eq("before")
           expect(lastLog.get("snapshots")[1]).to.be.an("object")
           expect(lastLog.get("snapshots")[1].name).to.eq("after")
-          expect(err.message).to.include "cy.click() failed because this element"
+          expect(err.message).to.include "`cy.click()` failed because this element"
           expect(err.message).to.include "is being covered by another element"
 
           console = lastLog.invoke("consoleProps")
@@ -1247,10 +1249,11 @@ describe "src/cy/commands/actions/click", ->
           expect(lastLog.get("snapshots")[0].name).to.eq("before")
           expect(lastLog.get("snapshots")[1]).to.be.an("object")
           expect(lastLog.get("snapshots")[1].name).to.eq("after")
-          expect(err.message).to.include "cy.click() failed because this element is not visible:"
+          expect(err.message).to.include "`cy.click()` failed because this element is not visible:"
           expect(err.message).to.include ">button ...</button>"
-          expect(err.message).to.include "'<button#button-covered-in-span>' is not visible because it has CSS property: 'position: fixed' and its being covered"
+          expect(err.message).to.include "`<button#button-covered-in-span>` is not visible because it has CSS property: `position: fixed` and its being covered"
           expect(err.message).to.include ">span on...</span>"
+          expect(err.docsUrl).to.eq "https://on.cypress.io/element-cannot-be-interacted-with"
 
           console = lastLog.invoke("consoleProps")
           expect(console["Tried to Click"]).to.be.undefined
@@ -1268,8 +1271,9 @@ describe "src/cy/commands/actions/click", ->
         cy.stub(Cypress.dom, "getElementAtPointFromViewport").returns(null)
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.click() failed because the center of this element is hidden from view:"
+          expect(err.message).to.include "`cy.click()` failed because the center of this element is hidden from view:"
           expect(err.message).to.include "<li>quux</li>"
+          expect(err.docsUrl).to.eq "https://on.cypress.io/element-cannot-be-interacted-with"
           done()
 
         cy.get("#overflow-auto-container").contains("quux").click()
@@ -1277,7 +1281,7 @@ describe "src/cy/commands/actions/click", ->
       it "throws when attempting to click a <select> element", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.eq "cy.click() cannot be called on a <select> element. Use cy.select() command instead to change the value."
+          expect(err.message).to.eq "`cy.click()` cannot be called on a `<select>` element. Use `cy.select()` command instead to change the value."
           done()
 
         cy.get("select:first").click()
@@ -1285,7 +1289,7 @@ describe "src/cy/commands/actions/click", ->
       it "throws when provided invalid position", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
+          expect(err.message).to.eq "Invalid position argument: `foo`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
           done()
 
         cy.get("button:first").click("foo")
@@ -1301,7 +1305,8 @@ describe "src/cy/commands/actions/click", ->
 
         cy.on "fail", (err) ->
           expect(clicks).to.eq(0)
-          expect(err.message).to.include("cy.click() could not be issued because this element is currently animating:\n")
+          expect(err.message).to.include("`cy.click()` could not be issued because this element is currently animating:\n")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/element-is-animating")
           done()
 
         cy.get("button:first").click()
@@ -1777,7 +1782,7 @@ describe "src/cy/commands/actions/click", ->
 
         cy.on "fail", (err) ->
           expect(dblclicked).to.eq 1
-          expect(err.message).to.include "cy.dblclick() failed because this element"
+          expect(err.message).to.include "`cy.dblclick()` failed because this element"
           done()
 
         cy.get("button:first").dblclick().dblclick()
@@ -1786,7 +1791,7 @@ describe "src/cy/commands/actions/click", ->
         $btn = cy.$$("button").slice(0, 3).show().last().hide()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.dblclick() failed because this element is not visible"
+          expect(err.message).to.include "`cy.dblclick()` failed because this element is not visible"
           done()
 
         cy.get("button").invoke("slice", 0, 3).dblclick()
@@ -1809,7 +1814,7 @@ describe "src/cy/commands/actions/click", ->
 
           expect(@logs.length).to.eq(4)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.dblclick() failed because this element is not visible"
+          expect(err.message).to.include "`cy.dblclick()` failed because this element is not visible"
           done()
 
         cy.get("#three-buttons button").dblclick()

@@ -276,7 +276,7 @@ This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
-Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 'foo'
       at stack trace line
 
 

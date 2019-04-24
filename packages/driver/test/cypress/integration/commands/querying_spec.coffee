@@ -18,7 +18,7 @@ describe "src/cy/commands/querying", ->
     it "returns the activeElement", ->
       $button = cy.$$("#button")
       $button.get(0).focus()
-      
+
       expect(cy.state("document").activeElement).to.eq($button.get(0))
 
       cy.focused().then ($focused) ->
@@ -339,7 +339,7 @@ describe "src/cy/commands/querying", ->
       _.each ["", [], {}, 1, null, undefined], (value) =>
         it "throws if passed anything other than a function, such as: #{value}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.within() must be called with a function."
+            expect(err.message).to.include "`cy.within()` must be called with a function."
             done()
 
           cy.get("body").within(value)
@@ -349,7 +349,7 @@ describe "src/cy/commands/querying", ->
           cy.$$("#list").remove()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.within() failed because this element"
+          expect(err.message).to.include "`cy.within()` failed because this element"
           done()
 
         cy.get("#list").within ->
@@ -1100,7 +1100,7 @@ describe "src/cy/commands/querying", ->
         cy.$$("#button").hide()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "element '<button#button>' is not visible because"
+          expect(err.message).to.include "element `<button#button>` is not visible because"
           done()
 
         cy.get("#button").should("be.visible")
@@ -1117,7 +1117,7 @@ describe "src/cy/commands/querying", ->
 
       it "throws when alias property is '0'", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @getUsers.1"
+          expect(err.message).to.include "`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@getUsers.1`"
           done()
 
         cy
@@ -1127,7 +1127,7 @@ describe "src/cy/commands/querying", ->
 
       it "throws when alias property isnt just a digit", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "'1b' is not a valid alias property. Only 'numbers' or 'all' is permitted."
+          expect(err.message).to.include "`1b` is not a valid alias property. Only numbers or `all` is permitted."
           done()
 
         cy
@@ -1137,7 +1137,7 @@ describe "src/cy/commands/querying", ->
 
       it "throws when alias property isnt a digit or 'all'", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "'all ' is not a valid alias property. Only 'numbers' or 'all' is permitted."
+          expect(err.message).to.include "`all ` is not a valid alias property. Only numbers or `all` is permitted."
           done()
 
         cy
@@ -1491,14 +1491,14 @@ describe "src/cy/commands/querying", ->
       _.each [undefined, null], (val) ->
         it "throws when text is #{val}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq("cy.contains() can only accept a string, number or regular expression.")
+            expect(err.message).to.eq("`cy.contains()` can only accept a string, number or regular expression.")
             done()
 
           cy.contains(val)
 
       it "throws on a blank string", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.contains() cannot be passed an empty string."
+          expect(err.message).to.eq "`cy.contains()` cannot be passed an empty string."
           done()
 
         cy.contains("")
@@ -1566,7 +1566,7 @@ describe "src/cy/commands/querying", ->
       it "throws when assertion is have.length > 1", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq 1
-          expect(err.message).to.eq "cy.contains() cannot be passed a length option because it will only ever return 1 element."
+          expect(err.message).to.eq "`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element."
           done()
 
         cy.contains("Nested Find").should("have.length", 2)

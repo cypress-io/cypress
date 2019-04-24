@@ -2,6 +2,7 @@ _ = require("lodash")
 uniqueSelector = require("@cypress/unique-selector").default
 
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 
 SELECTOR_PRIORITIES = "data-cy data-test data-testid id class tag attributes nth-child".split(" ")
 
@@ -38,13 +39,13 @@ module.exports = {
 
   defaults: (props) ->
     if not _.isPlainObject(props)
-      $utils.throwErrByPath("selector_playground.defaults_invalid_arg", {
+      $errUtils.throwErrByPath("selector_playground.defaults_invalid_arg", {
         args: { arg: $utils.stringify(props) }
       })
 
     if priority = props.selectorPriority
       if not _.isArray(priority)
-        $utils.throwErrByPath("selector_playground.defaults_invalid_priority", {
+        $errUtils.throwErrByPath("selector_playground.defaults_invalid_priority", {
           args: { arg: $utils.stringify(priority) }
         })
 
@@ -52,7 +53,7 @@ module.exports = {
 
     if onElement = props.onElement
       if not _.isFunction(onElement)
-        $utils.throwErrByPath("selector_playground.defaults_invalid_on_element", {
+        $errUtils.throwErrByPath("selector_playground.defaults_invalid_on_element", {
           args: { arg: $utils.stringify(onElement) }
         })
 

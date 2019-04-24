@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 
 create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
   return {
@@ -47,16 +47,20 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
 
         if assertions = options.assertions
           finishAssertions(assertions)
+        
+        { error, onFail } = options
 
-        getErrMessage = (err) ->
-          _.get(err, 'displayMessage') or
-            _.get(err, 'message') or
-              err
+        prependMsg = $errUtils.errMsgByPath("miscellaneous.retry_timed_out")
 
-        $utils.throwErrByPath "miscellaneous.retry_timed_out", {
-          onFail: (options.onFail or log)
-          args: { error: getErrMessage(options.error) }
-        }
+        retryErrProps = $errUtils.modifyErrMsg(error, prependMsg, (msg1, msg2) ->
+          return "#{msg2}#{msg1}"
+        )
+
+        retryErr = $errUtils.mergeErrProps(error, retryErrProps)
+
+        $errUtils.throwErr(retryErr, {
+          onFail: onFail or log
+        })
 
       runnableHasChanged = ->
         ## if we've changed runnables don't retry!

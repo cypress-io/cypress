@@ -5,7 +5,7 @@ Promise = require("bluebird")
 
 $Screenshot = require("../../cypress/screenshot")
 $dom = require("../../dom")
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 getViewportHeight = (state) ->
   ## TODO this doesn't seem correct
@@ -55,9 +55,9 @@ automateScreenshot = (state, options = {}) ->
     automate()
     .timeout(timeout)
     .catch (err) ->
-      $utils.throwErr(err, { onFail: options.log })
+      $errUtils.throwErr(err, { onFail: options.log })
     .catch Promise.TimeoutError, (err) ->
-      $utils.throwErrByPath "screenshot.timed_out", {
+      $errUtils.throwErrByPath "screenshot.timed_out", {
         onFail: options.log
         args: { timeout }
       }
@@ -334,7 +334,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if subject and subject.length > 1
-        $utils.throwErrByPath("screenshot.multiple_elements", {
+        $errUtils.throwErrByPath("screenshot.multiple_elements", {
           log: options._log
           args: { numElements: subject.length }
         })

@@ -2,6 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
@@ -27,7 +28,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not task or not _.isString(task)
-        $utils.throwErrByPath("task.invalid_argument", {
+        $errUtils.throwErrByPath("task.invalid_argument", {
           onFail: options._log,
           args: { task: task ? "" }
         })
@@ -48,13 +49,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return result
 
       .catch Promise.TimeoutError, ->
-        $utils.throwErrByPath "task.timed_out", {
+        $errUtils.throwErrByPath "task.timed_out", {
           onFail: options._log
           args: { task, timeout: options.timeout }
         }
 
       .catch { timedOut: true }, (error) ->
-        $utils.throwErrByPath "task.server_timed_out", {
+        $errUtils.throwErrByPath "task.server_timed_out", {
           onFail: options._log
           args: { task, timeout: options.timeout, error: error.message }
         }
@@ -64,12 +65,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         throw error if error.name is "CypressError"
 
         if error?.isKnownError
-          $utils.throwErrByPath("task.known_error", {
+          $errUtils.throwErrByPath("task.known_error", {
             onFail: options._log
             args: { task, error: error.message }
           })
 
-        $utils.throwErrByPath("task.failed", {
+        $errUtils.throwErrByPath("task.failed", {
           onFail: options._log
           args: { task, error: error?.stack or error?.message or error }
         })

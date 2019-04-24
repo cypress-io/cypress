@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 $LocalStorage = require("../../cypress/local_storage")
 
 clearLocalStorage = (state, keys) ->
@@ -33,7 +33,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
       if keys and not _.isString(keys) and not _.isRegExp(keys)
-        $utils.throwErrByPath("clearLocalStorage.invalid_argument")
+        $errUtils.throwErrByPath("clearLocalStorage.invalid_argument")
 
       remote = clearLocalStorage(state, keys)
 

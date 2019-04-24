@@ -46,7 +46,7 @@ describe "src/cy/commands/traversals", ->
 
         it "throws when options.length isnt a number", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "You must provide a valid number to a length assertion. You passed: 'asdf'"
+            expect(err.message).to.include "You must provide a valid number to a `length` assertion. You passed: `asdf`"
             done()
 
           cy.get("#list")[name](arg).should("have.length", "asdf")
@@ -82,7 +82,7 @@ describe "src/cy/commands/traversals", ->
             cy.$$("#list").remove()
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.#{name}() failed because this element"
+            expect(err.message).to.include "`cy.#{name}()` failed because this element"
             done()
 
           cy.get("#list")[name](arg)

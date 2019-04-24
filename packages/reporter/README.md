@@ -26,7 +26,7 @@ cd packages/reporter
 npm install
 ```
 
-The reporter may also require that dependencies by installed at the root of this repository:
+The reporter may also require that dependencies be installed at the root of this repository:
 
 ```bash
 npm install

@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$errUtils = require("../../../cypress/error_utils")
 $elements = require('../../../dom/elements')
 
 newLineRe = /\n/g
@@ -45,10 +46,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if not options.$el.is("select")
         node = $dom.stringify(options.$el)
-        $utils.throwErrByPath "select.invalid_element", { args: { node } }
+        $errUtils.throwErrByPath "select.invalid_element", { args: { node } }
 
       if (num = options.$el.length) and num > 1
-        $utils.throwErrByPath "select.multiple_elements", { args: { num } }
+        $errUtils.throwErrByPath "select.multiple_elements", { args: { num } }
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
@@ -57,13 +58,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## throw if we're not a multiple select and we've
       ## passed an array of values
       if not multiple and valueOrText.length > 1
-        $utils.throwErrByPath "select.invalid_multiple"
+        $errUtils.throwErrByPath "select.invalid_multiple"
 
       getOptions = ->
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
           node = $dom.stringify(options.$el)
-          $utils.throwErrByPath "select.disabled", { args: { node } }
+          $errUtils.throwErrByPath "select.disabled", { args: { node } }
 
         values = []
         optionEls = []
@@ -107,19 +108,19 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
         if not multiple and values.length > 1
-          $utils.throwErrByPath("select.multiple_matches", {
+          $errUtils.throwErrByPath("select.multiple_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         if not values.length
-          $utils.throwErrByPath("select.no_matches", {
+          $errUtils.throwErrByPath("select.no_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         _.each optionEls, ($el) =>
           if $el.prop("disabled")
             node = $dom.stringify($el)
-            $utils.throwErrByPath("select.option_disabled", {
+            $errUtils.throwErrByPath("select.option_disabled", {
               args: { node }
             })
 

@@ -59,5 +59,5 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onFail: (err) ->
             if err.type is "existence"
               node = $dom.stringify(subject, "short")
-              err.displayMessage += " Queried from element: #{node}"
+              err.message += " Queried from element: #{node}"
         })

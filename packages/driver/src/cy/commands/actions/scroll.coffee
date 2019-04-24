@@ -4,6 +4,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$errUtils = require("../../../cypress/error_utils")
 
 findScrollableParent = ($el, win) ->
   $parent = $el.parent()
@@ -26,16 +27,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
     scrollIntoView: (subject, options = {}) ->
       if !_.isObject(options)
-        $utils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
+        $errUtils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
 
       ## ensure the subject is not window itself
       ## cause how are you gonna scroll the window into view...
       if subject is state("window")
-        $utils.throwErrByPath("scrollIntoView.subject_is_window")
+        $errUtils.throwErrByPath("scrollIntoView.subject_is_window")
 
       ## throw if we're trying to scroll to multiple elements
       if subject.length > 1
-        $utils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
+        $errUtils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
 
       _.defaults(options, {
         $el: subject
@@ -63,10 +64,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if we cannot parse an integer out of duration
       ## which could be 500 or "500", then it's NaN...throw
       if isNaNOrInfinity(options.duration)
-        $utils.throwErrByPath("scrollIntoView.invalid_duration", {args: { duration: options.duration }})
+        $errUtils.throwErrByPath("scrollIntoView.invalid_duration", {args: { duration: options.duration }})
 
       if !(options.easing is "swing" or options.easing is "linear")
-        $utils.throwErrByPath("scrollIntoView.invalid_easing", {args: { easing: options.easing }})
+        $errUtils.throwErrByPath("scrollIntoView.invalid_easing", {args: { easing: options.easing }})
 
       if options.log
         deltaOptions = $utils.filterOutOptions(options, {duration: 0, easing: 'swing', offset: {left: 0, top: 0}})
@@ -104,7 +105,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             fail: (animation, jumpedToEnd) ->
               ## its Promise object is rejected
               try
-                $utils.throwErrByPath("scrollTo.animation_failed")
+                $errUtils.throwErrByPath("scrollTo.animation_failed")
               catch err
                 reject(err)
             always: ->
@@ -124,7 +125,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
       ## check for undefined or null values
       if not xOrPosition?
-        $utils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
+        $errUtils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
 
       switch
         when _.isObject(yOrOptions)
@@ -194,7 +195,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## throw if we're trying to scroll multiple containers
       if $container.length > 1
-        $utils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
+        $errUtils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
 
       _.defaults(options, {
         $el: $container
@@ -209,16 +210,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if we cannot parse an integer out of duration
       ## which could be 500 or "500", then it's NaN...throw
       if isNaNOrInfinity(options.duration)
-        $utils.throwErrByPath("scrollTo.invalid_duration", {args: { duration: options.duration }})
+        $errUtils.throwErrByPath("scrollTo.invalid_duration", {args: { duration: options.duration }})
 
       if !(options.easing is "swing" or options.easing is "linear")
-        $utils.throwErrByPath("scrollTo.invalid_easing", {args: { easing: options.easing }})
+        $errUtils.throwErrByPath("scrollTo.invalid_easing", {args: { easing: options.easing }})
 
       ## if we cannot parse an integer out of y or x
       ## which could be 50 or "50px" or "50%" then
       ## it's NaN/Infinity...throw
       if isNaNOrInfinity(options.y) or isNaNOrInfinity(options.x)
-        $utils.throwErrByPath("scrollTo.invalid_target", {args: { x, y }})
+        $errUtils.throwErrByPath("scrollTo.invalid_target", {args: { x, y }})
 
       if options.log
         deltaOptions = $utils.stringify(
@@ -277,7 +278,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             fail: (animation, jumpedToEnd) ->
               ## its Promise object is rejected
               try
-                $utils.throwErrByPath("scrollTo.animation_failed")
+                $errUtils.throwErrByPath("scrollTo.animation_failed")
               catch err
                 reject(err)
           })

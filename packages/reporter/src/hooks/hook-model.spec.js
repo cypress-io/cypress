@@ -77,34 +77,34 @@ describe('Hook model', () => {
 
   context('#commandMatchingErr', () => {
     it('returns last command to match the error', () => {
-      const matchesButIsntLast = { err: { displayMessage: 'matching error message' }, isMatchingEvent: () => {
+      const matchesButIsntLast = { err: { message: 'matching error message' }, isMatchingEvent: () => {
         return false
       } }
 
       hook.addCommand(matchesButIsntLast)
-      const doesntMatch = { err: { displayMessage: 'other error message' }, isMatchingEvent: () => {
+      const doesntMatch = { err: { message: 'other error message' }, isMatchingEvent: () => {
         return false
       } }
 
       hook.addCommand(doesntMatch)
-      const matches = { err: { displayMessage: 'matching error message' } }
+      const matches = { err: { message: 'matching error message' } }
 
       hook.addCommand(matches)
 
-      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' })).to.eql(matches)
+      expect(hook.commandMatchingErr({ message: 'matching error message' })).to.eql(matches)
     })
 
     it('returns undefined when no match', () => {
-      const noMatch1 = { err: { displayMessage: 'some error message' }, isMatchingEvent: () => {
+      const noMatch1 = { err: { message: 'some error message' }, isMatchingEvent: () => {
         return false
       } }
 
       hook.addCommand(noMatch1)
-      const noMatch2 = { err: { displayMessage: 'other error message' } }
+      const noMatch2 = { err: { message: 'other error message' } }
 
       hook.addCommand(noMatch2)
 
-      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' })).to.be.undefined
+      expect(hook.commandMatchingErr({ message: 'matching error message' })).to.be.undefined
     })
   })
 

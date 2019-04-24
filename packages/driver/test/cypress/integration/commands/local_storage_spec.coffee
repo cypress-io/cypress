@@ -38,7 +38,7 @@ describe "src/cy/commands/local_storage", ->
     describe "errors", ->
       it "throws when being passed a non string or regexp", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clearLocalStorage() must be called with either a string or regular expression."
+          expect(err.message).to.include "`cy.clearLocalStorage()` must be called with either a string or regular expression."
           done()
 
         cy.clearLocalStorage({})

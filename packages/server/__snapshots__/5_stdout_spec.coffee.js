@@ -35,7 +35,7 @@ exports['e2e stdout displays errors from failures 1'] = `
       at stack trace line
 
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 /does-not-exist.html
 
@@ -47,8 +47,7 @@ The internal Cypress web server responded with:
 
   > 404: Not Found
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
-      at stack trace line
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'failing hook'
       at stack trace line
       at stack trace line
       at stack trace line
@@ -65,7 +64,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
       at stack trace line
 
   3) stdout_failing_spec passing hook is failing:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 /does-not-exist.html
 
@@ -76,7 +75,6 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

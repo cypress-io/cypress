@@ -325,7 +325,7 @@ describe "src/cy/commands/actions/scroll", ->
 
       it "throws when subject isn't scrollable", (done) ->
         cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.scrollTo() failed because this element is not scrollable:"
+          expect(err.message).to.include "`cy.scrollTo()` failed because this element is not scrollable:"
           done()
 
         cy.get("button:first").scrollTo("bottom")
@@ -333,16 +333,16 @@ describe "src/cy/commands/actions/scroll", ->
       context "subject errors", ->
         it "throws when not passed DOM element as subject", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() failed because it requires a DOM element."
+            expect(err.message).to.include "`cy.scrollTo()` failed because it requires a DOM element."
             expect(err.message).to.include "{foo: bar}"
-            expect(err.message).to.include "> cy.noop()"
+            expect(err.message).to.include "> `cy.noop()`"
             done()
 
           cy.noop({foo: "bar"}).scrollTo("250px")
 
         it "throws if scrollable container is multiple elements", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() can only be used to scroll one element, you tried to scroll 2 elements."
+            expect(err.message).to.include "`cy.scrollTo()` can only be used to scroll one element, you tried to scroll 2 elements."
             done()
 
           cy.get("button").scrollTo("500px")
@@ -350,28 +350,28 @@ describe "src/cy/commands/actions/scroll", ->
       context "argument errors", ->
         it "throws if no args passed", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object."
+            expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `position`. It can be a string, number or object."
             done()
 
           cy.scrollTo()
 
         it "throws if NaN", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object. Your position was: 25, NaN"
+            expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `position`. It can be a string, number or object. Your position was: `25, NaN`"
             done()
 
           cy.get("#scroll-to-both").scrollTo(25, 0/0)
 
         it "throws if Infinity", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object. Your position was: 25, Infinity"
+            expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `position`. It can be a string, number or object. Your position was: `25, Infinity`"
             done()
 
           cy.get("#scroll-to-both").scrollTo(25, 10/0)
 
         it "throws if unrecognized position", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "Invalid position argument: \'botom\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
+            expect(err.message).to.include "Invalid position argument: `botom`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
             done()
 
           cy.get("#scroll-to-both").scrollTo("botom")
@@ -379,14 +379,14 @@ describe "src/cy/commands/actions/scroll", ->
       context "option errors", ->
         it "throws if duration is not a number or valid string", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
+            expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `duration`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: `foo`"
             done()
 
           cy.get("#scroll-to-both").scrollTo("25px", { duration: "foo" })
 
         it "throws if unrecognized easing", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() must be called with a valid easing. Your easing was: flower"
+            expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `easing`. Your easing was: `flower`"
             done()
 
           cy.get("#scroll-to-both").scrollTo("25px", { easing: "flower" })
@@ -625,34 +625,34 @@ describe "src/cy/commands/actions/scroll", ->
       context "subject errors", ->
         it "throws when not passed DOM element as subject", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+            expect(err.message).to.include "`cy.scrollIntoView()` failed because it requires a DOM element."
             expect(err.message).to.include "{foo: bar}"
-            expect(err.message).to.include "> cy.noop()"
+            expect(err.message).to.include "> `cy.noop()`"
             done()
 
           cy.noop({foo: "bar"}).scrollIntoView()
 
         it "throws when passed window object as subject", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+            expect(err.message).to.include "`cy.scrollIntoView()` failed because it requires a DOM element."
             expect(err.message).to.include "<window>"
-            expect(err.message).to.include "> cy.window()"
+            expect(err.message).to.include "> `cy.window()`"
             done()
 
           cy.window().scrollIntoView()
 
         it "throws when passed document object as subject", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() failed because it requires a DOM element."
+            expect(err.message).to.include "`cy.scrollIntoView()` failed because it requires a DOM element."
             expect(err.message).to.include "<document>"
-            expect(err.message).to.include "> cy.document()"
+            expect(err.message).to.include "> `cy.document()`"
             done()
 
           cy.document().scrollIntoView()
 
         it "throws if scrollable container is multiple elements", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() can only be used to scroll to 1 element, you tried to scroll to 2 elements."
+            expect(err.message).to.include "`cy.scrollIntoView()` can only be used to scroll to 1 element, you tried to scroll to 2 elements."
             done()
 
           cy.get("button").scrollIntoView()
@@ -660,7 +660,7 @@ describe "src/cy/commands/actions/scroll", ->
       context "argument errors", ->
         it "throws if arg passed as non-object", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() can only be called with an options object. Your argument was: foo"
+            expect(err.message).to.include "`cy.scrollIntoView()` can only be called with an `options` object. Your argument was: `foo`"
             done()
 
           cy.get("#scroll-into-view-both h5").scrollIntoView("foo")
@@ -668,14 +668,14 @@ describe "src/cy/commands/actions/scroll", ->
       context "option errors", ->
         it "throws if duration is not a number or valid string", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
+            expect(err.message).to.include "`cy.scrollIntoView()` must be called with a valid `duration`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: `foo`"
             done()
 
           cy.get("#scroll-into-view-both h5").scrollIntoView({ duration: "foo" })
 
         it "throws if unrecognized easing", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() must be called with a valid easing. Your easing was: flower"
+            expect(err.message).to.include "`cy.scrollIntoView()` must be called with a valid `easing`. Your easing was: `flower`"
             done()
 
           cy.get("#scroll-into-view-both h5").scrollIntoView({ easing: "flower" })

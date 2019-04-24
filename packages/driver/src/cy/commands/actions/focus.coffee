@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$errUtils = require("../../../cypress/error_utils")
 $elements = require("../../../dom/elements")
 $actionability = require("../../actionability")
 
@@ -35,7 +36,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return if options.error is false
 
         node = $dom.stringify(options.$el)
-        $utils.throwErrByPath("focus.invalid_element", {
+        $errUtils.throwErrByPath("focus.invalid_element", {
           onFail: options._log
           args: { node }
         })
@@ -43,7 +44,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        $utils.throwErrByPath("focus.multiple_elements", {
+        $errUtils.throwErrByPath("focus.multiple_elements", {
           onFail: options._log
           args: { num }
         })
@@ -92,7 +93,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        $utils.throwErrByPath("blur.multiple_elements", {
+        $errUtils.throwErrByPath("blur.multiple_elements", {
           onFail: options._log
           args: { num }
         })
@@ -102,7 +103,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if (options.force isnt true) and (not $focused) and (not isWin) and (not isBody)
         return if options.error is false
 
-        $utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
+        $errUtils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
 
       ## if we're currently window dont check for the wrong
       ## focused element because window will not show up
@@ -113,7 +114,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return if options.error is false
 
         node = $dom.stringify($focused)
-        $utils.throwErrByPath("blur.wrong_focused_element", {
+        $errUtils.throwErrByPath("blur.wrong_focused_element", {
           onFail: options._log
           args: { node }
         })

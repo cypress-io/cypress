@@ -130,10 +130,10 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.readFile() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
+          expect(err.message).to.eq("`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.")
           done()
 
-        cy.readFile()
+        `cy.readFile()`
 
       it "throws when file argument is not a string", (done) ->
         cy.on "fail", (err) =>
@@ -142,7 +142,7 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.readFile() must be passed a non-empty string as its 1st argument. You passed: '2'.")
+          expect(err.message).to.eq("`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.")
           done()
 
         cy.readFile(2)
@@ -154,7 +154,7 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.readFile() must be passed a non-empty string as its 1st argument. You passed: ''.")
+          expect(err.message).to.eq("`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.")
           done()
 
         cy.readFile("")
@@ -174,9 +174,9 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq """
-          cy.readFile(\"foo\") failed while trying to read the file at the following path:
+          `cy.readFile(\"foo\")` failed while trying to read the file at the following path:
 
-            /path/to/foo
+            `/path/to/foo`
 
           The following error occurred:
 
@@ -201,9 +201,9 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
 
-          expect(err.message).to.eq("""Timed out retrying: cy.readFile(\"foo.json\") failed because the file does not exist at the following path:
+          expect(err.message).to.eq("""Timed out retrying: `cy.readFile(\"foo.json\")` failed because the file does not exist at the following path:
 
-            /path/to/foo.json
+            `/path/to/foo.json`
           """)
           done()
 
@@ -219,9 +219,9 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("""
-          Timed out retrying: cy.readFile(\"foo.json\") failed because the file exists when expected not to exist at the following path:
+          Timed out retrying: `cy.readFile(\"foo.json\")` failed because the file exists when expected not to exist at the following path:
 
-          /path/to/foo.json
+          `/path/to/foo.json`
           """)
           done()
 
@@ -291,7 +291,7 @@ describe "src/cy/commands/files", ->
 
       cy.writeFile("foo.txt", "contents").then (subject) ->
         expect(subject).to.equal("contents")
-       
+
     it "sets a JSON as the subject", ->
       Cypress.backend.resolves(okResponse)
 
@@ -391,10 +391,10 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
+          expect(err.message).to.eq("`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.")
           done()
 
-        cy.writeFile()
+        `cy.writeFile()`
 
       it "throws when file name argument is not a string", (done) ->
         cy.on "fail", (err) =>
@@ -403,7 +403,7 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string as its 1st argument. You passed: '2'.")
+          expect(err.message).to.eq("`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.")
           done()
 
         cy.writeFile(2)
@@ -415,7 +415,7 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: 'undefined'.")
+          expect(err.message).to.eq("`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `undefined`.")
           done()
 
         cy.writeFile("foo.txt")
@@ -427,7 +427,7 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: '2'.")
+          expect(err.message).to.eq("`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `2`.")
           done()
 
         cy.writeFile("foo.txt", 2)
@@ -446,9 +446,9 @@ describe "src/cy/commands/files", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq """cy.writeFile(\"foo.txt\") failed while trying to write the file at the following path:
+          expect(err.message).to.eq """`cy.writeFile(\"foo.txt\")` failed while trying to write the file at the following path:
 
-            /path/to/foo.txt
+            `/path/to/foo.txt`
 
           The following error occurred:
 

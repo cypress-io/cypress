@@ -491,35 +491,35 @@ describe "src/cypress/dom/visibility", ->
           expect($dom.getReasonIsHidden($el)).to.eq(str)
 
       it "has 'display: none'", ->
-        @reasonIs @$displayNone, "This element '<button>' is not visible because it has CSS property: 'display: none'"
+        @reasonIs @$displayNone, "This element `<button>` is not visible because it has CSS property: `display: none`"
 
       it "has a parent with 'display: none'", ->
-        @reasonIs @$parentDisplayNone.find("span"), "This element '<span>' is not visible because its parent '<div#none>' has CSS property: 'display: none'"
+        @reasonIs @$parentDisplayNone.find("span"), "This element `<span>` is not visible because its parent `<div#none>` has CSS property: `display: none`"
 
       it "has 'visibility: hidden'", ->
-        @reasonIs @$visHidden, "This element '<ul>' is not visible because it has CSS property: 'visibility: hidden'"
+        @reasonIs @$visHidden, "This element `<ul>` is not visible because it has CSS property: `visibility: hidden`"
 
       it "has parent with 'visibility: hidden'", ->
-        @reasonIs @$parentVisHidden.find("button"), "This element '<button>' is not visible because its parent '<div.invis>' has CSS property: 'visibility: hidden'"
+        @reasonIs @$parentVisHidden.find("button"), "This element `<button>` is not visible because its parent `<div.invis>` has CSS property: `visibility: hidden`"
 
       it "has effective zero width", ->
-        @reasonIs @$divNoWidth, "This element '<div>' is not visible because it has an effective width and height of: '0 x 100' pixels."
+        @reasonIs @$divNoWidth, "This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels."
 
       it "has effective zero height", ->
-        @reasonIs @$divNoHeight, "This element '<div>' is not visible because it has an effective width and height of: '50 x 0' pixels."
+        @reasonIs @$divNoHeight, "This element `<div>` is not visible because it has an effective width and height of: `50 x 0` pixels."
 
       it "has a parent with an effective zero width and overflow: hidden", ->
-        @reasonIs @$parentNoHeight.find("span"), "This element '<span>' is not visible because its parent '<div>' has CSS property: 'overflow: hidden' and an effective width and height of: '100 x 0' pixels."
+        @reasonIs @$parentNoHeight.find("span"), "This element `<span>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels."
 
       it "element sits outside boundaries of parent with overflow clipping", ->
-        @reasonIs @$elOutOfParentBoundsToRight.find("span"), "This element '<span>' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \'hidden\', \'scroll\' or \'auto\'"
+        @reasonIs @$elOutOfParentBoundsToRight.find("span"), "This element `<span>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `scroll` or `auto`"
 
       it "element is fixed and being covered", ->
         @reasonIs @$coveredUpPosFixed.find("#coveredUpPosFixed"), """
-        This element '<div#coveredUpPosFixed>' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
+        This element `<div#coveredUpPosFixed>` is not visible because it has CSS property: `position: fixed` and its being covered by another element:
 
-        <div style="position: fixed; bottom: 0; left: 0">on top</div>
+        `<div style="position: fixed; bottom: 0; left: 0">on top</div>`
         """
 
       it "cannot determine why element is not visible", ->
-        @reasonIs @$btnOpacity, "Cypress could not determine why this element '<button>' is not visible."
+        @reasonIs @$btnOpacity, "Cypress could not determine why this element `<button>` is not visible."

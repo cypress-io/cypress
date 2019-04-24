@@ -19,7 +19,7 @@ describe "promises", ->
         msg = top.console.warn.firstCall.args[0]
 
         expect(msg).to.include("Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.")
-
+        expect(msg).to.include(title)
         expect(msg).to.include(title)
 
         expect(top.console.warn).to.be.calledOnce
@@ -59,8 +59,9 @@ describe "promises", ->
       expect(lastLog.get("error")).to.eq(err)
 
       expect(err.message).to.include("Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.")
-      expect(err.message).to.include("> cy.foo()")
-      expect(err.message).to.include("> cy.wrap()")
+      expect(err.message).to.include("> `cy.foo()`")
+      expect(err.message).to.include("> `cy.wrap()`")
+      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-promise-and-commands-in-another-command")
 
       done()
 
@@ -88,8 +89,8 @@ describe "promises", ->
       expect(lastLog.get("error")).to.eq(err)
 
       expect(err.message).to.include("Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.")
-      expect(err.message).to.include("> cy.foo()")
-      expect(err.message).to.include("> cy.wrap()")
+      expect(err.message).to.include("> `cy.foo()`")
+      expect(err.message).to.include("> `cy.wrap()`")
 
       done()
 

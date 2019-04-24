@@ -26,6 +26,7 @@ $Server = require("./cypress/server")
 $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
+$errUtils = require("./cypress/error_utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
@@ -34,7 +35,7 @@ proxies = {
 
 jqueryProxyFn = ->
   if not @cy
-    $utils.throwErrByPath("miscellaneous.no_cy")
+    $errUtils.throwErrByPath("miscellaneous.no_cy")
 
   @cy.$$.apply(@cy, arguments)
 
@@ -43,9 +44,9 @@ _.extend(jqueryProxyFn, $)
 ## provide the old interface and
 ## throw a deprecation message
 $Log.command = ->
-  $utils.throwErrByPath("miscellaneous.command_log_renamed")
+  $errUtils.throwErrByPath("miscellaneous.command_log_renamed")
 
-throwDeprecatedCommandInterface = (key, method) ->
+throwDeprecatedCommandInterface = (key = "commandName", method) ->
   signature = switch method
     when "addParentCommand"
       "'#{key}', function(){...}"
@@ -54,12 +55,12 @@ throwDeprecatedCommandInterface = (key, method) ->
     when "addDualCommand"
       "'#{key}', { prevSubject: 'optional' }, function(){...}"
 
-  $utils.throwErrByPath("miscellaneous.custom_command_interface_changed", {
+  $errUtils.throwErrByPath("miscellaneous.custom_command_interface_changed", {
     args: { method, signature }
   })
 
 throwPrivateCommandInterface = (method) ->
-  $utils.throwErrByPath("miscellaneous.private_custom_command_interface", {
+  $errUtils.throwErrByPath("miscellaneous.private_custom_command_interface", {
     args: { method }
   })
 
@@ -150,7 +151,7 @@ class $Cypress
     @cy.initialize($autIframe)
 
   run: (fn) ->
-    $utils.throwErrByPath("miscellaneous.no_runner") if not @runner
+    $errUtils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
     @runner.run(fn)
 
@@ -407,7 +408,7 @@ class $Cypress
           ## attaching long stace traces
           ## which otherwise make this err
           ## unusably long
-          err = $utils.cloneErr(e)
+          err = $errUtils.makeErrFromObj(e)
           err.__stackCleaned__ = true
           err.backend = true
           reject(err)
@@ -421,7 +422,7 @@ class $Cypress
     new Promise (resolve, reject) =>
       fn = (reply) ->
         if e = reply.error
-          err = $utils.cloneErr(e)
+          err = $errUtils.makeErrFromObj(e)
           err.automation = true
           reject(err)
         else

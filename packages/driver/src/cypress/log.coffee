@@ -6,13 +6,12 @@ $Snapshots = require("../cy/snapshots")
 $Events = require("./events")
 $dom = require("../dom")
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 
 ## adds class methods for command, route, and agent logging
 ## including the intermediate $Log interface
-CypressErrorRe  = /(AssertionError|CypressError)/
 groupsOrTableRe = /^(groups|table)$/
 parentOrChildRe = /parent|child/
-ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
 DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
 BLACKLIST_PROPS = "snapshots".split(" ")
@@ -184,26 +183,15 @@ Log = (state, config, obj) ->
 
       invoke() ? {}
 
-    serializeError: ->
-      if err = @get("error")
-        _.reduce ERROR_PROPS, (memo, prop) ->
-          if _.has(err, prop) or err[prop]
-            memo[prop] = err[prop]
-
-          memo
-        , {}
-      else
-        null
-
     toJSON: ->
       _
       .chain(attributes)
       .omit("error")
       .omitBy(_.isFunction)
       .extend({
-        err:          @serializeError()
+        err: $errUtils.wrapErr(@get("error"))
         consoleProps: @invoke("consoleProps")
-        renderProps:  @invoke("renderProps")
+        renderProps: @invoke("renderProps")
       })
       .value()
 
@@ -320,12 +308,7 @@ Log = (state, config, obj) ->
       return @
 
     getError: (err) ->
-      ## dont log stack traces on cypress errors
-      ## or assertion errors
-      if CypressErrorRe.test(err.name)
-        err.toString()
-      else
-        err.stack
+      $errUtils.getErrStack(err)
 
     setElAttrs: ->
       $el = @get("$el")

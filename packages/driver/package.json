@@ -17,6 +17,7 @@
     "lib"
   ],
   "devDependencies": {
+    "@babel/code-frame": "^7.0.0",
     "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/sinon-chai": "1.1.0",
     "@cypress/underscore.inflection": "1.0.1",
@@ -45,8 +46,8 @@
     "jsdom": "13.2.0",
     "lodash": "4.17.11",
     "lolex": "3.1.0",
-    "methods": "1.1.2",
     "method-override": "2.3.10",
+    "methods": "1.1.2",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
     "mocha": "cypress-io/mocha#58f6eac05e664fc6b69aa9fba70f1f6b5531a900",

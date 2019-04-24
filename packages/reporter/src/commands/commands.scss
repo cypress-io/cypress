@@ -110,13 +110,12 @@
 
     &:hover {
       background-color: #E0E5E7;
-      box-shadow: 0 1px 2px #ccc inset;
     }
 
     .command-alias {
       border-radius: 10px;
       color: #777888;
-      padding: 0px 5px;
+      padding: 0 5px;
       display: inline-block;
 
       &.route {
@@ -188,8 +187,12 @@
   }
 
   .command-state-pending .command-number {
-    i { display: inline-block;; }
-    span { display: none; }
+    i { 
+      display: inline-block; 
+    }
+    span { 
+      display: none; 
+    }
   }
 
   .command-method {
@@ -219,7 +222,8 @@
 
     .command-number,
     .command-method,
-    .command-message {
+    .command-message,
+    .command-pin {
       color: lighten($pending, 15%);
     }
   }
@@ -227,16 +231,17 @@
   .command-state-failed > span > .command-wrapper {
     padding-left: 3px;
     border-left: 2px solid $fail;
-    background-color: lighten($fail, 30%);
+    background-color: $err-header-background;
 
     &:hover {
-      background: lighten($fail, 26%);
+      background: darken($err-header-background, 2%);
     }
 
     .command-number,
     .command-method,
-    .command-message {
-      color: $fail;
+    .command-message,
+    .command-pin {
+      color: $err-header-text;
     }
   }
 
