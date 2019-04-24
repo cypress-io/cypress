@@ -18,15 +18,20 @@ exports['e2e network error handling Cypress tests run as expected 1'] = `
 
 
   network error handling
-    retries
-      1) retries 3x
+    cy.visit() retries
+      1) retries 5x
       ✓ works on the third try after two failed requests
+      ✓ works on the third try after two 500 errors
+    cy.request() retries
+      2) retries 5x
+      ✓ works on the third try after two failed requests
+      ✓ works on the third try after two 500 errors
 
 
-  1 passing
-  1 failing
+  4 passing
+  2 failing
 
-  1) network error handling retries retries 3x:
+  1) network error handling cy.visit() retries retries 5x:
      CypressError: cy.visit() failed trying to load:
 
 http://localhost:13370/immediate-reset
@@ -67,18 +72,74 @@ Error: socket hang up
       at stack trace line
       at stack trace line
 
+  2) network error handling cy.request() retries retries 5x:
+     CypressError: cy.request() failed trying to load:
+
+http://localhost:13370/immediate-reset
+
+We attempted to make an http request to this URL but the request failed without a response.
+
+We received this error at the network level:
+
+  > Error: socket hang up
+
+-----------------------------------------------------------
+
+The request we sent was:
+
+Method: GET
+URL: http://localhost:13370/immediate-reset
+
+-----------------------------------------------------------
+
+Common situations why this would fail:
+  - you don't have internet access
+  - you forgot to run / boot your web server
+  - your web server isn't accessible
+  - you have weird network configuration settings on your computer
+
+The stack trace for this error is:
+
+RequestError: Error: socket hang up
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
 
 
 
   (Results)
 
   ┌──────────────────────────────────────────────┐
-  │ Tests:        2                              │
-  │ Passing:      1                              │
-  │ Failing:      1                              │
+  │ Tests:        6                              │
+  │ Passing:      4                              │
+  │ Failing:      2                              │
   │ Pending:      0                              │
   │ Skipped:      0                              │
-  │ Screenshots:  1                              │
+  │ Screenshots:  2                              │
   │ Video:        true                           │
   │ Duration:     X seconds                      │
   │ Spec Ran:     network_error_handling_spec.js │
@@ -87,7 +148,8 @@ Error: socket hang up
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/network_error_handling_spec.js/network error handling -- retries -- retries 3x (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/network_error_handling_spec.js/network error handling -- cy.visit() retries -- retries 5x (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/network_error_handling_spec.js/network error handling -- cy.request() retries -- retries 5x (failed).png (1280x720)
 
 
   (Video)
@@ -103,9 +165,9 @@ Error: socket hang up
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ network_error_handling_spec.js            XX:XX        2        1        1        -        - │
+  │ ✖ network_error_handling_spec.js            XX:XX        6        4        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        1        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        6        4        2        -        -  
 
 
 `

@@ -1,6 +1,6 @@
 describe('network error handling', function () {
   context('cy.visit() retries', function () {
-    it('retries 3x', function () {
+    it('retries 5x', function () {
       cy.visit({
         url: '/immediate-reset',
       })
@@ -21,7 +21,7 @@ describe('network error handling', function () {
   })
 
   context('cy.request() retries', function () {
-    it('retries 3x', function () {
+    it('retries 5x', function () {
       cy.request({
         url: '/immediate-reset',
       })

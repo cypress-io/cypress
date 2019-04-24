@@ -240,8 +240,9 @@ describe "e2e network error handling", ->
         # exit: false
         # browser: "chrome"
         video: false
-        expectedExitCode: 1
+        expectedExitCode: 2
       }).then () ->
+        expect(count).to.eq(12)
         expect(e2eCount).to.deep.eq({
           "for-request": 3
           "for-visit": 3

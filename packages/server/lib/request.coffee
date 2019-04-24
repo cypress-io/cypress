@@ -29,10 +29,13 @@ getOriginalHeaders = (req = {}) ->
   req.req?.headers ? req.headers
 
 getDelayForRetry = (iteration) ->
-  _.get([0, 1, 2, 2], iteration) * 1000
+  _.get([0, 0, 1, 2, 2], iteration) * 1000
 
-isRetriableError = (err = {}, options) ->
-  options.retryOnNetworkFailure && ['ECONNREFUSED', 'ECONNRESET', 'EPIPE'].includes(err.code)
+hasRetriableStatusCodeFailure = (res, opts) ->
+  opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
+
+isRetriableError = (err = {}, opts) ->
+  opts.retryOnNetworkFailure && ['ECONNREFUSED', 'ECONNRESET', 'EPIPE'].includes(err.code)
 
 pick = (resp = {}) ->
   req = resp.request ? {}
@@ -140,6 +143,14 @@ createCookieString = (c) ->
   reduceCookieToArray(c).join("; ")
 
 createRetryingRequestPromise = (opts, iteration = 0) ->
+  retry = ->
+    delay = getDelayForRetry(iteration)
+
+    debug("retry %o", { iteration, delay })
+
+    Promise.delay(delay).then ->
+      createRetryingRequestPromise(opts, iteration + 1)
+
   rp(opts)
   .catch (err) ->
     debug("received an error creating request %o", err)
@@ -152,12 +163,15 @@ createRetryingRequestPromise = (opts, iteration = 0) ->
       debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
       throw err
 
-    delay = getDelayForRetry(iteration)
+    retry()
+  .then (res) ->
+    ## ok, no net error, but what about a bad status code?
+    if hasRetriableStatusCodeFailure(res, opts) && iteration < MAX_REQUEST_ATTEMPTS
+      debug("received failing status code on res, retrying", _.pick(res, "statusCode"))
 
-    debug("retry %o", { iteration, delay })
+      return retry()
 
-    Promise.delay(delay).then ->
-      createRetryingRequestPromise(opts, iteration + 1)
+    res
 
 pipeEvent = (source, destination, event) ->
   source.on event, (args...) ->
@@ -168,6 +182,17 @@ createRetryingRequestStream = (opts) ->
 
   tryStartStream = (iteration = 0) ->
     reqStream = r(opts)
+
+    retry = ->
+      delay = getDelayForRetry(iteration)
+
+      retryingReqStream.emit("retry", { iteration, delay })
+
+      debug("retry %o", { iteration, delay })
+
+      setTimeout ->
+        tryStartStream(iteration + 1)
+      , delay
 
     # wait for an `error` or a `response` on the reqStream
     reqStream.once "error", (err) ->
@@ -186,15 +211,15 @@ createRetryingRequestStream = (opts) ->
         # this reqStream is now garbage, but sometimes it still receives errors, so this can't crash the process
         debug("received another error on stream %o", err)
 
-      delay = getDelayForRetry(iteration)
-
-      retryingReqStream.emit("retry", { iteration, delay })
-
-      debug("retry %o", { iteration, delay })
-
-      setTimeout((() -> tryStartStream(iteration + 1)), delay)
+      retry()
 
     reqStream.once "response", (incomingRes) ->
+      ## ok, no net error, but what about a bad status code?
+      if hasRetriableStatusCodeFailure(incomingRes, opts) && iteration < MAX_REQUEST_ATTEMPTS
+        debug("received failing status code on res, retrying", _.pick(incomingRes, "statusCode"))
+
+        return retry()
+
       # on `response`, begin piping everything and re-emit `response` on retryingReqStream
       reqStream.pipe(retryingReqStream)
 
