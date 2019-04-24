@@ -103,6 +103,25 @@ describe "driver/src/cypress/cy", ->
             existing.concat(["multiple", "url", "location", "noop", "then"])
           )
 
+    it "stores invocation stack for first command", ->
+      cy
+      .get("input:first")
+      .then ->
+        invocationStack = cy.queue.find({ name: "get" }).get("invocationStack")
+        expect(invocationStack).to.include("command invocation stack")
+        expect(invocationStack).to.include("as get") ## might be browser-specific
+        expect(invocationStack).to.include("cypress_runner.js")
+
+    it "stores invocation stack for chained command", ->
+      cy
+      .get("div")
+      .find("input")
+      .then ->
+        invocationStack = cy.queue.find({ name: "find" }).get("invocationStack")
+        expect(invocationStack).to.include("command invocation stack")
+        expect(invocationStack).to.include("as find") ## might be browser-specific
+        expect(invocationStack).to.include("cypress_runner.js")
+
   context "custom commands", ->
     beforeEach ->
       Cypress.Commands.add "dashboard.selectRenderer", =>
@@ -130,6 +149,31 @@ describe "driver/src/cypress/cy", ->
       cy
         .command("dashboard.selectRenderer").then ($ce) ->
           expect($ce.get(0)).to.eq(ce.get(0))
+
+    describe "invocation stack", ->
+      beforeEach ->
+        Cypress.Commands.add "getInput", -> cy.get("input")
+        Cypress.Commands.add "findInput", { prevSubject: "element" }, (subject) ->
+          subject.find("input")
+
+      it "stores invocation stack for first command", ->
+        cy
+        .getInput()
+        .then ->
+          invocationStack = cy.queue.find({ name: "getInput" }).get("invocationStack")
+          expect(invocationStack).to.include("command invocation stack")
+          expect(invocationStack).to.include("as getInput") ## might be browser-specific
+          expect(invocationStack).to.include("cypress_runner.js")
+
+      it "stores invocation stack for chained command", ->
+        cy
+        .get("div")
+        .findInput()
+        .then ->
+          invocationStack = cy.queue.find({ name: "findInput" }).get("invocationStack")
+          expect(invocationStack).to.include("command invocation stack")
+          expect(invocationStack).to.include("as findInput") ## might be browser-specific
+          expect(invocationStack).to.include("cypress_runner.js")
 
     describe "parent commands", ->
       it "ignores existing subject", ->

@@ -772,11 +772,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           fn.apply(runnableCtx(name), args)
 
       cy[name] = (args...) ->
+        invocationStack = (new Error("command invocation stack")).stack
+
         ensures.ensureRunnable(name)
 
         ## this is the first call on cypress
         ## so create a new chainer instance
-        chain = $Chainer.create(name, args)
+        chain = $Chainer.create(name, invocationStack, args)
 
         ## store the chain so we can access it later
         state("chain", chain)
@@ -810,7 +812,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         return chain
 
-      cy.addChainer name, (chainer, args) ->
+      cy.addChainer name, (chainer, invocationStack, args) ->
         { firstCall, chainerId } = chainer
 
         ## dont enqueue / inject any new commands if
@@ -825,6 +827,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           args
           type
           chainerId
+          invocationStack
           fn: wrap(firstCall)
         })
 
