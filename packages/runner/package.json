@@ -24,7 +24,6 @@
     "lib"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-decorators": "7.4.0",
     "@babel/plugin-proposal-object-rest-spread": "7.4.0",
     "@cypress/react-tooltip": "0.4.0",
     "bin-up": "1.1.0",

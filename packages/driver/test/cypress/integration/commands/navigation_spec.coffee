@@ -91,7 +91,6 @@ describe "src/cy/commands/navigation", ->
         expect(stub2).to.be.calledOnce
         expect(stub3).to.be.calledOnce
 
-    # Array(100).fill().map -> 
     it "removes listeners", ->
       win = cy.state("window")
 
@@ -100,14 +99,6 @@ describe "src/cy/commands/navigation", ->
       cy.reload().then ->
         expect(rel).to.be.calledWith("beforeunload")
         expect(rel).to.be.calledWith("unload")
-
-          
-        # cy.reload().then ->
-        #   cy.wrap(null).should ->
-        #     expect(rel).to.be.calledWith("beforeunload")
-        #     expect(rel).to.be.calledWith("unload")
-
-        
 
     describe "errors", ->
       beforeEach ->
@@ -158,7 +149,6 @@ describe "src/cy/commands/navigation", ->
             expect(win.foo).to.be.undefined
 
       it "throws when reload times out", (done) ->
-        console.time('foo')
         locReload = cy.spy(Cypress.utils, "locReload")
 
         cy
@@ -176,8 +166,6 @@ describe "src/cy/commands/navigation", ->
 
             cy.on "fail", (err) ->
               expected = true
-
-              console.timeEnd('foo')
 
               expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
 
@@ -244,18 +232,17 @@ describe "src/cy/commands/navigation", ->
       $(doc.body).empty().html(@body)
 
     ## TODO: fix this
-    # it.skip "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
-    #   timeout = cy.spy Promise.prototype, "timeout"
-    #   Cypress.config("pageLoadTimeout", 4567)
+    it.skip "(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)", ->
+      timeout = cy.spy Promise.prototype, "timeout"
+      Cypress.config("pageLoadTimeout", 4567)
 
-    #   cy
-    #     .visit("/fixtures/jquery.html")
-    #     .go("back").then ->
-    #       expect(timeout).to.be.calledWith(4567, "go")
+      cy
+        .visit("/fixtures/jquery.html")
+        .go("back").then ->
+          expect(timeout).to.be.calledWith(4567, "go")
 
     it "removes listeners", ->
       cy
-        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then ->
           winLoadListeners = cy.listeners("window:load")
@@ -279,7 +266,6 @@ describe "src/cy/commands/navigation", ->
       stub3 = cy.stub()
 
       cy
-        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then ->
           cy.on("stability:changed", stub1)
@@ -293,7 +279,6 @@ describe "src/cy/commands/navigation", ->
 
     it "removes listeners from window", ->
       cy
-        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then (win) ->
           rel = cy.stub(win, "removeEventListener")
@@ -384,7 +369,6 @@ describe "src/cy/commands/navigation", ->
 
       it "logs go", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             lastLog = @lastLog
@@ -394,14 +378,12 @@ describe "src/cy/commands/navigation", ->
 
       it "can turn off logging", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back", {log: false}).then ->
             expect(@lastLog).to.be.undefined
 
       it "does not log 'Page Load' events", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
@@ -411,7 +393,6 @@ describe "src/cy/commands/navigation", ->
         beforeunload = false
 
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
             cy.on "window:before:unload", =>
