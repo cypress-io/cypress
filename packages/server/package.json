@@ -183,6 +183,8 @@
     "shell-env": "0.3.0",
     "signal-exit": "3.0.2",
     "sinon": "5.1.1",
+    "source-map": "0.7.3",
+    "stack-utils": "1.0.2",
     "string-to-stream": "1.1.1",
     "strip-ansi": "3.0.1",
     "supports-color": "5.5.0",
