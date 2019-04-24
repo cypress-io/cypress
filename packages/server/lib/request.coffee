@@ -6,6 +6,7 @@ tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
+stream     = require("stream")
 agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 Cookies    = require("./automation/cookies")
@@ -16,6 +17,8 @@ CookieJar = tough.CookieJar
 ## shallow clone the original
 serializableProperties = Cookie.serializableProperties.slice(0)
 
+MAX_REQUEST_ATTEMPTS = 5
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 getOriginalHeaders = (req = {}) ->
@@ -24,6 +27,12 @@ getOriginalHeaders = (req = {}) ->
   ## as the 'req' property which holds the
   ## original headers
   req.req?.headers ? req.headers
+
+getDelayForRetry = (iteration) ->
+  _.get([0, 1, 2, 2], iteration) * 1000
+
+isRetriableError = (err = {}, options) ->
+  options.retryOnNetworkFailure && ['ECONNREFUSED', 'ECONNRESET', 'EPIPE'].includes(err.code)
 
 pick = (resp = {}) ->
   req = resp.request ? {}
@@ -130,6 +139,80 @@ reduceCookieToArray = (c) ->
 createCookieString = (c) ->
   reduceCookieToArray(c).join("; ")
 
+createRetryingRequestPromise = (opts, iteration = 0) ->
+  rp(opts)
+  .catch (err) ->
+    debug("received an error creating request %o", err)
+
+    ## rp wraps network errors in a RequestError, so might need to unwrap it to check
+    if not isRetriableError(err.error || err, opts)
+      throw err
+
+    if iteration >= MAX_REQUEST_ATTEMPTS
+      debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
+      throw err
+
+    delay = getDelayForRetry(iteration)
+
+    debug("retry %o", { iteration, delay })
+
+    Promise.delay(delay).then ->
+      createRetryingRequestPromise(opts, iteration + 1)
+
+pipeEvent = (source, destination, event) ->
+  source.on event, (args...) ->
+    destination.emit(event, args...)
+
+createRetryingRequestStream = (opts) ->
+  retryingReqStream = stream.PassThrough()
+
+  tryStartStream = (iteration = 0) ->
+    reqStream = r(opts)
+
+    # wait for an `error` or a `response` on the reqStream
+    reqStream.once "error", (err) ->
+      # on `error`, retry and emit `retry` on retryingReqStream
+
+      debug("received an error creating stream %o", err)
+
+      if not isRetriableError(err, opts)
+        return retryingReqStream.emit("error", err)
+
+      if iteration >= MAX_REQUEST_ATTEMPTS
+        debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
+        return retryingReqStream.emit("error", err)
+
+      reqStream.on "error", (err) ->
+        # this reqStream is now garbage, but sometimes it still receives errors, so this can't crash the process
+        debug("received another error on stream %o", err)
+
+      delay = getDelayForRetry(iteration)
+
+      retryingReqStream.emit("retry", { iteration, delay })
+
+      debug("retry %o", { iteration, delay })
+
+      setTimeout((() -> tryStartStream(iteration + 1)), delay)
+
+    reqStream.once "response", (incomingRes) ->
+      # on `response`, begin piping everything and re-emit `response` on retryingReqStream
+      reqStream.pipe(retryingReqStream)
+
+      # also need to pipe all the non-data events
+      _.map(
+        [
+          # all `stream.Readable` events except "data"
+          "close", "end", "error", "pause", "readable", "resume"
+        ],
+        _.partial(pipeEvent, reqStream, retryingReqStream)
+      )
+
+      retryingReqStream.emit("response", incomingRes)
+
+  tryStartStream()
+
+  retryingReqStream
+
 module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout ? 20000
@@ -164,9 +247,9 @@ module.exports = (options = {}) ->
           opts = strOrOpts
 
       if promise
-        rp(opts)
+        createRetryingRequestPromise(opts)
       else
-        r(opts)
+        createRetryingRequestStream(opts)
 
     contentTypeIsJson: (response) ->
       ## TODO: use https://github.com/jshttp/type-is for this

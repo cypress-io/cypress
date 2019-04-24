@@ -13,7 +13,7 @@ hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
-REQUEST_URL_OPTS = ["auth", "failOnStatusCode", "method", "body", "headers"]
+REQUEST_URL_OPTS = ["auth", "failOnStatusCode", "retryOnNetworkFailure", "retryOnStatusCodeFailure", "method", "body", "headers"]
 VISIT_OPTS = ["url", "log", "onBeforeLoad", "onLoad", "timeout"].concat(REQUEST_URL_OPTS)
 
 reset = (test = {}) ->
@@ -483,6 +483,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
+        retryOnNetworkFailure: true
+        retryOnStatusCodeFailure: false
         method: 'GET'
         body: null
         headers: {}
@@ -491,6 +493,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         onBeforeLoad: ->
         onLoad: ->
       })
+
+      if options.retryOnStatusCodeFailure and not options.failOnStatusCode
+        $utils.throwErrByPath("visit.status_code_flags_invalid")
 
       if not isValidVisitMethod(options.method)
         $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
