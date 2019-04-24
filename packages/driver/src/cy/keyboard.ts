@@ -49,6 +49,7 @@ interface KeyDetails {
   shiftText?: string
   shiftKeyCode?: number
   simulatedDefault?: SimulatedDefault
+  simulatedDefualtOnly?: boolean
   events: {
     [key in KeyEventType]?: boolean
   }
@@ -189,26 +190,7 @@ const getKeyDetails = (key: string) => {
 }
 
 const getStatefulKeyDetails = (keyDetails: KeyDetails, modifiers: keyboardModifiers) => {
-  const details = _.defaults(keyDetails)
 
-  if (modifiers.shift && details.shiftKey) {
-    details.key = details.shiftKey
-  }
-
-  if (modifiers.shift && details.shiftKeyCode) {
-    details.keyCode = details.shiftKeyCode
-  }
-
-  if (modifiers.shift && details.shiftText) {
-    details.text = details.shiftText
-  }
-
-  // If any modifier besides shift is pressed, no text.
-  if (_.some(_.omit(modifiers, ['shift']))) {
-    details.text = ''
-  }
-
-  return details
 }
 
 // type shouldBe = <K extends Function,T>(fn:K, a:T): re
@@ -229,8 +211,8 @@ const shouldIgnoreEvent = <T extends KeyEventType, K extends { [key in T]?: bool
 }
 
 const getSimulatedDefaultForKey = (el, key: KeyDetails) => {
-  const simulatedDefault = simulatedDefaultKeyMap[key.key]
-  if (simulatedDefault) return simulatedDefault
+  if (key.simulatedDefault) return key.simulatedDefault
+  if (simulatedDefaultKeyMap[key.key]) return simulatedDefaultKeyMap[key.key]
   return () => {
     debug('replaceSelectionContents')
     $selection.replaceSelectionContents(el, key.text)
@@ -325,29 +307,26 @@ export default class Keyboard {
       if (!_skipCheckUntilIndex) {
         const { skipCheckUntilIndex } = validateTyping(activeEl, joinKeyArrayToString(keyDetailsArr.slice(i)), options._log, _skipCheckUntilIndex)
         _skipCheckUntilIndex = skipCheckUntilIndex
-        if (_skipCheckUntilIndex) {
+        if (_skipCheckUntilIndex && $elements.isNeedSingleValueChangeInputElement(el)) {
           debug('skip validate until:', _skipCheckUntilIndex)
-          const isNeedSingleValueChangeInputElement = $elements.isNeedSingleValueChangeInputElement(activeEl)
           const keysType = keyDetailsArr.slice(0, _skipCheckUntilIndex)
-          _.each(keysType, key => key!.simulatedDefault = _.noop)
-          _.last(keysType)!.simulatedDefault = (el, options) => {
+          _.each(keysType, key => key.simulatedDefault = _.noop)
+          _.last(keysType)!.simulatedDefault = () => {
             return $elements.setNativeProp(el as HTMLTextLikeInputElement, 'value', joinKeyArrayToString(keysType))
           }
         }
       }
 
-      const details = getStatefulKeyDetails(key, getActiveModifiers(this.state))
-
-      if (key.simulatedDefault) {
+      if (key.simulatedDefualtOnly && key.simulatedDefault) {
         key.simulatedDefault(activeEl, key, options)
         return null
       }
       if (options.simulated) {
-        this.typeSimulatedKey(activeEl, details, options)
+        this.typeSimulatedKey(activeEl, key, options)
         debug('returning null')
         return null
       }
-      return this.typeKey(activeEl, details, options)
+      return this.typeKey(activeEl, key, options)
     })
 
     const modifierKeys = _.filter(keyDetailsArr, (key) => isModifier(key))
@@ -361,7 +340,7 @@ export default class Keyboard {
       return
     }
 
-    return Promise.each(typeKeyFns, (fn) => Promise.try(()=>fn()).delay(options.delay))
+    return Promise.each(typeKeyFns, (fn) => Promise.try(() => fn()).delay(options.delay))
       .then(() => {
         if (options.release !== false) {
           if (options.simulated) {
@@ -371,7 +350,7 @@ export default class Keyboard {
         }
         return []
       })
-      .then(()=>{
+      .then(() => {
         options.onAfterType()
       })
 
@@ -513,16 +492,27 @@ export default class Keyboard {
   // const maybeFireSimulatedEvent:Curry = (shouldFire:boolean | undefined, fireSimulatedEvent) => {
 
   getModifierKeyDetails(key: KeyDetails) {
-    return _.extend(key, { modifiers: getModifiersValue(getActiveModifiers(this.state)) })
-  }
+    const modifiers = getActiveModifiers(this.state)
+    const details = { ...key, modifiers: getModifiersValue(modifiers) }
 
-  releaseModifiers(modifiers: KeyDetails[]) {
-    return Promise.each(modifiers, this.releaseKey.bind(this))
-  }
+    if (modifiers.shift && details.shiftKey) {
+      details.key = details.shiftKey
+    }
 
-  releaseKey(key: KeyDetails) {
-    const keyWithModifiers = this.getModifierKeyDetails(key)
-    return $native.keyup(keyWithModifiers)
+    if (modifiers.shift && details.shiftKeyCode) {
+      details.keyCode = details.shiftKeyCode
+    }
+
+    if (modifiers.shift && details.shiftText) {
+      details.text = details.shiftText
+    }
+
+    // If any modifier besides shift is pressed, no text.
+    if (_.some(_.omit(modifiers, ['shift']))) {
+      details.text = ''
+    }
+
+    return details
   }
 
   keyup(key: KeyDetails) {
@@ -616,20 +606,19 @@ export default class Keyboard {
 
   }
 
-  simulatedKeydown(el: HTMLElement, key: KeyDetails, options: any) {
-    if (isModifier(key)) {
-      this.flagModifier(key)
-      key.events.keyup = false
+  simulatedKeydown(el: HTMLElement, _key: KeyDetails, options: any) {
+    if (isModifier(_key)) {
+      this.flagModifier(_key)
+      _key.events.keyup = false
     }
+
+    const key = this.getModifierKeyDetails(_key)
 
     debug('typeSimulatedKey options:', _.pick(options, ['keydown', 'keypress', 'textInput', 'input']))
     if (shouldIgnoreEvent('keydown', key.events) || this.fireSimulatedEvent(el, 'keydown', key, options)) {
       if (shouldIgnoreEvent('keypress', key.events) || this.fireSimulatedEvent(el, 'keypress', key, options)) {
         this.performSimulatedDefault(el, key, options)
-        if (!shouldIgnoreEvent('textInput', key.events)) {
-          debugger
-          this.fireSimulatedEvent(el, 'textInput', key, options)
-        }
+        shouldIgnoreEvent('textInput', key.events) || this.fireSimulatedEvent(el, 'textInput', key, options)
       }
     }
   }
@@ -655,17 +644,18 @@ export default class Keyboard {
 
   }
 
-  simulatedKeyup(el: HTMLElement, key: KeyDetails, options: any) {
-    if (shouldIgnoreEvent('keyup', key.events)) {
+  simulatedKeyup(el: HTMLElement, _key: KeyDetails, options: any) {
+    if (shouldIgnoreEvent('keyup', _key.events)) {
       debug('simulatedKeyup: ignoring event')
-      delete key.events.keyup
+      delete _key.events.keyup
       return
     }
 
-    if (isModifier(key)) {
-      this.flagModifier(key, false)
+    if (isModifier(_key)) {
+      this.flagModifier(_key, false)
     }
 
+    const key = this.getModifierKeyDetails(_key)
     this.fireSimulatedEvent(el, 'keyup', key, options)
 
   }
@@ -692,7 +682,7 @@ export default class Keyboard {
   performSimulatedDefault(el: HTMLElement, key: KeyDetails, options: any) {
     debug('performSimulatedDefault', key.key)
     const simulatedDefault = getSimulatedDefaultForKey(el, key)
- 
+
 
     const shouldUpdateValue = () => {
       if (key.text && ($elements.isInput(el) || $elements.isTextarea(el))) {
@@ -730,7 +720,7 @@ export default class Keyboard {
         isValueChangeElement = true
         curText = $elements.getNativeProp(el, 'value')
       }
-      
+
       simulatedDefault(el, key, options)
 
       if (!key.text) {
@@ -740,6 +730,7 @@ export default class Keyboard {
 
       if (options.prevText === null && isValueChangeElement) {
         options.prevText = curText
+        debugger
         options.onValueChange(options.prevText, el)
       }
 
@@ -1055,21 +1046,24 @@ const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
     simulatedDefault: (el) => {
       const doc = $document.getDocumentFromElement(el)
       return $selection.selectAll(doc)
-    }
+    },
+    simulatedDefualtOnly: true
   },
   movetostart: {
     key: 'moveToStart',
     simulatedDefault: (el) => {
       const doc = $document.getDocumentFromElement(el)
       return $selection.moveSelectionToStart(doc)
-    }
+    },
+    simulatedDefualtOnly: true
   },
   movetoend: {
     key: 'moveToEnd',
     simulatedDefault: (el) => {
       const doc = $document.getDocumentFromElement(el)
       return $selection.moveSelectionToEnd(doc)
-    }
+    },
+    simulatedDefualtOnly: true
   },
 
   del: USKeyboard.Delete,

@@ -2118,9 +2118,9 @@ describe('src/cy/commands/actions/type', function () {
 
         it('up and down arrow on contenteditable', () => {
           cy.$$('[contenteditable]:first').get(0).innerHTML =
-                      '<div>foo</div>' +
-                      '<div>bar</div>' +
-                      '<div>baz</div>'
+            '<div>foo</div>' +
+            '<div>bar</div>' +
+            '<div>baz</div>'
 
           cy.get('[contenteditable]:first')
           .type('{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33').then(($div) => {
@@ -2132,9 +2132,9 @@ describe('src/cy/commands/actions/type', function () {
           const ce = cy.$$('[contenteditable]:first').get(0)
 
           ce.innerHTML =
-                      '<div>foo</div>' +
-                      '<div>bar</div>' +
-                      '<div>baz</div>'
+            '<div>foo</div>' +
+            '<div>bar</div>' +
+            '<div>baz</div>'
           //# select 'bar'
           const line = cy.$$('[contenteditable]:first div:nth-child(1)').get(0)
 
@@ -2228,9 +2228,9 @@ describe('src/cy/commands/actions/type', function () {
           const ce = cy.$$('[contenteditable]:first').get(0)
 
           ce.innerHTML =
-                      '<div>foo</div>' +
-                      '<div>bar</div>' +
-                      '<div>baz</div>'
+            '<div>foo</div>' +
+            '<div>bar</div>' +
+            '<div>baz</div>'
           //# select 'foo'
           const line = cy.$$('[contenteditable]:first div:first').get(0)
 
@@ -2379,12 +2379,19 @@ describe('src/cy/commands/actions/type', function () {
             events.push(e)
           })
 
-          cy.get('input:text:first').type('{shift}{ctrl}').then(() => {
+          const handleKeyup = cy.stub().as('keyup')
+
+          $input.on('keyup', handleKeyup)
+
+          // cy.get('input:text:first').type('{shift}{ctrl}')
+          cy.wait(5000).then(() => {
             expect(events[0].shiftKey).to.be.true
             expect(events[0].which).to.equal(16)
+            expect(handleKeyup.firstCall.args[0].shiftKey).eq(false)
 
             expect(events[1].ctrlKey).to.be.true
             expect(events[1].which).to.equal(17)
+            expect(handleKeyup.lastCall.args[0].ctrlKey).eq(false)
 
             $input.off('keydown')
 
@@ -3182,8 +3189,8 @@ describe('src/cy/commands/actions/type', function () {
         const el = $el.get(0)
 
         el.innerHTML = 'start' +
-        '<div>middle</div>' +
-        '<div>end</div>'
+          '<div>middle</div>' +
+          '<div>end</div>'
 
         cy.get('[contenteditable]:first')
         //# move cursor to beginning of div
@@ -3198,8 +3205,8 @@ describe('src/cy/commands/actions/type', function () {
         const el = $el.get(0)
 
         el.innerHTML = 'start' +
-        '<div>middle</div>' +
-        '<div>end</div>'
+          '<div>middle</div>' +
+          '<div>end</div>'
 
         cy.get('[contenteditable]:first').type(`${'{leftarrow}'.repeat(12)}[_I_]`).then(($el) => {
           expect(trimInnerText($el)).to.eql('star[_I_]t\nmiddle\nend')
@@ -3750,7 +3757,7 @@ describe('src/cy/commands/actions/type', function () {
           }
         })
 
-        cy.get(':text:first').type('foo').then(() => {})
+        cy.get(':text:first').type('foo').then(() => { })
 
         cy.get(':text:first').type('foo')
       })
