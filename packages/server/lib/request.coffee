@@ -18,20 +18,12 @@ serializableProperties = Cookie.serializableProperties.slice(0)
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-MAX_REQUEST_ATTEMPTS = 5
-
-getDelayForRetry = (iteration) ->
-  return _.get([0, 0, 1, 2, 2], iteration) * 1000
-
 getOriginalHeaders = (req = {}) ->
   ## the request instance holds an instance
   ## of the original ClientRequest
   ## as the 'req' property which holds the
   ## original headers
   req.req?.headers ? req.headers
-
-isRetriableError = (err = {}, options) ->
-  options.retryOnNetworkFailure && ['ECONNREFUSED', 'ECONNRESET', 'EPIPE'].includes(err.code)
 
 pick = (resp = {}) ->
   req = resp.request ? {}
@@ -273,12 +265,10 @@ module.exports = (options = {}) ->
         ## values which need to be set in order
         Promise.each(store.cookies, setCookie)
 
-    sendStream: (headers, automationFn, options = {}, cb) ->
+    sendStream: (headers, automationFn, options = {}) ->
       _.defaults options, {
         headers: {}
         jar: true
-        retryOnNetworkFailure: true
-        retryOnStatusCodeFailure: false
       }
 
       if ua = headers["user-agent"]
@@ -320,47 +310,12 @@ module.exports = (options = {}) ->
 
           followRedirect.call(req, incomingRes)
 
-      createAndRetry = (iteration = 0) =>
-        newReq = @create(options)
-        newReq.getJar = -> options.jar
-
-        delay = getDelayForRetry(iteration)
-
-        onError = (err) ->
-          debug("caught request error in send #{err.code} %o", err)
-
-          newReq.on "error", (newErr) ->
-            # sockets can/do emit multiple errors depending on how they're closed
-            # listen for these extra errors so that the whole process doesn't crash
-            debug("received error on already-errored request stream: %o", {
-              originalError: err,
-              lastError: newErr
-            })
-
-          if not isRetriableError(err, options)
-            return cb(err)
-
-          if iteration >= MAX_REQUEST_ATTEMPTS
-            debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
-            return cb(err)
-
-          debug("retry %o", { iteration, delay })
-
-          setTimeout ->
-            createAndRetry(iteration + 1)
-          , delay
-
-        newReq
-        .once "error", onError
-        .once "response", (incomingRes) ->
-          debug('received response event')
-          newReq.removeListener("error", onError)
-          cb(null, newReq, incomingRes)
-
-      send = ->
+      send = =>
         debug("sending request as stream %o", _.omit(options, "jar"))
 
-        createAndRetry()
+        str = @create(options)
+        str.getJar = -> options.jar
+        str
 
       automationFn("get:cookies", {url: options.url, includeHostOnly: true})
       .then(convertToJarCookie)
@@ -375,8 +330,6 @@ module.exports = (options = {}) ->
         jar: true
         cookies: true
         followRedirect: true
-        retryOnNetworkFailure: true
-        retryOnStatusCodeFailure: false
       }
 
       if ua = headers["user-agent"]
@@ -457,30 +410,7 @@ module.exports = (options = {}) ->
             ## so we can build an array of responses
             return true
 
-        createAndRetry = (iteration = 0) =>
-          delay = getDelayForRetry(iteration)
-
-          @create(options, true)
-          .catch (err) =>
-            debug("caught request error in send %o", err)
-
-            ## rp wraps network errors in a RequestError, so might need to unwrap it to check
-            if not isRetriableError(err.error || err, options)
-              throw err
-
-            if iteration >= MAX_REQUEST_ATTEMPTS
-              debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
-              throw err
-
-            debug("retry %o", { iteration, delay })
-
-            Promise.delay(delay)
-            .then =>
-              createAndRetry(iteration + 1, err)
-
-        debug("sending request with options %o", options)
-
-        createAndRetry()
+        @create(options, true)
         .then(@normalizeResponse.bind(@, push))
         .then (resp) =>
           ## TODO: move duration somewhere...?
