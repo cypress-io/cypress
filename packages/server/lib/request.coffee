@@ -6,7 +6,6 @@ tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
-stream     = require("stream")
 agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 Cookies    = require("./automation/cookies")
@@ -19,6 +18,11 @@ serializableProperties = Cookie.serializableProperties.slice(0)
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+MAX_REQUEST_ATTEMPTS = 5
+
+getDelayForRetry = (iteration) ->
+  return _.get([0, 0, 1, 2, 2], iteration) * 1000
+
 getOriginalHeaders = (req = {}) ->
   ## the request instance holds an instance
   ## of the original ClientRequest
@@ -26,8 +30,8 @@ getOriginalHeaders = (req = {}) ->
   ## original headers
   req.req?.headers ? req.headers
 
-isRetriableError = (err) ->
-  ['ECONNREFUSED', 'ECONNRESET', 'EPIPE'].includes(err.code)
+isRetriableError = (err = {}, options) ->
+  options.retryOnNetworkFailure && ['ECONNREFUSED', 'ECONNRESET', 'EPIPE'].includes(err.code)
 
 pick = (resp = {}) ->
   req = resp.request ? {}
@@ -273,7 +277,8 @@ module.exports = (options = {}) ->
       _.defaults options, {
         headers: {}
         jar: true
-        retry: false
+        retryOnNetworkFailure: true
+        retryOnStatusCodeFailure: false
       }
 
       if ua = headers["user-agent"]
@@ -319,8 +324,10 @@ module.exports = (options = {}) ->
         newReq = @create(options)
         newReq.getJar = -> options.jar
 
+        delay = getDelayForRetry(iteration)
+
         onError = (err) ->
-          debug("caught request error in sendstream #{err.code} #{err} %o", err)
+          debug("caught request error in send #{err.code} %o", err)
 
           newReq.on "error", (newErr) ->
             # sockets can/do emit multiple errors depending on how they're closed
@@ -330,21 +337,18 @@ module.exports = (options = {}) ->
               lastError: newErr
             })
 
-          if not isRetriableError(err)
+          if not isRetriableError(err, options)
             return cb(err)
 
-          if iteration >= 2
-            debug("retried 3x and still network error, not retrying")
+          if iteration >= MAX_REQUEST_ATTEMPTS
+            debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
             return cb(err)
 
-          debug("retry %o", {
-            iteration
-            delay: options.timeout
-          })
+          debug("retry %o", { iteration, delay })
 
           setTimeout ->
             createAndRetry(iteration + 1)
-          , options.timeout || 0
+          , delay
 
         newReq
         .once "error", onError
@@ -371,6 +375,8 @@ module.exports = (options = {}) ->
         jar: true
         cookies: true
         followRedirect: true
+        retryOnNetworkFailure: true
+        retryOnStatusCodeFailure: false
       }
 
       if ua = headers["user-agent"]
@@ -451,23 +457,28 @@ module.exports = (options = {}) ->
             ## so we can build an array of responses
             return true
 
-        createAndRetry = (iteration = 0, originalErr = null) ->
+        createAndRetry = (iteration = 0) =>
+          delay = getDelayForRetry(iteration)
+
           @create(options, true)
-          .catch(err) ->
-            if not isRetriableError(err)
+          .catch (err) =>
+            debug("caught request error in send %o", err)
+
+            ## rp wraps network errors in a RequestError, so might need to unwrap it to check
+            if not isRetriableError(err.error || err, options)
               throw err
 
-            debug("caught request error in send #{err.code} #{err}")
+            if iteration >= MAX_REQUEST_ATTEMPTS
+              debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
+              throw err
 
-            originalErr ?= err
+            debug("retry %o", { iteration, delay })
 
-            if iteration >= 3
-              debug("retried 3x and still network error, not retrying")
-              throw originalErr
+            Promise.delay(delay)
+            .then =>
+              createAndRetry(iteration + 1, err)
 
-            Promise.delay(options.timeout)
-            .then ->
-              createAndRetry(iteration + 1, originalErr)
+        debug("sending request with options %o", options)
 
         createAndRetry()
         .then(@normalizeResponse.bind(@, push))

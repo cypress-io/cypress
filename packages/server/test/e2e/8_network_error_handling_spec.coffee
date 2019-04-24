@@ -16,7 +16,7 @@ getElapsed = ->
 
 onVisit = null
 count = 0
-e2eCount = 0
+e2eCount = {}
 
 launchBrowser = (url, opts = {}) ->
   launcher.detect().then (browsers) ->
@@ -63,10 +63,18 @@ controllers = {
     , 1000
 
   worksThirdTime: (req, res) ->
-    e2eCount++
-    if e2eCount == 3
+    e2eCount[req.params.id] ?= 0
+    e2eCount[req.params.id]++
+    if e2eCount[req.params.id] == 3
       return res.send('ok')
     req.socket.destroy()
+
+  worksThirdTimeElse500: (req, res) ->
+    e2eCount[req.params.id] ?= 0
+    e2eCount[req.params.id]++
+    if e2eCount[req.params.id] == 3
+      return res.send('ok')
+    res.sendStatus(500)
 
   proxyInternalServerError: (req, res) ->
     count++
@@ -110,7 +118,9 @@ describe "e2e network error handling", ->
 
           app.get "/during-body-reset", controllers.duringBodyReset
 
-          app.get "/works-third-time", controllers.worksThirdTime
+          app.get "/works-third-time/:id", controllers.worksThirdTime
+
+          app.get "/works-third-time-else-500/:id", controllers.worksThirdTimeElse500
 
           app.get "*", (req, res) ->
             ## pretending we're a http proxy
@@ -232,4 +242,9 @@ describe "e2e network error handling", ->
         video: false
         expectedExitCode: 1
       }).then () ->
-        expect(e2eCount).to.eq(3)
+        expect(e2eCount).to.deep.eq({
+          "for-request": 3
+          "for-visit": 3
+          "500-for-request": 3
+          "500-for-visit": 3
+        })
