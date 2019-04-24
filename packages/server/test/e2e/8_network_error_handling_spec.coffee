@@ -242,7 +242,7 @@ describe "e2e network error handling", ->
         video: false
         expectedExitCode: 2
       }).then () ->
-        expect(count).to.eq(12)
+        expect(count).to.eq(10)
         expect(e2eCount).to.deep.eq({
           "for-request": 3
           "for-visit": 3

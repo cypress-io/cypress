@@ -17,7 +17,7 @@ CookieJar = tough.CookieJar
 ## shallow clone the original
 serializableProperties = Cookie.serializableProperties.slice(0)
 
-MAX_REQUEST_ATTEMPTS = 5
+MAX_REQUEST_RETRIES = 4
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -29,7 +29,7 @@ getOriginalHeaders = (req = {}) ->
   req.req?.headers ? req.headers
 
 getDelayForRetry = (iteration) ->
-  _.get([0, 0, 1, 2, 2], iteration) * 1000
+  _.get([0, 1, 2, 2], iteration) * 1000
 
 hasRetriableStatusCodeFailure = (res, opts) ->
   opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
@@ -159,14 +159,14 @@ createRetryingRequestPromise = (opts, iteration = 0) ->
     if not isRetriableError(err.error || err, opts)
       throw err
 
-    if iteration >= MAX_REQUEST_ATTEMPTS
-      debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
+    if iteration >= MAX_REQUEST_RETRIES
+      debug("retried %dx and still network error, not retrying", MAX_REQUEST_RETRIES)
       throw err
 
     retry()
   .then (res) ->
     ## ok, no net error, but what about a bad status code?
-    if hasRetriableStatusCodeFailure(res, opts) && iteration < MAX_REQUEST_ATTEMPTS
+    if hasRetriableStatusCodeFailure(res, opts) && iteration < MAX_REQUEST_RETRIES
       debug("received failing status code on res, retrying", _.pick(res, "statusCode"))
 
       return retry()
@@ -203,8 +203,8 @@ createRetryingRequestStream = (opts) ->
       if not isRetriableError(err, opts)
         return retryingReqStream.emit("error", err)
 
-      if iteration >= MAX_REQUEST_ATTEMPTS
-        debug("retried %dx and still network error, not retrying", MAX_REQUEST_ATTEMPTS)
+      if iteration >= MAX_REQUEST_RETRIES
+        debug("retried %dx and still network error, not retrying", MAX_REQUEST_RETRIES)
         return retryingReqStream.emit("error", err)
 
       reqStream.on "error", (err) ->
@@ -215,7 +215,7 @@ createRetryingRequestStream = (opts) ->
 
     reqStream.once "response", (incomingRes) ->
       ## ok, no net error, but what about a bad status code?
-      if hasRetriableStatusCodeFailure(incomingRes, opts) && iteration < MAX_REQUEST_ATTEMPTS
+      if hasRetriableStatusCodeFailure(incomingRes, opts) && iteration < MAX_REQUEST_RETRIES
         debug("received failing status code on res, retrying", _.pick(incomingRes, "statusCode"))
 
         return retry()
