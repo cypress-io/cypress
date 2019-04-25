@@ -183,8 +183,14 @@ createRetryingRequestStream = (opts) ->
   tryStartStream = (iteration = 0) ->
     reqStream = r(opts)
 
+    # re-attach so proxy can control the response
+    retryingReqStream.abort = ->
+      reqStream.abort()
+
     retry = ->
       delay = getDelayForRetry(iteration)
+
+      reqStream.abort()
 
       retryingReqStream.emit("retry", { iteration, delay })
 
@@ -194,29 +200,37 @@ createRetryingRequestStream = (opts) ->
         tryStartStream(iteration + 1)
       , delay
 
-    # wait for an `error` or a `response` on the reqStream
-    reqStream.once "error", (err) ->
+    onUselessError = (err) ->
+      # this reqStream is now garbage, but sometimes it still receives errors, so this can't crash the process
+      debug("received another error on stream %o", err)
+
+    onError = (err) ->
       # on `error`, retry and emit `retry` on retryingReqStream
 
       debug("received an error creating stream %o", err)
 
+      reqStream.on "error", onUselessError
+
       if not isRetriableError(err, opts)
+        debug('this err aint retriable %o', err)
         return retryingReqStream.emit("error", err)
 
       if iteration >= MAX_REQUEST_RETRIES
         debug("retried %dx and still network error, not retrying", MAX_REQUEST_RETRIES)
         return retryingReqStream.emit("error", err)
 
-      reqStream.on "error", (err) ->
-        # this reqStream is now garbage, but sometimes it still receives errors, so this can't crash the process
-        debug("received another error on stream %o", err)
-
       retry()
 
+    reqStream.once "error", onError
+
     reqStream.once "response", (incomingRes) ->
+      reqStream.removeListener("error", onError)
+
       ## ok, no net error, but what about a bad status code?
       if hasRetriableStatusCodeFailure(incomingRes, opts) && iteration < MAX_REQUEST_RETRIES
         debug("received failing status code on res, retrying", _.pick(incomingRes, "statusCode"))
+
+        reqStream.on "error", onUselessError
 
         return retry()
 

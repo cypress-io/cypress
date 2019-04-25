@@ -148,34 +148,32 @@ describe "e2e network error handling", ->
     counts = {}
 
   context "Google Chrome", ->
-    it "retries 3+ times when receiving immediate reset", ->
-      launchBrowser("http://127.0.0.1:#{PORT}/immediate-reset")
+    testRetries = (path) ->
+      launchBrowser("http://127.0.0.1:#{PORT}#{path}")
       .then (proc) ->
         Promise.fromCallback (cb) ->
           onVisit = ->
-            if counts['/immediate-reset'] >= 3
+            if counts[path] >= 3
               cb()
         .then ->
           proc.kill(9)
-          expect(counts['/immediate-reset']).to.be.at.least(3)
+          expect(counts[path]).to.be.at.least(3)
 
-    it "retries 3+ times when receiving reset after headers", ->
-      launchBrowser("http://localhost:#{PORT}/after-headers-reset")
-      .then (proc) ->
-        Promise.fromCallback (cb) ->
-          onVisit = ->
-            if counts['/after-headers-reset'] >= 3
-              cb()
-        .then ->
-          proc.kill(9)
-          expect(counts['/after-headers-reset']).to.be.at.least(3)
-
-    it "does not retry if reset during body", ->
-      launchBrowser("http://localhost:#{PORT}/during-body-reset")
+    testNoRetries = (path) ->
+      launchBrowser("http://localhost:#{PORT}#{path}")
       .delay(6000)
       .then (proc) ->
         proc.kill(9)
-        expect(counts['/during-body-reset']).to.eq(1)
+        expect(counts[path]).to.eq(1)
+
+    it "retries 3+ times when receiving immediate reset", ->
+      testRetries('/immediate-reset')
+
+    it "retries 3+ times when receiving reset after headers", ->
+      testRetries('/after-headers-reset')
+
+    it "does not retry if reset during body", ->
+      testNoRetries('/during-body-reset')
 
     context "behind a proxy server", ->
       testProxiedRetries = (url) ->
@@ -214,7 +212,7 @@ describe "e2e network error handling", ->
       it "does not retry on '503 Service Unavailable'", ->
         testProxiedNoRetries("http://proxy-service-unavailable.invalid/")
 
-  context "Cypress", ->
+  context.only "Cypress", ->
     it "tests run as expected", ->
       e2e.exec(@, {
         spec: "network_error_handling_spec.js"
