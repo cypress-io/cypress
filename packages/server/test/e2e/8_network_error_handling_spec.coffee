@@ -15,8 +15,7 @@ getElapsed = ->
   Math.round((Number(new Date()) - start)/1000)
 
 onVisit = null
-count = 0
-e2eCount = {}
+counts = {}
 
 launchBrowser = (url, opts = {}) ->
   launcher.detect().then (browsers) ->
@@ -42,12 +41,16 @@ launchBrowser = (url, opts = {}) ->
     launcher.launch(browser, url, args)
 
 controllers = {
+  loadScriptNetError: (req, res) ->
+    res.send('<script type="text/javascript" src="/immediate-reset?load-js"></script>')
+
+  loadImgNetError: (req, res) ->
+    res.send('<img src="/immediate-reset?load-img"/>')
+
   immediateReset: (req, res) ->
-    count++
     req.socket.destroy()
 
   afterHeadersReset: (req, res) ->
-    count++
     res.writeHead(200)
     res.write('')
     setTimeout ->
@@ -55,7 +58,6 @@ controllers = {
     , 1000
 
   duringBodyReset: (req, res) ->
-    count++
     res.writeHead(200)
     res.write('<html>')
     setTimeout ->
@@ -63,31 +65,24 @@ controllers = {
     , 1000
 
   worksThirdTime: (req, res) ->
-    e2eCount[req.params.id] ?= 0
-    e2eCount[req.params.id]++
-    if e2eCount[req.params.id] == 3
+    if counts[req.url] == 3
       return res.send('ok')
     req.socket.destroy()
 
   worksThirdTimeElse500: (req, res) ->
-    e2eCount[req.params.id] ?= 0
-    e2eCount[req.params.id]++
-    if e2eCount[req.params.id] == 3
+    if counts[req.url] == 3
       return res.send('ok')
     res.sendStatus(500)
 
   proxyInternalServerError: (req, res) ->
-    count++
     res.sendStatus(500)
 
   proxyBadGateway: (req, res) ->
-    count++
     ## https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.3
     ## "The server, while acting as a gateway or proxy, received an invalid response"
     res.sendStatus(502)
 
   proxyServiceUnavailable: (req, res) ->
-    count++
     ## https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4
     ## "The implication is that this is a temporary condition which will be alleviated after some delay."
     res.sendStatus(503)
@@ -101,8 +96,10 @@ describe "e2e network error handling", ->
       {
         onServer: (app) ->
           app.use (req, res, next) ->
+            counts[req.url] = _.get(counts, req.url, 0) + 1
+
             debug('received request %o', {
-              count
+              counts
               elapsedTime: getElapsed()
               reqUrl: req.url
             })
@@ -113,14 +110,13 @@ describe "e2e network error handling", ->
             next()
 
           app.get "/immediate-reset", controllers.immediateReset
-
           app.get "/after-headers-reset", controllers.afterHeadersReset
-
           app.get "/during-body-reset", controllers.duringBodyReset
-
           app.get "/works-third-time/:id", controllers.worksThirdTime
-
           app.get "/works-third-time-else-500/:id", controllers.worksThirdTimeElse500
+
+          app.get "/load-img-net-error.html", controllers.loadImgNetError
+          app.get "/load-script-net-error.html", controllers.loadScriptNetError
 
           app.get "*", (req, res) ->
             ## pretending we're a http proxy
@@ -149,7 +145,7 @@ describe "e2e network error handling", ->
 
   afterEach ->
     onVisit = null
-    count = 0
+    counts = {}
 
   context "Google Chrome", ->
     it "retries 3+ times when receiving immediate reset", ->
@@ -157,95 +153,84 @@ describe "e2e network error handling", ->
       .then (proc) ->
         Promise.fromCallback (cb) ->
           onVisit = ->
-            if count >= 3
+            if counts['/immediate-reset'] >= 3
               cb()
         .then ->
           proc.kill(9)
-          expect(count).to.be.at.least(3)
+          expect(counts['/immediate-reset']).to.be.at.least(3)
 
     it "retries 3+ times when receiving reset after headers", ->
       launchBrowser("http://localhost:#{PORT}/after-headers-reset")
       .then (proc) ->
         Promise.fromCallback (cb) ->
           onVisit = ->
-            if count >= 3
+            if counts['/after-headers-reset'] >= 3
               cb()
         .then ->
           proc.kill(9)
-          expect(count).to.be.at.least(3)
+          expect(counts['/after-headers-reset']).to.be.at.least(3)
 
     it "does not retry if reset during body", ->
       launchBrowser("http://localhost:#{PORT}/during-body-reset")
       .delay(6000)
       .then (proc) ->
         proc.kill(9)
-        expect(count).to.eq(1)
+        expect(counts['/during-body-reset']).to.eq(1)
 
     context "behind a proxy server", ->
-      it "retries 3+ times when receiving immediate reset", ->
-        launchBrowser("http://immediate-reset.invalid/", { withProxy: true })
+      testProxiedRetries = (url) ->
+        launchBrowser(url, { withProxy: true })
         .then (proc) ->
           Promise.fromCallback (cb) ->
             onVisit = ->
-              if count >= 3
+              if counts[url] >= 3
                 cb()
           .then ->
             proc.kill(9)
-            expect(count).to.be.at.least(3)
+            expect(counts[url]).to.be.at.least(3)
 
-      it "retries 3+ times when receiving reset after headers", ->
-        launchBrowser("http://after-headers-reset.invalid/", { withProxy: true })
-        .then (proc) ->
-          Promise.fromCallback (cb) ->
-            onVisit = ->
-              if count >= 3
-                cb()
-          .then ->
-            proc.kill(9)
-            expect(count).to.be.at.least(3)
-
-      it "does not retry if reset during body", ->
+      testProxiedNoRetries = (url) ->
         launchBrowser("http://during-body-reset.invalid/", { withProxy: true })
         .delay(6000)
         .then (proc) ->
           proc.kill(9)
-          expect(count).to.eq(1)
+          expect(counts[url]).to.eq(1)
+
+      it "retries 3+ times when receiving immediate reset", ->
+        testProxiedRetries("http://immediate-reset.invalid/")
+
+      it "retries 3+ times when receiving reset after headers", ->
+        testProxiedRetries("http://after-headers-reset.invalid/",)
+
+      it "does not retry if reset during body", ->
+        testProxiedNoRetries("http://during-body-reset.invalid/")
 
       it "does not retry on '500 Internal Server Error'", ->
-        launchBrowser("http://proxy-internal-server-error.invalid/", { withProxy: true })
-        .delay(6000)
-        .then (proc) ->
-          proc.kill(9)
-          expect(count).to.eq(1)
+        testProxiedNoRetries("http://proxy-internal-server-error.invalid/")
 
       it "does not retry on '502 Bad Gateway'", ->
-        launchBrowser("http://proxy-bad-gateway.invalid/", { withProxy: true })
-        .delay(6000)
-        .then (proc) ->
-          proc.kill(9)
-          expect(count).to.eq(1)
+        testProxiedNoRetries("http://proxy-bad-gateway.invalid/")
 
       it "does not retry on '503 Service Unavailable'", ->
-        launchBrowser("http://proxy-service-unavailable.invalid/", { withProxy: true })
-        .delay(6000)
-        .then (proc) ->
-          proc.kill(9)
-          expect(count).to.eq(1)
+        testProxiedNoRetries("http://proxy-service-unavailable.invalid/")
 
   context "Cypress", ->
     it "tests run as expected", ->
       e2e.exec(@, {
         spec: "network_error_handling_spec.js"
-        snapshot: true
-        # exit: false
-        # browser: "chrome"
+        # snapshot: true
+        exit: false
+        browser: "chrome"
         video: false
-        expectedExitCode: 2
+        expectedExitCode: 1
       }).then () ->
-        expect(count).to.eq(10)
-        expect(e2eCount).to.deep.eq({
-          "for-request": 3
-          "for-visit": 3
-          "500-for-request": 3
-          "500-for-visit": 3
+        expect(counts).to.deep.eq({
+          "/immediate-reset?visit": 5
+          "/immediate-reset?request": 5
+          "/immediate-reset?load-img": 10
+          "/immediate-reset?load-js": 10
+          "/works-third-time-else-500/500-for-request": 3
+          "/works-third-time/for-request": 3
+          "/works-third-time-else-500/500-for-visit": 3
+          "/works-third-time/for-visit": 3
         })

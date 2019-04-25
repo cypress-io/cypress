@@ -1,8 +1,8 @@
 describe('network error handling', function () {
   context('cy.visit() retries', function () {
-    it('retries 5x', function () {
+    it('fails after retrying 5x', function () {
       cy.visit({
-        url: '/immediate-reset',
+        url: '/immediate-reset?visit',
       })
     })
 
@@ -21,9 +21,9 @@ describe('network error handling', function () {
   })
 
   context('cy.request() retries', function () {
-    it('retries 5x', function () {
+    it('fails after retrying 5x', function () {
       cy.request({
-        url: '/immediate-reset',
+        url: '/immediate-reset?request',
       })
     })
 
@@ -38,6 +38,16 @@ describe('network error handling', function () {
         url: '/works-third-time-else-500/500-for-request',
         retryOnStatusCodeFailure: true,
       })
+    })
+  })
+
+  context('subresource retries', function () {
+    it('on <img> tags', function () {
+      cy.visit('/load-img-net-error.html')
+    })
+
+    it('on <script> tags', function () {
+      cy.visit('load-script-net-error.html')
     })
   })
 })

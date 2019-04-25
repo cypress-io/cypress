@@ -337,8 +337,11 @@ module.exports = {
 
       onResponse(obj.stream, obj.response)
     else
-      # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
-      opts = {followRedirect: false, strictSSL: false}
+      opts = {
+        followRedirect: false
+        strictSSL: false
+        retryOnNetworkFailure: true
+      }
 
       if isEventStream
         opts.timeout = null
@@ -381,7 +384,7 @@ module.exports = {
       ## like SSE, but also on any regular ol'
       ## http request
       req.on "aborted", ->
-        rq.abort()
+        #rq.abort()
 
       ## proxy the request body, content-type, headers
       ## to the new rq
