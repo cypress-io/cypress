@@ -169,7 +169,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               if cy.needsFocus($elToFocus, $previouslyFocused)
                 cy.fireFocus($elToFocus.get(0))
 
-                ## if we are currently trying to focus is
+                ## if we are currently trying to focus
                 ## the window then blur the currently focused el
                 if $dom.isWindow($elToFocus)
                   $focused = cy.getFocused()
