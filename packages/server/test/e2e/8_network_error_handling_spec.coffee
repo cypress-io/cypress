@@ -147,7 +147,7 @@ describe "e2e network error handling", ->
     onVisit = null
     counts = {}
 
-  context "Google Chrome", ->
+  context.skip "Google Chrome", ->
     testRetries = (path) ->
       launchBrowser("http://127.0.0.1:#{PORT}#{path}")
       .then (proc) ->
@@ -212,15 +212,15 @@ describe "e2e network error handling", ->
       it "does not retry on '503 Service Unavailable'", ->
         testProxiedNoRetries("http://proxy-service-unavailable.invalid/")
 
-  context.only "Cypress", ->
+  context "Cypress", ->
     it "tests run as expected", ->
       e2e.exec(@, {
         spec: "network_error_handling_spec.js"
-        # snapshot: true
-        exit: false
-        browser: "chrome"
+        snapshot: true
+        # exit: false
+        # browser: "chrome"
         video: false
-        expectedExitCode: 1
+        expectedExitCode: 2
       }).then () ->
         expect(counts).to.deep.eq({
           "/immediate-reset?visit": 5
@@ -231,4 +231,6 @@ describe "e2e network error handling", ->
           "/works-third-time/for-request": 3
           "/works-third-time-else-500/500-for-visit": 3
           "/works-third-time/for-visit": 3
+          "/load-img-net-error.html": 1
+          "/load-script-net-error.html": 1
         })

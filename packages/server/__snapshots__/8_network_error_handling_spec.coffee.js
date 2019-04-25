@@ -19,22 +19,25 @@ exports['e2e network error handling Cypress tests run as expected 1'] = `
 
   network error handling
     cy.visit() retries
-      1) retries 5x
+      1) fails after retrying 5x
       ✓ works on the third try after two failed requests
       ✓ works on the third try after two 500 errors
     cy.request() retries
-      2) retries 5x
+      2) fails after retrying 5x
       ✓ works on the third try after two failed requests
       ✓ works on the third try after two 500 errors
+    subresource retries
+      ✓ on <img> tags
+      ✓ on <script> tags
 
 
-  4 passing
+  6 passing
   2 failing
 
-  1) network error handling cy.visit() retries retries 5x:
+  1) network error handling cy.visit() retries fails after retrying 5x:
      CypressError: cy.visit() failed trying to load:
 
-http://localhost:13370/immediate-reset
+http://localhost:13370/immediate-reset?visit
 
 We attempted to make an http request to this URL but the request failed without a response.
 
@@ -72,10 +75,10 @@ Error: socket hang up
       at stack trace line
       at stack trace line
 
-  2) network error handling cy.request() retries retries 5x:
+  2) network error handling cy.request() retries fails after retrying 5x:
      CypressError: cy.request() failed trying to load:
 
-http://localhost:13370/immediate-reset
+http://localhost:13370/immediate-reset?request
 
 We attempted to make an http request to this URL but the request failed without a response.
 
@@ -88,7 +91,7 @@ We received this error at the network level:
 The request we sent was:
 
 Method: GET
-URL: http://localhost:13370/immediate-reset
+URL: http://localhost:13370/immediate-reset?request
 
 -----------------------------------------------------------
 
@@ -134,8 +137,8 @@ RequestError: Error: socket hang up
   (Results)
 
   ┌──────────────────────────────────────────────┐
-  │ Tests:        6                              │
-  │ Passing:      4                              │
+  │ Tests:        8                              │
+  │ Passing:      6                              │
   │ Failing:      2                              │
   │ Pending:      0                              │
   │ Skipped:      0                              │
@@ -148,8 +151,8 @@ RequestError: Error: socket hang up
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/network_error_handling_spec.js/network error handling -- cy.visit() retries -- retries 5x (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/network_error_handling_spec.js/network error handling -- cy.request() retries -- retries 5x (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/network_error_handling_spec.js/network error handling -- cy.visit() retries -- fails after retrying 5x (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/network_error_handling_spec.js/network error handling -- cy.request() retries -- fails after retrying 5x (failed).png (1280x720)
 
 
   (Video)
@@ -165,9 +168,9 @@ RequestError: Error: socket hang up
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ network_error_handling_spec.js            XX:XX        6        4        2        -        - │
+  │ ✖ network_error_handling_spec.js            XX:XX        8        6        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        6        4        2        -        -  
+    1 of 1 failed (100%)                        XX:XX        8        6        2        -        -  
 
 
 `

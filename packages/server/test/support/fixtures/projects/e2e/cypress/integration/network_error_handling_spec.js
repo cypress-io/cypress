@@ -47,7 +47,7 @@ describe('network error handling', function () {
     })
 
     it('on <script> tags', function () {
-      cy.visit('load-script-net-error.html')
+      cy.visit('/load-script-net-error.html')
     })
   })
 })
