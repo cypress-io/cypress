@@ -19,6 +19,7 @@ debug = require("debug")("cypress:binary")
 R = require("ramda")
 la = require("lazy-ass")
 check = require("check-more-types")
+humanInterval = require("human-interval")
 
 meta = require("./meta")
 smoke = require("./smoke")
@@ -241,14 +242,43 @@ buildCypressApp = (platform, version, options = {}) ->
     else
       run()
 
-  codeSign = ->
+  codeSign = Promise.method ->
     if platform isnt "darwin"
       # do we need to code sign on Windows?
-      return Promise.resolve()
+      return
 
     appFolder = meta.zipDir(platform)
-    log("#codeSign #{appFolder}")
-    execa('build', ["--publish", "never", "--prepackaged", appFolder], {stdio: "inherit"})
+    fiveMinutes = humanInterval("5 minutes")
+
+    execaBuild = Promise.method ->
+      log("#codeSign #{appFolder}")
+
+      execa('build', ["--publish", "never", "--prepackaged", appFolder], {
+        stdio: "inherit"
+      })
+      .catch (err) ->
+        ## ignore canceled errors
+        if err.isCanceled
+          return
+
+        throw err
+
+    ## try to build and if we timeout in 5 minutes
+    ## then try again - which sometimes happens in
+    ## circle CI
+    b = execaBuild()
+
+    b
+    .timeout(fiveMinutes)
+    .catch Promise.TimeoutError, (err) ->
+      console.log(
+        chalk.red("timed out signing binary after #{fiveMinutes}ms. retrying...")
+      )
+
+      b.cancel()
+
+      execaBuild()
+
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()

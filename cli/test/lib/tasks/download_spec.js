@@ -5,7 +5,7 @@ const la = require('lazy-ass')
 const is = require('check-more-types')
 const path = require('path')
 const nock = require('nock')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)

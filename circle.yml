@@ -276,7 +276,10 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
-      - run: DEBUG=test:proxy-performance npm run all test-performance -- --package server
+      - run: 
+          environment:
+            DEBUG: test:proxy-performance 
+          command: npm run all test-performance -- --package server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
