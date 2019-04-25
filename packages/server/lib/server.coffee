@@ -34,6 +34,26 @@ fileServer   = require("./file_server")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
+RETRY_INTERVALS = [1, 2, 2]
+
+retryBaseUrlCheck = (baseUrl, onWarning, iteration = 0) ->
+  ensureUrl.isListening(baseUrl)
+  .catch (e) =>
+    if iteration == RETRY_INTERVALS.length
+      throw e
+
+    delay = RETRY_INTERVALS[iteration]
+
+    onWarning(errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
+      tries: RETRY_INTERVALS.length - iteration
+      delay
+      baseUrl
+    }))
+
+    Promise.delay(delay * 1000)
+    .then ->
+      retryBaseUrlCheck(baseUrl, onWarning, iteration + 1)
+
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
   return if req.proxiedUrl
@@ -141,13 +161,13 @@ class Server
 
       @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
-      @createServer(app, config, @_request)
+      @createServer(app, config, project, @_request)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
 
-  createServer: (app, config, request) ->
+  createServer: (app, config, project, request) ->
     new Promise (resolve, reject) =>
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
@@ -233,13 +253,15 @@ class Server
           if baseUrl
             @_baseUrl = baseUrl
 
+            if config.isTextTerminal
+              return retryBaseUrlCheck(baseUrl, project.onWarning)
+              .catch () =>
+                reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
+
             ensureUrl.isListening(baseUrl)
             .return(null)
             .catch (err) =>
-              if config.isTextTerminal
-                reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
-              else
-                errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+              errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
 
         .then (warning) =>
           ## once we open set the domain

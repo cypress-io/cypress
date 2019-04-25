@@ -639,6 +639,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
       """
+    when "CANNOT_CONNECT_BASE_URL_RETRYING"
+      """
+      Cypress could not verify that the server set as your `baseUrl` is running: #{arg1.baseUrl}
+
+      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
+
+      We will retry #{arg1.tries} more #{pluralize('time', arg1.tries)} in #{arg1.delay} #{pluralize('second', arg1.delay)}...
+      """
     when "INVALID_REPORTER_NAME"
       """
       Could not load reporter by name: #{chalk.yellow(arg1.name)}

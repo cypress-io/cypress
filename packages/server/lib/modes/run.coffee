@@ -351,6 +351,9 @@ openProjectCreate = (projectRoot, socketId, options) ->
     morgan:       false
     report:       true
     isTextTerminal: options.isTextTerminal
+    onWarning: (err) ->
+      console.log("")
+      console.log(err.message)
     onError: (err) ->
       console.log("")
       if err.details

@@ -213,14 +213,13 @@ describe "e2e network error handling", ->
         testProxiedNoRetries("http://proxy-service-unavailable.invalid/")
 
   context "Cypress", ->
-    it.only "baseurl check tries 5 times in run mode", ->
+    it "baseurl check tries 5 times in run mode", ->
       e2e.exec(@, {
         config: {
           baseUrl: "http://never-gonna-exist.invalid"
         }
         snapshot: true
         expectedExitCode: 1
-        inspectBrk: true
       })
 
     it "tests run as expected", ->
