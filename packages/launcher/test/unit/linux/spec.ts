@@ -23,37 +23,25 @@ const goalBrowsers = [
 
 describe('linux browser detection', () => {
   beforeEach(function stubShell () {
-    const shell = sinon.stub(execa, 'shell')
-    shell.withArgs('"test-browser" --version')
-      .resolves({
-        stdout: 'test-browser v100.1.2.3'
-      })
-    shell.withArgs('"foo-browser" --version')
-      .resolves({
-        stdout: 'foo-browser v100.1.2.3'
-      })
-    shell.withArgs('"/Applications/My Shiny New Browser.app" --version')
-      .resolves({
-        stdout: 'foo-browser v100.1.2.3'
-      })
-    shell.withArgs('"foo-bar-browser" --version')
-      .resolves({
-        stdout: 'foo-browser v100.1.2.3'
-      })
-    shell.withArgs('"/foo/bar/browser" --version')
-      .resolves({
-        stdout: 'foo-browser v9001.1.2.3'
-      })
-    shell.withArgs('"/not/a/browser" --version')
-      .resolves({
-        stdout: 'not a browser version string'
-      })
-    shell.withArgs('"/not/a/real/path" --version')
+    const stdout = sinon.stub(execa, 'stdout')
+    stdout.withArgs('test-browser', ['--version'])
+      .resolves('test-browser v100.1.2.3')
+    stdout.withArgs('foo-browser', ['--version'])
+      .resolves('foo-browser v100.1.2.3')
+    stdout.withArgs('foo-bar-browser', ['--version'])
+      .resolves('foo-browser v100.1.2.3')
+    stdout.withArgs('/Applications/My Shiny New Browser.app', ['--version'])
+      .resolves('foo-browser v100.1.2.3')
+    stdout.withArgs('/foo/bar/browser', ['--version'])
+      .resolves('foo-browser v9001.1.2.3')
+    stdout.withArgs('/not/a/browser', ['--version'])
+      .resolves('not a browser version string')
+    stdout.withArgs('/not/a/real/path', ['--version'])
       .rejects()
   })
 
   afterEach(() => {
-    execa.shell.restore()
+    execa.stdout.restore()
   })
 
   it('detects browser by running --version', () => {
@@ -139,22 +127,6 @@ describe('linux browser detection', () => {
       })
     })
 
-    it('works with spaces in the path', () => {
-      return detectByPath('/Applications/My Shiny New Browser.app', goalBrowsers)
-      .then(browser => {
-        return expect(browser).to.deep.equal(
-          Object.assign({}, goalBrowsers.find(gb => gb.name === 'foo-browser'), {
-            displayName: 'Custom Foo Browser',
-            info: 'Loaded from /Applications/My Shiny New Browser.app',
-            custom: true,
-            version: '100.1.2.3',
-            majorVersion: '100',
-            path: '/Applications/My Shiny New Browser.app'
-          })
-        )
-      })
-    })
-
     it('rejects when there was no matching versionRegex', () => {
       return detectByPath('/not/a/browser', goalBrowsers)
       .then(browser => {
@@ -173,6 +145,22 @@ describe('linux browser detection', () => {
       })
       .catch(err => {
         expect(err.notDetectedAtPath).to.be.true
+      })
+    })
+
+    it('works with spaces in the path', () => {
+      return detectByPath('/Applications/My Shiny New Browser.app', goalBrowsers)
+      .then(browser => {
+        return expect(browser).to.deep.equal(
+          Object.assign({}, goalBrowsers.find(gb => gb.name === 'foo-browser'), {
+            displayName: 'Custom Foo Browser',
+            info: 'Loaded from /Applications/My Shiny New Browser.app',
+            custom: true,
+            version: '100.1.2.3',
+            majorVersion: '100',
+            path: '/Applications/My Shiny New Browser.app'
+          })
+        )
       })
     })
   })
