@@ -665,7 +665,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedPrivateTestsMessage}
 
       To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
@@ -673,7 +673,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedPrivateTestsMessage}
 
       Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
@@ -681,7 +681,31 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedPrivateTestsMessage}
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
 
       To upgrade your account, please visit your billing to upgrade to another billing plan.
 
