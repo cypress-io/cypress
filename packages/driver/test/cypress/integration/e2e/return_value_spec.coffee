@@ -30,7 +30,7 @@ describe "return values", ->
 
   it "stringifies function bodies", (done) ->
     cy.on "fail", (err) ->
-      expect(err.message).to.include("> function () {")
+      expect(err.message).to.include("> function")
       expect(err.message).to.include("return \"foo\";")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
       expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-test")
