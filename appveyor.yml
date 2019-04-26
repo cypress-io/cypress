@@ -6,8 +6,8 @@ branches:
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
-  # use latest version of Node 8 with NPM 6
-  nodejs_version: "8.2.1"
+  # use matching version of Node.js
+  nodejs_version: "8.9.3"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables

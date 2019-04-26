@@ -1482,7 +1482,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("[contenteditable]:first")
           .type("{home}11{uparrow}{home}22{uparrow}{home}33").then ($div) ->
-            expect($div.get(0).innerText).to.eql("33foo\n22bar\n11baz\n")
+            expect(trimInnerText($div)).to.eql("33foo\n22bar\n11baz")
 
       context "{end}", ->
         it "sets which and keyCode to 35 and does not fire keypress events", (done) ->
@@ -1532,7 +1532,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("[contenteditable]:first")
           .type("{end}11{uparrow}{end}22{uparrow}{end}33").then ($div) ->
-            expect($div.get(0).innerText).to.eql("foo33\nbar22\nbaz11\n")
+            expect(trimInnerText($div)).to.eql("foo33\nbar22\nbaz11")
 
       context "{uparrow}", ->
         beforeEach ->
