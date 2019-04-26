@@ -2,17 +2,19 @@ _         = require("lodash")
 la        = require("lazy-ass")
 debug     = require("debug")("cypress:server:openproject")
 Promise   = require("bluebird")
+path      = require("path")
 files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
+Watchers  = require("./watchers")
 specsUtil = require("./util/specs")
 preprocessor = require("./plugins/preprocessor")
 
 create = ->
   openProject     = null
-  specIntervalId  = null
   relaunchBrowser = null
+  watchers        = null
 
   reset = ->
     openProject     = null
@@ -128,7 +130,7 @@ create = ->
 
       checkForSpecUpdates = =>
         if not openProject
-          return @clearSpecInterval()
+          return @stopSpecWatcher()
 
         get()
         .then(sendIfChanged)
@@ -137,6 +139,12 @@ create = ->
       get = ->
         openProject.getConfig()
         .then (cfg) ->
+          if !watchers
+            watchers = Watchers()
+            watchers.watch(path.join(cfg.integrationFolder, cfg.testFiles), {
+              onChange: =>
+                checkForSpecUpdates()
+            })
           specsUtil.find(cfg)
         .then (specs = []) ->
           ## TODO: put back 'integration' property
@@ -145,15 +153,12 @@ create = ->
             integration: specs
           }
 
-      specIntervalId = setInterval(checkForSpecUpdates, 2500)
 
       ## immediately check the first time around
       checkForSpecUpdates()
 
-    clearSpecInterval: ->
-      if specIntervalId
-        clearInterval(specIntervalId)
-        specIntervalId = null
+    stopSpecWatcher: ->
+      watchers?.close()
 
     closeBrowser: ->
       browsers.close()
@@ -171,7 +176,7 @@ create = ->
     close:  ->
       debug("closing opened project")
 
-      @clearSpecInterval()
+      @stopSpecWatcher()
       @closeOpenProjectAndBrowsers()
 
     create: (path, args = {}, options = {}) ->
