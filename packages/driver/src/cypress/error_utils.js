@@ -1,10 +1,12 @@
 const _ = require('lodash')
 const { codeFrameColumns } = require('@babel/code-frame')
+const StackUtils = require('stack-utils')
 
 const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
+const $sourceMapUtils = require('./source_map_utils')
 
-const ERROR_PROPS = 'message renderMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl'.split(' ')
+const ERROR_PROPS = 'message renderMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrames'.split(' ')
 
 const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
@@ -221,21 +223,23 @@ const getErrStack = (err) => {
   return err.stack
 }
 
-//# TODO: This isn't in use for the reporter,
-//# but we may want this for stdout in run mode
-const getCodeFrame = (source, path, lineNumber, columnNumber) => {
-  const location = { start: { line: lineNumber, column: columnNumber } }
+const getCodeFrame = (source, stackLineDetails) => {
+  const location = { start: { line: stackLineDetails.line, column: stackLineDetails.column } }
   const options = {
-    highlightCode: true,
-    forceColor: true,
+    // TODO: pass in message?
   }
 
-  return {
+  return _.extend(stackLineDetails, {
     frame: codeFrameColumns(source, location, options),
-    path,
-    lineNumber,
-    columnNumber,
-  }
+  })
+}
+
+const getCodeFrameFromStack = (stack, lineIndex = 0) => {
+  const artifactStackLineDetails = getStackLineDetails(stack, lineIndex)
+  const file = artifactStackLineDetails.file.replace(':', '://')
+  const stackLineDetails = $sourceMapUtils.getMappedPosition(file, artifactStackLineDetails)
+
+  return getCodeFrame($sourceMapUtils.getSourceContents(file), stackLineDetails)
 }
 
 const escapeErrMarkdown = (text) => {
@@ -273,6 +277,13 @@ const getObjValueByPath = (obj, keyPath) => {
   return val
 }
 
+const getStackLineDetails = (stackString, lineIndex = 0, cwd) => {
+  const stack = new StackUtils({ cwd })
+  const line = stack.clean(stackString).split('\n')[lineIndex]
+
+  return stack.parseLine(line)
+}
+
 module.exports = {
   wrapErr,
   modifyErrMsg,
@@ -290,6 +301,8 @@ module.exports = {
   errMsgByPath,
   getErrStack,
   getCodeFrame,
+  getCodeFrameFromStack,
   escapeErrMarkdown,
   getObjValueByPath,
+  getStackLineDetails,
 }

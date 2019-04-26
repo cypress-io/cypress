@@ -22,7 +22,6 @@ class TestError extends Component {
     if (!err.displayMessage) return null
 
     return (
-
       <div className='runnable-err-wrapper'>
         <div className='runnable-err'>
           <div className='runnable-err-header'>
@@ -51,7 +50,7 @@ class TestError extends Component {
             null
           }
           {_.map(err.codeFrames, (codeFrame) => (
-            <ErrorCodeFrame {...codeFrame} />
+            <ErrorCodeFrame codeFrame={codeFrame} />
           ))}
         </div>
       </div>
@@ -60,4 +59,3 @@ class TestError extends Component {
 }
 
 export default TestError
-

@@ -44,6 +44,7 @@ module.exports = function setZunderConfig (zunder) {
     staticGlobs: {
       'static/**': '',
       'node_modules/font-awesome/fonts/**': '/fonts',
+      '../driver/node_modules/source-map/lib/mappings.wasm': '/driver',
     },
     stylesheets: {
       'src/main.scss': {

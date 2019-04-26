@@ -27,6 +27,7 @@ $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 $errUtils = require("./cypress/error_utils")
+$sourceMapUtils = require("./cypress/source_map_utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
@@ -71,7 +72,6 @@ class $Cypress
     @mocha    = null
     @runner   = null
     @Commands = null
-    @sourceMaps = {}
     @_RESUMED_AT_TEST = null
 
     @events = $Events.extend(@)
@@ -151,8 +151,8 @@ class $Cypress
 
     @cy.initialize($autIframe)
 
-  onSourceMap: (filePath, sourceMapBase64) ->
-    @sourceMaps[filePath] = sourceMapBase64
+  onSourceMap: (file, sourceMapBase64) ->
+    $sourceMapUtils.initialize(file, sourceMapBase64)
 
   run: (fn) ->
     $errUtils.throwErrByPath("miscellaneous.no_runner") if not @runner
@@ -261,6 +261,8 @@ class $Cypress
           @emit("mocha", "pending", args...)
 
       when "runner:fail"
+        @emit("cy:runner:fail", args...)
+
         ## mocha runner calculated a failure
         if @config("isTextTerminal")
           @emit("mocha", "fail", args...)

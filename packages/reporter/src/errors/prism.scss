@@ -5,7 +5,7 @@
 code[class*="language-"],
 pre[class*="language-"] {
 	color: #70787a;
-	margin: 0; 
+	margin: 0;
 }
 
 :not(pre) > code[class*="language-"],
@@ -72,4 +72,12 @@ pre[class*="language-"] {
 
 .line-highlight {
 	background: linear-gradient(to right, hsla(24, 20%, 50%,.1) 100%, hsla(24, 20%, 50%,0));
+
+	&:before {
+		display: none;
+	}
+}
+
+.test-error-code-frame pre[data-line] {
+	padding-left: 1em;
 }

@@ -23,7 +23,13 @@ module.exports = {
       debug("sending spec %o", { filePath })
       fs.readFileAsync(filePath, "utf8")
     .then (contents) ->
-      res.send(sourceMapUtil.embedSourceMap(req.url, contents))
+      file = {
+        # relative: req.url.replace("/__cypress/tests?p=", "")
+        relative: spec
+        nonFullyQualified: req.url
+        fullyQualified: req.proxiedUrl
+      }
+      res.send(sourceMapUtil.embedSourceMap(file, contents))
     .catch { code: "ECONNABORTED" }, (err) ->
       ## https://github.com/cypress-io/cypress/issues/1877
       ## now that we are properly catching errors from

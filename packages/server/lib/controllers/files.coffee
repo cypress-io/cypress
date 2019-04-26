@@ -62,7 +62,6 @@ module.exports = {
     @getTestUrl(filePath)
 
   getTestUrl: (file) ->
-    file += CacheBuster.get()
     "/__cypress/tests?p=#{file}"
 
   getTitle: (test) ->

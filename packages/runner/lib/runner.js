@@ -2,6 +2,7 @@ const path = require('path')
 
 function dist (...args) {
   const paths = [__dirname, '..', 'dist'].concat(args)
+
   return path.join(...paths)
 }
 
@@ -12,5 +13,9 @@ module.exports = {
 
   getPathToIndex () {
     return dist('index.html')
+  },
+
+  getPathToSourceMappings () {
+    return dist('driver/mappings.wasm')
   },
 }

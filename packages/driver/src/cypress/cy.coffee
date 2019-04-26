@@ -6,6 +6,7 @@ $dom = require("../dom")
 $selection = require("../dom/selection")
 $utils = require("./utils")
 $errUtils = require("./error_utils")
+$sourceMapUtils = require("./source_map_utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
 $jQuery = require("../cy/jquery")
@@ -64,7 +65,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     title = state("runnable").fullTitle()
 
     msg = $errUtils.errMsgByPath("miscellaneous.mixing_promises_and_commands", {
-      title: title 
+      title: title
     })
 
     $utils.warning(msg)
@@ -538,6 +539,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   fail = (err, runnable) ->
     stopped = true
 
+    # sourceMap = Cypress.sourceMaps["/__cypress/tests?p=cypress/integration/scratch.js"]
+    # if sourceMap
+    #   if not sourceMap.parsed
+    #     sourceMap.parsed = $sourceMapUtils.base64toJson(sourceMap.base64)
+
+    stack = state("current")?.get("invocationStack")
+    err.codeFrames = [$errUtils.getCodeFrameFromStack(stack)]
+
     ## store the error on state now
     state("error", err)
 
@@ -775,13 +784,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           fn.apply(runnableCtx(name), args)
 
       cy[name] = (args...) ->
-        invocationStack = (new Error("command invocation stack")).stack
+        # invocationStack = (new state("window").Error("command invocation stack")).stack
+        invocationStack = "Error: foo\nat Context.<anonymous> (#{window.location.origin}/__cypress/tests?p=cypress/integration/scratch.js:7:6)"
 
         ensures.ensureRunnable(name)
 
         ## this is the first call on cypress
         ## so create a new chainer instance
-        chain = $Chainer.create(name, invocationStack, args)
+        chain = $Chainer.create(name, invocationStack, state("window"), args)
 
         ## store the chain so we can access it later
         state("chain", chain)
