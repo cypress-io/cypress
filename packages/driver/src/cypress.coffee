@@ -71,6 +71,7 @@ class $Cypress
     @mocha    = null
     @runner   = null
     @Commands = null
+    @sourceMaps = {}
     @_RESUMED_AT_TEST = null
 
     @events = $Events.extend(@)
@@ -149,6 +150,9 @@ class $Cypress
     @mocha.options(@runner)
 
     @cy.initialize($autIframe)
+
+  onSourceMap: (filePath, sourceMapBase64) ->
+    @sourceMaps[filePath] = sourceMapBase64
 
   run: (fn) ->
     $errUtils.throwErrByPath("miscellaneous.no_runner") if not @runner

@@ -7,6 +7,37 @@ const regexCommentStyle1 = new RegExp("/\\*"+baseSourceMapRegex+"\\s*\\*/") // m
 const regexCommentStyle2 = new RegExp("//"+baseSourceMapRegex+"($|\n|\r\n?)") // matches // .... comments
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
 
+const insertStringAtIndex = (string, stringToInsert, index) => {
+  return `${string.slice(0, index)}${stringToInsert}${string.slice(index)}`
+}
+
+export const embedSourceMap = (filePath: string, fileContents: string) => {
+  const sourceMapMatch = fileContents.match(regexCommentStyle1) || fileContents.match(regexCommentStyle2)
+
+  if (!sourceMapMatch) {
+    return fileContents
+  }
+
+  const url = sourceMapMatch[1]
+  const index = sourceMapMatch.index
+  const dataUrlMatch = url.match(regexDataUrl)
+
+  if (!dataUrlMatch) {
+    return fileContents
+  }
+
+  const sourceMapBase64 = dataUrlMatch[1]
+  const embed = `window.Cypress.onSourceMap('${filePath}', '${sourceMapBase64}');\n`
+
+  return insertStringAtIndex(fileContents, embed, index)
+}
+
+export const getSourceContents = (rawSourceMap: RawSourceMap, filePath: string) => {
+  return SourceMapConsumer.with(rawSourceMap, null, (consumer) => {
+    return consumer.sourceContentFor(filePath)
+  })
+}
+
 export const getStackDetails = (stackString: string, lineIndex: number = 0, cwd?: string) => {
   const stack = new StackUtils({ cwd, internals: StackUtils.nodeInternals() });
   const line = stack.clean(stackString).split('\n')[lineIndex]

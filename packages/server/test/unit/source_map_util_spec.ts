@@ -2,13 +2,32 @@ require('../spec_helper')
 
 import fs from 'fs'
 import { resolve } from 'path'
-import { getStackDetails, extractSourceMap, getSourcePosition, getContentsOfLines } from '../../lib/util/source_map_util'
+import { getStackDetails, extractSourceMap, getSourcePosition, getContentsOfLines, getSourceContents, embedSourceMap } from '../../lib/util/source_map_util'
 
 describe('source map utils', () => {
   let artifactFilePath = resolve(__dirname, '../support/fixtures/example_artifact.js')
   let artifactContents = fs.readFileSync(artifactFilePath, 'utf8')
   let sourceFilePath = resolve(__dirname, '../support/fixtures/example_source.js')
   let sourceContents = fs.readFileSync(sourceFilePath, 'utf8')
+
+  context('.embedSourceMap', () => {
+    it('embeds Cypress.onSourceMap invocation with base64 source map', () => {
+      const contents = embedSourceMap('cypress/integration/spec.js', artifactContents)
+      expect(contents).to.include('window.Cypress.onSourceMap(\'cypress/integration/spec.js\', \'eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5vZGVfbW')
+      expect(contents).to.include('ufSlcbiJdfQ==\');\n//# sourceMappingURL=')
+    })
+
+    it('returns original contents if no source map', () => {
+      const contents = embedSourceMap('cypress/integration/spec.js', sourceContents)
+      expect(contents).to.equal(sourceContents)
+    })
+
+    it('returns original contents if not an inline source map', () => {
+      const externalSourceMapContents = artifactContents.replace(/data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/, 'foo.js.map')
+      const contents = embedSourceMap('cypress/integration/spec.js', externalSourceMapContents)
+      expect(contents).to.equal(externalSourceMapContents)
+    })
+  })
 
   context('.getStackDetails', () => {
     it('pulls detailed information from stack line', () => {
@@ -49,6 +68,22 @@ describe('source map utils', () => {
       expect(() => {
         extractSourceMap(contents)
       }).to.throw('Cannot parse inline source map: SyntaxError: Unexpected token')
+    })
+  })
+
+  context('.getSourceContents', () => {
+    it('provides source contents for given file', () => {
+      const sourceMap = extractSourceMap(artifactContents)
+      console.log(sourceMap)
+
+      return getSourceContents(sourceMap, 'cypress/integration/source_map_spec.js').then((contents) => {
+        expect(contents).to.equal(`it('is pretty simple', () => {
+  expect(true).to.be.true
+  expect(true).to.be.false
+  expect(false).to.be.false
+})
+`)
+      })
     })
   })
 

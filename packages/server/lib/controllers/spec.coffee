@@ -1,7 +1,9 @@
 debug = require("debug")("cypress:server:controllers:spec")
 Promise = require("bluebird")
+fs = require("../util/fs")
 errors = require("../errors")
 preprocessor = require("../plugins/preprocessor")
+sourceMapUtil = require("../util/source_map_util")
 
 module.exports = {
   handle: (spec, req, res, config, next, project) ->
@@ -19,8 +21,9 @@ module.exports = {
     .getFile(spec, config)
     .then (filePath) ->
       debug("sending spec %o", { filePath })
-      sendFile = Promise.promisify(res.sendFile.bind(res))
-      sendFile(filePath)
+      fs.readFileAsync(filePath, "utf8")
+    .then (contents) ->
+      res.send(sourceMapUtil.embedSourceMap(req.url, contents))
     .catch { code: "ECONNABORTED" }, (err) ->
       ## https://github.com/cypress-io/cypress/issues/1877
       ## now that we are properly catching errors from
