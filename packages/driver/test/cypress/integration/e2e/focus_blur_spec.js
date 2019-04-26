@@ -44,6 +44,85 @@ const chaiSubset = require('chai-subset')
 
 chai.use(chaiSubset)
 
+const requireWindowInFocus = () => {
+  let hasFocus = false
+
+  window.addEventListener('focus', function () {
+    hasFocus = true
+  })
+  window.focus()
+  expect(hasFocus, 'this test requires the window to be in focus').ok
+
+}
+
+it('can intercept blur/focus events', () => {
+  // Browser must be in focus
+
+  const focus = cy.spy(window.top.HTMLElement.prototype, 'focus')
+  const blur = cy.spy(window.top.HTMLElement.prototype, 'blur')
+
+  const handleFocus = cy.stub().as('handleFocus')
+  const handleBlur = cy.stub().as('handleBlur')
+
+  const resetStubs = () => {
+    focus.reset()
+    blur.reset()
+    handleFocus.reset()
+    handleBlur.reset()
+  }
+
+  cy
+  .visit('http://localhost:3500/fixtures/active-elements.html')
+  .then(() => {
+
+    requireWindowInFocus()
+
+    expect(cy.getFocused()).to.be.null
+
+    // programmatically focus the first, then second input element
+
+    const one = cy.$$('#one')[0]
+    const two = cy.$$('#two')[0]
+
+    one.addEventListener('focus', handleFocus)
+    two.addEventListener('focus', handleFocus)
+    one.addEventListener('blur', handleBlur)
+    two.addEventListener('blur', handleBlur)
+
+    one.focus()
+
+    expect(focus).to.calledOnce
+    expect(handleFocus).calledOnce
+    expect(blur).not.called
+    expect(handleBlur).not.called
+
+    resetStubs()
+
+    one.focus()
+
+    expect(focus).to.calledOnce
+    expect(handleFocus).not.called
+    expect(blur).not.called
+    expect(handleBlur).not.called
+
+    resetStubs()
+
+    one.blur()
+
+    expect(blur).calledOnce
+    expect(handleBlur).calledOnce
+
+    resetStubs()
+
+    one.blur()
+
+    expect(blur).calledOnce
+    expect(handleBlur).not.called
+
+  })
+
+})
+
 it('blur the activeElement when clicking the body', () => {
   cy
   .visit('http://localhost:3500/fixtures/active-elements.html')
@@ -73,9 +152,9 @@ it('blur the activeElement when clicking the body', () => {
     $two.get(0).focus()
 
     cy.then(() => {
-    // if we currently have focus it means
-    // that the browser should fire the
-    // native event immediately
+      // if we currently have focus it means
+      // that the browser should fire the
+      // native event immediately
       expect(events).to.have.length(3)
 
       expect(_.toPlainObject(events[0])).to.include({
@@ -104,8 +183,8 @@ it('blur the activeElement when clicking the body', () => {
     })
 
     cy.then(() => {
-    // if we had focus then no additional
-    // focus event is necessary
+      // if we had focus then no additional
+      // focus event is necessary
       expect(events).to.have.length(4)
 
       expect(_.toPlainObject(events[3])).to.include({
@@ -115,8 +194,7 @@ it('blur the activeElement when clicking the body', () => {
       })
     })
   })
-}
-)
+})
 
 describe('polyfill programmatic blur events', () => {
   // restore these props for the rest of the tests
@@ -142,8 +220,8 @@ describe('polyfill programmatic blur events', () => {
     window.top.document.hasFocus = () => {
       return false
     }
-    window.top.HTMLElement.prototype.focus = function () {}
-    window.top.HTMLElement.prototype.blur = function () {}
+    window.top.HTMLElement.prototype.focus = function () { }
+    window.top.HTMLElement.prototype.blur = function () { }
   })
 
   afterEach(() => {
@@ -222,7 +300,7 @@ describe('polyfill programmatic blur events', () => {
     cy
     .visit('http://localhost:3500/fixtures/active-elements.html')
     .then(() => {
-    // programmatically focus the first, then second input element
+      // programmatically focus the first, then second input element
       const $one = cy.$$('#one')
       const $two = cy.$$('#two')
 
