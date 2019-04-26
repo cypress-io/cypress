@@ -10,6 +10,7 @@ const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
 const coerce = require('./coerce')
 const config = require('../config')
+const proxy = require('./proxy')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
