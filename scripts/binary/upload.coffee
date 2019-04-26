@@ -60,7 +60,7 @@ module.exports = {
         win32: getUrl("win32-ia32")
         linux: getUrl("linux-x64")
 
-        ## the new-new names that use arch and platform
+        ## the new-new names that use platform and arch as is
         "darwin-x64": getUrl("darwin-x64")
         "linux-x64": getUrl("linux-x64")
         "win32-ia32": getUrl("win32-ia32")

@@ -19,12 +19,11 @@ uploadFileName = "cypress.tgz"
 
 isNpmPackageFile = check.extension(npmPackageExtension)
 
-# wonder if our CDN url would just work
-# https://cdn.cypress.io/desktop/0.20.1/darwin-x64/cypress.zip
+# the package tgz file will be uploaded into unique folder
 # in our case something like this
-# https://cdn.cypress.io/beta/npm/0.20.2/<some unique version info>/cypress.tgz
-npmFolder = "npm"
+# https://cdn.cypress.io/beta/npm/<version>/<some unique hash>/cypress.tgz
 rootFolder = "beta"
+npmFolder = "npm"
 
 getCDN = ({version, hash, filename}) ->
   [konfig("cdn_url"), rootFolder, npmFolder, version, hash, filename].join("/")
