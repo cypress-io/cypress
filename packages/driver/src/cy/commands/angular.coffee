@@ -2,7 +2,6 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$utils = require("../../cypress/utils")
 $errUtils = require("../../cypress/error_utils")
 
 ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
@@ -67,7 +66,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cancelAll()
       return subject
     .catch Promise.AggregateError, (err) ->
-      $utils.throwErr error
+      $errUtils.throwErr error
 
   Commands.addAll({
     ng: (type, selector, options = {}) ->
