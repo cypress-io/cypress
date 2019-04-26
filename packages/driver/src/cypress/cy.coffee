@@ -573,7 +573,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       finish(err2)
 
     ## bail if we had callbacks attached
-    return if rets.length
+    return if rets?.length
 
     ## else figure out how to finisht this failure
     return finish(err)
