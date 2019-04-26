@@ -146,7 +146,6 @@ create = (state) ->
     ## is always in focus
 
     $focused = getFocused()
-
     if $elements.isFocusable($dom.wrap(el)) && (!$focused || $focused[0] isnt el)
       fireFocus(el)
       return

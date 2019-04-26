@@ -44,14 +44,25 @@ const chaiSubset = require('chai-subset')
 
 chai.use(chaiSubset)
 
-const requireWindowInFocus = () => {
+const windowHasFocus = function () {
+  if (document.hasFocus()) return true
+
   let hasFocus = false
 
   window.addEventListener('focus', function () {
     hasFocus = true
   })
   window.focus()
-  expect(hasFocus, 'this test requires the window to be in focus').ok
+
+  return hasFocus
+}
+
+const requireWindowInFocus = () => {
+  let hasFocus = windowHasFocus()
+
+  if (!hasFocus) {
+    expect(hasFocus, 'this test requires the window to be in focus').ok
+  }
 
 }
 
