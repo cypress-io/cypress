@@ -167,8 +167,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               $elToFocus = $elements.getFirstFocusableEl($elToClick)
 
               if cy.needsFocus($elToFocus, $previouslyFocused)
-                cy.fireFocus($elToFocus.get(0))
-
                 ## if we are currently trying to focus
                 ## the window then blur the currently focused el
                 if $dom.isWindow($elToFocus)
@@ -178,6 +176,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   ## then blur manually
                   if $elements.isSame($focused, $previouslyFocused)
                     cy.fireBlur($focused.get(0))
+                
+                else
+                  cy.fireFocus($elToFocus.get(0))
+
 
               afterMouseDown($elToClick, coords)
         })

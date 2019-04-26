@@ -68,7 +68,7 @@ create = (state) ->
   fireFocus = (el) ->
     ## body will never emit focus events
     ## so we avoid simulating this
-    if $elements.isBody(el) || $dom.isWindow(el)
+    if $elements.isBody(el)
       return
 
     ## if we are focusing a different element
