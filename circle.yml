@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:chrome64
+      - image: cypress/browsers:node8.9.3-chrome73
     environment:
       PLATFORM: linux
 
@@ -276,7 +276,10 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
-      - run: DEBUG=test:proxy-performance npm run all test-performance -- --package server
+      - run: 
+          environment:
+            DEBUG: test:proxy-performance 
+          command: npm run all test-performance -- --package server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:

@@ -1,0 +1,7 @@
+{
+ "mac": {
+  "forceCodeSigning": true,
+  "publish": null,
+  "target": "zip"
+ }
+}
