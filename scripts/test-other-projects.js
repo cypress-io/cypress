@@ -98,11 +98,16 @@ const getStatusAndMessage = (projectRepoName) => {
 
   if (commit && is.commitId(commit)) {
     // commit is full 40 character hex string
+    const platform = os.platform()
+    const arch = os.arch()
+
     status = {
       owner: 'cypress-io',
       repo: 'cypress',
       sha: commit,
-      context: `[${os.platform()}-${os.arch()}] ${projectRepoName}`,
+      platform,
+      arch,
+      context: `[${platform}-${arch}] ${projectRepoName}`,
     }
   }
 
