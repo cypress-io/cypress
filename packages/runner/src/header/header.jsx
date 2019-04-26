@@ -45,7 +45,7 @@ export default class Header extends Component {
           >
             <input className='url' value={state.url} readOnly onClick={this._openUrl} />
             <span className='loading-container'>
-              ...loading <i className='fa fa-spinner fa-pulse'></i>
+              ...loading <i className='fa fa-spinner fa-spin fa-pulse'></i>
             </span>
           </div>
         </div>

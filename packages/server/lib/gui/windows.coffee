@@ -209,9 +209,7 @@ module.exports = {
     if options.contextMenu
       ## adds context menu with copy, paste, inspect element, etc
       contextMenu({
-        ## don't show inspect element until this fix is released
-        ## and we upgrade electron: https://github.com/electron/electron/pull/8688
-        showInspectElement: false
+        showInspectElement: true
         window: win
       })
 

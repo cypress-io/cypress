@@ -127,7 +127,7 @@ class Command extends Component {
         >
           <div className='command-wrapper'>
             <span className='command-number'>
-              <i className='fa fa-spinner fa-pulse'></i>
+              <i className='fa fa-spinner fa-spin'></i>
               <span>{model.number || ''}</span>
             </span>
             <span className='command-pin'>
