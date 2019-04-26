@@ -115,7 +115,7 @@ describe "Settings", ->
       it "displays project id section", ->
         cy.contains(@config.projectId)
 
-    describe "when record key panels is opened", ->
+    describe "when record key panel is opened", ->
       beforeEach ->
         cy.contains("Record Key").click()
 
@@ -181,6 +181,45 @@ describe "Settings", ->
             expect(@ipc.getRecordKeys).to.be.calledTwice
           cy.get(".settings-record-key")
             .contains("cypress run --record --key #{@keys[0].id}")
+
+    describe "when proxy settings panel is opened", ->
+      beforeEach ->
+        cy.contains("Proxy Settings").click()
+
+      it "with no proxy config set informs the user no proxy configuration is active", ->
+        cy.get(".settings-proxy").should("contain", "There is no active proxy configuration.")
+
+      it "opens help link on click", ->
+        cy.get(".settings-proxy .learn-more").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/proxy-configuration")
+
+      it "with Windows proxy settings indicates proxy and the source", ->
+        cy.setAppStore({
+          projectRoot: "/foo/bar",
+          proxySource: "win32",
+          proxyServer: "http://foo-bar.baz",
+          proxyBypassList: "a,b,c,d"
+        })
+        cy.get(".settings-proxy").should("contain", "from Windows system settings")
+        cy.get(".settings-proxy tr:nth-child(1) > td > code").should("contain", "http://foo-bar.baz")
+        cy.get(".settings-proxy tr:nth-child(2) > td > code").should("contain", "a, b, c, d")
+
+      it "with environment proxy settings indicates proxy and the source", ->
+        cy.setAppStore({
+          projectRoot: "/foo/bar",
+          proxyServer: "http://foo-bar.baz",
+          proxyBypassList: "a,b,c,d"
+        })
+        cy.get(".settings-proxy").should("contain", "from environment variables")
+        cy.get(".settings-proxy tr:nth-child(1) > td > code").should("contain", "http://foo-bar.baz")
+        cy.get(".settings-proxy tr:nth-child(2) > td > code").should("contain", "a, b, c, d")
+
+      it "with no bypass list but a proxy set shows 'none' in bypass list", ->
+        cy.setAppStore({
+          projectRoot: "/foo/bar",
+          proxyServer: "http://foo-bar.baz",
+        })
+        cy.get(".settings-proxy tr:nth-child(2) > td").should("contain", "none")
 
     context "on:focus:tests clicked", ->
       beforeEach ->

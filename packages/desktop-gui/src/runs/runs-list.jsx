@@ -212,11 +212,12 @@ class RunsList extends Component {
           <h5>Runs
             {this._lastUpdated()}
             <button
+              aria-label='Refresh'
               className='btn btn-link btn-sm'
               disabled={this.runsStore.isLoading}
               onClick={this._getRuns}
             >
-              <i className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
+              <i aria-hidden="true" className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
           </h5>
           <div>

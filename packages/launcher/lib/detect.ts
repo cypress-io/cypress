@@ -1,19 +1,19 @@
-import * as Bluebird from 'bluebird'
-import { extend, compact, find } from 'lodash'
+import Bluebird from 'bluebird'
+import { compact, extend, find } from 'lodash'
 import * as os from 'os'
-import { merge, pick, props, tap, uniqBy, flatten } from 'ramda'
+import { flatten, merge, pick, props, tap, uniqBy } from 'ramda'
 import { browsers } from './browsers'
 import * as darwinHelper from './darwin'
+import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
 import { log } from './log'
 import {
-  FoundBrowser,
   Browser,
-  NotInstalledError,
-  NotDetectedAtPathError
+  FoundBrowser,
+  NotDetectedAtPathError,
+  NotInstalledError
 } from './types'
 import * as windowsHelper from './windows'
-import { notDetectedAtPathErr } from './errors'
 
 const setMajorVersion = (browser: FoundBrowser) => {
   if (browser.version) {
@@ -64,7 +64,7 @@ function lookup(
  * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
  * we don't use the `binary` field on Windows.
  */
-function checkBrowser(browser: Browser): Promise<(boolean | FoundBrowser)[]> {
+function checkBrowser(browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
     return Bluebird.map(browser.binary, (binary: string) => {
       return checkOneBrowser(extend({}, browser, { binary }))
@@ -128,7 +128,7 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
 export const detectByPath = (
   path: string,
   goalBrowsers?: Browser[]
-): Bluebird<FoundBrowser> => {
+): Promise<FoundBrowser> => {
   if (!goalBrowsers) {
     goalBrowsers = browsers
   }
@@ -164,5 +164,5 @@ export const detectByPath = (
         throw err
       }
       throw notDetectedAtPathErr(err.message)
-    }) as Bluebird<FoundBrowser>
+    })
 }

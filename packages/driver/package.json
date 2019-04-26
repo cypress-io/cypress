@@ -33,7 +33,7 @@
     "chai-as-promised": "6.0.0",
     "chokidar-cli": "1.2.1",
     "clone": "2.1.2",
-    "compression": "1.7.3",
+    "compression": "1.7.4",
     "cors": "2.8.5",
     "debug": "2.6.9",
     "errorhandler": "1.5.0",
@@ -53,7 +53,7 @@
     "moment": "2.24.0",
     "morgan": "1.9.1",
     "npm-install-version": "6.0.2",
-    "parse-domain": "2.1.7",
+    "parse-domain": "2.0.0",
     "setimmediate": "1.0.5",
     "sinon": "3.3.0",
     "text-mask-addons": "3.8.0",
@@ -62,6 +62,6 @@
     "url-parse": "1.4.4",
     "vanilla-text-mask": "5.1.1",
     "wait-on": "2.1.2",
-    "zone.js": "0.8.29"
+    "zone.js": "0.9.0"
   }
 }
