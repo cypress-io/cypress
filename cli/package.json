@@ -16,13 +16,13 @@
     "pretest-unit": "npm run check-deps-pre",
     "test-unit": "npm run unit",
     "pretest-watch": "npm run check-deps-pre",
-    "test-watch": "npm run unit -- --watch",
+    "test-watch": "npm run unit -- --watch --exclude __snapshots__",
     "check-deps": "node ../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "test-dependencies": "npm run check-deps && dependency-check . --no-dev",
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
     "test-cov": "nyc npm run unit",
-    "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
+    "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json --ignore __snapshots__",
     "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "dtslint": "dtslint types",
     "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
@@ -98,7 +98,8 @@
     "proxyquire": "2.0.1",
     "shelljs": "0.7.8",
     "sinon": "7.2.2",
-    "snap-shot-it": "6.3.3"
+    "snap-shot-it": "6.3.3",
+    "spawn-mock": "1.0.0"
   },
   "files": [
     "bin",

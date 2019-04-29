@@ -36,7 +36,7 @@ const checkExecutable = (binaryDir) => {
   })
 }
 
-const runSmokeTest = (binaryDir) => {
+const runSmokeTest = (binaryDir, options) => {
   debug('running smoke test')
   const cypressExecPath = state.getPathToExecutable(binaryDir)
 
@@ -51,7 +51,13 @@ const runSmokeTest = (binaryDir) => {
   const onSmokeTestError = (err) => {
     debug('Smoke test failed:', err)
 
-    return throwFormErrorText(errors.missingDependency)(err.stderr || err.message)
+    let errMessage = err.stderr || err.message
+
+    if (err.timedOut) {
+      errMessage = `It timed out\n${errMessage}`
+    }
+
+    return throwFormErrorText(errors.missingDependency)(errMessage)
   }
 
   const needsXvfb = xvfb.isNeeded()
@@ -65,7 +71,11 @@ const runSmokeTest = (binaryDir) => {
 
     debug('smoke test command:', smokeTestCommand)
 
-    return Promise.resolve(util.exec(cypressExecPath, args))
+    return Promise.resolve(util.exec(
+      cypressExecPath,
+      args,
+      { timeout: options.smokeTestTimeout }
+    ))
     .catch(onSmokeTestError)
     .then((result) => {
       const smokeTestReturned = result.stdout
@@ -99,7 +109,7 @@ const runSmokeTest = (binaryDir) => {
 
 }
 
-function testBinary (version, binaryDir) {
+function testBinary (version, binaryDir, options) {
   debug('running binary verification check', version)
 
   logger.log(stripIndent`
@@ -128,7 +138,7 @@ function testBinary (version, binaryDir) {
         return state.clearBinaryStateAsync(binaryDir)
         .then(() => {
           return Promise.all([
-            runSmokeTest(binaryDir),
+            runSmokeTest(binaryDir, options),
             Promise.resolve().delay(1500), // good user experience
           ])
         })
@@ -154,7 +164,7 @@ function testBinary (version, binaryDir) {
   return tasks.run()
 }
 
-const maybeVerify = (installedVersion, binaryDir, options = {}) => {
+const maybeVerify = (installedVersion, binaryDir, options) => {
   return state.getBinaryVerifiedAsync(binaryDir)
   .then((isVerified) => {
 
@@ -169,7 +179,7 @@ const maybeVerify = (installedVersion, binaryDir, options = {}) => {
     }
 
     if (shouldVerify) {
-      return testBinary(installedVersion, binaryDir)
+      return testBinary(installedVersion, binaryDir, options)
       .then(() => {
         if (options.welcomeMessage) {
           logger.log()
@@ -189,6 +199,7 @@ const start = (options = {}) => {
   _.defaults(options, {
     force: false,
     welcomeMessage: true,
+    smokeTestTimeout: 10000,
   })
 
   const parseBinaryEnvVar = () => {
@@ -285,5 +296,4 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
-  maybeVerify,
 }
