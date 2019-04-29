@@ -38,13 +38,18 @@ module.exports = {
     console.log("target directory %s", dirName)
     dirName
 
-  createRemoteManifest: (folder, version) ->
-    getUrl = (uploadOsName) ->
-      {
-        url: [konfig('cdn_url'), folder, version, uploadOsName, zipName].join("/")
-      }
+  getManifestUrl: (folder, version, uploadOsName) ->
+    {
+      url: [konfig('cdn_url'), folder, version, uploadOsName, zipName].join("/")
+    }
 
-    obj = {
+  getRemoteManifest: (folder, version) ->
+    la(check.unemptyString(folder), 'missing manifest folder', folder)
+    la(check.semver(version), 'invalid manifest version', version)
+
+    getUrl = @getManifestUrl.bind(null, folder, version)
+
+    {
       name: "Cypress"
       version: version
       packages: {
@@ -67,6 +72,9 @@ module.exports = {
         "win32-x64": getUrl("win32-x64")
       }
     }
+
+  createRemoteManifest: (folder, version) ->
+    obj = @getRemoteManifest(folder, version)
 
     src = path.resolve("manifest.json")
     fs.outputJsonAsync(src, obj).return(src)
