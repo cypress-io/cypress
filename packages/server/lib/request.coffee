@@ -1,4 +1,7 @@
 _          = require("lodash")
+fs         = require("fs")
+os         = require("os")
+path       = require("path")
 r          = require("request")
 rp         = require("request-promise")
 url        = require("url")
@@ -7,7 +10,6 @@ debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
 stream     = require("stream")
-pumpify    = require("pumpify")
 agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 Cookies    = require("./automation/cookies")
@@ -20,6 +22,8 @@ serializableProperties = Cookie.serializableProperties.slice(0)
 
 MAX_REQUEST_RETRIES = 4
 
+bufferCount = 0
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 getOriginalHeaders = (req = {}) ->
@@ -31,6 +35,9 @@ getOriginalHeaders = (req = {}) ->
 
 getDelayForRetry = (iteration) ->
   _.get([0, 1, 2, 2], iteration) * 1000
+
+getBufferFilename = () ->
+  path.join(os.tmpdir(), "cy-request-#{Number(new Date())}-#{process.pid}-#{bufferCount++}.tmp")
 
 hasRetriableStatusCodeFailure = (res, opts) ->
   opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
@@ -179,13 +186,13 @@ pipeEvent = (source, destination, event) ->
     destination.emit(event, args...)
 
 createRetryingRequestStream = (opts = {}) ->
-  retryStream = pumpify()
+  retryStream = stream.PassThrough()
 
   retryStream.on "error", (err) ->
     debugger
 
   didAbort = false
-  pipeSrc = null
+  bufferFilename = null
 
   emitError = (err) ->
     # retryStream.emit("error", err)
@@ -223,16 +230,11 @@ createRetryingRequestStream = (opts = {}) ->
       , delay
 
     reqStream = r(opts)
-    delayStream = stream.PassThrough()
-
-    retryStream.setPipeline([reqStream, delayStream])
-    # retryStream.setWritable(reqStream)
-    # retryStream.setReadable(delayStream)
 
     ## if we're retrying and we previous piped
     ## into the reqStream, then reapply this now
-    if pipeSrc
-      pipeSrc.pipe(reqStream)
+    if bufferFilename
+      fs.createReadStream(bufferFilename).pipe(reqStream)
 
     ## forward the abort call to the underlying request
     retryStream.abort = ->
@@ -243,11 +245,10 @@ createRetryingRequestStream = (opts = {}) ->
     onPiped = (src) ->
       ## store this so we can reapply it
       ## if we need to retry
-      ## TODO: this needs to write to the fs
-      ## so we can re-read the request body
-      ## later and then remove it after the
-      ## response is complete
-      pipeSrc = src
+      bufferFilename = getBufferFilename()
+      diskBuffer = fs.createWriteStream(bufferFilename)
+      debug("streaming request body to disk %o", { bufferFilename })
+      src.pipe(diskBuffer)
 
     ## when this passthrough stream is being piped into
     ## then make sure we properly "forward" and connect
@@ -306,15 +307,15 @@ createRetryingRequestStream = (opts = {}) ->
 
       # retryStream.setReadable(delayStream)
 
-      # also need to pipe all the non-data events
+      ## also need to pipe all the non-data events
       _.map(
         [
-          # all `stream.Readable` events except "data"
+          ## all `stream.Readable` events except "data"
           "close", "end", "error", "pause", "readable", "resume"
-          # `http.ClientRequest` events
+          ## `http.ClientRequest` events
           "abort", "connect", "continue", "information", "socket", "timeout", "upgrade"
         ],
-        _.partial(pipeEvent, reqStream, retryingReqStream)
+        _.partial(pipeEvent, reqStream, retryStream)
       )
 
     return null
