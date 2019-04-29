@@ -91,6 +91,19 @@ niv.install("react-dom@15.6.1")
     .status(500)
     .send("<html><body>server error</body></html>")
 
+  cachedCssRules = {}
+
+  ## <link href="/dynamically-sized-css-file/:ruleCount.css" /> will include a stylesheet with 1000 rules
+  app.get "/dynamically-sized-css-file/:ruleCount.css", (req, res) ->
+    ruleCount = parseInt(req.params.ruleCount, 10);
+
+    if !cachedCssRules[ruleCount]
+      ## cache dynamically generated css rules, so they don't slow down any tests
+      cachedCssRules[ruleCount] = _.range(1, ruleCount + 1).map((n) -> ".c#{n} { font-size: #{1 + Math.round n/10}px; }").join("\n");
+
+    res.setHeader('Content-Type', 'text/css')
+    res.status(200).send(cachedCssRules[ruleCount])
+
   app.use(express.static(path.join(__dirname, "..", "cypress")))
 
   app.use(require("errorhandler")())

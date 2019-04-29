@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/dynamically-sized-css-file/10000.css" />
+  </head>
+  <body>
+      <script>
+          // The .c# classname is tightly coupled to generated CSS file made in packages/driver/test/support/server.coffee
+          // Avoid 0 px, so should('be.visible') check does not randomly fail
+          var h1 = document.createElement('h1');
+          h1.id = 'test';
+          // Using 1000 here, so that the class name used will match one from the dynamic stylesheet
+          h1.className += "c" + (1 + Math.ceil((Math.random() * 1000)));
+          h1.innerText = 'h1 with "' + h1.className + '" class';
+          document.body.appendChild(h1);
+        </script>
+  </body>
+</html>
