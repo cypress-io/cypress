@@ -240,8 +240,13 @@ const getCodeFrame = (source, stackLineDetails) => {
 
 const getCodeFrameFromStack = (stack, lineIndex = 0) => {
   const artifactStackLineDetails = getStackLineDetails(stack, lineIndex)
+
+  if (!artifactStackLineDetails) return null
+
   const file = artifactStackLineDetails.file.replace(':', '://')
   const stackLineDetails = $sourceMapUtils.getMappedPosition(file, artifactStackLineDetails)
+
+  if (!stackLineDetails) return null
 
   return getCodeFrame($sourceMapUtils.getSourceContents(file), stackLineDetails)
 }
@@ -283,7 +288,12 @@ const getObjValueByPath = (obj, keyPath) => {
 
 const getStackLineDetails = (stackString, lineIndex = 0, cwd) => {
   const stack = new StackUtils({ cwd })
-  const line = stack.clean(stackString).split('\n')[lineIndex]
+
+  let line
+
+  if (stackString) {
+    line = stack.clean(stackString).split('\n')[lineIndex]
+  }
 
   return stack.parseLine(line)
 }

@@ -18,12 +18,16 @@ const initialize = (file, sourceMapBase64) => {
 }
 
 const getSourceContents = (filePath) => {
+  if (!sourceMapConsumers[filePath]) return null
+
   const { consumer, file } = sourceMapConsumers[filePath]
 
   return consumer.sourceContentFor(file.relative)
 }
 
 const getMappedPosition = (filePath, position) => {
+  if (!sourceMapConsumers[filePath]) return null
+
   const { consumer } = sourceMapConsumers[filePath]
 
   return consumer.originalPositionFor(position)
