@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 require('@packages/coffee/register')
+require('@packages/ts/register')
 
 const command = process.argv[2]
 
@@ -18,11 +19,11 @@ if (!fn) {
 // TODO allow passing CLI arguments to each command
 
 fn()
-.then(() => {
-  return console.log('✅ %s completed', command)
-})
-.catch((err) => {
-  console.error('🔥 deploy error')
-  console.error(err)
-  process.exit(1)
-})
+  .then(() => {
+    return console.log('✅ %s completed', command)
+  })
+  .catch(err => {
+    console.error('🔥 deploy error')
+    console.error(err)
+    process.exit(1)
+  })
