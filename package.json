@@ -50,7 +50,7 @@
     "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
     "binary-release": "node ./scripts/binary.js release",
-    "test-scripts": "mocha --reporter spec scripts/unit/*spec.js",
+    "test-scripts": "mocha -r packages/coffee/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js",
     "check-node-version": "node scripts/check-node-version.js",
