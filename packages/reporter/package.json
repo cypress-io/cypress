@@ -35,7 +35,7 @@
     "classnames": "2.2.6",
     "css-element-queries": "1.1.1",
     "enzyme": "3.9.0",
-    "enzyme-adapter-react-16": "1.11.2",
+    "enzyme-adapter-react-16": "1.12.1",
     "font-awesome": "4.7.0",
     "jsdom": "13.2.0",
     "lodash": "4.17.11",
