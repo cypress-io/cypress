@@ -103,33 +103,6 @@ const getFirstWorkingFamily = (
   })
 }
 
-const addRequest = http.Agent.prototype.addRequest
-
-http.Agent.prototype.addRequest = function (req, options) {
-  // get all the TCP handles for the free sockets
-  const hasNullHandle = _
-  .chain(this.freeSockets)
-  .values()
-  .flatten()
-  .find((socket) => {
-    return !socket._handle
-  })
-  .value()
-
-  // if any of our freeSockets have a null handle
-  // then immediately return on nextTick to prevent
-  // a node 8.2.1 bug where socket._handle is null
-  // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
-  // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
-  if (hasNullHandle) {
-    return process.nextTick(() => {
-      this.addRequest(req, options)
-    })
-  }
-
-  return addRequest.call(this, req, options)
-}
-
 export class CombinedAgent {
   httpAgent: HttpAgent
   httpsAgent: HttpsAgent
