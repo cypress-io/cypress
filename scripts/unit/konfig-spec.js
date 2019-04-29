@@ -19,6 +19,7 @@ describe('konfig check', () => {
   it('does not change CWD on load', () => {
     const konfig = require('../binary/get-config')()
     const cwdAfter = process.cwd()
+
     la(
       cwd === cwdAfter,
       'previous cwd',

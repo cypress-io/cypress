@@ -15,6 +15,7 @@ const getConfig = () => {
 
   // restore previous cwd in case it was changed by loading "konfig"
   process.chdir(cwd)
+
   return konfig
 }
 
