@@ -283,9 +283,6 @@ createRetryingRequestStream = (opts = {}) ->
 
       return retry(err)
 
-    ## TODO: need to forward the other request + http.ClientRequest events
-    ## abort[ed], complete, request, etc...
-
     reqStream.once "request", (req) ->
       ## remove the pipe listener since once the request has
       ## been made, we cannot pipe into the reqStream anymore
@@ -309,6 +306,16 @@ createRetryingRequestStream = (opts = {}) ->
 
       # retryStream.setReadable(delayStream)
 
+      # also need to pipe all the non-data events
+      _.map(
+        [
+          # all `stream.Readable` events except "data"
+          "close", "end", "error", "pause", "readable", "resume"
+          # `http.ClientRequest` events
+          "abort", "connect", "continue", "information", "socket", "timeout", "upgrade"
+        ],
+        _.partial(pipeEvent, reqStream, retryingReqStream)
+      )
 
     return null
 
