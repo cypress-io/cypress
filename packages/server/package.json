@@ -58,7 +58,7 @@
     "@cypress/debugging-proxy": "1.6.0",
     "@cypress/json-schemas": "5.31.3",
     "@cypress/sinon-chai": "1.1.0",
-    "babel-plugin-add-module-exports": "1.0.0",
+    "babel-plugin-add-module-exports": "1.0.2",
     "babelify": "10.0.0",
     "bin-up": "1.1.0",
     "body-parser": "1.12.4",
