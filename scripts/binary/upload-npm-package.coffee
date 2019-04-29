@@ -26,6 +26,10 @@ rootFolder = "beta"
 npmFolder = "npm"
 
 getCDN = ({version, hash, filename}) ->
+  la(check.semver(version), 'invalid version', version)
+  la(check.unemptyString(hash), 'missing hash', hash)
+  la(check.unemptyString(filename), 'missing filename', filename)
+  la(isNpmPackageFile(filename), 'wrong extension for file', filename)
   [konfig("cdn_url"), rootFolder, npmFolder, version, hash, filename].join("/")
 
 getUploadDirName = (options) ->

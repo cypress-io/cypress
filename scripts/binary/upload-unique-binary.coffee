@@ -27,6 +27,11 @@ folder = "binary"
 # in our case something like this
 # https://cdn.cypress.io/desktop/binary/0.20.2/<platform>/<some unique version info>/cypress.zip
 getCDN = ({version, hash, filename, platform}) ->
+  la(check.semver(version), 'invalid version', version)
+  la(check.unemptyString(hash), 'missing hash', hash)
+  la(check.unemptyString(filename), 'missing filename', filename)
+  la(isBinaryFile(filename), 'wrong extension for file', filename)
+  la(check.unemptyString(platform), 'missing platform', platform)
   [konfig("cdn_url"), rootFolder, folder, version, platform, hash, filename].join("/")
 
 getUploadDirName = (options) ->
