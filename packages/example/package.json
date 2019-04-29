@@ -36,6 +36,6 @@
     "gulp-rev-all": "0.8.24",
     "mocha": "2.5.3",
     "run-sequence": "1.2.2",
-    "shelljs": "0.7.8"
+    "shelljs": "0.8.3"
   }
 }
