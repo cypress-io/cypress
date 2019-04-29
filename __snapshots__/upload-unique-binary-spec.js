@@ -16,3 +16,11 @@ exports['upload binary folder'] = {
   },
   "result": "beta/binary/3.3.0/darwin-x64/ci-name-e154a40f3f76abd39a1d85c0ebc0ff9565015706-123/"
 }
+
+exports['upload binary folder for platform'] = {
+  "input": {
+    "platformArch": "darwin-x64",
+    "version": "3.3.0"
+  },
+  "result": "beta/binary/3.3.0/darwin-x64"
+}

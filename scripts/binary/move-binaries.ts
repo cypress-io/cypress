@@ -5,7 +5,12 @@ import is from 'check-more-types'
 // because it plays really nicely with TypeScript
 import arg from 'arg'
 import S3 from 'aws-sdk/clients/s3'
-import {getS3Credentials} from './util/upload'
+
+// ignore TS errors - we are importing from CoffeeScript files
+// @ts-ignore
+import {getS3Credentials, validPlatformArchs} from './util/upload'
+// @ts-ignore
+import {getUploadDirForPlatform} from './upload-unique-binary'
 
 /**
  * 40 character full sha commit string
@@ -50,5 +55,12 @@ export const moveBinaries = async (args = []) => {
 
   const s3 = new S3({
     credentials: getS3Credentials()
+  })
+
+  validPlatformArchs.forEach((platformArch: string) => {
+    const uploadDir = getUploadDirForPlatform({
+      version: releaseOptions.version
+    }, platformArch)
+    console.log('finding binary for %s in %s', platformArch, uploadDir)
   })
 }
