@@ -1,7 +1,4 @@
 _          = require("lodash")
-fs         = require("fs")
-os         = require("os")
-path       = require("path")
 r          = require("request")
 rp         = require("request-promise")
 url        = require("url")
@@ -10,6 +7,7 @@ debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
 stream     = require("stream")
+pumpify    = require("pumpify")
 agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 Cookies    = require("./automation/cookies")
@@ -22,8 +20,6 @@ serializableProperties = Cookie.serializableProperties.slice(0)
 
 MAX_REQUEST_RETRIES = 4
 
-bufferCount = 0
-
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 getOriginalHeaders = (req = {}) ->
@@ -35,9 +31,6 @@ getOriginalHeaders = (req = {}) ->
 
 getDelayForRetry = (iteration) ->
   _.get([0, 1, 2, 2], iteration) * 1000
-
-getBufferFilename = () ->
-  path.join(os.tmpdir(), "cy-request-#{Number(new Date())}-#{process.pid}-#{bufferCount++}.tmp")
 
 hasRetriableStatusCodeFailure = (res, opts) ->
   opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
@@ -186,13 +179,13 @@ pipeEvent = (source, destination, event) ->
     destination.emit(event, args...)
 
 createRetryingRequestStream = (opts = {}) ->
-  retryStream = stream.PassThrough()
+  retryStream = pumpify()
 
   retryStream.on "error", (err) ->
     debugger
 
   didAbort = false
-  bufferFilename = null
+  pipeSrc = null
 
   emitError = (err) ->
     # retryStream.emit("error", err)
@@ -204,6 +197,8 @@ createRetryingRequestStream = (opts = {}) ->
     ## then immediately bail
     if didAbort
       return
+
+    didReceiveResponse = false
 
     retry = (err) ->
       attempts = iteration + 1
@@ -219,11 +214,6 @@ createRetryingRequestStream = (opts = {}) ->
         err
       })
 
-      reqStream.removeListener("error", onError)
-
-      reqStream.on "error", ->
-        debug("received an error on already-errored request that has been retried %o", { opts, err })
-
       retryStream.emit("retry", { attempts, delay })
 
       debug("retry %o", { iteration, delay })
@@ -233,11 +223,16 @@ createRetryingRequestStream = (opts = {}) ->
       , delay
 
     reqStream = r(opts)
+    delayStream = stream.PassThrough()
+
+    retryStream.setPipeline([reqStream, delayStream])
+    # retryStream.setWritable(reqStream)
+    # retryStream.setReadable(delayStream)
 
     ## if we're retrying and we previous piped
     ## into the reqStream, then reapply this now
-    if bufferFilename
-      fs.createReadStream(bufferFilename).pipe(reqStream)
+    if pipeSrc
+      pipeSrc.pipe(reqStream)
 
     ## forward the abort call to the underlying request
     retryStream.abort = ->
@@ -248,10 +243,11 @@ createRetryingRequestStream = (opts = {}) ->
     onPiped = (src) ->
       ## store this so we can reapply it
       ## if we need to retry
-      bufferFilename = getBufferFilename()
-      diskBuffer = fs.createWriteStream(bufferFilename)
-      debug("streaming request body to disk %o", { bufferFilename })
-      src.pipe(diskBuffer)
+      ## TODO: this needs to write to the fs
+      ## so we can re-read the request body
+      ## later and then remove it after the
+      ## response is complete
+      pipeSrc = src
 
     ## when this passthrough stream is being piped into
     ## then make sure we properly "forward" and connect
@@ -259,7 +255,18 @@ createRetryingRequestStream = (opts = {}) ->
     ## request to read off the IncomingMessage readable stream
     retryStream.once("pipe", onPiped)
 
-    onError = (err) ->
+    reqStream.on "error", (err) ->
+      if didReceiveResponse
+        ## if we've already begun processing the requests
+        ## response, then that means we failed during transit
+        ## and its no longer safe to retry. all we can do now
+        ## is propogate the error upwards
+        debug("received an error on request after response started %o", { opts, err })
+
+        return emitError(err)
+
+      ## otherwise, see if we can retry another request under the hood...
+
       if not isRetriableError(err, opts)
         debug("received a non-retryable request error %o", { opts, err })
 
@@ -276,7 +283,8 @@ createRetryingRequestStream = (opts = {}) ->
 
       return retry(err)
 
-    reqStream.on "error", onError
+    ## TODO: need to forward the other request + http.ClientRequest events
+    ## abort[ed], complete, request, etc...
 
     reqStream.once "request", (req) ->
       ## remove the pipe listener since once the request has
@@ -284,33 +292,23 @@ createRetryingRequestStream = (opts = {}) ->
       retryStream.removeListener("pipe", onPiped)
 
     reqStream.once "response", (incomingRes) ->
+      didReceiveResponse = true
+
       ## ok, no net error, but what about a bad status code?
       if hasRetriableStatusCodeFailure(incomingRes, opts) && iteration < MAX_REQUEST_RETRIES
         debug("received failing status code on res, retrying", _.pick(incomingRes, "statusCode"))
 
         return retry()
 
-      ## consumer of the stream will attach their own error listeners
-      reqStream.removeListener("error", onError)
-
       ## otherwise, we've successfully received a valid response...
-      reqStream.pipe(retryStream)
 
       ## forward the response event upwards which should happen
       ## prior to the pipe event, same as what request does
       ## https://github.com/request/request/blob/master/request.js#L1059
       retryStream.emit("response", incomingRes)
 
-      ## also need to pipe all the non-data events
-      _.map(
-        [
-          ## all `stream.Readable` events except "data"
-          "close", "end", "pause", "readable", "resume", "error"
-          ## `http.ClientRequest` events
-          "abort", "connect", "continue", "information", "socket", "timeout", "upgrade"
-        ],
-        _.partial(pipeEvent, reqStream, retryStream)
-      )
+      # retryStream.setReadable(delayStream)
+
 
     return null
 
