@@ -9,7 +9,8 @@ HIGHLIGHT_ATTR = "data-cypress-el"
 reduceText = (arr, fn) ->
   _.reduce arr, ((memo, item) -> memo += fn(item)), ""
 
-getCssRulesString = (stylesheet) ->
+## memoized by href (lodash will cache results by first argument, if no resolver is supplied)
+getCssRulesString = _.memoize (href, stylesheet) ->
   ## some browsers may throw a SecurityError if the stylesheet is cross-domain
   ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
   ## for others, it will just be null
@@ -40,7 +41,7 @@ getStylesFor = (doc, $$, stylesheets, location) ->
       ## return the CSS rules as a string, or, if cross-domain,
       ## a reference to the stylesheet's href
       makePathsAbsoluteToStylesheet(
-        getCssRulesString(stylesheets[stylesheet.href]),
+        getCssRulesString(stylesheet.href, stylesheets[stylesheet.href]),
         stylesheet.href
       ) or {
         href: stylesheet.href
