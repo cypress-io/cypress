@@ -34,12 +34,22 @@ getCDN = ({version, hash, filename, platform}) ->
   la(check.unemptyString(platform), 'missing platform', platform)
   [konfig("cdn_url"), rootFolder, folder, version, platform, hash, filename].join("/")
 
-getUploadDirName = (options) ->
+# returns folder that contains beta (unreleased) binaries for given version
+#
+getUploadVersionDirName = (options) ->
   la(check.unemptyString(options.version), 'missing version', options)
+
+  dir = [rootFolder, folder, options.version].join("/")
+  dir
+
+getUploadDirName = (options) ->
   la(check.unemptyString(options.hash), 'missing hash', options)
   la(check.unemptyString(options.platformArch), 'missing platformArch', options)
 
-  dir = [rootFolder, folder, options.version, options.platformArch, options.hash, null].join("/")
+  versionFolder = getUploadVersionDirName(options)
+  la(check.unemptyString(versionFolder), 'could not form version folder from', options)
+
+  dir = [versionFolder, options.platformArch, options.hash, null].join("/")
   dir
 
 uploadFile = (options) ->
@@ -106,6 +116,7 @@ uploadUniqueBinary = (args = []) ->
   .then uploadUtils.saveUrl("binary-url.json")
 
 module.exports = {
+  getUploadDirName,
   uploadUniqueBinary,
   getCDN
 }
