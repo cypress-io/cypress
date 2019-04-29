@@ -90,7 +90,7 @@
     "chalk": "2.4.2",
     "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
-    "cloudflare-cli": "3.2.1",
+    "cloudflare-cli": "3.2.2",
     "coffeelint": "1.16.2",
     "common-tags": "1.8.0",
     "console.table": "0.10.0",
