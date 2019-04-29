@@ -9,6 +9,7 @@ describe('upload', () => {
       const folder = 'desktop'
       const version = '3.3.0'
       const manifest = upload.getRemoteManifest(folder, version)
+
       snapshot('test runner manifest', manifest)
     })
   })
