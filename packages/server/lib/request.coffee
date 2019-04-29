@@ -294,6 +294,7 @@ createRetryingRequestStream = (opts = {}) ->
       reqStream.removeListener("error", onError)
 
       ## otherwise, we've successfully received a valid response...
+      reqStream.pipe(retryStream)
 
       ## forward the response event upwards which should happen
       ## prior to the pipe event, same as what request does
