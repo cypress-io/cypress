@@ -47,6 +47,14 @@ controllers = {
   loadImgNetError: (req, res) ->
     res.send('<img src="/immediate-reset?load-img"/>')
 
+  printBodyThirdTimeForm: (req, res) ->
+    res.send("<html><body><form method='POST' action='/print-body-third-time/#{req.url}'><input type='text' name='foo'/><input type='submit'/></form></body></html>")
+
+  printBodyThirdTime: (req, res) ->
+    if counts[req.url] == 3
+      return res.send(req.body)
+    req.socket.destroy()
+
   immediateReset: (req, res) ->
     req.socket.destroy()
 
@@ -114,9 +122,11 @@ describe "e2e network error handling", ->
           app.get "/during-body-reset", controllers.duringBodyReset
           app.get "/works-third-time/:id", controllers.worksThirdTime
           app.get "/works-third-time-else-500/:id", controllers.worksThirdTimeElse500
+          app.post "/print-body-third-time", controllers.printBodyThirdTime
 
           app.get "/load-img-net-error.html", controllers.loadImgNetError
           app.get "/load-script-net-error.html", controllers.loadScriptNetError
+          app.get "/print-body-third-time-form", controllers.printBodyThirdTimeForm
 
           app.get "*", (req, res) ->
             ## pretending we're a http proxy
@@ -225,9 +235,9 @@ describe "e2e network error handling", ->
     it "tests run as expected", ->
       e2e.exec(@, {
         spec: "network_error_handling_spec.js"
-        snapshot: true
-        # exit: false
-        # browser: "chrome"
+        # snapshot: true
+        exit: false
+        browser: "chrome"
         video: false
         expectedExitCode: 2
       }).then () ->
