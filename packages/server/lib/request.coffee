@@ -205,8 +205,6 @@ createRetryingRequestStream = (opts = {}) ->
     if didAbort
       return
 
-    didReceiveResponse = false
-
     retry = (err) ->
       attempts = iteration + 1
 
@@ -220,6 +218,11 @@ createRetryingRequestStream = (opts = {}) ->
         delay
         err
       })
+
+      reqStream.removeListener("error", onError)
+
+      reqStream.on "error", ->
+        debug("received an error on already-errored request that has been retried %o", { opts, err })
 
       retryStream.emit("retry", { attempts, delay })
 
@@ -256,18 +259,7 @@ createRetryingRequestStream = (opts = {}) ->
     ## request to read off the IncomingMessage readable stream
     retryStream.once("pipe", onPiped)
 
-    reqStream.on "error", (err) ->
-      if didReceiveResponse
-        ## if we've already begun processing the requests
-        ## response, then that means we failed during transit
-        ## and its no longer safe to retry. all we can do now
-        ## is propogate the error upwards
-        debug("received an error on request after response started %o", { opts, err })
-
-        return emitError(err)
-
-      ## otherwise, see if we can retry another request under the hood...
-
+    onError = (err) ->
       if not isRetriableError(err, opts)
         debug("received a non-retryable request error %o", { opts, err })
 
@@ -284,19 +276,22 @@ createRetryingRequestStream = (opts = {}) ->
 
       return retry(err)
 
+    reqStream.on "error", onError
+
     reqStream.once "request", (req) ->
       ## remove the pipe listener since once the request has
       ## been made, we cannot pipe into the reqStream anymore
       retryStream.removeListener("pipe", onPiped)
 
     reqStream.once "response", (incomingRes) ->
-      didReceiveResponse = true
-
       ## ok, no net error, but what about a bad status code?
       if hasRetriableStatusCodeFailure(incomingRes, opts) && iteration < MAX_REQUEST_RETRIES
         debug("received failing status code on res, retrying", _.pick(incomingRes, "statusCode"))
 
         return retry()
+
+      ## consumer of the stream will attach their own error listeners
+      reqStream.removeListener("error", onError)
 
       ## otherwise, we've successfully received a valid response...
 
@@ -305,13 +300,11 @@ createRetryingRequestStream = (opts = {}) ->
       ## https://github.com/request/request/blob/master/request.js#L1059
       retryStream.emit("response", incomingRes)
 
-      # retryStream.setReadable(delayStream)
-
       ## also need to pipe all the non-data events
       _.map(
         [
           ## all `stream.Readable` events except "data"
-          "close", "end", "error", "pause", "readable", "resume"
+          "close", "end", "pause", "readable", "resume", "error"
           ## `http.ClientRequest` events
           "abort", "connect", "continue", "information", "socket", "timeout", "upgrade"
         ],
