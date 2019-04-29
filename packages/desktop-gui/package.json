@@ -24,11 +24,11 @@
     "lib"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.4.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.31.3",
     "@cypress/react-tooltip": "0.4.0",
-    "bin-up": "1.1.0",
+    "bin-up": "1.2.0",
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
