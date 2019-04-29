@@ -13,10 +13,11 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
+agent        = require("@packages/network").agent
 cors         = require("./util/cors")
 uri          = require("./util/uri")
 origin       = require("./util/origin")
-connect      = require("./util/connect")
+ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 blacklist    = require("./util/blacklist")
@@ -232,7 +233,7 @@ class Server
           if baseUrl
             @_baseUrl = baseUrl
 
-            connect.ensureUrl(baseUrl)
+            ensureUrl.isListening(baseUrl)
             .return(null)
             .catch (err) =>
               if config.isTextTerminal
@@ -255,20 +256,17 @@ class Server
   _listen: (port, onError) ->
     new Promise (resolve) =>
       listener = =>
-        port = @_server.address().port
+        address = @_server.address()
 
         @isListening = true
 
-        debug("Server listening on port %s", port)
+        debug("Server listening on ", address)
 
         @_server.removeListener "error", onError
 
-        resolve(port)
+        resolve(address.port)
 
-      ## nuke port from our args if its falsy
-      args = _.compact([port, listener])
-
-      @_server.listen.apply(@_server, args)
+      @_server.listen(port || 0, '127.0.0.1', listener)
 
   _getRemoteState: ->
     # {
@@ -458,15 +456,19 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
-        request.sendStream(headers, automationRequest, {
+        # if they're POSTing an object, querystringify their POST body
+        if options.method == 'POST' and _.isObject(options.body)
+          options.form = options.body
+          delete options.body
+
+        _.assign(options, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
-          auth: options.auth
           gzip: false
           url: urlFile ? urlStr
-          headers: {
+          headers: _.assign({
             accept: "text/html,*/*"
-          }
+          }, options.headers)
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
@@ -479,6 +481,10 @@ class Server
 
             return true
         })
+
+        debug('sending request with options %o', options)
+
+        request.sendStream(headers, automationRequest, options)
         .then(handleReqStream)
         .catch(error)
 
@@ -591,6 +597,7 @@ class Server
           port: port
           protocol: protocol
         }
+        agent: agent
       }, onProxyErr)
     else
       ## we can't do anything with this socket

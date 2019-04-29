@@ -592,13 +592,11 @@ https://on.cypress.io/recording-project-runs
 `
 
 exports['e2e record api interaction errors recordKey and projectId errors and exits on 401 1'] = `
-We failed trying to authenticate this project: pid123
-
-Your Record Key is invalid: f858a...ee7e1
+Your Record Key f858a...ee7e1 is not valid with this project: pid123
 
 It may have been recently revoked by you or another user.
 
-Please log into the Dashboard to see the updated token.
+Please log into the Dashboard to see the valid record keys.
 
 https://on.cypress.io/dashboard/projects/pid123
 
@@ -762,7 +760,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 `
 
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-Can't run because you've entered an invalid browser.
+Can't run because you've entered an invalid browser name.
 
 Browser: 'browserDoesNotExist' was not found on your system.
 
