@@ -14,6 +14,7 @@ describe('upload util', () => {
     it('checks given strings', () => {
       const valid = upload.validPlatformArchs
       const invalid = ['darwin', 'win32', 'windows', 'linux', 'linux64']
+
       snapshot(isValidPlatformArch, ...valid, ...invalid)
     })
   })
