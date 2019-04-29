@@ -9,7 +9,7 @@ fs = require("fs")
 os = require("os")
 Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
-konfig  = require("../../../packages/server/lib/konfig")
+konfig = require('../../binary/get-config')()
 
 formHashFromEnvironment = () ->
   env = process.env
