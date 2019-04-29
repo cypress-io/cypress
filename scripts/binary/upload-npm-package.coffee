@@ -11,7 +11,7 @@ gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
 
-konfig  = require("../../packages/server/lib/konfig")
+konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
 
 npmPackageExtension = ".tgz"
