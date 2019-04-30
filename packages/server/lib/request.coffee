@@ -30,8 +30,8 @@ getOriginalHeaders = (req = {}) ->
   ## original headers
   req.req?.headers ? req.headers
 
-getDelayForRetry = (iteration) ->
-  _.get([0, 1, 2, 2], iteration) * 1000
+getDelayForRetry = (iteration, err) ->
+  _.get([0, 1, 2, 2], iteration) * (err.code == 'ECONNREFUSED' ? 100 : 1000)
 
 hasRetriableStatusCodeFailure = (res, opts) ->
   opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
@@ -211,7 +211,7 @@ createRetryingRequestStream = (opts = {}) ->
     retry = (err) ->
       attempts = iteration + 1
 
-      delay = getDelayForRetry(iteration)
+      delay = getDelayForRetry(iteration, err)
 
       reqStream.abort()
 
