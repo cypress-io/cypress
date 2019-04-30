@@ -1,4 +1,6 @@
 _          = require("lodash")
+os         = require("os")
+path       = require("path")
 r          = require("request")
 rp         = require("request-promise")
 url        = require("url")
@@ -10,6 +12,7 @@ stream     = require("stream")
 pumpify    = require("pumpify")
 agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
+streamBuffer = require("./util/stream_buffer").streamBuffer
 Cookies    = require("./automation/cookies")
 
 Cookie    = tough.Cookie
@@ -18,9 +21,14 @@ CookieJar = tough.CookieJar
 ## shallow clone the original
 serializableProperties = Cookie.serializableProperties.slice(0)
 
+requestBuffers = 0
+
 MAX_REQUEST_RETRIES = 4
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
+getReqBodyBufferFilename = () ->
+  path.join(os.tmpdir(), "cy-request-#{process.pid}-#{requestBuffers++}-#{Number(new Date())}")
 
 getOriginalHeaders = (req = {}) ->
   ## the request instance holds an instance
@@ -183,7 +191,7 @@ createRetryingRequestStream = (opts = {}) ->
     debugger
 
   didAbort = false
-  pipeSrc = null
+  reqBodyBuffer = null
 
   emitError = (err) ->
     retryStream.emit("error", err)
@@ -225,6 +233,7 @@ createRetryingRequestStream = (opts = {}) ->
       , delay
 
     reqStream = r(opts)
+
     delayStream = stream.PassThrough()
 
     retryStream.setPipeline([reqStream, delayStream])
@@ -233,8 +242,8 @@ createRetryingRequestStream = (opts = {}) ->
 
     ## if we're retrying and we previous piped
     ## into the reqStream, then reapply this now
-    if pipeSrc
-      pipeSrc.pipe(reqStream)
+    if reqBodyBuffer
+      reqBodyBuffer.reader().pipe(reqStream)
 
     ## forward the abort call to the underlying request
     retryStream.abort = ->
@@ -245,11 +254,8 @@ createRetryingRequestStream = (opts = {}) ->
     onPiped = (src) ->
       ## store this so we can reapply it
       ## if we need to retry
-      ## TODO: this needs to write to the fs
-      ## so we can re-read the request body
-      ## later and then remove it after the
-      ## response is complete
-      pipeSrc = src
+      reqBodyBuffer = streamBuffer()
+      src.pipe(reqBodyBuffer.bufferer)
 
       ## internally pumpify does not call the
       ## .pipe() method on the reqStream, which
@@ -260,11 +266,12 @@ createRetryingRequestStream = (opts = {}) ->
       ## outgoing message - so we manually fire it here
       reqStream.emit('pipe', src)
 
-    ## when this passthrough stream is being piped into
-    ## then make sure we properly "forward" and connect
-    ## forward it to the real reqStream which enables
-    ## request to read off the IncomingMessage readable stream
-    retryStream.once("pipe", onPiped)
+    if iteration == 0
+      ## when this passthrough stream is being piped into
+      ## then make sure we properly "forward" and connect
+      ## forward it to the real reqStream which enables
+      ## request to read off the IncomingMessage readable stream
+      retryStream.once("pipe", onPiped)
 
     reqStream.on "error", (err) ->
       if didReceiveResponse
