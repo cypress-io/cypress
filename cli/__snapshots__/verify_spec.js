@@ -78,31 +78,6 @@ Cypress Version: 1.2.3
 
 `
 
-exports['error hanging process'] = `
-It looks like this is your first time using Cypress: 1.2.3
-
- ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
-   → Cypress Version: 1.2.3
-Error: Cypress failed to start.
-
-This is usually caused by a missing library or dependency.
-
-The error below should indicate which dependency is missing.
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
-----------
-
-It timed out 
-some stderr
-----------
-
-Platform: darwin (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
 exports['executable cannot be found 1'] = `
 Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
 
