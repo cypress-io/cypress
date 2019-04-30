@@ -5,20 +5,17 @@ const count = (num) => num > 0 ? num : '--'
 const formatDuration = (duration) => duration > 0 ? (duration / 1000).toFixed(2) : 0
 
 const Stats = observer(({ stats }) => (
-  <ul aria-label='Stats' className='stats'>
+  <ul className='stats'>
     <li className='passed'>
-      <i aria-hidden="true" className='fa fa-check'></i>
-      <span className='visually-hidden'>Passed:</span>
+      <i className='fa fa-check'></i>
       <span className='num'>{count(stats.numPassed)}</span>
     </li>
     <li className='failed'>
-      <i aria-hidden="true" className='fa fa-times'></i>
-      <span className='visually-hidden'>Failed:</span>
+      <i className='fa fa-times'></i>
       <span className='num'>{count(stats.numFailed)}</span>
     </li>
     <li className='pending'>
-      <i aria-hidden="true" className='fa fa-circle-o-notch'></i>
-      <span className='visually-hidden'>Pending:</span>
+      <i className='fa fa-circle-o-notch'></i>
       <span className='num'>{count(stats.numPending)}</span>
     </li>
     <li className='duration'>

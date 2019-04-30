@@ -1,16 +1,13 @@
 #!/usr/bin/env node
 
 /* eslint-disable no-console */
-// @ts-check
 
 // builds Windows binary on AppVeyor CI
 // but only on the right branch
 
 const shell = require('shelljs')
-const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-// const assert = require('assert')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -21,17 +18,15 @@ shell.set('-e') // any error is fatal
 const isRightBranch = () => {
   const branch = process.env.APPVEYOR_REPO_BRANCH
 
-  return branch === 'develop' || branch === 'issue-716-ffmpeg-packaging'
+  return branch === 'develop'
 }
 
-const isForkedPullRequest = () => {
-  const repoName = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME
-
-  return repoName && repoName !== 'cypress-io/cypress'
+const isPullRequest = () => {
+  return Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
 }
 
 const shouldBuildBinary = () => {
-  return isRightBranch() && !isForkedPullRequest()
+  return isRightBranch() && !isPullRequest()
 }
 
 if (!shouldBuildBinary()) {
@@ -49,11 +44,6 @@ la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
 console.log('building version', version)
 
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
-
-const arch = os.arch()
-
-shell.echo(`Building for win32 [${arch}]...`)
-
 shell.cat('npm-package-url.json')
 shell.exec(`npm run binary-build -- --platform windows --version ${version}`)
 
@@ -72,37 +62,8 @@ if (result.stdout.includes('nodemon')) {
   process.exit(1)
 }
 
-// const pathToExe = 'C:/projects/cypress/build/win32/Cypress/Cypress.exe'
-
-// // verify that Cypress.exe is either 32bit or 64bit based on node's arch
-// const dumpbin = shell.exec(`dumpbin /headers ${pathToExe}`)
-
-// // eslint-disable-next-line default-case
-// switch (arch) {
-//   case 'ia32':
-//     assert.ok(dumpbin.stdout.includes('machine (x86)'))
-//     break
-
-//   case 'x64':
-//     assert.ok(dumpbin.stdout.includes('machine (x64)'))
-//     break
-// }
-
-/**
- * Returns true if we are building a pull request
- */
-const isPullRequest = () => {
-  return Boolean(process.env.APPVEYOR_PULL_REQUEST_NUMBER)
-}
-
-if (isPullRequest()) {
-  console.log('This is a pull request, skipping uploading binary')
-} else {
-  console.log('Zipping and upload binary')
-
-  shell.exec('npm run binary-zip')
-  shell.ls('-l', '*.zip')
-  shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)
-  shell.cat('binary-url.json')
-  shell.exec('node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor')
-}
+shell.exec('npm run binary-zip')
+shell.ls('-l', '*.zip')
+shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)
+shell.cat('binary-url.json')
+shell.exec('node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor')

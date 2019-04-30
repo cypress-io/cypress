@@ -53,7 +53,7 @@ getStylesFor = (doc, $$, stylesheets, location) ->
 
       makePathsAbsoluteToDoc(doc, styleRules)
 
-getDocumentStylesheets = (document = {}) ->
+getDocumentStylesheets = (document) ->
   _.reduce document.styleSheets, (memo, stylesheet) ->
     memo[stylesheet.href] = stylesheet
     return memo
@@ -208,8 +208,6 @@ create = ($$, state) ->
 
     ## careful renaming or removing this method, the runner depends on it
     getStyles
-
-    getDocumentStylesheets
   }
 
 module.exports = {

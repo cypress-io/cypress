@@ -739,7 +739,7 @@ describe "src/cy/commands/querying", ->
           .get("@getUsers").then ->
             expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
               message: "@getUsers"
-              referencesAlias: {name: "getUsers"}
+              referencesAlias: "getUsers"
               aliasType: "route"
             }
 
@@ -747,7 +747,7 @@ describe "src/cy/commands/querying", ->
         cy.on "log:added", (attrs, log) ->
           if attrs.name is "get"
             expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
-              referencesAlias: {name: "f"}
+              referencesAlias: "f"
               aliasType: "primitive"
             }
             done()

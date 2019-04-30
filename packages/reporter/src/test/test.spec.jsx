@@ -14,6 +14,10 @@ const appStateStub = (props) => {
   }, props)
 }
 
+const eventsStub = () => ({
+  emit: sinon.spy(),
+})
+
 const model = (props) => {
   return _.extend({
     commands: [],
@@ -37,6 +41,16 @@ describe('<Test />', () => {
     const component = shallow(<Test model={model({ shouldRender: false })} />)
 
     expect(component).to.be.empty
+  })
+
+  it('emits show:error event and stops propagation when error is clicked', () => {
+    const events = eventsStub()
+    const component = shallow(<Test model={model({ err: { displayMessage: 'some error' } })} events={events} />)
+    const e = { stopPropagation: sinon.spy() }
+
+    component.find('FlashOnClick').simulate('click', e)
+    expect(events.emit).to.have.been.calledWith('show:error', 't1')
+    expect(e.stopPropagation).to.have.been.called
   })
 
   context('open/closed', () => {

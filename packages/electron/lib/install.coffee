@@ -64,7 +64,7 @@ module.exports = {
       out: "tmp"
       name: "Cypress"
       platform: os.platform()
-      arch: os.arch()
+      arch: "x64"
       asar: false
       prune: true
       overwrite: true

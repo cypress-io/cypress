@@ -1,18 +1,16 @@
 require("../spec_helper")
 
 _             = require("lodash")
-os            = require("os")
 http          = require("http")
 express       = require("express")
 Promise       = require("bluebird")
-connect       = require("@packages/network").connect
 routes        = require("#{root}lib/routes")
 config        = require("#{root}lib/config")
 logger        = require("#{root}lib/logger")
 Server        = require("#{root}lib/server")
 Socket        = require("#{root}lib/socket")
 fileServer    = require("#{root}lib/file_server")
-ensureUrl     = require("#{root}lib/util/ensure-url")
+connect       = require("#{root}lib/util/connect")
 buffers       = require("#{root}lib/util/buffers")
 
 morganFn = ->
@@ -31,7 +29,6 @@ describe "lib/server", ->
       @config = cfg
       @server = Server()
 
-      @oldFileServer = @server._fileServer
       @server._fileServer = @fileServer
 
   afterEach ->
@@ -117,38 +114,8 @@ describe "lib/server", ->
       .spread (port) =>
         expect(port).to.eq(@port)
 
-    it "all servers listen only on localhost and no other interface", ->
-      fileServer.create.restore()
-      @server._fileServer = @oldFileServer
-
-      interfaces = _.flatten(_.values(os.networkInterfaces()))
-      nonLoopback = interfaces.find (iface) =>
-        iface.family == "IPv4" && iface.address != "127.0.0.1"
-
-      ## verify that we can connect to `port` over loopback
-      ## and not over another configured IPv4 address
-      tryOnlyLoopbackConnect = (port) =>
-        Promise.all([
-          connect.byPortAndAddress(port, "127.0.0.1")
-          connect.byPortAndAddress(port, nonLoopback)
-          .then ->
-            throw new Error("Shouldn't be able to connect on #{nonLoopback.address}:#{port}")
-          .catch { errno: "ECONNREFUSED" }, ->
-        ])
-
-      @server.createServer(@app, {})
-      .spread (port) =>
-        Promise.map(
-          [
-            port
-            @server._fileServer.port()
-            @server._httpsProxy._sniPort
-          ],
-          tryOnlyLoopbackConnect
-        )
-
     it "resolves with warning if cannot connect to baseUrl", ->
-      sinon.stub(ensureUrl, "isListening").rejects()
+      sinon.stub(connect, "ensureUrl").rejects()
       @server.createServer(@app, {port: @port, baseUrl: "http://localhost:#{@port}"})
       .spread (port, warning) =>
         expect(warning.type).to.eq("CANNOT_CONNECT_BASE_URL_WARNING")
@@ -266,7 +233,7 @@ describe "lib/server", ->
 
       @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
 
-      expect(@proxy.ws).to.be.calledWithMatch(req, @socket, @head, {
+      expect(@proxy.ws).to.be.calledWith(req, @socket, @head, {
         secure: false
         target: {
           host: "www.google.com"

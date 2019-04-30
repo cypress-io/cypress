@@ -331,9 +331,6 @@ class Socket
         ## we only use the 'ack' here in tests
         cb() if cb
 
-      socket.on "external:open", (url) ->
-        require("electron").shell.openExternal(url)
-
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
           @toRunner(event, data)

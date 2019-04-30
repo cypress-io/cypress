@@ -4,6 +4,8 @@ Promise = require("bluebird")
 $utils = require("../../cypress/utils")
 $Location = require("../../cypress/location")
 
+validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
+
 isOptional = (memo, val, key) ->
   if _.isNull(val)
     memo.push(key)
@@ -27,23 +29,14 @@ REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 
 OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 
-hasFormUrlEncodedContentTypeHeader = (headers) ->
-  header = _.findKey(headers, _.matches("application/x-www-form-urlencoded"))
-
-  header and _.toLower(header) is "content-type"
+argIsHttpMethod = (str) ->
+  _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
 
 isValidJsonObj = (body) ->
   _.isObject(body) and not _.isFunction(body)
 
 whichAreOptional = (val, key) ->
   val is null and key in OPTIONAL_OPTS
-
-needsFormSpecified = (options = {}) ->
-  { body, json, headers } = options
-
-  ## json isn't true, and we have an object body and the user
-  ## specified that the content-type header is x-www-form-urlencoded
-  json isnt true and _.isObject(body) and hasFormUrlEncodedContentTypeHeader(headers)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   # Cypress.extend
@@ -67,7 +60,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         when args.length is 2
           ## if our first arg is a valid
           ## HTTP method then set method + url
-          if $utils.isValidHttpMethod(args[0])
+          if argIsHttpMethod(args[0])
             o.method = args[0]
             o.url    = args[1]
           else
@@ -99,7 +92,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.has(options, "followRedirects")
         options.followRedirect = options.followRedirects
 
-      if not $utils.isValidHttpMethod(options.method)
+      if not validHttpMethodsRe.test(options.method)
         $utils.throwErrByPath("request.invalid_method", {
           args: { method: o.method }
         })
@@ -124,13 +117,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
         $utils.throwErrByPath("request.url_invalid")
-
-      ## if a user has `x-www-form-urlencoded` content-type set
-      ## with an object body, they meant to add 'form: true'
-      ## so we are nice and do it for them :)
-      ## https://github.com/cypress-io/cypress/issues/2923
-      if needsFormSpecified(options)
-        options.form = true
 
       ## only set json to true if form isnt true
       ## and we have a valid object for body

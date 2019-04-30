@@ -128,14 +128,13 @@ describe "lib/request", ->
         expect(resp.requestHeaders).to.deep.eq({
           "accept": "*/*"
           "accept-encoding": "gzip, deflate"
-          "connection": "keep-alive"
           "content-length": 9
           "host": "www.github.com"
         })
         expect(resp.allRequestResponses).to.deep.eq([
           {
             "Request Body":     "foobarbaz"
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "content-length": 9, "host": "www.github.com"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "content-length": 9, "host": "www.github.com"}
             "Request URL":      "http://www.github.com/foo"
             "Response Body":    "hello"
             "Response Headers": {"content-type": "text/html"}
@@ -177,29 +176,28 @@ describe "lib/request", ->
         ])
         expect(resp.requestHeaders).to.deep.eq({
           "accept": "*/*"
-          "accept-encoding": "gzip, deflate"
-          "connection": "keep-alive"
+          "accept-encoding": "gzip, deflate",
           "referer": "http://www.github.com/auth"
           "host": "www.github.com"
         })
         expect(resp.allRequestResponses).to.deep.eq([
           {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com"}
             "Request URL":      "http://www.github.com/dashboard"
             "Response Body":    null
             "Response Headers": {"location": "/auth"}
             "Response Status":  301
           }, {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com", "referer": "http://www.github.com/dashboard"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com", "referer": "http://www.github.com/dashboard"}
             "Request URL":      "http://www.github.com/auth"
             "Response Body":    null
             "Response Headers": {"location": "/login"}
             "Response Status":  302
           }, {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com", "referer": "http://www.github.com/auth"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com", "referer": "http://www.github.com/auth"}
             "Request URL":      "http://www.github.com/login"
             "Response Body":    "log in"
             "Response Headers": {"content-type": "text/html"}
@@ -301,19 +299,6 @@ describe "lib/request", ->
       })
       .then (resp) ->
         expect(resp.body).to.eq("derp")
-
-    it "sends connection: keep-alive by default", ->
-      nock("http://localhost:8080")
-      .matchHeader("connection", "keep-alive")
-      .get("/foo")
-      .reply(200, "it worked")
-
-      request.send({}, @fn, {
-        url: "http://localhost:8080/foo"
-        cookies: false
-      })
-      .then (resp) ->
-        expect(resp.body).to.eq("it worked")
 
     context "accept header", ->
       it "sets to */* by default", ->

@@ -1,4 +1,3 @@
-_ = require("lodash")
 path = require("path")
 awspublish = require('gulp-awspublish')
 human = require("human-interval")
@@ -9,7 +8,7 @@ fs = require("fs")
 os = require("os")
 Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
-konfig = require('../../binary/get-config')()
+konfig  = require("../../../packages/server/lib/konfig")
 
 formHashFromEnvironment = () ->
   env = process.env
@@ -101,7 +100,7 @@ purgeDesktopAppFromCache = ({version, platform, zipName}) ->
   la(check.extension("zip", zipName),
     "zip filename should end with .zip", zipName)
 
-  osName = getUploadNameByOsAndArch(platform)
+  osName = getUploadNameByOs(platform)
   la(check.unemptyString(osName), "missing osName", osName)
   url = getDestktopUrl(version, osName, zipName)
   purgeCache(url)
@@ -117,25 +116,15 @@ purgeDesktopAppAllPlatforms = (version, zipName) ->
   Promise.mapSeries platforms, (platform) ->
     purgeDesktopAppFromCache({version, platform, zipName})
 
-getUploadNameByOsAndArch = (platform) ->
-  ## just hard code for now...
-  arch = os.arch()
-
+getUploadNameByOs = (osName = os.platform()) ->
   uploadNames = {
-    darwin: {
-      "x64": "darwin-x64"
-    },
-    linux: {
-      "x64": "linux-x64"
-    },
-    win32: {
-      "x64": "win32-x64",
-      "ia32": "win32-ia32"
-    }
+    darwin: "osx64"
+    linux:  "linux64"
+    win32:  "win64"
   }
-  name = _.get(uploadNames[platform], arch)
+  name = uploadNames[osName]
   if not name
-    throw new Error("Cannot find upload name for OS: '#{platform}' with arch: '#{arch}'")
+    throw new Error("Cannot find upload name for OS #{osName}")
   name
 
 saveUrl = (filename) -> (url) ->
@@ -152,7 +141,7 @@ module.exports = {
   purgeCache,
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
-  getUploadNameByOsAndArch,
+  getUploadNameByOs,
   saveUrl,
   formHashFromEnvironment
 }

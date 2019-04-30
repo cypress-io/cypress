@@ -1,4 +1,4 @@
-import { shallow, mount } from 'enzyme'
+import { shallow } from 'enzyme'
 import _ from 'lodash'
 import React from 'react'
 import sinon from 'sinon'
@@ -180,11 +180,11 @@ describe('<Command />', () => {
       let aliases
 
       beforeEach(() => {
-        aliases = mount(<Command model={model({ referencesAlias: [{ name: 'barAlias' }, { name: 'bazAlias', ordinal: '1st', cardinal: '1' }, { name: 'bazAlias', ordinal: '2nd', cardinal: '2' }], aliasType: 'dom' })} aliasesWithDuplicates={['bazAlias']}/>).find(AliasesReferences)
+        aliases = shallow(<Command model={model({ referencesAlias: ['barAlias', 'bazAlias'], aliasType: 'dom' })} />).find(AliasesReferences).shallow()
       })
 
       it('renders the aliases for each one it references', () => {
-        expect(aliases.find('.command-alias').length).to.equal(3)
+        expect(aliases.find('.command-alias').length).to.equal(2)
       })
 
       it('renders the aliases with the right class', () => {
@@ -197,21 +197,14 @@ describe('<Command />', () => {
       })
 
       it('renders tooltip for each alias it references', () => {
-        expect(aliases.find('Tooltip').length).to.equal(3)
+        expect(aliases.find('Tooltip').length).to.equal(2)
       })
 
       it('renders the right tooltip title for each alias it references', () => {
         const tooltips = aliases.find('Tooltip')
 
         expect(tooltips.first()).to.have.prop('title', 'Found an alias for: \'barAlias\'')
-        expect(tooltips.last()).to.have.prop('title', 'Found 2nd alias for: \'bazAlias\'')
-      })
-
-      it('only renders the count for aliases with duplicates', () => {
-        const commandAliasContainers = aliases.find('.command-alias-container')
-
-        expect(commandAliasContainers.first().find('.command-alias-count')).to.not.exist
-        expect(commandAliasContainers.last().find('.command-alias-count')).to.have.text('2')
+        expect(tooltips.last()).to.have.prop('title', 'Found an alias for: \'bazAlias\'')
       })
     })
 
@@ -494,18 +487,6 @@ describe('<Command />', () => {
       const component = shallow(<Command model={model()} />)
 
       expect(component).not.to.have.className('command-is-duplicate')
-    })
-
-    it('num duplicates renders with has-alias class if command is an alias', () => {
-      const component = shallow(<Command model={model({ alias: 'foo' })} />)
-
-      expect(component.find('.num-duplicates')).to.have.className('has-alias')
-    })
-
-    it('num duplicates renders without has-alias class if command is not an alias', () => {
-      const component = shallow(<Command model={model()} />)
-
-      expect(component.find('.num-duplicates')).not.to.have.className('has-alias')
     })
 
     it('displays number of duplicates', () => {

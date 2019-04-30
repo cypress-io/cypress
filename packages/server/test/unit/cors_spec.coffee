@@ -58,14 +58,6 @@ describe "lib/util/cors", ->
         tld: "nl"
       })
 
-    ## https://github.com/cypress-io/cypress/issues/3717
-    it "parses http://dev.classea12.beta.gouv.fr", ->
-      @isEq("http://dev.classea12.beta.gouv.fr", {
-        port: "80"
-        domain: "beta"
-        tld: "gouv.fr"
-      })
-
     it "parses http://www.local.nl:8080", ->
       @isEq("http://www.local.nl:8080", {
         port: "8080"

@@ -79,7 +79,7 @@ export default (props) => {
       </svg>
       <p>Sorry, we could not load:</p>
       <p>
-        <a href="${props.url}" target="_blank" rel="noopener noreferrer">${props.url}</a>
+        <a href="${props.url}" target="_blank">${props.url}</a>
       </p>
       ${getStatus()}
     </div>

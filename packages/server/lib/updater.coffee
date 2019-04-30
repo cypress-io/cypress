@@ -5,7 +5,6 @@ semver         = require("semver")
 request        = require("request")
 NwUpdater      = require("node-webkit-updater")
 pkg            = require("@packages/root")
-agent          = require("@packages/network").agent
 cwd            = require("./cwd")
 konfig         = require("./konfig")
 
@@ -42,9 +41,7 @@ NwUpdater.prototype.checkNewVersion = (cb) ->
       headers: {
         "x-cypress-version": pkg.version
         "x-machine-id": id
-      },
-      agent: agent
-      proxy: null
+      }
     }, gotManifest.bind(@))
 
   ## return hashed value because we dont care nor want

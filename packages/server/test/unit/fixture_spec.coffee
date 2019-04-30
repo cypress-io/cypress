@@ -132,15 +132,6 @@ describe "lib/fixture", ->
             }
           """
 
-    ## https://github.com/cypress-io/cypress/issues/3739
-    it "can load a fixture with no extension when a same-named folder also exists", ->
-      projectPath = FixturesHelper.projectPath("folder-same-as-fixture")
-      config.get(projectPath)
-      .then (cfg) =>
-        fixture.get(cfg.fixturesFolder, "foo")
-        .then (fixture) ->
-          expect(fixture).to.deep.eq({ "bar": "baz" })
-
   context "js files", ->
     it "returns valid JS object", ->
       fixture.get(@fixturesFolder, "user.js").then (user) ->

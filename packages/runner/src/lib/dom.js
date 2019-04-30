@@ -138,12 +138,13 @@ function getOrCreateSelectorHelperDom ($body) {
   let $container = $body.find('.__cypress-selector-playground')
 
   if ($container.length) {
-    const shadowRoot = $container[0].shadowRoot
+    const shadowRoot = $container.find('.__cypress-selector-playground-shadow-root-container')[0].shadowRoot
 
     return Promise.resolve({
       $container,
       shadowRoot,
       $reactContainer: $(shadowRoot).find('.react-container'),
+      $cover: $container.find('.__cypress-selector-playground-cover'),
     })
   }
 
@@ -152,11 +153,20 @@ function getOrCreateSelectorHelperDom ($body) {
   .css({ position: 'static' })
   .appendTo($body)
 
-  const shadowRoot = $container[0].attachShadow({ mode: 'open' })
+  const $shadowRootContainer = $('<div />')
+  .addClass('__cypress-selector-playground-shadow-root-container')
+  .css({ position: 'static' })
+  .appendTo($container)
+
+  const shadowRoot = $shadowRootContainer[0].attachShadow({ mode: 'open' })
 
   const $reactContainer = $('<div />')
   .addClass('react-container')
   .appendTo(shadowRoot)
+
+  const $cover = $('<div />')
+  .addClass('__cypress-selector-playground-cover')
+  .appendTo($container)
 
   return Promise.try(() => {
     return fetch('/__cypress/runner/cypress_selector_playground.css')
@@ -167,21 +177,21 @@ function getOrCreateSelectorHelperDom ($body) {
   .then((content) => {
     $('<style />', { html: content }).prependTo(shadowRoot)
 
-    return { $container, shadowRoot, $reactContainer }
+    return { $container, shadowRoot, $reactContainer, $cover }
   })
   .catch((error) => {
     console.error('Selector playground failed to load styles:', error) // eslint-disable-line no-console
 
-    return { $container, shadowRoot, $reactContainer }
+    return { $container, shadowRoot, $reactContainer, $cover }
   })
 }
 
 function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
   getOrCreateSelectorHelperDom($body)
-  .then(({ $container, shadowRoot, $reactContainer }) => {
+  .then(({ $container, shadowRoot, $reactContainer, $cover }) => {
     if (!$el) {
       selectorPlaygroundHighlight.unmount($reactContainer[0])
-      $reactContainer.off('click')
+      $cover.off('click')
       $container.remove()
 
       return
@@ -206,8 +216,9 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
       }
     }).get()
 
-    if ($el.length === 1) {
-      $reactContainer
+    if (styles.length === 1) {
+      $cover
+      .css(styles[0])
       .off('click')
       .on('click', onClick)
     }
@@ -215,6 +226,7 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
     selectorPlaygroundHighlight.render($reactContainer[0], {
       selector,
       appendTo: shadowRoot,
+      boundary: $body[0],
       showTooltip,
       styles,
     })

@@ -11,7 +11,7 @@ gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
 
-konfig = require('../binary/get-config')()
+konfig  = require("../../packages/server/lib/konfig")
 uploadUtils = require("./util/upload")
 
 npmPackageExtension = ".tgz"
@@ -19,17 +19,14 @@ uploadFileName = "cypress.tgz"
 
 isNpmPackageFile = check.extension(npmPackageExtension)
 
-# the package tgz file will be uploaded into unique folder
+# wonder if our CDN url would just work
+# https://cdn.cypress.io/desktop/0.20.1/osx64/cypress.zip
 # in our case something like this
-# https://cdn.cypress.io/beta/npm/<version>/<some unique hash>/cypress.tgz
-rootFolder = "beta"
+# https://cdn.cypress.io/beta/npm/0.20.2/<some unique version info>/cypress.tgz
 npmFolder = "npm"
+rootFolder = "beta"
 
 getCDN = ({version, hash, filename}) ->
-  la(check.semver(version), 'invalid version', version)
-  la(check.unemptyString(hash), 'missing hash', hash)
-  la(check.unemptyString(filename), 'missing filename', filename)
-  la(isNpmPackageFile(filename), 'wrong extension for file', filename)
   [konfig("cdn_url"), rootFolder, npmFolder, version, hash, filename].join("/")
 
 getUploadDirName = (options) ->

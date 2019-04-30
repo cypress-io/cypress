@@ -141,14 +141,14 @@ describe "Specs List", ->
 
       context "displays list of specs", ->
         it "lists main folders of specs", ->
-          cy.contains(".folder.level-0", "integration")
-          cy.contains(".folder.level-0", "unit")
+          cy.contains(".folder", "integration")
+          cy.contains(".folder", "unit")
 
         it "lists nested folders", ->
-          cy.get(".folder.level-0 .folder.level-1").contains("accounts")
+          cy.get(".folder .folder").contains("accounts")
 
         it "lists test specs", ->
-          cy.get(".folder.level-0 .file.level-1 a").contains("app_spec.coffee")
+          cy.get(".file a").contains("app_spec.coffee")
 
         it "lists folder with '.'", ->
           cy.get(".file").should("have.length", 7)
@@ -157,22 +157,22 @@ describe "Specs List", ->
       context "collapsing specs", ->
         it "sets folder collapsed when clicked", ->
           cy.get(".folder:first").should("have.class", "folder-expanded")
-          cy.get(".folder .folder-name:first").click()
+          cy.get(".folder .folder-display-name:first").click()
           cy.get(".folder:first").should("have.class", "folder-collapsed")
 
         it "hides children when folder clicked", ->
           cy.get(".file").should("have.length", 7)
-          cy.get(".folder .folder-name:first").click()
+          cy.get(".folder .folder-display-name:first").click()
           cy.get(".file").should("have.length", 2)
 
         it "sets folder expanded when clicked twice", ->
-          cy.get(".folder .folder-name:first").click()
+          cy.get(".folder .folder-display-name:first").click()
           cy.get(".folder:first").should("have.class", "folder-collapsed")
-          cy.get(".folder .folder-name:first").click()
+          cy.get(".folder .folder-display-name:first").click()
           cy.get(".folder:first").should("have.class", "folder-expanded")
 
         it "hides children for every folder collapsed", ->
-          lastExpandedFolderSelector = ".folder-expanded:last > div > .folder-name:last"
+          lastExpandedFolderSelector = ".folder-expanded:last > div > div > .folder-display-name:last"
 
           cy.get(".file").should("have.length", 7)
 

@@ -60,7 +60,7 @@ if (isWindows()) {
 if (options['inspect-brk']) {
   commandAndArguments.args.push(
     '--inspect',
-    `--inspect-brk${options['inspect-brk'] === true ? '' : `=${options['inspect-brk']}`}`
+    `--inspect-brk=${options['inspect-brk']}`
   )
 }
 

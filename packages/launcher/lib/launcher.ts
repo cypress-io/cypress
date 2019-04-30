@@ -1,6 +1,9 @@
+import { LauncherApi } from './types'
 import { launch } from './browsers'
 import { detect, detectByPath } from './detect'
 
-export { detect }
-export { detectByPath }
-export { launch }
+module.exports = {
+  detect,
+  detectByPath,
+  launch
+} as LauncherApi

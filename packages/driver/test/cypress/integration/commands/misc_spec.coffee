@@ -69,18 +69,6 @@ describe "src/cy/commands/misc", ->
       cy.wrap({}).then (subject) ->
         expect(subject).to.deep.eq {}
 
-    ## https://github.com/cypress-io/cypress/issues/3241
-    it "cy.wrap(undefined) should retry", () ->
-      stub = cy.stub()
-
-      cy.wrap().should ->
-        stub()
-        expect(stub).to.be.calledTwice
-
-      cy.wrap(undefined).should ->
-        stub()
-        expect(stub.callCount).to.eq(4)
-
     it "can wrap jquery objects and continue to chain", ->
       @remoteWindow.$.fn.foo = "foo"
 
@@ -136,16 +124,6 @@ describe "src/cy/commands/misc", ->
           expect(arr).to.be.an('array')
           expect(Array.isArray(arr)).to.be.true
           expect(arr[0]).to.eq(doc)
-
-    ## https://github.com/cypress-io/cypress/issues/2927
-    it "can properly handle objects with 'jquery' functions as properties", ->
-      ## the root issue here has to do with the fact that window.jquery points
-      ## to the jquery constructor, but not an actual jquery instance and
-      ## we need to account for that...
-      cy.window().then (win) ->
-        win.jquery = ->
-
-        return win
 
     describe "errors", ->
       it "throws when wrapping an array of windows", (done) ->

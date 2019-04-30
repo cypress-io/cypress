@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const os = require('os')
-const snapshot = require('../support/snapshot')
+const snapshot = require('snap-shot-it')
 const { errors, formErrorText } = require(`${lib}/errors`)
 const util = require(`${lib}/util`)
 
@@ -16,18 +16,14 @@ describe('errors', function () {
   describe('individual', () => {
     it('has the following errors', () => {
       return snapshot(Object.keys(errors))
-    })
+    }
+    )
   })
 
   context('.errors.formErrorText', function () {
     it('returns fully formed text message', () => {
-      expect(missingXvfb).to.be.an('object')
-
-      return formErrorText(missingXvfb)
-      .then((text) => {
-        expect(text).to.be.a('string')
-        snapshot(text)
-      })
-    })
+      return snapshot(formErrorText(missingXvfb))
+    }
+    )
   })
 })

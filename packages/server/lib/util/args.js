@@ -18,13 +18,13 @@ const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
 const coerce = require('./coerce')
 const config = require('../config')
-const proxy = require('./proxy')
+const cwd = require('../cwd')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
-const everythingAfterFirstEqualRe = /=(.*)/
+const everythingAfterFirstEqualRe = /=(.+)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource'.split(' ')
+const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk'.split(' ')
 
 // returns true if the given string has double quote character "
 // only at the last position.
@@ -145,8 +145,7 @@ const sanitizeAndConvertNestedArgs = function (str) {
   .split(',')
   .map((pair) => {
     return pair.split(everythingAfterFirstEqualRe)
-  })
-  .fromPairs()
+  }).fromPairs()
   .mapValues(JSONOrCoerce)
   .value()
 }
@@ -173,7 +172,6 @@ module.exports = {
       'reporter-options': 'reporterOptions',
       'output-path': 'outputPath',
       'inspect-brk': 'inspectBrk',
-      'proxy-source': 'proxySource',
     }
 
     //# takes an array of args and converts
@@ -214,28 +212,11 @@ module.exports = {
         return path.resolve(options.cwd, p)
       }
 
-      // clean up single quotes wrapping the spec for Windows users
-      // https://github.com/cypress-io/cypress/issues/2298
-      if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
-        spec = spec.substring(1, spec.length - 1)
-      }
-
       options.spec = strToArray(spec).map(resolvePath)
     }
 
     if (envs = options.env) {
       options.env = sanitizeAndConvertNestedArgs(envs)
-    }
-
-    const proxySource = proxy.loadSystemProxySettings()
-
-    if (process.env.HTTP_PROXY) {
-      if (proxySource) {
-        options.proxySource = proxySource
-      }
-
-      options.proxyServer = process.env.HTTP_PROXY
-      options.proxyBypassList = process.env.NO_PROXY
     }
 
     if (ro = options.reporterOptions) {

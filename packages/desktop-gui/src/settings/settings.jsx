@@ -6,9 +6,8 @@ import Collapse, { Panel } from 'rc-collapse'
 import Configuration from './configuration'
 import ProjectId from './project-id'
 import RecordKey from './record-key'
-import ProxySettings from './proxy-settings'
 
-const Settings = observer(({ project, app }) => (
+const Settings = observer(({ project }) => (
   <div className={cs('settings', {
     'show-project-id': !!project.id,
     'show-record-key': project.isSetupForRecording,
@@ -23,9 +22,6 @@ const Settings = observer(({ project, app }) => (
         </Panel>
         <Panel header='Record Key' key='record-key' className='form-horizontal settings-record-key'>
           <RecordKey project={project} />
-        </Panel>
-        <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
-          <ProxySettings app={app} />
         </Panel>
       </Collapse>
     </div>

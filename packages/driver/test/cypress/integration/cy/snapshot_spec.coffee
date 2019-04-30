@@ -1,17 +1,16 @@
 $ = Cypress.$.bind(Cypress)
-$Snapshots = require("../../../../src/cy/snapshots")
 
 normalizeStyles = (styles) ->
   styles
   .replace(/\s+/gm, "")
   .replace(/['"]/gm, "'")
 
-describe "driver/src/cy/snapshots", ->
+describe "driver/src/cy/snapshot", ->
   context "invalid snapshot html", ->
     beforeEach ->
       cy.visit("/fixtures/invalid_html.html")
 
-    it "can snapshot html with invalid attributes", ->
+    it "can spapshot html with invalid attributes", ->
       { htmlAttrs } = cy.createSnapshot()
 
       expect(htmlAttrs).to.eql({
@@ -265,11 +264,3 @@ describe "driver/src/cy/snapshots", ->
 
         { body } = cy.createSnapshot(@$el)
         expect(body.find("iframe").css("height")).to.equal("70px")
-
-  context ".getDocumentStylesheets", ->
-    it "returns empty obj when no document", ->
-      fn = ->
-
-      snapshot = $Snapshots.create(fn, fn)
-      
-      expect(snapshot.getDocumentStylesheets(null)).to.deep.eq({})

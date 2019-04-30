@@ -49,8 +49,12 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
           finishAssertions(assertions)
 
         getErrMessage = (err) ->
-          _.get(err, 'displayMessage') or
-            _.get(err, 'message') or
+          switch
+            when err and err.displayMessage
+              err.displayMessage
+            when err and err.message
+              err.message
+            else
               err
 
         $utils.throwErrByPath "miscellaneous.retry_timed_out", {

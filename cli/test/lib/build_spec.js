@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const fs = require(`${lib}/fs`)
 const makeUserPackageFile = require('../../scripts/build')
-const snapshot = require('../support/snapshot')
+const snapshot = require('snap-shot-it')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const R = require('ramda')

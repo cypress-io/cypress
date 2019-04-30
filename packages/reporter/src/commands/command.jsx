@@ -24,47 +24,24 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const shouldShowCount = (aliasesWithDuplicates, aliasName) => {
-  return _.includes(aliasesWithDuplicates, aliasName)
-}
-
-const AliasReference = observer(({ model, aliasObj, aliasesWithDuplicates }) => {
-  if (shouldShowCount(aliasesWithDuplicates, aliasObj.name)) {
-    return (
-      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`}>
-        <span>
-          <span className={`command-alias ${model.aliasType} show-count`}>@{aliasObj.name}</span>
-          <span className={'command-alias-count'}>{aliasObj.cardinal}</span>
-        </span>
-      </Tooltip>
-    )
-  }
-
-  return (
-    <Tooltip placement='top' title={`Found an alias for: '${aliasObj.name}'`}>
-      <span className={`command-alias ${model.aliasType}`}>@{aliasObj.name}</span>
-    </Tooltip>
-  )
-})
-
-const AliasesReferences = observer(({ model, aliasesWithDuplicates }) => (
+const AliasesReferences = observer(({ model }) => (
   <span>
-    {_.map([].concat(model.referencesAlias), (aliasObj) => (
-      <span className="command-alias-container" key={aliasObj.name + aliasObj.cardinal}>
-        <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-      </span>
+    {_.map([].concat(model.referencesAlias), (alias) => (
+      <Tooltip key={alias} placement='top' title={`Found an alias for: '${alias}'`}>
+        <span className={`command-alias ${model.aliasType}`}>@{alias}</span>
+      </Tooltip>
     ))}
   </span>
 ))
 
-const Aliases = observer(({ model, aliasesWithDuplicates }) => {
+const Aliases = observer(({ model }) => {
   if (!model.alias) return null
 
   return (
     <span>
       {_.map([].concat(model.alias), (alias) => (
         <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`}>
-          <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': (model.aliasType === 'route' && model.numDuplicates > 1) ? shouldShowCount(aliasesWithDuplicates, alias) : false })}>{alias}</span>
+          <span className={`command-alias ${model.aliasType}`}>{alias}</span>
         </Tooltip>
       ))}
     </span>
@@ -92,7 +69,7 @@ class Command extends Component {
   }
 
   render () {
-    const { model, aliasesWithDuplicates } = this.props
+    const { model } = this.props
     const message = model.displayMessage
 
     return (
@@ -140,21 +117,19 @@ class Command extends Component {
               <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
             </span>
             <span className='command-message'>
-              {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
+              {model.referencesAlias ? <AliasesReferences model={model} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
+              <Aliases model={model} />
               <Tooltip placement='top' title={visibleMessage(model)}>
                 <i className='command-invisible fa fa-eye-slash'></i>
               </Tooltip>
               <Tooltip placement='top' title={`${model.numElements} matched elements`}>
                 <span className='num-elements'>{model.numElements}</span>
               </Tooltip>
-              <span className='alias-container'>
-                <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`}>
-                  <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
-                </Tooltip>
-              </span>
+              <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`}>
+                <span className='num-duplicates'>{model.numDuplicates}</span>
+              </Tooltip>
             </span>
           </div>
         </FlashOnClick>

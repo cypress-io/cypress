@@ -39,10 +39,10 @@ const binaryNotExecutable = (executable) => {
     description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
     solution: stripIndent`\n
     Reasons this may happen:
-
+      
     - node was installed as 'root' or with 'sudo'
     - the cypress npm package as 'root' or with 'sudo'
-
+    
     Please check that you have the appropriate user permissions.
   `,
   }
@@ -53,7 +53,7 @@ const notInstalledCI = (executable) => {
     description: 'The cypress npm package is installed, but the Cypress binary is missing.',
     solution: stripIndent`\n
     We expected the binary to be installed here: ${chalk.cyan(executable)}
-
+ 
     Reasons it may be missing:
 
     - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
@@ -176,10 +176,6 @@ function addPlatformInformation (info) {
   })
 }
 
-/**
- * Forms nice error message with error and platform information,
- * and if possible a way to solve it. Resolves with a string.
-*/
 function formErrorText (info, msg) {
   const hr = '----------'
 

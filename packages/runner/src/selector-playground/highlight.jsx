@@ -3,7 +3,7 @@ import React from 'react'
 import { render, unmountComponentAtNode } from 'react-dom'
 import Tooltip from '@cypress/react-tooltip'
 
-const Highlight = ({ selector, appendTo, styles, showTooltip = true }) => {
+const Highlight = ({ selector, appendTo, boundary, styles, showTooltip = true }) => {
   return (
     <div>
       {_.map(styles, (style, i) => {
@@ -17,6 +17,7 @@ const Highlight = ({ selector, appendTo, styles, showTooltip = true }) => {
             visible={showTooltip}
             placement='top-start'
             appendTo={appendTo}
+            boundary={boundary}
             updateCue={updateCue}
           >
             <div className='highlight' style={style} />

@@ -1,7 +1,7 @@
 import { log } from '../log'
 import { notInstalledErr } from '../errors'
 import { prop, tap } from 'ramda'
-import execa from 'execa'
+import * as execa from 'execa'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as plist from 'plist'

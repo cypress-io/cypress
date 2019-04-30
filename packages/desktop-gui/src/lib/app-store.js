@@ -9,15 +9,6 @@ class AppStore {
   @observable version
   @observable localInstallNoticeDismissed = localData.get('local-install-notice-dimissed')
   @observable error
-  @observable proxyServer
-  @observable proxyBypassList
-  @observable proxySource
-
-  constructor () {
-    if (window.Cypress) {
-      window.AppStore = this // for testing
-    }
-  }
 
   @computed get displayVersion () {
     return this.isDev ? `${this.version} (dev)` : this.version
@@ -43,10 +34,6 @@ class AppStore {
     if (props.projectRoot != null) this.projectRoot = props.projectRoot
 
     if (props.version != null) this.version = this.newVersion = props.version
-
-    this.proxyServer = props.proxyServer || this.proxyServer
-    this.proxyBypassList = props.proxyBypassList || this.proxyBypassList
-    this.proxySource = props.proxySource || this.proxySource
   }
 
   @action setNewVersion (newVersion) {

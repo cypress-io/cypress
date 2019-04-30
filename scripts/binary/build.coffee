@@ -19,7 +19,6 @@ debug = require("debug")("cypress:binary")
 R = require("ramda")
 la = require("lazy-ass")
 check = require("check-more-types")
-humanInterval = require("human-interval")
 
 meta = require("./meta")
 smoke = require("./smoke")
@@ -117,7 +116,17 @@ buildCypressApp = (platform, version, options = {}) ->
   npmInstallPackages = ->
     log("#npmInstallPackages")
 
-    packages.npmInstallAll(distDir("packages", "*"), options)
+    packages.npmInstallAll(distDir("packages", "*"))
+    .then () ->
+      if os.platform() != "win32"
+        return
+      # on windows include both versions of FFMPEG
+      console.log("installing FFMPEG win32-x64")
+      serverFolder = distDir("packages", "server")
+      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-x64")
+      .then () ->
+        console.log("installing FFMPEG win32-ia32")
+        packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-ia32")
 
   createRootPackage = ->
     log("#createRootPackage #{platform} #{version}")
@@ -157,7 +166,7 @@ buildCypressApp = (platform, version, options = {}) ->
     ## remove the .ts files in our packages
     log("#removeTypeScript")
     del([
-      ## include ts files of packages
+      ## include coffee files of packages
       distDir("**", "*.ts")
 
       ## except those in node_modules
@@ -242,43 +251,14 @@ buildCypressApp = (platform, version, options = {}) ->
     else
       run()
 
-  codeSign = Promise.method ->
+  codeSign = ->
     if platform isnt "darwin"
       # do we need to code sign on Windows?
-      return
+      return Promise.resolve()
 
     appFolder = meta.zipDir(platform)
-    fiveMinutes = humanInterval("5 minutes")
-
-    execaBuild = Promise.method ->
-      log("#codeSign #{appFolder}")
-
-      execa('build', ["--publish", "never", "--prepackaged", appFolder], {
-        stdio: "inherit"
-      })
-      .catch (err) ->
-        ## ignore canceled errors
-        if err.isCanceled
-          return
-
-        throw err
-
-    ## try to build and if we timeout in 5 minutes
-    ## then try again - which sometimes happens in
-    ## circle CI
-    b = execaBuild()
-
-    b
-    .timeout(fiveMinutes)
-    .catch Promise.TimeoutError, (err) ->
-      console.log(
-        chalk.red("timed out signing binary after #{fiveMinutes}ms. retrying...")
-      )
-
-      b.cancel()
-
-      execaBuild()
-
+    log("#codeSign #{appFolder}")
+    execa('build', ["--publish", "never", "--prepackaged", appFolder], {stdio: "inherit"})
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()

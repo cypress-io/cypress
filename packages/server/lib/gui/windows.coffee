@@ -32,16 +32,6 @@ firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
 
-setWindowProxy = (win) ->
-  if not process.env.HTTP_PROXY
-    return
-
-  return new Promise (resolve) ->
-    win.webContents.session.setProxy({
-      proxyRules: process.env.HTTP_PROXY
-      proxyBypassRules: process.env.NO_PROXY
-    }, resolve)
-
 module.exports = {
   reset: ->
     windows = {}
@@ -209,7 +199,9 @@ module.exports = {
     if options.contextMenu
       ## adds context menu with copy, paste, inspect element, etc
       contextMenu({
-        showInspectElement: true
+        ## don't show inspect element until this fix is released
+        ## and we upgrade electron: https://github.com/electron/electron/pull/8688
+        showInspectElement: false
         window: win
       })
 
@@ -288,19 +280,15 @@ module.exports = {
 
     ## enable our url to be a promise
     ## and wait for this to be resolved
-    Promise.join(
-      options.url,
-      setWindowProxy(win)
-    )
-    .spread (url) ->
-      if options.type is "GITHUB_LOGIN"
-        ## remove the GitHub warning banner about an outdated browser
-        ## TODO: remove this once we have upgraded Electron or added native browser auth
-        newUserAgent = win.webContents.getUserAgent()
-        .replace(/Chrome\/\d+\.\d+\.\d+\.\d+/, 'Chrome/72.0.3626.121')
-        .replace(/Electron\/\d+\.\d+\.\d+/, 'Electron/4.0.5')
-        debug('changing user agent to ', newUserAgent)
-        win.webContents.setUserAgent(newUserAgent)
+    Promise
+    .resolve(options.url)
+    .then (url) ->
+      # if width and height
+      #   ## width and height are truthy when
+      #   ## transparent: true is sent
+      #   win.webContents.once "dom-ready", ->
+      #     win.setSize(width, height)
+      #     win.show()
 
       ## navigate the window here!
       win.loadURL(url)

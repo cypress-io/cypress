@@ -143,10 +143,6 @@ export default {
         autoScrollingEnabled: appState.autoScrollingEnabled,
       })
     })
-
-    localBus.on('external:open', (url) => {
-      runner.emit('external:open', url)
-    })
   },
 
   emit (event, ...args) {

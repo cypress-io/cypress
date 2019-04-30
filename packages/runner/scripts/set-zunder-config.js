@@ -9,8 +9,6 @@ module.exports = function setZunderConfig (zunder) {
       coffeeCompiler: require('@packages/coffee'),
     },
   ])
-  browserifyOptions.extensions.push('.ts')
-  browserifyOptions.plugin.push(zunder.defaults.browserify.pluginTsify.module)
   // ensure no duplicates of common dependencies between runner, reporter, & driver
   browserifyOptions.transform.push([
     zunder.defaults.browserify.transformAliasify.module,

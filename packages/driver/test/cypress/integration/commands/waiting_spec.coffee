@@ -770,7 +770,7 @@ describe "src/cy/commands/waiting", ->
           cy.on "fail", (err) =>
             obj = {
               name: "wait"
-              referencesAlias: [{name: 'getFoo', cardinal: 1, ordinal: "1st"}]
+              referencesAlias: ["getFoo"]
               aliasType: "route"
               type: "parent"
               error: err
@@ -847,28 +847,11 @@ describe "src/cy/commands/waiting", ->
             .window().then (win) ->
               xhrGet(win, "/foo")
               xhrGet(win, "/bar")
-              xhrGet(win, "/foo")
               null
-            .wait(["@getFoo", "@getBar", "@getFoo"]).then (xhrs) ->
+            .wait(["@getFoo", "@getBar"]).then (xhrs) ->
               lastLog = @lastLog
 
-              expect(lastLog.get("referencesAlias")).to.deep.eq [
-                {
-                  name: "getFoo",
-                  cardinal: 1,
-                  ordinal: '1st'
-                },
-                {
-                  name: "getBar",
-                  cardinal: 1,
-                  ordinal: '1st'
-                },
-                {
-                  name: "getFoo",
-                  cardinal: 2,
-                  ordinal: '2nd'
-                }
-              ]
+              expect(lastLog.get("referencesAlias")).to.deep.eq ["getFoo", "getBar"]
 
         it "#consoleProps waiting on 1 alias", ->
           cy

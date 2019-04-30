@@ -82,22 +82,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       type = cy.getXhrTypeByAlias(str)
 
-      [ index, num ] = getNumRequests(state, alias)
-
       ## if we have a command then continue to
       ## build up an array of referencesAlias
       ## because wait can reference an array of aliases
       if log
         referencesAlias = log.get("referencesAlias") ? []
         aliases = [].concat(referencesAlias)
-
-        if str
-          aliases.push({
-            name: str
-            cardinal: index + 1,
-            ordinal: num
-          })
-
+        aliases.push(str)
         log.set "referencesAlias", aliases
 
       if command.get("name") isnt "route"
@@ -112,6 +103,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       timeout = options.timeout
       requestTimeout = options.requestTimeout ? timeout
       responseTimeout = options.responseTimeout ? timeout
+
+      [ index, num ] = getNumRequests(state, alias)
 
       waitForRequest = ->
         options = _.omit(options, "_runnableTimeout")
@@ -143,7 +136,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if log
         log.set "consoleProps", -> {
-          "Waited For": (_.map(log.get("referencesAlias"), 'name') || []).join(", ")
+          "Waited For": (log.get("referencesAlias") || []).join(", ")
           "Yielded": ret
         }
 

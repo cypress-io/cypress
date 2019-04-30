@@ -92,9 +92,7 @@ const mapTasks = (cmd, packages) => {
 
   let runCommand
 
-  const command = cmd.split(' ', 2)[0]
-
-  switch (command) {
+  switch (cmd) {
     case 'install':
     case 'i':
     case 'test':
@@ -191,10 +189,6 @@ module.exports = (cmd, options) => {
     return checkDirsLength(dirs, errMessage)
   })
   .then((dirs) => {
-    if (options.args) {
-      cmd += ` ${options.args}`
-    }
-
     return mapTasks(cmd, dirs)
   })
   .then((tasks) => {

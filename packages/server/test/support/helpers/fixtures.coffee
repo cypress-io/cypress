@@ -1,5 +1,7 @@
-fs       = require("fs-extra")
 path     = require("path")
+fs       = require("fs-extra")
+Promise  = require("bluebird")
+request  = require("request-promise")
 
 root       = path.join(__dirname, "..", "..", "..")
 projects   = path.join(root, "test", "support", "fixtures", "projects")

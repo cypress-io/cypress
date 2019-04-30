@@ -207,21 +207,3 @@
   color: #999;
   margin: 1em;
 }
-
-.proxy-settings {
-  .proxy-table {
-    width: 100%;
-
-    th:first-child {
-      width: 150px;
-    }
-
-    .no-bypass {
-      opacity: .8;
-    }
-
-    td, th {
-      padding: 3px;
-    }
-  }
-}

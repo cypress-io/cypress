@@ -114,4 +114,4 @@ describe "xhrs", ->
           .then ->
             win.location.href = '/index.html'
 
-          .wait("@createUser").its("canceled").should("be.true")
+          .wait("@createUser").its("aborted").should("be.true")

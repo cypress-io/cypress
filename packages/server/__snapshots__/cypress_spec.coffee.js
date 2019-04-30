@@ -59,7 +59,6 @@ In order to use either of these features a ciBuildId must be determined.
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
-- azure
 - bamboo
 - bitbucket
 - buildkite
@@ -89,7 +88,6 @@ In order to use either of these features a ciBuildId must be determined.
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
-- azure
 - bamboo
 - bitbucket
 - buildkite
@@ -120,7 +118,6 @@ In order to use either of these features a ciBuildId must be determined.
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
-- azure
 - bamboo
 - bitbucket
 - buildkite

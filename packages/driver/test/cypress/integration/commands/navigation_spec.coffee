@@ -243,7 +243,6 @@ describe "src/cy/commands/navigation", ->
 
     it "removes listeners", ->
       cy
-        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then ->
           winLoadListeners = cy.listeners("window:load")
@@ -267,7 +266,6 @@ describe "src/cy/commands/navigation", ->
       stub3 = cy.stub()
 
       cy
-        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then ->
           cy.on("stability:changed", stub1)
@@ -281,7 +279,6 @@ describe "src/cy/commands/navigation", ->
 
     it "removes listeners from window", ->
       cy
-        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then (win) ->
           rel = cy.stub(win, "removeEventListener")
@@ -372,7 +369,6 @@ describe "src/cy/commands/navigation", ->
 
       it "logs go", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             lastLog = @lastLog
@@ -382,14 +378,12 @@ describe "src/cy/commands/navigation", ->
 
       it "can turn off logging", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back", {log: false}).then ->
             expect(@lastLog).to.be.undefined
 
       it "does not log 'Page Load' events", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
@@ -399,7 +393,6 @@ describe "src/cy/commands/navigation", ->
         beforeunload = false
 
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
             cy.on "window:before:unload", =>
@@ -912,27 +905,6 @@ describe "src/cy/commands/navigation", ->
               "Command": "visit"
               "Note": "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
           })
-
-      it "logs options if they are supplied", ->
-        cy.visit({
-          url: "http://localhost:3500/fixtures/generic.html"
-          headers: {
-            "foo": "bar"
-          },
-          notReal: "baz"
-        })
-        .then ->
-          expect(@lastLog.invoke("consoleProps")["Options"]).to.deep.eq({
-            url: "http://localhost:3500/fixtures/generic.html"
-            headers: {
-              "foo": "bar"
-            }
-          })
-
-      it "does not log options if they are not supplied", ->
-        cy.visit("http://localhost:3500/fixtures/generic.html")
-        .then ->
-          expect(@lastLog.invoke("consoleProps")["Options"]).to.be.undefined
 
     describe "errors", ->
       beforeEach ->

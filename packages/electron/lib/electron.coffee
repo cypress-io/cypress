@@ -59,6 +59,8 @@ module.exports = {
     .then ->
       execPath = paths.getPathToExec()
 
+      debug("spawning %s", execPath)
+
       ## we have an active debugger session
       if inspector.url()
         dp = process.debugPort + 1
@@ -69,8 +71,6 @@ module.exports = {
         opts = minimist(argv)
         if opts.inspectBrk
           argv.unshift("--inspect-brk=5566")
-
-      debug("spawning %s with args", execPath, argv)
 
       cp.spawn(execPath, argv, {stdio: "inherit"})
       .on "close", (code) ->

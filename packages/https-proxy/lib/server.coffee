@@ -1,38 +1,26 @@
 _            = require("lodash")
-agent        = require("@packages/network").agent
-allowDestroy = require("server-destroy-vvo")
-debug        = require("debug")("cypress:https-proxy")
 fs           = require("fs-extra")
-getProxyForUrl = require("proxy-from-env").getProxyForUrl
-https        = require("https")
 net          = require("net")
-parse        = require("./util/parse")
+url          = require("url")
+https        = require("https")
 Promise      = require("bluebird")
 semaphore    = require("semaphore")
-url          = require("url")
+allowDestroy = require("server-destroy-vvo")
+log          = require("debug")("cypress:https-proxy")
+parse        = require("./util/parse")
 
 fs = Promise.promisifyAll(fs)
 
 sslServers    = {}
 sslSemaphores = {}
 
-## https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_record
-SSL_RECORD_TYPES = [
-  22 ## Handshake
-  128, 0 ## TODO: what do these unknown types mean?
-]
-
 class Server
   constructor: (@_ca, @_port) ->
     @_onError = null
 
   connect: (req, socket, head, options = {}) ->
-    ## don't buffer writes - thanks a lot, Nagle
-    ## https://github.com/cypress-io/cypress/issues/3192
-    socket.setNoDelay(true)
-
     if not head or head.length is 0
-      debug("Writing socket connection headers for URL:", req.url)
+      log("Writing socket connection headers for URL:", req.url)
 
       socket.once "data", (data) =>
         @connect(req, socket, data, options)
@@ -50,9 +38,10 @@ class Server
         ## if onDirectConnection return true
         ## then dont proxy, just pass this through
         if odc.call(@, req, socket, head) is true
+          log("Making direct connection to #{req.url}")
           return @_makeDirectConnection(req, socket, head)
         else
-          debug("Not making direct connection to #{req.url}")
+          log("Not making direct connection to #{req.url}")
 
       socket.pause()
 
@@ -80,84 +69,42 @@ class Server
       res.end()
     .pipe(res)
 
-  _upstreamProxyForHostPort: (hostname, port) ->
-    getProxyForUrl("https://#{hostname}:#{port}")
-
   _makeDirectConnection: (req, socket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
 
-    if upstreamProxy = @_upstreamProxyForHostPort(hostname, port)
-      return @_makeUpstreamProxyConnection(upstreamProxy, socket, head, port, hostname)
-
-    debug("Making direct connection to #{hostname}:#{port}")
     @_makeConnection(socket, head, port, hostname)
 
   _makeConnection: (socket, head, port, hostname) ->
-    onConnect = ->
+    cb = ->
       socket.pipe(conn)
       conn.pipe(socket)
-      conn.write(head)
+      socket.emit("data", head)
 
       socket.resume()
 
-    conn = new net.Socket()
-    conn.setNoDelay(true)
+    ## compact out hostname when undefined
+    args = _.compact([port, hostname, cb])
+
+    conn = net.connect.apply(net, args)
 
     conn.on "error", (err) =>
       if @_onError
         @_onError(err, socket, head, port)
 
-    ## compact out hostname when undefined
-    args = _.compact([port, hostname, onConnect])
-    conn.connect.apply(conn, args)
-
-  # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
-  _makeUpstreamProxyConnection: (upstreamProxy, socket, head, toPort, toHostname) ->
-    debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
-
-    onUpstreamSock = (err, upstreamSock) ->
-      if @_onError
-        if err
-          return @_onError(err, socket, head, port)
-        upstreamSock.on "error", (err) =>
-          @_onError(err, socket, head, port)
-
-      if not upstreamSock
-        ## couldn't establish a proxy connection, fail gracefully
-        socket.resume()
-        return socket.destroy()
-
-      upstreamSock.setNoDelay(true)
-      upstreamSock.pipe(socket)
-      socket.pipe(upstreamSock)
-      upstreamSock.write(head)
-
-      socket.resume()
-
-    agent.httpsAgent.createProxiedConnection {
-      proxy: upstreamProxy
-      href: "https://#{toHostname}:#{toPort}"
-      uri: {
-        port: toPort
-        hostname: toHostname
-      }
-    }, onUpstreamSock.bind(@)
-
   _onServerConnectData: (req, socket, head) ->
     firstBytes = head[0]
 
     makeConnection = (port) =>
-      debug("Making intercepted connection to %s", port)
+      log("Making intercepted connection to %s", port)
 
       @_makeConnection(socket, head, port)
 
-    if firstBytes in SSL_RECORD_TYPES
+    if firstBytes is 0x16 or firstBytes is 0x80 or firstBytes is 0x00
       {hostname} = url.parse("http://#{req.url}")
 
       if sslServer = sslServers[hostname]
         return makeConnection(sslServer.port)
 
-      ## only be creating one SSL server per hostname at once
       if not sem = sslSemaphores[hostname]
         sem = sslSemaphores[hostname] = semaphore(1)
 
@@ -217,11 +164,11 @@ class Server
 
       @_sniServer.on "upgrade", @_onUpgrade.bind(@, options.onUpgrade)
       @_sniServer.on "request", @_onRequest.bind(@, options.onRequest)
-      @_sniServer.listen 0, '127.0.0.1', =>
+      @_sniServer.listen =>
         ## store the port of our current sniServer
         @_sniPort = @_sniServer.address().port
 
-        debug("Created SNI HTTPS Proxy on port %s", @_sniPort)
+        log("Created SNI HTTPS Proxy on port %s", @_sniPort)
 
         resolve()
 

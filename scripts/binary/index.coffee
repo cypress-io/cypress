@@ -165,10 +165,7 @@ deploy = {
   # upload Cypress binary ZIP file
   upload: (options) ->
     console.log('#upload')
-
-    if not options
-      options = @parseOptions(process.argv)
-
+    if !options then options = @parseOptions(process.argv)
     askMissingOptions(['version', 'platform', 'zip'])(options)
     .then (options) ->
       la(check.unemptyString(options.zip),
@@ -183,7 +180,7 @@ deploy = {
       upload.toS3({
         zipFile: options.zip,
         version: options.version,
-        platform: options.platform,
+        platform: options.platform
       })
 
   # purge all platforms of a desktop app for specific version

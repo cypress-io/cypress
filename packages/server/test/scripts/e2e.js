@@ -58,10 +58,6 @@ glob('test/e2e/**/*')
     spec,
   ]
 
-  if (options['inspect-brk']) {
-    args.push('--inspect-brk')
-  }
-
   return spawn('node', args, { stdio: 'inherit' })
   .then((code) => {
     console.log(`${spec} exited with code`, code)

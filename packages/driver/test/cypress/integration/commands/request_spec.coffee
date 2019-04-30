@@ -153,7 +153,7 @@ describe "src/cy/commands/request", ->
               timeout: RESPONSE_TIMEOUT
             })
 
-        it "uses www urls", ->
+        it "uses wwww urls", ->
           cy.request("www.foo.com").then ->
             @expectOptionsToBe({
               url: "http://www.foo.com/"
@@ -319,30 +319,6 @@ describe "src/cy/commands/request", ->
               timeout: RESPONSE_TIMEOUT
             })
 
-        ## https://github.com/cypress-io/cypress/issues/2923
-        it "application/x-www-form-urlencoded w/ an object body uses form: true", ->
-          cy.request({
-            url: "http://localhost:8888"
-            headers: {
-              "a": "b"
-              "Content-type": "application/x-www-form-urlencoded"
-            }
-            body: { foo: "bar" }
-          }).then ->
-            @expectOptionsToBe({
-              url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
-              form: true
-              followRedirect: true
-              headers: {
-                "a": "b"
-                "Content-type": "application/x-www-form-urlencoded"
-              }
-              body: { foo: "bar" }
-              timeout: RESPONSE_TIMEOUT
-            })
-
     describe "failOnStatus", ->
       it "is deprecated but does not fail even on 500 when failOnStatus=false", ->
         warning = cy.spy(Cypress.utils, "warning")
@@ -374,14 +350,6 @@ describe "src/cy/commands/request", ->
         .then (resp) ->
           ## make sure it really was 500!
           expect(resp.status).to.eq(401)
-
-    describe "method", ->
-      it "can use M-SEARCH method", ->
-        cy.request({
-          url: 'http://localhost:3500/dump-method',
-          method: 'm-Search'
-        }).then (res) =>
-          expect(res.body).to.contain('M-SEARCH')
 
     describe "subjects", ->
       it "resolves with response obj", ->
@@ -693,7 +661,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() was called with an invalid method: 'FOO'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser.")
+          expect(err.message).to.eq("cy.request() was called with an invalid method: 'FOO'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS")
           done()
 
         cy.request({

@@ -13,11 +13,10 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
-agent        = require("@packages/network").agent
 cors         = require("./util/cors")
 uri          = require("./util/uri")
 origin       = require("./util/origin")
-ensureUrl    = require("./util/ensure-url")
+connect      = require("./util/connect")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 blacklist    = require("./util/blacklist")
@@ -233,7 +232,7 @@ class Server
           if baseUrl
             @_baseUrl = baseUrl
 
-            ensureUrl.isListening(baseUrl)
+            connect.ensureUrl(baseUrl)
             .return(null)
             .catch (err) =>
               if config.isTextTerminal
@@ -256,17 +255,20 @@ class Server
   _listen: (port, onError) ->
     new Promise (resolve) =>
       listener = =>
-        address = @_server.address()
+        port = @_server.address().port
 
         @isListening = true
 
-        debug("Server listening on ", address)
+        debug("Server listening on port %s", port)
 
         @_server.removeListener "error", onError
 
-        resolve(address.port)
+        resolve(port)
 
-      @_server.listen(port || 0, '127.0.0.1', listener)
+      ## nuke port from our args if its falsy
+      args = _.compact([port, listener])
+
+      @_server.listen.apply(@_server, args)
 
   _getRemoteState: ->
     # {
@@ -597,7 +599,6 @@ class Server
           port: port
           protocol: protocol
         }
-        agent: agent
       }, onProxyErr)
     else
       ## we can't do anything with this socket

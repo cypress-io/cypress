@@ -2,7 +2,7 @@ import { log } from '../log'
 import { trim, tap } from 'ramda'
 import { FoundBrowser, Browser } from '../types'
 import { notInstalledErr } from '../errors'
-import execa from 'execa'
+import * as execa from 'execa'
 
 function getLinuxBrowser(
   name: string,

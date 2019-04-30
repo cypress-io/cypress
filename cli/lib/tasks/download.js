@@ -1,4 +1,3 @@
-const arch = require('arch')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const os = require('os')
@@ -15,20 +14,6 @@ const fs = require('../fs')
 const util = require('../util')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
-
-const getRealOsArch = () => {
-  // os.arch() returns the arch for which this node was compiled
-  // we want the operating system's arch instead: x64 or x86
-
-  const osArch = arch()
-
-  if (osArch === 'x86') {
-    // match process.platform output
-    return 'ia32'
-  }
-
-  return osArch
-}
 
 const getBaseUrl = () => {
   if (util.getEnv('CYPRESS_DOWNLOAD_MIRROR')) {
@@ -47,7 +32,7 @@ const getBaseUrl = () => {
 const prepend = (urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
-  const arch = getRealOsArch()
+  const arch = os.arch()
 
   return `${endpoint}?platform=${platform}&arch=${arch}`
 }

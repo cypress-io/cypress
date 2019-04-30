@@ -1,8 +1,6 @@
 import cs from 'classnames'
 import React, { Component } from 'react'
 
-import { onEnterOrSpace } from '../lib/util'
-
 class Collapsible extends Component {
   static defaultProps = {
     isOpen: false,
@@ -26,15 +24,7 @@ class Collapsible extends Component {
   render () {
     return (
       <div className={cs('collapsible', { 'is-open': this.state.isOpen })}>
-        <div
-          aria-expanded={this.state.isOpen}
-          className={cs('collapsible-header', this.props.headerClass)}
-          onClick={this._toggleOpen}
-          onKeyPress={onEnterOrSpace(this._toggleOpen)}
-          role='button'
-          style={this.props.headerStyle}
-          tabIndex='0'
-        >
+        <div className={cs('collapsible-header', this.props.headerClass)} style={this.props.headerStyle} onClick={this._toggleOpen}>
           <i className='collapsible-indicator fa-fw fa'></i>
           {this.props.header}
           <i className='collapsible-more fa fa-ellipsis-h'></i>
