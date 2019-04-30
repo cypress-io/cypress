@@ -7,9 +7,10 @@ debug      = require("debug")("cypress:server:request")
 moment     = require("moment")
 Promise    = require("bluebird")
 stream     = require("stream")
-pumpify    = require("pumpify")
+duplexify  = require("duplexify")
 agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
+streamBuffer = require("./util/stream_buffer").streamBuffer
 Cookies    = require("./automation/cookies")
 
 Cookie    = tough.Cookie
@@ -175,15 +176,19 @@ createRetryingRequestPromise = (opts, iteration = 0) ->
     res
 
 createRetryingRequestStream = (opts = {}) ->
-  retryStream = pumpify()
+  delayStream = stream.PassThrough()
+  reqBodyBuffer = streamBuffer()
+
+  retryStream = duplexify(reqBodyBuffer, delayStream)
+
+  req = null
+  didAbort = false
 
   ## TODO: remove this after finishing the
   ## implementation of everything
   retryStream.on "error", (err) ->
+    debug('error %o', err)
     debugger
-
-  didAbort = false
-  pipeSrc = null
 
   emitError = (err) ->
     retryStream.emit("error", err)
@@ -200,6 +205,7 @@ createRetryingRequestStream = (opts = {}) ->
     if didAbort
       return
 
+    reqStream = r(opts)
     didReceiveResponse = false
 
     retry = (err) ->
@@ -224,17 +230,11 @@ createRetryingRequestStream = (opts = {}) ->
         tryStartStream(attempts)
       , delay
 
-    reqStream = r(opts)
-    delayStream = stream.PassThrough()
-
-    retryStream.setPipeline([reqStream, delayStream])
-    # retryStream.setWritable(reqStream)
-    # retryStream.setReadable(delayStream)
-
     ## if we're retrying and we previous piped
     ## into the reqStream, then reapply this now
-    if pipeSrc
-      pipeSrc.pipe(reqStream)
+    if req
+      reqStream.emit('pipe', req)
+      reqBodyBuffer.reader().pipe(reqStream)
 
     ## forward the abort call to the underlying request
     retryStream.abort = ->
@@ -243,22 +243,15 @@ createRetryingRequestStream = (opts = {}) ->
       reqStream.abort()
 
     onPiped = (src) ->
-      ## store this so we can reapply it
+      ## store this IncomingMessage so we can reapply it
       ## if we need to retry
-      ## TODO: this needs to write to the fs
-      ## so we can re-read the request body
-      ## later and then remove it after the
-      ## response is complete
-      pipeSrc = src
+      req = src
 
-      ## internally pumpify does not call the
-      ## .pipe() method on the reqStream, which
-      ## prevents the 'pipe' event from being called.
-      ## https://github.com/request/request/blob/master/request.js#L493
+      ## https://github.com/request/request/blob/b3a218dc7b5689ce25be171e047f0d4f0eef8919/request.js#L493
       ## the request lib expects this 'pipe' event in
       ## order to copy the request headers onto the
-      ## outgoing message - so we manually fire it here
-      reqStream.emit('pipe', src)
+      ## outgoing message - so we manually pipe it here
+      src.pipe(reqStream)
 
     ## when this passthrough stream is being piped into
     ## then make sure we properly "forward" and connect
@@ -318,7 +311,7 @@ createRetryingRequestStream = (opts = {}) ->
       ## https://github.com/request/request/blob/master/request.js#L1059
       retryStream.emit("response", incomingRes)
 
-      # retryStream.setReadable(delayStream)
+      reqStream.pipe(delayStream)
 
 
     return null
