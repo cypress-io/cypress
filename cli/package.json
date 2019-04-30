@@ -72,7 +72,7 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
-    "@cypress/sinon-chai": "1.0.0",
+    "@cypress/sinon-chai": "1.1.0",
     "@types/blob-util": "1.3.3",
     "@types/bluebird": "3.5.18",
     "@types/chai": "4.0.8",
@@ -85,20 +85,20 @@
     "@types/sinon-chai": "3.2.2",
     "babel-cli": "6.26.0",
     "babel-preset-es2015": "6.24.1",
-    "bin-up": "1.1.0",
+    "bin-up": "1.2.0",
     "chai": "3.5.0",
     "chai-string": "1.4.0",
     "clear-module": "2.1.0",
     "dependency-check": "2.10.1",
-    "dtslint": "0.5.5",
+    "dtslint": "0.7.1",
     "execa-wrap": "1.4.0",
     "mock-fs": "4.8.0",
     "nock": "9.6.1",
     "nyc": "13.3.0",
     "proxyquire": "2.0.1",
-    "shelljs": "0.7.8",
+    "shelljs": "0.8.3",
     "sinon": "7.2.2",
-    "snap-shot-it": "6.3.3"
+    "snap-shot-it": "6.3.5"
   },
   "files": [
     "bin",
