@@ -35,13 +35,24 @@ describe('lib/util/stream_buffer', function () {
     // this will trigger a disk write
     pt.write('test 5')
 
-    setImmediate(() => {
-      while ((chunk = reader.read()) || buf.length < 28) {
-        buf += chunk || ''
-      }
+    while ((chunk = reader.read())) {
+      buf += chunk
+    }
 
-      expect(buf).to.eq('testtest 2test 3test 4test 5')
-      done()
-    })
+    expect(buf).to.eq('testtest 2test 3test 4test 5')
+
+    // const r = () => {
+    //   setImmediate(() => {
+    //     if (buf.length < 28) {
+    //       buf += reader.read() || ''
+
+    //       return r()
+    //     }
+
+    //     done()
+    //   })
+    // }
+
+    // r()
   })
 })

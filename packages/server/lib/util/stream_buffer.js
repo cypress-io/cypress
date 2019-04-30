@@ -62,9 +62,9 @@ function streamBuffer (filename, highWaterMark = 4096) {
 
           const chunk = readStream.read(size)
 
-          debug('reading chunk from file %o', { size, chunkLength: chunk.length })
+          debug('reading chunk from file %o', { size, chunk: chunk ? chunk.toString() : chunk })
 
-          return this.push(chunk)
+          return this.push(chunk || '')
         }
 
         // if there are unread bytes in the buffer, send up to bytesWritten back
