@@ -66,7 +66,7 @@ export const moveBinaries = async (args = []) => {
     }, platformArch)
     console.log('finding binary for %s in %s', platformArch, uploadDir)
 
-    const list = await new Promise((resolve, reject) => {
+    const list: string[] = await new Promise((resolve, reject) => {
       const prefix = uploadDir + '/'
 
       s3.listObjectsV2({
@@ -85,6 +85,9 @@ export const moveBinaries = async (args = []) => {
       })
     })
 
-    console.log(list)
+    if (debug.isEnabled) {
+      debug('all found subfolders')
+      debug(list.join('\n'))
+    }
   })
 }
