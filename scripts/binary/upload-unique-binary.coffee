@@ -11,22 +11,27 @@ gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
 
-konfig  = require("../../packages/server/lib/konfig")
+konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
 
+# we zip the binary on every platform and upload under same name
 binaryExtension = ".zip"
 uploadFileName = "cypress.zip"
 
 isBinaryFile = check.extension(binaryExtension)
 
-# wonder if our CDN url would just work
-# https://cdn.cypress.io/desktop/0.20.1/osx64/cypress.zip
-# in our case something like this
-# https://cdn.cypress.io/desktop/binary/0.20.2/<platform>/<some unique version info>/cypress.tgz
 rootFolder = "beta"
 folder = "binary"
 
+# the binary will be uploaded into unique folder
+# in our case something like this
+# https://cdn.cypress.io/desktop/binary/0.20.2/<platform>/<some unique version info>/cypress.zip
 getCDN = ({version, hash, filename, platform}) ->
+  la(check.semver(version), 'invalid version', version)
+  la(check.unemptyString(hash), 'missing hash', hash)
+  la(check.unemptyString(filename), 'missing filename', filename)
+  la(isBinaryFile(filename), 'wrong extension for file', filename)
+  la(check.unemptyString(platform), 'missing platform', platform)
   [konfig("cdn_url"), rootFolder, folder, version, platform, hash, filename].join("/")
 
 getUploadDirName = (options) ->
