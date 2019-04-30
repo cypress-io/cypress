@@ -7,7 +7,8 @@
     <h1 id="test">random font size test</h1>
     <script>
       // The .c# classname is tighty coupled to generated CSS file made in packages/driver/test/support/server.coffee
-      document.getElementById('test').className = "c" + Math.round(Math.random() * 1000);
+      // Avoid 0 px, so should('be.visible') check does not randomly fail
+      document.getElementById('test').className = "c" + (1 + (Math.random() * 1000));
     </script>
   </body>
 </html>
