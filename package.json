@@ -142,6 +142,7 @@
     "print-arch": "1.0.0",
     "ramda": "0.24.1",
     "shelljs": "0.8.3",
+    "sinon": "7.3.2",
     "snap-shot-it": "6.3.5",
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
