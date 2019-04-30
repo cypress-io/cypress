@@ -408,9 +408,11 @@ const commitDefaults = function (existingInfo) {
   debug(existingInfo)
 
   const providerName = provider()
+
   debug('detected provider name: %s', providerName)
 
   let commitParamsObj = commitParams()
+
   if (!commitParamsObj) {
     debug('could not get commit param object, using empty one')
     commitParamsObj = {}

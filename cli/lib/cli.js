@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const commander = require('commander')
-const { oneLine } = require('common-tags')
 const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
@@ -50,10 +49,8 @@ const descriptions = {
   port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
-  browser: oneLine`
-    runs Cypress in the browser with the given name.
-    note: using an external browser will not record a video.
-  `,
+  browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
+  browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
   global: 'force Cypress into global mode as if its globally installed',
@@ -137,7 +134,7 @@ module.exports = {
     .option('-p, --port <port>', text('port'))
     .option('-e, --env <env>', text('env'))
     .option('-c, --config <config>', text('config'))
-    .option('-b, --browser <browser-name>', text('browser'))
+    .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
     .option('-P, --project <project-path>', text('project'))
     .option('--parallel', text('parallel'))
     .option('--group <name>', text('group'))
@@ -160,7 +157,8 @@ module.exports = {
     .option('-e, --env <env>', text('env'))
     .option('-c, --config <config>', text('config'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
-    .option('-P, --project <project path>', text('project'))
+    .option('-b, --browser <browser-path>', text('browserOpenMode'))
+    .option('-P, --project <project-path>', text('project'))
     .option('--global', text('global'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {

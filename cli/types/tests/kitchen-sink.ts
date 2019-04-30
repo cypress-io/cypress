@@ -11,9 +11,12 @@ cy.wrap('foo').then(subject => {
   subject // $ExpectType string
 })
 
-Cypress.minimatch('/users/1/comments', '/users/*/comments', {
+const result = Cypress.minimatch('/users/1/comments', '/users/*/comments', {
   matchBase: true,
 })
+result // $ExpectType boolean
+
+Cypress.minimatch('/users/1/comments', '/users/*/comments') // $ExpectType boolean
 
 // check if cy.server() yields default server options
 cy.server().should((server) => {
@@ -45,14 +48,20 @@ Cypress.browser // $ExpectType Browser
 
 // stubbing window.alert type on "Cypress" should
 // work with plain function or with a Sinon stub
-Cypress.on('window:alert', () => {})
+Cypress.on('window:alert', () => { })
+Cypress.on('window:alert', cy.spy())
 Cypress.on('window:alert', cy.stub())
 // same for a single test
-cy.on('window:alert', () => {})
+cy.on('window:alert', () => { })
+cy.on('window:alert', cy.spy())
 cy.on('window:alert', cy.stub())
 
 // window:confirm stubbing
-cy.on('window:confirm', () => {})
+Cypress.on('window:confirm', () => { })
+Cypress.on('window:confirm', cy.spy())
+Cypress.on('window:confirm', cy.stub())
+cy.on('window:confirm', () => { })
+cy.on('window:confirm', cy.spy())
 cy.on('window:confirm', cy.stub())
 
 // specifying HTTP method directly in the options object
@@ -90,6 +99,6 @@ const opts2 = {
 cy.request(opts2)
 
 const obj = {
-  foo: () => {}
+  foo: () => { }
 }
 cy.spy(obj, 'foo').as('my-spy')
