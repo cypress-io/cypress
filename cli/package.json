@@ -92,7 +92,7 @@
     "dependency-check": "2.10.1",
     "dtslint": "0.7.1",
     "execa-wrap": "1.4.0",
-    "mock-fs": "4.8.0",
+    "mock-fs": "4.9.0",
     "nock": "9.6.1",
     "nyc": "13.3.0",
     "proxyquire": "2.0.1",
