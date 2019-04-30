@@ -140,7 +140,7 @@ exports['lib/tasks/verify logs error when child process hangs 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
-   → Cypress Version: 1.2.3
+STRIPPED
 Error: Cypress Smoke Test timed out attempting to start
 
 The command '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222' 
@@ -159,7 +159,7 @@ exports['lib/tasks/verify logs error when child process returns incorrect stdout
 It looks like this is your first time using Cypress: 1.2.3
 
  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
-   → Cypress Version: 1.2.3
+STRIPPED
 Error: Cypress Smoke Test failed to start
 
 The command '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222' 
@@ -178,7 +178,7 @@ exports['lib/tasks/verify logs error when child process returns incorrect stdout
 It looks like this is your first time using Cypress: 1.2.3
 
  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
-   → Cypress Version: 1.2.3
+STRIPPED
 Error: Cypress Smoke Test failed to start
 
 The command '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222' 

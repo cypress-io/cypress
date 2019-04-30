@@ -151,7 +151,7 @@ context('lib/tasks/verify', () => {
       logger.error(err)
     })
     .then(() => {
-      snapshot(normalize(stdout.toString()))
+      snapshot(normalize(slice(stdout.toString())))
     })
 
   })
@@ -178,7 +178,7 @@ context('lib/tasks/verify', () => {
       logger.error(err)
     })
     .then(() => {
-      snapshot(normalize(stdout.toString()))
+      snapshot(normalize(slice(stdout.toString())))
     })
 
   })
@@ -204,7 +204,7 @@ context('lib/tasks/verify', () => {
       logger.error(err)
     })
     .then(() => {
-      snapshot(normalize(stdout.toString()))
+      snapshot(normalize(slice(stdout.toString())))
     })
 
   })
