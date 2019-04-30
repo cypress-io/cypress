@@ -71,6 +71,31 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
 }
 
 /**
+ * Returns list of prefixes in a given folder
+ */
+const listS3Objects = (uploadDir: string, bucket: string, s3: S3): Promise<string[]> => {
+  la(is.unemptyString(uploadDir), 'invalid upload dir', uploadDir)
+
+  return new Promise((resolve, reject) => {
+    const prefix = uploadDir + '/'
+    s3.listObjectsV2({
+      Bucket: bucket,
+      Prefix: prefix,
+      Delimiter: '/'
+    }, (err, result) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('AWS result in %s %s', bucket, prefix)
+      debug('%o', result)
+
+      resolve(result.CommonPrefixes.map(prop('Prefix')))
+    })
+  })
+}
+
+/**
  * Moves binaries built for different platforms into a single
  * folder on S3 before officially releasing as a new version.
  */
@@ -112,24 +137,7 @@ export const moveBinaries = async (args = []) => {
     }, platformArch)
     console.log('finding binary for %s in %s', platformArch, uploadDir)
 
-    const list: string[] = await new Promise((resolve, reject) => {
-      const prefix = uploadDir + '/'
-
-      s3.listObjectsV2({
-        Bucket: aws.bucket,
-        Prefix: prefix,
-        Delimiter: '/'
-      }, (err, result) => {
-        if (err) {
-          return reject(err)
-        }
-
-        debug('AWS result in %s %s', aws.bucket, prefix)
-        debug('%o', result)
-
-        resolve(result.CommonPrefixes.map(prop('Prefix')))
-      })
-    })
+    const list: string[] = await listS3Objects(uploadDir, aws.bucket, s3)
 
     if (debug.enabled) {
       console.log('all found subfolders')
