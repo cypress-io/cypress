@@ -1,19 +1,3 @@
-exports['errors individual has the following errors 1'] = [
-  "nonZeroExitCodeXvfb",
-  "missingXvfb",
-  "missingApp",
-  "notInstalledCI",
-  "missingDependency",
-  "versionMismatch",
-  "binaryNotExecutable",
-  "unexpected",
-  "failedDownload",
-  "failedUnzip",
-  "invalidCacheDirectory",
-  "removed",
-  "CYPRESS_RUN_BINARY"
-]
-
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `
 Your system is missing the dependency: XVFB
 
@@ -29,3 +13,19 @@ If you are using Docker, we provide containers with all required dependencies in
 Platform: test platform (Foo-OsVersion)
 Cypress Version: 1.2.3
 `
+
+exports['errors individual has the following errors 1'] = [
+  "nonZeroExitCodeXvfb",
+  "missingXvfb",
+  "missingApp",
+  "notInstalledCI",
+  "missingDependency",
+  "versionMismatch",
+  "binaryNotExecutable",
+  "unexpected",
+  "failedDownload",
+  "failedUnzip",
+  "invalidCacheDirectory",
+  "removed",
+  "CYPRESS_RUN_BINARY"
+]

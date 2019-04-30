@@ -24,15 +24,15 @@
     "lib"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.3.4",
+    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/react-tooltip": "0.4.0",
-    "bin-up": "1.1.0",
+    "bin-up": "1.2.0",
     "bluebird": "3.5.0",
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
     "enzyme": "3.9.0",
-    "enzyme-adapter-react-16": "1.10.0",
+    "enzyme-adapter-react-16": "1.12.1",
     "font-awesome": "4.7.0",
     "jsdom": "13.2.0",
     "lodash": "4.17.11",
@@ -45,6 +45,6 @@
     "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
-    "zunder": "6.3.2"
+    "zunder": "6.4.1"
   }
 }

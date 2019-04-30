@@ -96,9 +96,9 @@ npm i https://cdn.../npm/<new version>/hash/cypress.tgz
 - Build the Mac binary and upload (see above) to the CDN. Make sure to build it from the
     same commit as the binaries built by CI.
 - The upload from Mac binary will create new folder on CDN like
-    `https://cdn.../desktop/1.0.5/osx64`. We need to create parallel subfolders for
+    `https://cdn.../desktop/1.0.5/darwin-x64`. We need to create parallel subfolders for
     Windows and Linux binaries. Go to the AWS console and create them. In this case you would create
-    folders `desktop/1.0.5/linux64` and `desktop/1.0.5/win64`.
+    folders `desktop/1.0.5/linux-x64` and `desktop/1.0.5/win32-x64`.
 - Copy _the tested binaries_ from the unique `binary` folder into `desktop/1.0.5` subfolders for each
     platform.
 - Publish the new NPM package under the dev tag. The unique link to the package file `cypress.tgz`
@@ -129,5 +129,6 @@ npm i https://cdn.../npm/<new version>/hash/cypress.tgz
 - Close the release in Zenhub.
 - Bump `version` in `package.json` from `develop` branch and then merge into `master`.
 - Publish GitHub release doc using [cypress-io/set-releases](https://github.com/cypress-io/set-releases)
+- Add a note to each GH issue that has been resolved with the new published version using [https://github.com/cypress-io/issues-in-release](cypress-io/issues-in-release)
 
 Take a break, you deserve it! :sunglasses:

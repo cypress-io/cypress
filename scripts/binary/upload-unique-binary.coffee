@@ -11,30 +11,35 @@ gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
 
-konfig  = require("../../packages/server/lib/konfig")
+konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
 
+# we zip the binary on every platform and upload under same name
 binaryExtension = ".zip"
 uploadFileName = "cypress.zip"
 
 isBinaryFile = check.extension(binaryExtension)
 
-# wonder if our CDN url would just work
-# https://cdn.cypress.io/desktop/0.20.1/osx64/cypress.zip
-# in our case something like this
-# https://cdn.cypress.io/desktop/binary/0.20.2/<platform>/<some unique version info>/cypress.tgz
 rootFolder = "beta"
 folder = "binary"
 
+# the binary will be uploaded into unique folder
+# in our case something like this
+# https://cdn.cypress.io/desktop/binary/0.20.2/<platform>/<some unique version info>/cypress.zip
 getCDN = ({version, hash, filename, platform}) ->
+  la(check.semver(version), 'invalid version', version)
+  la(check.unemptyString(hash), 'missing hash', hash)
+  la(check.unemptyString(filename), 'missing filename', filename)
+  la(isBinaryFile(filename), 'wrong extension for file', filename)
+  la(check.unemptyString(platform), 'missing platform', platform)
   [konfig("cdn_url"), rootFolder, folder, version, platform, hash, filename].join("/")
 
 getUploadDirName = (options) ->
   la(check.unemptyString(options.version), 'missing version', options)
   la(check.unemptyString(options.hash), 'missing hash', options)
-  la(check.unemptyString(options.platform), 'missing platform', options)
+  la(check.unemptyString(options.platformArch), 'missing platformArch', options)
 
-  dir = [rootFolder, folder, options.version, options.platform, options.hash, null].join("/")
+  dir = [rootFolder, folder, options.version, options.platformArch, options.hash, null].join("/")
   dir
 
 uploadFile = (options) ->
@@ -42,7 +47,6 @@ uploadFile = (options) ->
     publisher = uploadUtils.getPublisher()
 
     headers = {}
-    # TODO: should cache it!
     headers["Cache-Control"] = "no-cache"
 
     gulp.src(options.file)
@@ -84,8 +88,9 @@ uploadUniqueBinary = (args = []) ->
 
   la(fs.existsSync(options.file), "cannot find file", options.file)
 
-  if not options.platform
-    options.platform = uploadUtils.getUploadNameByOs()
+  platform = options.platform ? process.platform
+
+  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
   uploadFile(options)
   .then () ->
@@ -93,7 +98,7 @@ uploadUniqueBinary = (args = []) ->
       version: options.version,
       hash: options.hash,
       filename: uploadFileName
-      platform: options.platform
+      platform: options.platformArch
     })
     console.log("Binary can be downloaded using URL")
     console.log(cdnUrl)
