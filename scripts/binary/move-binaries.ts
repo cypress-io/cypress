@@ -86,70 +86,76 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
   return prop('s3path', last(sortedBuilds))
 }
 
-const verifyZipFileExists = (zipFile: string, bucket: string, s3: S3): Promise<null> => {
-  debug('checking S3 file %s', zipFile)
-  debug('bucket %s', bucket)
-
-  return new Promise((resolve, reject) => {
-    s3.headObject({
-      Bucket: bucket,
-      Key: zipFile
-    }, (err, data) => {
-      if (err) {
-        debug('error getting object %s', zipFile)
-        debug(err)
-
-        return reject(err)
-      }
-      debug('s3 data for %s', zipFile)
-      debug(data)
-      resolve()
-    })
-  })
-}
-
 /**
- * Returns list of prefixes in a given folder
- */
-const listS3Objects = (uploadDir: string, bucket: string, s3: S3): Promise<string[]> => {
-  la(is.unemptyString(uploadDir), 'invalid upload dir', uploadDir)
+ * Utility object with methods that deal with S3.
+ * Useful for testing our code that calls S3 methods.
+*/
+const s3helpers = {
+  verifyZipFileExists (zipFile: string, bucket: string, s3: S3): Promise<null> {
+    debug('checking S3 file %s', zipFile)
+    debug('bucket %s', bucket)
 
-  return new Promise((resolve, reject) => {
-    const prefix = uploadDir + '/'
-    s3.listObjectsV2({
-      Bucket: bucket,
-      Prefix: prefix,
-      Delimiter: '/'
-    }, (err, result) => {
-      if (err) {
-        return reject(err)
-      }
+    return new Promise((resolve, reject) => {
+      s3.headObject({
+        Bucket: bucket,
+        Key: zipFile
+      }, (err, data) => {
+        if (err) {
+          debug('error getting object %s', zipFile)
+          debug(err)
 
-      debug('AWS result in %s %s', bucket, prefix)
-      debug('%o', result)
-
-      resolve(result.CommonPrefixes.map(prop('Prefix')))
+          return reject(err)
+        }
+        debug('s3 data for %s', zipFile)
+        debug(data)
+        resolve()
+      })
     })
-  })
-}
+  },
 
-const copyS3 = async (sourceKey: string, destinationKey: string, bucket: string, s3: S3) => {
-  return new Promise((resole, reject) => {
-    debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
+  /**
+   * Returns list of prefixes in a given folder
+   */
+  listS3Objects (uploadDir: string, bucket: string, s3: S3): Promise<string[]> {
+    la(is.unemptyString(uploadDir), 'invalid upload dir', uploadDir)
 
-    s3.copyObject({
-      Bucket: bucket,
-      CopySource: bucket + '/' + sourceKey,
-      Key: destinationKey
-    }, (err, data) => {
-      if (err) {
-        return reject(err)
-      }
+    return new Promise((resolve, reject) => {
+      const prefix = uploadDir + '/'
+      s3.listObjectsV2({
+        Bucket: bucket,
+        Prefix: prefix,
+        Delimiter: '/'
+      }, (err, result) => {
+        if (err) {
+          return reject(err)
+        }
 
-      debug('result of copying')
-      debug('%o', data)
+        debug('AWS result in %s %s', bucket, prefix)
+        debug('%o', result)
+
+        resolve(result.CommonPrefixes.map(prop('Prefix')))
+      })
     })
-  })
+  },
+
+  async copyS3 (sourceKey: string, destinationKey: string, bucket: string, s3: S3) {
+    return new Promise((resole, reject) => {
+      debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
+
+      s3.copyObject({
+        Bucket: bucket,
+        CopySource: bucket + '/' + sourceKey,
+        Key: destinationKey
+      }, (err, data) => {
+        if (err) {
+          return reject(err)
+        }
+
+        debug('result of copying')
+        debug('%o', data)
+      })
+    })
+  }
 }
 
 /**
@@ -194,7 +200,7 @@ export const moveBinaries = async (args = []) => {
     }, platformArch)
     console.log('finding binary for %s in %s', platformArch, uploadDir)
 
-    const list: string[] = await listS3Objects(uploadDir, aws.bucket, s3)
+    const list: string[] = await s3helpers.listS3Objects(uploadDir, aws.bucket, s3)
 
     if (debug.enabled) {
       console.log('all found subfolders')
@@ -211,7 +217,7 @@ export const moveBinaries = async (args = []) => {
 
     const s3zipPath = lastBuildPath + zipName
 
-    await verifyZipFileExists(s3zipPath, aws.bucket, s3)
+    await s3helpers.verifyZipFileExists(s3zipPath, aws.bucket, s3)
 
     lastBuilds.push({
       platformArch,
@@ -245,6 +251,6 @@ export const moveBinaries = async (args = []) => {
     const destinationPath = getFullUploadName(options)
     console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
 
-    await copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket, s3)
+    await s3helpers.copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket, s3)
   }
 }
