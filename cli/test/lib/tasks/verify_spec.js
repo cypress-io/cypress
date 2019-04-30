@@ -2,11 +2,12 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const mockfs = require('mock-fs')
+const cp = require('child_process')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
+
 const { mockSpawn } = require('spawn-mock')
-const cp = require('child_process')
+const mockfs = require('mock-fs')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
