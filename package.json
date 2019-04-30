@@ -51,7 +51,7 @@
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "binary-release": "node ./scripts/binary.js release",
-    "test-scripts": "mocha -r packages/coffee/register --reporter spec 'scripts/unit/**/*spec.js'",
+    "test-scripts": "mocha -r packages/coffee/register -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js",
     "check-node-version": "node scripts/check-node-version.js",

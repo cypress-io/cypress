@@ -5,7 +5,8 @@ import is from 'check-more-types'
 // because it plays really nicely with TypeScript
 import arg from 'arg'
 import S3 from 'aws-sdk/clients/s3'
-import {prop} from 'ramda'
+import {prop, sortBy, last} from 'ramda'
+import pluralize from 'pluralize'
 
 // ignore TS errors - we are importing from CoffeeScript files
 // @ts-ignore
@@ -25,6 +26,48 @@ type semver = string
 interface ReleaseInformation {
   commit: commit,
   version: semver
+}
+
+interface CommitAndBuild {
+  commit: commit,
+  build: number,
+  s3path: string
+}
+
+/**
+ * Parses a binary S3 path like
+ * "beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-100/"
+ * and returns object with SHA string and build number
+ */
+export const parseBuildPath = (s3path: string): CommitAndBuild | null => {
+  const shaAndBuild = /([0-9a-f]{40})-(\d+)\/?$/i
+  const found = s3path.match(shaAndBuild)
+  if (!found) {
+    return null
+  }
+  const [, commit, build] = found
+  return {
+    commit,
+    build: parseInt(build),
+    s3path
+  }
+}
+
+export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
+  const matching = s3paths.filter(s => s.includes(commit))
+  if (!matching.length) {
+    // could not find path with commit SHA
+    return null
+  }
+
+  if (matching.length === 1) {
+    return matching[0]
+  }
+
+  // each path includes commit SHA and build number, let's pick the last build
+  const parsedBuilds = matching.map(parseBuildPath)
+  const sortedBuilds = sortBy(prop('build'))(parsedBuilds)
+  return prop('s3path', last(sortedBuilds))
 }
 
 /**
@@ -85,9 +128,14 @@ export const moveBinaries = async (args = []) => {
       })
     })
 
-    if (debug.isEnabled) {
-      debug('all found subfolders')
-      debug(list.join('\n'))
+    if (debug.enabled) {
+      console.log('all found subfolders')
+      console.log(list.join('\n'))
     }
+
+    const commitList = list.filter(s => s.includes(releaseOptions.commit))
+    console.log('found %s for commit %s',
+      pluralize('build', commitList.length, true),
+      releaseOptions.commit)
   })
 }
