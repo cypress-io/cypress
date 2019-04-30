@@ -91,6 +91,13 @@ niv.install("react-dom@15.6.1")
     .status(500)
     .send("<html><body>server error</body></html>")
 
+  css4068 = ""
+
+  app.get "/dynamically-server-generated/issue-4068.css", (req, res) ->
+    css4068 = if !css4068 then _.range(1, 2501).map((n) -> ".c#{n} { font-size: #{Math.round n/10}px; }").join("\n") else css4068
+    res.setHeader('Content-Type', 'text/css')
+    res.status(200).send(css4068)
+
   app.use(express.static(path.join(__dirname, "..", "cypress")))
 
   app.use(require("errorhandler")())

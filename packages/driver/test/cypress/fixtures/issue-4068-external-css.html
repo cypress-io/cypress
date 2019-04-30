@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="issue-4068.css" />
+    <link rel="stylesheet" href="/dynamically-server-generated/issue-4068.css" />
   </head>
   <body>
-    <h1 id="test">test</h1>
+    <h1 id="test">random font size test</h1>
     <script>
-      document.getElementById('test').innerHTML = 'Random Number: ' + Math.random() * 100;
+      // The .c# classname is tighty coupled to generated CSS file made in packages/driver/test/support/server.coffee
+      document.getElementById('test').className = "c" + Math.round(Math.random() * 1000);
     </script>
   </body>
 </html>
