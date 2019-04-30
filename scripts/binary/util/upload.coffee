@@ -37,6 +37,9 @@ getS3Credentials = () ->
 
   la(check.unemptyString(config.bucket), 'missing AWS config bucket')
   la(check.unemptyString(config.folder), 'missing AWS config folder')
+  la(check.unemptyString(config.key), 'missing AWS key')
+  la(check.unemptyString(config.secret), 'missing AWS secret key')
+
   config
 
 getPublisher = (getAwsObj = getS3Credentials) ->

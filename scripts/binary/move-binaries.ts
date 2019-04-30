@@ -5,6 +5,7 @@ import is from 'check-more-types'
 // because it plays really nicely with TypeScript
 import arg from 'arg'
 import S3 from 'aws-sdk/clients/s3'
+import {prop} from 'ramda'
 
 // ignore TS errors - we are importing from CoffeeScript files
 // @ts-ignore
@@ -53,14 +54,37 @@ export const moveBinaries = async (args = []) => {
     version: options['--version']
   }
 
+  const aws = getS3Credentials()
   const s3 = new S3({
-    credentials: getS3Credentials()
+    accessKeyId:     aws.key,
+    secretAccessKey: aws.secret
   })
 
-  validPlatformArchs.forEach((platformArch: string) => {
+  validPlatformArchs.slice(0,1).forEach(async (platformArch: string) => {
     const uploadDir = getUploadDirForPlatform({
       version: releaseOptions.version
     }, platformArch)
     console.log('finding binary for %s in %s', platformArch, uploadDir)
+
+    const list = await new Promise((resolve, reject) => {
+      const prefix = uploadDir + '/'
+
+      s3.listObjectsV2({
+        Bucket: aws.bucket,
+        Prefix: prefix,
+        Delimiter: '/'
+      }, (err, result) => {
+        if (err) {
+          return reject(err)
+        }
+
+        debug('AWS result in %s %s', aws.bucket, prefix)
+        debug('%o', result)
+
+        resolve(result.CommonPrefixes.map(prop('Prefix')))
+      })
+    })
+
+    console.log(list)
   })
 }
