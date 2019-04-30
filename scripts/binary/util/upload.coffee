@@ -126,6 +126,8 @@ validPlatformArchs = ["darwin-x64", "linux-x64", "win32-ia32", "win32-x64"]
 # example: isValidPlatformArch("darwin") // FALSE
 isValidPlatformArch = check.oneOf(validPlatformArchs)
 
+getValidPlatformArchs = () -> validPlatformArchs
+
 getUploadNameByOsAndArch = (platform) ->
   ## just hard code for now...
   arch = os.arch()
@@ -165,6 +167,7 @@ module.exports = {
   purgeDesktopAppAllPlatforms,
   getUploadNameByOsAndArch,
   validPlatformArchs,
+  getValidPlatformArchs,
   isValidPlatformArch,
   saveUrl,
   formHashFromEnvironment

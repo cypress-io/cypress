@@ -14,7 +14,8 @@ import confirm from 'inquirer-confirm'
 
 // ignore TS errors - we are importing from CoffeeScript files
 // @ts-ignore
-import {getS3Credentials, validPlatformArchs} from './util/upload'
+import uploadUtils from './util/upload'
+
 // @ts-ignore
 import {getUploadDirForPlatform} from './upload-unique-binary'
 // @ts-ignore
@@ -87,10 +88,33 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
 }
 
 /**
+ * An object of all confirm prompts to the user.
+ * Useful to stubbing the confirmation prompts during testing.
+ */
+export const prompts = {
+  async shouldCopy () {
+    await confirm({
+      question: 'Would you like to proceed? This will overwrite existing files',
+      default: false,
+    })
+  }
+}
+
+/**
  * Utility object with methods that deal with S3.
  * Useful for testing our code that calls S3 methods.
-*/
-const s3helpers = {
+ */
+export const s3helpers = {
+  makeS3 (aws) {
+    la(is.unemptyString(aws.key), 'missing aws key')
+    la(is.unemptyString(aws.secret), 'missing aws secret')
+
+    return new S3({
+      accessKeyId: aws.key,
+      secretAccessKey: aws.secret
+    })
+  },
+
   verifyZipFileExists (zipFile: string, bucket: string, s3: S3): Promise<null> {
     debug('checking S3 file %s', zipFile)
     debug('bucket %s', bucket)
@@ -185,16 +209,18 @@ export const moveBinaries = async (args = []) => {
     version: options['--version']
   }
 
-  const aws = getS3Credentials()
-  const s3 = new S3({
-    accessKeyId:     aws.key,
-    secretAccessKey: aws.secret
-  })
+  const aws = uploadUtils.getS3Credentials()
+  const s3 = s3helpers.makeS3(aws)
 
   // found s3 paths with last build for same commit for all platforms
   const lastBuilds: Desktop[] = []
 
-  for (const platformArch of validPlatformArchs) {
+  const platforms: platformArch[] = uploadUtils.getValidPlatformArchs()
+
+  for (const platformArch of platforms) {
+    la(uploadUtils.isValidPlatformArch(platformArch),
+      'invalid platform arch', platformArch)
+
     const uploadDir = getUploadDirForPlatform({
       version: releaseOptions.version
     }, platformArch)
@@ -230,16 +256,16 @@ export const moveBinaries = async (args = []) => {
   console.log(lastBuilds.map(prop('s3zipPath')).join('\n'))
 
   try {
-    await confirm({
-      question: 'Would you like to proceed? This will overwrite existing files',
-      default: false,
-    })
+    await prompts.shouldCopy()
   } catch (e) {
     console.log('Copying has been cancelled')
     return
   }
 
   console.log('Copying ...')
+
+  // final test runners that we have copied
+  const testRunners: Desktop[] = []
 
   for (const lastBuild of lastBuilds) {
     const options = {
@@ -252,5 +278,13 @@ export const moveBinaries = async (args = []) => {
     console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
 
     await s3helpers.copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket, s3)
+
+    testRunners.push({
+      platformArch: lastBuild.platformArch,
+      s3zipPath: destinationPath
+    })
   }
+
+  // return all available information
+  return {lastBuilds, testRunners}
 }

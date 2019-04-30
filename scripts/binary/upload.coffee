@@ -37,6 +37,8 @@ module.exports = {
     dirName
 
   getFullUploadName: ({folder, version, platformArch, name}) ->
+    la(check.unemptyString(folder), 'missing folder', folder)
+    la(check.semver(version), 'missing or invalid version', version)
     la(check.unemptyString(name), 'missing file name', name)
     la(uploadUtils.isValidPlatformArch(platformArch),
       'invalid platform and arch', platformArch)
