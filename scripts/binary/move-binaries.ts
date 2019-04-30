@@ -8,6 +8,10 @@ import S3 from 'aws-sdk/clients/s3'
 import {prop, sortBy, last} from 'ramda'
 import pluralize from 'pluralize'
 
+// inquirer-confirm is missing type definition
+// @ts-ignore
+import confirm from 'inquirer-confirm'
+
 // ignore TS errors - we are importing from CoffeeScript files
 // @ts-ignore
 import {getS3Credentials, validPlatformArchs} from './util/upload'
@@ -129,8 +133,23 @@ const listS3Objects = (uploadDir: string, bucket: string, s3: S3): Promise<strin
   })
 }
 
-const createS3Folder = async (folderToCreate: string, bucket: string, s3: S3) => {
+const copyS3 = async (sourceKey: string, destinationKey: string, bucket: string, s3: S3) => {
+  return new Promise((resole, reject) => {
+    debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
 
+    s3.copyObject({
+      Bucket: bucket,
+      CopySource: bucket + '/' + sourceKey,
+      Key: destinationKey
+    }, (err, data) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('result of copying')
+      debug('%o', data)
+    })
+  })
 }
 
 /**
@@ -169,7 +188,7 @@ export const moveBinaries = async (args = []) => {
   // found s3 paths with last build for same commit for all platforms
   const lastBuilds: Desktop[] = []
 
-  for (const platformArch of validPlatformArchs.slice(0, 1)) {
+  for (const platformArch of validPlatformArchs) {
     const uploadDir = getUploadDirForPlatform({
       version: releaseOptions.version
     }, platformArch)
@@ -204,6 +223,18 @@ export const moveBinaries = async (args = []) => {
     pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
   console.log(lastBuilds.map(prop('s3zipPath')).join('\n'))
 
+  try {
+    await confirm({
+      question: 'Would you like to proceed? This will overwrite existing files',
+      default: false,
+    })
+  } catch (e) {
+    console.log('Copying has been cancelled')
+    return
+  }
+
+  console.log('Copying ...')
+
   for (const lastBuild of lastBuilds) {
     const options = {
       folder: aws.folder,
@@ -212,6 +243,8 @@ export const moveBinaries = async (args = []) => {
       name: zipName
     }
     const destinationPath = getFullUploadName(options)
-    console.log('copying desktop %s to %s', lastBuild.platformArch, destinationPath)
+    console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
+
+    await copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket, s3)
   }
 }
