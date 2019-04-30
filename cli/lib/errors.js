@@ -90,6 +90,16 @@ const missingXvfb = {
     `,
 }
 
+const smokeTestFailure = (smokeTestCommand, timedOut) => {
+  return {
+    description: `Cypress Smoke Test ${timedOut ? 'timed out attempting to start' : 'failed to start'}`,
+    solution: stripIndent`
+    The command '${smokeTestCommand}' 
+    failed with the following output:
+    `,
+  }
+}
+
 const missingDependency = {
   description: 'Cypress failed to start.',
   // this message is too Linux specific
@@ -261,5 +271,6 @@ module.exports = {
     invalidCacheDirectory,
     removed,
     CYPRESS_RUN_BINARY,
+    smokeTestFailure,
   },
 }

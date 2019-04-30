@@ -5,9 +5,8 @@ const os = require('os')
 const mockfs = require('mock-fs')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
+const { mockSpawn } = require('spawn-mock')
 const cp = require('child_process')
-const events = require('events')
-const { Readable } = require('stream')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -131,31 +130,6 @@ context('lib/tasks/verify', () => {
     })
   })
 
-  const ReadableStream = () => {
-    /** @type {Readable} */
-    const ee = new Readable()
-
-    ee.destroy = _.noop
-    ee._read = _.noop
-
-    return ee
-  }
-
-  const StubbedProcess = () => {
-    const ee = new events.EventEmitter()
-    const proc = {
-      on: ee.on,
-      emit: ee.emit,
-      kill: _.noop,
-      stdout: ReadableStream(),
-      // stdin: ReadableStream(),
-      stderr: ReadableStream(),
-    }
-
-    return proc
-  }
-
-
   it('logs error when child process hangs', () => {
     createfs({
       alreadyVerified: false,
@@ -166,13 +140,6 @@ context('lib/tasks/verify', () => {
     sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
       cp.stderr.write('some stderr')
       cp.stdout.write('some stdout')
-
-      const _kill = cp.kill.bind(cp)
-
-      cp.kill = () => {
-        cp.emit('exit')
-        _kill()
-      }
     }))
 
     util.exec.restore()
@@ -183,7 +150,60 @@ context('lib/tasks/verify', () => {
       logger.error(err)
     })
     .then(() => {
-      snapshot('error hanging process', normalize(stdout.toString()))
+      snapshot(normalize(stdout.toString()))
+    })
+
+  })
+
+  it('logs error when child process returns incorrect stdout (stderr when exists)', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+      cp.stderr.write('some stderr')
+      cp.stdout.write('some stdout')
+      cp.emit('exit', 0, null)
+      cp.end()
+    }))
+
+    util.exec.restore()
+
+    return verify
+    .start()
+    .catch((err) => {
+      logger.error(err)
+    })
+    .then(() => {
+      snapshot(normalize(stdout.toString()))
+    })
+
+  })
+
+  it('logs error when child process returns incorrect stdout (stdout when no stderr)', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+      cp.stdout.write('some stdout')
+      cp.emit('exit', 0, null)
+      cp.end()
+    }))
+
+    util.exec.restore()
+
+    return verify
+    .start()
+    .catch((err) => {
+      logger.error(err)
+    })
+    .then(() => {
+      snapshot(normalize(stdout.toString()))
     })
 
   })

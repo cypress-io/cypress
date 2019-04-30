@@ -161,6 +161,63 @@ Cypress Version: 1.2.3
 
 `
 
+exports['lib/tasks/verify logs error when child process hangs 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+   → Cypress Version: 1.2.3
+Error: Cypress Smoke Test timed out attempting to start
+
+The command '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222' 
+failed with the following output:
+----------
+
+some stderr
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['lib/tasks/verify logs error when child process returns incorrect stdout (stderr when exists) 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+   → Cypress Version: 1.2.3
+Error: Cypress Smoke Test failed to start
+
+The command '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222' 
+failed with the following output:
+----------
+
+some stderr
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['lib/tasks/verify logs error when child process returns incorrect stdout (stdout when no stderr) 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+   → Cypress Version: 1.2.3
+Error: Cypress Smoke Test failed to start
+
+The command '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222' 
+failed with the following output:
+----------
+
+some stdout
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
 exports['linux: error when invalid CYPRESS_RUN_BINARY 1'] = `
 Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/:
 

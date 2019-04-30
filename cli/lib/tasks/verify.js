@@ -48,16 +48,19 @@ const runSmokeTest = (binaryDir, options) => {
     return throwFormErrorText(errors.missingXvfb)(`Caught error trying to run XVFB: "${err.message}"`)
   }
 
-  const onSmokeTestError = (err) => {
-    debug('Smoke test failed:', err)
+  const onSmokeTestError = (smokeTestCommand) => {
+    return (err) => {
+      debug('Smoke test failed:', err)
 
-    let errMessage = err.stderr || err.message
+      let errMessage = err.stderr || err.message
 
-    if (err.timedOut) {
-      errMessage = `It timed out\n${errMessage}`
+      if (err.timedOut) {
+
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, true))(errMessage)
+      }
+
+      return throwFormErrorText(errors.missingDependency)(errMessage)
     }
-
-    return throwFormErrorText(errors.missingDependency)(errMessage)
   }
 
   const needsXvfb = xvfb.isNeeded()
@@ -76,21 +79,19 @@ const runSmokeTest = (binaryDir, options) => {
       args,
       { timeout: options.smokeTestTimeout }
     ))
-    .catch(onSmokeTestError)
+    .catch(onSmokeTestError(smokeTestCommand))
     .then((result) => {
+
+      // TODO: when execa > 1.1 is released
+      // change this to `result.all` for both stderr and stdout
       const smokeTestReturned = result.stdout
 
       debug('smoke test stdout "%s"', smokeTestReturned)
 
       if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
         debug('Smoke test failed:', result)
-        throw new Error(stripIndent`
-          Smoke failed.
 
-          Command was: ${smokeTestCommand}
-
-          Returned: ${smokeTestReturned}
-        `)
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(result.stderr || result.stdout)
       }
     })
   }
