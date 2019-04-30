@@ -38,7 +38,7 @@ RETRY_INTERVALS = [1, 2, 2]
 
 retryBaseUrlCheck = (baseUrl, onWarning, iteration = 0) ->
   ensureUrl.isListening(baseUrl)
-  .catch (e) =>
+  .catch (e) ->
     if iteration == RETRY_INTERVALS.length
       throw e
 
@@ -137,7 +137,7 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project) ->
+  open: (config = {}, project, onWarning) ->
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -161,13 +161,13 @@ class Server
 
       @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
-      @createServer(app, config, project, @_request)
+      @createServer(app, config, @_request, onWarning)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
 
-  createServer: (app, config, project, request) ->
+  createServer: (app, config, project, request, onWarning) ->
     new Promise (resolve, reject) =>
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
@@ -254,13 +254,14 @@ class Server
             @_baseUrl = baseUrl
 
             if config.isTextTerminal
-              return retryBaseUrlCheck(baseUrl, project.onWarning)
-              .catch () =>
+              return retryBaseUrlCheck(baseUrl, onWarning)
+              .return(null)
+              .catch ->
                 reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
 
             ensureUrl.isListening(baseUrl)
             .return(null)
-            .catch (err) =>
+            .catch (err) ->
               errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
 
         .then (warning) =>

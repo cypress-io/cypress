@@ -72,8 +72,6 @@ class Project extends EE
 
       @memoryCheck = setInterval(logMemory, 1000)
 
-    @onWarning = options.onWarning
-
     @getConfig(options)
     .tap (cfg) =>
       process.chdir(@projectRoot)
@@ -91,7 +89,7 @@ class Project extends EE
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
-      @server.open(cfg, @)
+      @server.open(cfg, @, options.onWarning)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
