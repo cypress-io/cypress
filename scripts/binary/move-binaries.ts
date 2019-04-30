@@ -13,6 +13,8 @@ import pluralize from 'pluralize'
 import {getS3Credentials, validPlatformArchs} from './util/upload'
 // @ts-ignore
 import {getUploadDirForPlatform} from './upload-unique-binary'
+// @ts-ignore
+import {zipName, getFullUploadName} from './upload'
 
 /**
  * 40 character full sha commit string
@@ -23,6 +25,11 @@ type commit = string
  */
 type semver = string
 
+/**
+ * Platform plus architecture string like "darwin-x64"
+ */
+type platformArch = "darwin-x64" | "linux-x64"| "win32-ia32" | "win32-x64"
+
 interface ReleaseInformation {
   commit: commit,
   version: semver
@@ -32,6 +39,11 @@ interface CommitAndBuild {
   commit: commit,
   build: number,
   s3path: string
+}
+
+interface Desktop {
+  s3zipPath: string
+  platformArch: platformArch
 }
 
 /**
@@ -70,6 +82,28 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
   return prop('s3path', last(sortedBuilds))
 }
 
+const verifyZipFileExists = (zipFile: string, bucket: string, s3: S3): Promise<null> => {
+  debug('checking S3 file %s', zipFile)
+  debug('bucket %s', bucket)
+
+  return new Promise((resolve, reject) => {
+    s3.headObject({
+      Bucket: bucket,
+      Key: zipFile
+    }, (err, data) => {
+      if (err) {
+        debug('error getting object %s', zipFile)
+        debug(err)
+
+        return reject(err)
+      }
+      debug('s3 data for %s', zipFile)
+      debug(data)
+      resolve()
+    })
+  })
+}
+
 /**
  * Returns list of prefixes in a given folder
  */
@@ -93,6 +127,10 @@ const listS3Objects = (uploadDir: string, bucket: string, s3: S3): Promise<strin
       resolve(result.CommonPrefixes.map(prop('Prefix')))
     })
   })
+}
+
+const createS3Folder = async (folderToCreate: string, bucket: string, s3: S3) => {
+
 }
 
 /**
@@ -129,9 +167,9 @@ export const moveBinaries = async (args = []) => {
   })
 
   // found s3 paths with last build for same commit for all platforms
-  const lastBuilds: string[] = []
+  const lastBuilds: Desktop[] = []
 
-  for (const platformArch of validPlatformArchs) {
+  for (const platformArch of validPlatformArchs.slice(0, 1)) {
     const uploadDir = getUploadDirForPlatform({
       version: releaseOptions.version
     }, platformArch)
@@ -152,10 +190,28 @@ export const moveBinaries = async (args = []) => {
       lastBuildPath,
       releaseOptions.commit, platformArch)
 
-    lastBuilds.push(lastBuildPath)
+    const s3zipPath = lastBuildPath + zipName
+
+    await verifyZipFileExists(s3zipPath, aws.bucket, s3)
+
+    lastBuilds.push({
+      platformArch,
+      s3zipPath
+    })
   }
 
   console.log('Copying %s for commit %s',
     pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
-  console.log(lastBuilds.join('\n'))
+  console.log(lastBuilds.map(prop('s3zipPath')).join('\n'))
+
+  for (const lastBuild of lastBuilds) {
+    const options = {
+      folder: aws.folder,
+      version: releaseOptions.version,
+      platformArch: lastBuild.platformArch,
+      name: zipName
+    }
+    const destinationPath = getFullUploadName(options)
+    console.log('copying desktop %s to %s', lastBuild.platformArch, destinationPath)
+  }
 }

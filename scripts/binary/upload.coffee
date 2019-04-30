@@ -36,6 +36,14 @@ module.exports = {
     dirName = [aws.folder, version].join("/")
     dirName
 
+  getFullUploadName: ({folder, version, platformArch, name}) ->
+    la(check.unemptyString(name), 'missing file name', name)
+    la(uploadUtils.isValidPlatformArch(platformArch),
+      'invalid platform and arch', platformArch)
+
+    fileName = [folder, version, platformArch, name].join("/")
+    fileName
+
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/darwin-x64/
   getUploadDirName: ({version, platform}) ->
