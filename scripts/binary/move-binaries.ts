@@ -103,7 +103,10 @@ export const moveBinaries = async (args = []) => {
     secretAccessKey: aws.secret
   })
 
-  validPlatformArchs.slice(0,1).forEach(async (platformArch: string) => {
+  // found s3 paths with last build for same commit for all platforms
+  const lastBuilds: string[] = []
+
+  for (const platformArch of validPlatformArchs) {
     const uploadDir = getUploadDirForPlatform({
       version: releaseOptions.version
     }, platformArch)
@@ -133,9 +136,18 @@ export const moveBinaries = async (args = []) => {
       console.log(list.join('\n'))
     }
 
-    const commitList = list.filter(s => s.includes(releaseOptions.commit))
-    console.log('found %s for commit %s',
-      pluralize('build', commitList.length, true),
-      releaseOptions.commit)
-  })
+    const lastBuildPath = findBuildByCommit(releaseOptions.commit, list)
+    if (!lastBuildPath) {
+      throw new Error(`Cannot find build with commit ${releaseOptions.commit} for platform ${platformArch}`)
+    }
+    console.log('found %s for commit %s on platform %s',
+      lastBuildPath,
+      releaseOptions.commit, platformArch)
+
+    lastBuilds.push(lastBuildPath)
+  }
+
+  console.log('Copying %s for commit %s',
+    pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
+  console.log(lastBuilds.join('\n'))
 }

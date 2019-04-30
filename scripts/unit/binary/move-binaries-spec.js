@@ -13,12 +13,13 @@ describe('move-binaries', () => {
       const path =
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/'
       const parsed = parseBuildPath(path)
+
       la(is.commitId(parsed.commit), 'missing commit', parsed)
       la(is.positive(parsed.build), 'missing build', parsed)
 
       snapshot({
         path,
-        parsed
+        parsed,
       })
     })
   })
@@ -33,9 +34,10 @@ describe('move-binaries', () => {
 
     it('finds single matching path', () => {
       const paths = [
-        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/'
+        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
       ]
       const found = findBuildByCommit(sha, paths)
+
       la(found === paths[0], 'expected to find the only path', found)
     })
 
@@ -44,9 +46,10 @@ describe('move-binaries', () => {
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
         // these are not matching
         'beta/binary/3.3.0/darwin-x64/circle-develop-ffff8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
-        'beta/binary/3.3.0/darwin-x64/circle-develop-aaaa8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/'
+        'beta/binary/3.3.0/darwin-x64/circle-develop-aaaa8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
       ]
       const found = findBuildByCommit(sha, paths)
+
       la(found === paths[0], 'expected to find the only path', found)
     })
 
@@ -60,9 +63,10 @@ describe('move-binaries', () => {
         'beta/binary/3.3.0/darwin-x64/circle-develop-ffff8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
         'beta/binary/3.3.0/darwin-x64/circle-develop-aaaa8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
         // this one is matching, but not the latest one
-        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-2/'
+        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-2/',
       ]
       const found = findBuildByCommit(sha, paths)
+
       la(found === paths[1], 'expected to find the only path', found)
     })
   })
