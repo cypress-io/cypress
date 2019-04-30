@@ -41,8 +41,8 @@ getStylesFor = (doc, $$, stylesheets, location) ->
       ## return the CSS rules as a string, or, if cross-domain,
       ## a reference to the stylesheet's href
       makePathsAbsoluteToStylesheet(
-        getCssRulesString(stylesheet.href, stylesheets[stylesheet.href]),
         stylesheet.href
+        getCssRulesString(stylesheet.href, stylesheets[stylesheet.href]),
       ) or {
         href: stylesheet.href
       }
@@ -60,7 +60,8 @@ getDocumentStylesheets = (document = {}) ->
     return memo
   , {}
 
-makePathsAbsoluteToStylesheet = (styles, stylesheetHref) ->
+## memoized by href (lodash will cache results by first argument, if no resolver is supplied)
+makePathsAbsoluteToStylesheet = _.memoize (stylesheetHref, styles) ->
   return styles if not _.isString(styles)
 
   stylesheetPath = stylesheetHref.replace(path.basename(stylesheetHref), '')
