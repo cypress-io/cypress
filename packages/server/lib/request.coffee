@@ -174,13 +174,11 @@ createRetryingRequestPromise = (opts, iteration = 0) ->
 
     res
 
-pipeEvent = (source, destination, event) ->
-  source.on event, (args...) ->
-    destination.emit(event, args...)
-
 createRetryingRequestStream = (opts = {}) ->
   retryStream = pumpify()
 
+  ## TODO: remove this after finishing the
+  ## implementation of everything
   retryStream.on "error", (err) ->
     debugger
 
@@ -188,8 +186,12 @@ createRetryingRequestStream = (opts = {}) ->
   pipeSrc = null
 
   emitError = (err) ->
-    # retryStream.emit("error", err)
-    retryStream.destroy(err)
+    retryStream.emit("error", err)
+
+    ## TODO: we probably want to destroy
+    ## the stream, but leaving in the error emit
+    ## temporarily until we finish implementation
+    # retryStream.destroy(err)
 
   tryStartStream = (iteration = 0) ->
     ## if our request has been aborted
@@ -248,6 +250,15 @@ createRetryingRequestStream = (opts = {}) ->
       ## later and then remove it after the
       ## response is complete
       pipeSrc = src
+
+      ## internally pumpify does not call the
+      ## .pipe() method on the reqStream, which
+      ## prevents the 'pipe' event from being called.
+      ## https://github.com/request/request/blob/master/request.js#L493
+      ## the request lib expects this 'pipe' event in
+      ## order to copy the request headers onto the
+      ## outgoing message - so we manually fire it here
+      reqStream.emit('pipe', src)
 
     ## when this passthrough stream is being piped into
     ## then make sure we properly "forward" and connect
