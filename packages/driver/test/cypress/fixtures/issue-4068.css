@@ -1,4 +1,7 @@
-/* This file contains the following stylsheets copied a few times in order to reproduce an issue caused by stylesheets with lots of rules */
+/*
+ * This file contains the following stylsheets copied a few times in order to reproduce an issue caused by stylesheets with lots of rules
+ * This sheet has 2166 rules.
+ */
 
 	/*! jQuery UI - v1.11.4 - 2015-03-11
 	* http://jqueryui.com
