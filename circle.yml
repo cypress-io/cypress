@@ -276,9 +276,9 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
-      - run: 
+      - run:
           environment:
-            DEBUG: test:proxy-performance 
+            DEBUG: test:proxy-performance
           command: npm run all test-performance -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -797,6 +797,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -863,6 +864,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - Mac build
 

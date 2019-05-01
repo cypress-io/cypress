@@ -119,6 +119,7 @@
     "gulp-debug": "3.2.0",
     "gulp-rename": "1.4.0",
     "gulp-typescript": "3.2.4",
+    "hasha": "5.0.0",
     "human-interval": "0.1.6",
     "husky": "0.14.3",
     "inquirer": "3.3.0",
