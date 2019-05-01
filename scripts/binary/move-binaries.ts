@@ -195,7 +195,8 @@ export const moveBinaries = async (args = []) => {
     const destinationPath = getFullUploadName(options)
     console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
 
-    await s3helpers.copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket, s3)
+    await s3helpers.copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket,
+      'application/zip', 'public-read', s3)
 
     testRunners.push({
       platformArch: lastBuild.platformArch,

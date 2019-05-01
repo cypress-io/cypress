@@ -70,9 +70,13 @@ export const s3helpers = {
   },
 
   /**
-   * Copies one S3 object into another key, metadata is copied
+   * Copies one S3 object into another key, metadata is copied.
+   * For copying a public zip file use content 'application/zip'
+   * and ACL 'public-read'
    */
-  copyS3 (sourceKey: string, destinationKey: string, bucket: string, s3: S3): Promise<S3.CopyObjectOutput> {
+  copyS3 (sourceKey: string, destinationKey: string, bucket: string,
+    contentType: S3.ContentType, acl: S3.ObjectCannedACL,
+    s3: S3): Promise<S3.CopyObjectOutput> {
     return new Promise((resolve, reject) => {
       debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
 
@@ -81,7 +85,9 @@ export const s3helpers = {
         CopySource: bucket + '/' + sourceKey,
         Key: destinationKey,
         // when we copy S3 object, copy the original metadata, if any
-        MetadataDirective: 'COPY'
+        MetadataDirective: 'COPY',
+        ContentType: contentType,
+        ACL: acl
       }
       s3.copyObject(params, (err, data) => {
         if (err) {
