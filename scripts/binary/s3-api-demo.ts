@@ -8,5 +8,11 @@ const s3 = s3helpers.makeS3(aws)
 
 const bucket = aws.bucket
 const key = 'beta/binary/3.3.0/darwin-x64/circle-develop-455046b928c861d4457b2ec5426a51de1fda74fd-102212/cypress.zip'
-s3helpers.getUserMetadata(key, bucket, s3)
+
+s3helpers.setUserMetadata(bucket, key, {
+  user: 'bar'
+}, s3)
+.then(() => {
+  return s3helpers.getUserMetadata(bucket, key, s3)
+})
   .then(console.log, console.error)

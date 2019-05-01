@@ -67,20 +67,22 @@ export const s3helpers = {
   },
 
   copyS3 (sourceKey: string, destinationKey: string, bucket: string, s3: S3): Promise<S3.CopyObjectOutput> {
-    return new Promise((resole, reject) => {
+    return new Promise((resolve, reject) => {
       debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
 
-      s3.copyObject({
+      const params: S3.CopyObjectRequest = {
         Bucket: bucket,
         CopySource: bucket + '/' + sourceKey,
         Key: destinationKey
-      }, (err, data) => {
+      }
+      s3.copyObject(params, (err, data) => {
         if (err) {
           return reject(err)
         }
 
         debug('result of copying')
         debug('%o', data)
+        resolve(data)
       })
     })
   },
@@ -91,7 +93,7 @@ export const s3helpers = {
    * but the returned object has these prefixes stripped. Thus if we set
    * a single "x-amz-meta-user: gleb", the resolved object will be simply {user: "gleb"}
   */
-  getUserMetadata (key: string, bucket: string, s3: S3): Promise<S3.Metadata> {
+  getUserMetadata (bucket: string, key: string, s3: S3): Promise<S3.Metadata> {
     return new Promise((resole, reject) => {
       debug('getting user metadata from %s %s', bucket, key)
 
@@ -106,6 +108,33 @@ export const s3helpers = {
         debug('user metadata')
         debug('%o', data.Metadata)
         resole(data.Metadata)
+      })
+    })
+  },
+
+  /**
+   * Setting user metadata can be accomplished with copying the object back onto itself
+   * with replaced metadata object.
+  */
+  setUserMetadata (bucket: string, key: string, metadata: S3.Metadata, s3: S3): Promise<S3.CopyObjectOutput> {
+    return new Promise((resolve, reject) => {
+      debug('setting metadata to %o for %s %s', metadata, bucket, key)
+
+      const params: S3.CopyObjectRequest = {
+        Bucket: bucket,
+        CopySource: bucket + '/' + key,
+        Key: key,
+        Metadata: metadata,
+        MetadataDirective: 'REPLACE'
+      }
+      s3.copyObject(params, (err, data) => {
+        if (err) {
+          return reject(err)
+        }
+
+        debug('result of copying')
+        debug('%o', data)
+        resolve(data)
       })
     })
   }
