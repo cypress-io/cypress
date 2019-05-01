@@ -2,7 +2,10 @@ const debug = require("debug")("cypress:binary")
 import la from 'lazy-ass'
 import is from 'check-more-types'
 import S3 from 'aws-sdk/clients/s3'
-import {prop} from 'ramda'
+import {prop, values, all} from 'ramda'
+
+export const hasOnlyStringValues = (o) =>
+  all(is.unemptyString, values(o))
 
 /**
  * Utility object with methods that deal with S3.
@@ -121,7 +124,11 @@ export const s3helpers = {
    * Setting user metadata can be accomplished with copying the object back onto itself
    * with replaced metadata object.
   */
-  setUserMetadata (bucket: string, key: string, metadata: S3.Metadata, s3: S3): Promise<S3.CopyObjectOutput> {
+  setUserMetadata (bucket: string, key: string, metadata: S3.Metadata,
+      acl: S3.ObjectCannedACL, s3: S3): Promise<S3.CopyObjectOutput> {
+    la(hasOnlyStringValues(metadata),
+      'metadata object can only have string values', metadata)
+
     return new Promise((resolve, reject) => {
       debug('setting metadata to %o for %s %s', metadata, bucket, key)
 
@@ -130,7 +137,8 @@ export const s3helpers = {
         CopySource: bucket + '/' + key,
         Key: key,
         Metadata: metadata,
-        MetadataDirective: 'REPLACE'
+        MetadataDirective: 'REPLACE',
+        ACL: acl
       }
       s3.copyObject(params, (err, data) => {
         if (err) {

@@ -108,7 +108,9 @@ setChecksum = (filename, key) =>
     checksum,
     size: String(size)
   }
-  s3helpers.setUserMetadata(aws.bucket, key, metadata, s3)
+  # by default s3.copyObject does not preserve ACL when copying
+  # thus we need to reset it for our public files
+  s3helpers.setUserMetadata(aws.bucket, key, metadata, 'public-read', s3)
 
 uploadUniqueBinary = (args = []) ->
   options = minimist(args, {
