@@ -145,8 +145,8 @@ createCookieString = (c) ->
   reduceCookieToArray(c).join("; ")
 
 createRetryingRequestPromise = (opts, iteration = 0) ->
-  retry = ->
-    delay = getDelayForRetry(iteration)
+  retry = (err = {}) ->
+    delay = getDelayForRetry(iteration, err)
 
     debug("retry %o", { iteration, delay })
 
