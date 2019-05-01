@@ -72,7 +72,14 @@ uploadFile = (options) ->
     headers = {}
     headers["Cache-Control"] = "no-cache"
 
-    key = null
+    # add custom metadata with checksums
+    # every value should be a string
+    checksum = hasha.fromFileSync(options.file)
+    size = fs.statSync(options.file).size
+    console.log('SHA256 checksum %s', checksum)
+    console.log('size', size)
+    headers["x-amz-meta-checksum"] = checksum
+    headers["x-amz-meta-size"] = String(size)
 
     gulp.src(options.file)
     .pipe rename (p) =>
@@ -81,34 +88,12 @@ uploadFile = (options) ->
       console.log("renaming upload to", p.dirname, p.basename)
       la(check.unemptyString(p.basename), "missing basename")
       la(check.unemptyString(p.dirname), "missing dirname")
-      key = p.dirname + uploadFileName
       p
     .pipe debug()
     .pipe publisher.publish(headers)
     .pipe awspublish.reporter()
     .on "error", reject
-    .on "end", () -> resolve(key)
-
-setChecksum = (filename, key) =>
-  console.log('setting checksum for file %s', filename)
-  console.log('on s3 object %s', key)
-
-  la(check.unemptyString(filename), 'expected filename', filename)
-  la(check.unemptyString(key), 'expected uploaded S3 key', key)
-
-  checksum = hasha.fromFileSync(filename)
-  size = fs.statSync(filename).size
-  console.log('SHA256 checksum %s', checksum)
-  console.log('size', size)
-
-  aws = uploadUtils.getS3Credentials()
-  s3 = s3helpers.makeS3(aws)
-  # S3 object metadata can only have string values
-  metadata = {
-    checksum,
-    size: String(size)
-  }
-  s3helpers.setUserMetadata(aws.bucket, key, metadata, s3)
+    .on "end", resolve
 
 uploadUniqueBinary = (args = []) ->
   options = minimist(args, {
@@ -140,8 +125,6 @@ uploadUniqueBinary = (args = []) ->
   options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
   uploadFile(options)
-  .then (key) ->
-    setChecksum(options.file, key)
   .then () ->
     cdnUrl = getCDN({
       version: options.version,
