@@ -161,7 +161,7 @@ class Server
 
       @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
-      @createServer(app, config, @_request, onWarning)
+      @createServer(app, config, project, @_request, onWarning)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
@@ -256,7 +256,8 @@ class Server
             if config.isTextTerminal
               return retryBaseUrlCheck(baseUrl, onWarning)
               .return(null)
-              .catch ->
+              .catch (e) ->
+                debug(e)
                 reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
 
             ensureUrl.isListening(baseUrl)

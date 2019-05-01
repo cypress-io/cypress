@@ -72,6 +72,8 @@ class Project extends EE
 
       @memoryCheck = setInterval(logMemory, 1000)
 
+    @onWarning = options.onWarning
+
     @getConfig(options)
     .tap (cfg) =>
       process.chdir(@projectRoot)
