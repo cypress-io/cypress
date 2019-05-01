@@ -502,6 +502,7 @@ describe "e2e record", ->
         expect(getRequestUrls()).to.be.empty
 
     it "warns but does not exit when is forked pr", ->
+      process.env.CIRCLECI = "true"
       process.env.CIRCLE_PR_NUMBER = "123"
       process.env.CIRCLE_PR_USERNAME = "brian-mann"
       process.env.CIRCLE_PR_REPONAME = "cypress"
@@ -517,7 +518,7 @@ describe "e2e record", ->
         expect(getRequestUrls()).to.be.empty
 
     it "warns but does not exit when is forked pr and parallel", ->
-      process.env.CIRCLECI = "1"
+      process.env.CIRCLECI = "true"
       process.env.CIRCLE_WORKFLOW_ID = "123"
       process.env.CIRCLE_PR_NUMBER = "123"
       process.env.CIRCLE_PR_USERNAME = "brian-mann"

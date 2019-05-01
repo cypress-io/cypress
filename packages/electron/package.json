@@ -1,7 +1,7 @@
 {
   "name": "@packages/electron",
   "version": "0.0.0",
-  "electronVersion": "1.8.2",
+  "electronVersion": "2.0.18",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -30,7 +30,7 @@
   "dependencies": {
     "@cypress/icons": "0.7.0",
     "bluebird": "3.5.3",
-    "debug": "3.2.6",
+    "debug": "4.1.1",
     "electron-packager": "9.1.0",
     "fs-extra": "0.30.0",
     "lodash": "4.17.11",
