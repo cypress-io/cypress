@@ -133,7 +133,7 @@
     "execa": "1.0.0",
     "express": "4.16.4",
     "express-handlebars": "3.0.2",
-    "find-process": "1.2.1",
+    "find-process": "1.4.1",
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "4.0.3",
     "getos": "2.8.4",
