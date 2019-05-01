@@ -37,7 +37,7 @@ hasRetriableStatusCodeFailure = (res, opts) ->
   opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
 
 isRetriableError = (err = {}, opts) ->
-  opts.retryOnNetworkFailure && ['ECONNREFUSED', 'ECONNRESET', 'EPIPE'].includes(err.code)
+  opts.retryOnNetworkFailure && ['ECONNREFUSED', 'ECONNRESET', 'EPIPE', 'EHOSTUNREACH', 'EAI_AGAIN'].includes(err.code)
 
 pick = (resp = {}) ->
   req = resp.request ? {}
