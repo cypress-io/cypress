@@ -7,9 +7,11 @@ path      = require("path")
 la        = require('lazy-ass')
 check     = require('check-more-types')
 R         = require("ramda")
+os        = require("os")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
 makeEmptyGithubCommit = require("make-empty-github-commit")
 parse = require("parse-github-repo-url")
+{setCommitStatus} = require("@cypress/set-commit-status")
 
 fs = Promise.promisifyAll(fs)
 
@@ -173,56 +175,96 @@ module.exports = {
   # triggers test projects on multiple CIs
   # the test projects will exercise the new version of
   # the Cypress test runner we just built
-  runTestProjects: (message, providerName, version) ->
+  runTestProjects: (getStatusAndMessage, providerName, version) ->
+
     projectFilter = getFilterByProvider(providerName)
 
-    if not message
-      message =
-        """
-        Testing new Cypress version #{version}
-
-        """
-      if process.env.CIRCLE_BUILD_URL
-        message += "\n"
-        message += "Circle CI build url #{process.env.CIRCLE_BUILD_URL}"
-
-      if process.env.APPVEYOR
-        slug = process.env.APPVEYOR_PROJECT_SLUG
-        build = process.env.APPVEYOR_BUILD_ID
-        message += "\n"
-        message += "AppVeyor CI #{slug} #{build}"
-
     makeCommit = (project, provider, creds) ->
-      # instead of triggering CI via API
-      # car.runProject(project, provider)
-      # make empty commit to trigger CIs
-
-      parsedRepo = parse(project)
+      ## make empty commit to trigger CIs
+      ## project is owner/repo string like cypress-io/cypress-test-tiny
       console.log("making commit to project", project)
 
+      parsedRepo = parse(project)
+      owner = parsedRepo[0]
+      repo = parsedRepo[1]
+
+      { status, message } = getStatusAndMessage(repo)
+
+      if not message
+        message =
+          """
+          Testing new Cypress version #{version}
+
+          """
+        if process.env.CIRCLE_BUILD_URL
+          message += "\n"
+          message += "Circle CI build url #{process.env.CIRCLE_BUILD_URL}"
+
+        if process.env.APPVEYOR
+          slug = process.env.APPVEYOR_PROJECT_SLUG
+          build = process.env.APPVEYOR_BUILD_ID
+          message += "\n"
+          message += "AppVeyor CI #{slug} #{build}"
+
       defaultOptions = {
-        owner: parsedRepo[0],
-        repo: parsedRepo[1],
+        owner,
+        repo,
+        message,
         token: creds.githubToken,
-        message
       }
 
+      createGithubCommitStatusCheck = ({ sha }) ->
+        return if not status
+
+        # status is {owner, repo, sha} and maybe a few other properties
+        isStatus = check.schema({
+          owner: check.unemptyString,
+          repo: check.unemptyString,
+          sha: check.commitId,
+          context: check.unemptyString,
+          platform: check.unemptyString,
+          arch: check.unemptyString
+        })
+        if not isStatus(status)
+          console.error("Invalid status object %o", status)
+
+        targetUrl = "https://github.com/#{owner}/#{repo}/commit/#{sha}"
+        commitStatusOptions = {
+          targetUrl,
+          owner: status.owner,
+          repo: status.repo,
+          sha: status.sha,
+          context: status.context,
+          state: 'pending',
+          description: "#{owner}/#{repo}",
+        }
+
+        console.log(
+          'creating commit status check',
+          commitStatusOptions.description,
+          commitStatusOptions.context
+        )
+
+        setCommitStatus(commitStatusOptions)
+
       if not version
-        return makeEmptyGithubCommit(defaultOptions)
+        return makeEmptyGithubCommit(defaultOptions).then(createGithubCommitStatusCheck)
 
       # first try to commit to branch for next upcoming version
       specificBranchOptions = {
-        owner: parsedRepo[0],
-        repo: parsedRepo[1],
+        owner: owner,
+        repo: repo,
         token: creds.githubToken,
         message,
         branch: version
       }
+
       makeEmptyGithubCommit(specificBranchOptions)
       .catch () ->
         # maybe there is no branch for next version
         # try default branch
         makeEmptyGithubCommit(defaultOptions)
+      .then(createGithubCommitStatusCheck)
 
     awaitEachProjectAndProvider(PROJECTS, makeCommit, projectFilter)
 }

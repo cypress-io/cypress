@@ -277,28 +277,101 @@ module.exports = {
 
   hover:
     not_implemented: """
-      #{cmd('hover')} is not currently implemented.\n
-      However it is usually easy to workaround.\n
-      Read the following document for a detailed explanation.\n
+      #{cmd('hover')} is not currently implemented.
+
+      However it is usually easy to workaround.
+
+      Read the following document for a detailed explanation.
+
       https://on.cypress.io/hover
     """
 
   invoke:
-    invalid_type: "Cannot call #{cmd('invoke')} because '{{prop}}' is not a function. You probably want to use #{cmd('its', '\'{{prop}}\'')}."
+    prop_not_a_function:
+      """
+      #{cmd('invoke')} errored because the property: '{{prop}}' returned a '{{type}}' value instead of a function. #{cmd('invoke')} can only be used on properties that return callable functions.
+
+      #{cmd('invoke')} waited for the specified property '{{prop}}' to return a function, but it never did.
+
+      If you want to assert on the property's value, then switch to use #{cmd('its')} and add an assertion such as:
+
+      cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')
+      """
+    subject_null_or_undefined:
+      """
+      #{cmd('invoke')} errored because your subject is: '{{value}}'. You cannot invoke any functions such as '{{prop}}' on a '{{value}}' value.
+
+      If you expect your subject to be '{{value}}', then add an assertion such as:
+
+      cy.wrap({{value}}).should('be.{{value}}')
+      """
+    null_or_undefined_prop_value:
+      """
+      #{cmd('invoke')} errored because the property: '{{prop}}' is not a function, and instead returned a '{{value}}' value.
+
+      #{cmd('invoke')} waited for the specified property '{{prop}}' to become a callable function, but it never did.
+
+      If you expect the property '{{prop}}' to be '{{value}}', then switch to use #{cmd('its')} and add an assertion such as:
+
+      cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')
+      """
+
+  its:
+    subject_null_or_undefined:
+      """
+      #{cmd('its')} errored because your subject is: '{{value}}'. You cannot access any properties such as '{{prop}}' on a '{{value}}' value.
+
+      If you expect your subject to be '{{value}}', then add an assertion such as:
+
+      cy.wrap({{value}}).should('be.{{value}}')
+      """
+    null_or_undefined_prop_value:
+      """
+      #{cmd('its')} errored because the property: '{{prop}}' returned a '{{value}}' value.
+
+      #{cmd('its')} waited for the specified property '{{prop}}' to become accessible, but it never did.
+
+      If you expect the property '{{prop}}' to be '{{value}}', then add an assertion such as:
+
+      cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')
+      """
 
   invoke_its:
-    current_prop_nonexistent: "#{cmd('{{cmd}}')} errored because your subject is currently: '{{value}}'. You cannot call any properties such as '{{prop}}' on a '{{value}}' value."
+    nonexistent_prop:
+      """
+      #{cmd('{{cmd}}')} errored because the property: '{{prop}}' does not exist on your subject.
+
+      #{cmd('{{cmd}}')} waited for the specified property '{{prop}}' to exist, but it never did.
+
+      If you do not expect the property '{{prop}}' to exist, then add an assertion such as:
+
+      cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')
+      """
+    previous_prop_null_or_undefined:
+      """
+      #{cmd('{{cmd}}')} errored because the property: '{{previousProp}}' returned a '{{value}}' value. The property: '{{prop}}' does not exist on a '{{value}}' value.
+
+      #{cmd('{{cmd}}')} waited for the specified property '{{prop}}' to become accessible, but it never did.
+
+      If you do not expect the property '{{prop}}' to exist, then add an assertion such as:
+
+      cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')
+      """
     invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
-    invalid_num_of_args:  """
-      #{cmd('{{cmd}}')} only accepts a single argument.\n
+    invalid_num_of_args:
+      """
+      #{cmd('{{cmd}}')} only accepts a single argument.
+
       If you want to invoke a function with arguments, use cy.invoke().
-    """
-    invalid_property: "#{cmd('{{cmd}}')} errored because the property: '{{prop}}' does not exist on your subject."
-    previous_prop_nonexistent: "#{cmd('{{cmd}}')} errored because the property: '{{previousProp}}' returned a '{{value}}' value. You cannot access any properties such as '{{currentProp}}' on a '{{value}}' value."
-    timed_out: """
-      #{cmd('{{cmd}}')} timed out after waiting '{{timeout}}ms'.\n
-      Your callback function returned a promise which never resolved.\n
-      The callback function was:\n
+      """
+    timed_out:
+      """
+      #{cmd('{{cmd}}')} timed out after waiting '{{timeout}}ms'.
+
+      Your callback function returned a promise which never resolved.
+
+      The callback function was:
+
       {{func}}
     """
 
@@ -519,7 +592,7 @@ module.exports = {
     auth_invalid: "#{cmd('request')} must be passed an object literal for the 'auth' option."
     gzip_invalid: "#{cmd('request')} requires the 'gzip' option to be a boolean."
     headers_invalid: "#{cmd('request')} requires the 'headers' option to be an object literal."
-    invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+    invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser."
     form_invalid: """
     #{cmd('request')} requires the 'form' option to be a boolean.
 
@@ -616,7 +689,7 @@ module.exports = {
   route:
     failed_prerequisites: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"
     invalid_arguments: "#{cmd('route')} was not provided any arguments. You must provide valid arguments."
-    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser."
     response_invalid: "#{cmd('route')} cannot accept an undefined or null response. It must be set to something, even an empty string will work."
     url_invalid: "#{cmd('route')} was called with an invalid url. Url must be either a string or regular expression."
     url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
@@ -845,7 +918,15 @@ module.exports = {
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
 
   visit:
-    invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
+    invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
+    invalid_method: "#{cmd('visit')} was called with an invalid method: '{{method}}'. Method can only be GET or POST."
+    invalid_headers: "#{cmd('visit')} requires the 'headers' option to be an object."
+    no_duplicate_url: """
+      #{cmd('visit')} must be called with only one URL. You specified two URLs:
+
+      URL from the `options` object: {{optionsUrl}}
+      URL from the `url` parameter: {{url}}
+    """
     cannot_visit_2nd_domain: """
       #{cmd('visit')} failed because you are attempting to visit a second unique domain.
 
