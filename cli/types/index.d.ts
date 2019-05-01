@@ -1784,6 +1784,29 @@ declare namespace Cypress {
     whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
   }
 
+  interface Failable {
+    /**
+     * Whether to fail on response codes other than 2xx and 3xx
+     *
+     * @default {true}
+     */
+    failOnStatusCode: boolean
+
+    /**
+     * Whether Cypress should automatically retry status code errors under the hood
+     *
+     * @default {false}
+     */
+    retryOnStatusCodeFailure: boolean
+
+    /**
+     * Whether Cypress should automatically retry transient network errors under the hood
+     *
+     * @default {true}
+     */
+    retryOnNetworkFailure: boolean
+  }
+
   /**
    * Options that control how a command is logged in the Reporter
    */
@@ -2034,10 +2057,9 @@ declare namespace Cypress {
   /**
    * Full set of possible options for cy.request call
    */
-  interface RequestOptions extends Loggable, Timeoutable {
+  interface RequestOptions extends Loggable, Timeoutable, Failable {
     auth: object
     body: RequestBody
-    failOnStatusCode: boolean
     followRedirect: boolean
     form: boolean
     gzip: boolean
@@ -2167,7 +2189,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/visit
    */
-  interface VisitOptions extends Loggable, Timeoutable {
+  interface VisitOptions extends Loggable, Timeoutable, Failable {
     /**
      * The URL to visit. Behaves the same as the `url` argument.
      */
@@ -2221,13 +2243,6 @@ declare namespace Cypress {
      * @param {Window} contentWindow the remote page's window object
      */
     onLoad(win: Window): void
-
-    /**
-     * Whether to fail on response codes other than 2xx and 3xx
-     *
-     * @default {true}
-     */
-    failOnStatusCode: boolean
 
     /**
      * Cypress will automatically apply the right authorization headers
