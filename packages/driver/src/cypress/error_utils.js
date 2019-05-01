@@ -239,12 +239,13 @@ const getCodeFrame = (source, stackLineDetails) => {
 }
 
 const getCodeFrameFromStack = (stack, lineIndex = 0) => {
-  const artifactStackLineDetails = getStackLineDetails(stack, lineIndex)
+  const generatedStackLineDetails = getStackLineDetails(stack, lineIndex)
 
-  if (!artifactStackLineDetails) return null
+  if (!generatedStackLineDetails) return null
 
-  const file = artifactStackLineDetails.file.replace(':', '://')
-  const stackLineDetails = $sourceMapUtils.getMappedPosition(file, artifactStackLineDetails)
+  // stack-utils removes the // in http:// for some reason, so put it back
+  const file = generatedStackLineDetails.file.replace(':', '://')
+  const stackLineDetails = $sourceMapUtils.getMappedPosition(file, generatedStackLineDetails)
 
   if (!stackLineDetails) return null
 
