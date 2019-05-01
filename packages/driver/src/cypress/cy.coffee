@@ -539,13 +539,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   fail = (err, runnable) ->
     stopped = true
 
-    # sourceMap = Cypress.sourceMaps["/__cypress/tests?p=cypress/integration/scratch.js"]
-    # if sourceMap
-    #   if not sourceMap.parsed
-    #     sourceMap.parsed = $sourceMapUtils.base64toJson(sourceMap.base64)
-
     stack = state("current")?.get("invocationStack")
-    err.codeFrames = [$errUtils.getCodeFrameFromStack(stack)]
+    codeFrame = $errUtils.getCodeFrameFromStack(stack)
+    if codeFrame
+      err.codeFrames = [codeFrame]
 
     ## store the error on state now
     state("error", err)
