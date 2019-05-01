@@ -5,7 +5,7 @@ import is from 'check-more-types'
 // using "arg" module for parsing CLI arguments
 // because it plays really nicely with TypeScript
 import arg from 'arg'
-import {prop, sortBy, last} from 'ramda'
+import {prop, sortBy, last, equals} from 'ramda'
 import pluralize from 'pluralize'
 
 // inquirer-confirm is missing type definition
@@ -109,6 +109,8 @@ export const moveBinaries = async (args = []) => {
   const options = arg({
     '--commit': String,
     '--version': String,
+    // optional, if passed, only the binary for that platform will be moved
+    '--platformArch': String,
     // aliases
     '--sha': '--commit',
     '-v': '--version'
@@ -118,7 +120,7 @@ export const moveBinaries = async (args = []) => {
   debug('moveBinaries with options %o', options)
 
   // @ts-ignore
-  la(is.commitId(options['--commit']), 'missing commit SHA', options)
+  la(is.commitId(options['--commit']), 'missing or invalid commit SHA', options)
   // @ts-ignore
   la(is.semver(options['--version']), 'missing version to collect', options)
 
@@ -133,7 +135,14 @@ export const moveBinaries = async (args = []) => {
   // found s3 paths with last build for same commit for all platforms
   const lastBuilds: Desktop[] = []
 
-  const platforms: platformArch[] = uploadUtils.getValidPlatformArchs()
+  let platforms: platformArch[] = uploadUtils.getValidPlatformArchs()
+  if (options['--platformArch']) {
+    const onlyPlatform = options['--platformArch']
+    console.log('only moving single platform %s', onlyPlatform)
+    la(uploadUtils.isValidPlatformArch(onlyPlatform), 'invalid platform-arch', onlyPlatform)
+    platforms = platforms.filter(equals(onlyPlatform))
+  }
+  la(platforms.length, 'no platforms to move', platforms)
 
   for (const platformArch of platforms) {
     la(uploadUtils.isValidPlatformArch(platformArch),
