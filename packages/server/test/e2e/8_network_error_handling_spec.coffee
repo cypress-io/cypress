@@ -2,6 +2,7 @@ _        = require("lodash")
 bodyParser = require("body-parser")
 debug    = require("debug")("network-error-handling-spec")
 DebugProxy = require("@cypress/debugging-proxy")
+net      = require("net")
 Promise  = require("bluebird")
 chrome   = require("../../lib/browsers/chrome")
 e2e      = require("../support/helpers/e2e")
@@ -9,6 +10,7 @@ launcher = require("@packages/launcher")
 random   = require("../../lib/util/random")
 
 PORT = 13370
+HTTPS_PORT = 13371
 
 start = Number(new Date())
 
@@ -265,3 +267,40 @@ describe "e2e network error handling", ->
           "/load-img-net-error.html": 1
           "/load-script-net-error.html": 1
         })
+
+    it "retries HTTPS passthrough", (done) ->
+      count = 0
+      server = net.createServer (sock) ->
+        count++
+        debug('count', count)
+        if count != 3
+          return sock.destroy()
+
+        server.close()
+        done()
+
+      server.listen(HTTPS_PORT)
+
+      e2e.exec(@, {
+        spec: "https_passthru_spec.js"
+      })
+
+    it "retries HTTPS passthrough behind a proxy", (done) ->
+      count = 0
+      server = net.createServer (sock) ->
+        count++
+        debug('count', count)
+        if count != 3
+          return sock.destroy()
+
+        server.close()
+        process.env.HTTP_PROXY = undefined
+        done()
+
+      server.listen(HTTPS_PORT)
+
+      process.env.HTTP_PROXY = "http://localhost:#{HTTPS_PORT}"
+
+      e2e.exec(@, {
+        spec: "https_passthru_spec.js"
+      })
