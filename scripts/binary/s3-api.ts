@@ -66,6 +66,9 @@ export const s3helpers = {
     })
   },
 
+  /**
+   * Copies one S3 object into another key, metadata is copied
+   */
   copyS3 (sourceKey: string, destinationKey: string, bucket: string, s3: S3): Promise<S3.CopyObjectOutput> {
     return new Promise((resolve, reject) => {
       debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
@@ -73,7 +76,9 @@ export const s3helpers = {
       const params: S3.CopyObjectRequest = {
         Bucket: bucket,
         CopySource: bucket + '/' + sourceKey,
-        Key: destinationKey
+        Key: destinationKey,
+        // when we copy S3 object, copy the original metadata, if any
+        MetadataDirective: 'COPY'
       }
       s3.copyObject(params, (err, data) => {
         if (err) {

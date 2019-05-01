@@ -103,9 +103,10 @@ setChecksum = (filename, key) =>
 
   aws = uploadUtils.getS3Credentials()
   s3 = s3helpers.makeS3(aws)
+  # S3 object metadata can only have string values
   metadata = {
     checksum,
-    size
+    size: String(size)
   }
   s3helpers.setUserMetadata(aws.bucket, key, metadata, s3)
 
