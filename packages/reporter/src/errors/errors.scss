@@ -115,6 +115,11 @@
     border-radius: 5px;
     padding: 2px 5px;
   }
+
+  strong {
+    color: $err-text;
+    font-weight: bold;
+  }
 }
 
 .runnable-err-stack-expander {
