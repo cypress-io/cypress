@@ -1,4 +1,5 @@
 _        = require("lodash")
+bodyParser = require("body-parser")
 debug    = require("debug")("network-error-handling-spec")
 DebugProxy = require("@cypress/debugging-proxy")
 Promise  = require("bluebird")
@@ -48,11 +49,13 @@ controllers = {
     res.send('<img src="/immediate-reset?load-img"/>')
 
   printBodyThirdTimeForm: (req, res) ->
-    res.send("<html><body><form method='POST' action='/print-body-third-time/#{req.url}'><input type='text' name='foo'/><input type='submit'/></form></body></html>")
+    res.send("<html><body><form method='POST' action='/print-body-third-time'><input type='text' name='foo'/><input type='submit'/></form></body></html>")
 
   printBodyThirdTime: (req, res) ->
+    console.log(req.body)
+    res.type('html')
     if counts[req.url] == 3
-      return res.send(req.body)
+      return res.send(JSON.stringify(req.body))
     req.socket.destroy()
 
   immediateReset: (req, res) ->
@@ -116,6 +119,8 @@ describe "e2e network error handling", ->
               onVisit()
 
             next()
+
+          app.use(bodyParser.urlencoded({ extended: true }))
 
           app.get "/immediate-reset", controllers.immediateReset
           app.get "/after-headers-reset", controllers.afterHeadersReset
@@ -235,21 +240,21 @@ describe "e2e network error handling", ->
     it "tests run as expected", ->
       e2e.exec(@, {
         spec: "network_error_handling_spec.js"
-        # snapshot: true
-        exit: false
-        browser: "chrome"
+        snapshot: true
         video: false
         expectedExitCode: 2
       }).then () ->
         expect(counts).to.deep.eq({
           "/immediate-reset?visit": 5
           "/immediate-reset?request": 5
-          "/immediate-reset?load-img": 10
-          "/immediate-reset?load-js": 10
+          "/immediate-reset?load-img": 5
+          "/immediate-reset?load-js": 5
           "/works-third-time-else-500/500-for-request": 3
           "/works-third-time/for-request": 3
           "/works-third-time-else-500/500-for-visit": 3
           "/works-third-time/for-visit": 3
+          "/print-body-third-time": 3
+          "/print-body-third-time-form": 1
           "/load-img-net-error.html": 1
           "/load-script-net-error.html": 1
         })

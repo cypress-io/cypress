@@ -51,6 +51,7 @@ exports['e2e network error handling Cypress tests run as expected 1'] = `
       1) fails after retrying 5x
       ✓ works on the third try after two failed requests
       ✓ works on the third try after two 500 errors
+      ✓ re-sends a <form> body on failures
     cy.request() retries
       2) fails after retrying 5x
       ✓ works on the third try after two failed requests
@@ -60,7 +61,7 @@ exports['e2e network error handling Cypress tests run as expected 1'] = `
       ✓ on <script> tags
 
 
-  6 passing
+  7 passing
   2 failing
 
   1) network error handling cy.visit() retries fails after retrying 5x:
@@ -166,8 +167,8 @@ RequestError: Error: socket hang up
   (Results)
 
   ┌──────────────────────────────────────────────┐
-  │ Tests:        8                              │
-  │ Passing:      6                              │
+  │ Tests:        9                              │
+  │ Passing:      7                              │
   │ Failing:      2                              │
   │ Pending:      0                              │
   │ Skipped:      0                              │
@@ -197,9 +198,9 @@ RequestError: Error: socket hang up
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ network_error_handling_spec.js            XX:XX        8        6        2        -        - │
+  │ ✖ network_error_handling_spec.js            XX:XX        9        7        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        8        6        2        -        -  
+    1 of 1 failed (100%)                        XX:XX        9        7        2        -        -  
 
 
 `
