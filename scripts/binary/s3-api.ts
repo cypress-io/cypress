@@ -125,7 +125,7 @@ export const s3helpers = {
    * with replaced metadata object.
   */
   setUserMetadata (bucket: string, key: string, metadata: S3.Metadata,
-      acl: S3.ObjectCannedACL, s3: S3): Promise<S3.CopyObjectOutput> {
+    contentType: S3.ContentType, acl: S3.ObjectCannedACL, s3: S3): Promise<S3.CopyObjectOutput> {
     la(hasOnlyStringValues(metadata),
       'metadata object can only have string values', metadata)
 
@@ -138,6 +138,7 @@ export const s3helpers = {
         Key: key,
         Metadata: metadata,
         MetadataDirective: 'REPLACE',
+        ContentType: contentType,
         ACL: acl
       }
       s3.copyObject(params, (err, data) => {
