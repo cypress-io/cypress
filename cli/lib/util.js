@@ -16,10 +16,6 @@ const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
 
-Promise.config({
-  cancellation: true,
-})
-
 const getosAsync = Promise.promisify(getos)
 
 const stringify = (val) => {
