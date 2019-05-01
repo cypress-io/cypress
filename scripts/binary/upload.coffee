@@ -11,9 +11,7 @@ Promise = require("bluebird")
 meta    = require("./meta")
 la      = require("lazy-ass")
 check   = require("check-more-types")
-hasha   = require('hasha')
 uploadUtils = require("./util/upload")
-s3helpers   = require("./s3-api")
 
 fs = Promise.promisifyAll(fs)
 
@@ -142,7 +140,6 @@ module.exports = {
     if !fs.existsSync(zipFile)
       throw new Error("Cannot find zip file #{zipFile}")
 
-    # resolves with uploaded S3 key path
     upload = =>
       new Promise (resolve, reject) =>
         publisher = @getPublisher()
@@ -150,41 +147,19 @@ module.exports = {
         headers = {}
         headers["Cache-Control"] = "no-cache"
 
-        key = null
-
         gulp.src(zipFile)
         .pipe rename (p) =>
           # rename to standard filename zipName
           p.basename = path.basename(zipName, p.extname)
           p.dirname = @getUploadDirName({version, platform})
-          key = p.dirname + p.basename
           p
         .pipe debug()
         .pipe publisher.publish(headers)
         .pipe awspublish.reporter()
         .on "error", reject
-        .on "end", () -> resolve(key)
-
-    setChecksum = (key) =>
-      console.log('setting checksum for file %s', zipFile)
-      console.log('on s3 object %s', key)
-      la(check.unemptyString(key), 'expected uploaded S3 key', key)
-
-      checksum = hasha.fromFileSync(zipFile)
-      size = fs.statSync(zipFile).size
-      console.log('SHA256 checksum %s', checksum)
-      console.log('size', size)
-
-      aws = @getAwsObj()
-      s3 = s3helpers.makeS3(aws)
-      metadata = {
-        checksum,
-        size
-      }
-      s3helpers.setUserMetadata(aws.bucket, key, metadata, s3)
+        .on "end", resolve
 
     upload()
-    .then setChecksum
     .then ->
       uploadUtils.purgeDesktopAppFromCache({version, platform, zipName})
 }
