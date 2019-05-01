@@ -175,6 +175,10 @@ createRetryingRequestPromise = (opts, iteration = 0) ->
 
     res
 
+pipeEvent = (source, destination, event) ->
+  source.on event, (args...) ->
+    destination.emit(event, args...)
+
 createRetryingRequestStream = (opts = {}) ->
   delayStream = stream.PassThrough()
   reqBodyBuffer = streamBuffer()
@@ -183,12 +187,6 @@ createRetryingRequestStream = (opts = {}) ->
 
   req = null
   didAbort = false
-
-  ## TODO: remove this after finishing the
-  ## implementation of everything
-  retryStream.on "error", (err) ->
-    debug('error %o', err)
-    debugger
 
   emitError = (err) ->
     retryStream.emit("error", err)
@@ -287,9 +285,6 @@ createRetryingRequestStream = (opts = {}) ->
 
       return retry(err)
 
-    ## TODO: need to forward the other request + http.ClientRequest events
-    ## abort[ed], complete, request, etc...
-
     reqStream.once "request", (req) ->
       ## remove the pipe listener since once the request has
       ## been made, we cannot pipe into the reqStream anymore
@@ -313,8 +308,14 @@ createRetryingRequestStream = (opts = {}) ->
 
       reqStream.pipe(delayStream)
 
-
-    return null
+      # also need to pipe all the non-data events
+      _.map(
+        [
+          # `http.ClientRequest` events
+          "abort", "connect", "continue", "information", "socket", "timeout", "upgrade"
+        ],
+        _.partial(pipeEvent, reqStream, retryStream)
+      )
 
   tryStartStream()
 
