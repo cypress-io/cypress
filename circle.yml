@@ -790,6 +790,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -805,6 +806,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build-npm-package
           - build-binary
