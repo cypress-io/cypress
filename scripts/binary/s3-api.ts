@@ -120,8 +120,6 @@ export const s3helpers = {
   /**
    * Setting user metadata can be accomplished with copying the object back onto itself
    * with replaced metadata object.
-   *
-   * Hmm, does this need to fetch metadata and ACL first, then set it back?
   */
   setUserMetadata (bucket: string, key: string, metadata: S3.Metadata, s3: S3): Promise<S3.CopyObjectOutput> {
     return new Promise((resolve, reject) => {
