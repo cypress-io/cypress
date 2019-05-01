@@ -341,10 +341,8 @@ module.exports = {
         followRedirect: false
         strictSSL: false
         retryOnNetworkFailure: true
+        timeout: null
       }
-
-      if isEventStream
-        opts.timeout = null
 
       ## strip unsupported accept-encoding headers
       encodings = accept.parser(req.headers["accept-encoding"]) ? []
