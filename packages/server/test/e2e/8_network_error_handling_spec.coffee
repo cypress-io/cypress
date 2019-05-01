@@ -240,10 +240,29 @@ describe "e2e network error handling", ->
     it "tests run as expected", ->
       e2e.exec(@, {
         spec: "network_error_handling_spec.js"
-        snapshot: true
         video: false
         expectedExitCode: 2
-      }).then () ->
+      }).then (res) ->
+        expect(res).to.contain('1) network error handling cy.visit() retries fails after retrying 5x:
+     CypressError: cy.visit() failed trying to load:
+
+http://localhost:13370/immediate-reset?visit
+
+We attempted to make an http request to this URL but the request failed without a response.
+
+We received this error at the network level:
+
+  > Error: socket hang up')
+        expect(res).to.contain('2) network error handling cy.request() retries fails after retrying 5x:
+     CypressError: cy.request() failed trying to load:
+
+http://localhost:13370/immediate-reset?request
+
+We attempted to make an http request to this URL but the request failed without a response.
+
+We received this error at the network level:
+
+  > Error: socket hang up')
         expect(counts).to.deep.eq({
           "/immediate-reset?visit": 5
           "/immediate-reset?request": 5
