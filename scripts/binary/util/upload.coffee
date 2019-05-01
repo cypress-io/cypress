@@ -37,6 +37,9 @@ getS3Credentials = () ->
 
   la(check.unemptyString(config.bucket), 'missing AWS config bucket')
   la(check.unemptyString(config.folder), 'missing AWS config folder')
+  la(check.unemptyString(config.key), 'missing AWS key')
+  la(check.unemptyString(config.secret), 'missing AWS secret key')
+
   config
 
 getPublisher = (getAwsObj = getS3Credentials) ->
@@ -117,6 +120,14 @@ purgeDesktopAppAllPlatforms = (version, zipName) ->
   Promise.mapSeries platforms, (platform) ->
     purgeDesktopAppFromCache({version, platform, zipName})
 
+# all architectures we are building test runner for
+validPlatformArchs = ["darwin-x64", "linux-x64", "win32-ia32", "win32-x64"]
+# simple check for platform-arch string
+# example: isValidPlatformArch("darwin") // FALSE
+isValidPlatformArch = check.oneOf(validPlatformArchs)
+
+getValidPlatformArchs = () -> validPlatformArchs
+
 getUploadNameByOsAndArch = (platform) ->
   ## just hard code for now...
   arch = os.arch()
@@ -136,6 +147,8 @@ getUploadNameByOsAndArch = (platform) ->
   name = _.get(uploadNames[platform], arch)
   if not name
     throw new Error("Cannot find upload name for OS: '#{platform}' with arch: '#{arch}'")
+  la(isValidPlatformArch(name), "formed invalid platform", name, "from", platform, arch)
+
   name
 
 saveUrl = (filename) -> (url) ->
@@ -153,6 +166,9 @@ module.exports = {
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
   getUploadNameByOsAndArch,
+  validPlatformArchs,
+  getValidPlatformArchs,
+  isValidPlatformArch,
   saveUrl,
   formHashFromEnvironment
 }
