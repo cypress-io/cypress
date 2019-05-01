@@ -31,7 +31,7 @@ getOriginalHeaders = (req = {}) ->
   req.req?.headers ? req.headers
 
 getDelayForRetry = (iteration, err) ->
-  _.get([0, 1, 2, 2], iteration) * (err.code == 'ECONNREFUSED' ? 100 : 1000)
+  _.get([0, 1, 2, 2], iteration) * (err && err.code == 'ECONNREFUSED' ? 100 : 1000)
 
 hasRetriableStatusCodeFailure = (res, opts) ->
   opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
@@ -145,7 +145,7 @@ createCookieString = (c) ->
   reduceCookieToArray(c).join("; ")
 
 createRetryingRequestPromise = (opts, iteration = 0) ->
-  retry = (err = {}) ->
+  retry = (err) ->
     delay = getDelayForRetry(iteration, err)
 
     debug("retry %o", { iteration, delay })
