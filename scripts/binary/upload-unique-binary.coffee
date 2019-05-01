@@ -14,7 +14,7 @@ hasha = require('hasha')
 
 konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
-s3helpers = require("./s3-api")
+s3helpers = require("./s3-api").s3helpers
 
 # we zip the binary on every platform and upload under same name
 binaryExtension = ".zip"
