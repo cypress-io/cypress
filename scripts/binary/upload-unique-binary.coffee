@@ -81,7 +81,7 @@ uploadFile = (options) ->
       console.log("renaming upload to", p.dirname, p.basename)
       la(check.unemptyString(p.basename), "missing basename")
       la(check.unemptyString(p.dirname), "missing dirname")
-      key = p.dirname + p.basename
+      key = p.dirname + uploadFileName
       p
     .pipe debug()
     .pipe publisher.publish(headers)
