@@ -27,8 +27,8 @@ module.exports = function setZunderConfig (zunder) {
   ])
 
   browserifyOptions.transform[0][1].plugins.push(['prismjs', {
-    'languages': ['javascript'],
-    'plugins': ['line-numbers', 'line-highlight'],
+    'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+    'plugins': ['line-highlight'],
     'theme': 'default',
     'css': false,
   }])

@@ -50,7 +50,7 @@ class TestError extends Component {
             null
           }
           {_.map(err.codeFrames, (codeFrame) => (
-            <ErrorCodeFrame codeFrame={codeFrame} />
+            <ErrorCodeFrame key={`${codeFrame.file}:${codeFrame.column}:${codeFrame.line}`} codeFrame={codeFrame} />
           ))}
         </div>
       </div>

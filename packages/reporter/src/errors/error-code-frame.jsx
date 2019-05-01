@@ -10,13 +10,13 @@ class ErrorCodeFrame extends Component {
 
   render () {
     const { file, line, column, frame } = this.props.codeFrame
+    const language = this.props.codeFrame.language || 'text'
 
     return (
       <div className='test-error-code-frame'>
         <div className='runnable-err-code-frame-file-path'>{file}:{line}:{column}</div>
         <pre ref='codeFrame' data-line={3}>
-          {/* TODO: language must be dynamic */}
-          <code className='language-javascript'>{frame}</code>
+          <code className={`language-${language}`}>{frame}</code>
         </pre>
       </div>
     )

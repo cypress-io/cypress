@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const { codeFrameColumns } = require('@babel/code-frame')
 const StackUtils = require('stack-utils')
+const path = require('path')
 
 const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
@@ -227,15 +228,20 @@ const getErrStack = (err) => {
   return err.stack
 }
 
-const getCodeFrame = (source, stackLineDetails) => {
-  const location = { start: { line: stackLineDetails.line, column: stackLineDetails.column } }
-  const options = {
-    // TODO: pass in message?
-  }
+const getLanguageFromExtension = (filePath) => {
+  return (path.extname(filePath) || '').toLowerCase().replace('.', '') || null
+}
 
-  return _.extend(stackLineDetails, {
-    frame: codeFrameColumns(source, location, options),
-  })
+const getCodeFrame = (sourceCode, { line, column, source: file }) => {
+  const location = { start: { line, column } }
+
+  return {
+    line,
+    column,
+    file,
+    language: getLanguageFromExtension(file),
+    frame: codeFrameColumns(sourceCode, location),
+  }
 }
 
 const getCodeFrameFromStack = (stack, lineIndex = 0) => {
