@@ -22,6 +22,17 @@ SSL_RECORD_TYPES = [
   128, 0 ## TODO: what do these unknown types mean?
 ]
 
+MAX_REQUEST_RETRIES = 4
+
+getDelayForRetry = (iteration, err) ->
+  increment = 1000
+  if err && err.code == 'ECONNREFUSED'
+    increment = 100
+  _.get([0, 1, 2, 2], iteration) * increment
+
+isRetriableError = (err = {}) ->
+  err.fromProxy || ['ECONNREFUSED', 'ECONNRESET', 'EPIPE', 'EHOSTUNREACH', 'EAI_AGAIN'].includes(err.code)
+
 class Server
   constructor: (@_ca, @_port) ->
     @_onError = null
@@ -93,29 +104,51 @@ class Server
     @_makeConnection(socket, head, port, hostname)
 
   _makeConnection: (socket, head, port, hostname) ->
-    onConnect = ->
-      socket.pipe(conn)
-      conn.pipe(socket)
-      conn.write(head)
+    tryConnect = (iteration = 0) =>
+      retried = false
 
-      socket.resume()
+      conn = new net.Socket()
+      conn.setNoDelay(true)
 
-    conn = new net.Socket()
-    conn.setNoDelay(true)
+      onConnect = ->
+        socket.pipe(conn)
+        conn.pipe(socket)
+        conn.write(head)
 
-    conn.on "error", (err) =>
-      if @_onError
-        @_onError(err, socket, head, port)
+        socket.resume()
 
-    ## compact out hostname when undefined
-    args = _.compact([port, hostname, onConnect])
-    conn.connect.apply(conn, args)
+      onError = (err) =>
+        if retried
+          debug('received second error on errored-out socket %o', { iteration, hostname, port, err })
+
+        if iteration < MAX_REQUEST_RETRIES && isRetriableError(err)
+          retried = true
+          delay = getDelayForRetry(iteration, err)
+          debug('re-trying request on failure %o', { delay, iteration, err })
+          return setTimeout ->
+            tryConnect(iteration + 1)
+          , delay
+
+        debug('socket error irrecoverable, ending upstream socket and not retrying %o', { err })
+
+        socket.destroy(err)
+
+        if @_onError
+          @_onError(err, socket, head, port)
+
+      conn.on "error", onError
+
+      ## compact out hostname when undefined
+      args = _.compact([port, hostname, onConnect])
+      conn.connect.apply(conn, args)
+
+    tryConnect()
 
   # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
   _makeUpstreamProxyConnection: (upstreamProxy, socket, head, toPort, toHostname) ->
     debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
 
-    onUpstreamSock = (err, upstreamSock) ->
+    onUpstreamSock = (err, upstreamSock) =>
       if @_onError
         if err
           return @_onError(err, socket, head, port)
@@ -124,8 +157,7 @@ class Server
 
       if not upstreamSock
         ## couldn't establish a proxy connection, fail gracefully
-        socket.resume()
-        return socket.destroy()
+        return socket.destroy(err)
 
       upstreamSock.setNoDelay(true)
       upstreamSock.pipe(socket)
@@ -134,14 +166,27 @@ class Server
 
       socket.resume()
 
-    agent.httpsAgent.createProxiedConnection {
-      proxy: upstreamProxy
-      href: "https://#{toHostname}:#{toPort}"
-      uri: {
-        port: toPort
-        hostname: toHostname
-      }
-    }, onUpstreamSock.bind(@)
+    tryConnect = (iteration = 0) =>
+      agent.httpsAgent.createProxiedConnection {
+        proxy: upstreamProxy
+        href: "https://#{toHostname}:#{toPort}"
+        uri: {
+          port: toPort
+          hostname: toHostname
+        }
+      }, (err, upstreamSock) =>
+        debug(err)
+        if err
+          if isRetriableError(err) && iteration < MAX_REQUEST_RETRIES
+            delay = getDelayForRetry(iteration, err)
+            debug('re-trying request on failure %o', { delay, iteration, err })
+            setTimeout ->
+              tryConnect(iteration + 1)
+            , delay
+
+        onUpstreamSock(err, upstreamSock)
+
+    tryConnect()
 
   _onServerConnectData: (req, socket, head) ->
     firstBytes = head[0]

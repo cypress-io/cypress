@@ -264,7 +264,9 @@ class HttpsAgent extends https.Agent {
       proxySocket.removeListener('close', onClose)
 
       if (!isResponseStatusCode200(buffer)) {
-        return onError(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`))
+        const err: any = new Error(`Error establishing proxy connection. Response from server was: ${buffer}`)
+        err.fromProxy = true
+        return onError(err)
       }
 
       if (options._agentKey) {

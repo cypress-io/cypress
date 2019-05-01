@@ -31,7 +31,10 @@ getOriginalHeaders = (req = {}) ->
   req.req?.headers ? req.headers
 
 getDelayForRetry = (iteration, err) ->
-  _.get([0, 1, 2, 2], iteration) * (err && err.code == 'ECONNREFUSED' ? 100 : 1000)
+  increment = 1000
+  if err && err.code == 'ECONNREFUSED'
+    increment = 100
+  _.get([0, 1, 2, 2], iteration) * increment
 
 hasRetriableStatusCodeFailure = (res, opts) ->
   opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
