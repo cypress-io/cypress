@@ -126,6 +126,21 @@ const createCypress = (mochaTests, opts = {}) => {
         const emitMap = autCypress.emitMap
         const emitThen = autCypress.emitThen
 
+        cy.stub(autCypress, 'automation').snapshot(enableStubSnapshots)
+        .callThrough()
+        .withArgs('take:screenshot')
+        .resolves({
+          path: '/path/to/screenshot',
+          size: 12,
+          dimensions: { width: 20, height: 20 },
+          multipart: false,
+          pixelRatio: 1,
+          takenAt: new Date().toISOString(),
+          name: 'name',
+          blackout: ['.foo'],
+          duration: 100,
+        })
+
         cy.stub(autCypress, 'emit').snapshot(enableStubSnapshots).log(false)
         .callsFake(function () {
 
@@ -139,7 +154,7 @@ const createCypress = (mochaTests, opts = {}) => {
             'window:unload',
             'newListener',
           ], arguments[0])
-          const noCall = _.includes(['window:before:unload', 'before:screenshot', 'mocha'], arguments[0])
+          const noCall = _.includes(['window:before:unload', 'mocha'], arguments[0])
           const isMocha = _.includes(['mocha'], arguments[0])
 
           isMocha && mochaStubs.apply(this, arguments)
@@ -158,13 +173,8 @@ const createCypress = (mochaTests, opts = {}) => {
 
         cy.stub(autCypress, 'emitThen').snapshot(enableStubSnapshots).log(false)
         .callsFake(function () {
-          const noCall = ['runnable:after:run:async'].includes(arguments[0])
 
           allStubs.apply(this, ['emitThen'].concat([].slice.call(arguments)))
-
-          if (noCall) {
-            return Promise.resolve()
-          }
 
           return emitThen.apply(this, arguments)
         })
@@ -592,7 +602,7 @@ describe('src/cypress/runner', () => {
               cy.contains('AssertionError').should('not.be.visible')
               cy.contains('Attempt 1').click()
               cy.contains('AssertionError').should('be.visible')
-              cy.contains('Attempt 1').click()
+              cy.contains('Attempt 1').click().find('i:last').pseudo(':before').should('have.property', 'content', '""')
               cy.contains('AssertionError').should('not.be.visible')
             })
           })
@@ -718,7 +728,7 @@ describe('src/cypress/runner', () => {
           }, { config: { numTestRetries: 2 } })
           .then(shouldHaveTestResults(5, 0))
           .then(() => {
-            cy.contains('test 1').click()
+            cy.contains('test 1')
             cy.contains('Attempt 1').click()
             cy.contains('AssertionError').click()
             cy.get('@reporterBus').its('lastCall.args').should('contain', 'runner:console:log')
@@ -1097,6 +1107,28 @@ describe('src/cypress/runner', () => {
           expect(getOrderFired({ 1: 'pass', 2: { title: 'test 2' } }))
           .to.be.lt(getOrderFired({ 1: 'suite end', 2: { title: 'suite 1-1' } }))
 
+        })
+
+      })
+
+      it('screenshots during each retry', () => {
+        createCypress({
+          suites: {
+            'suite 1': {
+              tests: [
+                {
+                  name: 'test 1',
+                  fn: () => {
+                    assert(false, 'some error')
+                  },
+                  eval: true,
+                },
+              ],
+            },
+          },
+        }, { config: { numTestRetries: 2 } })
+        .then(() => {
+          expect(autCypress.automation.withArgs('take:screenshot')).calledThrice
         })
 
       })

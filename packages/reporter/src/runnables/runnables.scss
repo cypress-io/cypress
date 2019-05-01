@@ -66,15 +66,8 @@
       outline: 1px dotted #6c6c6c;
       outline-offset: -1px;
     }
-    
-    &.runnable-active {
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-refresh;
-        @extend .#{$fa-css-prefix}-spin;
-      }
-    }
 
-    .runnable-state {
+    > .runnable-wrapper > .runnable-content-region > .runnable-state {
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
@@ -164,11 +157,8 @@
       }
     }
 
-    &.runnable-passed > .runnable-wrapper {
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-check;
-        color: $pass;
-      }
+    &.runnable-passed > .runnable-wrapper .runnable-content-region {
+      @include runnable-state-passed;
     }
 
     &.runnable-pending > .runnable-wrapper {
