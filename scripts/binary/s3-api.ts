@@ -66,7 +66,7 @@ export const s3helpers = {
     })
   },
 
-  async copyS3 (sourceKey: string, destinationKey: string, bucket: string, s3: S3) {
+  copyS3 (sourceKey: string, destinationKey: string, bucket: string, s3: S3): Promise<S3.CopyObjectOutput> {
     return new Promise((resole, reject) => {
       debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
 
@@ -81,6 +81,25 @@ export const s3helpers = {
 
         debug('result of copying')
         debug('%o', data)
+      })
+    })
+  },
+
+  getUserMetadata (key: string, bucket: string, s3: S3): Promise<S3.Metadata> {
+    return new Promise((resole, reject) => {
+      debug('getting user metadata from %s %s', bucket, key)
+
+      s3.headObject({
+        Bucket: bucket,
+        Key: key
+      }, (err, data) => {
+        if (err) {
+          return reject(err)
+        }
+
+        debug('user metadata')
+        debug('%o', data.Metadata)
+        resole(data.Metadata)
       })
     })
   }
