@@ -101,7 +101,7 @@ setChecksum = (filename, key) =>
   console.log('SHA256 checksum %s', checksum)
   console.log('size', size)
 
-  aws = uploadUtils.getAwsObj()
+  aws = uploadUtils.getS3Credentials()
   s3 = s3helpers.makeS3(aws)
   metadata = {
     checksum,
