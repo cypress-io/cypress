@@ -242,27 +242,15 @@ describe "e2e network error handling", ->
         spec: "network_error_handling_spec.js"
         video: false
         expectedExitCode: 2
-      }).then (res) ->
-        expect(res).to.contain('1) network error handling cy.visit() retries fails after retrying 5x:
-     CypressError: cy.visit() failed trying to load:
-
-http://localhost:13370/immediate-reset?visit
-
-We attempted to make an http request to this URL but the request failed without a response.
-
-We received this error at the network level:
-
-  > Error: socket hang up')
-        expect(res).to.contain('2) network error handling cy.request() retries fails after retrying 5x:
-     CypressError: cy.request() failed trying to load:
-
-http://localhost:13370/immediate-reset?request
-
-We attempted to make an http request to this URL but the request failed without a response.
-
-We received this error at the network level:
-
-  > Error: socket hang up')
+      }).then ({ stdout }) ->
+        expect(stdout).to.contain('1) network error handling cy.visit() retries fails after retrying 5x:')
+        expect(stdout).to.contain('CypressError: cy.visit() failed trying to load:')
+        expect(stdout).to.contain('http://localhost:13370/immediate-reset?visit')
+        expect(stdout).to.contain('We attempted to make an http request to this URL but the request failed without a response.')
+        expect(stdout).to.contain('We received this error at the network level:')
+        expect(stdout).to.contain('> Error: socket hang up')
+        expect(stdout).to.contain('2) network error handling cy.request() retries fails after retrying 5x:')
+        expect(stdout).to.contain('http://localhost:13370/immediate-reset?request')
         expect(counts).to.deep.eq({
           "/immediate-reset?visit": 5
           "/immediate-reset?request": 5
