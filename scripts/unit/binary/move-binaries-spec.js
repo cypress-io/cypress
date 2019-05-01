@@ -22,7 +22,7 @@ describe('move-binaries', () => {
 
       snapshot({
         path,
-        parsed
+        parsed,
       })
     })
   })
@@ -37,7 +37,7 @@ describe('move-binaries', () => {
 
     it('finds single matching path', () => {
       const paths = [
-        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/'
+        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
       ]
       const found = findBuildByCommit(sha, paths)
 
@@ -49,7 +49,7 @@ describe('move-binaries', () => {
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
         // these are not matching
         'beta/binary/3.3.0/darwin-x64/circle-develop-ffff8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
-        'beta/binary/3.3.0/darwin-x64/circle-develop-aaaa8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/'
+        'beta/binary/3.3.0/darwin-x64/circle-develop-aaaa8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
       ]
       const found = findBuildByCommit(sha, paths)
 
@@ -66,7 +66,7 @@ describe('move-binaries', () => {
         'beta/binary/3.3.0/darwin-x64/circle-develop-ffff8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
         'beta/binary/3.3.0/darwin-x64/circle-develop-aaaa8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
         // this one is matching, but not the latest one
-        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-2/'
+        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-2/',
       ]
       const found = findBuildByCommit(sha, paths)
 
@@ -107,13 +107,13 @@ describe('move-binaries', () => {
         'beta/binary/3.3.0/darwin-x64/circle-develop-9372bc3f67a6a83bd5ec8a69d7350f5a9b52ddf9-102246/',
         'beta/binary/3.3.0/darwin-x64/circle-develop-455046b928c861d4457b2ec5426a51de1fda74fd-102359/',
         'beta/binary/3.3.0/darwin-x64/circle-develop-ec36bf013224942f6198bf831d62af64b9b16cf5-102729/',
-        'beta/binary/3.3.0/darwin-x64/circle-issue-3996-6d539513e709ddd5aad866f6bf653280db6622cd-98450/'
+        'beta/binary/3.3.0/darwin-x64/circle-issue-3996-6d539513e709ddd5aad866f6bf653280db6622cd-98450/',
       ]
 
       // fake AWS config
       const aws = {
         bucket: 'cdn.cypress.io',
-        folder: 'desktop' // destination for test runner downloads
+        folder: 'desktop', // destination for test runner downloads
       }
 
       sinon.stub(uploadUtils, 'getS3Credentials').returns(aws)
@@ -123,33 +123,33 @@ describe('move-binaries', () => {
 
       sinon.stub(s3helpers, 'makeS3').returns(s3)
       sinon
-        .stub(s3helpers, 'listS3Objects')
-        .withArgs('beta/binary/3.3.0/darwin-x64', aws.bucket)
-        .resolves(darwinBuilds)
+      .stub(s3helpers, 'listS3Objects')
+      .withArgs('beta/binary/3.3.0/darwin-x64', aws.bucket)
+      .resolves(darwinBuilds)
 
       sinon
-        .stub(s3helpers, 'verifyZipFileExists')
-        .withArgs(`${latestMacBuild}cypress.zip`, aws.bucket)
-        .resolves()
+      .stub(s3helpers, 'verifyZipFileExists')
+      .withArgs(`${latestMacBuild}cypress.zip`, aws.bucket)
+      .resolves()
 
       // our method will ask user to confirm copying
       sinon.stub(moveBinaries.prompts, 'shouldCopy').resolves()
 
       sinon
-        .stub(s3helpers, 'copyS3')
-        .withArgs(
-          `${latestMacBuild}cypress.zip`,
-          'desktop/3.3.0/darwin-x64/cypress.zip',
-          aws.bucket
-        )
-        .resolves()
+      .stub(s3helpers, 'copyS3')
+      .withArgs(
+        `${latestMacBuild}cypress.zip`,
+        'desktop/3.3.0/darwin-x64/cypress.zip',
+        aws.bucket
+      )
+      .resolves()
 
       // first two arguments are sliced anyway
       const nodeName = null
       const scriptName = null
       const args = [nodeName, scriptName, '--sha', sha, '--version', version]
 
-      return move(args).then(result => {
+      return move(args).then((result) => {
         la(is.object(result), 'expected a result', result)
 
         snapshot('collected builds and copied desktop', result)
