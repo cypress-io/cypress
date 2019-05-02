@@ -342,6 +342,7 @@ module.exports = {
         strictSSL: false
         retryOnNetworkFailure: true
         timeout: null
+        fromProxy: true
       }
 
       ## strip unsupported accept-encoding headers

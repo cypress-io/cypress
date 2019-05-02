@@ -14,8 +14,6 @@ describe "server sent events", ->
     cy.visit("http://localhost:3038/foo")
 
   it "does not crash", ->
-    @timeout(30000) ## allow the subresources sufficient time to retry
-
     cy.window().then (win) ->
       Cypress.Promise.all([
         urlErrors(win, "http://localhost:3038/sse")
