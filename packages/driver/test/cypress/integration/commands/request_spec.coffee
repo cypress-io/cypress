@@ -667,7 +667,7 @@ describe "src/cy/commands/request", ->
           form: {foo: "bar"}
         })
 
-      it.only "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
+      it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.contain "cy.request() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
           done()
