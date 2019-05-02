@@ -22,7 +22,7 @@ module.exports = {
       detail: 1
     })
 
-    mdownEvt = new window.MouseEvent "mousedown", mdownEvtProps
+    mdownEvt = new win.MouseEvent "mousedown", mdownEvtProps
 
     ## ensure this property exists on older chromium versions
     mdownEvt.buttons ?= 1
@@ -57,7 +57,7 @@ module.exports = {
       detail: 1
     })
 
-    mupEvt = new MouseEvent "mouseup", mupEvtProps
+    mupEvt = new win.MouseEvent "mouseup", mupEvtProps
 
     ## ensure this property exists on older chromium versions
     mupEvt.buttons ?= 0
@@ -92,7 +92,7 @@ module.exports = {
       detail: 1
     })
 
-    clickEvt = new MouseEvent "click", clickEvtProps
+    clickEvt = new win.MouseEvent "click", clickEvtProps
 
     ## ensure this property exists on older chromium versions
     clickEvt.buttons ?= 0

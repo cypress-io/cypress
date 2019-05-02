@@ -21,6 +21,8 @@ describe "src/cy/commands/actions/click", ->
     it "receives native click event", (done) ->
       $btn = cy.$$("#button")
 
+      win = cy.state('window')
+
       $btn.on "click", (e) =>
         { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
@@ -28,7 +30,7 @@ describe "src/cy/commands/actions/click", ->
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: cy.state("window")
+          view: win
           button: 0
           buttons: 0
           which: 1
@@ -41,6 +43,7 @@ describe "src/cy/commands/actions/click", ->
           type: "click"
         }
 
+        expect(e.originalEvent instanceof win.Event).to.be.true
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
         done()
@@ -82,6 +85,7 @@ describe "src/cy/commands/actions/click", ->
           type: "mousedown"
         }
 
+        expect(e instanceof win.Event).to.be.true
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
         done()
@@ -113,6 +117,7 @@ describe "src/cy/commands/actions/click", ->
           type: "mouseup"
         }
 
+        expect(e instanceof win.Event).to.be.true
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
         done()
