@@ -383,6 +383,16 @@ describe "src/cy/commands/request", ->
         }).then (res) =>
           expect(res.body).to.contain('M-SEARCH')
 
+    describe "headers", ->
+      it "can send user-agent header", ->
+        cy.request({
+          url: "http://localhost:3500/dump-headers",
+          headers: {
+            "user-agent": "something special"
+          }
+        }).then (res) ->
+          expect(res.body).to.contain('"user-agent":"something special"')
+
     describe "subjects", ->
       it "resolves with response obj", ->
         resp = {

@@ -29,12 +29,32 @@ module.exports = {
   getAwsObj: ->
     uploadUtils.getS3Credentials()
 
+  # returns desktop folder for a given folder without platform
+  # something like desktop/0.20.1
+  getUploadeVersionFolder: (aws, version) ->
+    la(check.unemptyString(aws.folder), 'aws object is missing desktop folder', aws.folder)
+    dirName = [aws.folder, version].join("/")
+    dirName
+
+  getFullUploadName: ({folder, version, platformArch, name}) ->
+    la(check.unemptyString(folder), 'missing folder', folder)
+    la(check.semver(version), 'missing or invalid version', version)
+    la(check.unemptyString(name), 'missing file name', name)
+    la(uploadUtils.isValidPlatformArch(platformArch),
+      'invalid platform and arch', platformArch)
+
+    fileName = [folder, version, platformArch, name].join("/")
+    fileName
+
   # store uploaded application in subfolders by platform and version
   # something like desktop/0.20.1/darwin-x64/
   getUploadDirName: ({version, platform}) ->
     aws = @getAwsObj()
     platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
-    dirName = [aws.folder, version, platformArch, null].join("/")
+
+    versionFolder = @getUploadeVersionFolder(aws, version)
+    dirName = [versionFolder, platformArch, null].join("/")
+
     console.log("target directory %s", dirName)
     dirName
 
