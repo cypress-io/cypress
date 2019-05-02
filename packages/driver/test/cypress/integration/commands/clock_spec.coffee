@@ -72,6 +72,13 @@ describe "src/cy/commands/clock", ->
         expect(new win.Date()).to.be.an.instanceof(win.Date)
         expect(new win.Date() instanceof win.Date).to.be.true
 
+    it "doesn't override window.performance members", ->
+      cy.clock()
+      cy.window().then (win) ->
+        expect(win.performance.getEntriesByType("foo")).to.deep.eq([])
+        expect(win.performance.getEntriesByName("foo")).to.deep.eq([])
+        expect(win.performance.getEntries("foo")).to.deep.eq([])
+
     context "errors", ->
       it "throws if now is not a number (or options object)", (done) ->
         cy.on "fail", (err) ->
