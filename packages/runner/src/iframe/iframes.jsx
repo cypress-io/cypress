@@ -3,7 +3,7 @@ import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
 
 import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
@@ -14,6 +14,8 @@ import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import util from '../lib/util'
+
+const $ = $Cypress.$
 
 @observer
 export default class Iframes extends Component {

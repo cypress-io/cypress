@@ -2,7 +2,7 @@
   "name": "@packages/driver",
   "version": "0.0.0",
   "private": true,
-  "main": "index.js",
+  "main": "index.ts",
   "browser": "src/main",
   "scripts": {
     "prestart": "npm run check-deps-pre",
