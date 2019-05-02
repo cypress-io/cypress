@@ -84,7 +84,7 @@
     "ansi-styles": "3.2.1",
     "arg": "4.1.0",
     "ascii-table": "0.0.9",
-    "aws-sdk": "2.445.0",
+    "aws-sdk": "2.447.0",
     "babel-eslint": "10.0.1",
     "bluebird": "3.5.3",
     "bluebird-retry": "0.11.0",
