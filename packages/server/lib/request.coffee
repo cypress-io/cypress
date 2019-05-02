@@ -130,6 +130,13 @@ reduceCookieToArray = (c) ->
 createCookieString = (c) ->
   reduceCookieToArray(c).join("; ")
 
+caseInsensitiveGet = (obj, property) ->
+  lowercaseProperty = property.toLowerCase()
+
+  for key in Object.keys(obj)
+    if key.toLowerCase() == lowercaseProperty
+      return obj[key]
+
 module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout ? 20000
@@ -271,7 +278,7 @@ module.exports = (options = {}) ->
         jar: true
       }
 
-      if ua = headers["user-agent"]
+      if not caseInsensitiveGet(options.headers, "user-agent") and (ua = headers["user-agent"])
         options.headers["user-agent"] = ua
 
       ## create a new jar instance
@@ -332,7 +339,7 @@ module.exports = (options = {}) ->
         followRedirect: true
       }
 
-      if ua = headers["user-agent"]
+      if not caseInsensitiveGet(options.headers, "user-agent") and (ua = headers["user-agent"])
         options.headers["user-agent"] = ua
 
       ## normalize case sensitivity

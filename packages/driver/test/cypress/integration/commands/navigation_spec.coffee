@@ -596,6 +596,15 @@ describe "src/cy/commands/navigation", ->
       })
       cy.contains('"x-foo-baz":"bar-quux"')
 
+    it "can send user-agent header", ->
+      cy.visit({
+        url: "http://localhost:3500/dump-headers",
+        headers: {
+          "user-agent": "something special"
+        }
+      })
+      cy.contains('"user-agent":"something special"')
+
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
         cy.visit("http://localhost:3500/post-only", {
