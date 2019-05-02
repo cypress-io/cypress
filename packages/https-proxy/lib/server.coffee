@@ -45,6 +45,10 @@ class Server
     if not head or head.length is 0
       debug("Writing socket connection headers for URL:", req.url)
 
+      socket.on "error", (err) =>
+        ## nothing to do except catch here, the browser has d/c'd
+        debug("received error on client socket", { err })
+
       socket.once "data", (data) =>
         @connect(req, socket, data, options)
 
@@ -175,7 +179,6 @@ class Server
           hostname: toHostname
         }
       }, (err, upstreamSock) =>
-        debug(err)
         if err
           if isRetriableError(err) && iteration < MAX_REQUEST_RETRIES
             delay = getDelayForRetry(iteration, err)

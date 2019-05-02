@@ -200,10 +200,6 @@ class Server
       @_server.on "connect", (req, socket, head) =>
         debug("Got CONNECT request from %s", req.url)
 
-        socket.on "error", (err) =>
-          ## nothing to do except catch here, the browser has d/c'd
-          debug("received error on client socket", { err })
-
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
             urlToCheck = "https://" + req.url
