@@ -273,11 +273,12 @@ describe "e2e network error handling", ->
       server = net.createServer (sock) ->
         count++
         debug('count', count)
-        if count != 3
-          return sock.destroy()
+        sock.destroy()
 
-        server.close()
-        done()
+        if count != 3
+          server.close()
+          process.env.HTTP_PROXY = undefined
+          done()
 
       server.listen(HTTPS_PORT)
 
@@ -290,12 +291,11 @@ describe "e2e network error handling", ->
       server = net.createServer (sock) ->
         count++
         debug('count', count)
-        if count != 3
-          return sock.destroy()
+        sock.destroy()
 
-        server.close()
-        process.env.HTTP_PROXY = undefined
-        done()
+        if count != 3
+          server.close()
+          done()
 
       server.listen(HTTPS_PORT)
 
