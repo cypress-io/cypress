@@ -261,7 +261,7 @@ describe('lib/agent', function() {
           throw new Error('should not succeed')
         })
         .catch((e) => {
-          expect(e.message).to.eq('Error: Connection closed while sending request to upstream proxy')
+          expect(e.message).to.eq('Error: An error occurred while sending the request to upstream proxy: "Connection closed while sending request to upstream proxy"')
 
           return proxy.closeAsync()
         })

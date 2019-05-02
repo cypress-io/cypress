@@ -161,7 +161,6 @@ describe "Proxy", ->
 
   context "with an upstream proxy", ->
     beforeEach ->
-      @oldEnv = Object.assign({}, process.env)
       process.env.NO_PROXY = ""
       process.env.HTTP_PROXY = process.env.HTTPS_PROXY = "http://localhost:9001"
 
@@ -232,4 +231,6 @@ describe "Proxy", ->
 
     afterEach ->
       @upstream.stop()
-      Object.assign(process.env, @oldEnv)
+      delete process.env.HTTP_PROXY
+      delete process.env.HTTPS_PROXY
+      delete process.env.NO_PROXY

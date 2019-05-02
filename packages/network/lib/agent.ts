@@ -235,6 +235,7 @@ class HttpsAgent extends https.Agent {
     const proxy = url.parse(options.proxy)
     const port = options.uri.port || '443'
     const hostname = options.uri.hostname || 'localhost'
+    let errored = false
 
     const proxySocket = createProxySock(proxy)
 
@@ -242,7 +243,14 @@ class HttpsAgent extends https.Agent {
       onError(new Error("Connection closed while sending request to upstream proxy"))
     }
 
-    const onError = (err: Error) => {
+    const onError = (originalErr: Error) => {
+      if (errored) {
+        return debug('received second error on createProxiedConnection %o', { err: originalErr, options })
+      }
+      errored = true
+
+      const err = new Error(`An error occurred while sending the request to upstream proxy: "${originalErr.message}"`)
+      err[0] = originalErr
       proxySocket.destroy()
       cb(err, undefined)
     }

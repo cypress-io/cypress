@@ -153,15 +153,14 @@ class Server
     debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
 
     onUpstreamSock = (err, upstreamSock) =>
+      if err
+        socket.destroy()
+
       if @_onError
         if err
-          return @_onError(err, socket, head, port)
+          return @_onError(err, socket, head, toPort)
         upstreamSock.on "error", (err) =>
-          @_onError(err, socket, head, port)
-
-      if not upstreamSock
-        ## couldn't establish a proxy connection, fail gracefully
-        return socket.destroy(err)
+          @_onError(err, socket, head, toPort)
 
       upstreamSock.setNoDelay(true)
       upstreamSock.pipe(socket)

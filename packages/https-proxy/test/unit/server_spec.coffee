@@ -34,22 +34,47 @@ describe "lib/server", ->
 
         expect(onRequest).to.be.calledWith(req, res)
 
-    it "calls options.onError with err and port", (done) ->
-      onError = @sandbox.stub()
+    it "calls options.onError with err and port and destroys the client socket", (done) ->
       socket = new EE()
+      socket.destroy = @sandbox.stub()
       head = {}
+
+      onError = (err, socket, head, port) ->
+        expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:8444")
+
+        expect(socket).to.eq(socket)
+        expect(head).to.eq(head)
+        expect(port).to.eq("8444")
+
+        expect(socket.destroy).to.be.calledOnce
+
+        done()
 
       @setup({onError: onError})
       .then (srv) ->
         conn = srv._makeDirectConnection({url: "localhost:8444"}, socket, head)
 
-        conn.once "error", ->
-          err = onError.getCall(0).args[0]
-          expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:8444")
-
-          expect(onError.getCall(0).args[1]).to.eq(socket)
-          expect(onError.getCall(0).args[2]).to.eq(head)
-          expect(onError.getCall(0).args[3]).to.eq("8444")
-
-          done()
       return
+
+    it "with proxied connection calls options.onError with err and port and destroys the client socket", (done) ->
+      socket = new EE()
+      socket.destroy = @sandbox.stub()
+      head = {}
+
+      onError = (err, socket, head, port) ->
+        expect(err.message).to.eq("An error occurred while sending the request to upstream proxy: \"connect ECONNREFUSED 127.0.0.1:8444\"")
+
+        expect(socket).to.eq(socket)
+        expect(head).to.eq(head)
+        expect(port).to.eq("11111")
+
+        expect(socket.destroy).to.be.calledOnce
+
+        done()
+
+      @setup({onError: onError})
+      .then (srv) ->
+        conn = srv._makeUpstreamProxyConnection('http://127.0.0.1:8444', socket, head, '11111', 'should-not-reach.invalid')
+
+      return
+
