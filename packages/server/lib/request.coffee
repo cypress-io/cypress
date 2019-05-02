@@ -172,7 +172,7 @@ createRetryingRequestPromise = (opts, iteration = 0) ->
   .then (res) ->
     ## ok, no net error, but what about a bad status code?
     if hasRetriableStatusCodeFailure(res, opts) && iteration < MAX_REQUEST_RETRIES
-      debug("received failing status code on res, retrying", _.pick(res, "statusCode"))
+      debug("received failing status code on res, retrying %o", _.pick(res, "statusCode"))
 
       return retry()
 
@@ -278,8 +278,8 @@ createRetryingRequestStream = (opts = {}) ->
         return emitError(err)
 
       if iteration >= MAX_REQUEST_RETRIES
-        debug("exhausted all attempts to retry request", {
-          attempts: iteration,
+        debug("exhausted all attempts to retry request %o", {
+          iteration,
           opts,
           err,
         })
@@ -298,7 +298,7 @@ createRetryingRequestStream = (opts = {}) ->
 
       ## ok, no net error, but what about a bad status code?
       if hasRetriableStatusCodeFailure(incomingRes, opts) && iteration < MAX_REQUEST_RETRIES
-        debug("received failing status code on res, retrying", _.pick(incomingRes, "statusCode"))
+        debug("received failing status code on res, retrying %o", _.pick(incomingRes, "statusCode"))
 
         return retry()
 
