@@ -234,13 +234,16 @@ const getLanguageFromExtension = (filePath) => {
 
 const getCodeFrame = (sourceCode, { line, column, source: file }) => {
   const location = { start: { line, column } }
+  const frame = codeFrameColumns(sourceCode, location)
+
+  if (!frame) return null
 
   return {
     line,
     column,
     file,
+    frame,
     language: getLanguageFromExtension(file),
-    frame: codeFrameColumns(sourceCode, location),
   }
 }
 
@@ -251,7 +254,7 @@ const getCodeFrameFromStack = (stack, lineIndex = 0) => {
 
   // stack-utils removes the // in http:// for some reason, so put it back
   const file = generatedStackLineDetails.file.replace(':', '://')
-  const stackLineDetails = $sourceMapUtils.getMappedPosition(file, generatedStackLineDetails)
+  const stackLineDetails = $sourceMapUtils.getSourcePosition(file, generatedStackLineDetails)
 
   if (!stackLineDetails) return null
 

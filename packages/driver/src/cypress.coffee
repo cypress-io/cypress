@@ -261,8 +261,6 @@ class $Cypress
           @emit("mocha", "pending", args...)
 
       when "runner:fail"
-        @emit("cy:runner:fail", args...)
-
         ## mocha runner calculated a failure
         if @config("isTextTerminal")
           @emit("mocha", "fail", args...)

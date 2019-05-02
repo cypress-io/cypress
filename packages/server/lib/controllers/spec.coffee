@@ -24,7 +24,6 @@ module.exports = {
       fs.readFileAsync(filePath, "utf8")
     .then (contents) ->
       file = {
-        # relative: req.url.replace("/__cypress/tests?p=", "")
         relative: spec
         nonFullyQualified: req.url
         fullyQualified: req.proxiedUrl

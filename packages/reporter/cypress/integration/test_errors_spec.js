@@ -4,7 +4,6 @@ describe('test errors', function () {
   beforeEach(function () {
     cy.fixture('runnables_error').as('runnablesErr')
 
-    // SET ERROR INFO
     this.setError = function (err) {
       this.runnablesErr.suites[0].tests[0].err = err
 
@@ -35,7 +34,7 @@ describe('test errors', function () {
         docsUrl: 'https://on.cypress.io/type',
         codeFrames: [
           {
-            path: 'users.spec.js',
+            file: 'users.spec.js',
             line: 5,
             column: 6,
             language: 'javascript',
@@ -43,20 +42,40 @@ describe('test errors', function () {
           },
         ],
       }
+    })
 
+    it('shows error name', function () {
       this.setError(this.commandErr)
+
+      cy.get('.runnable-err-name').should('contain', this.commandErr.name)
     })
 
-    it('shows err name', function () {
-      cy.get('.runnbale-err-name').should('contain', this.commandErr.name)
-    })
+    it('renders and escapes backticks', function () {
+      this.setError(this.commandErr)
 
-    it('renders and escapes backticks', () => {
-      cy.get('.runnable-err-message')
+      cy
+      .get('.runnable-err-message')
       .should('contain', '`bar`')
       .and('contain', '**baz**')
       .contains('code', 'foo')
       .and('not.contain', '`foo`')
+    })
+
+    it('use correct language class', function () {
+      this.setError(this.commandErr)
+
+      cy
+      .get('.test-error-code-frame pre')
+      .should('have.class', 'language-javascript')
+    })
+
+    it('falls back to text language class', function () {
+      this.commandErr.codeFrames[0].language = null
+      this.setError(this.commandErr)
+
+      cy
+      .get('.test-error-code-frame pre')
+      .should('have.class', 'language-text')
     })
   })
 })

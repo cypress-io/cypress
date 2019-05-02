@@ -436,11 +436,8 @@ describe "driver/src/cypress/error_utils", ->
       expect(msg).to.eq("click simple error message")
 
   context ".getCodeFrame", ->
-    it "returns a code frame with syntax highlighting", ->
-      path = "foo/bar/baz"
-      line = 5
-      column = 6
-      src = """
+    it "returns a code frame the line and column marked", ->
+      sourceCode = """
         <!DOCTYPE html>
         <html>
         <body>
@@ -451,21 +448,20 @@ describe "driver/src/cypress/error_utils", ->
         </html>
       """
 
-      { frame, path, lineNumber, columnNumber } = $errUtils.getCodeFrame(src, path, line, column)
+      { frame, file, line, column } = $errUtils.getCodeFrame(sourceCode, {
+        source: "foo/bar/baz"
+        line: 5
+        column: 6
+      })
 
-      expect(frame).to.contain("foo")
-      expect(frame).to.contain("bar()")
-      expect(frame).to.contain("[0m")
-      expect(path).to.eq("foo/bar/baz")
-      expect(lineNumber).to.eq(5)
-      expect(columnNumber).to.eq(6)
+      expect(frame).to.contain("> 5 |     foo.bar()")
+      expect(frame).to.contain("    |      ^")
+      expect(file).to.eq("foo/bar/baz")
+      expect(line).to.eq(5)
+      expect(column).to.eq(6)
 
-    ## TODO determine if we want more failure cases covered
-    it "returns empty string when code frame can't be generated", ->
-      path = "foo/bar/baz"
-      line = 100 ## There are not 100 lines in src
-      column = 6
-      src = """
+    it "returns null when code frame can't be generated", ->
+      sourceCode = """
         <!DOCTYPE html>
         <html>
         <body>
@@ -476,9 +472,13 @@ describe "driver/src/cypress/error_utils", ->
         </html>
       """
 
-      { frame } = $errUtils.getCodeFrame(src, path, line, column)
+      result = $errUtils.getCodeFrame(sourceCode, {
+        source: "foo/bar/baz"
+        line: 100 ## There are not 100 lines in src
+        column: 6
+      })
 
-      expect(frame).to.eq("")
+      expect(result).to.be.null
 
   context ".escapeErrMarkdown", ->
     it "accepts non-strings", ->

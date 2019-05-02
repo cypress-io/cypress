@@ -25,7 +25,7 @@ class TestError extends Component {
       <div className='runnable-err-wrapper'>
         <div className='runnable-err'>
           <div className='runnable-err-header'>
-            <div className='runnbale-err-name'>
+            <div className='runnable-err-name'>
               <i className='fa fa-exclamation-circle'></i>
               {err.name}
             </div>

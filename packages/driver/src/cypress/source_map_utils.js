@@ -25,7 +25,7 @@ const getSourceContents = (filePath) => {
   return consumer.sourceContentFor(file.relative)
 }
 
-const getMappedPosition = (filePath, position) => {
+const getSourcePosition = (filePath, position) => {
   if (!sourceMapConsumers[filePath]) return null
 
   const { consumer } = sourceMapConsumers[filePath]
@@ -46,6 +46,5 @@ const base64toJson = (base64) => {
 module.exports = {
   initialize,
   getSourceContents,
-  getMappedPosition,
-  base64toJson,
+  getSourcePosition,
 }
