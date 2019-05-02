@@ -21,6 +21,8 @@ serializableProperties = Cookie.serializableProperties.slice(0)
 
 MAX_REQUEST_RETRIES = 4
 
+requestIdCounter = 0
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 getOriginalHeaders = (req = {}) ->
@@ -148,24 +150,26 @@ createCookieString = (c) ->
   reduceCookieToArray(c).join("; ")
 
 createRetryingRequestPromise = (opts, iteration = 0) ->
+  requestId = requestIdCounter++
+
   retry = (err) ->
     delay = getDelayForRetry(iteration, err)
 
-    debug("retry %o", { iteration, delay })
+    debug("retry %o", { iteration, delay, requestId })
 
     Promise.delay(delay).then ->
       createRetryingRequestPromise(opts, iteration + 1)
 
   rp(opts)
   .catch (err) ->
-    debug("received an error creating request %o", err)
+    debug("received an error creating request %o", { err, requestId })
 
     ## rp wraps network errors in a RequestError, so might need to unwrap it to check
     if not isRetriableError(err.error || err, opts)
       throw err
 
     if iteration >= MAX_REQUEST_RETRIES
-      debug("retried %dx and still network error, not retrying", MAX_REQUEST_RETRIES)
+      debug("retried %dx and still network error, not retrying", { MAX_REQUEST_RETRIES, requestId })
       throw err
 
     retry()
@@ -188,6 +192,7 @@ createRetryingRequestStream = (opts = {}) ->
 
   retryStream = duplexify(reqBodyBuffer, delayStream)
 
+  requestId = requestIdCounter++
   req = null
   didAbort = false
 
@@ -221,11 +226,10 @@ createRetryingRequestStream = (opts = {}) ->
         attempts
         delay
         err
+        requestId
       })
 
       retryStream.emit("retry", { attempts, delay })
-
-      debug("retry %o", { iteration, delay })
 
       setTimeout ->
         tryStartStream(attempts)
@@ -239,6 +243,7 @@ createRetryingRequestStream = (opts = {}) ->
 
     ## forward the abort call to the underlying request
     retryStream.abort = ->
+      debug('aborting', { requestId })
       didAbort = true
 
       reqStream.abort()
@@ -266,19 +271,20 @@ createRetryingRequestStream = (opts = {}) ->
         ## response, then that means we failed during transit
         ## and its no longer safe to retry. all we can do now
         ## is propogate the error upwards
-        debug("received an error on request after response started %o", { opts, err })
+        debug("received an error on request after response started %o", { requestId, opts, err })
 
         return emitError(err)
 
       ## otherwise, see if we can retry another request under the hood...
 
       if not isRetriableError(err, opts)
-        debug("received a non-retryable request error %o", { opts, err })
+        debug("received a non-retryable request error %o", { requestId, opts, err })
 
         return emitError(err)
 
       if iteration >= MAX_REQUEST_RETRIES
         debug("exhausted all attempts to retry request %o", {
+          requestId,
           iteration,
           opts,
           err,
@@ -303,6 +309,8 @@ createRetryingRequestStream = (opts = {}) ->
         return retry()
 
       ## otherwise, we've successfully received a valid response...
+
+      debug("successful response received", { requestId })
 
       ## forward the response event upwards which should happen
       ## prior to the pipe event, same as what request does
