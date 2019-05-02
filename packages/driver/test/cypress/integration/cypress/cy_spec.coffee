@@ -206,7 +206,7 @@ describe "driver/src/cypress/cy", ->
         cy.c("bar")
 
       it "fails when previous subject becomes detached", (done) ->
-        cy.$$("button:first").click ->
+        cy.$$("#button").click ->
           $(@).remove()
 
         cy.on "fail", (err) ->
@@ -215,7 +215,7 @@ describe "driver/src/cypress/cy", ->
           expect(err.message).to.include("> cy.click()")
           done()
 
-        cy.get("button:first").click().parent()
+        cy.get("#button").click().parent()
 
       it "fails when previous subject isnt window", (done) ->
         cy.on "fail", (err) ->

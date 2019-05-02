@@ -216,6 +216,8 @@ jobs:
           at: ~/
       # make sure mocha runs
       - run: npm run test-mocha
+      # test binary build code
+      - run: npm run test-scripts
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
@@ -792,6 +794,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -799,6 +802,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -806,6 +810,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build-npm-package
           - build-binary
@@ -865,6 +870,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - Mac build
 
