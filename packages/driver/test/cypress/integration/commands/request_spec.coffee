@@ -667,6 +667,17 @@ describe "src/cy/commands/request", ->
           form: {foo: "bar"}
         })
 
+      it.only "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.request() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          done()
+
+        cy.request({
+          url: "http://foobarbaz",
+          failOnStatusCode: false
+          retryOnStatusCodeFailure: true
+        })
+
       it "throws when status code doesnt start with 2 and failOnStatusCode is true", (done) ->
         backend = Cypress.backend
         .withArgs("http:request")
