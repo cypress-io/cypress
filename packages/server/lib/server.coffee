@@ -137,7 +137,7 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project, onWarning) ->
+  open: (config = {}, project) ->
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -161,13 +161,13 @@ class Server
 
       @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
-      @createServer(app, config, project, @_request, onWarning)
+      @createServer(app, config, project, @_request)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
 
-  createServer: (app, config, project, request, onWarning) ->
+  createServer: (app, config, project, request) ->
     new Promise (resolve, reject) =>
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
@@ -254,7 +254,7 @@ class Server
             @_baseUrl = baseUrl
 
             if config.isTextTerminal
-              return retryBaseUrlCheck(baseUrl, onWarning)
+              return retryBaseUrlCheck(baseUrl, project.onWarning)
               .return(null)
               .catch (e) ->
                 debug(e)

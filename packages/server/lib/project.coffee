@@ -91,7 +91,7 @@ class Project extends EE
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
-      @server.open(cfg, @, options.onWarning)
+      @server.open(cfg, @)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
