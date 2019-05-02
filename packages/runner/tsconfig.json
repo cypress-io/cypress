@@ -32,7 +32,6 @@
      * Skip type checking of all declaration files (*.d.ts).
      * TODO: Look into changing this in the future
      */
-    "skipLibCheck": true,
     /* Additional Checks */
     /* Report errors on unused locals. */
     // "noEmit": true,
@@ -46,7 +45,7 @@
     // "baseUrl": "../",                       /* Base directory to resolve non-absolute module names. */
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
-    "typeRoots": ["../driver/node_modules", "../../cli", "../driver/src"],                       /* List of folders to include type definitions from. */
+    "typeRoots": ["../driver/node_modules", "../../cli", "../driver/src", "./node_modules"],                       /* List of folders to include type definitions from. */
     // "types": [],                           /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

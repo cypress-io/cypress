@@ -1,4 +1,4 @@
-import webpack from 'webpack'
+import webpack, { Configuration } from 'webpack'
 import path from 'path'
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import CopyWebpackPlugin = require('copy-webpack-plugin')
@@ -6,15 +6,19 @@ import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
 
 import sassGlobImporter = require('node-sass-globbing')
 
+
+const mode = process.env.NODE_ENV as ('development' | 'production') || 'development'
+
+const isDevServer = !!process.env.DEV_SERVER
+
 const config: webpack.Configuration = {
-  // entry: './src/main.scss',
+
   entry: {
     'cypress_runner.js': ['./src/main.jsx'],
     cypress_runner: ['./src/main.scss'],
     cypress_selector_playground: ['./src/selector-playground/selector-playground.scss'],
-    cypress_reporter: ['../reporter/src/main.scss']
   },
-  mode: 'development',
+  mode,
   node: {
     fs: 'empty',
     child_process: 'empty',
@@ -39,8 +43,8 @@ const config: webpack.Configuration = {
     warnings: true,
     all: false,
     builtAt: true,
-    colors:true,
-    modules:true,
+    colors: true,
+    modules: true,
     excludeModules: /main.scss/,
   },
 
@@ -105,12 +109,32 @@ const config: webpack.Configuration = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './static/index.html',
+      template: isDevServer ? './static/index.dev.html' :'./static/index.html' ,
       inject: false,
     }),
     new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
     new MiniCSSExtractWebpackPlugin('[name]'),
   ],
+  
+  devServer: {
+    port: 3938,
+    stats: {
+      errors: true,
+      warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
+      warnings: true,
+      all: false,
+      builtAt: true,
+      colors:true,
+      modules:true,
+      excludeModules: /main.scss/,
+    },
+    noInfo:true,
+    writeToDisk: (filepath) => /index.html/.test(filepath),
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    }
+  }
+
 }
 
 export default config

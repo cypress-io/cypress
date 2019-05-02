@@ -7,9 +7,9 @@
   "scripts": {
     "postinstall": "echo '@packages/reporter needs: npm run build'",
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "node ./scripts/build-dev.js",
+    "build": "true || node ./scripts/build-dev.js",
     "prebuild-prod": "npm run check-deps-pre",
-    "build-prod": "node ./scripts/build-prod.js",
+    "build-prod": "true || node ./scripts/build-prod.js",
     "prewatch": "npm run check-deps-pre",
     "watch": "node ./scripts/watch.js",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
