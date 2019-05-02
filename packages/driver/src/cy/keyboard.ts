@@ -17,7 +17,7 @@ type MyKeys = 'foo' | 'bar' | 'baz'
 type FooType = { [key in MyKeys]: boolean } & {
   quux: boolean
 }
-
+ 
 export interface keyboardModifiers {
   alt: boolean
   ctrl: boolean

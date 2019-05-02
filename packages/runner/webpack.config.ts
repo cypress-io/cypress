@@ -15,6 +15,7 @@ const config: webpack.Configuration = {
     'cypress_runner.js': ['./src/main.jsx'],
     cypress_runner: ['./src/main.scss'],
     cypress_selector_playground: ['./src/selector-playground/selector-playground.scss'],
+    cypress_reporter: ['../reporter/src/main.scss']
   },
   stats: 'minimal',
   mode: 'development',
@@ -23,6 +24,9 @@ const config: webpack.Configuration = {
     child_process: 'empty',
   },
   resolve: {
+    alias: {
+      'react': path.resolve('./node_modules/react')
+    },
     extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss'],
   },
   output: {
@@ -30,18 +34,20 @@ const config: webpack.Configuration = {
     filename: '[name]',
   },
 
+  devtool: 'cheap-eval-source-map',
+
   module: {
     rules: [
       {
         test: /\.coffee/,
-        exclude: /.*node_modules.*/,
+        exclude: /node_modules/,
         use: {
           loader: require.resolve('coffee-loader'),
         },
       },
       {
         test: /\.(ts|js|jsx|tsx)$/,
-        exclude: /.*node_modules.*/,
+        exclude: /node_modules/,
         use: {
           loader: require.resolve('babel-loader'),
           options: {
@@ -57,7 +63,7 @@ const config: webpack.Configuration = {
       },
       {
         test: /\.s?css$/,
-        exclude: /.*node_modules.*/,
+        exclude: /node_modules/,
         // use: ExtractTextWebpackPlugin.extract({
         // 	fallback: 'style-loader',
         // 	use: ['css-loader', 'sass-loader']
@@ -69,8 +75,8 @@ const config: webpack.Configuration = {
           {
             loader: 'css-loader',
             options: {
-              sourceMap: true,
-              modules: true,
+              // sourceMap: true,
+              modules: false,
             },
           }, // translates CSS into CommonJS
           {

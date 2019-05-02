@@ -81,7 +81,7 @@ describe "src/cy/commands/actions/type", ->
 
 
 
-    it.only "does not change the subject", ->
+    it "does not change the subject", ->
       input = cy.$$("input:first")
 
       cy.get("input:first").type("foo").then ($input) ->

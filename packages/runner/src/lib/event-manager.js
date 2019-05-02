@@ -7,7 +7,8 @@ import io from '@packages/socket'
 import automation from './automation'
 import logger from './logger'
 
-import $Cypress, { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
+const $ = $Cypress.$
 
 const channel = io.connect({
   path: '/__socket.io',

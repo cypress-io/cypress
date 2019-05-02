@@ -3,10 +3,12 @@ import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
-import { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
 
 import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+
+const $ = $Cypress.$
 
 @observer
 export default class Header extends Component {

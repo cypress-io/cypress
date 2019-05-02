@@ -393,7 +393,7 @@ describe('src/cy/commands/actions/click', function () {
       cy.contains('button').click()
     })
 
-    it.only('sends modifiers', () => {
+    it('sends modifiers', () => {
 
       const btn = cy.$$('button:first')
 

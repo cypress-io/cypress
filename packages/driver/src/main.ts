@@ -5,4 +5,4 @@ import "./config/jquery"
 import "./config/lodash"
 import "./config/moment"
 
-module.exports = require("./cypress")
+export default require("./cypress")
