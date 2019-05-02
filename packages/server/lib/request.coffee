@@ -32,9 +32,9 @@ getOriginalHeaders = (req = {}) ->
   ## original headers
   req.req?.headers ? req.headers
 
-getDelayForRetry = (iteration, err) ->
+getDelayForRetry = (iteration, err, opts) ->
   increment = 1000
-  if err && err.code == 'ECONNREFUSED'
+  if opts.fromProxy || (err && err.code == 'ECONNREFUSED')
     increment = 100
   _.get([0, 1, 2, 2], iteration) * increment
 
@@ -153,7 +153,7 @@ createRetryingRequestPromise = (opts, iteration = 0) ->
   requestId = requestIdCounter++
 
   retry = (err) ->
-    delay = getDelayForRetry(iteration, err)
+    delay = getDelayForRetry(iteration, err, opts)
 
     debug("retry %o", { iteration, delay, requestId })
 
@@ -217,7 +217,7 @@ createRetryingRequestStream = (opts = {}) ->
     retry = (err) ->
       attempts = iteration + 1
 
-      delay = getDelayForRetry(iteration, err)
+      delay = getDelayForRetry(iteration, err, opts)
 
       reqStream.abort()
 
