@@ -208,10 +208,12 @@ const start = (options = {}) => {
 
     debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
     logger.log(stripIndent`
-        ${chalk.yellow('Note:')} You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}:
-        
-              This overrides the default Cypress binary path used.
-        `)
+      ${chalk.yellow('Note:')} You have set the environment variable:
+
+      ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}
+
+      This overrides the default Cypress binary path used.
+    `)
     logger.log()
 
     return util.isExecutableAsync(envBinaryPath)
@@ -273,8 +275,8 @@ const start = (options = {}) => {
       logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
       logger.log()
       logger.warn(stripIndent`
-      
-      
+
+
       ${logSymbols.warning} Warning: Binary version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
 
         These versions may not work properly together.

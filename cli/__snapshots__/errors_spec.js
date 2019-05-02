@@ -8,6 +8,7 @@ Read our documentation on dependencies for more information:
 [34mhttps://on.cypress.io/required-dependencies[39m
 
 If you are using Docker, we provide containers with all required dependencies installed.
+
 ----------
 
 Platform: test platform (Foo-OsVersion)
