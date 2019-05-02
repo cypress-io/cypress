@@ -1,3 +1,5 @@
+const addPrismTransform = require('../../reporter/scripts/add-prism-transform')
+
 module.exports = function setZunderConfig (zunder) {
   const { browserifyOptions } = zunder.config
 
@@ -26,12 +28,7 @@ module.exports = function setZunderConfig (zunder) {
     },
   ])
 
-  browserifyOptions.transform[0][1].plugins.push(['prismjs', {
-    'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
-    'plugins': ['line-highlight'],
-    'theme': 'default',
-    'css': false,
-  }])
+  addPrismTransform(browserifyOptions)
 
   zunder.setConfig({
     cacheBust: false,
