@@ -22,6 +22,9 @@ zlibOptions = {
   finishFlush: zlib.Z_SYNC_FLUSH
 }
 
+isGzipError = (err) ->
+  _.keys(zlib.constants).includes(err.code)
+
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
   ## is not sent correctly
@@ -142,15 +145,6 @@ module.exports = {
 
       setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
-    getErrorHtml = (err, filePath) =>
-      status = err.status ? 500
-
-      debug("request failed %o", { url: remoteUrl, status: status, error: err.stack })
-
-      urlStr = filePath ? remoteUrl
-
-      networkFailures.get(err, urlStr, status, remoteState.strategy)
-
     setBody = (str, statusCode, headers) =>
       ## set the status to whatever the incomingRes statusCode is
       res.status(statusCode)
@@ -188,7 +182,9 @@ module.exports = {
             .then(rewrite)
             .then(zlib.gzipAsync)
             .then(thr.end)
-            .catch(endWithResponseErr)
+            .catch (err) ->
+              debug('received error while ungzipping response, letting browser handle response %o', { err })
+              thr.end body
           else
             thr.end rewrite(body)
 
@@ -200,25 +196,23 @@ module.exports = {
           gunzip.setEncoding("utf8")
 
           onError = (err) ->
+            gzipError = isGzipError(err)
+
             debug("failed to proxy response %o", {
               url: remoteUrl
               headers
               statusCode
               isGzipped
+              gzipError
               wantsInjection
               wantsSecurityRemoved
               err
             })
 
-            if not res.headersSent
-              res
-              .set({
-                "X-Cypress-Proxy-Error-Message": err.message
-                "X-Cypress-Proxy-Error-Stack": JSON.stringify(err.stack)
-              })
-              .status(502)
+            if gzipError ## transparently proxy it, chrome will indicate the error
+              return str.pipe(thr)
 
-            return thr.end()
+            endWithNetworkErr(err)
 
           ## only unzip when it is already gzipped
           return str
@@ -233,40 +227,14 @@ module.exports = {
 
         return str.pipe(thr)
 
-    endWithResponseErr = (err) ->
-      ## TODO: add debug logs here that the request
-      ## failed, including the original url, the error
-      ## and whether or not the res headers were sent
-
-      ## if this is an event stream just destroy
-      ## the socket without sending a response
-      ## which matches how it works without a proxy
-      ## in the middle
-      if isEventStream
-        return req.socket.destroy()
-
-      ## use res.statusCode if we have one
-      ## in the case of an ESOCKETTIMEDOUT
-      ## and we have the incomingRes headers
-      checkResStatus = ->
-        if res.headersSent
-          res.statusCode
-
-      status = err.status ? checkResStatus() ? 500
-
-      if not res.headersSent
-        res.removeHeader("Content-Encoding")
-
-      str = through (d) -> @queue(d)
-
-      onResponse(str, {
-        statusCode: status
-        headers: {
-          "content-type": "text/html"
-        }
+    endWithNetworkErr = (err) ->
+      debug('request failed in proxy layer', {
+        res: _.pick(res, 'headersSent', 'statusCode', 'headers')
+        req: _.pick(req, 'url', 'proxiedUrl', 'headers', 'method')
+        err
       })
 
-      str.end(getErrorHtml(err))
+      req.socket.destroy()
 
     onResponse = (str, incomingRes) =>
       {headers, statusCode} = incomingRes
@@ -314,13 +282,8 @@ module.exports = {
         res.redirect(statusCode, newUrl)
       else
         if headers["x-cypress-file-server-error"]
-          filePath = headers["x-cypress-file-path"]
           wantsInjection or= "partial"
-          str = through (d) -> @queue(d)
-          setBody(str, statusCode, headers)
-          str.end(getErrorHtml({status: statusCode}, filePath))
-        else
-          setBody(str, statusCode, headers)
+        setBody(str, statusCode, headers)
 
     if obj = buffers.take(remoteUrl)
       wantsInjection = "full"
@@ -329,11 +292,11 @@ module.exports = {
       ## on our stream just immediately
       ## end with this
       if err = obj.stream.error
-        endWithResponseErr(err)
+        endWithNetworkErr(err)
       else
         ## else listen for the error even which
         ## could happen at any time
-        obj.stream.on("error", endWithResponseErr)
+        obj.stream.on("error", endWithNetworkErr)
 
       onResponse(obj.stream, obj.response)
     else
@@ -369,7 +332,7 @@ module.exports = {
 
       rq = request.create(opts)
 
-      rq.on("error", endWithResponseErr)
+      rq.on("error", endWithNetworkErr)
 
       rq.on "response", (incomingRes) ->
         onResponse(rq, incomingRes)

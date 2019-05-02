@@ -1212,7 +1212,7 @@ describe "Routes", ->
           expect(res.body).to.include("document.domain = 'github.com'")
           expect(res.headers["set-cookie"]).to.match(/__cypress.initial=;/)
 
-      it "sends back cypress content on request errors which match origin", ->
+      it "sends back socket hang up on request errors which match origin", ->
         nock("http://app.github.com")
         .get("/")
         .replyWithError("ECONNREFUSED")
@@ -1223,18 +1223,12 @@ describe "Routes", ->
             "Accept": "text/html, application/xhtml+xml, */*"
           }
         })
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
-          expect(res.body).to.include("http://app.github.com")
-          expect(res.body).to.include("The error was:")
-          expect(res.body).to.include("ECONNREFUSED")
-          expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("<html>\n<head> <script")
-          expect(res.body).to.include("</script> </head> <body>")
-          expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
+        .then ->
+          throw new Error("should not reach")
+        .catch (err) ->
+          expect(err.message).to.eq('Error: socket hang up')
 
-      it "sends back cypress content on actual request errors", ->
+      it "sends back socket hang up on actual request errors", ->
         @setup("http://localhost:64644")
         .then =>
           @rp({
@@ -1243,38 +1237,22 @@ describe "Routes", ->
               "Accept": "text/html, application/xhtml+xml, */*"
             }
           })
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
-          expect(res.body).to.include("http://localhost:64644")
-          expect(res.body).to.include("The error was:")
-          expect(res.body).to.include("connect ECONNREFUSED 127.0.0.1:64644")
-          expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("_exceptionWithHostPort")
-          expect(res.body).to.include("TCPConnectWrap.afterConnect")
-          expect(res.body).to.include("<html>\n<head> <script")
-          expect(res.body).to.include("</script> </head> <body>")
-          expect(res.body).to.include("document.domain = 'localhost';") ## should continue to inject
+        .then ->
+          throw new Error("should not reach")
+        .catch (err) ->
+          expect(err.message).to.eq('Error: socket hang up')
 
-      it "sends back cypress content without injection on http errors when no matching origin", ->
+      it "sends back socket hang up on http errors when no matching origin", ->
         @rp({
           url: "http://localhost:64644"
           headers: {
             "Accept": "text/html, application/xhtml+xml, */*"
           }
         })
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
-          expect(res.body).to.include("http://localhost:64644")
-          expect(res.body).to.include("The error was:")
-          expect(res.body).to.include("connect ECONNREFUSED 127.0.0.1:64644")
-          expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("_exceptionWithHostPort")
-          expect(res.body).to.include("TCPConnectWrap.afterConnect")
-          expect(res.body).not.to.include("<html>\n<head> <script")
-          expect(res.body).not.to.include("</script> </head> <body>")
-          expect(res.body).not.to.include("document.domain") ## should not inject because
+        .then ->
+          throw new Error("should not reach")
+        .catch (err) ->
+          expect(err.message).to.eq('Error: socket hang up')
 
       it "sends back 404 when file does not exist locally", ->
         @setup("<root>", {
@@ -1311,7 +1289,7 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(500)
             expect(res.body).to.eq("server error")
 
-      it "handles decoding gzip failures", ->
+      it "transparently proxies decoding gzip failures", ->
         nock(@server._remoteOrigin)
         .get("/index.html")
         .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
@@ -1324,19 +1302,12 @@ describe "Routes", ->
           headers: {
             "Accept": "text/html, application/xhtml+xml, */*"
           }
+          gzip: true
         })
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-          expect(res.headers).not.to.have.property("content-encoding")
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
-          expect(res.body).to.include("http://www.github.com/index.html")
-          expect(res.body).to.include("The error was:")
-          expect(res.body).to.include("incorrect header check")
-          expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("at Gunzip.zlibOnError")
-          expect(res.body).to.include("<html>\n<head> <script")
-          expect(res.body).to.include("</script> </head> <body>")
-          expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
+        .then ->
+          throw new Error("should not reach")
+        .catch (err) ->
+          expect(err.message).to.eq('Error: incorrect header check')
 
     context "headers", ->
       beforeEach ->
@@ -2545,7 +2516,7 @@ describe "Routes", ->
 
               expect(res.body).to.include("I am a gzipped response</html>")
 
-        it "handles bad gzip responses", (done) ->
+        it "transparently proxies bad gzip responses", (done) ->
           ## honestly this is just a quick hack to make request
           ## be forcibly less leniant about gzip errors, but
           ## we should just switch to something like http.request()
@@ -2585,10 +2556,10 @@ describe "Routes", ->
           .on "response", (res) ->
             gotResponse = true
 
-            expect(res.statusCode).to.eq(502)
-            expect(res.headers["x-cypress-proxy-error-message"]).to.eq("incorrect header check")
+            expect(res.statusCode).to.eq(200)
+            expect(res.headers["content-encoding"]).to.eq("gzip")
 
-        it "handles bad gzip responses when injecting", ->
+        it "transparently proxies bad gzip responses when injecting", ->
           nock(@server._remoteOrigin)
           .get("/index.html")
           .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
@@ -2603,10 +2574,10 @@ describe "Routes", ->
               "Cookie": "__cypress.initial=true"
             }
           })
-          .then (res) ->
-            expect(res.statusCode).to.eq(500)
-
-            expect(res.body).to.include("<html>")
+          .then ->
+            throw new Error("should not reach")
+          .catch (err) ->
+            expect(err.message).to.eq('Error: incorrect header check')
 
         it "does not die rewriting a huge JS file", ->
           pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")
