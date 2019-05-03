@@ -44,7 +44,7 @@
     "js-cookie": "2.2.0",
     "jsdom": "13.2.0",
     "lodash": "4.17.11",
-    "lolex": "3.1.0",
+    "lolex": "flotwig/lolex#775312f1c5d657f45f3414e24db81be0b30c5bcd",
     "methods": "1.1.2",
     "method-override": "2.3.10",
     "minimatch": "3.0.4",

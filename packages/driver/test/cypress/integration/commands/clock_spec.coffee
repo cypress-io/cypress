@@ -74,10 +74,17 @@ describe "src/cy/commands/clock", ->
 
     it "doesn't override window.performance members", ->
       cy.clock()
-      cy.window().then (win) ->
-        expect(win.performance.getEntriesByType("foo")).to.deep.eq([])
-        expect(win.performance.getEntriesByName("foo")).to.deep.eq([])
-        expect(win.performance.getEntries("foo")).to.deep.eq([])
+      .then (clock) ->
+        cy.window().then (win) ->
+          expect(win.performance.getEntriesByType("paint")).to.deep.eq([])
+          expect(win.performance.getEntriesByName("first-paint")).to.deep.eq([])
+          expect(win.performance.getEntries()).to.deep.eq([])
+
+          clock.restore()
+
+          expect(win.performance.getEntriesByType("paint").length).to.be.at.least(1)
+          expect(win.performance.getEntriesByName("first-paint").length).to.be.at.least(1)
+          expect(win.performance.getEntries().length).to.be.at.least(1)
 
     context "errors", ->
       it "throws if now is not a number (or options object)", (done) ->
