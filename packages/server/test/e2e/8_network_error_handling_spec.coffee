@@ -10,7 +10,8 @@ launcher = require("@packages/launcher")
 random   = require("../../lib/util/random")
 
 PORT = 13370
-HTTPS_PORT = 13371
+PROXY_PORT = 13371
+HTTPS_PORT = 13372
 
 start = Number(new Date())
 
@@ -153,6 +154,23 @@ describe "e2e network error handling", ->
             res.sendStatus(404)
 
         port: PORT
+      }, {
+        onServer: ->
+          app.use (req, res, next) ->
+            counts[req.url] = _.get(counts, req.url, 0) + 1
+
+            debug('received request %o', {
+              counts
+              elapsedTime: getElapsed()
+              reqUrl: req.url
+            })
+
+            if onVisit
+              onVisit()
+
+            next()
+        https: true
+        port: HTTPS_PORT
       }
     ],
     settings: {
@@ -230,6 +248,10 @@ describe "e2e network error handling", ->
         testProxiedNoRetries("http://proxy-service-unavailable.invalid/")
 
   context "Cypress", ->
+    beforeEach ->
+      delete process.env.HTTP_PROXY
+      delete process.env.NO_PROXY
+
     it "baseurl check tries 5 times in run mode", ->
       e2e.exec(@, {
         config: {
@@ -295,21 +317,13 @@ describe "e2e network error handling", ->
         spec: "https_passthru_spec.js"
       })
 
-    it "retries HTTPS passthrough behind a proxy", (done) ->
-      count = 0
-      server = net.createServer (sock) ->
-        count++
-        debug('count', count)
-        sock.destroy()
+    it "retries HTTPS passthrough behind a proxy", ->
+      new DebugProxy()
+      .start(HTTPS_PORT)
+      .then =>
+        process.env.HTTP_PROXY = "http://localhost:#{HTTPS_PORT}"
+        process.env.NO_PROXY = ""
 
-        if count != 3
-          server.close()
-          done()
-
-      server.listen(HTTPS_PORT)
-
-      process.env.HTTP_PROXY = "http://localhost:#{HTTPS_PORT}"
-
-      e2e.exec(@, {
-        spec: "https_passthru_spec.js"
-      })
+        e2e.exec(@, {
+          spec: "https_passthru_spec.js"
+        })

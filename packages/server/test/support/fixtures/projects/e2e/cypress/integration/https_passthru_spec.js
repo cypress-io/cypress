@@ -1,8 +1,11 @@
 describe('https passthru retries', function () {
-  it('retries when visiting a non-test domain', function (done) {
-    const img = new Image()
+  it('retries when visiting a non-test domain', function () {
+    return new Cypress.Promise((resolve, reject) => {
+      const img = new Image()
 
-    img.src = 'https://localhost:13371'
-    img.onload = done
+      img.src = 'https://localhost:13372/the-image.jpg'
+      img.onload = resolve
+      img.onerror = reject
+    })
   })
 })

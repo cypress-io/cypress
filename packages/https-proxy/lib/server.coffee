@@ -189,10 +189,11 @@ class Server
           if isRetriableError(err) && iteration < MAX_REQUEST_RETRIES
             delay = getDelayForRetry(iteration, err)
             debug('re-trying request on failure %o', { delay, iteration, err })
-            return setTimeout ->
+            debugger
+            setTimeout ->
               tryConnect(iteration + 1)
             , delay
-
+        debugger
         onUpstreamSock(err, upstreamSock)
 
     tryConnect()
