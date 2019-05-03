@@ -253,6 +253,15 @@ describe "e2e network error handling", ->
         expect(stdout).to.contain('> Error: socket hang up')
         expect(stdout).to.contain('2) network error handling cy.request() retries fails after retrying 5x:')
         expect(stdout).to.contain('http://localhost:13370/immediate-reset?request')
+
+        ## sometimes <img>, <script> get retried 2x by chrome instead of 1x
+
+        if counts['/immediate-reset?load-img'] == 10
+          counts['/immediate-reset?load-img'] = 5
+
+        if counts['/immediate-reset?load-js'] == 10
+          counts['/immediate-reset?load-js'] = 5
+
         expect(counts).to.deep.eq({
           "/immediate-reset?visit": 5
           "/immediate-reset?request": 5
