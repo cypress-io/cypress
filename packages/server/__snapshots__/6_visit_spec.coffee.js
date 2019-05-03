@@ -468,6 +468,7 @@ When this 'load' event occurs, Cypress will continue running commands.
       at stack trace line
       at stack trace line
       at stack trace line
+      at stack trace line
 
   2) visits response timeouts result in an error handles no response errors when not initially visiting:
      CypressError: Timed out after waiting '1000ms' for your remote page to load.
@@ -479,6 +480,7 @@ You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait lon
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
 When this 'load' event occurs, Cypress will continue running commands.
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
