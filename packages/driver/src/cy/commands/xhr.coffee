@@ -358,11 +358,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         _.defaults(options, defaults)
 
-        if not options.url
-          $utils.throwErrByPath "route.url_missing"
-
-        if not (_.isString(options.url) or _.isRegExp(options.url))
-          $utils.throwErrByPath "route.url_invalid"
+        if options.matcher
+          if not _.isFunction(options.matcher)
+            $utils.throwErrByPath "route.matcher_invalid"
+        else
+          if not options.url
+            $utils.throwErrByPath "route.url_missing"
+          if not (_.isString(options.url) or _.isRegExp(options.url))
+            $utils.throwErrByPath "route.url_invalid"
 
         if not $utils.isValidHttpMethod(options.method)
           $utils.throwErrByPath "route.method_invalid", {
