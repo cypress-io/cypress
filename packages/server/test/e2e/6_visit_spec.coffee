@@ -77,7 +77,7 @@ describe "e2e visit", ->
       e2e.exec(@, {
         spec: "visit_spec.coffee"
         snapshot: true
-        expectedExitCode: 0
+        expectedExitCode: 2
       })
 
     it "fails when network connection immediately fails", ->
