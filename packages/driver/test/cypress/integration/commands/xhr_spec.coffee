@@ -1204,6 +1204,58 @@ describe "src/cy/commands/xhr", ->
           response: {}
         })
 
+    it "accepts matcher option", ->
+      matcher = () => true
+      response = { foo: true }
+
+      cy.route({
+        matcher,
+        response,
+      }).then ->
+        @expectOptionsToBe({
+          matcher,
+          status: 200,
+          response
+        })
+
+    it "throws an error when matcher option is not a function", ->
+      cy.route({
+        matcher: 'foo',
+      });
+      cy.on "fail", (err) -> expect(err.message).to.eq(
+        "cy.route() was called with an invalid matcher option: matcher must be a Function that returns a Boolean."
+      )
+
+    it "passes both xhr and options arguments to matcher option function", ->
+      cy
+      .window()
+      .then (win) ->
+        options = {
+          matcher: (xhr, _options) =>
+            expect(xhr instanceof win.XMLHttpRequest).to.be.true
+            expect(_options.matcher).to.eq(options.matcher)
+            expect(_options.response).to.eq(options.response)
+          response: 'foo',
+        }
+        cy
+          .route(options)
+          .window().then (win) ->
+            win.$.get("/foo")
+
+    it "ignores url when matcher option is present", ->
+      cy
+        .route({
+          url: "/bar"
+          matcher: (xhr, options) => /foo/.test(xhr.url)
+          response: 'foo',
+        }).as("getFoo")
+        .window().then (win) ->
+          win.$.get("/bar").catch((response) -> expect(response.status == 404))
+        .window().then (win) ->
+          win.$.get("/foo")
+        .wait("@getFoo").then (xhr) ->
+          expect(xhr.responseBody).to.eq 'foo'
+
     ## FIXME
     it.skip "can explicitly done() in onRequest function from options", (done) ->
       cy
