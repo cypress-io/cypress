@@ -209,9 +209,6 @@ module.exports = {
               err
             })
 
-            if gzipError ## transparently proxy it, chrome will indicate the error
-              return str.pipe(thr)
-
             endWithNetworkErr(err)
 
           ## only unzip when it is already gzipped

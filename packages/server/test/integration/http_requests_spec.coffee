@@ -2516,25 +2516,7 @@ describe "Routes", ->
 
               expect(res.body).to.include("I am a gzipped response</html>")
 
-        it "transparently proxies bad gzip responses", (done) ->
-          ## honestly this is just a quick hack to make request
-          ## be forcibly less leniant about gzip errors, but
-          ## we should just switch to something like http.request()
-          ## which is built in
-          # flush <integer> Default: zlib.constants.Z_NO_FLUSH
-          # finishFlush <integer> Default: zlib.constants.Z_FINISH
-          createGunzip = zlib.createGunzip
-
-          sinon.stub(zlib, "createGunzip")
-          .callThrough()
-          .onSecondCall().callsFake ->
-            zlib.createGunzip.restore()
-
-            createGunzip.call(zlib, {
-              flush: zlib.Z_NO_FLUSH
-              finishFlush: zlib.Z_FINISH
-            })
-
+        it "ECONNRESETs bad gzip responses when not injecting", (done) ->
           nock(@server._remoteOrigin)
           .get("/app.js")
           .delayBody(100)
@@ -2550,14 +2532,9 @@ describe "Routes", ->
             gzip: true
           })
           .on "error", (err) ->
-            expect(err.code).to.eq("Z_BUF_ERROR")
+            expect(err.code).to.eq("ECONNRESET")
 
             done()
-          .on "response", (res) ->
-            gotResponse = true
-
-            expect(res.statusCode).to.eq(200)
-            expect(res.headers["content-encoding"]).to.eq("gzip")
 
         it "transparently proxies bad gzip responses when injecting", ->
           nock(@server._remoteOrigin)
