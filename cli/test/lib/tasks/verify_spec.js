@@ -2,10 +2,12 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const mockfs = require('mock-fs')
-const _snapshot = require('snap-shot-it')
+const cp = require('child_process')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
+
+const { mockSpawn } = require('spawn-mock')
+const mockfs = require('mock-fs')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -15,6 +17,7 @@ const verify = require(`${lib}/tasks/verify`)
 
 const Stdout = require('../../support/stdout')
 const normalize = require('../../support/normalize')
+const snapshot = require('../../support/snapshot')
 
 const packageVersion = '1.2.3'
 const cacheDir = '/cache/Cypress'
@@ -25,11 +28,6 @@ let stdout
 let spawnedProcess
 
 /* eslint-disable no-octal */
-
-const snapshot = (...args) => {
-  mockfs.restore()
-  _snapshot(...args)
-}
 
 context('lib/tasks/verify', () => {
   require('mocha-banner').register()
@@ -67,7 +65,6 @@ context('lib/tasks/verify', () => {
   })
 
   it('logs error and exits when no version of Cypress is installed', () => {
-    mockfs({})
 
     return verify
     .start()
@@ -132,6 +129,84 @@ context('lib/tasks/verify', () => {
 
       snapshot('executable cannot be found 1', normalize(stdout.toString()))
     })
+  })
+
+  it('logs error when child process hangs', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+      cp.stderr.write('some stderr')
+      cp.stdout.write('some stdout')
+    }))
+
+    util.exec.restore()
+
+    return verify
+    .start({ smokeTestTimeout: 1 })
+    .catch((err) => {
+      logger.error(err)
+    })
+    .then(() => {
+      snapshot(normalize(slice(stdout.toString())))
+    })
+
+  })
+
+  it('logs error when child process returns incorrect stdout (stderr when exists)', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+      cp.stderr.write('some stderr')
+      cp.stdout.write('some stdout')
+      cp.emit('exit', 0, null)
+      cp.end()
+    }))
+
+    util.exec.restore()
+
+    return verify
+    .start()
+    .catch((err) => {
+      logger.error(err)
+    })
+    .then(() => {
+      snapshot(normalize(slice(stdout.toString())))
+    })
+
+  })
+
+  it('logs error when child process returns incorrect stdout (stdout when no stderr)', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+      cp.stdout.write('some stdout')
+      cp.emit('exit', 0, null)
+      cp.end()
+    }))
+
+    util.exec.restore()
+
+    return verify
+    .start()
+    .catch((err) => {
+      logger.error(err)
+    })
+    .then(() => {
+      snapshot(normalize(slice(stdout.toString())))
+    })
+
   })
 
   describe('with force: true', () => {

@@ -33,7 +33,7 @@ declare const assert: Chai.AssertStatic
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = "back" | "forward"
-  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "PATCH"
+  type HttpMethod = string
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
@@ -510,7 +510,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable<Clock>
+    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -2168,6 +2168,46 @@ declare namespace Cypress {
    * @see https://on.cypress.io/visit
    */
   interface VisitOptions extends Loggable, Timeoutable {
+    /**
+     * The URL to visit. Behaves the same as the `url` argument.
+     */
+    url: string
+
+    /**
+     * The HTTP method to use in the visit. Can be `GET` or `POST`.
+     *
+     * @default "GET"
+     */
+    method: 'GET' | 'POST'
+
+    /**
+     * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-urlencoded` header.
+     *
+     * @example
+     *    cy.visit({
+     *      url: 'http://www.example.com/form.html',
+     *      method: 'POST',
+     *      body: {
+     *        "field1": "foo",
+     *        "field2": "bar"
+     *      }
+     *    })
+     */
+    body: RequestBody
+
+    /**
+     * An object that maps HTTP header names to values to be sent along with the request.
+     *
+     * @example
+     *    cy.visit({
+     *      url: 'http://www.example.com',
+     *      headers: {
+     *        'Accept-Language': 'en-US'
+     *      }
+     *    })
+     */
+    headers: { [header: string]: string }
+
     /**
      * Called before your page has loaded all of its resources.
      *
