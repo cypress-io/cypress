@@ -188,7 +188,8 @@ describe "gui/menu", ->
       expect(labels).to.eql([
         "Support"
         "Documentation"
-        "Report an Issue.."
+        "Download Chromium"
+        "Report an Issue"
       ])
 
     it "opens chat when Support is clicked", ->
@@ -201,9 +202,14 @@ describe "gui/menu", ->
       getMenuItem("Help").submenu[1].click()
       expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io")
 
-    it "opens new issue when Report an Issue is clicked", ->
+    it "opens chromium downloads when Download Chromium is clicked", ->
       menu.set()
       getMenuItem("Help").submenu[2].click()
+      expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/chromium-downloads")
+
+    it "opens new issue when Report an Issue is clicked", ->
+      menu.set()
+      getMenuItem("Help").submenu[3].click()
       expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/new-issue")
 
   context "Developer Tools", ->

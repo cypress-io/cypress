@@ -739,7 +739,7 @@ describe "src/cy/commands/querying", ->
           .get("@getUsers").then ->
             expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
               message: "@getUsers"
-              referencesAlias: "getUsers"
+              referencesAlias: {name: "getUsers"}
               aliasType: "route"
             }
 
@@ -747,7 +747,7 @@ describe "src/cy/commands/querying", ->
         cy.on "log:added", (attrs, log) ->
           if attrs.name is "get"
             expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
-              referencesAlias: "f"
+              referencesAlias: {name: "f"}
               aliasType: "primitive"
             }
             done()
@@ -1204,6 +1204,29 @@ describe "src/cy/commands/querying", ->
       cy.contains("form", "click me").then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
 
+    it "searches all els in comma separated filter", ->
+      cy.contains("a,button", "Naruto").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("a")
+
+      cy.contains("a,button", "Boruto").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("button")
+
+    it "searches all els in comma separated filter with spaces", ->
+      aText = "Naruto"
+      bText = "Boruto"
+
+      cy.contains("a, button", aText).then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("a")
+        expect($el.text()).to.eq(aText)
+
+      cy.contains("a, button", bText).then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("button")
+        expect($el.text()).to.eq(bText)
+    
     it "favors input type=submit", ->
       input = cy.$$("#input-type-submit input")
 

@@ -36,13 +36,13 @@ const missingApp = (binaryDir) => {
 
 const binaryNotExecutable = (executable) => {
   return {
-    description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
+    description: `Cypress cannot run because this binary file does not have executable permissions here:\n\n${executable}`,
     solution: stripIndent`\n
     Reasons this may happen:
-      
+
     - node was installed as 'root' or with 'sudo'
     - the cypress npm package as 'root' or with 'sudo'
-    
+
     Please check that you have the appropriate user permissions.
   `,
   }
@@ -53,7 +53,7 @@ const notInstalledCI = (executable) => {
     description: 'The cypress npm package is installed, but the Cypress binary is missing.',
     solution: stripIndent`\n
     We expected the binary to be installed here: ${chalk.cyan(executable)}
- 
+
     Reasons it may be missing:
 
     - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
@@ -88,6 +88,18 @@ const missingXvfb = {
 
     If you are using Docker, we provide containers with all required dependencies installed.
     `,
+}
+
+const smokeTestFailure = (smokeTestCommand, timedOut) => {
+  return {
+    description: `Cypress verification ${timedOut ? 'timed out' : 'failed'}.`,
+    solution: stripIndent`
+    This command failed with the following output:
+
+    ${smokeTestCommand}
+
+    `,
+  }
 }
 
 const missingDependency = {
@@ -153,7 +165,7 @@ const CYPRESS_RUN_BINARY = {
     const properFormat = `**/${state.getPlatformExecutable()}`
 
     return {
-      description: `Could not run binary set by environment variable CYPRESS_RUN_BINARY=${value}`,
+      description: `Could not run binary set by environment variable: CYPRESS_RUN_BINARY=${value}`,
       solution: `Ensure the environment variable is a path to the Cypress binary, matching ${properFormat}`,
     }
   },
@@ -176,6 +188,10 @@ function addPlatformInformation (info) {
   })
 }
 
+/**
+ * Forms nice error message with error and platform information,
+ * and if possible a way to solve it. Resolves with a string.
+*/
 function formErrorText (info, msg) {
   const hr = '----------'
 
@@ -185,7 +201,7 @@ function formErrorText (info, msg) {
 
     function add (msg) {
       formatted.push(
-        stripIndents`${msg}`
+        stripIndents(msg)
       )
     }
 
@@ -220,7 +236,7 @@ function formErrorText (info, msg) {
       `)
     }
 
-    return formatted.join('\n')
+    return formatted.join('\n\n')
   })
 }
 
@@ -257,5 +273,6 @@ module.exports = {
     invalidCacheDirectory,
     removed,
     CYPRESS_RUN_BINARY,
+    smokeTestFailure,
   },
 }

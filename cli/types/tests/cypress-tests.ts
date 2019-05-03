@@ -255,3 +255,22 @@ cy.screenshot('example', {
   log: true,
   blackout: []
 })
+
+namespace CypressTriggerTests {
+  cy.get('something')
+    .trigger('click') // .trigger(eventName)
+    .trigger('click', 'center') // .trigger(eventName, position)
+    .trigger('click', { // .trigger(eventName, options)
+      arbitraryProperty: 0
+    })
+    .trigger('click', 0, 0) // .trigger(eventName, x, y)
+    .trigger('click', 'center', { // .trigger(eventName, position, options)
+      arbitraryProperty: 0
+    })
+    .trigger('click', 0, 0, { // .trigger(eventName, x, y, options)
+      arbitraryProperty: 0
+    })
+}
+
+const now = new Date(2019, 3, 2).getTime()
+cy.clock(now, ['Date'])

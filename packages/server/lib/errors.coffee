@@ -719,6 +719,19 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1.link}
       """
+    when "FIXTURE_NOT_FOUND"
+      """
+      A fixture file could not be found at any of the following paths:
+
+       > #{arg1}
+       > #{arg1}{{extension}}
+
+      Cypress looked for these file extensions at the provided path:
+
+       > #{arg2.join(', ')}
+
+      Provide a path to an existing fixture file.
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:chrome64
+      - image: cypress/browsers:node8.9.3-chrome73
     environment:
       PLATFORM: linux
 
@@ -65,7 +65,7 @@ jobs:
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-cli-deps
+          key: v8-{{ arch }}-{{ .Branch }}-cli-deps
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-root-deps
       - restore_cache:
@@ -73,7 +73,7 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-driver
+          key: v6-{{ arch }}-{{ .Branch }}-deps-driver
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-example
       - restore_cache:
@@ -85,11 +85,13 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
       - restore_cache:
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network
+      - restore_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-reporter
       - restore_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-server
+          key: v8-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-socket
       - restore_cache:
@@ -117,7 +119,7 @@ jobs:
 
       # save each node_modules folder per package
       - save_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
           paths:
             - cli/node_modules
       - save_cache:
@@ -133,7 +135,7 @@ jobs:
           paths:
             - packages/desktop-gui/node_modules
       - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
           paths:
             - packages/driver/node_modules
       - save_cache:
@@ -159,6 +161,10 @@ jobs:
           paths:
             - packages/launcher/node_modules
       - save_cache:
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
+          paths:
+            - packages/network/node_modules
+      - save_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
           paths:
             - packages/reporter/node_modules
@@ -167,7 +173,7 @@ jobs:
           paths:
             - packages/runner/node_modules
       - save_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
           paths:
             - packages/server/node_modules
       - save_cache:
@@ -210,6 +216,8 @@ jobs:
           at: ~/
       # make sure mocha runs
       - run: npm run test-mocha
+      # test binary build code
+      - run: npm run test-scripts
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
@@ -220,6 +228,7 @@ jobs:
       - run: npm run all test -- --package extension
       - run: npm run all test -- --package https-proxy
       - run: npm run all test -- --package launcher
+      - run: npm run all test -- --package network
       # how to pass Mocha reporter through zunder?
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
@@ -234,6 +243,12 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - run:
+          command: ls -la types
+          working_directory: cli
+      - run:
+          command: ls -la chai
+          working_directory: cli/types
       - run:
           command: npm run dtslint
           working_directory: cli
@@ -257,6 +272,20 @@ jobs:
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
+
+  "server-performance-tests":
+      <<: *defaults
+      steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          environment:
+            DEBUG: test:proxy-performance
+          command: npm run all test-performance -- --package server
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "server-e2e-tests-1":
     <<: *defaults
@@ -530,6 +559,9 @@ jobs:
           working_directory: cli
           command: npm run build
       - run:
+          command: ls -la types
+          working_directory: cli/build
+      - run:
           name: list NPM package contents
           working_directory: cli/build
           command: npm run size
@@ -559,7 +591,7 @@ jobs:
             - npm-package-url.json
             - cypress.tgz
 
-  "test-next-version":
+  "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -593,7 +625,7 @@ jobs:
               --binary /tmp/urls/binary-url.json \
               --provider circle
 
-  "test-next-version-locally":
+  "test-npm-module-and-verify-binary":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -616,7 +648,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i ../cli/build
+          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -700,6 +732,9 @@ linux-workflow: &linux-workflow
     - server-integration-tests:
         requires:
           - build
+    - server-performance-tests:
+        requires:
+          - build
     - server-e2e-tests-1:
         requires:
           - build
@@ -730,6 +765,9 @@ linux-workflow: &linux-workflow
     - desktop-gui-integration-tests-2x:
         requires:
           - build
+    - reporter-integration-tests:
+        requires:
+          - build
     - run-launcher:
         requires:
           - build
@@ -754,6 +792,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -761,17 +800,19 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
-    - test-next-version:
+    - test-binary-and-npm-against-other-projects:
         filters:
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build-npm-package
           - build-binary
-    - test-next-version-locally:
+    - test-npm-module-and-verify-binary:
         filters:
           branches:
             only:
@@ -827,6 +868,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - Mac build
 

@@ -128,13 +128,14 @@ describe "lib/request", ->
         expect(resp.requestHeaders).to.deep.eq({
           "accept": "*/*"
           "accept-encoding": "gzip, deflate"
+          "connection": "keep-alive"
           "content-length": 9
           "host": "www.github.com"
         })
         expect(resp.allRequestResponses).to.deep.eq([
           {
             "Request Body":     "foobarbaz"
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "content-length": 9, "host": "www.github.com"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "content-length": 9, "host": "www.github.com"}
             "Request URL":      "http://www.github.com/foo"
             "Response Body":    "hello"
             "Response Headers": {"content-type": "text/html"}
@@ -176,28 +177,29 @@ describe "lib/request", ->
         ])
         expect(resp.requestHeaders).to.deep.eq({
           "accept": "*/*"
-          "accept-encoding": "gzip, deflate",
+          "accept-encoding": "gzip, deflate"
+          "connection": "keep-alive"
           "referer": "http://www.github.com/auth"
           "host": "www.github.com"
         })
         expect(resp.allRequestResponses).to.deep.eq([
           {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com"}
             "Request URL":      "http://www.github.com/dashboard"
             "Response Body":    null
             "Response Headers": {"location": "/auth"}
             "Response Status":  301
           }, {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com", "referer": "http://www.github.com/dashboard"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com", "referer": "http://www.github.com/dashboard"}
             "Request URL":      "http://www.github.com/auth"
             "Response Body":    null
             "Response Headers": {"location": "/login"}
             "Response Status":  302
           }, {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com", "referer": "http://www.github.com/auth"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com", "referer": "http://www.github.com/auth"}
             "Request URL":      "http://www.github.com/login"
             "Response Body":    "log in"
             "Response Headers": {"content-type": "text/html"}
@@ -296,6 +298,56 @@ describe "lib/request", ->
       request.send(headers, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
+
+    it "sends connection: keep-alive by default", ->
+      nock("http://localhost:8080")
+      .matchHeader("connection", "keep-alive")
+      .get("/foo")
+      .reply(200, "it worked")
+
+      request.send({}, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("it worked")
+
+    it "lower cases headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("test", "true")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {}
+      headers["user-agent"] = "foobarbaz"
+
+      request.send(headers, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'TEST': true,
+        }
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
+
+    it "allows overriding user-agent in headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("user-agent", "custom-agent")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {'user-agent': 'test'}
+
+      request.send(headers, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'User-Agent': "custom-agent",
+        },
       })
       .then (resp) ->
         expect(resp.body).to.eq("derp")
@@ -569,3 +621,31 @@ describe "lib/request", ->
             "x-text": "אבגד"
           }
         })
+
+  context '#sendStream', ->
+    beforeEach ->
+      @fn = sinon.stub()
+
+    it "allows overriding user-agent in headers", ->
+      nock("http://localhost:8080")
+        .matchHeader("user-agent", "custom-agent")
+        .get("/foo")
+        .reply(200, "derp")
+
+      sinon.spy(request, "create")
+      @fn.resolves({})
+
+      headers = {'user-agent': 'test'}
+
+      options =  {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'user-agent': "custom-agent",
+        },
+      }
+
+      request.sendStream(headers, @fn, options)
+      .then ->
+        expect(request.create).to.be.calledOnce
+        expect(request.create).to.be.calledWith(options)
