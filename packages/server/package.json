@@ -177,7 +177,7 @@
     "request-promise": "4.2.4",
     "return-deep-diff": "0.3.0",
     "sanitize-filename": "1.6.1",
-    "semver": "5.6.0",
+    "semver": "5.7.0",
     "send": "0.16.2",
     "server-destroy": "1.0.1",
     "shell-env": "0.3.0",
