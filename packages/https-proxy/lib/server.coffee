@@ -108,22 +108,20 @@ class Server
     @_makeConnection(socket, head, port, hostname)
 
   _makeConnection: (socket, head, port, hostname) ->
+    connected = false
+
     tryConnect = (iteration = 0) =>
       retried = false
 
       conn = new net.Socket()
       conn.setNoDelay(true)
 
-      onConnect = ->
-        socket.pipe(conn)
-        conn.pipe(socket)
-        conn.write(head)
-
-        socket.resume()
-
       onError = (err) =>
         if retried
-          debug('received second error on errored-out socket %o', { iteration, hostname, port, err })
+          return debug('received second error on errored-out socket %o', { iteration, hostname, port, err })
+
+        if connected
+          return debug("error received on https socket after connection established %o", { hostname, port, err })
 
         if iteration < MAX_REQUEST_RETRIES && isRetriableError(err)
           retried = true
@@ -139,6 +137,15 @@ class Server
 
         if @_onError
           @_onError(err, socket, head, port)
+
+      onConnect = ->
+        connected = true
+
+        socket.pipe(conn)
+        conn.pipe(socket)
+        conn.write(head)
+
+        socket.resume()
 
       conn.on "error", onError
 
@@ -182,7 +189,7 @@ class Server
           if isRetriableError(err) && iteration < MAX_REQUEST_RETRIES
             delay = getDelayForRetry(iteration, err)
             debug('re-trying request on failure %o', { delay, iteration, err })
-            setTimeout ->
+            return setTimeout ->
               tryConnect(iteration + 1)
             , delay
 
