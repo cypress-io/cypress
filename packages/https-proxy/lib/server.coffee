@@ -138,7 +138,10 @@ class Server
         if @_onError
           @_onError(err, browserSocket, head, port)
 
-      onConnect = ->
+      onConnect = (err) ->
+        if (err)
+          return onError(err)
+
         connected = true
 
         browserSocket.pipe(upstreamSocket)
@@ -166,6 +169,7 @@ class Server
       if @_onError
         if err
           return @_onError(err, browserSocket, head, toPort)
+
         upstreamSock.on "error", (err) =>
           @_onError(err, browserSocket, head, toPort)
 
