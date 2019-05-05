@@ -43,11 +43,11 @@ class Server
     browserSocket.setNoDelay(true)
 
     if not head or head.length is 0
-      debug("Writing browserSocket connection headers for URL:", req.url)
+      debug("Writing browserSocket connection headers %o", { url: req.url })
 
       browserSocket.on "error", (err) =>
         ## nothing to do except catch here, the browser has d/c'd
-        debug("received error on client browserSocket", { err })
+        debug("received error on client browserSocket %o", { err, url: req.url })
 
       browserSocket.once "data", (data) =>
         @connect(req, browserSocket, data, options)
@@ -67,7 +67,7 @@ class Server
         if odc.call(@, req, browserSocket, head) is true
           return @_makeDirectConnection(req, browserSocket, head)
         else
-          debug("Not making direct connection to #{req.url}")
+          debug("Not making direct connection %o", { url: req.url })
 
       browserSocket.pause()
 
