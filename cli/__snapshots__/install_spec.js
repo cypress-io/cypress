@@ -16,6 +16,7 @@ exports['error for removed CYPRESS_BINARY_VERSION 1'] = `
 Error: The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version 3.0.0
 
 You should set CYPRESS_INSTALL_BINARY instead.
+
 ----------
 
 Platform: darwin (Foo-OsVersion)
@@ -93,11 +94,13 @@ https://on.cypress.io/installing-cypress
 
 exports['invalid cache directory 1'] = `
 Error: Cypress cannot write to the cache directory due to file permissions
+
 ----------
 
 Failed to access /invalid/cache/dir:
 
 EACCES: permission denied, mkdir '/invalid'
+
 ----------
 
 Platform: darwin (Foo-OsVersion)
