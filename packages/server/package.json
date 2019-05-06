@@ -55,7 +55,7 @@
     "@babel/preset-env": "7.4.4",
     "@babel/preset-react": "7.0.0",
     "@babel/runtime": "7.4.4",
-    "@cypress/debugging-proxy": "1.6.0",
+    "@cypress/debugging-proxy": "2.0.0",
     "@cypress/json-schemas": "5.31.3",
     "@cypress/sinon-chai": "1.1.0",
     "babel-plugin-add-module-exports": "1.0.2",
