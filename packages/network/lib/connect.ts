@@ -1,6 +1,9 @@
 import Bluebird from 'bluebird'
+import debugModule from 'debug'
 import dns from 'dns'
 import net from 'net'
+
+const debug = debugModule('cypress:network:connect')
 
 export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
@@ -34,4 +37,44 @@ export function getAddress (port: number, hostname: string) {
     return Array.prototype.concat.call(addresses).map(fn)
   })
   .any()
+}
+
+export function getDelayForRetry (iteration, err: Error) {
+  return [0, 100, 200, 200][iteration]
+}
+
+export function createRetryingSocket (port: number, host: string | undefined, cb: (err?: Error, sock?: net.Socket) => void, getDelayMsForRetryCb?: (iteration: number, err: Error) => number | undefined) {
+  if (!getDelayMsForRetryCb) {
+    getDelayMsForRetryCb = getDelayForRetry
+  }
+
+  function tryConnect(iteration = 0) {
+    function onError(err) {
+      sock.on("error", (err) => {
+        debug("second error received on retried socket %o", { port, host, iteration, err })
+      })
+
+      const delay = getDelayForRetry(iteration, err)
+
+      if (typeof delay === 'undefined') {
+        debug("retries exhausted, bubbling up error",)
+        return cb(err)
+      }
+
+      setTimeout(() => {
+        tryConnect(iteration + 1)
+      }, delay)
+    }
+
+    function onConnect() {
+      sock.removeListener("error", onError)
+
+      cb(undefined, sock)
+    }
+
+    const sock = net.connect({ port, host }, onConnect)
+    sock.once("error", onError)
+  }
+
+  tryConnect()
 }

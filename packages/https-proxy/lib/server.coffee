@@ -1,5 +1,5 @@
 _            = require("lodash")
-agent        = require("@packages/network").agent
+{ agent, connect } = require("@packages/network")
 allowDestroy = require("server-destroy-vvo")
 debug        = require("debug")("cypress:https-proxy")
 fs           = require("fs-extra")
@@ -21,18 +21,6 @@ SSL_RECORD_TYPES = [
   22 ## Handshake
   128, 0 ## TODO: what do these unknown types mean?
 ]
-
-MAX_REQUEST_RETRIES = 4
-
-getDelayForRetry = (iteration, err) ->
-  ## TODO: fix this
-  increment = 100
-  if err && err.code == 'ECONNREFUSED'
-    increment = 100
-  _.get([0, 1, 2, 2], iteration) * increment
-
-isRetriableError = (err = {}) ->
-  err.fromProxy || ['ECONNREFUSED', 'ECONNRESET', 'EPIPE', 'EHOSTUNREACH', 'EAI_AGAIN'].includes(err.code)
 
 class Server
   constructor: (@_ca, @_port) ->
@@ -114,52 +102,20 @@ class Server
     @_makeConnection(browserSocket, head, port, hostname)
 
   _makeConnection: (browserSocket, head, port, hostname) ->
-    connected = false
+    onSocket = (err, upstreamSocket) ->
+      if err
+        return onError(err)
 
-    tryConnect = (iteration = 0) =>
-      retried = false
-
-      upstreamSocket = new net.Socket()
       upstreamSocket.setNoDelay(true)
-
-      onError = (err) =>
-        if retried
-          return debug('received second error on errored-out browserSocket %o', { iteration, hostname, port, err })
-
-        if connected
-          return debug("error received on https browserSocket after connection established %o", { hostname, port, err })
-
-        if iteration < MAX_REQUEST_RETRIES && isRetriableError(err)
-          retried = true
-          delay = getDelayForRetry(iteration, err)
-          debug('re-trying request on failure %o', { delay, iteration, err })
-          return setTimeout ->
-            tryConnect(iteration + 1)
-          , delay
-
-        debug('browserSocket error irrecoverable, ending upstream socket and not retrying %o', { err })
-
-        browserSocket.destroy(err)
-
-        if @_onError
-          @_onError(err, browserSocket, head, port)
-
-      onConnect = ->
-        connected = true
-
-        browserSocket.pipe(upstreamSocket)
-        upstreamSocket.pipe(browserSocket)
-        upstreamSocket.write(head)
-
-        browserSocket.resume()
-
       upstreamSocket.on "error", onError
 
-      ## compact out hostname when undefined
-      args = _.compact([port, hostname, onConnect])
-      upstreamSocket.connect.apply(upstreamSocket, args)
+      browserSocket.pipe(upstreamSocket)
+      upstreamSocket.pipe(browserSocket)
+      upstreamSocket.write(head)
 
-    tryConnect()
+      browserSocket.resume()
+
+    connect.createRetryingSocket(port, hostname, onSocket)
 
   # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
   _makeUpstreamProxyConnection: (upstreamProxy, browserSocket, head, toPort, toHostname) ->
@@ -168,19 +124,19 @@ class Server
       proxy: upstreamProxy,
     })
 
-    onUpstreamSock = (err, upstreamSocket) =>
-      if err
-        return browserSocket.destroy()
+    onError = (err) ->
+      browserSocket.destroy(err)
 
-      ## TODO: remove this
       if @_onError
-        if err
-          return @_onError(err, browserSocket, head, toPort)
+        @_onError(err, browserSocket, head, port)
+      return
 
-        upstreamSocket.on "error", (err) =>
-          @_onError(err, browserSocket, head, toPort)
+    onSocket = (err, upstreamSocket) =>
+      if err
+        return onError(err)
 
       upstreamSocket.setNoDelay(true)
+      upstreamSocket.on "error", onError
 
       browserSocket.pipe(upstreamSocket)
       upstreamSocket.pipe(browserSocket)
@@ -188,27 +144,14 @@ class Server
 
       browserSocket.resume()
 
-    tryConnect = (iteration = 0) =>
-      agent.httpsAgent.createProxiedConnection {
-        proxy: upstreamProxy
-        href: "https://#{toHostname}:#{toPort}"
-        uri: {
-          port: toPort
-          hostname: toHostname
-        }
-      }, (err, upstreamSocket) =>
-        if err
-          if isRetriableError(err) && iteration < MAX_REQUEST_RETRIES
-            delay = getDelayForRetry(iteration, err)
-            debug('re-trying request on failure %o', { delay, iteration, err })
-
-            return setTimeout ->
-              tryConnect(iteration + 1)
-            , delay
-
-        onUpstreamSock(err, upstreamSocket)
-
-    tryConnect()
+    agent.httpsAgent.createProxiedConnection {
+      proxy: upstreamProxy
+      href: "https://#{toHostname}:#{toPort}"
+      uri: {
+        port: toPort
+        hostname: toHostname
+      }
+    }, onSocket
 
   _onServerConnectData: (req, browserSocket, head) ->
     firstBytes = head[0]
