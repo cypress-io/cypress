@@ -1,66 +1,3 @@
-exports['e2e browserify, babel, es2015 passes 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (browserify_babel_es2015_passing_spec.coffee)                              │
-  │ Searched:   cypress/integration/browserify_babel_es2015_passing_spec.coffee                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: browserify_babel_es2015_passing_spec.coffee...                                  (1 of 1) 
-
-
-  imports work
-    ✓ foo coffee
-    ✓ bar babel
-    ✓ dom jsx
-
-
-  3 passing
-
-
-  (Results)
-
-  ┌───────────────────────────────────────────────────────────┐
-  │ Tests:        3                                           │
-  │ Passing:      3                                           │
-  │ Failing:      0                                           │
-  │ Pending:      0                                           │
-  │ Skipped:      0                                           │
-  │ Screenshots:  0                                           │
-  │ Video:        true                                        │
-  │ Duration:     X seconds                                   │
-  │ Spec Ran:     browserify_babel_es2015_passing_spec.coffee │
-  └───────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ browserify_babel_es2015_passing_spec…     XX:XX        3        3        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        3        3        -        -        -  
-
-
-`
-
 exports['e2e browserify, babel, es2015 fails 1'] = `
 
 ====================================================================================================
@@ -129,6 +66,69 @@ Fix the error in your code and re-run your tests.
   │ ✖ browserify_babel_es2015_failing_spec…     XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+
+
+`
+
+exports['e2e browserify, babel, es2015 passes 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (browserify_babel_es2015_passing_spec.coffee)                              │
+  │ Searched:   cypress/integration/browserify_babel_es2015_passing_spec.coffee                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: browserify_babel_es2015_passing_spec.coffee...                                  (1 of 1) 
+
+
+  imports work
+    ✓ foo coffee
+    ✓ bar babel
+    ✓ dom jsx
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌───────────────────────────────────────────────────────────┐
+  │ Tests:        3                                           │
+  │ Passing:      3                                           │
+  │ Failing:      0                                           │
+  │ Pending:      0                                           │
+  │ Skipped:      0                                           │
+  │ Screenshots:  0                                           │
+  │ Video:        true                                        │
+  │ Duration:     X seconds                                   │
+  │ Spec Ran:     browserify_babel_es2015_passing_spec.coffee │
+  └───────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ browserify_babel_es2015_passing_spec…     XX:XX        3        3        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        3        3        -        -        -  
 
 
 `

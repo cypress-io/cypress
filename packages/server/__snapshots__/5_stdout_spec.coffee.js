@@ -1,3 +1,74 @@
+exports['e2e stdout displays errors from exiting early due to bundle errors 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (stdout_exit_early_failing_spec.coffee)                                    │
+  │ Searched:   cypress/integration/stdout_exit_early_failing_spec.coffee                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: stdout_exit_early_failing_spec.coffee...                                        (1 of 1) 
+
+Oops...we found an error preparing this test file:
+
+  /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee
+
+The error was:
+
+/foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee:1
++>
+ ^
+ParseError: unexpected >
+
+This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
+
+- A missing file or dependency
+- A syntax error in the file or one of its dependencies
+
+Fix the error in your code and re-run your tests.
+
+  (Results)
+
+  ┌─────────────────────────────────────────────────────┐
+  │ Tests:        0                                     │
+  │ Passing:      0                                     │
+  │ Failing:      1                                     │
+  │ Pending:      0                                     │
+  │ Skipped:      0                                     │
+  │ Screenshots:  0                                     │
+  │ Video:        true                                  │
+  │ Duration:     X seconds                             │
+  │ Spec Ran:     stdout_exit_early_failing_spec.coffee │
+  └─────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ stdout_exit_early_failing_spec.coffee     XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+
+
+`
+
 exports['e2e stdout displays errors from failures 1'] = `
 
 ====================================================================================================
@@ -137,77 +208,6 @@ The internal Cypress web server responded with:
 
 `
 
-exports['e2e stdout displays errors from exiting early due to bundle errors 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_exit_early_failing_spec.coffee)                                    │
-  │ Searched:   cypress/integration/stdout_exit_early_failing_spec.coffee                          │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: stdout_exit_early_failing_spec.coffee...                                        (1 of 1) 
-
-Oops...we found an error preparing this test file:
-
-  /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee
-
-The error was:
-
-/foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee:1
-+>
- ^
-ParseError: unexpected >
-
-This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
-
-- A missing file or dependency
-- A syntax error in the file or one of its dependencies
-
-Fix the error in your code and re-run your tests.
-
-  (Results)
-
-  ┌─────────────────────────────────────────────────────┐
-  │ Tests:        0                                     │
-  │ Passing:      0                                     │
-  │ Failing:      1                                     │
-  │ Pending:      0                                     │
-  │ Skipped:      0                                     │
-  │ Screenshots:  0                                     │
-  │ Video:        true                                  │
-  │ Duration:     X seconds                             │
-  │ Spec Ran:     stdout_exit_early_failing_spec.coffee │
-  └─────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ stdout_exit_early_failing_spec.coffee     XX:XX        -        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
-
-
-`
-
 exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
 ====================================================================================================
@@ -280,7 +280,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
 `
 
-exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
+exports['e2e stdout logs that chrome cannot be recorded 1'] = `
 
 ====================================================================================================
 
@@ -298,11 +298,11 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
                                                                                                     
   Running: simple_spec.coffee...                                                           (1 of 1) 
 
-Warning: Cypress can only record videos when running headlessly.
+Warning: Cypress can only record videos when using the built in 'electron' browser.
 
-You have set the 'electron' browser to run headed.
+You have set the browser to: 'chrome'
 
-A video will not be recorded when using this mode.
+A video will not be recorded when using this browser.
 
 
   ✓ is true
@@ -339,7 +339,7 @@ A video will not be recorded when using this mode.
 
 `
 
-exports['e2e stdout logs that chrome cannot be recorded 1'] = `
+exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
 
 ====================================================================================================
 
@@ -357,11 +357,11 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
                                                                                                     
   Running: simple_spec.coffee...                                                           (1 of 1) 
 
-Warning: Cypress can only record videos when using the built in 'electron' browser.
+Warning: Cypress can only record videos when running headlessly.
 
-You have set the browser to: 'chrome'
+You have set the 'electron' browser to run headed.
 
-A video will not be recorded when using this browser.
+A video will not be recorded when using this mode.
 
 
   ✓ is true

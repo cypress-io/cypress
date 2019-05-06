@@ -1,68 +1,3 @@
-exports['e2e config passes 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_passing_spec.coffee                                     │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: config_passing_spec.coffee...                                                   (1 of 1) 
-
-
-  Cypress static methods + props
-    ✓ .version
-    ✓ .platform
-    ✓ .arch
-    ✓ .browser
-    ✓ .spec
-
-
-  5 passing
-
-
-  (Results)
-
-  ┌──────────────────────────────────────────┐
-  │ Tests:        5                          │
-  │ Passing:      5                          │
-  │ Failing:      0                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  0                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     config_passing_spec.coffee │
-  └──────────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ config_passing_spec.coffee                XX:XX        5        5        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        5        5        -        -        -  
-
-
-`
-
 exports['e2e config fails 1'] = `
 
 ====================================================================================================
@@ -145,6 +80,71 @@ exports['e2e config fails 1'] = `
   │ ✖ config_failing_spec.coffee                XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['e2e config passes 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (config_passing_spec.coffee)                                               │
+  │ Searched:   cypress/integration/config_passing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: config_passing_spec.coffee...                                                   (1 of 1) 
+
+
+  Cypress static methods + props
+    ✓ .version
+    ✓ .platform
+    ✓ .arch
+    ✓ .browser
+    ✓ .spec
+
+
+  5 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────┐
+  │ Tests:        5                          │
+  │ Passing:      5                          │
+  │ Failing:      0                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  0                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     config_passing_spec.coffee │
+  └──────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ config_passing_spec.coffee                XX:XX        5        5        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        5        5        -        -        -  
 
 
 `

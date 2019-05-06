@@ -1,3 +1,66 @@
+exports['e2e web security when disabled passes 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (web_security_spec.coffee)                                                 │
+  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: web_security_spec.coffee...                                                     (1 of 1) 
+
+Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
+
+
+  web security
+    ✓ fails when clicking <a> to another origin
+    ✓ fails when submitted a form and being redirected to another origin
+    ✓ fails when using a javascript redirect to another origin
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────┐
+  │ Tests:        3                        │
+  │ Passing:      3                        │
+  │ Failing:      0                        │
+  │ Pending:      0                        │
+  │ Skipped:      0                        │
+  │ Screenshots:  0                        │
+  │ Video:        false                    │
+  │ Duration:     X seconds                │
+  │ Spec Ran:     web_security_spec.coffee │
+  └────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ web_security_spec.coffee                  XX:XX        3        3        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        3        3        -        -        -  
+
+
+`
+
 exports['e2e web security when enabled fails 1'] = `
 
 ====================================================================================================
@@ -163,69 +226,6 @@ https://on.cypress.io/cross-origin-violation
   │ ✖ web_security_spec.coffee                  XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
-
-
-`
-
-exports['e2e web security when disabled passes 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security_spec.coffee)                                                 │
-  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: web_security_spec.coffee...                                                     (1 of 1) 
-
-Warning: Cypress can only record videos when using the built in 'electron' browser.
-
-You have set the browser to: 'chrome'
-
-A video will not be recorded when using this browser.
-
-
-  web security
-    ✓ fails when clicking <a> to another origin
-    ✓ fails when submitted a form and being redirected to another origin
-    ✓ fails when using a javascript redirect to another origin
-
-
-  3 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────┐
-  │ Tests:        3                        │
-  │ Passing:      3                        │
-  │ Failing:      0                        │
-  │ Pending:      0                        │
-  │ Skipped:      0                        │
-  │ Screenshots:  0                        │
-  │ Video:        false                    │
-  │ Duration:     X seconds                │
-  │ Spec Ran:     web_security_spec.coffee │
-  └────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ web_security_spec.coffee                  XX:XX        3        3        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        3        3        -        -        -  
 
 
 `

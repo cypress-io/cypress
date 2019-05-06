@@ -1,4 +1,4 @@
-exports['e2e visit low response timeout passes 1'] = `
+exports['e2e visit low response timeout fails when content type isnt html 1'] = `
 
 ====================================================================================================
 
@@ -7,53 +7,74 @@ exports['e2e visit low response timeout passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_spec.coffee)                                                        │
-  │ Searched:   cypress/integration/visit_spec.coffee                                              │
+  │ Specs:      1 found (visit_non_html_content_type_failing_spec.coffee)                          │
+  │ Searched:   cypress/integration/visit_non_html_content_type_failing_spec.coffee                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_spec.coffee...                                                            (1 of 1) 
+  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1) 
 
 
-  visits
-    ✓ scrolls automatically to div with id=foo
-    ✓ can load an http page with a huge amount of elements without timing out
-    ✓ can load a local file with a huge amount of elements without timing out
-    issue #225: hash urls
-      ✓ can visit a hash url and loads
-      ✓ can visit the same hash url and loads
-      ✓ can visit a different hash url and loads
-    issue #230: User Agent headers
-      ✓ submits user agent on cy.visit
-      ✓ submits user agent on page load
-      ✓ submits user agent on cy.request
-    issue #255: url with like two domain
-      ✓ passes
-    issue #272: responses which are never ended still send valid html
-      ✓ handles no response errors on the initial visit
-      ✓ handles no response errors when not initially visiting
-    issue #309: request accept header not set
-      ✓ sets accept header to text/html,*/*
+  when content type is plain/text
+    1) fails
 
 
-  13 passing
+  0 passing
+  1 failing
+
+  1) when content type is plain/text fails:
+     CypressError: cy.visit() failed trying to load:
+
+/static/hello.txt
+
+The content-type of the response we received from this local file was:
+
+  > text/plain
+
+This was considered a failure because responses must have content-type: 'text/html'
+
+However, you can likely use cy.request() instead of cy.visit().
+
+cy.request() will automatically get and set cookies and enable you to parse responses.
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+
 
 
   (Results)
 
-  ┌─────────────────────────────────┐
-  │ Tests:        13                │
-  │ Passing:      13                │
-  │ Failing:      0                 │
-  │ Pending:      0                 │
-  │ Skipped:      0                 │
-  │ Screenshots:  0                 │
-  │ Video:        true              │
-  │ Duration:     X seconds         │
-  │ Spec Ran:     visit_spec.coffee │
-  └─────────────────────────────────┘
+  ┌───────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                               │
+  │ Passing:      0                                               │
+  │ Failing:      1                                               │
+  │ Pending:      0                                               │
+  │ Skipped:      0                                               │
+  │ Screenshots:  1                                               │
+  │ Video:        true                                            │
+  │ Duration:     X seconds                                       │
+  │ Spec Ran:     visit_non_html_content_type_failing_spec.coffee │
+  └───────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_non_html_content_type_failing_spec.coffee/when content type is plaintext -- fails (failed).png (1280x720)
 
 
   (Video)
@@ -69,9 +90,106 @@ exports['e2e visit low response timeout passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ visit_spec.coffee                         XX:XX       13       13        -        -        - │
+  │ ✖ visit_non_html_content_type_failing_…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       13       13        -        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['e2e visit low response timeout fails when file server responds with 404 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_file_404_response_failing_spec.coffee)                              │
+  │ Searched:   cypress/integration/visit_file_404_response_failing_spec.coffee                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1) 
+
+
+  when file server response is 404
+    1) fails
+
+
+  0 passing
+  1 failing
+
+  1) when file server response is 404 fails:
+     CypressError: cy.visit() failed trying to load:
+
+/static/does-not-exist.html
+
+We failed looking for this file at the path:
+
+/foo/bar/.projects/e2e/static/does-not-exist.html
+
+The internal Cypress web server responded with:
+
+  > 404: Not Found
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌───────────────────────────────────────────────────────────┐
+  │ Tests:        1                                           │
+  │ Passing:      0                                           │
+  │ Failing:      1                                           │
+  │ Pending:      0                                           │
+  │ Skipped:      0                                           │
+  │ Screenshots:  1                                           │
+  │ Video:        true                                        │
+  │ Duration:     X seconds                                   │
+  │ Spec Ran:     visit_file_404_response_failing_spec.coffee │
+  └───────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_file_404_response_failing_spec.coffee/when file server response is 404 -- fails (failed).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ visit_file_404_response_failing_spec…     XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
 
 `
@@ -282,7 +400,7 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 
 `
 
-exports['e2e visit low response timeout fails when file server responds with 404 1'] = `
+exports['e2e visit low response timeout passes 1'] = `
 
 ====================================================================================================
 
@@ -291,72 +409,53 @@ exports['e2e visit low response timeout fails when file server responds with 404
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_file_404_response_failing_spec.coffee)                              │
-  │ Searched:   cypress/integration/visit_file_404_response_failing_spec.coffee                    │
+  │ Specs:      1 found (visit_spec.coffee)                                                        │
+  │ Searched:   cypress/integration/visit_spec.coffee                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1) 
+  Running: visit_spec.coffee...                                                            (1 of 1) 
 
 
-  when file server response is 404
-    1) fails
+  visits
+    ✓ scrolls automatically to div with id=foo
+    ✓ can load an http page with a huge amount of elements without timing out
+    ✓ can load a local file with a huge amount of elements without timing out
+    issue #225: hash urls
+      ✓ can visit a hash url and loads
+      ✓ can visit the same hash url and loads
+      ✓ can visit a different hash url and loads
+    issue #230: User Agent headers
+      ✓ submits user agent on cy.visit
+      ✓ submits user agent on page load
+      ✓ submits user agent on cy.request
+    issue #255: url with like two domain
+      ✓ passes
+    issue #272: responses which are never ended still send valid html
+      ✓ handles no response errors on the initial visit
+      ✓ handles no response errors when not initially visiting
+    issue #309: request accept header not set
+      ✓ sets accept header to text/html,*/*
 
 
-  0 passing
-  1 failing
-
-  1) when file server response is 404 fails:
-     CypressError: cy.visit() failed trying to load:
-
-/static/does-not-exist.html
-
-We failed looking for this file at the path:
-
-/foo/bar/.projects/e2e/static/does-not-exist.html
-
-The internal Cypress web server responded with:
-
-  > 404: Not Found
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-
-
+  13 passing
 
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────────┐
-  │ Tests:        1                                           │
-  │ Passing:      0                                           │
-  │ Failing:      1                                           │
-  │ Pending:      0                                           │
-  │ Skipped:      0                                           │
-  │ Screenshots:  1                                           │
-  │ Video:        true                                        │
-  │ Duration:     X seconds                                   │
-  │ Spec Ran:     visit_file_404_response_failing_spec.coffee │
-  └───────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_file_404_response_failing_spec.coffee/when file server response is 404 -- fails (failed).png (1280x720)
+  ┌─────────────────────────────────┐
+  │ Tests:        13                │
+  │ Passing:      13                │
+  │ Failing:      0                 │
+  │ Pending:      0                 │
+  │ Skipped:      0                 │
+  │ Screenshots:  0                 │
+  │ Video:        true              │
+  │ Duration:     X seconds         │
+  │ Spec Ran:     visit_spec.coffee │
+  └─────────────────────────────────┘
 
 
   (Video)
@@ -372,108 +471,9 @@ The internal Cypress web server responded with:
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_file_404_response_failing_spec…     XX:XX        1        -        1        -        - │
+  │ ✔ visit_spec.coffee                         XX:XX       13       13        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
-
-
-`
-
-exports['e2e visit low response timeout fails when content type isnt html 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_non_html_content_type_failing_spec.coffee)                          │
-  │ Searched:   cypress/integration/visit_non_html_content_type_failing_spec.coffee                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1) 
-
-
-  when content type is plain/text
-    1) fails
-
-
-  0 passing
-  1 failing
-
-  1) when content type is plain/text fails:
-     CypressError: cy.visit() failed trying to load:
-
-/static/hello.txt
-
-The content-type of the response we received from this local file was:
-
-  > text/plain
-
-This was considered a failure because responses must have content-type: 'text/html'
-
-However, you can likely use cy.request() instead of cy.visit().
-
-cy.request() will automatically get and set cookies and enable you to parse responses.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-
-
-
-
-  (Results)
-
-  ┌───────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                               │
-  │ Passing:      0                                               │
-  │ Failing:      1                                               │
-  │ Pending:      0                                               │
-  │ Skipped:      0                                               │
-  │ Screenshots:  1                                               │
-  │ Video:        true                                            │
-  │ Duration:     X seconds                                       │
-  │ Spec Ran:     visit_non_html_content_type_failing_spec.coffee │
-  └───────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_non_html_content_type_failing_spec.coffee/when content type is plaintext -- fails (failed).png (1280x720)
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_non_html_content_type_failing_…     XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    All specs passed!                           XX:XX       13       13        -        -        -  
 
 
 `

@@ -1,4 +1,4 @@
-exports['e2e baseUrl https passes 1'] = `
+exports['e2e baseUrl http passes 1'] = `
 
 ====================================================================================================
 
@@ -59,7 +59,7 @@ exports['e2e baseUrl https passes 1'] = `
 
 `
 
-exports['e2e baseUrl http passes 1'] = `
+exports['e2e baseUrl https passes 1'] = `
 
 ====================================================================================================
 
