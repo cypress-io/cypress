@@ -308,9 +308,11 @@ createRetryingRequestStream = (opts = {}) ->
 
         return retry()
 
-      ## otherwise, we've successfully received a valid response...
-
       debug("successful response received", { requestId })
+
+      ## null req body out to free memory
+      reqBodyBuffer.unpipeAll()
+      reqBodyBuffer = null
 
       ## forward the response event upwards which should happen
       ## prior to the pipe event, same as what request does
