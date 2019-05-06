@@ -21,19 +21,18 @@ const getPidFromFolder = (folder, pidPrefix) => {
   )
 }
 
-const folderWithPid = (pidPrefix) => (folder) => {
-  return {
-    folder,
-    pid: getPidFromFolder(folder, pidPrefix),
+const folderWithPid = (pidPrefix) => {
+  return (folder) => {
+    return {
+      folder,
+      pid: getPidFromFolder(folder, pidPrefix),
+    }
   }
 }
 
 // find all the pids not associated to a cypress process
 const inactivePids = ({ pid }) => {
   debug('finding process by pid:', pid)
-  if (!_.isFinite(pid)) {
-    return null
-  }
 
   return findProcess.byPid(pid)
   .then((processes) => {
