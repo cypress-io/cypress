@@ -43,36 +43,49 @@ export function getDelayForRetry (iteration, err: Error) {
   return [0, 100, 200, 200][iteration]
 }
 
-export function createRetryingSocket (port: number, host: string | undefined, cb: (err?: Error, sock?: net.Socket) => void, getDelayMsForRetryCb?: (iteration: number, err: Error) => number | undefined) {
-  if (!getDelayMsForRetryCb) {
-    getDelayMsForRetryCb = getDelayForRetry
+interface RetryingOptions {
+  port: number
+  host: string | undefined
+  getDelayMsForRetry: (iteration: number, err: Error) => number | undefined
+}
+
+export function createRetryingSocket (opts: RetryingOptions, cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void) {
+  if (typeof opts.getDelayMsForRetry === 'undefined') {
+    opts.getDelayMsForRetry = getDelayForRetry
   }
 
   function tryConnect(iteration = 0) {
-    function onError(err) {
-      sock.on("error", (err) => {
-        debug("second error received on retried socket %o", { port, host, iteration, err })
-      })
-
-      const delay = getDelayForRetry(iteration, err)
+    const retry = (err) => {
+      const delay = opts.getDelayMsForRetry(iteration, err)
 
       if (typeof delay === 'undefined') {
-        debug("retries exhausted, bubbling up error",)
+        debug("retries exhausted, bubbling up error %o", { iteration, err })
         return cb(err)
       }
+
+      debug("received error on connect, retrying %o", { iteration, delay, err })
 
       setTimeout(() => {
         tryConnect(iteration + 1)
       }, delay)
     }
 
-    function onConnect() {
-      sock.removeListener("error", onError)
+    function onError(err) {
+      sock.on("error", (err) => {
+        debug("second error received on retried socket %o", { port: opts.port, host: opts.host, iteration, err })
+      })
 
-      cb(undefined, sock)
+      retry(err)
     }
 
-    const sock = net.connect({ port, host }, onConnect)
+    function onConnect() {
+      // connection successfully established, pass control of errors/retries to consuming function
+      sock.removeListener("error", onError)
+
+      cb(undefined, sock, retry)
+    }
+
+    const sock = net.connect(opts, onConnect)
     sock.once("error", onError)
   }
 
