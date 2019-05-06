@@ -1,10 +1,10 @@
 // https://github.com/cypress-io/cypress/issues/3847
 describe('issue 3847', () => {
   // global variable
-  let queryKey = `'input'`
+  let queryKey = '\'input\''
 
   // like Sizzle throw error
-  let error = new Error("Syntax error, unrecognized expression: " + queryKey)
+  let error = new Error(`Syntax error, unrecognized expression: ${queryKey}`)
 
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -15,6 +15,7 @@ describe('issue 3847', () => {
       expect(err.message).to.eql(error.message)
       expect(err.name).to.eql(error.name)
       done()
+
       return false
     })
 
@@ -31,10 +32,11 @@ describe('issue 3847', () => {
       expect(err.name).to.eql(error.name)
       expect(err.message).not.to.match(/Unhandled\srejection\sTypeError/)
       done()
+
       return false
     })
 
     // get 'input'
-    cy.get(queryKey, {log: false})
+    cy.get(queryKey, { log: false })
   })
 })
