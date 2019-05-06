@@ -268,7 +268,7 @@ class HttpsAgent extends https.Agent {
         const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
         err[0] = originalErr
         err.fromProxy = true
-        return cb(err)
+        return cb(err, undefined)
       }
 
       const onClose = () => {
@@ -299,7 +299,7 @@ class HttpsAgent extends https.Agent {
         proxySocket.removeListener('close', onClose)
 
         if (!isResponseStatusCode200(buffer)) {
-          return cb(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`))
+          return cb(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`), undefined)
         }
 
         if (options._agentKey) {

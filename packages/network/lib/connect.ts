@@ -39,7 +39,7 @@ export function getAddress (port: number, hostname: string) {
   .any()
 }
 
-export function getDelayForRetry (iteration, err: Error) {
+export function getDelayForRetry (iteration) {
   return [0, 100, 200, 200][iteration]
 }
 
