@@ -55,14 +55,21 @@ buildCypressApp = (platform, version, options = {}) ->
   log = _.partialRight(logger, platform)
 
   testVersion = (folderNameFn) -> () ->
+    log("#testVersion")
     dir = folderNameFn()
     la(check.unemptyString(dir), "missing folder for platform", platform)
-    console.log("testing package version in folder", dir)
+    console.log("testing dist package version")
+    console.log("by calling: node index.js --version")
+    console.log("in the folder %s", dir)
+
     execa("node", ["index.js", "--version"], {
       cwd: dir
     }).then (result) ->
-      console.log('built version', result.stdout)
-      la(check.unemptyString(result.stdout), 'missing output', result)
+      la(check.unemptyString(result.stdout),
+        'missing output when getting built version', result)
+
+      console.log('app in %s', dir)
+      console.log('built app version', result.stdout)
       la(result.stdout == version, "different version reported",
         result.stdout, "from input version to build", version)
 

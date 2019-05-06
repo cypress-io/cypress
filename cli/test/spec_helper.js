@@ -5,6 +5,20 @@ const sinon = require('sinon')
 const mockfs = require('mock-fs')
 const Promise = require('bluebird')
 const util = require('../lib/util')
+const { MockChildProcess } = require('spawn-mock')
+const _kill = MockChildProcess.prototype.kill
+
+const patchMockSpawn = () => {
+
+  MockChildProcess.prototype.kill = function (...args) {
+
+    this.emit('exit')
+
+    return _kill.apply(this, args)
+  }
+}
+
+patchMockSpawn()
 
 global.sinon = sinon
 global.expect = require('chai').expect
