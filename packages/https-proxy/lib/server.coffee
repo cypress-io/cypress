@@ -95,43 +95,17 @@ class Server
   _makeDirectConnection: (req, browserSocket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
 
-    if upstreamProxy = @_upstreamProxyForHostPort(hostname, port)
-      return @_makeUpstreamProxyConnection(upstreamProxy, browserSocket, head, port, hostname)
-
     debug("Making direct connection to #{hostname}:#{port}")
     @_makeConnection(browserSocket, head, port, hostname)
 
   _makeConnection: (browserSocket, head, port, hostname) ->
-    onSocket = (err, upstreamSocket) ->
-      if err
-        return onError(err)
-
-      upstreamSocket.setNoDelay(true)
-      upstreamSocket.on "error", onError
-
-      browserSocket.pipe(upstreamSocket)
-      upstreamSocket.pipe(browserSocket)
-      upstreamSocket.write(head)
-
-      browserSocket.resume()
-
-    connect.createRetryingSocket(port, hostname, onSocket)
-
-  # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
-  _makeUpstreamProxyConnection: (upstreamProxy, browserSocket, head, toPort, toHostname) ->
-    debug("making proxied connection %o", {
-      host: "#{toHostname}:#{toPort}",
-      proxy: upstreamProxy,
-    })
-
-    onError = (err) ->
-      browserSocket.destroy(err)
-
-      if @_onError
-        @_onError(err, browserSocket, head, port)
-      return
-
     onSocket = (err, upstreamSocket) =>
+      onError = (err) =>
+        browserSocket.destroy(err)
+
+        if @_onError
+          @_onError(err, browserSocket, head, port)
+
       if err
         return onError(err)
 
@@ -144,14 +118,24 @@ class Server
 
       browserSocket.resume()
 
-    agent.httpsAgent.createProxiedConnection {
-      proxy: upstreamProxy
-      href: "https://#{toHostname}:#{toPort}"
-      uri: {
-        port: toPort
-        hostname: toHostname
-      }
-    }, onSocket
+    if upstreamProxy = @_upstreamProxyForHostPort(hostname, port)
+      # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
+      debug("making proxied connection %o", {
+        host: "#{hostname}:#{port}",
+        proxy: upstreamProxy,
+      })
+
+      agent.httpsAgent.createProxiedConnection {
+        proxy: upstreamProxy
+        href: "https://#{hostname}:#{port}"
+        uri: {
+          port
+          hostname
+        }
+        shouldRetry: true
+      }, onSocket
+    else
+      connect.createRetryingSocket({ port, host: hostname }, onSocket)
 
   _onServerConnectData: (req, browserSocket, head) ->
     firstBytes = head[0]
