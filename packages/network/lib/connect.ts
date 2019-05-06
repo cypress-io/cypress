@@ -1,7 +1,9 @@
+import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import dns from 'dns'
 import net from 'net'
+import tls from 'tls'
 
 const debug = debugModule('cypress:network:connect')
 
@@ -46,7 +48,16 @@ export function getDelayForRetry (iteration) {
 interface RetryingOptions {
   port: number
   host: string | undefined
+  useTls: boolean
   getDelayMsForRetry: (iteration: number, err: Error) => number | undefined
+}
+
+function createSocket(opts: RetryingOptions, onConnect): net.Socket {
+  const netOpts = _.pick(opts, 'host', 'port')
+  if (opts.useTls) {
+    return tls.connect(netOpts, onConnect)
+  }
+  return net.connect(netOpts, onConnect)
 }
 
 export function createRetryingSocket (opts: RetryingOptions, cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void) {
@@ -85,7 +96,7 @@ export function createRetryingSocket (opts: RetryingOptions, cb: (err?: Error, s
       cb(undefined, sock, retry)
     }
 
-    const sock = net.connect(opts, onConnect)
+    const sock = createSocket(opts, onConnect)
     sock.once("error", onError)
   }
 

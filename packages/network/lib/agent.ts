@@ -4,7 +4,6 @@ import https from 'https'
 import _ from 'lodash'
 import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
-import tls from 'tls'
 import url from 'url'
 import { getAddress, createRetryingSocket } from './connect'
 
@@ -50,6 +49,7 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
   let connectOpts: any = {
     port: Number(port),
     host: opts.proxy.hostname,
+    useTls: isHttps
   }
 
   if (!opts.shouldRetry) {
@@ -59,14 +59,6 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
   createRetryingSocket(connectOpts, (err, sock, triggerRetry) => {
     if (err) {
       return cb(err)
-    }
-
-    if (isHttps) {
-      // if the upstream is https, we need to wrap the socket with tls
-      sock = tls.connect({ socket: sock })
-      return sock.once("secureConnect", () => {
-        cb(undefined, <net.Socket>sock, <CreateProxySockCb>triggerRetry)
-      })
     }
 
     cb(undefined, <net.Socket>sock, <CreateProxySockCb>triggerRetry)
