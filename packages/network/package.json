@@ -2,12 +2,11 @@
   "name": "@packages/network",
   "version": "0.0.0",
   "private": true,
-  "main": "index.js",
+  "main": "index",
   "files": [
     "lib"
   ],
   "scripts": {
-    "build": "bin-up tsc --project .",
     "build-js": "bin-up tsc --project .",
     "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
