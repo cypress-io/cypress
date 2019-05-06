@@ -13,6 +13,10 @@ describe "lib/server", ->
 
       Server.create(@ca, @port, options)
 
+  afterEach ->
+    delete process.env.HTTPS_PROXY
+    delete process.env.NO_PROXY
+
   context "#listen", ->
     it "calls options.onUpgrade with req, socket head", ->
       onUpgrade = @sandbox.stub()
@@ -62,7 +66,7 @@ describe "lib/server", ->
       head = {}
 
       onError = (err, socket, head, port) ->
-        expect(err.message).to.eq("An error occurred while sending the request to upstream proxy: \"connect ECONNREFUSED 127.0.0.1:8444\"")
+        expect(err.message).to.eq("A connection to the upstream proxy could not be established: connect ECONNREFUSED 127.0.0.1:8444")
 
         expect(socket).to.eq(socket)
         expect(head).to.eq(head)
@@ -72,9 +76,12 @@ describe "lib/server", ->
 
         done()
 
+      process.env.HTTPS_PROXY = 'http://localhost:8444'
+      process.env.NO_PROXY = ''
+
       @setup({onError: onError})
       .then (srv) ->
-        conn = srv._makeUpstreamProxyConnection('http://127.0.0.1:8444', socket, head, '11111', 'should-not-reach.invalid')
+        conn = srv._makeDirectConnection({url: "should-not-reach.invalid:11111"}, socket, head)
 
       return
 

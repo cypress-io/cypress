@@ -39,6 +39,7 @@ function streamBuffer (initialSize = 2048) {
   }
 
   const bufferer = through2(onChunk, onFlush)
+  const readers = []
 
   bufferer.reader = () => {
     let bytesRead = 0
@@ -70,12 +71,21 @@ function streamBuffer (initialSize = 2048) {
       },
     })
 
+    readers.push(readable)
+
     return readable
+  }
+
+  bufferer.unpipeAll = () => {
+    readers.forEach((reader) => {
+      reader.unpipe() // unpipes from all destinations
+    })
   }
 
   bufferer._buffer = () => {
     return buffer
   }
+
   bufferer._finished = () => {
     return finished
   }

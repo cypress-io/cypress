@@ -1,6 +1,11 @@
+import _ from 'lodash'
 import Bluebird from 'bluebird'
+import debugModule from 'debug'
 import dns from 'dns'
 import net from 'net'
+import tls from 'tls'
+
+const debug = debugModule('cypress:network:connect')
 
 export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
@@ -34,4 +39,67 @@ export function getAddress (port: number, hostname: string) {
     return Array.prototype.concat.call(addresses).map(fn)
   })
   .any()
+}
+
+export function getDelayForRetry (iteration) {
+  return [0, 100, 200, 200][iteration]
+}
+
+interface RetryingOptions {
+  port: number
+  host: string | undefined
+  useTls: boolean
+  getDelayMsForRetry: (iteration: number, err: Error) => number | undefined
+}
+
+function createSocket(opts: RetryingOptions, onConnect): net.Socket {
+  const netOpts = _.pick(opts, 'host', 'port')
+  if (opts.useTls) {
+    return tls.connect(netOpts, onConnect)
+  }
+  return net.connect(netOpts, onConnect)
+}
+
+export function createRetryingSocket (opts: RetryingOptions, cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void) {
+  if (typeof opts.getDelayMsForRetry === 'undefined') {
+    opts.getDelayMsForRetry = getDelayForRetry
+  }
+
+  function tryConnect(iteration = 0) {
+    const retry = (err) => {
+      const delay = opts.getDelayMsForRetry(iteration, err)
+
+      if (typeof delay === 'undefined') {
+        debug("retries exhausted, bubbling up error %o", { iteration, err })
+        return cb(err)
+      }
+
+      debug("received error on connect, retrying %o", { iteration, delay, err })
+
+      setTimeout(() => {
+        tryConnect(iteration + 1)
+      }, delay)
+    }
+
+    function onError(err) {
+      sock.on("error", (err) => {
+        debug("second error received on retried socket %o", { opts, iteration, err })
+      })
+
+      retry(err)
+    }
+
+    function onConnect() {
+      debug("successfully connected %o", { opts, iteration })
+      // connection successfully established, pass control of errors/retries to consuming function
+      sock.removeListener("error", onError)
+
+      cb(undefined, sock, retry)
+    }
+
+    const sock = createSocket(opts, onConnect)
+    sock.once("error", onError)
+  }
+
+  tryConnect()
 }

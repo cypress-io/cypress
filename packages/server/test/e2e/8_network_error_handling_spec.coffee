@@ -1,18 +1,24 @@
 _        = require("lodash")
-bodyParser = require("body-parser")
-debug    = require("debug")("network-error-handling-spec")
-DebugProxy = require("@cypress/debugging-proxy")
+path     = require("path")
 net      = require("net")
+debug    = require("debug")("network-error-handling-spec")
 Promise  = require("bluebird")
+bodyParser = require("body-parser")
+DebugProxy = require("@cypress/debugging-proxy")
+launcher = require("@packages/launcher")
 chrome   = require("../../lib/browsers/chrome")
 e2e      = require("../support/helpers/e2e")
-launcher = require("@packages/launcher")
 random   = require("../../lib/util/random")
+Fixtures = require("../support/helpers/fixtures")
 
 PORT = 13370
-HTTPS_PORT = 13371
+PROXY_PORT = 13371
+HTTPS_PORT = 13372
+ERR_HTTPS_PORT = 13373
 
 start = Number(new Date())
+
+e2ePath = Fixtures.projectPath("e2e")
 
 getElapsed = ->
   Math.round((Number(new Date()) - start)/1000)
@@ -153,6 +159,29 @@ describe "e2e network error handling", ->
             res.sendStatus(404)
 
         port: PORT
+      }, {
+        onServer: (app) ->
+          app.use (req, res, next) ->
+            counts[req.url] = _.get(counts, req.url, 0) + 1
+
+            debug('received request %o', {
+              counts
+              elapsedTime: getElapsed()
+              reqUrl: req.url
+            })
+
+            if onVisit
+              onVisit()
+
+            next()
+
+          app.get '/javascript-logo.png', (req, res) ->
+            pathToJsLogo = path.join(e2ePath, "static", "javascript-logo.png")
+
+            res.sendFile(pathToJsLogo)
+
+        https: true
+        port: HTTPS_PORT
       }
     ],
     settings: {
@@ -230,6 +259,10 @@ describe "e2e network error handling", ->
         testProxiedNoRetries("http://proxy-service-unavailable.invalid/")
 
   context "Cypress", ->
+    beforeEach ->
+      delete process.env.HTTP_PROXY
+      delete process.env.NO_PROXY
+
     it "baseurl check tries 5 times in run mode", ->
       e2e.exec(@, {
         config: {
@@ -277,39 +310,65 @@ describe "e2e network error handling", ->
           "/load-script-net-error.html": 1
         })
 
-    it "retries HTTPS passthrough", (done) ->
-      count = 0
-      server = net.createServer (sock) ->
-        count++
-        debug('count', count)
-        sock.destroy()
+    it "retries HTTPS passthrough behind a proxy", ->
+      ## this tests retrying multiple times
+      ## to connect to the upstream server
+      ## as well as network errors when the
+      ## upstream server is not accessible
 
-        if count != 3
-          server.close()
-          process.env.HTTP_PROXY = undefined
-          done()
+      connectCounts = {}
 
-      server.listen(HTTPS_PORT)
+      onConnect = ({ host, port, socket }) ->
+        dest = "#{host}:#{port}"
 
-      e2e.exec(@, {
-        spec: "https_passthru_spec.js"
+        connectCounts[dest] ?= 0
+        connectCounts[dest] += 1
+
+        switch port
+          when HTTPS_PORT
+            ## this tests network related errors
+            ## when we do immediately destroy the
+            ## socket and prevent connecting to the
+            ## upstream server
+            ##
+            ## on the 3rd time around, don't destroy the socket.
+            if connectCounts["localhost:#{HTTPS_PORT}"] >= 3
+              return true
+
+            ## else if this is the 1st or 2nd time destroy the
+            ## socket so we retry connecting to the debug proxy
+            socket.destroy()
+
+            return false
+
+          when ERR_HTTPS_PORT
+            ## always destroy the socket attempting to connect
+            ## to the upstream server to test that network errors
+            ## are propagated correctly
+            socket.destroy()
+
+            return false
+
+          else
+            ## pass everything else on to the upstream
+            ## server as expected
+            return true
+
+      new DebugProxy({
+        onConnect
       })
+      .start(PROXY_PORT)
+      .then =>
+        process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
+        process.env.NO_PROXY = "foobarbaz" ## proxy everything including localhost
 
-    it "retries HTTPS passthrough behind a proxy", (done) ->
-      count = 0
-      server = net.createServer (sock) ->
-        count++
-        debug('count', count)
-        sock.destroy()
+        e2e.exec(@, {
+          spec: "https_passthru_spec.js"
+          snapshot: true
+          expectedExitCode: 0
+        })
+        .then ->
+          console.log("connect counts are", connectCounts)
 
-        if count != 3
-          server.close()
-          done()
-
-      server.listen(HTTPS_PORT)
-
-      process.env.HTTP_PROXY = "http://localhost:#{HTTPS_PORT}"
-
-      e2e.exec(@, {
-        spec: "https_passthru_spec.js"
-      })
+          expect(connectCounts["localhost:#{HTTPS_PORT}"]).to.be.gte(3)
+          expect(connectCounts["localhost:#{ERR_HTTPS_PORT}"]).to.be.gte(4)
