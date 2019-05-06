@@ -36,7 +36,7 @@ const checkExecutable = (binaryDir) => {
   })
 }
 
-const runSmokeTest = (binaryDir) => {
+const runSmokeTest = (binaryDir, options) => {
   debug('running smoke test')
   const cypressExecPath = state.getPathToExecutable(binaryDir)
 
@@ -48,10 +48,19 @@ const runSmokeTest = (binaryDir) => {
     return throwFormErrorText(errors.missingXvfb)(`Caught error trying to run XVFB: "${err.message}"`)
   }
 
-  const onSmokeTestError = (err) => {
-    debug('Smoke test failed:', err)
+  const onSmokeTestError = (smokeTestCommand) => {
+    return (err) => {
+      debug('Smoke test failed:', err)
 
-    return throwFormErrorText(errors.missingDependency)(err.stderr || err.message)
+      let errMessage = err.stderr || err.message
+
+      if (err.timedOut) {
+
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, true))(errMessage)
+      }
+
+      return throwFormErrorText(errors.missingDependency)(errMessage)
+    }
   }
 
   const needsXvfb = xvfb.isNeeded()
@@ -65,22 +74,24 @@ const runSmokeTest = (binaryDir) => {
 
     debug('smoke test command:', smokeTestCommand)
 
-    return Promise.resolve(util.exec(cypressExecPath, args))
-    .catch(onSmokeTestError)
+    return Promise.resolve(util.exec(
+      cypressExecPath,
+      args,
+      { timeout: options.smokeTestTimeout }
+    ))
+    .catch(onSmokeTestError(smokeTestCommand))
     .then((result) => {
+
+      // TODO: when execa > 1.1 is released
+      // change this to `result.all` for both stderr and stdout
       const smokeTestReturned = result.stdout
 
       debug('smoke test stdout "%s"', smokeTestReturned)
 
       if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
         debug('Smoke test failed:', result)
-        throw new Error(stripIndent`
-          Smoke failed.
 
-          Command was: ${smokeTestCommand}
-
-          Returned: ${smokeTestReturned}
-        `)
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(result.stderr || result.stdout)
       }
     })
   }
@@ -99,7 +110,7 @@ const runSmokeTest = (binaryDir) => {
 
 }
 
-function testBinary (version, binaryDir) {
+function testBinary (version, binaryDir, options) {
   debug('running binary verification check', version)
 
   logger.log(stripIndent`
@@ -128,7 +139,7 @@ function testBinary (version, binaryDir) {
         return state.clearBinaryStateAsync(binaryDir)
         .then(() => {
           return Promise.all([
-            runSmokeTest(binaryDir),
+            runSmokeTest(binaryDir, options),
             Promise.resolve().delay(1500), // good user experience
           ])
         })
@@ -154,7 +165,7 @@ function testBinary (version, binaryDir) {
   return tasks.run()
 }
 
-const maybeVerify = (installedVersion, binaryDir, options = {}) => {
+const maybeVerify = (installedVersion, binaryDir, options) => {
   return state.getBinaryVerifiedAsync(binaryDir)
   .then((isVerified) => {
 
@@ -169,7 +180,7 @@ const maybeVerify = (installedVersion, binaryDir, options = {}) => {
     }
 
     if (shouldVerify) {
-      return testBinary(installedVersion, binaryDir)
+      return testBinary(installedVersion, binaryDir, options)
       .then(() => {
         if (options.welcomeMessage) {
           logger.log()
@@ -189,6 +200,7 @@ const start = (options = {}) => {
   _.defaults(options, {
     force: false,
     welcomeMessage: true,
+    smokeTestTimeout: 10000,
   })
 
   const parseBinaryEnvVar = () => {
@@ -196,10 +208,12 @@ const start = (options = {}) => {
 
     debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
     logger.log(stripIndent`
-        ${chalk.yellow('Note:')} You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}:
-        
-              This overrides the default Cypress binary path used.
-        `)
+      ${chalk.yellow('Note:')} You have set the environment variable:
+
+      ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}
+
+      This overrides the default Cypress binary path used.
+    `)
     logger.log()
 
     return util.isExecutableAsync(envBinaryPath)
@@ -261,8 +275,8 @@ const start = (options = {}) => {
       logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
       logger.log()
       logger.warn(stripIndent`
-      
-      
+
+
       ${logSymbols.warning} Warning: Binary version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
 
         These versions may not work properly together.
@@ -285,5 +299,4 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
-  maybeVerify,
 }
