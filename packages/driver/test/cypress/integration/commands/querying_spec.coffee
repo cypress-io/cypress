@@ -18,7 +18,7 @@ describe "src/cy/commands/querying", ->
     it "returns the activeElement", ->
       $button = cy.$$("#button")
       $button.get(0).focus()
-      
+
       expect(cy.state("document").activeElement).to.eq($button.get(0))
 
       cy.focused().then ($focused) ->
@@ -434,7 +434,7 @@ describe "src/cy/commands/querying", ->
 
   context "#get", ->
     beforeEach ->
-      Cypress.config("defaultCommandTimeout", 100)
+      Cypress.config("defaultCommandTimeout", 200)
 
     it "finds by selector", ->
       list = cy.$$("#list")
@@ -1226,7 +1226,7 @@ describe "src/cy/commands/querying", ->
         expect($el.length).to.eq(1)
         expect($el).to.match("button")
         expect($el.text()).to.eq(bText)
-    
+
     it "favors input type=submit", ->
       input = cy.$$("#input-type-submit input")
 
