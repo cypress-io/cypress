@@ -95,11 +95,12 @@ class Server
   _makeDirectConnection: (req, browserSocket, head) ->
     { port, hostname } = url.parse("http://#{req.url}")
 
-    debug("Making direct connection to #{hostname}:#{port}")
+    debug("Making connection to #{hostname}:#{port}")
     @_makeConnection(browserSocket, head, port, hostname)
 
   _makeConnection: (browserSocket, head, port, hostname) ->
     onSocket = (err, upstreamSocket) =>
+      debug('received upstreamSocket callback for request %o', { port, hostname, err })
       onError = (err) =>
         browserSocket.destroy(err)
 
