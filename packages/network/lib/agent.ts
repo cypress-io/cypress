@@ -302,8 +302,8 @@ class HttpsAgent extends https.Agent {
       cb(undefined, proxySocket)
     }
 
-    proxySocket.once('error', onError)
     proxySocket.once('close', onClose)
+    proxySocket.once('error', onError)
     proxySocket.once('data', onData)
 
     const connectReq = buildConnectReqHead(hostname, port, proxy)
