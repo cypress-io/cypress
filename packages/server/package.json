@@ -23,7 +23,6 @@
     "test-e2e-chrome": "node ./test/scripts/run.js test/e2e chrome",
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./test/support/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
-    "codecov": "codecov",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "bin-up coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
     "prestart": "npm run check-deps-pre",
@@ -39,7 +38,6 @@
     "pretest-e2e-chrome": "npm run check-deps-pre",
     "pretest-cov": "npm run check-deps-pre",
     "pretest-cov-process": "npm run check-deps-pre",
-    "precodecov": "npm run check-deps-pre",
     "precoveralls": "npm run check-deps-pre"
   },
   "files": [
@@ -65,7 +63,6 @@
     "chai-uuid": "1.0.6",
     "chokidar-cli": "1.2.2",
     "chrome-har-capturer": "0.13.4",
-    "codecov": "1.0.1",
     "coffee-coverage": "1.0.1",
     "console-table-printer": "1.0.0-beta12",
     "cors": "2.8.5",
