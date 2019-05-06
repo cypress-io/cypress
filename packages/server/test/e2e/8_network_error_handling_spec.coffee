@@ -14,6 +14,7 @@ Fixtures = require("../support/helpers/fixtures")
 PORT = 13370
 PROXY_PORT = 13371
 HTTPS_PORT = 13372
+ERR_HTTPS_PORT = 13373
 
 start = Number(new Date())
 
@@ -175,7 +176,6 @@ describe "e2e network error handling", ->
             next()
 
           app.get '/javascript-logo.png', (req, res) ->
-            debugger
             pathToJsLogo = path.join(e2ePath, "static", "javascript-logo.png")
 
             res.sendFile(pathToJsLogo)
@@ -329,24 +329,55 @@ describe "e2e network error handling", ->
       })
 
     it "retries HTTPS passthrough behind a proxy", ->
-      new DebugProxy({
-        onConnect: ({ host, port, socket }) ->
-          ## destroy the socket connection to the
-          ## outgoing proxy if this request matches
-          ## the https server's port
-          ## TODO: only destroy the first two times
-          ## then on the 3rd attempt allow it to
-          ## connect
-          if port is HTTPS_PORT
+      ## this tests retrying multiple times
+      ## to connect to the upstream server
+      ## as well as network errors when the
+      ## upstream server is not accessible
+
+      connectCounts = {}
+
+      onConnect = ({ host, port, socket }) ->
+        dest = "#{host}:#{port}"
+
+        connectCounts[dest] ?= 0
+        connectCounts[dest] += 1
+
+        switch port
+          when HTTPS_PORT
+            ## this tests network related errors
+            ## when we do immediately destroy the
+            ## socket and prevent connecting to the
+            ## upstream server
+            ##
+            ## on the 3rd time around, don't destroy the socket.
+            if connectCounts["localhost:#{HTTPS_PORT}"] >= 3
+              return true
+
+            ## else if this is the 1st or 2nd time destroy the
+            ## socket so we retry connecting to the debug proxy
             socket.destroy()
+
             return false
 
-          return true
+          when ERR_HTTPS_PORT
+            ## always destroy the socket attempting to connect
+            ## to the upstream server to test that network errors
+            ## are propagated correctly
+            socket.destroy()
+
+            return false
+
+          else
+            ## pass everything else on to the upstream
+            ## server as expected
+            return true
+
+      new DebugProxy({
+        onConnect
       })
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
-        process.env.HTTPS_PROXY = "http://localhost:#{PROXY_PORT}"
         process.env.NO_PROXY = "foobarbaz" ## proxy everything including localhost
 
         e2e.exec(@, {
@@ -354,3 +385,8 @@ describe "e2e network error handling", ->
           snapshot: true
           expectedExitCode: 0
         })
+        .then ->
+          console.log("connect counts are", connectCounts)
+
+          expect(connectCounts["localhost:#{HTTPS_PORT}"]).to.be.gte(3)
+          expect(connectCounts["localhost:#{ERR_HTTPS_PORT}"]).to.be.gte(4)

@@ -25,7 +25,8 @@ SSL_RECORD_TYPES = [
 MAX_REQUEST_RETRIES = 4
 
 getDelayForRetry = (iteration, err) ->
-  increment = 1000
+  ## TODO: fix this
+  increment = 100
   if err && err.code == 'ECONNREFUSED'
     increment = 100
   _.get([0, 1, 2, 2], iteration) * increment
@@ -61,6 +62,8 @@ class Server
       return browserSocket.write("\r\n")
 
     else
+      browserSocket.pause()
+
       if odc = options.onDirectConnection
         ## if onDirectConnection return true
         ## then dont proxy, just pass this through
@@ -68,8 +71,6 @@ class Server
           return @_makeDirectConnection(req, browserSocket, head)
         else
           debug("Not making direct connection %o", { url: req.url })
-
-      browserSocket.pause()
 
       @_onServerConnectData(req, browserSocket, head)
 
@@ -138,10 +139,7 @@ class Server
         if @_onError
           @_onError(err, browserSocket, head, port)
 
-      onConnect = (err) ->
-        if (err)
-          return onError(err)
-
+      onConnect = ->
         connected = true
 
         browserSocket.pipe(upstreamSocket)
@@ -160,23 +158,28 @@ class Server
 
   # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
   _makeUpstreamProxyConnection: (upstreamProxy, browserSocket, head, toPort, toHostname) ->
-    debug("making proxied connection to #{toHostname}:#{toPort} with upstream #{upstreamProxy}")
+    debug("making proxied connection %o", {
+      host: "#{toHostname}:#{toPort}",
+      proxy: upstreamProxy,
+    })
 
-    onUpstreamSock = (err, upstreamSock) =>
+    onUpstreamSock = (err, upstreamSocket) =>
       if err
-        browserSocket.destroy()
+        return browserSocket.destroy()
 
+      ## TODO: remove this
       if @_onError
         if err
           return @_onError(err, browserSocket, head, toPort)
 
-        upstreamSock.on "error", (err) =>
+        upstreamSocket.on "error", (err) =>
           @_onError(err, browserSocket, head, toPort)
 
-      upstreamSock.setNoDelay(true)
-      upstreamSock.pipe(browserSocket)
-      browserSocket.pipe(upstreamSock)
-      upstreamSock.write(head)
+      upstreamSocket.setNoDelay(true)
+
+      browserSocket.pipe(upstreamSocket)
+      upstreamSocket.pipe(browserSocket)
+      upstreamSocket.write(head)
 
       browserSocket.resume()
 
@@ -188,17 +191,17 @@ class Server
           port: toPort
           hostname: toHostname
         }
-      }, (err, upstreamSock) =>
+      }, (err, upstreamSocket) =>
         if err
           if isRetriableError(err) && iteration < MAX_REQUEST_RETRIES
             delay = getDelayForRetry(iteration, err)
             debug('re-trying request on failure %o', { delay, iteration, err })
-            debugger
-            setTimeout ->
+
+            return setTimeout ->
               tryConnect(iteration + 1)
             , delay
-        debugger
-        onUpstreamSock(err, upstreamSock)
+
+        onUpstreamSock(err, upstreamSocket)
 
     tryConnect()
 

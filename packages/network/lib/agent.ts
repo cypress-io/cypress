@@ -235,22 +235,34 @@ class HttpsAgent extends https.Agent {
     const proxy = url.parse(options.proxy)
     const port = options.uri.port || '443'
     const hostname = options.uri.hostname || 'localhost'
+
     let errored = false
 
+    // TODO: if this throws it will crash cypress
+    // and we should add a try/catch here
     const proxySocket = createProxySock(proxy)
 
     const onClose = () => {
-      onError(new Error("Connection closed while sending request to upstream proxy"))
+      const err: any = new Error('The upstream proxy closed the socket after connecting but before sending a response.')
+      err.fromProxy = true
+      onError(err)
     }
 
-    const onError = (originalErr: Error) => {
+    // TODO: retrying the upstream proxy connection should be
+    // handled here. once properly connected, remove all error
+    // listeners since those should be handled by the consumers
+    const onError = (err: Error) => {
       if (errored) {
-        return debug('received second error on createProxiedConnection %o', { err: originalErr, options })
-      }
-      errored = true
+        const { href, proxy } = options
 
-      const err = new Error(`An error occurred while sending the request to upstream proxy: "${originalErr.message}"`)
-      err[0] = originalErr
+        return debug('received second error on createProxiedConnection %o', {
+          err,
+          url: href,
+          proxy,
+        })
+      }
+
+      errored = true
       proxySocket.destroy()
       cb(err, undefined)
     }
@@ -268,11 +280,14 @@ class HttpsAgent extends https.Agent {
         return
       }
 
+      // we've now gotten enough of a response not to retry
+      // connecting to the proxy
       proxySocket.removeListener('error', onError)
       proxySocket.removeListener('close', onClose)
 
       if (!isResponseStatusCode200(buffer)) {
         const err: any = new Error(`Error establishing proxy connection. Response from server was: ${buffer}`)
+        // TODO: fix this
         err.fromProxy = true
         return onError(err)
       }
