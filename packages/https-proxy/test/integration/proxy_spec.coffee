@@ -91,6 +91,19 @@ describe "Proxy", ->
     .then (html) ->
       expect(html).to.include("https server")
 
+  it "retries 5 times", ->
+    @sandbox.spy(net, 'connect')
+
+    request({
+      strictSSL: false
+      url: "https://localhost:12344"
+      proxy: "http://localhost:3333"
+    })
+    .then ->
+      throw new Error("should not reach")
+    .catch ->
+      expect(net.connect).to.have.callCount(5)
+
   it "closes outgoing connections when client disconnects", ->
     @sandbox.spy(net, 'connect')
 

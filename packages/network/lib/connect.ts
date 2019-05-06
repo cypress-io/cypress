@@ -83,13 +83,14 @@ export function createRetryingSocket (opts: RetryingOptions, cb: (err?: Error, s
 
     function onError(err) {
       sock.on("error", (err) => {
-        debug("second error received on retried socket %o", { port: opts.port, host: opts.host, iteration, err })
+        debug("second error received on retried socket %o", { opts, iteration, err })
       })
 
       retry(err)
     }
 
     function onConnect() {
+      debug("successfully connected %o", { opts, iteration })
       // connection successfully established, pass control of errors/retries to consuming function
       sock.removeListener("error", onError)
 

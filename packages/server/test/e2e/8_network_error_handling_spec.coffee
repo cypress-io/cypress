@@ -310,24 +310,6 @@ describe "e2e network error handling", ->
           "/load-script-net-error.html": 1
         })
 
-    it "retries HTTPS passthrough", (done) ->
-      count = 0
-      server = net.createServer (sock) ->
-        count++
-        debug('count', count)
-        sock.destroy()
-
-        if count != 3
-          server.close()
-          process.env.HTTP_PROXY = undefined
-          done()
-
-      server.listen(HTTPS_PORT)
-
-      e2e.exec(@, {
-        spec: "https_passthru_spec.js"
-      })
-
     it "retries HTTPS passthrough behind a proxy", ->
       ## this tests retrying multiple times
       ## to connect to the upstream server
