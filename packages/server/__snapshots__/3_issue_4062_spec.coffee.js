@@ -18,13 +18,13 @@ exports['e2e issue 4062 fails 1'] = `
 
 
   issue 4062
-    1) fails with correct chaingin afterEach err when both test and afterEach fail
+    1) fails with correct chaining afterEach err when both test and afterEach fail
 
 
   0 passing
   1 failing
 
-  1) issue 4062 fails with correct chaingin afterEach err when both test and afterEach fail:
+  1) issue 4062 fails with correct chaining afterEach err when both test and afterEach fail:
      CypressError: Timed out retrying: expected '<h1>' to have value 'h2', but the value was ''
       at stack trace line
       at stack trace line
@@ -61,7 +61,7 @@ exports['e2e issue 4062 fails 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_4062_spec.coffee/issue 4062 -- fails with correct chaingin afterEach err when both test and afterEach fail (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/issue_4062_spec.coffee/issue 4062 -- fails with correct chaining afterEach err when both test and afterEach fail (failed).png (1280x720)
 
 
   (Video)
