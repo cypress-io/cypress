@@ -24,7 +24,6 @@
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./test/support/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
     "codecov": "codecov",
-    "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "bin-up coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
     "prestart": "npm run check-deps-pre",
     "predev": "npm run check-deps-pre",
@@ -40,7 +39,6 @@
     "pretest-cov": "npm run check-deps-pre",
     "pretest-cov-process": "npm run check-deps-pre",
     "precodecov": "npm run check-deps-pre",
-    "precoveralls": "npm run check-deps-pre"
   },
   "files": [
     "config",
@@ -69,7 +67,6 @@
     "coffee-coverage": "1.0.1",
     "console-table-printer": "1.0.0-beta12",
     "cors": "2.8.5",
-    "coveralls": "2.13.3",
     "electron-osx-sign": "0.4.11",
     "eol": "0.9.1",
     "eventsource": "1.0.7",
