@@ -47,6 +47,11 @@ class Server
       debug("Writing browserSocket connection headers %o", { url: req.url })
 
       browserSocket.on "error", (err) =>
+        ## TODO: shouldn't we destroy the upstream socket here?
+        ## and also vise versa if the upstream socket throws?
+        ## we may get this "for free" though because piping will
+        ## automatically forward the TCP errors...?
+
         ## nothing to do except catch here, the browser has d/c'd
         debug("received error on client browserSocket %o", { err, url: req.url })
 
