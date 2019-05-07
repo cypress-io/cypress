@@ -6762,96 +6762,6 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
 ]
 
 exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #2'] = [
-  "take:screenshot",
-  {
-    "titles": [
-      "suite 1",
-      "test 1"
-    ],
-    "testId": "r3",
-    "testAttemptIndex": "match.match(0)",
-    "takenPaths": [
-      "/path/to/screenshot"
-    ],
-    "simple": false,
-    "testFailure": true,
-    "capture": "runner",
-    "clip": {
-      "x": 0,
-      "y": 0,
-      "width": 1000,
-      "height": 660
-    },
-    "viewport": {
-      "width": 1000,
-      "height": 660
-    },
-    "scaled": true,
-    "blackout": [],
-    "startTime": "match.string"
-  }
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #3'] = [
-  "take:screenshot",
-  {
-    "titles": [
-      "suite 1",
-      "test 1"
-    ],
-    "testId": "r3",
-    "testAttemptIndex": "match.match(1)",
-    "capture": "fullPage",
-    "clip": {
-      "x": 0,
-      "y": 0,
-      "width": 1000,
-      "height": 660
-    },
-    "viewport": {
-      "width": 1000,
-      "height": 660
-    },
-    "scaled": false,
-    "blackout": [],
-    "startTime": "match.string",
-    "current": 1,
-    "total": 1
-  }
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #4'] = [
-  "take:screenshot",
-  {
-    "titles": [
-      "suite 1",
-      "test 1"
-    ],
-    "testId": "r3",
-    "testAttemptIndex": "match.match(1)",
-    "takenPaths": [
-      "/path/to/screenshot"
-    ],
-    "simple": false,
-    "testFailure": true,
-    "capture": "runner",
-    "clip": {
-      "x": 0,
-      "y": 0,
-      "width": 1000,
-      "height": 660
-    },
-    "viewport": {
-      "width": 1000,
-      "height": 660
-    },
-    "scaled": true,
-    "blackout": [],
-    "startTime": "match.string"
-  }
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #5'] = [
   "{jQuery}",
   {
     "path": "/path/to/screenshot",
@@ -6872,7 +6782,7 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
   }
 ]
 
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #6'] = [
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #3'] = [
   {
     "id": "r3",
     "attemptIndex": 0,
@@ -6916,98 +6826,6 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
 ]
 
 exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #2'] = [
-  "take:screenshot",
-  {
-    "titles": [
-      "suite 1",
-      "test 1"
-    ],
-    "testId": "r3",
-    "testAttemptIndex": "match.match(0)",
-    "takenPaths": [
-      "/path/to/screenshot"
-    ],
-    "simple": false,
-    "testFailure": true,
-    "capture": "runner",
-    "clip": {
-      "x": 0,
-      "y": 0,
-      "width": 1000,
-      "height": 660
-    },
-    "viewport": {
-      "width": 1000,
-      "height": 660
-    },
-    "scaled": true,
-    "blackout": [],
-    "startTime": "match.string"
-  }
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #3'] = [
-  "take:screenshot",
-  {
-    "titles": [
-      "suite 1",
-      "test 1",
-      "\"before each\" hook: newFn"
-    ],
-    "testId": "r3",
-    "testAttemptIndex": "match.match(1)",
-    "capture": "fullPage",
-    "clip": {
-      "x": 0,
-      "y": 0,
-      "width": 1000,
-      "height": 660
-    },
-    "viewport": {
-      "width": 1000,
-      "height": 660
-    },
-    "scaled": false,
-    "blackout": [],
-    "startTime": "match.string",
-    "current": 1,
-    "total": 1
-  }
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #4'] = [
-  "take:screenshot",
-  {
-    "titles": [
-      "suite 1",
-      "test 1",
-      "\"before each\" hook: newFn"
-    ],
-    "testId": "r3",
-    "testAttemptIndex": "match.match(1)",
-    "takenPaths": [
-      "/path/to/screenshot"
-    ],
-    "simple": false,
-    "testFailure": true,
-    "capture": "runner",
-    "clip": {
-      "x": 0,
-      "y": 0,
-      "width": 1000,
-      "height": 660
-    },
-    "viewport": {
-      "width": 1000,
-      "height": 660
-    },
-    "scaled": true,
-    "blackout": [],
-    "startTime": "match.string"
-  }
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #5'] = [
   "{jQuery}",
   {
     "path": "/path/to/screenshot",
@@ -7028,7 +6846,7 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
   }
 ]
 
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #6'] = [
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #3'] = [
   {
     "id": "r3",
     "attemptIndex": 0,

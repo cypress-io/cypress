@@ -1176,9 +1176,9 @@ describe('src/cypress/runner', () => {
           .then(() => {
             expect(autCypress.automation.withArgs('take:screenshot')).callCount(4)
             expect(autCypress.automation.withArgs('take:screenshot').args[0]).matchSnapshot({ startTime: match.string, testAttemptIndex: match(0) })
-            expect(autCypress.automation.withArgs('take:screenshot').args[1]).matchSnapshot({ startTime: match.string, testAttemptIndex: match(0) })
-            expect(autCypress.automation.withArgs('take:screenshot').args[2]).matchSnapshot({ startTime: match.string, testAttemptIndex: match(1) })
-            expect(autCypress.automation.withArgs('take:screenshot').args[3]).matchSnapshot({ startTime: match.string, testAttemptIndex: match(1) })
+            expect(autCypress.automation.withArgs('take:screenshot').getCall(1).args).matchDeep({ 1: { startTime: match.string, testAttemptIndex: 0 } })
+            expect(autCypress.automation.withArgs('take:screenshot').getCall(2).args).matchDeep({ 1: { startTime: match.string, testAttemptIndex: 1 } })
+            expect(autCypress.automation.withArgs('take:screenshot').getCall(3).args).matchDeep({ 1: { startTime: match.string, testAttemptIndex: 1 } })
             expect(autCypress.Screenshot.onAfterScreenshot.args[0]).to.matchSnapshot(
               { '^.0': stringifyShort, 'test': stringifyShort, takenAt: match.string }
             )
@@ -1212,9 +1212,9 @@ describe('src/cypress/runner', () => {
           .then(() => {
             expect(autCypress.automation.withArgs('take:screenshot')).callCount(4)
             expect(autCypress.automation.withArgs('take:screenshot').getCall(0).args).matchSnapshot({ startTime: match.string, testAttemptIndex: match(0) })
-            expect(autCypress.automation.withArgs('take:screenshot').getCall(1).args).matchSnapshot({ startTime: match.string, testAttemptIndex: match(0) })
-            expect(autCypress.automation.withArgs('take:screenshot').getCall(2).args).matchSnapshot({ startTime: match.string, testAttemptIndex: match(1) })
-            expect(autCypress.automation.withArgs('take:screenshot').getCall(3).args).matchSnapshot({ startTime: match.string, testAttemptIndex: match(1) })
+            expect(autCypress.automation.withArgs('take:screenshot').getCall(1).args).matchDeep({ 1: { startTime: match.string, testAttemptIndex: 0 } })
+            expect(autCypress.automation.withArgs('take:screenshot').getCall(2).args).matchDeep({ 1: { startTime: match.string, testAttemptIndex: 1 } })
+            expect(autCypress.automation.withArgs('take:screenshot').getCall(3).args).matchDeep({ 1: { startTime: match.string, testAttemptIndex: 1 } })
             expect(autCypress.Screenshot.onAfterScreenshot.args[0]).to.matchSnapshot(
               { '^.0': stringifyShort, 'test': stringifyShort, takenAt: match.string }
             )
