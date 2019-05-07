@@ -210,6 +210,7 @@ exports['e2e spec_isolation failing 1'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r4",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
           "height": 720,
@@ -219,6 +220,7 @@ exports['e2e spec_isolation failing 1'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r8",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
           "height": 720,
@@ -228,6 +230,7 @@ exports['e2e spec_isolation failing 1'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r12",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
           "height": 720,
@@ -318,6 +321,7 @@ exports['e2e spec_isolation failing 1'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r3",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png",
           "height": 720,
@@ -327,6 +331,7 @@ exports['e2e spec_isolation failing 1'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r4",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png",
           "height": 720,
@@ -691,9 +696,9 @@ Although you have test retries enabled, we do not retry 'before all' or 'after a
   (Screenshots)
 
   - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 1).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (1).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 1).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png (1280x720)
 
 
@@ -758,9 +763,9 @@ Although you have test retries enabled, we do not retry 'before all' or 'after a
   (Screenshots)
 
   - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed) (1).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed) (attempt 1).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed) (1).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed) (attempt 1).png (1280x720)
 
 
   (Video)
@@ -1119,6 +1124,7 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r4",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
           "height": 720,
@@ -1128,8 +1134,9 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r4",
+          "testAttemptIndex": 1,
           "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
+          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 1).png",
           "height": 720,
           "width": 1280
         },
@@ -1137,6 +1144,7 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r8",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
           "height": 720,
@@ -1146,8 +1154,9 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r8",
+          "testAttemptIndex": 1,
           "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (1).png",
+          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 1).png",
           "height": 720,
           "width": 1280
         },
@@ -1155,6 +1164,7 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r12",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
           "height": 720,
@@ -1281,6 +1291,7 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r3",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png",
           "height": 720,
@@ -1290,8 +1301,9 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r3",
+          "testAttemptIndex": 1,
           "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed) (1).png",
+          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed) (attempt 1).png",
           "height": 720,
           "width": 1280
         },
@@ -1299,6 +1311,7 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r4",
+          "testAttemptIndex": 0,
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png",
           "height": 720,
@@ -1308,8 +1321,9 @@ exports['e2e spec_isolation failing with retries enabled 2'] = {
           "screenshotId": "some-random-id",
           "name": null,
           "testId": "r4",
+          "testAttemptIndex": 1,
           "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed) (1).png",
+          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed) (attempt 1).png",
           "height": 720,
           "width": 1280
         }

@@ -142,12 +142,10 @@ defaults = (state, config, obj) ->
     if _.isFunction(obj.type)
       obj.type = obj.type(current, state("subject"))
 
-  getTestFromRunnable = (r) =>
-    return r.ctx.currentTest || r
 
   getTestAttemptFromRunnable = (runnable) =>
     return if not runnable
-    t = getTestFromRunnable(runnable)
+    t = $utils.getTestFromRunnable(runnable)
     t._currentRetry || 0
 
   _.defaults(obj, {

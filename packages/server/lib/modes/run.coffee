@@ -740,6 +740,7 @@ module.exports = {
       screenshotId: random.id()
       name:      data.name ? null
       testId:    data.testId
+      testAttemptIndex: data.testAttemptIndex
       takenAt:   resp.takenAt
       path:      resp.path
       height:    resp.dimensions.height

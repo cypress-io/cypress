@@ -39,6 +39,7 @@ automateScreenshot = (state, options = {}) ->
   props = _.extend({
     titles
     testId: runnable.id
+    testAttemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry
     takenPaths: state("screenshotPaths")
   }, _.omit(options, "runnable", "timeout", "log", "subject"))
 
@@ -208,6 +209,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   getOptions = (isOpen) ->
     {
       id: runnable.id
+      attemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry
       isOpen: isOpen
       appOnly: isAppOnly(screenshotConfig)
       scale: getShouldScale(screenshotConfig)
@@ -266,6 +268,10 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       else
         automateScreenshot(state, automationOptions)
   .then (props) ->
+    _.extend(props, {
+      test: $utils.getTestFromRunnable(runnable)
+    })
+
     onAfterScreenshot and onAfterScreenshot.call(state("ctx"), $el, props)
 
     $Screenshot.onAfterScreenshot($el, props)

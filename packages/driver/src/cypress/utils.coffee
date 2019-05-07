@@ -367,4 +367,7 @@ module.exports = {
           values
 
     run(0)
+
+  getTestFromRunnable: (r) =>
+    return r.ctx.currentTest || r
 }

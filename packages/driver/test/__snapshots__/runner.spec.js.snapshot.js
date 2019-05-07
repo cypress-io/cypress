@@ -2087,7 +2087,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "id": "r3",
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 5}",
+      "err": "{AssertionError}",
       "state": "failed",
       "failedFromHookId": "h5",
       "body": "[body]",
@@ -3159,7 +3159,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "id": "r7",
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 5}",
+      "err": "{AssertionError}",
       "state": "failed",
       "failedFromHookId": "h7",
       "body": "[body]",
@@ -3275,7 +3275,7 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "id": "r7",
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 5}",
+      "err": "{AssertionError}",
       "state": "failed",
       "failedFromHookId": "h7",
       "body": "[body]",
@@ -6732,6 +6732,315 @@ exports['serialize state - retries'] = {
   "pending": 0,
   "numLogs": 0
 }
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #1'] = [
+  "take:screenshot",
+  {
+    "titles": [
+      "suite 1",
+      "test 1"
+    ],
+    "testId": "r3",
+    "testAttemptIndex": "match.match(0)",
+    "capture": "fullPage",
+    "clip": {
+      "x": 0,
+      "y": 0,
+      "width": 1000,
+      "height": 660
+    },
+    "viewport": {
+      "width": 1000,
+      "height": 660
+    },
+    "scaled": false,
+    "blackout": [],
+    "startTime": "match.string",
+    "current": 1,
+    "total": 1
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #2'] = [
+  "take:screenshot",
+  {
+    "titles": [
+      "suite 1",
+      "test 1"
+    ],
+    "testId": "r3",
+    "testAttemptIndex": "match.match(0)",
+    "takenPaths": [
+      "/path/to/screenshot"
+    ],
+    "simple": false,
+    "testFailure": true,
+    "capture": "runner",
+    "clip": {
+      "x": 0,
+      "y": 0,
+      "width": 1000,
+      "height": 660
+    },
+    "viewport": {
+      "width": 1000,
+      "height": 660
+    },
+    "scaled": true,
+    "blackout": [],
+    "startTime": "match.string"
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #3'] = [
+  "take:screenshot",
+  {
+    "titles": [
+      "suite 1",
+      "test 1"
+    ],
+    "testId": "r3",
+    "testAttemptIndex": "match.match(1)",
+    "capture": "fullPage",
+    "clip": {
+      "x": 0,
+      "y": 0,
+      "width": 1000,
+      "height": 660
+    },
+    "viewport": {
+      "width": 1000,
+      "height": 660
+    },
+    "scaled": false,
+    "blackout": [],
+    "startTime": "match.string",
+    "current": 1,
+    "total": 1
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #4'] = [
+  "take:screenshot",
+  {
+    "titles": [
+      "suite 1",
+      "test 1"
+    ],
+    "testId": "r3",
+    "testAttemptIndex": "match.match(1)",
+    "takenPaths": [
+      "/path/to/screenshot"
+    ],
+    "simple": false,
+    "testFailure": true,
+    "capture": "runner",
+    "clip": {
+      "x": 0,
+      "y": 0,
+      "width": 1000,
+      "height": 660
+    },
+    "viewport": {
+      "width": 1000,
+      "height": 660
+    },
+    "scaled": true,
+    "blackout": [],
+    "startTime": "match.string"
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #5'] = [
+  "{jQuery}",
+  {
+    "path": "/path/to/screenshot",
+    "size": 12,
+    "dimensions": {
+      "width": 20,
+      "height": 20
+    },
+    "multipart": false,
+    "pixelRatio": 1,
+    "takenAt": "match.string",
+    "name": "name",
+    "blackout": [
+      ".foo"
+    ],
+    "duration": 100,
+    "test": "{Test}"
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #6'] = [
+  {
+    "id": "r3",
+    "attemptIndex": 0,
+    "isOpen": false,
+    "appOnly": true,
+    "scale": false,
+    "waitForCommandSynchronization": false,
+    "disableTimersAndAnimations": true,
+    "blackout": []
+  },
+  null
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #1'] = [
+  "take:screenshot",
+  {
+    "titles": [
+      "suite 1",
+      "test 1",
+      "\"before each\" hook: newFn"
+    ],
+    "testId": "r3",
+    "testAttemptIndex": "match.match(0)",
+    "capture": "fullPage",
+    "clip": {
+      "x": 0,
+      "y": 0,
+      "width": 1000,
+      "height": 660
+    },
+    "viewport": {
+      "width": 1000,
+      "height": 660
+    },
+    "scaled": false,
+    "blackout": [],
+    "startTime": "match.string",
+    "current": 1,
+    "total": 1
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #2'] = [
+  "take:screenshot",
+  {
+    "titles": [
+      "suite 1",
+      "test 1"
+    ],
+    "testId": "r3",
+    "testAttemptIndex": "match.match(0)",
+    "takenPaths": [
+      "/path/to/screenshot"
+    ],
+    "simple": false,
+    "testFailure": true,
+    "capture": "runner",
+    "clip": {
+      "x": 0,
+      "y": 0,
+      "width": 1000,
+      "height": 660
+    },
+    "viewport": {
+      "width": 1000,
+      "height": 660
+    },
+    "scaled": true,
+    "blackout": [],
+    "startTime": "match.string"
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #3'] = [
+  "take:screenshot",
+  {
+    "titles": [
+      "suite 1",
+      "test 1",
+      "\"before each\" hook: newFn"
+    ],
+    "testId": "r3",
+    "testAttemptIndex": "match.match(1)",
+    "capture": "fullPage",
+    "clip": {
+      "x": 0,
+      "y": 0,
+      "width": 1000,
+      "height": 660
+    },
+    "viewport": {
+      "width": 1000,
+      "height": 660
+    },
+    "scaled": false,
+    "blackout": [],
+    "startTime": "match.string",
+    "current": 1,
+    "total": 1
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #4'] = [
+  "take:screenshot",
+  {
+    "titles": [
+      "suite 1",
+      "test 1",
+      "\"before each\" hook: newFn"
+    ],
+    "testId": "r3",
+    "testAttemptIndex": "match.match(1)",
+    "takenPaths": [
+      "/path/to/screenshot"
+    ],
+    "simple": false,
+    "testFailure": true,
+    "capture": "runner",
+    "clip": {
+      "x": 0,
+      "y": 0,
+      "width": 1000,
+      "height": 660
+    },
+    "viewport": {
+      "width": 1000,
+      "height": 660
+    },
+    "scaled": true,
+    "blackout": [],
+    "startTime": "match.string"
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #5'] = [
+  "{jQuery}",
+  {
+    "path": "/path/to/screenshot",
+    "size": 12,
+    "dimensions": {
+      "width": 20,
+      "height": 20
+    },
+    "multipart": false,
+    "pixelRatio": 1,
+    "takenAt": "match.string",
+    "name": "name",
+    "blackout": [
+      ".foo"
+    ],
+    "duration": 100,
+    "test": "{Test}"
+  }
+]
+
+exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #6'] = [
+  {
+    "id": "r3",
+    "attemptIndex": 0,
+    "isOpen": false,
+    "appOnly": true,
+    "scale": false,
+    "waitForCommandSynchronization": false,
+    "disableTimersAndAnimations": true,
+    "blackout": []
+  },
+  null
+]
 
 exports['src/cypress/runner isolated test runner test events hook failures fail in [after] #1'] = `
 AssertionError: after

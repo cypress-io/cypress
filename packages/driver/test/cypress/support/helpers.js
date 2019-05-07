@@ -21,6 +21,18 @@ const createHooks = (win, hooks = []) => {
     let { type, fail, fn } = hook
 
     if (fn) {
+
+      if (hook.eval) {
+        const fnStr = fn.toString()
+
+        const newFn = function () {
+          return win.eval(`(${fnStr})`).call(this)
+        }
+
+        Object.defineProperty(newFn, 'length', { value: fn.length })
+        fn = newFn
+      }
+
       return win[type](fn)
     }
 

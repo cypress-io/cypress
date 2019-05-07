@@ -15,10 +15,42 @@ const registerInCypress = () => {
   sinon = Cypress.sinon
   const $ = Cypress.$
 
+  chai = window.chai
+
   let snapshotIndex = {}
 
   const matchDeepCypress = function (...args) {
-    matchDeep.apply(this, [...args, { Cypress }])
+    const exp = args[1] || args[0]
+
+    try {
+      const res = matchDeep.apply(this, [args[0], args[1], { Cypress, expectedOnly: true }])
+
+      Cypress.log({
+        name: 'assert',
+        message: `Expected **${chai.util.objDisplay(res.act)}** to deep match: **${chai.util.objDisplay(exp)}**`,
+        state: 'passed',
+        consoleProps: () => {
+          return {
+            Actual: res.act,
+          }
+        },
+      })
+    } catch (e) {
+      Cypress.log({
+        name: 'assert',
+        message: `Expected **${chai.util.objDisplay(e.act)}** to deep match: **${chai.util.objDisplay(args[1] || args[0])}**`,
+        state: 'failed',
+        consoleProps: () => {
+          return {
+            Actual: e.act,
+            Expected: exp,
+          }
+        },
+      })
+
+      throw e
+    }
+
   }
 
   const matchSnapshotCypress = function (m, snapshotName) {
@@ -26,37 +58,55 @@ const registerInCypress = () => {
     const testName = Cypress.mocha.getRunner().test.fullTitle()
     const file = Cypress.spec.name
 
-    snapshotIndex[testName] = (snapshotIndex[testName] || 1)
-    const exactSpecName = snapshotName || `${testName} #${snapshotIndex[testName]}`
+    return cy.then(() => {
+      snapshotIndex[testName] = (snapshotIndex[testName] || 1)
+      const exactSpecName = snapshotName || `${testName} #${snapshotIndex[testName]}`
 
-    return cy.task('getSnapshot', {
-      file,
-      exactSpecName,
-    }, { log: false })
-    .then((exp) => {
-      try {
-        const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
-
-        snapshotIndex[testName] = snapshotIndex[testName] + 1
-
-        Cypress.log({
-          name: 'assert',
-          message: `snapshot matched: **${exactSpecName}**`,
-          state: 'passed',
-          consoleProps: () => {
-            return {
-              Actual: res.act,
-            }
-          },
-        })
-      } catch (e) {
-        if (Cypress.env('SNAPSHOT_UPDATE') && e.act) {
+      return cy.task('getSnapshot', {
+        file,
+        exactSpecName,
+      }, { log: false })
+      .then((exp) => {
+        try {
           snapshotIndex[testName] = snapshotIndex[testName] + 1
+          const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
 
           Cypress.log({
             name: 'assert',
-            message: `snapshot updated: **${exactSpecName}**`,
+            message: `snapshot matched: **${exactSpecName}**`,
             state: 'passed',
+            consoleProps: () => {
+              return {
+                Actual: res.act,
+              }
+            },
+          })
+        } catch (e) {
+          if (Cypress.env('SNAPSHOT_UPDATE') && !e.failedMatcher && e.act) {
+
+            Cypress.log({
+              name: 'assert',
+              message: `snapshot updated: **${exactSpecName}**`,
+              state: 'passed',
+              consoleProps: () => {
+                return {
+                  Expected: exp,
+                  Actual: e.act,
+                }
+              },
+            })
+
+            return cy.task('saveSnapshot', {
+              file,
+              what: e.act,
+              exactSpecName,
+            }, { log: false })
+          }
+
+          Cypress.log({
+            name: 'assert',
+            message: `**snapshot failed match**: ${exactSpecName}`,
+            state: 'failed',
             consoleProps: () => {
               return {
                 Expected: exp,
@@ -65,27 +115,9 @@ const registerInCypress = () => {
             },
           })
 
-          return cy.task('saveSnapshot', {
-            file,
-            what: e.act,
-            exactSpecName,
-          }, { log: false })
+          throw e
         }
-
-        Cypress.log({
-          name: 'assert',
-          message: `**snapshot failed match**: ${exactSpecName}`,
-          state: 'failed',
-          consoleProps: () => {
-            return {
-              Expected: exp,
-              Actual: e.act,
-            }
-          },
-        })
-
-        throw e
-      }
+      })
     })
 
   }
@@ -193,7 +225,7 @@ const matchDeep = function (matchers, exp, optsArg) {
 
   if (diffStr.changed) {
 
-    let e = _.extend(new Error(), { act: diffStr.act })
+    let e = _.extend(new Error(), { act: diffStr.act, failedMatcher: diffStr.opts.failedMatcher })
 
     e.message = isAnsi ? `\n${diffStr.text}` : stripAnsi(diffStr.text)
 
@@ -209,12 +241,6 @@ const matchDeep = function (matchers, exp, optsArg) {
   }
 
   return diffStr
-
-}
-
-module.exports = {
-  registerInCypress,
-  matchDeep,
 
 }
 
@@ -259,7 +285,7 @@ function printVar (variable) {
     case 'Function':
       return `[Function${variable.name ? ` ${variable.name}` : ''}]`
 
-    // return variable.toString().replace(/\{.+\}/, '{}')
+      // return variable.toString().replace(/\{.+\}/, '{}')
 
     case 'Array':
     case 'Object':
@@ -273,8 +299,6 @@ function printVar (variable) {
 
     case 'String':
       return `${variable}`
-
-    // return JSON.stringify(variable)
 
     default: return `${variable}`
 
@@ -390,12 +414,12 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
   const no_replacement = {}
 
   const diff = (exp, act, path = ['^'], optsArg) => {
-    const opts = _.defaults(optsArg, {
+    const opts = _.defaults({}, optsArg, {
       expectedOnly,
     })
 
     if (path.length > 15) {
-      throw new Error(`exceeded max depth on ${path.slice(-8)}`)
+      throw new Error(`exceeded max depth on ${path.slice(0, 4)} ... ${path.slice(-4)}`)
     }
 
     // console.log(act)
@@ -414,12 +438,12 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
         if (testValue(replacement, act)) {
           act = matcherStringToObj(replacement.message).toJSON()
         } else {
-          // changed = true
+          opts.failedMatcher = true
           if (!_.isFunction(act)) {
             act = _.clone(act)
           }
 
-          exp = matcherStringToObj(replacement.message).toJSON()
+          exp = replacement
         }
 
       } else {
@@ -467,6 +491,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
 
         if (_.hasIn(act, key) || isUndef) {
           itemDiff = diff(exp[key], act[key], path.concat([key]))
+          _.defaults(opts, itemDiff.opts)
           act[key] = itemDiff.act
           if (itemDiff.changed) {
             subOutput += keyChanged(key, itemDiff.text)
@@ -490,10 +515,17 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
 
           const addDiff = diff(val, val, path.concat([key]))
 
+          _.defaults(opts, addDiff.opts)
+
           act[key] = addDiff.act
           if (act[key] === undefined) continue
 
-          subOutput += keyAdded(key, act[key])
+          if (opts.failedMatcher) {
+            subOutput += addDiff.text
+          } else {
+            subOutput += keyAdded(key, act[key])
+          }
+
           changed = true
         }
       }
@@ -511,9 +543,6 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
         text = options.wrap('normal', `${_O}${options.newLineChar}${subOutput}${_C}`)
       }
 
-    // }
-      // else if (Array.isArray(act)) {
-      //   return diff([], act, path)
     } else if (match.isMatcher(exp)) {
       debug('is matcher')
       if (!testValue(exp, act)) {
@@ -522,7 +551,10 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       }
     } else if (isObject(act)) {
       debug('only act is obj')
+
       const addDiff = diff({}, act, path, { expectedOnly: false })
+
+      _.defaults(opts, addDiff.opts)
 
       return _.extend({},
         addDiff, {
@@ -530,16 +562,11 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
           text: options.wrap('removed', `${printVar(exp)}\n${options.wrap('added', addDiff.text)}`),
         })
 
-      // return {
-      //   changed: true,
-      //   text: options.wrap('modified', `${exp} => ${act}`),
-      //   act: addDiff.act
-      // }
-
     } else {
       debug('neither is obj')
       exp = printVar(exp)
       act = printVar(act)
+
       if (exp !== act) {
         text = options.wrap('modified', `${exp} ➡️  ${act}`)
         changed = true
@@ -550,13 +577,12 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       changed,
       text,
       act,
+      opts,
     }
   }
 
   return diff
 }
-
-// module.exports = diff
 
 const stringifyShort = (obj) => {
   const constructorName = _.get(obj, 'constructor.name')
@@ -574,4 +600,11 @@ const stringifyShort = (obj) => {
   }
 
   return obj
+}
+
+module.exports = {
+  registerInCypress,
+  matchDeep,
+  stringifyShort,
+
 }

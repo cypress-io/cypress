@@ -326,6 +326,9 @@ getPath = (data, ext, screenshotsFolder) ->
   if data.testFailure
     names[index] = names[index] + " (failed)"
 
+  if data.testAttemptIndex > 0
+    names[index] = names[index] + " (attempt #{data.testAttemptIndex})"
+
   withoutExt = path.join(screenshotsFolder, specNames..., names...)
 
   ensureUniquePath(withoutExt, ext)
