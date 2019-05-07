@@ -182,7 +182,7 @@
     "sinon": "5.1.1",
     "string-to-stream": "1.1.1",
     "strip-ansi": "3.0.1",
-    "supports-color": "5.5.0",
+    "supports-color": "6.1.0",
     "syntax-error": "1.4.0",
     "tar-fs": "1.16.3",
     "term-size": "2.0.0",
