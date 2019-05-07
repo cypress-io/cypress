@@ -271,3 +271,6 @@ namespace CypressTriggerTests {
       arbitraryProperty: 0
     })
 }
+
+const now = new Date(2019, 3, 2).getTime()
+cy.clock(now, ['Date'])

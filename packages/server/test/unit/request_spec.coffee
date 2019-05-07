@@ -315,6 +315,43 @@ describe "lib/request", ->
       .then (resp) ->
         expect(resp.body).to.eq("it worked")
 
+    it "lower cases headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("test", "true")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {}
+      headers["user-agent"] = "foobarbaz"
+
+      request.send(headers, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'TEST': true,
+        }
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
+
+    it "allows overriding user-agent in headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("user-agent", "custom-agent")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {'user-agent': 'test'}
+
+      request.send(headers, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'User-Agent': "custom-agent",
+        },
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
+
     context "accept header", ->
       it "sets to */* by default", ->
         nock("http://localhost:8080")
@@ -584,3 +621,31 @@ describe "lib/request", ->
             "x-text": "אבגד"
           }
         })
+
+  context '#sendStream', ->
+    beforeEach ->
+      @fn = sinon.stub()
+
+    it "allows overriding user-agent in headers", ->
+      nock("http://localhost:8080")
+        .matchHeader("user-agent", "custom-agent")
+        .get("/foo")
+        .reply(200, "derp")
+
+      sinon.spy(request, "create")
+      @fn.resolves({})
+
+      headers = {'user-agent': 'test'}
+
+      options =  {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'user-agent': "custom-agent",
+        },
+      }
+
+      request.sendStream(headers, @fn, options)
+      .then ->
+        expect(request.create).to.be.calledOnce
+        expect(request.create).to.be.calledWith(options)

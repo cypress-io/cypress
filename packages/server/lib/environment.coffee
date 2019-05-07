@@ -1,6 +1,11 @@
 require("./util/fs")
 
 os      = require("os")
+##
+## NOTE
+##
+## by loading "./cwd" we are changing the current working directory
+## to the "packages/server" folder
 cwd     = require("./cwd")
 Promise = require("bluebird")
 
