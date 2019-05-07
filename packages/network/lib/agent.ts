@@ -5,7 +5,7 @@ import _ from 'lodash'
 import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
-import { getAddress, createRetryingSocket } from './connect'
+import { createRetryingSocket, getAddress } from './connect'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -36,7 +36,12 @@ interface CreateProxySockOpts {
   proxy: url.Url
   shouldRetry?: boolean
 }
-type CreateProxySockCb = ((err: undefined, result: net.Socket, triggerRetry: (err: Error) => void) => void) & ((err: Error) => void)
+
+type CreateProxySockCb = (
+  (err: undefined, result: net.Socket, triggerRetry: (err: Error) => void) => void
+) & (
+  (err: Error) => void
+)
 
 export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb) => {
   if (opts.proxy.protocol !== 'https:' && opts.proxy.protocol !== 'http:') {

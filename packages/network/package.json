@@ -2,7 +2,8 @@
   "name": "@packages/network",
   "version": "0.0.0",
   "private": true,
-  "main": "index",
+  "main": "index.js",
+  "types": "./lib/index.ts",
   "files": [
     "lib"
   ],

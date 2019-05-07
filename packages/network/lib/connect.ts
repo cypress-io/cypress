@@ -1,7 +1,7 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import dns from 'dns'
+import _ from 'lodash'
 import net from 'net'
 import tls from 'tls'
 
@@ -60,7 +60,10 @@ function createSocket(opts: RetryingOptions, onConnect): net.Socket {
   return net.connect(netOpts, onConnect)
 }
 
-export function createRetryingSocket (opts: RetryingOptions, cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void) {
+export function createRetryingSocket (
+  opts: RetryingOptions,
+  cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void
+) {
   if (typeof opts.getDelayMsForRetry === 'undefined') {
     opts.getDelayMsForRetry = getDelayForRetry
   }
