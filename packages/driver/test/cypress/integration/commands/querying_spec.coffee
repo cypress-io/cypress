@@ -885,6 +885,16 @@ describe "src/cy/commands/querying", ->
             .get("@getUsers").then (xhr) ->
               expect(xhr.url).to.include "/users"
 
+        it "handles dots in alias name", ->
+          cy
+            .server()
+            .route(/users/, {}).as("get.users")
+            .visit("http://localhost:3500/fixtures/jquery.html")
+            .window().then { timeout: 2000 }, (win) ->
+              win.$.get("/users")
+            .get("@get.users").then (xhr) ->
+              expect(xhr.url).to.include "/users"
+
         it "returns null if no xhr is found", ->
           cy
             .server()
