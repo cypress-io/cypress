@@ -146,7 +146,7 @@
     "ramda": "0.24.1",
     "shelljs": "0.8.3",
     "sinon": "7.3.2",
-    "snap-shot-it": "6.3.5",
+    "snap-shot-it": "7.0.1",
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",
