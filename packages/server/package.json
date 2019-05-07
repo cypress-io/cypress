@@ -184,7 +184,6 @@
     "strip-ansi": "3.0.1",
     "supports-color": "5.5.0",
     "syntax-error": "1.4.0",
-    "tar-fs": "1.16.3",
     "term-size": "2.0.0",
     "through": "2.3.8",
     "tough-cookie": "3.0.1",
