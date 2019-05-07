@@ -9,65 +9,17 @@ HIGHLIGHT_ATTR = "data-cypress-el"
 reduceText = (arr, fn) ->
   _.reduce arr, ((memo, item) -> memo += fn(item)), ""
 
-## memoized by href (lodash will cache results by first argument, if no resolver is supplied)
-getCssRulesString = _.memoize (href, stylesheet) ->
-  ## some browsers may throw a SecurityError if the stylesheet is cross-domain
-  ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
-  ## for others, it will just be null
-  try
-    if rules = stylesheet.rules or stylesheet.cssRules
-      reduceText rules, (rule) -> rule.cssText
-    else
-      null
-  catch e
-    null
-
 screenStylesheetRe = /(screen|all)/
 
 isScreenStylesheet = (stylesheet) ->
   media = stylesheet.getAttribute("media")
   return not _.isString(media) or screenStylesheetRe.test(media)
 
-getStylesFor = (doc, $$, stylesheets, location) ->
-  styles = $$(location).find("link[rel='stylesheet'],style")
-  styles = _.filter(styles, isScreenStylesheet)
-
-  _.map styles, (stylesheet) =>
-    ## in cases where we can get the CSS as a string, make the paths
-    ## absolute so that when they're restored by appending them to the page
-    ## in <style> tags, background images and fonts still properly load
-    if stylesheet.href
-      ## if there's an href, it's a link tag
-      ## return the CSS rules as a string, or, if cross-domain,
-      ## a reference to the stylesheet's href
-      makePathsAbsoluteToStylesheet(
-        stylesheet.href
-        getCssRulesString(stylesheet.href, stylesheets[stylesheet.href]),
-      ) or {
-        href: stylesheet.href
-      }
-    else
-      ## otherwise, it's a style tag, and we can just grab its content
-      styleRules = if stylesheet.sheet
-      then Array.prototype.slice.call(stylesheet.sheet.cssRules).map((rule) -> rule.cssText).join("")
-      else $$(stylesheet).text()
-
-      makePathsAbsoluteToDoc(doc, styleRules)
-
 getDocumentStylesheets = (document = {}) ->
   _.reduce document.styleSheets, (memo, stylesheet) ->
     memo[stylesheet.href] = stylesheet
     return memo
   , {}
-
-## memoized by href (lodash will cache results by first argument, if no resolver is supplied)
-makePathsAbsoluteToStylesheet = _.memoize (stylesheetHref, styles) ->
-  return styles if not _.isString(styles)
-
-  stylesheetPath = stylesheetHref.replace(path.basename(stylesheetHref), '')
-  styles.replace anyUrlInCssRe, (_1, _2, filePath) ->
-    absPath = url.resolve(stylesheetPath, filePath)
-    return "url('#{absPath}')"
 
 makePathsAbsoluteToDoc = (doc, styles) ->
   return styles if not _.isString(styles)
@@ -79,7 +31,81 @@ makePathsAbsoluteToDoc = (doc, styles) ->
     a.href = filePath
     return "url('#{a.href}')"
 
-create = ($$, state) ->
+create = (Cypress, $$, state) ->
+  externalCssCache = {}
+  newWindow = false
+
+  ## we invalidate the cache when css is modified by javascript
+  Cypress.on "css:modified", (href) ->
+    externalCssCache[href]?.valid = false
+
+  ## the lifecycle of a stylesheet is the lifecycle of the window
+  ## so track this to know when to re-evaluate the cache in case
+  ## of css being modified by javascript
+  Cypress.on "window:before:load", ->
+    newWindow = true
+
+  makePathsAbsoluteToStylesheet = _.memoize (styles, href) ->
+    return styles if not _.isString(styles)
+
+    stylesheetPath = href.replace(path.basename(href), '')
+    styles.replace anyUrlInCssRe, (_1, _2, filePath) ->
+      absPath = url.resolve(stylesheetPath, filePath)
+      return "url('#{absPath}')"
+
+  getCssRulesString = (href, stylesheet) ->
+    ## if we've loaded a new window and the css was invalidated due to javascript
+    ## we need to re-evaluate since this time around javascript might not change the css
+    if not (newWindow and externalCssCache[href]?.invalidLast) and externalCssCache[href]?.valid
+      return _.last(externalCssCache[href].styles)
+
+    ## some browsers may throw a SecurityError if the stylesheet is cross-domain
+    ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
+    ## for others, it will just be null
+    cssString = try
+      if rules = stylesheet.rules or stylesheet.cssRules
+        makePathsAbsoluteToStylesheet(reduceText(rules, (rule) -> rule.cssText), href)
+      else
+        null
+    catch e
+      null
+
+    externalCssCache[href] ?= {
+      styles: []
+      valid: true
+    }
+    externalCssCache[href].styles.push(cssString)
+
+    if not externalCssCache[href].valid
+      externalCssCache[href].invalidLast = true
+    else if newWindow
+      externalCssCache[href].invalidLast = false
+
+    externalCssCache[href].valid = true
+
+    return cssString
+
+  getStylesFor = (doc, $$, stylesheets, location) ->
+    styles = $$(location).find("link[rel='stylesheet'],style")
+    styles = _.filter(styles, isScreenStylesheet)
+
+    _.map styles, (stylesheet) =>
+      ## in cases where we can get the CSS as a string, make the paths
+      ## absolute so that when they're restored by appending them to the page
+      ## in <style> tags, background images and fonts still properly load
+      if href = stylesheet.href
+        ## if there's an href, it's a link tag
+        ## return the CSS rules as a string, or, if cross-domain,
+        ## a reference to the stylesheet's href
+        getCssRulesString(href, stylesheets[href]) or { href }
+      else
+        ## otherwise, it's a style tag, and we can just grab its content
+        styleRules = if stylesheet.sheet
+        then Array.prototype.slice.call(stylesheet.sheet.cssRules).map((rule) -> rule.cssText).join("")
+        else $$(stylesheet).text()
+
+        makePathsAbsoluteToDoc(doc, styleRules)
+
   getStyles = ->
     doc = state("document")
     stylesheets = getDocumentStylesheets(doc)
@@ -165,6 +191,7 @@ create = ($$, state) ->
     ## if it's same-origin, it will get the actual styles as a string
     ## it it's cross-domain, it will get a reference to the link's href
     {headStyles, bodyStyles} = getStyles()
+    newWindow = false
 
     ## replaces iframes with placeholders
     replaceIframes(body)

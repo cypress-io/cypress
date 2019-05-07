@@ -90,7 +90,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   errors = $Errors.create(state, config, log)
   ensures = $Ensures.create(state, expect)
 
-  snapshots = $Snapshots.create($$, state)
+  snapshots = $Snapshots.create(Cypress, $$, state)
 
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
@@ -140,6 +140,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         Cypress.action("app:window:confirmed", str, ret)
 
         return ret
+      onCssModification: (href) ->
+        Cypress.action("app:css:modified", href)
     })
 
   wrapNativeMethods = (contentWindow) ->

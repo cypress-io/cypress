@@ -394,6 +394,9 @@ class $Cypress
       when "app:window:unload"
         @emit("window:unload", args[0])
 
+      when "app:css:modified"
+        @emit("css:modified", args[0])
+
       when "spec:script:error"
         @emit("script:error", args...)
 

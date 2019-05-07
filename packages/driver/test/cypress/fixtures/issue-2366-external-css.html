@@ -4,11 +4,21 @@
     <link rel="stylesheet" href="/dynamically-server-generated/issue-2366.css" />
   </head>
   <body>
-    <h1 id="test">random font size test</h1>
+    <h1 id="lots-of-css">random font size test</h1>
+    <h1 id="external">external</h1>
+
     <script>
       // The .c# classname is tighty coupled to generated CSS file made in packages/driver/test/support/server.coffee
       // Avoid 0 px, so should('be.visible') check does not randomly fail
-      document.getElementById('test').className = "c" + (1 + (Math.random() * 1000));
+      document.getElementById('lots-of-css').className = "c" + (1 + (Math.random() * 1000));
+
+      // Modify the CSS with JavaScript to ensure it is represented by the snapshot
+      window.changeRules = function () {
+        document.styleSheets[0].deleteRule(0);
+        document.styleSheets[0].deleteRule(0);
+        document.styleSheets[0].insertRule("#external:after { content: ' (after change)'; }", 0);
+        document.styleSheets[0].insertRule("#external { background-color: black; color: white; margin-right: 20px; }", 1);
+      };
     </script>
   </body>
 </html>
