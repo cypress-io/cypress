@@ -4014,23 +4014,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
-  //   /**
-  //    * Fires after a screenshot is taken.
-  //    * @see https://on.cypress.io/catalog-of-events#App-Events
-  //    */
-  //   (action: 'after:screenshot', fn: (props: {
-  //     id: string
-  //     testAttemptIndex: number
-  //     isOpen: boolean
-  //     appOnly: boolean
-  //     scale: boolean
-  //     waitForCommandSynchronization: boolean
-  //     disableTimersAndAnimations: boolean,
-  //     blackout: string[]
-  //   }) => void | Promise<{path:string, size: number, dimensions:Dimensions}>  
-  // ): void
-
-
   }
 
   // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS
