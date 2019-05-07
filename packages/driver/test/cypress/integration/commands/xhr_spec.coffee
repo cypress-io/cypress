@@ -1366,7 +1366,6 @@ describe "src/cy/commands/xhr", ->
       it "receives request body in matcher", ->
         options = {
           matcher: (xhr) =>
-            debugger
             expect(xhr.body).to.eq('baz')
         }
 
