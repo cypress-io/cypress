@@ -56,6 +56,15 @@ describe "src/cy/commands/aliasing", ->
         expect(cy.get('@body.foo')).to.be.defined
         expect(cy.state("aliases")['body.foo']).to.be.defined
 
+    it "recognizes dot and non dot with same alias names", ->
+      cy.get("body").as("body").then ->
+        expect(cy.get('@body')).to.be.defined
+        expect(cy.state("aliases")['body']).to.be.defined
+      cy.contains("foo").as("body.foo").then ->
+        expect(cy.get('@body.foo')).to.be.defined
+        expect(cy.get('@body.foo')).to.not.eq(cy.get('@body'))
+        expect(cy.state("aliases")['body.foo']).to.be.defined
+
     context "DOM subjects", ->
       it "assigns the remote jquery instance", ->
         obj = {}
