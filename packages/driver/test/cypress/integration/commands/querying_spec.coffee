@@ -472,17 +472,19 @@ describe "src/cy/commands/querying", ->
       cy.on "command:retry", _.after 2, ->
         cy.$$("body").append(missingEl)
 
-      ## in this example our test has been running 200ms
-      ## but the timeout is below this amount, and it
-      ## still passes because the total running time is
-      ## not factored in (which is correct)
+      defaultCommandTimeout = Cypress.config('defaultCommandTimeout')
+
+      ## in this example our test has been running 300ms
+      ## but the default command timeout is below this amount,
+      ## and the test still passes because the timeout is only
+      ## into each command and not the total overall running time
       cy
-        .wait(200)
-        .get("#missing-el", {timeout: 125})
+        .wait(defaultCommandTimeout + 100)
+        .get("#missing-el", { timeout: defaultCommandTimeout + 50 })
         .then ->
           ## it should reset the timeout back
-          ## to 100 after successfully finished get method
-          expect(cy.timeout()).to.eq(100)
+          ## to 200 after successfully finishing 'get' method
+          expect(cy.timeout()).to.eq(defaultCommandTimeout)
 
     it "cancels existing promises", (done) ->
       cy.stub(Cypress.runner, "stop")
