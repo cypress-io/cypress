@@ -217,6 +217,8 @@ const matchDeep = function (matchers, exp, optsArg) {
 
   const act = this._obj
 
+  debug('matchDeep:actual:', act)
+
   m = _.map(m, (val, key) => {
     return [key.split('.'), val]
   })

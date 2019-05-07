@@ -209,7 +209,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   getOptions = (isOpen) ->
     {
       id: runnable.id
-      attemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry
+      testAttemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry
       isOpen: isOpen
       appOnly: isAppOnly(screenshotConfig)
       scale: getShouldScale(screenshotConfig)

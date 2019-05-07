@@ -6733,7 +6733,7 @@ exports['serialize state - retries'] = {
   "numLogs": 0
 }
 
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #1'] = [
+exports['src/cypress/runner isolated test runner other specs screenshots retry screenshot in test body #1'] = [
   "take:screenshot",
   {
     "titles": [
@@ -6761,7 +6761,18 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
   }
 ]
 
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #2'] = [
+exports['src/cypress/runner isolated test runner other specs screenshots retry screenshot in test body #2'] = {
+  "id": "r3",
+  "testAttemptIndex": "match.match(0)",
+  "isOpen": false,
+  "appOnly": true,
+  "scale": false,
+  "waitForCommandSynchronization": false,
+  "disableTimersAndAnimations": true,
+  "blackout": []
+}
+
+exports['src/cypress/runner isolated test runner other specs screenshots retry screenshot in test body #3'] = [
   "{jQuery}",
   {
     "path": "/path/to/screenshot",
@@ -6782,50 +6793,7 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
   }
 ]
 
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot #3'] = [
-  {
-    "id": "r3",
-    "attemptIndex": 0,
-    "isOpen": false,
-    "appOnly": true,
-    "scale": false,
-    "waitForCommandSynchronization": false,
-    "disableTimersAndAnimations": true,
-    "blackout": []
-  },
-  null
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #1'] = [
-  "take:screenshot",
-  {
-    "titles": [
-      "suite 1",
-      "test 1",
-      "\"before each\" hook: newFn"
-    ],
-    "testId": "r3",
-    "testAttemptIndex": "match.match(0)",
-    "capture": "fullPage",
-    "clip": {
-      "x": 0,
-      "y": 0,
-      "width": 1000,
-      "height": 660
-    },
-    "viewport": {
-      "width": 1000,
-      "height": 660
-    },
-    "scaled": false,
-    "blackout": [],
-    "startTime": "match.string",
-    "current": 1,
-    "total": 1
-  }
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #2'] = [
+exports['src/cypress/runner isolated test runner other specs screenshots screenshot during each failed attempt #1'] = [
   "{jQuery}",
   {
     "path": "/path/to/screenshot",
@@ -6844,20 +6812,6 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
     "duration": 100,
     "test": "{Test}"
   }
-]
-
-exports['src/cypress/runner isolated test runner other specs screenshots screenshots: after:screenshot in hook #3'] = [
-  {
-    "id": "r3",
-    "attemptIndex": 0,
-    "isOpen": false,
-    "appOnly": true,
-    "scale": false,
-    "waitForCommandSynchronization": false,
-    "disableTimersAndAnimations": true,
-    "blackout": []
-  },
-  null
 ]
 
 exports['src/cypress/runner isolated test runner test events hook failures fail in [after] #1'] = `

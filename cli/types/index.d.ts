@@ -2073,8 +2073,22 @@ declare namespace Cypress {
     clip: Dimensions
     disableTimersAndAnimations: boolean
     scale: boolean
-    beforeScreenshot(doc: Document): void
-    afterScreenshot(doc: Document): void
+    beforeScreenshot: ($el: JQuery<HTMLElement>) => void
+    afterScreenshot: ($el: JQuery<HTMLElement>, props: {
+      path: string,
+      size: 12,
+      dimensions: {
+        width: number,
+        height: number
+      },
+      multipart: boolean,
+      pixelRatio: number,
+      takenAt: string,
+      name: string,
+      blackout: string[],
+      duration: number,
+      test: Mocha.ITest
+    }) => void
   }
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
@@ -4000,6 +4014,23 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+  //   /**
+  //    * Fires after a screenshot is taken.
+  //    * @see https://on.cypress.io/catalog-of-events#App-Events
+  //    */
+  //   (action: 'after:screenshot', fn: (props: {
+  //     id: string
+  //     testAttemptIndex: number
+  //     isOpen: boolean
+  //     appOnly: boolean
+  //     scale: boolean
+  //     waitForCommandSynchronization: boolean
+  //     disableTimersAndAnimations: boolean,
+  //     blackout: string[]
+  //   }) => void | Promise<{path:string, size: number, dimensions:Dimensions}>  
+  // ): void
+
+
   }
 
   // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS
