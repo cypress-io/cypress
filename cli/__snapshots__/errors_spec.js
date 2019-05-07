@@ -8,6 +8,7 @@ Read our documentation on dependencies for more information:
 [34mhttps://on.cypress.io/required-dependencies[39m
 
 If you are using Docker, we provide containers with all required dependencies installed.
+
 ----------
 
 Platform: test platform (Foo-OsVersion)
@@ -27,5 +28,6 @@ exports['errors individual has the following errors 1'] = [
   "failedUnzip",
   "invalidCacheDirectory",
   "removed",
-  "CYPRESS_RUN_BINARY"
+  "CYPRESS_RUN_BINARY",
+  "smokeTestFailure"
 ]
