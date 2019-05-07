@@ -88,7 +88,6 @@
     "bin-up": "1.2.0",
     "chai": "3.5.0",
     "chai-string": "1.4.0",
-    "clear-module": "2.1.0",
     "dependency-check": "3.3.0",
     "dtslint": "0.7.1",
     "execa-wrap": "1.4.0",
