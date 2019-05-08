@@ -453,10 +453,13 @@ create = (Cypress, cy, state, config) ->
 
     logs[id] = true
 
-  logFn = (obj = {}) ->
+  logFn = (options) ->
+    if !_.isObject(options)
+      $utils.throwErrByPath "log.invalid_argument", {args: { arg: options }}
+
     attributes = {}
 
-    log = Log(state, config, obj)
+    log = Log(state, config, options)
 
     ## add event emitter interface
     $Events.extend(log)
@@ -468,7 +471,7 @@ create = (Cypress, cy, state, config) ->
     ## as fast as every 4ms
     log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
 
-    log.set(obj)
+    log.set(options)
 
     ## if snapshot was passed
     ## in, go ahead and snapshot
