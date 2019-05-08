@@ -89,7 +89,6 @@
     "ssestream": "1.0.1",
     "stream-to-promise": "1.1.1",
     "supertest": "4.0.2",
-    "supertest-as-promised": "3.2.0",
     "supertest-session": "0.0.7",
     "through2": "0.6.5",
     "ws": "5.2.2",
