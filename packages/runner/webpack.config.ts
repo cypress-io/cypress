@@ -145,7 +145,7 @@ const config: webpack.Configuration = {
 if (mode === 'reporter') {
   const reporterConfig: webpack.Configuration = {
     entry: {
-      cypress_reporter: ['../reporter/src/main.jsx']
+      cypress_reporter: ['../reporter/src']
     },
     output: {
       path: path.resolve('../reporter/dist'),

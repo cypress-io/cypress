@@ -50,8 +50,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
-    "experimentalDecorators": true
+		"experimentalDecorators": true,
     // "noResolve": true
   },
   "exclude": ["dist"]
+
 }
