@@ -6775,6 +6775,7 @@ exports['src/cypress/runner isolated test runner other specs screenshots retry s
 exports['src/cypress/runner isolated test runner other specs screenshots retry screenshot in test body #3'] = [
   "{jQuery}",
   {
+    "testAttemptIndex": 0,
     "path": "/path/to/screenshot",
     "size": 12,
     "dimensions": {
@@ -6788,14 +6789,14 @@ exports['src/cypress/runner isolated test runner other specs screenshots retry s
     "blackout": [
       ".foo"
     ],
-    "duration": 100,
-    "test": "{Test}"
+    "duration": 100
   }
 ]
 
 exports['src/cypress/runner isolated test runner other specs screenshots screenshot during each failed attempt #1'] = [
   "{jQuery}",
   {
+    "testAttemptIndex": 0,
     "path": "/path/to/screenshot",
     "size": 12,
     "dimensions": {
@@ -6809,8 +6810,7 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
     "blackout": [
       ".foo"
     ],
-    "duration": 100,
-    "test": "{Test}"
+    "duration": 100
   }
 ]
 

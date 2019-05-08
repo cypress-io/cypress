@@ -2087,7 +2087,7 @@ declare namespace Cypress {
       name: string,
       blackout: string[],
       duration: number,
-      test: Mocha.ITest
+      testAttemptIndex: number
     }) => void
   }
 

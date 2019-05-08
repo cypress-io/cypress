@@ -120,6 +120,7 @@ const createCypress = (mochaTests, opts = {}) => {
         .callThrough()
         .withArgs('take:screenshot')
         .resolves({
+          testAttemptIndex: 0,
           path: '/path/to/screenshot',
           size: 12,
           dimensions: { width: 20, height: 20 },
@@ -1146,7 +1147,7 @@ describe('src/cypress/runner', () => {
           }, { config: { numTestRetries: 2 } })
           .then(() => {
 
-            // send to server
+            // sent to server
             expect(autCypress.automation.withArgs('take:screenshot')).calledThrice
             expect(autCypress.automation.withArgs('take:screenshot').args).matchDeep([
               { 1: { testAttemptIndex: 0 } },

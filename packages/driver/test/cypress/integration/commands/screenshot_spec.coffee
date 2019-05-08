@@ -17,6 +17,7 @@ describe "src/cy/commands/screenshot", ->
       takenAt: new Date().toISOString()
       name: "name"
       blackout: [".foo"]
+      testAttemptIndex: 0
       duration: 100
     }
 
@@ -102,6 +103,7 @@ describe "src/cy/commands/screenshot", ->
           waitForCommandSynchronization: true
           disableTimersAndAnimations: true
           blackout: []
+          testAttemptIndex: 0
         })
         expect(Cypress.action).to.be.calledWith("cy:after:screenshot", {
           id: runnable.id
@@ -111,6 +113,7 @@ describe "src/cy/commands/screenshot", ->
           waitForCommandSynchronization: true
           disableTimersAndAnimations: true
           blackout: []
+          testAttemptIndex: 0
         })
 
     it "takes screenshot when not isInteractive", ->
@@ -142,6 +145,7 @@ describe "src/cy/commands/screenshot", ->
           simple: true
           testFailure: true
           blackout: []
+          testAttemptIndex: 0
           scaled: true
         })
 
@@ -180,6 +184,7 @@ describe "src/cy/commands/screenshot", ->
             simple: false
             scaled: true
             blackout: []
+            testAttemptIndex: 0
           })
 
   context "runnable:after:run:async hooks", ->
@@ -213,6 +218,7 @@ describe "src/cy/commands/screenshot", ->
           testFailure: true
           scaled: true
           blackout: []
+          testAttemptIndex: 0
         })
 
     it "takes screenshot of hook title with test", ->
@@ -323,6 +329,7 @@ describe "src/cy/commands/screenshot", ->
             waitForCommandSynchronization: false
             disableTimersAndAnimations: true
             blackout: [".foo"]
+            testAttemptIndex: 0
           })
 
       it "sends after:screenshot", ->
@@ -339,6 +346,7 @@ describe "src/cy/commands/screenshot", ->
             waitForCommandSynchronization: false
             disableTimersAndAnimations: true
             blackout: [".foo"]
+            testAttemptIndex: 0
           })
 
       it "always sends scale: true, waitForCommandSynchronization: true, and blackout: [] for non-app captures", ->
@@ -357,6 +365,7 @@ describe "src/cy/commands/screenshot", ->
             waitForCommandSynchronization: true
             disableTimersAndAnimations: true
             blackout: []
+            testAttemptIndex: 0
           })
 
       it "always sends waitForCommandSynchronization: false for viewport/fullPage captures", ->
@@ -374,6 +383,7 @@ describe "src/cy/commands/screenshot", ->
             waitForCommandSynchronization: false
             disableTimersAndAnimations: true
             blackout: [".foo"]
+            testAttemptIndex: 0
           })
 
     describe "capture: fullPage", ->

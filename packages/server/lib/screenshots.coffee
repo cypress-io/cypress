@@ -451,7 +451,7 @@ module.exports = {
     duration = new Date() - new Date(data.startTime)
 
     details = _.extend({}, data, details, { duration })
-    details = _.pick(details, "size", "takenAt", "dimensions", "multipart", "pixelRatio", "name", "specName", "testFailure", "path", "scaled", "blackout", "duration")
+    details = _.pick(details, "testAttemptIndex", "size", "takenAt", "dimensions", "multipart", "pixelRatio", "name", "specName", "testFailure", "path", "scaled", "blackout", "duration")
 
     if not plugins.has("after:screenshot")
       return Promise.resolve(details)
