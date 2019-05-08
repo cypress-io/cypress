@@ -1,27 +1,29 @@
-import webpack, { Configuration } from 'webpack'
+import webpack, { Configuration, optimize } from 'webpack'
 import path from 'path'
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import CopyWebpackPlugin = require('copy-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
+import CleanWebpackPlugin from 'clean-webpack-plugin'
+import _ from 'lodash'
 
 import sassGlobImporter = require('node-sass-globbing')
 
-
-const mode = process.env.NODE_ENV as ('development' | 'production') || 'development'
+const mode = process.env.NODE_ENV as ('development' | 'production' | 'test' | 'reporter') || 'development'
+const webpackmode = mode === 'production' ? mode : 'development'
 
 const isDevServer = !!process.env.DEV_SERVER
 
 const config: webpack.Configuration = {
-
   entry: {
-    'cypress_runner.js': ['./src/main.jsx'],
-    cypress_runner: ['./src/main.scss'],
-    cypress_selector_playground: ['./src/selector-playground/selector-playground.scss'],
+    cypress_runner: ['./src/main.jsx'],
   },
-  mode,
+  mode: webpackmode,
   node: {
     fs: 'empty',
     child_process: 'empty',
+    net: 'empty',
+    tls: 'empty',
+    module: 'empty'
   },
   resolve: {
     alias: {
@@ -31,11 +33,11 @@ const config: webpack.Configuration = {
   },
   output: {
     path: path.resolve('./dist'),
-    filename: '[name]',
+    filename: '[name].js',
   },
 
   // Enable source maps
-  // devtool: 'cheap-eval-source-map',
+  devtool: 'inline-cheap-module-source-map',
 
   stats: {
     errors: true,
@@ -45,6 +47,7 @@ const config: webpack.Configuration = {
     builtAt: true,
     colors: true,
     modules: true,
+    maxModules: 400,
     excludeModules: /main.scss/,
   },
 
@@ -100,22 +103,24 @@ const config: webpack.Configuration = {
           {
             loader: 'file-loader',
             options: {
-              name: '/fonts/[name].[ext]',
+              name: './fonts/[name].[ext]',
             },
           },
         ],
       },
     ],
   },
+
   plugins: [
     new HtmlWebpackPlugin({
-      template: isDevServer ? './static/index.dev.html' :'./static/index.html' ,
+      template: isDevServer ? './static/index.dev.html' : './static/index.html',
       inject: false,
     }),
+    new CleanWebpackPlugin(),
     new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
-    new MiniCSSExtractWebpackPlugin('[name]'),
+    new MiniCSSExtractWebpackPlugin('[name].css'),
   ],
-  
+
   devServer: {
     port: 3938,
     stats: {
@@ -124,16 +129,66 @@ const config: webpack.Configuration = {
       warnings: true,
       all: false,
       builtAt: true,
-      colors:true,
-      modules:true,
+      colors: true,
+      modules: true,
       excludeModules: /main.scss/,
     },
-    noInfo:true,
+    noInfo: true,
     writeToDisk: (filepath) => /index.html/.test(filepath),
     headers: {
       "Access-Control-Allow-Origin": "*",
     }
   }
+
+}
+
+if (mode === 'reporter') {
+  const reporterConfig: webpack.Configuration = {
+    entry: {
+      cypress_reporter: ['../reporter/src/main.jsx']
+    },
+    output: {
+      path: path.resolve('../reporter/dist'),
+      filename: '[name].js'
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './static/index.reporter.html',
+        chunks: ['cypress_reporter']
+      }),
+      new CleanWebpackPlugin(),
+      new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
+      new MiniCSSExtractWebpackPlugin('[name].css'),
+    ]
+  }
+
+  _.extend(config, reporterConfig)
+}
+
+
+if (mode === 'test') {
+  const testConfig: webpack.Configuration = {
+    devtool: 'inline-cheap-module-source-map',
+    target: 'node',
+    entry: {
+      cypress_test: ['../reporter/test/index.spec.js']
+    },
+    output: {
+      path: path.resolve('../reporter/dist-test'),
+      filename: '[name].js',
+      devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+      // devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
+    },
+    optimization: undefined,
+    plugins: [
+      new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
+    ],
+
+    externals: [require('webpack-node-externals')()],
+
+  }
+
+  _.extend(config, testConfig)
 
 }
 

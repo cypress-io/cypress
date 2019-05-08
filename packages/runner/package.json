@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "echo '@packages/runner needs: npm run build'",
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "webpack",
+    "build": "webpack --progress",
     "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "webpack --mode=production",
     "prewatch": "npm run check-deps-pre",
@@ -17,6 +17,10 @@
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
     "test": "node ./scripts/test.js",
+    "test-reporter": "cross-env NODE_ENV=test mochapack '../reporter/test/index.spec.js'",
+    "test-reporter-watch": "cross-env NODE_ENV=test mochapack '../reporter/test/index.spec.js' --watch",
+    "build-reporter": "cross-env NODE_ENV=reporter webpack",
+    "build-reporter-watch": "cross-env NODE_ENV=reporter webpack --watch",
     "lint": "bin-up eslint --fix scripts/*.js src/*.js* src/**/*.js*"
   },
   "files": [
@@ -40,6 +44,7 @@
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
+    "clean-webpack-plugin": "^2.0.2",
     "coffee-loader": "^0.9.0",
     "coffeescript": "^2.3.2",
     "copy-webpack-plugin": "^5.0.1",
@@ -53,11 +58,15 @@
     "happypack": "^5.0.1",
     "html-webpack-plugin": "^3.2.0",
     "ignore-loader": "^0.1.2",
+    "jest": "^24.7.1",
     "jsdom": "13.2.0",
     "lodash": "4.17.11",
     "mini-css-extract-plugin": "^0.5.0",
     "mobx": "3.6.2",
     "mobx-react": "4.4.3",
+    "mocha-loader": "^2.0.1",
+    "mocha-webpack": "^1.1.0",
+    "mochapack": "^1.1.1",
     "node-sass": "^4.11.0",
     "node-sass-glob-importer": "^5.3.0",
     "prop-types": "15.7.2",
@@ -74,6 +83,7 @@
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.3.1",
+    "webpack-node-externals": "^1.7.2",
     "zunder": "6.4.1"
   }
 }

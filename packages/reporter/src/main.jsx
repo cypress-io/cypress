@@ -1,3 +1,4 @@
+import './main.scss'
 import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
