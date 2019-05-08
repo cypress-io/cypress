@@ -34,7 +34,7 @@ fileServer   = require("./file_server")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
-RETRY_INTERVALS = [1, 2, 2]
+RETRY_INTERVALS = [3, 3, 4]
 
 retryBaseUrlCheck = (baseUrl, onWarning, iteration = 0) ->
   ensureUrl.isListening(baseUrl)
@@ -46,6 +46,7 @@ retryBaseUrlCheck = (baseUrl, onWarning, iteration = 0) ->
 
     onWarning(errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
       tries: RETRY_INTERVALS.length - iteration
+      attempt: iteration + 1
       delay
       baseUrl
     }))
