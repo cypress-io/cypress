@@ -14,6 +14,8 @@ const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
 
+const hr = '----------'
+
 // common errors Cypress application can encounter
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
@@ -111,7 +113,37 @@ const isDisplayOnLinuxSet = () => {
 }
 
 const invalidDisplayError = {
-  description: 'Cypress failed to start with own XVFB.',
+  description: 'Cypress failed to start.',
+  solution  (msg, prevMessage) {
+    return stripIndent`
+      First, we have tried to start Cypress using your DISPLAY settings
+      but his the following problem:
+
+      ${prevMessage}
+
+      ${hr}
+
+      Then we started our own XVFB and tried to start Cypress again, but
+      got the following error:
+
+      ${msg}
+
+      ${hr}
+
+      This is usually caused by a missing library or dependency.
+
+      The error below should indicate which dependency is missing.
+
+        ${chalk.blue(requiredDependenciesUrl)}
+
+      If you are using Docker, we provide containers with all required dependencies installed.
+    `
+  },
+}
+
+const missingDependency = {
+  description: 'Cypress failed to start.',
+  // this message is too Linux specific
   solution: stripIndent`
     This is usually caused by a missing library or dependency.
 
@@ -121,37 +153,6 @@ const invalidDisplayError = {
 
     If you are using Docker, we provide containers with all required dependencies installed.
   `,
-}
-
-const missingDependency = {
-  description: 'Cypress failed to start.',
-  // this message is too Linux specific
-  solution: () => {
-    let text = stripIndent`
-      This is usually caused by a missing library or dependency.
-
-      The error below should indicate which dependency is missing.
-
-        ${chalk.blue(requiredDependenciesUrl)}
-
-      If you are using Docker, we provide containers with all required dependencies installed.
-    `
-
-    if (isDisplayOnLinuxSet()) {
-      const issueUrl = util.getGitHubIssueUrl(4034)
-
-      text += `\n\n${stripIndent`
-        We have noticed that DISPLAY variable is set to "${process.env.DISPLAY}"
-        This might be a problem if X11 server is not responding.
-
-          ${chalk.blue(issueUrl)}
-
-        Try deleting the DISPLAY variable and running the command again.
-      `}`
-    }
-
-    return text
-  },
 }
 
 const invalidCacheDirectory = {
@@ -234,8 +235,6 @@ function addPlatformInformation (info) {
  * and if possible a way to solve it. Resolves with a string.
  */
 function formErrorText (info, msg, prevMessage) {
-  const hr = '----------'
-
   return addPlatformInformation(info)
   .then((obj) => {
     const formatted = []
@@ -246,26 +245,36 @@ function formErrorText (info, msg, prevMessage) {
       )
     }
 
-    const solution = is.fn(obj.solution)
-      ? obj.solution(msg, prevMessage)
-      : obj.solution
+    // assuming that if there the solution is a function it will handle
+    // error message and (optional previous error message)
+    if (is.fn(obj.solution)) {
+      const text = obj.solution(msg, prevMessage)
 
-    la(is.unemptyString(solution), 'expected solution to be text', solution)
+      la(is.unemptyString(text), 'expected solution to be text', text)
 
-    add(`
-      ${obj.description}
-
-      ${solution}
-
-    `)
-
-    if (msg) {
       add(`
-        ${hr}
+        ${obj.description}
 
-        ${msg}
+        ${text}
 
       `)
+    } else {
+
+      add(`
+        ${obj.description}
+
+        ${obj.solution}
+
+      `)
+
+      if (msg) {
+        add(`
+          ${hr}
+
+          ${msg}
+
+        `)
+      }
     }
 
     add(`
@@ -303,9 +312,9 @@ const throwFormErrorText = (info) => {
 
 module.exports = {
   raise,
-  // formError,
   formErrorText,
   throwFormErrorText,
+  hr,
   errors: {
     nonZeroExitCodeXvfb,
     missingXvfb,

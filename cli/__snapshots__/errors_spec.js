@@ -16,20 +16,21 @@ Cypress Version: 1.2.3
 `
 
 exports['errors individual has the following errors 1'] = [
-  "nonZeroExitCodeXvfb",
-  "missingXvfb",
-  "missingApp",
-  "notInstalledCI",
-  "missingDependency",
-  "versionMismatch",
+  "CYPRESS_RUN_BINARY",
   "binaryNotExecutable",
-  "unexpected",
   "failedDownload",
   "failedUnzip",
   "invalidCacheDirectory",
+  "invalidDisplayError",
+  "missingApp",
+  "missingDependency",
+  "missingXvfb",
+  "nonZeroExitCodeXvfb",
+  "notInstalledCI",
   "removed",
-  "CYPRESS_RUN_BINARY",
-  "smokeTestFailure"
+  "smokeTestFailure",
+  "unexpected",
+  "versionMismatch"
 ]
 
 exports['errors .errors.formErrorText calls solution if a function 1'] = `

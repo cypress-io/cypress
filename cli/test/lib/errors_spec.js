@@ -6,7 +6,7 @@ const { errors, formErrorText } = require(`${lib}/errors`)
 const util = require(`${lib}/util`)
 const mockedEnv = require('mocked-env')
 
-describe('errors', function () {
+describe.only('errors', function () {
   const { missingXvfb } = errors
 
   beforeEach(function () {
@@ -16,7 +16,7 @@ describe('errors', function () {
 
   describe('individual', () => {
     it('has the following errors', () => {
-      return snapshot(Object.keys(errors))
+      return snapshot(Object.keys(errors).sort())
     })
   })
 

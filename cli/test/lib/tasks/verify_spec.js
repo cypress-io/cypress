@@ -56,7 +56,7 @@ context('lib/tasks/verify', () => {
     sinon.stub(_, 'random').returns('222')
 
     util.exec
-    .withArgs(executablePath, ['--smoke-test', '--ping=222'])
+    .withArgs(executablePath, ['--smoke-test', '--ping=222', '--enable-logging'])
     .resolves(spawnedProcess)
   })
 
@@ -500,7 +500,7 @@ context('lib/tasks/verify', () => {
         customDir: '/real/custom',
       })
       util.exec
-      .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222'])
+      .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222', '--enable-logging'])
       .resolves(spawnedProcess)
 
       return verify.start().then(() => {
