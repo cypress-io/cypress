@@ -52,9 +52,8 @@ describe('errors', function () {
       }
 
       return formErrorText(error, 'msg', 'prevMsg')
-      .then((text) => {
+      .then(() => {
         expect(solution).to.have.been.calledWithExactly('msg', 'prevMsg')
-        expect(text).to.equal('a solution')
       })
     })
 
