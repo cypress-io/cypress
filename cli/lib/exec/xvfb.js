@@ -2,7 +2,7 @@ const os = require('os')
 const Promise = require('bluebird')
 const Xvfb = require('@cypress/xvfb')
 const R = require('ramda')
-const {stripIndent} = require('common-tags')
+const { stripIndent } = require('common-tags')
 const debug = require('debug')('cypress:cli')
 const debugXvfb = require('debug')('cypress:xvfb')
 const { throwFormErrorText, errors } = require('../errors')
@@ -45,6 +45,7 @@ module.exports = {
     if (os.platform() !== 'linux') {
       return false
     }
+
     if (process.env.DISPLAY) {
       const message = stripIndent`
         DISPLAY environment variable is set to ${process.env.DISPLAY} on Linux
@@ -56,12 +57,15 @@ module.exports = {
         Solution: Unset the DISPLAY variable and try again:
           DISPLAY= npx cypress run ...
       `
+
       debug(message)
+
       return false
     }
 
     debug('undefined DISPLAY environment variable')
     debug('Cypress will spawn its own XVFB')
+
     return true
   },
 
