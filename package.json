@@ -33,6 +33,7 @@
     "clean-deps": "npm run all clean-deps && rm -rf node_modules",
     "docker": "./scripts/run-docker-local.sh",
     "lint-js": "eslint --fix scripts/*.js packages/ts/*.js cli/*.js cli/**/*.js",
+    "lint-changed": "git diff --name-only | grep '\\.js$' | xargs npx eslint --fix",
     "lint-coffee": "coffeelint scripts/**/*.coffee",
     "lint": "npm run lint-js && npm run lint-coffee",
     "pretest": "npm run lint && npm run all lint && npm run test-scripts",
