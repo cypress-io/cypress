@@ -12,6 +12,9 @@ const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 
+// TODO it would be nice if all error objects could be enforced via types
+// to only have description + solution properties
+
 // common errors Cypress application can encounter
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
