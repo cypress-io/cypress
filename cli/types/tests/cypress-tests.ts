@@ -79,8 +79,8 @@ namespace CypressLogsTest {
 }
 
 namespace CypressLocalStorageTest {
-  Cypress.LocalStorage.clear = function (keys) {
-    keys // $ExpectType string[]
+  Cypress.LocalStorage.clear = function(keys) {
+    keys // $ExpectType string[] | undefined
   }
 }
 
