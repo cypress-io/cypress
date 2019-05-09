@@ -246,6 +246,16 @@ declare namespace Cypress {
     env(object: ObjectLike): void
 
     /**
+     * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
+     *
+     * @see https://on.cypress.io/iscy
+     * @example
+     *    Cypress.isCy(cy) // => true
+     */
+    isCy<TSubject = any>(obj: Chainable<TSubject>): obj is Chainable<TSubject>
+    isCy(obj: any): obj is Chainable
+
+    /**
      * Internal options for "cy.log" used in custom commands.
      *
      * @see https://on.cypress.io/cypress-log

@@ -40,6 +40,17 @@ namespace CypressEnvTests {
   })
 }
 
+namespace CypressIsCyTests {
+  Cypress.isCy(cy) // $ExpectType boolean
+  Cypress.isCy(undefined) // $ExpectType boolean
+
+  const chainer = cy.wrap("foo").then(function() {
+    if (Cypress.isCy(chainer)) {
+      chainer // $ExpectType Chainable<string>
+    }
+  })
+}
+
 namespace CypressCommandsTests {
   Cypress.Commands.add('newCommand', () => {
     return
