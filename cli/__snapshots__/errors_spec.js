@@ -1,3 +1,14 @@
+exports['errors .errors.formErrorText calls solution if a function 1'] = `
+description
+
+a solution
+
+----------
+
+Platform: test platform (Foo-OsVersion)
+Cypress Version: 1.2.3
+`
+
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `
 Your system is missing the dependency: XVFB
 
@@ -33,19 +44,26 @@ exports['errors individual has the following errors 1'] = [
   "versionMismatch"
 ]
 
-exports['errors .errors.formErrorText calls solution if a function 1'] = `
-description
+exports['invalid display error'] = `
+Cypress failed to start.
 
-a solution
+First, we have tried to start Cypress using your DISPLAY settings
+but his the following problem:
 
 ----------
 
-Platform: test platform (Foo-OsVersion)
-Cypress Version: 1.2.3
-`
+prev message
 
-exports['errors .errors.formErrorText custom solution returns specific solution if on Linux DISPLAY env is set 1'] = `
-Cypress failed to start.
+----------
+
+Then we started our own XVFB and tried to start Cypress again, but
+got the following error:
+
+----------
+
+current message
+
+----------
 
 This is usually caused by a missing library or dependency.
 
@@ -55,15 +73,8 @@ The error below should indicate which dependency is missing.
 
 If you are using Docker, we provide containers with all required dependencies installed.
 
-We have noticed that DISPLAY variable is set to "wrong-display-address"
-This might be a problem if X11 server is not responding.
-
-[34mhttps://github.com/cypress-io/cypress/issues/4034[39m
-
-Try deleting the DISPLAY variable and running the command again.
-
 ----------
 
-Platform: linux (Foo-OsVersion)
+Platform: test platform (Foo-OsVersion)
 Cypress Version: 1.2.3
 `

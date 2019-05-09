@@ -4,9 +4,8 @@ const os = require('os')
 const snapshot = require('../support/snapshot')
 const { errors, formErrorText } = require(`${lib}/errors`)
 const util = require(`${lib}/util`)
-const mockedEnv = require('mocked-env')
 
-describe.only('errors', function () {
+describe('errors', function () {
   const { missingXvfb } = errors
 
   beforeEach(function () {
@@ -45,6 +44,20 @@ describe.only('errors', function () {
       })
     })
 
+    it('passes message and previous message', () => {
+      const solution = sinon.stub().returns('a solution')
+      const error = {
+        description: 'description',
+        solution,
+      }
+
+      return formErrorText(error, 'msg', 'prevMsg')
+      .then((text) => {
+        expect(solution).to.have.been.calledWithExactly('msg', 'prevMsg')
+        expect(text).to.equal('a solution')
+      })
+    })
+
     it('expects solution to be a string', () => {
       const error = {
         description: 'description',
@@ -54,26 +67,10 @@ describe.only('errors', function () {
       return expect(formErrorText(error)).to.be.rejected
     })
 
-    describe('custom solution', () => {
-      let restore
-
-      beforeEach(() => {
-        restore = mockedEnv({
-          DISPLAY: 'wrong-display-address',
-        })
-      })
-
-      afterEach(() => {
-        restore()
-      })
-
-      it('returns specific solution if on Linux DISPLAY env is set', () => {
-        os.platform.returns('linux')
-
-        return formErrorText(errors.missingDependency)
-        .then((text) => {
-          snapshot(text)
-        })
+    it('forms full text for invalid display error', () => {
+      return formErrorText(errors.invalidDisplayError, 'current message', 'prev message')
+      .then((text) => {
+        snapshot('invalid display error', text)
       })
     })
   })

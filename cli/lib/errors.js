@@ -108,10 +108,6 @@ const smokeTestFailure = (smokeTestCommand, timedOut) => {
   }
 }
 
-const isDisplayOnLinuxSet = () => {
-  return os.platform() === 'linux' && Boolean(process.env.DISPLAY)
-}
-
 const invalidDisplayError = {
   description: 'Cypress failed to start.',
   solution  (msg, prevMessage) {
@@ -119,12 +115,16 @@ const invalidDisplayError = {
       First, we have tried to start Cypress using your DISPLAY settings
       but his the following problem:
 
+      ${hr}
+
       ${prevMessage}
 
       ${hr}
 
       Then we started our own XVFB and tried to start Cypress again, but
       got the following error:
+
+      ${hr}
 
       ${msg}
 
@@ -245,6 +245,9 @@ function formErrorText (info, msg, prevMessage) {
       )
     }
 
+    la(is.unemptyString(obj.description),
+      'expected error description to be text', obj.description)
+
     // assuming that if there the solution is a function it will handle
     // error message and (optional previous error message)
     if (is.fn(obj.solution)) {
@@ -259,6 +262,8 @@ function formErrorText (info, msg, prevMessage) {
 
       `)
     } else {
+      la(is.unemptyString(obj.solution),
+        'expected error solution to be text', obj.solution)
 
       add(`
         ${obj.description}
