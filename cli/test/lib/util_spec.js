@@ -18,13 +18,20 @@ describe('util', () => {
   context('.getGitHubIssueUrl', () => {
     it('returls url for issue number', () => {
       const url = util.getGitHubIssueUrl(4034)
+
       expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')
     })
 
     it('throws for anything but a positive integer', () => {
-      expect(() => util.getGitHubIssueUrl('4034')).to.throw
-      expect(() => util.getGitHubIssueUrl(-5)).to.throw
-      expect(() => util.getGitHubIssueUrl(5.19)).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl('4034')
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(-5)
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(5.19)
+      }).to.throw
     })
   })
 

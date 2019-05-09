@@ -255,7 +255,7 @@ const util = {
     la(_.isInteger(number), 'github issue should be an integer', number)
 
     return `${issuesUrl}/${number}`
-  }
+  },
 }
 
 module.exports = util
