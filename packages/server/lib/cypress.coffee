@@ -59,7 +59,9 @@ module.exports = {
             ## promise is expecting this object structure
             debug("electron finished with", code)
             resolve({totalFailed: code})
-          cypressElectron.open(".", require("./util/args").toArray(options), fn)
+          args = require("./util/args").toArray(options)
+          debug("electron open arguments %o", args)
+          cypressElectron.open(".", args, fn)
 
   openProject: (options) ->
     ## this code actually starts a project

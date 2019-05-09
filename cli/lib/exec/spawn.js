@@ -52,7 +52,7 @@ module.exports = {
       executable = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
     }
 
-    debug('needs XVFB?', needsXvfb)
+    debug('needs to start own XVFB?', needsXvfb)
 
     // always push cwd into the args
     args = [].concat(args, '--cwd', process.cwd())
