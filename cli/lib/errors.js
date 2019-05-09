@@ -104,23 +104,44 @@ const smokeTestFailure = (smokeTestCommand, timedOut) => {
   }
 }
 
+const isDisplayOnLinuxSet = () => {
+  return os.platform() === 'linux' &&
+  Boolean(process.env.DISPLAY)
+}
+
 const missingDependency = {
   description: 'Cypress failed to start.',
   // this message is too Linux specific
-  solution: stripIndent`
-    This is usually caused by a missing library or dependency.
+  solution: () => {
+    let text = stripIndent`
+      This is usually caused by a missing library or dependency.
 
-    The error below should indicate which dependency is missing.
+      The error below should indicate which dependency is missing.
 
-      ${chalk.blue(requiredDependenciesUrl)}
+        ${chalk.blue(requiredDependenciesUrl)}
 
-    If you are using Docker, we provide containers with all required dependencies installed.
-  `,
+      If you are using Docker, we provide containers with all required dependencies installed.
+    `
+
+    if (isDisplayOnLinuxSet()) {
+      text += `\n\n${stripIndent`
+        We have noticed that DISPLAY variable is set to "${process.env.DISPLAY}"
+        This might be a problem if X11 server is not responding.
+        See ${chalk.blue('https://github.com/cypress-io/cypress/issues/4034')} and try
+        deleting the DISPLAY variable and running the command again.
+      `}`
+    }
+
+    return text
+  },
 }
 
 const invalidCacheDirectory = {
   description: 'Cypress cannot write to the cache directory due to file permissions',
-  solution: '',
+  solution: stripIndent`
+    See discussion and possible solutions at
+    ${chalk.blue('https://github.com/cypress-io/cypress/issues/1281')}
+  `,
 }
 
 const versionMismatch = {

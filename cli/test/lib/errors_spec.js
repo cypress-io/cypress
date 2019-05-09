@@ -4,6 +4,7 @@ const os = require('os')
 const snapshot = require('../support/snapshot')
 const { errors, formErrorText } = require(`${lib}/errors`)
 const util = require(`${lib}/util`)
+const mockedEnv = require('mocked-env')
 
 describe('errors', function () {
   const { missingXvfb } = errors
@@ -19,7 +20,7 @@ describe('errors', function () {
     })
   })
 
-  context.only('.errors.formErrorText', function () {
+  context('.errors.formErrorText', function () {
     it('returns fully formed text message', () => {
       expect(missingXvfb).to.be.an('object')
 
@@ -39,7 +40,7 @@ describe('errors', function () {
 
       return formErrorText(error)
       .then((text) => {
-        console.log(text)
+        snapshot(text)
         expect(solution).to.have.been.calledOnce
       })
     })
@@ -51,6 +52,29 @@ describe('errors', function () {
       }
 
       return expect(formErrorText(error)).to.be.rejected
+    })
+
+    describe('custom solution', () => {
+      let restore
+
+      beforeEach(() => {
+        restore = mockedEnv({
+          DISPLAY: 'wrong-display-address',
+        })
+      })
+
+      afterEach(() => {
+        restore()
+      })
+
+      it('returns specific solution if on Linux DISPLAY env is set', () => {
+        os.platform.returns('linux')
+
+        return formErrorText(errors.missingDependency)
+        .then((text) => {
+          snapshot(text)
+        })
+      })
     })
   })
 })
