@@ -56,8 +56,10 @@ If you are using Docker, we provide containers with all required dependencies in
 
 We have noticed that DISPLAY variable is set to "wrong-display-address"
 This might be a problem if X11 server is not responding.
-See [34mhttps://github.com/cypress-io/cypress/issues/4034[39m and try
-deleting the DISPLAY variable and running the command again.
+
+[34mhttps://github.com/cypress-io/cypress/issues/4034[39m
+
+Try deleting the DISPLAY variable and running the command again.
 
 ----------
 

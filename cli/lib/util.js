@@ -1,6 +1,8 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 const tty = require('tty')
 const path = require('path')
 const isCi = require('is-ci')
@@ -15,6 +17,8 @@ const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
+
+const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
 const getosAsync = Promise.promisify(getos)
 
@@ -243,6 +247,15 @@ const util = {
   exec: execa,
 
   stdoutLineMatches,
+
+  issuesUrl,
+
+  getGitHubIssueUrl (number) {
+    la(is.positive(number), 'github issue should be a positive number', number)
+    la(_.isInteger(number), 'github issue should be an integer', number)
+
+    return `${issuesUrl}/${number}`
+  }
 }
 
 module.exports = util

@@ -8,7 +8,6 @@ const is = require('check-more-types')
 const util = require('./util')
 const state = require('./tasks/state')
 
-const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 
@@ -26,7 +25,7 @@ const failedUnzip = {
   solution: stripIndent`
     Search for an existing issue or open a GitHub issue at
 
-      ${chalk.blue(issuesUrl)}
+      ${chalk.blue(util.issuesUrl)}
   `,
 }
 
@@ -127,11 +126,15 @@ const missingDependency = {
     `
 
     if (isDisplayOnLinuxSet()) {
+      const issueUrl = util.getGitHubIssueUrl(4034)
+
       text += `\n\n${stripIndent`
         We have noticed that DISPLAY variable is set to "${process.env.DISPLAY}"
         This might be a problem if X11 server is not responding.
-        See ${chalk.blue('https://github.com/cypress-io/cypress/issues/4034')} and try
-        deleting the DISPLAY variable and running the command again.
+
+          ${chalk.blue(issueUrl)}
+
+        Try deleting the DISPLAY variable and running the command again.
       `}`
     }
 
@@ -143,7 +146,7 @@ const invalidCacheDirectory = {
   description: 'Cypress cannot write to the cache directory due to file permissions',
   solution: stripIndent`
     See discussion and possible solutions at
-    ${chalk.blue('https://github.com/cypress-io/cypress/issues/1281')}
+    ${chalk.blue(util.getGitHubIssueUrl(1281))}
   `,
 }
 
@@ -161,7 +164,7 @@ const unexpected = {
 
     Check if there is a GitHub issue describing this crash:
 
-      ${chalk.blue(issuesUrl)}
+      ${chalk.blue(util.issuesUrl)}
 
     Consider opening a new issue.
   `,
