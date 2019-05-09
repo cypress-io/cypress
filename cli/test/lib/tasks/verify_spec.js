@@ -293,6 +293,7 @@ context('lib/tasks/verify', () => {
       })
 
       util.exec.restore()
+      sinon.spy(logger, 'warn')
     })
 
     it('successfully retries with our XVFB on Linux', () => {
@@ -304,6 +305,7 @@ context('lib/tasks/verify', () => {
         // to allow retry logic to work
         os.platform.returns('linux')
         const firstSpawnError = new Error('')
+
         // this message contains typical Gtk error shown if X11 is incorrect
         // like in the case of DISPLAY=987
         firstSpawnError.stderr = '[some noise here] Gtk: cannot open display: 987'
@@ -319,6 +321,8 @@ context('lib/tasks/verify', () => {
 
       return verify.start().then(() => {
         expect(util.exec).to.have.been.calledTwice
+        // user should have been warned
+        expect(logger.warn).to.have.been.calledOnce
       })
     })
 
@@ -331,6 +335,7 @@ context('lib/tasks/verify', () => {
 
         os.platform.returns('linux')
         const firstSpawnError = new Error('')
+
         // this message contains typical Gtk error shown if X11 is incorrect
         // like in the case of DISPLAY=987
         firstSpawnError.stderr = '[some noise here] Gtk: cannot open display: 987'
@@ -349,6 +354,9 @@ context('lib/tasks/verify', () => {
         // second time around we should have called XVFB
         expect(xvfb.start).to.have.been.calledOnce
         expect(xvfb.stop).to.have.been.calledOnce
+
+        // user should have been warned
+        expect(logger.warn).to.have.been.calledOnce
 
         snapshot('tried to verify twice, on the first try got the DISPLAY error', e.message)
       })

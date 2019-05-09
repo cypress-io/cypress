@@ -53,10 +53,12 @@ const runSmokeTest = (binaryDir, options) => {
       debug('Smoke test failed:', err)
 
       let errMessage = err.stderr || err.message
+
       debug('error message:', errMessage)
 
       if (err.timedOut) {
         debug('error timedOut is true')
+
         return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, true))(errMessage)
       }
 
@@ -65,6 +67,17 @@ const runSmokeTest = (binaryDir, options) => {
         // for the very first time
         // and we hit invalid display error
         debug('Smoke test hit Linux display problem: %s', errMessage)
+
+        logger.warn(stripIndent`
+
+          ${logSymbols.warning} Warning: we have caught a display problem:
+
+          ${errMessage}
+
+          We will attempt to spin our XVFB server and verify again.
+        `)
+        logger.log()
+
         const err = new Error(errMessage)
 
         err.displayError = true
@@ -83,6 +96,7 @@ const runSmokeTest = (binaryDir, options) => {
       }
 
       debug('throwing missing dependency error')
+
       return throwFormErrorText(errors.missingDependency)(errMessage)
     }
   }
