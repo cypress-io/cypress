@@ -284,6 +284,39 @@ context('lib/tasks/verify', () => {
     })
   })
 
+  describe.only('smoke test retries on bad display with our XVFB', () => {
+    beforeEach(() => {
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0777 }),
+        packageVersion,
+      })
+
+      util.exec.restore()
+    })
+
+    it('successfully retries with our XVFB on Linux', () => {
+      // initially we think the user has everything set
+      xvfb.isNeeded.returns(false)
+
+      sinon.stub(util, 'exec').callsFake(() => {
+        os.platform.returns('linux')
+        const firstSpawnError = new Error('')
+        firstSpawnError.stderr = '[some noise here] Gtk: cannot open display: 987'
+        firstSpawnError.stdout = ''
+
+        // the second time the binary returns expected ping
+        util.exec.withArgs(executablePath).resolves({
+          stdout: '222',
+        })
+
+        return Promise.reject(firstSpawnError)
+      })
+
+      return verify.start()
+    })
+  })
+
   it('logs an error if Cypress executable does not exist', () => {
     createfs({
       alreadyVerified: false,

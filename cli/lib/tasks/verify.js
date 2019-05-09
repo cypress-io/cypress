@@ -53,9 +53,10 @@ const runSmokeTest = (binaryDir, options) => {
       debug('Smoke test failed:', err)
 
       let errMessage = err.stderr || err.message
+      debug('error message:', errMessage)
 
       if (err.timedOut) {
-
+        debug('error timedOut is true')
         return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, true))(errMessage)
       }
 
@@ -63,7 +64,7 @@ const runSmokeTest = (binaryDir, options) => {
         // running without our XVFB
         // for the very first time
         // and we hit invalid display error
-        debug('Smoke test hit Linux display problem %s', errMessage)
+        debug('Smoke test hit Linux display problem: %s', errMessage)
         const err = new Error(errMessage)
 
         err.displayError = true
@@ -81,6 +82,7 @@ const runSmokeTest = (binaryDir, options) => {
         return throwFormErrorText(errors.invalidDisplayError)(errMessage, prevDisplayError.message)
       }
 
+      debug('throwing missing dependency error')
       return throwFormErrorText(errors.missingDependency)(errMessage)
     }
   }
@@ -115,7 +117,7 @@ const runSmokeTest = (binaryDir, options) => {
       debug('smoke test stdout "%s"', smokeTestReturned)
 
       if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
-        debug('Smoke test failed:', result)
+        debug('Smoke test failed because could not find %d in:', random, result)
 
         return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(result.stderr || result.stdout)
       }
