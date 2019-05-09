@@ -30,6 +30,14 @@ function normalizeModuleOptions (options = {}) {
   return _.mapValues(options, stringify)
 }
 
+/**
+ * Returns true if the platform is Linux. We do a lot of different
+ * stuff on Linux (like XVFB) and it helps to has readable code
+ */
+const isLinux = () => {
+  return os.platform() === 'linux'
+}
+
 function stdoutLineMatches (expectedLine, stdout) {
   const lines = stdout.split('\n').map(R.trim)
   const lineMatches = R.equals(expectedLine)
@@ -180,9 +188,11 @@ const util = {
     return Promise.resolve(executable(filePath))
   },
 
+  isLinux,
+
   getOsVersionAsync () {
     return Promise.try(() => {
-      if (os.platform() === 'linux') {
+      if (isLinux()) {
         return getosAsync()
         .then((osInfo) => {
           return [osInfo.dist, osInfo.release].join(' - ')
@@ -255,6 +265,17 @@ const util = {
     la(_.isInteger(number), 'github issue should be an integer', number)
 
     return `${issuesUrl}/${number}`
+  },
+
+  /**
+   * If the DISPLAY variable is set incorrectly, when trying to spawn
+   * Cypress executable we get an error like this:
+  ```
+  [1005:0509/184205.663837:WARNING:browser_main_loop.cc(258)] Gtk: cannot open display: 99
+  ```
+   */
+  isDisplayError (errorMessage) {
+    return isLinux() && errorMessage.includes('cannot open display:')
   },
 }
 

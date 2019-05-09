@@ -107,8 +107,20 @@ const smokeTestFailure = (smokeTestCommand, timedOut) => {
 }
 
 const isDisplayOnLinuxSet = () => {
-  return os.platform() === 'linux' &&
-  Boolean(process.env.DISPLAY)
+  return os.platform() === 'linux' && Boolean(process.env.DISPLAY)
+}
+
+const invalidDisplayError = {
+  description: 'Cypress failed to start with own XVFB.',
+  solution: stripIndent`
+    This is usually caused by a missing library or dependency.
+
+    The error below should indicate which dependency is missing.
+
+      ${chalk.blue(requiredDependenciesUrl)}
+
+    If you are using Docker, we provide containers with all required dependencies installed.
+  `,
 }
 
 const missingDependency = {
@@ -220,8 +232,8 @@ function addPlatformInformation (info) {
 /**
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
-*/
-function formErrorText (info, msg) {
+ */
+function formErrorText (info, msg, prevMessage) {
   const hr = '----------'
 
   return addPlatformInformation(info)
@@ -234,7 +246,9 @@ function formErrorText (info, msg) {
       )
     }
 
-    const solution = is.fn(obj.solution) ? obj.solution() : obj.solution
+    const solution = is.fn(obj.solution)
+      ? obj.solution(msg, prevMessage)
+      : obj.solution
 
     la(is.unemptyString(solution), 'expected solution to be text', solution)
 
@@ -281,8 +295,8 @@ const raise = (text) => {
 }
 
 const throwFormErrorText = (info) => {
-  return (msg) => {
-    return formErrorText(info, msg)
+  return (msg, prevMessage) => {
+    return formErrorText(info, msg, prevMessage)
     .then(raise)
   }
 }
@@ -298,6 +312,7 @@ module.exports = {
     missingApp,
     notInstalledCI,
     missingDependency,
+    invalidDisplayError,
     versionMismatch,
     binaryNotExecutable,
     unexpected,

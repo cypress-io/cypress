@@ -48,7 +48,7 @@ const runSmokeTest = (binaryDir, options) => {
     return throwFormErrorText(errors.missingXvfb)(`Caught error trying to run XVFB: "${err.message}"`)
   }
 
-  const onSmokeTestError = (smokeTestCommand) => {
+  const onSmokeTestError = (smokeTestCommand, runningWithOurXvfb, prevDisplayError) => {
     return (err) => {
       debug('Smoke test failed:', err)
 
@@ -59,6 +59,28 @@ const runSmokeTest = (binaryDir, options) => {
         return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, true))(errMessage)
       }
 
+      if (!runningWithOurXvfb && !prevDisplayError && util.isDisplayError(errMessage)) {
+        // running without our XVFB
+        // for the very first time
+        // and we hit invalid display error
+        debug('Smoke test hit Linux display problem %s', errMessage)
+        const err = new Error(errMessage)
+
+        err.displayError = true
+        err.platform = 'linux'
+        throw err
+      }
+
+      if (prevDisplayError) {
+        debug('this was our 2nd attempt at verifying')
+        debug('first we tried with user-given DISPLAY')
+        debug('now we have tried spinning our own XVFB')
+        debug('and yet it still has failed with')
+        debug(errMessage)
+
+        return throwFormErrorText(errors.invalidDisplayError)(errMessage, prevDisplayError.message)
+      }
+
       return throwFormErrorText(errors.missingDependency)(errMessage)
     }
   }
@@ -67,9 +89,13 @@ const runSmokeTest = (binaryDir, options) => {
 
   debug('needs XVFB?', needsXvfb)
 
-  const spawn = () => {
+  /**
+   * Spawn Cypress running smoke test to check if all operating system
+   * dependencies are good.
+   */
+  const spawn = (runningWithOurXvfb, prevDisplayError) => {
     const random = _.random(0, 1000)
-    const args = ['--smoke-test', `--ping=${random}`]
+    const args = ['--smoke-test', `--ping=${random}`, '--enable-logging']
     const smokeTestCommand = `${cypressExecPath} ${args.join(' ')}`
 
     debug('smoke test command:', smokeTestCommand)
@@ -79,7 +105,7 @@ const runSmokeTest = (binaryDir, options) => {
       args,
       { timeout: options.smokeTestTimeout }
     ))
-    .catch(onSmokeTestError(smokeTestCommand))
+    .catch(onSmokeTestError(smokeTestCommand, runningWithOurXvfb, prevDisplayError))
     .then((result) => {
 
       // TODO: when execa > 1.1 is released
@@ -96,18 +122,27 @@ const runSmokeTest = (binaryDir, options) => {
     })
   }
 
-  if (needsXvfb) {
+  const spinXvfbAndVerify = (prevDisplayError) => {
     return xvfb.start()
     .catch(onXvfbError)
-    .then(spawn)
+    .then(spawn.bind(null, true, prevDisplayError))
     .finally(() => {
       return xvfb.stop()
       .catch(onXvfbError)
     })
   }
 
-  return spawn()
+  if (needsXvfb) {
+    return spinXvfbAndVerify()
+  }
 
+  return spawn()
+  .catch({ displayError: true, platform: 'linux' }, (e) => {
+    debug('there was a display error')
+    debug('will try spinning our own XVFB and verify Cypress')
+
+    return spinXvfbAndVerify(e)
+  })
 }
 
 function testBinary (version, binaryDir, options) {
