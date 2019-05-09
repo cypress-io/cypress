@@ -2,6 +2,8 @@ const os = require('os')
 const chalk = require('chalk')
 const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 
 const util = require('./util')
 const state = require('./tasks/state')
@@ -205,10 +207,14 @@ function formErrorText (info, msg) {
       )
     }
 
+    const solution = is.fn(obj.solution) ? obj.solution() : obj.solution
+
+    la(is.unemptyString(solution), 'expected solution to be text', solution)
+
     add(`
       ${obj.description}
 
-      ${obj.solution}
+      ${solution}
 
     `)
 

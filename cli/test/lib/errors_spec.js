@@ -19,7 +19,7 @@ describe('errors', function () {
     })
   })
 
-  context('.errors.formErrorText', function () {
+  context.only('.errors.formErrorText', function () {
     it('returns fully formed text message', () => {
       expect(missingXvfb).to.be.an('object')
 
@@ -28,6 +28,29 @@ describe('errors', function () {
         expect(text).to.be.a('string')
         snapshot(text)
       })
+    })
+
+    it('calls solution if a function', () => {
+      const solution = sinon.stub().returns('a solution')
+      const error = {
+        description: 'description',
+        solution,
+      }
+
+      return formErrorText(error)
+      .then((text) => {
+        console.log(text)
+        expect(solution).to.have.been.calledOnce
+      })
+    })
+
+    it('expects solution to be a string', () => {
+      const error = {
+        description: 'description',
+        solution: 42,
+      }
+
+      return expect(formErrorText(error)).to.be.rejected
     })
   })
 })

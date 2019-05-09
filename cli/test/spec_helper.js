@@ -27,6 +27,7 @@ global.lib = path.join(__dirname, '..', 'lib')
 require('chai')
 .use(require('@cypress/sinon-chai'))
 .use(require('chai-string'))
+.use(require('chai-as-promised'))
 
 sinon.usingPromise(Promise)
 
