@@ -78,6 +78,12 @@ namespace CypressLogsTest {
   log.get('$el') // $ExpectType JQuery<HTMLElement>
 }
 
+namespace CypressLocalStorageTest {
+  Cypress.LocalStorage.clear = function (keys) {
+    keys // $ExpectType string[]
+  }
+}
+
 cy.wrap({ foo: [1, 2, 3] })
   .its('foo')
   .each((s: number) => {
