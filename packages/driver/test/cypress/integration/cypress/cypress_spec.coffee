@@ -12,22 +12,6 @@ describe "driver/src/cypress/index", ->
       expect(window.$Cypress).to.be.undefined
       expect(window.top.$Cypress).to.be.undefined
 
-  context "$", ->
-    afterEach ->
-      delete Cypress.$.expr[":"].foo
-
-    ## https://github.com/cypress-io/cypress/issues/2830
-    it "exposes expr", ->
-      expect(Cypress.$).to.have.property("expr")
-
-      Cypress.$.expr[":"].foo = (elem) ->
-        Boolean(elem.getAttribute("foo"))
-
-      $foo = $("<div foo='bar'>foo element</div>").appendTo(cy.$$("body"))
-
-      cy.get(":foo").then ($el) ->
-        expect($el.get(0)).to.eq($foo.get(0))
-
   context "#backend", ->
     it "sets __stackCleaned__ on errors", (done) ->
       cy.stub(@Cypress, "emit")
@@ -47,7 +31,17 @@ describe "driver/src/cypress/index", ->
 
         done()
 
-  context "Log", ->
+  context ".isCy", ->
+    it "returns true on cy, cy chainable", ->
+      expect(Cypress.isCy(cy)).to.be.true
+      chainer = cy.wrap().then ->
+        expect(Cypress.isCy(chainer)).to.be.true
+
+    it "returns false on non-cy objects", ->
+      expect(Cypress.isCy(undefined)).to.be.false
+      expect(Cypress.isCy(() => {})).to.be.false
+
+  context ".Log", ->
     it "throws when using Cypress.Log.command()", ->
       fn = ->
         Cypress.Log.command({})
