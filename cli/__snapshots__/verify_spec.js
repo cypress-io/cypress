@@ -384,3 +384,38 @@ Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
+
+exports['tried to verify twice, on the first try got the DISPLAY error'] = `
+Cypress failed to start.
+
+First, we have tried to start Cypress using your DISPLAY settings
+but his the following problem:
+
+----------
+
+[some noise here] Gtk: cannot open display: 987
+
+----------
+
+Then we started our own XVFB and tried to start Cypress again, but
+got the following error:
+
+----------
+
+some other error
+
+----------
+
+This is usually caused by a missing library or dependency.
+
+The error above should indicate which dependency is missing.
+
+[34mhttps://on.cypress.io/required-dependencies[39m
+
+If you are using Docker, we provide containers with all required dependencies installed.
+
+----------
+
+Platform: linux (Foo-OsVersion)
+Cypress Version: 1.2.3
+`

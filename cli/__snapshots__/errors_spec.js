@@ -67,7 +67,7 @@ current message
 
 This is usually caused by a missing library or dependency.
 
-The error below should indicate which dependency is missing.
+The error above should indicate which dependency is missing.
 
 [34mhttps://on.cypress.io/required-dependencies[39m
 

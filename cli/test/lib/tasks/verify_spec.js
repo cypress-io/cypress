@@ -284,7 +284,7 @@ context('lib/tasks/verify', () => {
     })
   })
 
-  describe.only('smoke test retries on bad display with our XVFB', () => {
+  describe('smoke test retries on bad display with our XVFB', () => {
     beforeEach(() => {
       createfs({
         alreadyVerified: false,
@@ -300,8 +300,12 @@ context('lib/tasks/verify', () => {
       xvfb.isNeeded.returns(false)
 
       sinon.stub(util, 'exec').callsFake(() => {
+        // using .callsFake to set platform to Linux
+        // to allow retry logic to work
         os.platform.returns('linux')
         const firstSpawnError = new Error('')
+        // this message contains typical Gtk error shown if X11 is incorrect
+        // like in the case of DISPLAY=987
         firstSpawnError.stderr = '[some noise here] Gtk: cannot open display: 987'
         firstSpawnError.stdout = ''
 
@@ -313,7 +317,41 @@ context('lib/tasks/verify', () => {
         return Promise.reject(firstSpawnError)
       })
 
-      return verify.start()
+      return verify.start().then(() => {
+        expect(util.exec).to.have.been.calledTwice
+      })
+    })
+
+    it('fails on both retries with our XVFB on Linux', () => {
+      // initially we think the user has everything set
+      xvfb.isNeeded.returns(false)
+
+      sinon.stub(util, 'exec').callsFake(() => {
+        expect(xvfb.start).to.not.have.been.called
+
+        os.platform.returns('linux')
+        const firstSpawnError = new Error('')
+        // this message contains typical Gtk error shown if X11 is incorrect
+        // like in the case of DISPLAY=987
+        firstSpawnError.stderr = '[some noise here] Gtk: cannot open display: 987'
+        firstSpawnError.stdout = ''
+
+        // the second time it runs, it fails for some other reason
+        util.exec.withArgs(executablePath).rejects(new Error('some other error'))
+
+        return Promise.reject(firstSpawnError)
+      })
+
+      return verify.start().then(() => {
+        throw new Error('Should have failed')
+      }, (e) => {
+        expect(util.exec).to.have.been.calledTwice
+        // second time around we should have called XVFB
+        expect(xvfb.start).to.have.been.calledOnce
+        expect(xvfb.stop).to.have.been.calledOnce
+
+        snapshot('tried to verify twice, on the first try got the DISPLAY error', e.message)
+      })
     })
   })
 
