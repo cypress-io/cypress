@@ -69,7 +69,9 @@ module.exports = {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
           executable = 'node'
-          args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
+          args.unshift(
+            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+          )
         }
 
         const overrides = util.getEnvOverrides()
@@ -91,6 +93,12 @@ module.exports = {
           options = _.extend({}, options, { windowsHide: false })
         }
 
+        if (os.platform() === 'linux' && process.env.DISPLAY) {
+          // make sure we use the latest DISPLAY variable if any
+          debug('passing DISPLAY', process.env.DISPLAY)
+          options.env.DISPLAY = process.env.DISPLAY
+        }
+
         const child = cp.spawn(executable, args, options)
 
         child.on('close', resolve)
@@ -101,17 +109,21 @@ module.exports = {
 
         // if this is defined then we are manually piping for linux
         // to filter out the garbage
-        child.stderr && child.stderr.on('data', (data) => {
-          const str = data.toString()
+        child.stderr &&
+          child.stderr.on('data', (data) => {
+            const str = data.toString()
 
-          // bail if this is warning line garbage
-          if (isXlibOrLibudevRe.test(str) || isHighSierraWarningRe.test(str)) {
-            return
-          }
+            // bail if this is warning line garbage
+            if (
+              isXlibOrLibudevRe.test(str) ||
+              isHighSierraWarningRe.test(str)
+            ) {
+              return
+            }
 
-          // else pass it along!
-          process.stderr.write(data)
-        })
+            // else pass it along!
+            process.stderr.write(data)
+          })
 
         // https://github.com/cypress-io/cypress/issues/1841
         // In some versions of node, it will throw on windows
@@ -133,18 +145,44 @@ module.exports = {
       })
     }
 
-    const userFriendlySpawn = () => {
+    const spawnInXvfb = () => {
+      return xvfb
+      .start()
+      .then(() => {
+        // call userFriendlySpawn ourselves
+        // to prevent result of previous promise
+        // from becoming a parameter to userFriendlySpawn
+        return userFriendlySpawn()
+      })
+      .finally(xvfb.stop)
+    }
+
+    const userFriendlySpawn = (shouldRetryOnDisplayProblem) => {
+      debug('spawning')
+      if (os.platform() === 'linux') {
+        debug('DISPLAY is %s', process.env.DISPLAY)
+      }
+
       return spawn()
+      .then((code) => {
+        const POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE = 234
+
+        if (shouldRetryOnDisplayProblem && code === POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE) {
+          debug('Cypress thinks there is a display problem')
+          debug('retrying the command with our XVFB')
+
+          return spawnInXvfb()
+        }
+
+        return code
+      })
       .catch(throwFormErrorText(errors.unexpected))
     }
 
     if (needsXvfb) {
-      return xvfb.start()
-      .then(userFriendlySpawn)
-      .finally(xvfb.stop)
+      return spawnInXvfb()
     }
 
-    return userFriendlySpawn()
-
+    return userFriendlySpawn(os.platform() === 'linux')
   },
 }
