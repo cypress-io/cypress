@@ -75,24 +75,39 @@ describe "src/cy/commands/net_stubbing", ->
         handler = () => {}
 
         options = {
-          url: "http://foo.invalid"
-          headers: {
-            "Accept-Language": /hylian/i
-            "Content-Encoding": "corrupted"
-          }
           auth: {
             username: "foo"
             password: /.*/
           }
+          headers: {
+            "Accept-Language": /hylian/i
+            "Content-Encoding": "corrupted"
+          }
+          hostname: /any.com/
           https: true
+          method: "POST"
+          path: "/bing?foo"
+          pathname: "/bazz"
           port: [1,2,3,4,5,6]
+          query: {
+            bar: "baz"
+            quuz: /(.*)quux/gi
+          }
+          url: "http://foo.invalid"
+          webSocket: false
         }
 
         expectedEvent = {
           routeMatcher: {
-            url: {
-              type: "glob"
-              value: options.url
+            auth: {
+              username: {
+                type: "glob"
+                value: options.auth.username
+              }
+              password: {
+                type: "regex"
+                value: "/.*/"
+              }
             }
             headers: {
               "Accept-Language": {
@@ -104,18 +119,39 @@ describe "src/cy/commands/net_stubbing", ->
                 value: options.headers["Content-Encoding"]
               }
             }
+            hostname: {
+              type: "regex"
+              value: "/any.com/"
+            }
             https: options.https
+            method: {
+              type: "glob"
+              value: options.method
+            }
+            path: {
+              type: "glob"
+              value: options.path
+            }
+            pathname: {
+              type: "glob"
+              value: options.pathname
+            }
             port: options.port
-            auth: {
-              username: {
+            query: {
+              bar: {
                 type: "glob"
-                value: options.auth.username
+                value: options.query.bar
               }
-              password: {
+              quuz: {
                 type: "regex"
-                value: "/.*/"
+                value: "/(.*)quux/gi"
               }
             }
+            url: {
+              type: "glob"
+              value: options.url
+            }
+            webSocket: options.webSocket
           }
         }
 
