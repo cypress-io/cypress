@@ -3,7 +3,7 @@ const stream = require('stream')
 const through2 = require('through2')
 
 function streamBuffer (initialSize = 2048) {
-  let buffer = Buffer.alloc(initialSize)
+  let buffer = Buffer.allocUnsafe(initialSize)
   let bytesWritten = 0
   let finished = false
 
@@ -20,7 +20,7 @@ function streamBuffer (initialSize = 2048) {
         newBufferLength,
       })
 
-      const newBuffer = Buffer.alloc(newBufferLength)
+      const newBuffer = Buffer.allocUnsafe(newBufferLength)
 
       buffer.copy(newBuffer)
       buffer = newBuffer
