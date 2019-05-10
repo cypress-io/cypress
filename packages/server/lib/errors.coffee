@@ -28,7 +28,7 @@ displayFlags = (obj, mapper) ->
 displayRetriesRemaining = (tries) ->
   times = pluralize('time', tries)
 
-  lastTryNewLine = if tries is 1 then "\n\n" else ""
+  lastTryNewLine = if tries is 1 then "\n" else ""
 
   chalk.gray(
     "We will try connecting to it #{tries} more #{times}...#{lastTryNewLine}"
