@@ -169,14 +169,11 @@ function _isRegExp(obj) : obj is RegExp {
   return obj && (obj instanceof RegExp || obj.__proto__ === RegExp.prototype || obj.__proto__.constructor.name === 'RegExp')
 }
 
-
 interface Route {
   options: RouteMatcherOptions
   handler: RouteHandler
   hitCount: number
 }
-
-// TODO: clear callbacks when tests restart
 
 let routes : { [key: string]: Route } = {}
 
@@ -241,6 +238,7 @@ export = function registerCommands(Commands, Cypress, /** cy, state, config */) 
   }
 
   Cypress.on("test:before:run", () => {
+    // wipe out callbacks and routes when tests start
     routes = {}
     Cypress.routes = routes
   })
