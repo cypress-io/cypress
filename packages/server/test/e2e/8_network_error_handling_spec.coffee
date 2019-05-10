@@ -360,7 +360,7 @@ describe "e2e network error handling", ->
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
-        process.env.NO_PROXY = "foobarbaz" ## proxy everything including localhost
+        process.env.NO_PROXY = "" ## proxy everything including localhost
 
         e2e.exec(@, {
           spec: "https_passthru_spec.js"
