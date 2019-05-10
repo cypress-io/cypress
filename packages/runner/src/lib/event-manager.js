@@ -24,6 +24,7 @@ const driverToSocketEvents = 'backend:request automation:request mocha'.split(' 
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
+const socketToDriverEvents = 'net:event'.split(' ')
 
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
@@ -67,6 +68,13 @@ const eventManager = {
 
     _.each(socketRerunEvents, (event) => {
       channel.on(event, rerun)
+    })
+
+    _.each(socketToDriverEvents, (event) => {
+      channel.on(event, (...args) => {
+        // TODO: will this cause a loop?
+        Cypress.emit(event, ...args)
+      })
     })
 
     reporterBus.on('runner:console:error', (testId) => {

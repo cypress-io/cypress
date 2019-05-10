@@ -104,6 +104,9 @@ class Socket
   isSocketConnected: (socket) ->
     socket and socket.connected
 
+  toDriver: (event, data) ->
+    @io and @io.emit(event, data)
+
   onAutomation: (socket, message, data, id) ->
     ## instead of throwing immediately here perhaps we need
     ## to make this more resilient by automatically retrying
@@ -303,6 +306,9 @@ class Socket
               files.readFile(config.projectRoot, args[0], args[1])
             when "write:file"
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
+            when "net"
+              # TODO: dispatch this net event
+              return
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"
