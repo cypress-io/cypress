@@ -594,9 +594,9 @@ module.exports = {
 
     These options are incompatible with each other.
 
-     - To re-try on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-     - To not re-try on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-     - To fail on non-2xx status codes without re-trying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
+     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
     """
     auth_invalid: "#{cmd('request')} must be passed an object literal for the 'auth' option."
     gzip_invalid: "#{cmd('request')} requires the 'gzip' option to be a boolean."
@@ -932,9 +932,9 @@ module.exports = {
 
     These options are incompatible with each other.
 
-     - To re-try on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-     - To not re-try on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-     - To fail on non-2xx status codes without re-trying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
+     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
     """
     invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
     invalid_method: "#{cmd('visit')} was called with an invalid method: '{{method}}'. Method can only be GET or POST."
