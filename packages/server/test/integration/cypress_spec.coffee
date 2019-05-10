@@ -839,7 +839,7 @@ describe "lib/cypress", ->
         server = http.createServer()
         server = Promise.promisifyAll(server)
 
-        server.listenAsync(5555)
+        server.listenAsync(5555, "127.0.0.1")
         .then =>
           cypress.start(["--run-project=#{@todosPath}", "--port=5555"])
         .then =>
