@@ -625,13 +625,6 @@ describe "lib/cypress", ->
         @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "screenshotOnHeadlessFailure")
         @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "You now configure this behavior in your test code")
 
-    it "logs error and exits when baseUrl cannot be verified", ->
-      settings.write(@todosPath, {baseUrl: "http://localhost:90874"})
-      .then =>
-        cypress.start(["--run-project=#{@todosPath}"])
-      .then =>
-        @expectExitWithErr("CANNOT_CONNECT_BASE_URL", "http://localhost:90874")
-
     ## TODO: make sure we have integration tests around this
     ## for headed projects!
     ## also make sure we test the rest of the integration functionality
