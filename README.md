@@ -27,7 +27,7 @@
   </a>
 </p>
 
-## What is Cypress?
+<h2 align="center"> What is Cypress? </h2>
 
 <p align="center">
   <a href="https://player.vimeo.com/video/237527670">
