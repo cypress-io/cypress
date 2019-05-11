@@ -9,7 +9,7 @@ describe "issue #3121", ->
 
   it "passes", ->
     e2e.exec(@, {
-      spec: 'issue_3121_spec.coffee',
+      spec: "issue_3121_spec.coffee",
       snapshot: true,
       expectedExitCode: 0
     })

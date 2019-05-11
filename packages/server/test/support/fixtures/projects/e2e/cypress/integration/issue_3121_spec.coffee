@@ -5,7 +5,7 @@ describe "issue #3121", ->
       .get("iframe").then ($iframe) ->
         return cy
                 .wrap($iframe.contents()
-                .find('body'))
+                .find("body"))
       .within ->
         cy
           .get("a")
@@ -14,8 +14,8 @@ describe "issue #3121", ->
     cy
       .get("body").then ($body) ->
         expect($body).to.contain("hi")
-      .get('iframe')
-      .should('not.exist')
+      .get("iframe")
+      .should("not.exist")
         
 
       
