@@ -658,11 +658,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
           Cypress automatically waits until your server is accessible before running tests.
 
-          #{displayRetriesRemaining(arg1.tries)}
+          #{displayRetriesRemaining(arg1.remaining)}
           """
         else
           """
-          #{displayRetriesRemaining(arg1.tries)}
+          #{displayRetriesRemaining(arg1.remaining)}
           """
     when "INVALID_REPORTER_NAME"
       """

@@ -34,27 +34,6 @@ fileServer   = require("./file_server")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
-RETRY_INTERVALS = [3, 3, 4]
-
-retryBaseUrlCheck = (baseUrl, onWarning, iteration = 0) ->
-  ensureUrl.isListening(baseUrl)
-  .catch (e) ->
-    if iteration == RETRY_INTERVALS.length
-      throw e
-
-    delay = RETRY_INTERVALS[iteration]
-
-    onWarning(errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
-      tries: RETRY_INTERVALS.length - iteration
-      attempt: iteration + 1
-      delay
-      baseUrl
-    }))
-
-    Promise.delay(delay * 1000)
-    .then ->
-      retryBaseUrlCheck(baseUrl, onWarning, iteration + 1)
-
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
   return if req.proxiedUrl
@@ -255,7 +234,7 @@ class Server
             @_baseUrl = baseUrl
 
             if config.isTextTerminal
-              return retryBaseUrlCheck(baseUrl, onWarning)
+              return @_retryBaseUrlCheck(baseUrl, onWarning)
               .return(null)
               .catch (e) ->
                 debug(e)
@@ -576,6 +555,20 @@ class Server
       setProxiedUrl(req)
 
       @_callRequestListeners(server, listeners, req, res)
+
+  _retryBaseUrlCheck: (baseUrl, onWarning) ->
+    ensureUrl.retryIsListening(baseUrl, {
+      retryInterval: [3000, 3000, 4000],
+      onRetry: ({ attempt, delay, remaining }) ->
+        warning = errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
+          remaining
+          attempt
+          delay
+          baseUrl
+        })
+
+        onWarning(warning)
+    })
 
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
