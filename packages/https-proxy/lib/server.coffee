@@ -44,9 +44,6 @@ class Server
         err, url: req.url
       })
 
-    browserSocket.once "data", (data) =>
-      @_onFirstHeadBytes(req, browserSocket, data, options)
-
     browserSocket.write "HTTP/1.1 200 OK\r\n"
 
     if req.headers["proxy-connection"] is "keep-alive"
@@ -54,6 +51,15 @@ class Server
       browserSocket.write("Connection: keep-alive\r\n")
 
     browserSocket.write("\r\n")
+
+    ## if we somehow already have the head here
+    if _.get(head, "length")
+      ## then immediately make up the connection
+      return @_onFirstHeadBytes(req, browserSocket, head, options)
+
+    ## else once we get it make the connection later
+    browserSocket.once "data", (data) =>
+      @_onFirstHeadBytes(req, browserSocket, data, options)
 
   _onFirstHeadBytes: (req, browserSocket, head, options) ->
     browserSocket.pause()
