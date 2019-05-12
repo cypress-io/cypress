@@ -340,9 +340,9 @@ module.exports = {
       opts = {
         followRedirect: false
         strictSSL: false
-        retryOnNetworkFailure: true
         timeout: null
-        fromProxy: true
+        fromProxy: true ## TODO: why this?
+
       }
 
       ## strip unsupported accept-encoding headers

@@ -5,14 +5,14 @@ import * as url from 'url'
 import { agent, connect } from '@packages/network'
 
 type RetryOptions = {
-  retryInterval: number[]
+  retryIntervals: number[]
   onRetry: Function
 }
 
 export const retryIsListening = (urlStr: string, options: RetryOptions) => {
-  const { retryInterval, onRetry } = options
+  const { retryIntervals, onRetry } = options
 
-  const intervals = _.clone(retryInterval)
+  const intervals = _.clone(retryIntervals)
 
   const run = () => {
     return isListening(urlStr)
@@ -25,7 +25,7 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
 
       onRetry({
         delay,
-        attempt: retryInterval.length - intervals.length,
+        attempt: retryIntervals.length - intervals.length,
         remaining: intervals.length + 1,
       })
 
