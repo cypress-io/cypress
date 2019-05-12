@@ -88,7 +88,6 @@
     "bin-up": "1.2.0",
     "chai": "3.5.0",
     "chai-string": "1.4.0",
-    "clear-module": "2.1.0",
     "dependency-check": "3.3.0",
     "dtslint": "0.7.1",
     "execa-wrap": "1.4.0",
@@ -98,7 +97,7 @@
     "proxyquire": "2.1.0",
     "shelljs": "0.8.3",
     "sinon": "7.2.2",
-    "snap-shot-it": "6.3.5",
+    "snap-shot-it": "7.0.1",
     "spawn-mock": "1.0.0"
   },
   "files": [
