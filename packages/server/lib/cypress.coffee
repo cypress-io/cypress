@@ -11,6 +11,7 @@ require("./environment")
 
 _       = require("lodash")
 cp      = require("child_process")
+os      = require("os")
 path    = require("path")
 Promise = require("bluebird")
 debug   = require("debug")("cypress:server:cypress")
@@ -34,7 +35,13 @@ exitErr = (err) ->
   require("./errors").log(err)
   .then -> exit(1)
 
+# signals back that Cypress thinks there the Electron could not
+# start due to misconfigured DISPLAY on Linux
+POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE = 234
+
 module.exports = {
+  POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE,
+
   isCurrentlyRunningElectron: ->
     !!(process.versions and process.versions.electron)
 
@@ -54,12 +61,34 @@ module.exports = {
       else
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
+          electronStarted = Number(new Date())
           fn = (code) ->
             ## juggle up the totalFailed since our outer
             ## promise is expecting this object structure
             debug("electron finished with", code)
-            resolve({totalFailed: code})
-          cypressElectron.open(".", require("./util/args").toArray(options), fn)
+            electronFinished = Number(new Date())
+            elapsed = electronFinished - electronStarted
+            debug("electron open took %d ms", elapsed)
+
+            result = {totalFailed: code}
+
+            if code is 1 and elapsed < 1000
+              ## very suspicious - the Electron process quickly exited
+              if os.platform() is "linux" && Boolean(process.env.DISPLAY)
+                ## ok, maybe the DISPLAY is set incorrectly
+                ## and Electron just failed to start with
+                ## an error "Could not open display"
+                ## or it could be some system library missing for Electron to start
+                debug("because Linux with DISPLAY set to %s", process.env.DISPLAY)
+                debug("and very short elapsed time, returning potentialDisplayProblem flag")
+                debug("could be DISPLAY configuration or OS dependency missing")
+                result.potentialDisplayProblem = true
+
+            resolve(result)
+
+          args = require("./util/args").toArray(options)
+          debug("electron open arguments %o", args)
+          cypressElectron.open(".", args, fn)
 
   openProject: (options) ->
     ## this code actually starts a project
@@ -224,8 +253,13 @@ module.exports = {
         ## run headlessly and exit
         ## with num of totalFailed
         @runElectron(mode, options)
-        .get("totalFailed")
-        .then(exit)
+        .then (result) ->
+          if result.potentialDisplayProblem
+            debug("exiting with potential display problem")
+            exit(POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE)
+
+          # normal exit
+          exit(result.totalFailed)
         .catch(exitErr)
 
       when "interactive"

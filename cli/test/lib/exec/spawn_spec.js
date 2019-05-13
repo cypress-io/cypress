@@ -5,6 +5,7 @@ const os = require('os')
 const tty = require('tty')
 const path = require('path')
 const EE = require('events')
+const mockedEnv = require('mocked-env')
 
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -117,6 +118,38 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo')
       .then((code) => {
         expect(code).to.equal(10)
+      })
+    })
+
+    describe('Linux display', () => {
+      let restore
+
+      beforeEach(() => {
+        restore = mockedEnv({
+          DISPLAY: 'test-display',
+        })
+      })
+
+      afterEach(() => {
+        restore()
+      })
+
+      it('retries with xvfb if fails with display exit code', function () {
+        const POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE = 234
+
+        this.spawnedProcess.on.withArgs('close').onFirstCall().yieldsAsync(POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE)
+        this.spawnedProcess.on.withArgs('close').onSecondCall().yieldsAsync(0)
+
+        os.platform.returns('linux')
+
+        return spawn.start('--foo')
+        .then((code) => {
+          expect(xvfb.start).to.have.been.calledOnce
+          expect(xvfb.stop).to.have.been.calledOnce
+          expect(cp.spawn).to.have.been.calledTwice
+          // second code should be 0 after successfully running with XVFB
+          expect(code).to.equal(0)
+        })
       })
     })
 

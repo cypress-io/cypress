@@ -4,10 +4,13 @@ const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
+const { stripIndent } = require('common-tags')
 
 const util = require('../util')
 const state = require('../tasks/state')
 const xvfb = require('./xvfb')
+const logger = require('../logger')
+const logSymbols = require('log-symbols')
 const { throwFormErrorText, errors } = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
@@ -52,7 +55,7 @@ module.exports = {
       executable = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
     }
 
-    debug('needs XVFB?', needsXvfb)
+    debug('needs to start own XVFB?', needsXvfb)
 
     // always push cwd into the args
     args = [].concat(args, '--cwd', process.cwd())
@@ -69,7 +72,9 @@ module.exports = {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
           executable = 'node'
-          args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
+          args.unshift(
+            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+          )
         }
 
         const overrides = util.getEnvOverrides()
@@ -91,6 +96,12 @@ module.exports = {
           options = _.extend({}, options, { windowsHide: false })
         }
 
+        if (os.platform() === 'linux' && process.env.DISPLAY) {
+          // make sure we use the latest DISPLAY variable if any
+          debug('passing DISPLAY', process.env.DISPLAY)
+          options.env.DISPLAY = process.env.DISPLAY
+        }
+
         const child = cp.spawn(executable, args, options)
 
         child.on('close', resolve)
@@ -101,17 +112,21 @@ module.exports = {
 
         // if this is defined then we are manually piping for linux
         // to filter out the garbage
-        child.stderr && child.stderr.on('data', (data) => {
-          const str = data.toString()
+        child.stderr &&
+          child.stderr.on('data', (data) => {
+            const str = data.toString()
 
-          // bail if this is warning line garbage
-          if (isXlibOrLibudevRe.test(str) || isHighSierraWarningRe.test(str)) {
-            return
-          }
+            // bail if this is warning line garbage
+            if (
+              isXlibOrLibudevRe.test(str) ||
+              isHighSierraWarningRe.test(str)
+            ) {
+              return
+            }
 
-          // else pass it along!
-          process.stderr.write(data)
-        })
+            // else pass it along!
+            process.stderr.write(data)
+          })
 
         // https://github.com/cypress-io/cypress/issues/1841
         // In some versions of node, it will throw on windows
@@ -133,18 +148,61 @@ module.exports = {
       })
     }
 
-    const userFriendlySpawn = () => {
+    const spawnInXvfb = () => {
+      return xvfb
+      .start()
+      .then(() => {
+        // call userFriendlySpawn ourselves
+        // to prevent result of previous promise
+        // from becoming a parameter to userFriendlySpawn
+        debug('spawning Cypress after starting XVFB')
+
+        return userFriendlySpawn()
+      })
+      .finally(xvfb.stop)
+    }
+
+    const userFriendlySpawn = (shouldRetryOnDisplayProblem) => {
+      debug('spawning, should retry on display problem?', Boolean(shouldRetryOnDisplayProblem))
+      if (os.platform() === 'linux') {
+        debug('DISPLAY is %s', process.env.DISPLAY)
+      }
+
       return spawn()
+      .then((code) => {
+        const POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE = 234
+
+        if (shouldRetryOnDisplayProblem && code === POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE) {
+          debug('Cypress thinks there is a potential display or OS problem')
+          debug('retrying the command with our XVFB')
+
+          // if we get this error, we are on Linux and DISPLAY is set
+          logger.warn(`${stripIndent`
+
+            ${logSymbols.warning} Warning: Cypress process has finished very quickly with an error,
+            which might be related to a potential problem with how the DISPLAY is configured.
+
+            DISPLAY was set to "${process.env.DISPLAY}"
+
+            We will attempt to spin our XVFB server and run Cypress again.
+          `}\n`)
+
+          return spawnInXvfb()
+        }
+
+        return code
+      })
       .catch(throwFormErrorText(errors.unexpected))
     }
 
     if (needsXvfb) {
-      return xvfb.start()
-      .then(userFriendlySpawn)
-      .finally(xvfb.stop)
+      return spawnInXvfb()
     }
 
-    return userFriendlySpawn()
+    // if we have problems spawning Cypress, maybe user DISPLAY setting is incorrect
+    // in that case retry with our own XVFB
+    const shouldRetryOnDisplayProblem = os.platform() === 'linux'
 
+    return userFriendlySpawn(shouldRetryOnDisplayProblem)
   },
 }

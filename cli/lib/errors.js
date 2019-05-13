@@ -2,13 +2,19 @@ const os = require('os')
 const chalk = require('chalk')
 const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 
 const util = require('./util')
 const state = require('./tasks/state')
 
-const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
+
+// TODO it would be nice if all error objects could be enforced via types
+// to only have description + solution properties
+
+const hr = '----------'
 
 // common errors Cypress application can encounter
 const failedDownload = {
@@ -21,7 +27,7 @@ const failedUnzip = {
   solution: stripIndent`
     Search for an existing issue or open a GitHub issue at
 
-      ${chalk.blue(issuesUrl)}
+      ${chalk.blue(util.issuesUrl)}
   `,
 }
 
@@ -102,6 +108,39 @@ const smokeTestFailure = (smokeTestCommand, timedOut) => {
   }
 }
 
+const invalidDisplayError = {
+  description: 'Cypress failed to start.',
+  solution  (msg, prevMessage) {
+    return stripIndent`
+      First, we have tried to start Cypress using your DISPLAY settings
+      but encountered the following problem:
+
+      ${hr}
+
+      ${prevMessage}
+
+      ${hr}
+
+      Then we started our own XVFB and tried to start Cypress again, but
+      got the following error:
+
+      ${hr}
+
+      ${msg}
+
+      ${hr}
+
+      This is usually caused by a missing library or dependency.
+
+      The error above should indicate which dependency is missing.
+
+        ${chalk.blue(requiredDependenciesUrl)}
+
+      If you are using Docker, we provide containers with all required dependencies installed.
+    `
+  },
+}
+
 const missingDependency = {
   description: 'Cypress failed to start.',
   // this message is too Linux specific
@@ -118,7 +157,10 @@ const missingDependency = {
 
 const invalidCacheDirectory = {
   description: 'Cypress cannot write to the cache directory due to file permissions',
-  solution: '',
+  solution: stripIndent`
+    See discussion and possible solutions at
+    ${chalk.blue(util.getGitHubIssueUrl(1281))}
+  `,
 }
 
 const versionMismatch = {
@@ -135,7 +177,7 @@ const unexpected = {
 
     Check if there is a GitHub issue describing this crash:
 
-      ${chalk.blue(issuesUrl)}
+      ${chalk.blue(util.issuesUrl)}
 
     Consider opening a new issue.
   `,
@@ -191,10 +233,8 @@ function addPlatformInformation (info) {
 /**
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
-*/
-function formErrorText (info, msg) {
-  const hr = '----------'
-
+ */
+function formErrorText (info, msg, prevMessage) {
   return addPlatformInformation(info)
   .then((obj) => {
     const formatted = []
@@ -205,20 +245,41 @@ function formErrorText (info, msg) {
       )
     }
 
-    add(`
-      ${obj.description}
+    la(is.unemptyString(obj.description),
+      'expected error description to be text', obj.description)
 
-      ${obj.solution}
+    // assuming that if there the solution is a function it will handle
+    // error message and (optional previous error message)
+    if (is.fn(obj.solution)) {
+      const text = obj.solution(msg, prevMessage)
 
-    `)
+      la(is.unemptyString(text), 'expected solution to be text', text)
 
-    if (msg) {
       add(`
-        ${hr}
+        ${obj.description}
 
-        ${msg}
+        ${text}
 
       `)
+    } else {
+      la(is.unemptyString(obj.solution),
+        'expected error solution to be text', obj.solution)
+
+      add(`
+        ${obj.description}
+
+        ${obj.solution}
+
+      `)
+
+      if (msg) {
+        add(`
+          ${hr}
+
+          ${msg}
+
+        `)
+      }
     }
 
     add(`
@@ -248,23 +309,24 @@ const raise = (text) => {
 }
 
 const throwFormErrorText = (info) => {
-  return (msg) => {
-    return formErrorText(info, msg)
+  return (msg, prevMessage) => {
+    return formErrorText(info, msg, prevMessage)
     .then(raise)
   }
 }
 
 module.exports = {
   raise,
-  // formError,
   formErrorText,
   throwFormErrorText,
+  hr,
   errors: {
     nonZeroExitCodeXvfb,
     missingXvfb,
     missingApp,
     notInstalledCI,
     missingDependency,
+    invalidDisplayError,
     versionMismatch,
     binaryNotExecutable,
     unexpected,
