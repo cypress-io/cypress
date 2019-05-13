@@ -100,12 +100,27 @@ type RouteHandler = string | object | RouteHandlerController
 
 export interface AddRouteFrame {
   routeMatcher: AnnotatedRouteMatcherOptions
-  responseBody?: string
-  responseHeaders?: { [key: string] : string }
+  staticResponse?: StaticResponse
   handlerId?: string
 }
 
-/** Messaging */
+export interface BaseHttpFrame {
+  requestId: string
+}
+
+export interface HttpRequestReceivedFrame extends BaseHttpFrame {
+  req: CyIncomingHTTPRequest
+}
+
+export interface HttpRequestContinueFrame extends BaseHttpFrame {
+  req: CyIncomingHTTPRequest
+}
+
+export interface StaticResponse {
+  body?: string
+  headers?: { [key: string]: string }
+  statusCode?: number
+}
 
 /** Driver Commands **/
 
@@ -191,13 +206,11 @@ function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Fu
     case _isWebSocketController(handler, options):
       break
     case typeof handler === 'string':
-      frame.responseBody = handler as string
-      break
+      frame.staticResponse = { body: <string>handler }
+    break
     case typeof handler === 'object':
-      frame.responseHeaders = {
-        'content-type': 'application/json'
-      }
-      frame.responseBody = JSON.stringify(handler)
+      // TODO: automatically JSONify staticResponse.body objects
+      frame.staticResponse = <StaticResponse>handler
       break
     default:
       // TODO: warn that only string, object, HttpController, or WebSocketController allowed

@@ -162,3 +162,13 @@ describe "src/cy/commands/net_stubbing", ->
         }
 
         @testRoute(options, handler, expectedEvent, expectedRoute)
+
+    context "stubbing with static responses", ->
+      it "works with static body as string", ->
+        cy.route({
+          url: '*'
+        }, "hello world")
+
+        cy.visit("http://aaaaaaa.com")
+
+

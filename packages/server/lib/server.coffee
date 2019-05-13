@@ -139,7 +139,7 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
+      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy, @_socket)
 
       @createServer(app, config, @_request)
 

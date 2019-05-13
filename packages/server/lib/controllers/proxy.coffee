@@ -7,6 +7,7 @@ accept        = require("http-accept")
 debug         = require("debug")("cypress:server:proxy")
 cwd           = require("../cwd")
 cors          = require("../util/cors")
+netStubbing   = require("../net_stubbing")
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
@@ -38,7 +39,7 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request, nodeProxy) ->
+  handle: (req, res, config, getRemoteState, request, nodeProxy, socket) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
@@ -80,19 +81,12 @@ module.exports = {
 
         return res.status(503).end()
 
-    # if req.headers.accept is "text/event-stream"
-    #   return nodeProxy.web(req, res, {
-    #     secure: false
-    #     ignorePath: true
-    #     target: req.proxiedUrl
-    #     timeout: 0
-    #     proxyTimeout: 0
-    #   })
-
     thr = through (d) -> @queue(d)
 
-    @getHttpContent(thr, req, res, remoteState, config, request)
-    .pipe(res)
+    ## immediately before sending the request, offer it to netStubbing for interception
+    netStubbing.onProxiedRequest req, res, socket, =>
+      @getHttpContent(thr, req, res, remoteState, config, request)
+      .pipe(res)
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"

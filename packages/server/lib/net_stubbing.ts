@@ -1,20 +1,21 @@
 import * as _ from 'lodash'
 import debugModule from 'debug'
-import { IncomingMessage } from 'http'
+import { IncomingMessage, ServerResponse } from 'http'
 import minimatch from 'minimatch'
 import url from 'url'
 // TODO: figure out the right way to make these types accessible in server and driver
 import {
   AddRouteFrame,
   AnnotatedRouteMatcherOptions,
-  RouteMatcherOptions
+  HttpRequestReceivedFrame,
+  RouteMatcherOptions,
+  StaticResponse
 } from '../../driver/src/cy/commands/net_stubbing'
 
 interface BackendRoute {
   routeMatcher: RouteMatcherOptions
   handlerId?: string
-  responseBody?: string
-  responseHeaders?: { [key: string] : string }
+  staticResponse?: StaticResponse
 }
 
 interface ProxyIncomingMessage extends IncomingMessage {
@@ -65,6 +66,7 @@ function _restoreMatcherOptionsTypes(options: AnnotatedRouteMatcherOptions) {
   return ret
 }
 
+// TODO: clear between specs
 let routes : BackendRoute[] = []
 
 function _onRouteAdded(options: AddRouteFrame) {
@@ -125,17 +127,24 @@ export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyInc
   const booleanFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['https', 'webSocket']))
   const numberFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['port']))
 
-  debug('%o', { stringMatcherFields, booleanFields, numberFields })
-
   stringMatcherFields.forEach((field) => {
     const matcher = _.get(routeMatcher, field)
-    const value = _.get(matchable, field)
+    let value = _.get(matchable, field)
+
+    if (typeof value === 'undefined') {
+      value = ''
+    }
+
+    if (typeof value !== 'string') {
+      value = String(value)
+    }
+
     if (matcher.test) {
       // value is a regex
       match = match && matcher.test(value)
       return
     }
-    match = match && minimatch(value, matcher)
+    match = match && minimatch(value, matcher, { matchBase: true })
   })
 
   booleanFields.forEach((field) => {
@@ -155,7 +164,13 @@ export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyInc
     match = match && (matcher === value)
   })
 
+  debug('does route match? %o', { match, routeMatcher, req: _.pick(matchable, _.concat(stringMatcherFields, booleanFields, numberFields)) })
+
   return match
+}
+
+function _emit(socket: any, eventName: string, data: any) {
+  socket.toDriver('net:event', eventName, data)
 }
 
 export function onDriverEvent(eventName: string, ...args: any[]) {
@@ -166,6 +181,7 @@ export function onDriverEvent(eventName: string, ...args: any[]) {
       _onRouteAdded(<AddRouteFrame>args[0])
       break
     case 'http:request:continue':
+      _onRequestContinue(<HttpRequestContinueFrame>args[0])
       break
     case 'http:response:continue':
       break
@@ -176,4 +192,52 @@ export function onDriverEvent(eventName: string, ...args: any[]) {
     case 'ws:frame:incoming:continue':
       break
   }
+}
+
+interface BackendRequest {
+  requestId: string
+  route: BackendRoute
+  continue: Function
+}
+
+let requests : { [key: string]: BackendRequest } = {}
+
+export function onProxiedRequest(req: ProxyIncomingMessage, res: ServerResponse, socket: any, cb: Function) {
+  const route = _getRouteForRequest(req)
+
+  if (!route) {
+    return cb()
+  }
+
+  if (route.staticResponse) {
+    const { headers, body, statusCode } = route.staticResponse
+    if (headers) {
+      _.keys(headers).forEach(key => {
+        res.setHeader(key, headers[key])
+      })
+    }
+
+    res.statusCode = statusCode || 200
+    res.write(body)
+    res.end()
+
+    return // don't call cb since we've satisfied the response here
+  }
+
+  const requestId = _.uniqueId()
+
+  const request : BackendRequest = {
+    requestId,
+    route,
+    continue: cb
+  }
+
+  requests[requestId] = request
+
+  const frame : HttpRequestReceivedFrame = {
+    requestId,
+    req as any
+  }
+
+  _emit(socket, 'http:request:received', frame)
 }
