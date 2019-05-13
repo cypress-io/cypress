@@ -379,7 +379,7 @@ describe "src/cy/commands/waiting", ->
           Cypress.config("requestTimeout", 200)
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 3rd request to the route: 'getUsers'. No request ever occurred."
+            expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 3rd request to the route: 'get.users'. No request ever occurred."
             done()
 
           cy.on "command:retry", =>
@@ -390,10 +390,9 @@ describe "src/cy/commands/waiting", ->
             win = cy.state("window")
             win.$.get("/users", {num: response})
 
-          cy
-            .server()
-            .route(/users/, resp).as("getUsers")
-            .wait(["@getUsers", "@getUsers", "@getUsers"])
+          cy.server()
+          cy.route(/users/, resp).as("get.users")
+          cy.wait(["@get.users", "@get.users", "@get.users"])
 
         it "throws waiting for the 2nd response", (done) ->
           resp = {foo: "foo"}
@@ -517,15 +516,14 @@ describe "src/cy/commands/waiting", ->
             _.defer => win.$.get("/timeout?ms=2002")
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 500ms for the 1st request to the route: 'getThree'. No request ever occurred."
+            expect(err.message).to.include "cy.wait() timed out waiting 500ms for the 1st request to the route: 'get.three'. No request ever occurred."
             done()
 
-          cy
-            .server()
-            .route("/timeout?ms=2001").as("getOne")
-            .route("/timeout?ms=2002").as("getTwo")
-            .route(/three/, {}).as("getThree")
-            .wait(["@getOne", "@getTwo", "@getThree"])
+          cy.server()
+          cy.route("/timeout?ms=2001").as("getOne")
+          cy.route("/timeout?ms=2002").as("getTwo")
+          cy.route(/three/, {}).as("get.three")
+          cy.wait(["@getOne", "@getTwo", "@get.three"])
 
         it "throws when waiting on the 3rd response on array of aliases", (done) ->
           Cypress.config("requestTimeout", 200)
@@ -570,17 +568,16 @@ describe "src/cy/commands/waiting", ->
         resp1 = {foo: "foo"}
         resp2 = {bar: "bar"}
 
-        cy
-          .server()
-          .route(/users/, resp1).as("getUsers")
-          .route(/posts/, resp2).as("getPosts")
-          .window().then (win) ->
-            win.$.get("/users")
-            win.$.get("/posts")
-            null
-          .wait(["@getUsers", "@getPosts"]).spread (xhr1, xhr2) ->
-            expect(xhr1.responseBody).to.deep.eq resp1
-            expect(xhr2.responseBody).to.deep.eq resp2
+        cy.server()
+        cy.route(/users/, resp1).as("getUsers")
+        cy.route(/posts/, resp2).as("get.posts")
+        cy.window().then (win) ->
+          win.$.get("/users")
+          win.$.get("/posts")
+          null
+        cy.wait(["@getUsers", "@get.posts"]).spread (xhr1, xhr2) ->
+          expect(xhr1.responseBody).to.deep.eq resp1
+          expect(xhr2.responseBody).to.deep.eq resp2
 
     describe "multiple separate alias waits", ->
       before ->
