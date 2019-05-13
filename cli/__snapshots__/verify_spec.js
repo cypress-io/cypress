@@ -389,7 +389,7 @@ exports['tried to verify twice, on the first try got the DISPLAY error'] = `
 Cypress failed to start.
 
 First, we have tried to start Cypress using your DISPLAY settings
-but his the following problem:
+but encountered the following problem:
 
 ----------
 

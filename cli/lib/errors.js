@@ -113,7 +113,7 @@ const invalidDisplayError = {
   solution  (msg, prevMessage) {
     return stripIndent`
       First, we have tried to start Cypress using your DISPLAY settings
-      but his the following problem:
+      but encountered the following problem:
 
       ${hr}
 
