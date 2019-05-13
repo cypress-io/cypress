@@ -394,6 +394,7 @@ but encountered the following problem:
 ----------
 
 [some noise here] Gtk: cannot open display: 987
+and maybe a few other lines here with weird indent
 
 ----------
 
@@ -403,6 +404,8 @@ got the following error:
 ----------
 
 some other error
+again with
+some weird indent
 
 ----------
 

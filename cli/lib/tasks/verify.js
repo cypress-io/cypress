@@ -3,7 +3,7 @@ const chalk = require('chalk')
 const Listr = require('listr')
 const debug = require('debug')('cypress:cli')
 const verbose = require('@cypress/listr-verbose-renderer')
-const { stripIndent } = require('common-tags')
+const { stripIndent, stripIndents } = require('common-tags')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
 
@@ -68,11 +68,11 @@ const runSmokeTest = (binaryDir, options) => {
         // and we hit invalid display error
         debug('Smoke test hit Linux display problem: %s', errMessage)
 
-        logger.warn(`${stripIndent`
+        logger.warn(`${stripIndents`
 
           ${logSymbols.warning} Warning: we have caught a display problem:
 
-          ${errMessage}
+          ${stripIndents(errMessage)}
 
           We will attempt to spin our XVFB server and verify again.
         `}\n`)
