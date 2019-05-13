@@ -4,10 +4,13 @@ const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
+const { stripIndent } = require('common-tags')
 
 const util = require('../util')
 const state = require('../tasks/state')
 const xvfb = require('./xvfb')
+const logger = require('../logger')
+const logSymbols = require('log-symbols')
 const { throwFormErrorText, errors } = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
@@ -170,6 +173,14 @@ module.exports = {
         if (shouldRetryOnDisplayProblem && code === POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE) {
           debug('Cypress thinks there is a display problem')
           debug('retrying the command with our XVFB')
+
+          logger.warn(`${stripIndent`
+
+            ${logSymbols.warning} Warning: Cypress process has finished very quickly with an error,
+            which might be related to a potential problem with how the DISPLAY is configured.
+
+            We will attempt to spin our XVFB server and run Cypress again.
+          `}\n`)
 
           return spawnInXvfb()
         }

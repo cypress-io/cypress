@@ -68,15 +68,14 @@ const runSmokeTest = (binaryDir, options) => {
         // and we hit invalid display error
         debug('Smoke test hit Linux display problem: %s', errMessage)
 
-        logger.warn(stripIndent`
+        logger.warn(`${stripIndent`
 
           ${logSymbols.warning} Warning: we have caught a display problem:
 
           ${errMessage}
 
           We will attempt to spin our XVFB server and verify again.
-        `)
-        logger.log()
+        `}\n`)
 
         const err = new Error(errMessage)
 
