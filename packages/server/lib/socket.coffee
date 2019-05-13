@@ -8,6 +8,7 @@ open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
+netStubbing   = require("./net_stubbing")
 task          = require("./task")
 files         = require("./files")
 fixture       = require("./fixture")
@@ -307,7 +308,7 @@ class Socket
             when "write:file"
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "net"
-              # TODO: dispatch this net event
+              netStubbing.onDriverEvent(args...)
               return
             when "exec"
               exec.run(config.projectRoot, args[0])

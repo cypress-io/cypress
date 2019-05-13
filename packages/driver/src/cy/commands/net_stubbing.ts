@@ -38,9 +38,9 @@ interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions {
   webSocket?: boolean
 }
 
-type RouteMatcherOptions = RouteMatcherOptionsGeneric<StringMatcher>
+export type RouteMatcherOptions = RouteMatcherOptionsGeneric<StringMatcher>
 
-type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedStringMatcher>
+export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedStringMatcher>
 
 type CompatXHRHandler = (xhr: XMLHttpRequest /** ? */) => void
 
@@ -67,7 +67,7 @@ interface CyIncomingHTTPRequest extends CyIncomingRequest {
   // if `responseOrInterceptor` is undefined, just forward the modified request to the destination
   reply: (responseOrInterceptor?: CyResponse | CyInterceptor) => void
 
-  // todo: is this needed, when they could just do `setTimeout(()=>req.reply(), delayMs)`?
+  // TODO: is this needed, when they could just do `setTimeout(()=>req.reply(), delayMs)`?
   // delay: (delayMs: number) => void
 }
 
@@ -98,7 +98,7 @@ type RouteHandler = string | object | RouteHandlerController
 
 /** Types for messages between driver and server */
 
-interface AddRouteFrame {
+export interface AddRouteFrame {
   routeMatcher: AnnotatedRouteMatcherOptions
   responseBody?: string
   responseHeaders?: { [key: string] : string }
@@ -180,7 +180,7 @@ let routes : { [key: string]: Route } = {}
 function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Function) : void {
   const handlerId = _getUniqueId()
 
-  const frame : AddRouteFrame = {
+  const frame: AddRouteFrame = {
     handlerId,
     routeMatcher: _annotateMatcherOptionsTypes(options),
   }
@@ -212,10 +212,11 @@ function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Fu
   emit("route:added", frame)
 }
 
-export = function registerCommands(Commands, Cypress, /** cy, state, config */) {
+export function registerCommands(Commands, Cypress, /** cy, state, config */) {
   // TODO: figure out what to do for XHR compatibility
 
   function _emit(eventName: string, ...args: any[]) {
+    // all messages from driver to server are wrapped in backend:request
     Cypress.backend("net", eventName, ...args)
   }
 
