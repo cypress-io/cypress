@@ -25,7 +25,8 @@ interface ProxyIncomingMessage extends IncomingMessage {
 const debug = debugModule('cypress:server:net_stubbing')
 
 function _getAllStringMatcherFields(options) {
-  return ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url'].concat(
+  return _.concat(
+    _.filter(['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url'], _.partial(_.has, options)),
     // add the nested DictStringMatcher values to the list of fields
     _.flatten(
       _.filter(
@@ -80,23 +81,23 @@ function _onRouteAdded(options: AddRouteFrame) {
 function _getRouteForRequest(req: ProxyIncomingMessage, prevRoute?: BackendRoute) {
   const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
   return _.find(possibleRoutes, route => {
-    return _isRouteMatched(route.routeMatcher, req)
+    return _doesRouteMatch(route.routeMatcher, req)
   })
 }
 
-function _getMatchableForRequest(req) {
+export function _getMatchableForRequest(req) {
   let matchable : any = _.pick(req, ['headers', 'method', 'webSocket'])
 
   const authorization = req.headers['authorization']
   if (authorization) {
     const [mechanism, credentials] = authorization.split(' ', 2)
     if (mechanism && credentials && mechanism.toLowerCase() === 'basic') {
-      const [username, password] = atob(credentials).split(':', 2)
+      const [username, password] = Buffer.from(credentials, 'base64').toString().split(':', 2)
       matchable.auth = { username, password }
     }
   }
 
-  const proxiedUrl = url.parse(req.proxiedUrl)
+  const proxiedUrl = url.parse(req.proxiedUrl, true)
 
   _.assign(matchable, _.pick(proxiedUrl, ['hostname', 'path', 'pathname', 'port', 'query']))
 
@@ -104,44 +105,54 @@ function _getMatchableForRequest(req) {
 
   matchable.https = proxiedUrl.protocol && (proxiedUrl.protocol.indexOf('https') === 0)
 
+  if (!matchable.port) {
+    matchable.port = matchable.https ? 443 : 80
+  }
+
   return matchable
 }
 
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
-function _isRouteMatched(routeMatcher: RouteMatcherOptions, req: ProxyIncomingMessage) {
+export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyIncomingMessage) {
   const matchable = _getMatchableForRequest(req)
 
   let match = true
 
   // get a list of all the fields which exist where a rule needs to be succeed
-  const stringMatcherFields = _getAllStringMatcherFields(matchable)
-  const booleanFields = Object.keys(matchable).filter(_.partial(_.includes, ['https', 'webSocket']))
-  const numberFields = Object.keys(matchable).filter(_.partial(_.includes, ['port']))
+  const stringMatcherFields = _getAllStringMatcherFields(routeMatcher)
+  const booleanFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['https', 'webSocket']))
+  const numberFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['port']))
+
+  debug('%o', { stringMatcherFields, booleanFields, numberFields })
 
   stringMatcherFields.forEach((field) => {
-    const value = routeMatcher[field]
-    if (value.test) {
+    const matcher = _.get(routeMatcher, field)
+    const value = _.get(matchable, field)
+    if (matcher.test) {
       // value is a regex
-      match = match && value.test(matchable[field])
+      match = match && matcher.test(value)
       return
     }
-    match = match && minimatch(matchable[field], value)
+    match = match && minimatch(value, matcher)
   })
 
   booleanFields.forEach((field) => {
-    match = match && (matchable[field] === routeMatcher[field])
+    const matcher = _.get(routeMatcher, field)
+    const value = _.get(matchable, field)
+    match = match && (matcher === value)
   })
 
   numberFields.forEach((field) => {
-    const value = routeMatcher[field]
-    if (value.length) {
+    const matcher = _.get(routeMatcher, field)
+    const value = _.get(matchable, field)
+    if (matcher.length) {
       // list of numbers, any one can match
-      match = match && value.includes(matchable[field])
+      match = match && matcher.includes(value)
       return
     }
-    match = match && (matchable[field] === value)
+    match = match && (matcher === value)
   })
 
   return match
