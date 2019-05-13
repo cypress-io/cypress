@@ -135,9 +135,7 @@ describe('lib/exec/spawn', function () {
       })
 
       it('retries with xvfb if fails with display exit code', function () {
-        const POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE = 234
-
-        this.spawnedProcess.on.withArgs('close').onFirstCall().yieldsAsync(POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE)
+        this.spawnedProcess.on.withArgs('close').onFirstCall().yieldsAsync(1)
         this.spawnedProcess.on.withArgs('close').onSecondCall().yieldsAsync(0)
 
         os.platform.returns('linux')

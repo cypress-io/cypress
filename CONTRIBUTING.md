@@ -317,6 +317,24 @@ cd packages/desktop-gui
 npm rebuild node-sass
 ```
 
+#### Docker for built binary
+
+You can also use Docker to simulate and debug built binary. In a temp folder (for example from the folder `/tmp/test-folder/`) start a Docker image
+
+```shell
+$ docker run -it -w /app -v $PWD:/app cypress/base:8 /bin/bash
+```
+
+Point installation at a specific binary and NPM (if needed) and _set local cache folder_ to unzip downloaded binary into a subfolder.
+
+```shell
+$ export CYPRESS_INSTALL_BINARY=https://cdn.cypress.io/beta/.../cypress.zip
+$ export CYPRESS_CACHE_FOLDER=./cypress-cache
+$ npm i https://cdn.cypress.io/beta/npm/.../cypress.tgz
+```
+
+Note that unzipping Linux binary inside Docker container onto a mapped volume drive is slow. But once this is done you can modify application resource folder in local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
+
 ### Packages
 
 Generally when making contributions, you are typically making them to a small number of packages. Most of your local development work will be inside a single package at a time.
