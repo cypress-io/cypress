@@ -161,7 +161,7 @@ module.exports = {
     }
 
     const userFriendlySpawn = (shouldRetryOnDisplayProblem) => {
-      debug('spawning')
+      debug('spawning, should retry on display problem?', Boolean(shouldRetryOnDisplayProblem))
       if (os.platform() === 'linux') {
         debug('DISPLAY is %s', process.env.DISPLAY)
       }
@@ -174,10 +174,13 @@ module.exports = {
           debug('Cypress thinks there is a display problem')
           debug('retrying the command with our XVFB')
 
+          // if we get this error, we are on Linux and DISPLAY is set
           logger.warn(`${stripIndent`
 
             ${logSymbols.warning} Warning: Cypress process has finished very quickly with an error,
             which might be related to a potential problem with how the DISPLAY is configured.
+
+            DISPLAY was set to "${process.env.DISPLAY}"
 
             We will attempt to spin our XVFB server and run Cypress again.
           `}\n`)
