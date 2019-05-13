@@ -308,7 +308,10 @@ context('lib/tasks/verify', () => {
 
         // this message contains typical Gtk error shown if X11 is incorrect
         // like in the case of DISPLAY=987
-        firstSpawnError.stderr = '[some noise here] Gtk: cannot open display: 987'
+        firstSpawnError.stderr = stripIndent`
+          [some noise here] Gtk: cannot open display: 987
+            and maybe a few other lines here with weird indent
+        `
         firstSpawnError.stdout = ''
 
         // the second time the binary returns expected ping
@@ -338,11 +341,19 @@ context('lib/tasks/verify', () => {
 
         // this message contains typical Gtk error shown if X11 is incorrect
         // like in the case of DISPLAY=987
-        firstSpawnError.stderr = '[some noise here] Gtk: cannot open display: 987'
+        firstSpawnError.stderr = stripIndent`
+          [some noise here] Gtk: cannot open display: 987
+            and maybe a few other lines here with weird indent
+        `
         firstSpawnError.stdout = ''
 
         // the second time it runs, it fails for some other reason
-        util.exec.withArgs(executablePath).rejects(new Error('some other error'))
+        const secondMessage = stripIndent`
+          some other error
+            again with
+              some weird indent
+        `
+        util.exec.withArgs(executablePath).rejects(new Error(secondMessage))
 
         return Promise.reject(firstSpawnError)
       })
