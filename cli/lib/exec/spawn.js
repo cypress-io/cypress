@@ -155,6 +155,8 @@ module.exports = {
         // call userFriendlySpawn ourselves
         // to prevent result of previous promise
         // from becoming a parameter to userFriendlySpawn
+        debug('spawning Cypress after starting XVFB')
+
         return userFriendlySpawn()
       })
       .finally(xvfb.stop)
@@ -171,7 +173,7 @@ module.exports = {
         const POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE = 234
 
         if (shouldRetryOnDisplayProblem && code === POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE) {
-          debug('Cypress thinks there is a display problem')
+          debug('Cypress thinks there is a potential display or OS problem')
           debug('retrying the command with our XVFB')
 
           // if we get this error, we are on Linux and DISPLAY is set
@@ -197,6 +199,10 @@ module.exports = {
       return spawnInXvfb()
     }
 
-    return userFriendlySpawn(os.platform() === 'linux')
+    // if we have problems spawning Cypress, maybe user DISPLAY setting is incorrect
+    // in that case retry with our own XVFB
+    const shouldRetryOnDisplayProblem = os.platform() === 'linux'
+
+    return userFriendlySpawn(shouldRetryOnDisplayProblem)
   },
 }

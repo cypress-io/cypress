@@ -78,8 +78,10 @@ module.exports = {
                 ## ok, maybe the DISPLAY is set incorrectly
                 ## and Electron just failed to start with
                 ## an error "Could not open display"
+                ## or it could be some system library missing for Electron to start
                 debug("because Linux with DISPLAY set to %s", process.env.DISPLAY)
                 debug("and very short elapsed time, returning potentialDisplayProblem flag")
+                debug("could be DISPLAY configuration or OS dependency missing")
                 result.potentialDisplayProblem = true
 
             resolve(result)
