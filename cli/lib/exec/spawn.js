@@ -1,4 +1,6 @@
 const _ = require('lodash')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 const os = require('os')
 const cp = require('child_process')
 const path = require('path')
@@ -44,6 +46,18 @@ function getStdio (needsXvfb) {
   }
 
   return 'inherit'
+}
+
+/**
+ * Returns true if DISPLAY is set for Linux platform
+ * and the application exits really quickly.
+ */
+const isPotentialDisplayProblem = (platform, display, code, elapsedMs) => {
+  la(is.unemptyString(platform), 'missing platform', platform)
+  la(is.number(code), 'expected exit code to be a number', code)
+  la(elapsedMs >= 0, 'elapsed ms should be >= 0', elapsedMs)
+
+  return platform === 'linux' && display && code === 1 && elapsedMs < 1000
 }
 
 module.exports = {
@@ -168,11 +182,17 @@ module.exports = {
         debug('DISPLAY is %s', process.env.DISPLAY)
       }
 
+      const electronStarted = Number(new Date())
+
       return spawn()
       .then((code) => {
-        const POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE = 234
+        const electronFinished = Number(new Date())
+        const elapsed = electronFinished - electronStarted
 
-        if (shouldRetryOnDisplayProblem && code === POTENTIAL_DISPLAY_PROBLEM_EXIT_CODE) {
+        debug('electron open returned %d after %d ms', code, elapsed)
+
+        if (shouldRetryOnDisplayProblem &&
+          isPotentialDisplayProblem(os.platform(), process.env.DISPLAY, code, elapsed)) {
           debug('Cypress thinks there is a potential display or OS problem')
           debug('retrying the command with our XVFB')
 
