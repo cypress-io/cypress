@@ -106,6 +106,7 @@ export interface AddRouteFrame {
 
 export interface BaseHttpFrame {
   requestId: string
+  routeHandlerId: string
 }
 
 export interface HttpRequestReceivedFrame extends BaseHttpFrame {
@@ -113,7 +114,10 @@ export interface HttpRequestReceivedFrame extends BaseHttpFrame {
 }
 
 export interface HttpRequestContinueFrame extends BaseHttpFrame {
-  req: CyIncomingHTTPRequest
+  req?: CyIncomingHTTPRequest
+  response?: StaticResponse
+  replyOptions?: ReplyOptions
+  tryNextRoute?: boolean
 }
 
 export interface StaticResponse {
@@ -225,6 +229,16 @@ function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Fu
   emit("route:added", frame)
 }
 
+interface ReplyOptions {
+  delayMs?: number
+  /**
+   * Send a static response instead of passing the request through to the Internet.
+   */
+  response?: StaticResponse
+}
+
+type ReplyHandler = (res: CyIncomingResponse) => void | ReplyOptions
+
 export function registerCommands(Commands, Cypress, /** cy, state, config */) {
   // TODO: figure out what to do for XHR compatibility
 
@@ -251,10 +265,65 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
 
   }
 
+  function _onRequestReceived(frame: HttpRequestReceivedFrame) {
+    // TODO: add some vanity methods to the CyIncomingHttpRequest and pass it to the cb
+    // TODO: validate that this exists and have some failure mode if it doesn't
+    const { handler } = routes[frame.routeHandlerId]
+    const { req, requestId, routeHandlerId } = frame
+
+    const continueFrame : HttpRequestContinueFrame = {
+      routeHandlerId,
+      req,
+      requestId
+    }
+
+    req.reply = (replyHandler: ReplyHandler) => {
+      // TODO: this can only be called once
+      if (_.isFunction(replyHandler)) {
+        // allow `req` to be sent outgoing, then pass the response body to `replyHandler`
+        return
+      }
+      // TODO: `onResponse` is an object that can manipulate the response characteristics and/or send a staticresponse
+      _emit('http:request:continue', continueFrame)
+    }
+
+    if ((<Function>handler).length === 2) {
+      // next() will be called to pass this to the next route
+      const next = () => {
+        // TODO: this can only be called once
+        continueFrame.tryNextRoute = true
+        _emit('http:request:continue', continueFrame)
+      }
+
+      return (<Function>handler)(req, next)
+    }
+
+    // req.reply must be used in handler to complete the route
+    return (<Function>handler)(req)
+  }
+
   Cypress.on("test:before:run", () => {
     // wipe out callbacks and routes when tests start
     routes = {}
     Cypress.routes = routes
+  })
+
+  Cypress.on("net:event", (eventName, ...args) => {
+    switch (eventName) {
+      case 'http:request:received':
+        _onRequestReceived(<HttpRequestReceivedFrame>args[0])
+        break
+      case 'http:response:received':
+        break
+      case 'ws:connect':
+        break
+      case 'ws:disconnect':
+        break
+      case 'ws:frame:outgoing':
+        break
+      case 'ws:frame:incoming':
+        break
+    }
   })
 
 

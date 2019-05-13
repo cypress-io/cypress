@@ -9,7 +9,8 @@ import {
   AnnotatedRouteMatcherOptions,
   HttpRequestReceivedFrame,
   RouteMatcherOptions,
-  StaticResponse
+  StaticResponse,
+  HttpRequestContinueFrame
 } from '../../driver/src/cy/commands/net_stubbing'
 
 interface BackendRoute {
@@ -198,6 +199,8 @@ interface BackendRequest {
   requestId: string
   route: BackendRoute
   continue: Function
+  req: ProxyIncomingMessage
+  res: ServerResponse
 }
 
 let requests : { [key: string]: BackendRequest } = {}
@@ -229,15 +232,33 @@ export function onProxiedRequest(req: ProxyIncomingMessage, res: ServerResponse,
   const request : BackendRequest = {
     requestId,
     route,
-    continue: cb
+    continue: cb,
+    req,
+    res
   }
 
   requests[requestId] = request
 
   const frame : HttpRequestReceivedFrame = {
+    routeHandlerId: <string>route.handlerId,
     requestId,
-    req as any
+    req: (req as any)
   }
 
   _emit(socket, 'http:request:received', frame)
+}
+
+function _onRequestContinue(frame: HttpRequestContinueFrame) {
+  const backendRequest = requests[frame.requestId]
+
+  if (!backendRequest) {
+    // TODO
+  }
+
+  if (frame.tryNextRoute) {
+    // frame.req has been modified, now pass this to the next available route handler
+    const prevRoute = _.find(routes, { handlerId: frame.routeHandlerId })
+
+    const route = _getRouteForRequest(req, )
+  }
 }
