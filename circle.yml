@@ -89,7 +89,7 @@ jobs:
       - restore_cache:
           key: v9-{{ arch }}-{{ .Branch }}-deps-reporter
       - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-runner
+          key: v9-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
           key: v8-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
