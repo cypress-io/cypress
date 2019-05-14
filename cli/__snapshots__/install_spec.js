@@ -95,6 +95,9 @@ https://on.cypress.io/installing-cypress
 exports['invalid cache directory 1'] = `
 Error: Cypress cannot write to the cache directory due to file permissions
 
+See discussion and possible solutions at
+https://github.com/cypress-io/cypress/issues/1281
+
 ----------
 
 Failed to access /invalid/cache/dir:
