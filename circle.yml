@@ -65,39 +65,39 @@ jobs:
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-cli-deps
+          key: _v8-{{ arch }}-{{ .Branch }}-cli-deps
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-root-deps
+          key: _v5-{{ arch }}-{{ .Branch }}-root-deps
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-coffee
       - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-desktop-gui
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
       - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-driver
+          key: _v6-{{ arch }}-{{ .Branch }}-deps-driver
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-example
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-example
       - restore_cache:
-          key: v7-{{ arch }}-{{ .Branch }}-deps-electron
+          key: _v7-{{ arch }}-{{ .Branch }}-deps-electron
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-extension
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-extension
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
       - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-launcher
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-launcher
       - restore_cache:
-          key: v1-{{ arch }}-{{ .Branch }}-deps-network
+          key: _v1-{{ arch }}-{{ .Branch }}-deps-network
       - restore_cache:
-          key: v9-{{ arch }}-{{ .Branch }}-deps-reporter
+          key: _v8-{{ arch }}-{{ .Branch }}-deps-reporter
       - restore_cache:
-          key: v9-{{ arch }}-{{ .Branch }}-deps-runner
+          key: _v8-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-server
+          key: _v8-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-socket
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-socket
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-static
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-static
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-ts
+          key: _v5-{{ arch }}-{{ .Branch }}-deps-ts
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
