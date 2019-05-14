@@ -80,13 +80,17 @@ const prettyDownloadErr = (err, version) => {
   return throwFormErrorText(errors.failedDownload)(msg)
 }
 
+const getFileSize = (filename) => {
+  return fs.statAsync(filename).get('size')
+}
+
 const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
   if (expectedSize && expectedChecksum) {
     debug('verifying checksum and file size')
 
     return Promise.join(
       hasha.fromFile(filename),
-      fs.statAsync(filename).get('size')
+      getFileSize(filename)
     ).spread((checksum, filesize) => {
       if (checksum === expectedChecksum && filesize === expectedSize) {
         debug('downloaded file has the expected checksum and size ✅')
@@ -109,7 +113,32 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
     })
   }
 
-  debug('downloaded file does not have a checksum to verify')
+  if (expectedSize) {
+    // maybe we don't have a checksum, but at least CDN returns content length
+    // which we can check against the file size
+    debug('only checking expected file size %d', expectedSize)
+
+    return getFileSize(filename)
+    .then((filesize) => {
+      if (filesize === expectedSize) {
+        debug('downloaded file has the expected size ✅')
+
+        return
+      }
+
+      debug('raising error: file size mismatch')
+      const text = stripIndent`
+          Corrupted download
+
+          Expected downloaded file to have size: ${expectedSize}
+          Computed size: ${filesize}
+        `
+
+      throw new Error(text)
+    })
+  }
+
+  debug('downloaded file lacks checksum or size to verify')
 
   return Promise.resolve()
 
