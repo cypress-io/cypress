@@ -4,23 +4,17 @@ const fse = require('fs-extra')
 const path = require('path')
 const globber = require('glob')
 const Promise = require('bluebird')
-const _ = require('lodash')
 
 const fs = Promise.promisifyAll(fse)
 const glob = Promise.promisify(globber)
 
-const pathToPackages = path.join('node_modules', '@packages')
+const pathToPackages = path.join(__dirname, 'node_modules', '@packages')
 
 function deleteOutputFolder () {
-  const wildcard = `${pathToPackages}/*`
 
-  console.log('deleting all', wildcard)
+  console.log('deleting ', pathToPackages)
 
-  return glob(wildcard)
-  .map((filename) => {
-    return fs.unlinkAsync(filename)
-  })
-  .catch(_.noop)
+  return fs.remove(pathToPackages)
 }
 
 function makeLinks () {
