@@ -9,6 +9,7 @@ const request = require('request')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
 const { stripIndent } = require('common-tags')
+const hasha = require('hasha')
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
@@ -79,6 +80,41 @@ const prettyDownloadErr = (err, version) => {
   return throwFormErrorText(errors.failedDownload)(msg)
 }
 
+const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
+  if (expectedSize && expectedChecksum) {
+    debug('verifying checksum and file size')
+
+    return Promise.join(
+      hasha.fromFile(filename),
+      fs.statAsync(filename).get('size')
+    ).spread((checksum, filesize) => {
+      if (checksum === expectedChecksum && filesize === expectedSize) {
+        debug('downloaded file has the expected checksum and size ✅')
+
+        return
+      }
+
+      debug('raising error: checksum or file size mismatch')
+      const text = stripIndent`
+        Corrupted download
+
+        Expected downloaded file to have checksum: ${expectedChecksum}
+        Computed checksum: ${checksum}
+
+        Expected downloaded file to have size: ${expectedSize}
+        Computed size: ${filesize}
+      `
+
+      throw new Error(text)
+    })
+  }
+
+  debug('downloaded file does not have a checksum to verify')
+
+  return Promise.resolve()
+
+}
+
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
@@ -109,11 +145,22 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
 
     // closure
     let started = null
+    let expectedSize
+    let expectedChecksum
 
     requestProgress(req, {
       throttle: progress.throttle,
     })
     .on('response', (response) => {
+      expectedSize = response.headers['x-amz-meta-size'] ||
+        response.headers['content-length']
+      expectedChecksum = response.headers['x-amz-meta-checksum']
+      if (expectedSize && expectedChecksum) {
+        // convert from string (all Amazon custom headers are strings)
+        expectedSize = Number(expectedSize)
+        debug('expected checksum %s and file size %d', expectedChecksum, expectedSize)
+      }
+
       // start counting now once we've gotten
       // response headers
       started = new Date()
@@ -149,11 +196,19 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
     .on('finish', () => {
       debug('downloading finished')
 
-      resolve(redirectVersion)
+      verifyDownloadedFile(downloadDestination, expectedSize, expectedChecksum)
+      .then(() => {
+        return resolve(redirectVersion)
+      }, reject)
     })
   })
 }
 
+/**
+ * Download Cypress.zip from external url to local file.
+ * @param [string] version Could be "3.3.0" or full URL
+ * @param [string] downloadDestination Local filename to save as
+ */
 const start = ({ version, downloadDestination, progress }) => {
   if (!downloadDestination) {
     la(is.unemptyString(downloadDestination), 'missing download dir', arguments)
@@ -170,6 +225,7 @@ const start = ({ version, downloadDestination, progress }) => {
   progress.throttle = 100
 
   debug('needed Cypress version: %s', version)
+  debug('source url %s', url)
   debug(`downloading cypress.zip to "${downloadDestination}"`)
 
   // ensure download dir exists
