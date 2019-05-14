@@ -42,8 +42,6 @@
     "markdown-it": "6.1.1",
     "mobx": "3.6.2",
     "mobx-react": "4.4.3",
-    "mocha": "^6.1.4",
-    "mochapack": "^1.1.1",
     "mock-require": "^3.0.3",
     "prop-types": "15.7.2",
     "react": "16.8.6",
@@ -51,7 +49,6 @@
     "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
-    "source-map-support": "^0.5.12",
     "zunder": "6.4.1"
   }
 }
