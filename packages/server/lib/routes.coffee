@@ -75,7 +75,7 @@ module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
     })
 
   app.all "*", (req, res, next) ->
-    proxy.handle(req, res, config, getRemoteState, request, nodeProxy)
+    proxy.handle(req, res, config, getRemoteState, request, nodeProxy, project)
 
   ## when we experience uncaught errors
   ## during routing just log them out to

@@ -39,7 +39,7 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request, nodeProxy) ->
+  handle: (req, res, config, getRemoteState, request, nodeProxy, project) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
@@ -84,7 +84,7 @@ module.exports = {
     thr = through (d) -> @queue(d)
 
     ## immediately before sending the request, offer it to netStubbing for interception
-    netStubbing.onProxiedRequest req, res, =>
+    netStubbing.onProxiedRequest project, req, res, =>
       @getHttpContent(thr, req, res, remoteState, config, request)
       .pipe(res)
 

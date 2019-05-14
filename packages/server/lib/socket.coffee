@@ -105,8 +105,8 @@ class Socket
   isSocketConnected: (socket) ->
     socket and socket.connected
 
-  toDriver: (event, data) ->
-    @io and @io.emit(event, data)
+  toDriver: (event, data...) ->
+    @io and @io.emit(event, data...)
 
   onAutomation: (socket, message, data, id) ->
     ## instead of throwing immediately here perhaps we need
@@ -308,8 +308,7 @@ class Socket
             when "write:file"
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "net"
-              netStubbing.onDriverEvent(args...)
-              return
+              netStubbing.onDriverEvent(socket, args...)
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"

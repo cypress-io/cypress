@@ -177,6 +177,7 @@ export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyInc
 }
 
 function _emit(socket: any, eventName: string, data: any) {
+  debug('sending event to driver %o', { eventName, data })
   socket.toDriver('net:event', eventName, data)
 }
 
@@ -193,7 +194,7 @@ function _sendStaticResponse(res: ServerResponse, staticResponse: StaticResponse
   res.end()
 }
 
-export function onDriverEvent(eventName: string, ...args: any[]) {
+export function onDriverEvent(socket: any, eventName: string, ...args: any[]) {
   debug('received driver event %o', { eventName, args })
 
   switch(eventName) {
@@ -201,7 +202,7 @@ export function onDriverEvent(eventName: string, ...args: any[]) {
       _onRouteAdded(<NetEventMessages.AddRouteFrame>args[0])
       break
     case 'http:request:continue':
-      _onRequestContinue(<NetEventMessages.HttpRequestContinueFrame>args[0])
+      _onRequestContinue(<NetEventMessages.HttpRequestContinueFrame>args[0], socket)
       break
     case 'http:response:continue':
       break
@@ -227,7 +228,7 @@ interface BackendRequest {
 // TODO: clear on each test
 let requests : { [key: string]: BackendRequest } = {}
 
-export function onProxiedRequest(req: ProxyIncomingMessage, res: ServerResponse, socket: any, cb: Function) {
+export function onProxiedRequest(project: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
   const route = _getRouteForRequest(req)
 
   if (!route) {
@@ -259,10 +260,10 @@ export function onProxiedRequest(req: ProxyIncomingMessage, res: ServerResponse,
     }
   }
 
-  _emit(socket, 'http:request:received', frame)
+  _emit(project.server._socket, 'http:request:received', frame)
 }
 
-function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame) {
+function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame, socket: any) {
   const backendRequest = requests[frame.requestId]
 
   if (!backendRequest) {
@@ -277,6 +278,25 @@ function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame) {
     const prevRoute = _.find(routes, { handlerId: frame.routeHandlerId })
 
     const route = _getRouteForRequest(backendRequest.req, prevRoute)
+
+    if (!route) {
+      // no "next route" available, so just continue that bad boy
+      backendRequest.continue()
+      return
+    }
+
+    if (route.staticResponse) {
+      _sendStaticResponse(backendRequest.res, route.staticResponse)
+      return
+    }
+
+    const nextFrame : NetEventMessages.HttpRequestReceivedFrame = {
+      routeHandlerId: <string>route.handlerId,
+      requestId: backendRequest.requestId,
+      req: frame.req!
+    }
+
+    _emit(socket, 'http:request:received', nextFrame)
 
     return
   }

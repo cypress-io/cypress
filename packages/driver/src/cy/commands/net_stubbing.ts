@@ -275,11 +275,19 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
 
   function _onRequestReceived(frame: NetEventMessages.HttpRequestReceivedFrame) {
     // TODO: add some vanity methods to the CyIncomingHttpRequest and pass it to the cb
-    // TODO: validate that `handler` exists and have some failure mode if it doesn't
-    const { handler } = routes[frame.routeHandlerId]
+    const route = routes[frame.routeHandlerId]
     const { req, requestId, routeHandlerId } = frame
 
+    const continueFrame : NetEventMessages.HttpRequestContinueFrame = {
+      routeHandlerId,
+      requestId
+    }
+
     const sendContinueFrame = () => {
+      // copy changeable attributes of userReq to req in frame
+      continueFrame.req = {
+        ..._.pick(userReq, 'body', 'headers')
+      }
       _emit('http:request:continue', continueFrame)
     }
 
@@ -308,11 +316,13 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
       }
     }
 
-    const continueFrame : NetEventMessages.HttpRequestContinueFrame = {
-      routeHandlerId,
-      req: userReq,
-      requestId
+    if (!route) {
+      // TODO: remove this logging once we're done
+      console.log('no handler for frame', { frame })
+      return sendContinueFrame()
     }
+
+    const { handler } = route
 
     if ((<Function>handler).length === 2) {
       // next() will be called to pass this to the next route

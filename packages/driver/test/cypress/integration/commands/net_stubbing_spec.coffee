@@ -180,7 +180,7 @@ describe "src/cy/commands/net_stubbing", ->
         cy.route "/abc123", (req) ->
           expect(req.url).to.eq("/abc123")
           done()
-
-        xhr = new XMLHttpRequest()
-        xhr.open("GET", "/abc123")
-        xhr.send()
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "/abc123")
+          xhr.send()
