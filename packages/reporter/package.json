@@ -7,6 +7,8 @@
     "postinstall": "echo '@packages/reporter needs: npm run build'",
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
     "build": "cd ../runner && npm run build-reporter",
+    "prebuild-prod": "npm run check-deps-pre",
+    "build-prod": "npm run build",
     "prewatch": "npm run check-deps-pre",
     "watch": "cd ../runner && npm run build-reporter-watch",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
