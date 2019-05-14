@@ -5,12 +5,10 @@ import minimatch from 'minimatch'
 import url from 'url'
 // TODO: figure out the right way to make these types accessible in server and driver
 import {
-  AddRouteFrame,
+  NetEventMessages,
   AnnotatedRouteMatcherOptions,
-  HttpRequestReceivedFrame,
   RouteMatcherOptions,
   StaticResponse,
-  HttpRequestContinueFrame
 } from '../../driver/src/cy/commands/net_stubbing'
 
 interface BackendRoute {
@@ -70,7 +68,7 @@ function _restoreMatcherOptionsTypes(options: AnnotatedRouteMatcherOptions) {
 // TODO: clear between specs
 let routes : BackendRoute[] = []
 
-function _onRouteAdded(options: AddRouteFrame) {
+function _onRouteAdded(options: NetEventMessages.AddRouteFrame) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
 
   debug('adding route %o', { routeMatcher, options })
@@ -145,6 +143,14 @@ export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyInc
       match = match && matcher.test(value)
       return
     }
+
+    if (field === 'url') {
+      // for urls, check that it appears anywhere in the string
+      if (value.includes(matcher)) {
+        return
+      }
+    }
+
     match = match && minimatch(value, matcher, { matchBase: true })
   })
 
@@ -174,15 +180,28 @@ function _emit(socket: any, eventName: string, data: any) {
   socket.toDriver('net:event', eventName, data)
 }
 
+function _sendStaticResponse(res: ServerResponse, staticResponse: StaticResponse) {
+  const { headers, body, statusCode } = staticResponse
+  if (headers) {
+    _.keys(headers).forEach(key => {
+      res.setHeader(key, headers[key])
+    })
+  }
+
+  res.statusCode = statusCode || 200
+  res.write(body)
+  res.end()
+}
+
 export function onDriverEvent(eventName: string, ...args: any[]) {
   debug('received driver event %o', { eventName, args })
 
   switch(eventName) {
     case 'route:added':
-      _onRouteAdded(<AddRouteFrame>args[0])
+      _onRouteAdded(<NetEventMessages.AddRouteFrame>args[0])
       break
     case 'http:request:continue':
-      _onRequestContinue(<HttpRequestContinueFrame>args[0])
+      _onRequestContinue(<NetEventMessages.HttpRequestContinueFrame>args[0])
       break
     case 'http:response:continue':
       break
@@ -197,12 +216,15 @@ export function onDriverEvent(eventName: string, ...args: any[]) {
 
 interface BackendRequest {
   requestId: string
-  route: BackendRoute
+  /**
+   * A callback that can be used to make the request go outbound.
+   */
   continue: Function
   req: ProxyIncomingMessage
   res: ServerResponse
 }
 
+// TODO: clear on each test
 let requests : { [key: string]: BackendRequest } = {}
 
 export function onProxiedRequest(req: ProxyIncomingMessage, res: ServerResponse, socket: any, cb: Function) {
@@ -213,17 +235,7 @@ export function onProxiedRequest(req: ProxyIncomingMessage, res: ServerResponse,
   }
 
   if (route.staticResponse) {
-    const { headers, body, statusCode } = route.staticResponse
-    if (headers) {
-      _.keys(headers).forEach(key => {
-        res.setHeader(key, headers[key])
-      })
-    }
-
-    res.statusCode = statusCode || 200
-    res.write(body)
-    res.end()
-
+    _sendStaticResponse(res, route.staticResponse)
     return // don't call cb since we've satisfied the response here
   }
 
@@ -231,7 +243,6 @@ export function onProxiedRequest(req: ProxyIncomingMessage, res: ServerResponse,
 
   const request : BackendRequest = {
     requestId,
-    route,
     continue: cb,
     req,
     res
@@ -239,26 +250,44 @@ export function onProxiedRequest(req: ProxyIncomingMessage, res: ServerResponse,
 
   requests[requestId] = request
 
-  const frame : HttpRequestReceivedFrame = {
+  const frame : NetEventMessages.HttpRequestReceivedFrame = {
     routeHandlerId: <string>route.handlerId,
     requestId,
-    req: (req as any)
+    req: {
+      headers: <any>req.headers,
+      body: "not implemented... yet" // TODO: buffer the body here with the stream-buffer from net-retries
+    }
   }
 
   _emit(socket, 'http:request:received', frame)
 }
 
-function _onRequestContinue(frame: HttpRequestContinueFrame) {
+function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame) {
   const backendRequest = requests[frame.requestId]
 
   if (!backendRequest) {
     // TODO
   }
 
+  // modify the original paused request object using what the client returned
+  _.assign(backendRequest.req, _.pick(frame.req, ['headers', 'body']))
+
   if (frame.tryNextRoute) {
     // frame.req has been modified, now pass this to the next available route handler
     const prevRoute = _.find(routes, { handlerId: frame.routeHandlerId })
 
-    const route = _getRouteForRequest(req, )
+    const route = _getRouteForRequest(backendRequest.req, prevRoute)
+
+    return
+  }
+
+  if (frame.staticResponse) {
+    _sendStaticResponse(backendRequest.res, frame.staticResponse)
+    return
+  }
+
+  if (frame.hasResponseHandler) {
+    // TODO: send the request outbound, buffer the response, send it to the client
+    return
   }
 }

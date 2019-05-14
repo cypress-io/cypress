@@ -53,22 +53,38 @@ interface RouteMatcherCompatOptions {
 /** Types for Route Responses **/
 
 interface CyIncomingResponse {
-    // an interface like the one brian proposed to make changes to the response
+  /**
+   * Wait for `delayMs` milliseconds before sending the response to the client.
+   */
+  delay: (delayMs: number) => CyIncomingResponse
+  /**
+   * Serve the response at a maximum of `throttleKbps` kilobytes per second.
+   */
+  throttle: (throttleKbps: number) => CyIncomingResponse
+}
+
+interface CyIncomingResponseOptions {
+  delayMs?: number
 }
 
 interface CyIncomingRequest {
-    // as much stuff from `incomingmessage` as makes sense to serialize and send
+  // as much stuff from `incomingmessage` as makes sense to serialize and send
+  headers: { [key: string]: string }
+  body: any
 }
 
-type CyResponse = string | object
-type CyInterceptor = (res: CyIncomingResponse, send?: () => void) => void
+export interface StaticResponse {
+  body?: string
+  headers?: { [key: string]: string }
+  statusCode?: number
+}
+
+type CyResponseInterceptor = (res: CyIncomingResponse, send?: () => void) => void
 
 interface CyIncomingHTTPRequest extends CyIncomingRequest {
   // if `responseOrInterceptor` is undefined, just forward the modified request to the destination
-  reply: (responseOrInterceptor?: CyResponse | CyInterceptor) => void
-
-  // TODO: is this needed, when they could just do `setTimeout(()=>req.reply(), delayMs)`?
-  // delay: (delayMs: number) => void
+  reply: (responseOrInterceptor?: StaticResponse | CyResponseInterceptor) => void
+  redirect: (location: string, statusCode: 301 | 302 | 303 | 307 | number) => void
 }
 
 type HTTPController = (req: CyIncomingHTTPRequest, next: () => void) => void
@@ -98,32 +114,29 @@ type RouteHandler = string | object | RouteHandlerController
 
 /** Types for messages between driver and server */
 
-export interface AddRouteFrame {
-  routeMatcher: AnnotatedRouteMatcherOptions
-  staticResponse?: StaticResponse
-  handlerId?: string
-}
+export namespace NetEventMessages {
+  export interface AddRouteFrame {
+    routeMatcher: AnnotatedRouteMatcherOptions
+    staticResponse?: StaticResponse
+    handlerId?: string
+  }
 
-export interface BaseHttpFrame {
-  requestId: string
-  routeHandlerId: string
-}
+  export interface BaseHttpFrame {
+    requestId: string
+    routeHandlerId: string
+  }
 
-export interface HttpRequestReceivedFrame extends BaseHttpFrame {
-  req: CyIncomingHTTPRequest
-}
+  export interface HttpRequestReceivedFrame extends BaseHttpFrame {
+    req: CyIncomingRequest
+  }
 
-export interface HttpRequestContinueFrame extends BaseHttpFrame {
-  req?: CyIncomingHTTPRequest
-  response?: StaticResponse
-  replyOptions?: ReplyOptions
-  tryNextRoute?: boolean
-}
-
-export interface StaticResponse {
-  body?: string
-  headers?: { [key: string]: string }
-  statusCode?: number
+  export interface HttpRequestContinueFrame extends BaseHttpFrame {
+    req?: CyIncomingRequest
+    staticResponse?: StaticResponse
+    hasResponseHandler?: boolean
+    responseOptions?: CyIncomingResponseOptions
+    tryNextRoute?: boolean
+  }
 }
 
 /** Driver Commands **/
@@ -194,12 +207,17 @@ interface Route {
   hitCount: number
 }
 
+interface Request {
+  responseHandler: CyResponseInterceptor
+}
+
 let routes : { [key: string]: Route } = {}
+let requests : { [key: string]: Request } = {}
 
 function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Function) : void {
   const handlerId = _getUniqueId()
 
-  const frame: AddRouteFrame = {
+  const frame: NetEventMessages.AddRouteFrame = {
     handlerId,
     routeMatcher: _annotateMatcherOptionsTypes(options),
   }
@@ -229,16 +247,6 @@ function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Fu
   emit("route:added", frame)
 }
 
-interface ReplyOptions {
-  delayMs?: number
-  /**
-   * Send a static response instead of passing the request through to the Internet.
-   */
-  response?: StaticResponse
-}
-
-type ReplyHandler = (res: CyIncomingResponse) => void | ReplyOptions
-
 export function registerCommands(Commands, Cypress, /** cy, state, config */) {
   // TODO: figure out what to do for XHR compatibility
 
@@ -265,26 +273,45 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
 
   }
 
-  function _onRequestReceived(frame: HttpRequestReceivedFrame) {
+  function _onRequestReceived(frame: NetEventMessages.HttpRequestReceivedFrame) {
     // TODO: add some vanity methods to the CyIncomingHttpRequest and pass it to the cb
-    // TODO: validate that this exists and have some failure mode if it doesn't
+    // TODO: validate that `handler` exists and have some failure mode if it doesn't
     const { handler } = routes[frame.routeHandlerId]
     const { req, requestId, routeHandlerId } = frame
 
-    const continueFrame : HttpRequestContinueFrame = {
-      routeHandlerId,
-      req,
-      requestId
+    const sendContinueFrame = () => {
+      _emit('http:request:continue', continueFrame)
     }
 
-    req.reply = (replyHandler: ReplyHandler) => {
-      // TODO: this can only be called once
-      if (_.isFunction(replyHandler)) {
-        // allow `req` to be sent outgoing, then pass the response body to `replyHandler`
-        return
+    const userReq : CyIncomingHTTPRequest = {
+      ...req,
+      reply: function (responseHandler) {
+        // TODO: this can only be called once
+        if (_.isFunction(responseHandler)) {
+          // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
+          requests[requestId] = {
+            responseHandler
+          }
+          continueFrame.hasResponseHandler = true
+        } else if (!_.isUndefined(responseHandler)) {
+          // `replyHandler` is a StaticResponse
+          continueFrame.staticResponse = <StaticResponse>responseHandler
+        }
+        // if `replyHandler` is null, response doesn't need to come back to the driver
+        sendContinueFrame()
+      },
+      redirect: function (location, statusCode = 302) {
+        this.reply({
+          headers: { location },
+          statusCode
+        })
       }
-      // TODO: `onResponse` is an object that can manipulate the response characteristics and/or send a staticresponse
-      _emit('http:request:continue', continueFrame)
+    }
+
+    const continueFrame : NetEventMessages.HttpRequestContinueFrame = {
+      routeHandlerId,
+      req: userReq,
+      requestId
     }
 
     if ((<Function>handler).length === 2) {
@@ -292,7 +319,7 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
       const next = () => {
         // TODO: this can only be called once
         continueFrame.tryNextRoute = true
-        _emit('http:request:continue', continueFrame)
+        sendContinueFrame()
       }
 
       return (<Function>handler)(req, next)
@@ -311,7 +338,7 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
   Cypress.on("net:event", (eventName, ...args) => {
     switch (eventName) {
       case 'http:request:received':
-        _onRequestReceived(<HttpRequestReceivedFrame>args[0])
+        _onRequestReceived(<NetEventMessages.HttpRequestReceivedFrame>args[0])
         break
       case 'http:response:received':
         break

@@ -34,7 +34,9 @@ describe "src/cy/commands/net_stubbing", ->
               value: url
             }
           }
-          responseBody: "bar"
+          staticResponse: {
+            body: "bar"
+          }
         }
 
         expectedRoute = {
@@ -166,9 +168,19 @@ describe "src/cy/commands/net_stubbing", ->
     context "stubbing with static responses", ->
       it "works with static body as string", ->
         cy.route({
-          url: '*'
+          url: "*"
         }, "hello world")
 
-        cy.visit("http://aaaaaaa.com")
+        xhr = new XMLHttpRequest()
+        xhr.open("GET", "/abc123")
+        xhr.send()
 
+    context "stubbing with dynamic response", ->
+      it.only "receives the original request in handler", (done) ->
+        cy.route "/abc123", (req) ->
+          expect(req.url).to.eq("/abc123")
+          done()
 
+        xhr = new XMLHttpRequest()
+        xhr.open("GET", "/abc123")
+        xhr.send()
