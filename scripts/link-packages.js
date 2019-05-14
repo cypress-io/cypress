@@ -24,31 +24,33 @@ function deleteOutputFolder () {
 }
 
 function makeLinks () {
-  return glob('./packages/*/package.json')
-  .map((filename) => {
-    return fs.readJsonAsync(filename)
-    .then((json) => {
-      return { filename, json }
+  return fs.ensureDir(pathToPackages)
+  .then(() => {
+    return glob('./packages/*/package.json')
+    .map((filename) => {
+      return fs.readJsonAsync(filename)
+      .then((json) => {
+        return { filename, json }
+      })
     })
-  }
-  )
-  .map(({ filename }) => {
-    const dirname = path.dirname(filename)
-    const basename = path.basename(dirname)
+    .map(({ filename }) => {
+      const dirname = path.dirname(filename)
+      const basename = path.basename(dirname)
 
-    const destinationLink = path.join(pathToPackages, basename)
-    // const registerPath = path.join(destinationFolder, 'register.js')
-    // const fullMain = path.resolve(dirname, json.main)
+      const destinationLink = path.join(pathToPackages, basename)
+      // const registerPath = path.join(destinationFolder, 'register.js')
+      // const fullMain = path.resolve(dirname, json.main)
 
-    // debug('full name', fullMain)
-    // const relativePathToMain = path.relative(destinationFolder, fullMain)
+      // debug('full name', fullMain)
+      // const relativePathToMain = path.relative(destinationFolder, fullMain)
 
-    // debug('relative path to main', relativePathToMain)
-    const relativePathToDest = path.relative(path.dirname(destinationLink), dirname)
+      // debug('relative path to main', relativePathToMain)
+      const relativePathToDest = path.relative(path.dirname(destinationLink), dirname)
 
-    console.log(destinationLink, '->', relativePathToDest)
+      console.log(destinationLink, '->', relativePathToDest)
 
-    return fs.symlink(relativePathToDest, destinationLink)
+      return fs.symlink(relativePathToDest, destinationLink)
+    })
   })
 }
 
