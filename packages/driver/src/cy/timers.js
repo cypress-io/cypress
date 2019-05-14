@@ -67,43 +67,46 @@ const create = () => {
       return originals[fnName].apply(contentWindow, args)
     }
 
-    const wrapCancel = (fnName) => (timerId) => {
-      if (flushing) {
-        cancelledTimerIds[timerId] = true
-      }
-
-      return callThrough(fnName, [timerId])
-    }
-
-    const wrapTimer = (fnName) => (...args) => {
-      const [fnOrCode, delay, ...params] = args
-
-      let timerId
-
-      const timerOverride = () => {
-        // if we're currently paused then we need
-        // to enqueue this timer callback and invoke
-        // it immediately once we're unpaused
-        if (paused) {
-          timerQueue.push({
-            timerId,
-            fnOrCode,
-            params,
-            contentWindow,
-            type: fnName,
-          })
-
-          return
+    const wrapCancel = (fnName) => {
+      return (timerId) => {
+        if (flushing) {
+          cancelledTimerIds[timerId] = true
         }
 
-        // else go ahead and invoke the real function
-        // the same way the browser otherwise would
-        return invoke(contentWindow, fnOrCode, params)
+        return callThrough(fnName, [timerId])
       }
+    }
 
-      timerId = callThrough(fnName, [timerOverride, delay, ...params])
+    const wrapTimer = (fnName) => {
+      return (...args) => {
+        let timerId
+        let [fnOrCode, delay, ...params] = args
 
-      return timerId
+        const timerOverride = (...params) => {
+          // if we're currently paused then we need
+          // to enqueue this timer callback and invoke
+          // it immediately once we're unpaused
+          if (paused) {
+            timerQueue.push({
+              timerId,
+              fnOrCode,
+              params,
+              contentWindow,
+              type: fnName,
+            })
+
+            return
+          }
+
+          // else go ahead and invoke the real function
+          // the same way the browser otherwise would
+          return invoke(contentWindow, fnOrCode, params)
+        }
+
+        timerId = callThrough(fnName, [timerOverride, delay, ...params])
+
+        return timerId
+      }
     }
 
     contentWindow.setTimeout = wrapTimer('setTimeout')

@@ -51,6 +51,13 @@
       "onlySingle": true,
       "cwd": "[workspaceFolder]/packages/desktop-gui",
       "command": "npm run cypress:open"
+    },
+    {
+      "name": "packages/desktop-gui watch",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[workspaceFolder]/packages/desktop-gui",
+      "command": "npm run watch"
     }
   ]
 }

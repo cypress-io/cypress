@@ -110,6 +110,17 @@ describe "src/cy/commands/waiting", ->
           .wait("@fetch").then ->
             expect(cy.timeout()).to.eq 199
 
+      it "waits for requestTimeout override", (done) ->
+        cy.on "command:retry", (options) ->
+          expect(options.type).to.eq("request")
+          expect(options.timeout).to.eq(199)
+          done()
+
+        cy
+          .server()
+          .route("GET", "*", {}).as("fetch")
+          .wait("@fetch", {requestTimeout: 199})
+
       it "waits for responseTimeout", (done) ->
         Cypress.config("responseTimeout", 299)
 
@@ -124,6 +135,41 @@ describe "src/cy/commands/waiting", ->
             win.$.get("/foo")
             null
           .wait("@fetch")
+
+      it "waits for responseTimeout override", (done) ->
+        cy.on "command:retry", (options) ->
+          expect(options.type).to.eq("response")
+          expect(options.timeout).to.eq(299)
+          done()
+
+        cy
+          .server({delay: 100})
+          .route("GET", "*", {}).as("fetch")
+          .window().then (win) ->
+            win.$.get("/foo")
+            null
+          .wait("@fetch", {responseTimeout: 299})
+
+      it "waits for requestTimeout and responseTimeout override", (done) ->
+        retryCount = 0
+        cy.on "command:retry", (options) ->
+          retryCount++
+          if retryCount == 1
+            expect(options.type).to.eq("request")
+            expect(options.timeout).to.eq(100)
+
+            ## trigger request to move onto response timeout verification
+            win = cy.state("window")
+            win.$.get("/foo")
+          else if retryCount == 2
+            expect(options.type).to.eq("response")
+            expect(options.timeout).to.eq(299)
+            done()
+
+        cy
+          .server({delay: 100})
+          .route("GET", "*", {}).as("fetch")
+          .wait("@fetch", {requestTimeout: 100, responseTimeout: 299})
 
       ## https://github.com/cypress-io/cypress/issues/369
       it "does not mutate 2nd route methods when using shorthand route", ->
@@ -724,7 +770,7 @@ describe "src/cy/commands/waiting", ->
           cy.on "fail", (err) =>
             obj = {
               name: "wait"
-              referencesAlias: ["getFoo"]
+              referencesAlias: [{name: 'getFoo', cardinal: 1, ordinal: "1st"}]
               aliasType: "route"
               type: "parent"
               error: err
@@ -801,11 +847,28 @@ describe "src/cy/commands/waiting", ->
             .window().then (win) ->
               xhrGet(win, "/foo")
               xhrGet(win, "/bar")
+              xhrGet(win, "/foo")
               null
-            .wait(["@getFoo", "@getBar"]).then (xhrs) ->
+            .wait(["@getFoo", "@getBar", "@getFoo"]).then (xhrs) ->
               lastLog = @lastLog
 
-              expect(lastLog.get("referencesAlias")).to.deep.eq ["getFoo", "getBar"]
+              expect(lastLog.get("referencesAlias")).to.deep.eq [
+                {
+                  name: "getFoo",
+                  cardinal: 1,
+                  ordinal: '1st'
+                },
+                {
+                  name: "getBar",
+                  cardinal: 1,
+                  ordinal: '1st'
+                },
+                {
+                  name: "getFoo",
+                  cardinal: 2,
+                  ordinal: '2nd'
+                }
+              ]
 
         it "#consoleProps waiting on 1 alias", ->
           cy

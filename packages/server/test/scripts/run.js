@@ -10,7 +10,7 @@ const options = minimist(process.argv.slice(2))
 
 let run = options._[0]
 
-if (run.includes('--inspect-brk')) {
+if (run && run.includes('--inspect-brk')) {
   run = options._[1]
 }
 
@@ -60,7 +60,7 @@ if (isWindows()) {
 if (options['inspect-brk']) {
   commandAndArguments.args.push(
     '--inspect',
-    `--inspect-brk=${options['inspect-brk']}`
+    `--inspect-brk${options['inspect-brk'] === true ? '' : `=${options['inspect-brk']}`}`
   )
 }
 

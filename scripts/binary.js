@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 require('@packages/coffee/register')
+require('@packages/ts/register')
 
 const command = process.argv[2]
 
@@ -14,6 +15,8 @@ const fn = commands[command]
 if (!fn) {
   console.error('Invalid deploy command %s 🚫', command)
 }
+
+// TODO allow passing CLI arguments to each command
 
 fn()
 .then(() => {

@@ -6,6 +6,7 @@ dataUriToBuffer = require("data-uri-to-buffer")
 Jimp            = require("jimp")
 sizeOf          = require("image-size")
 colorString     = require("color-string")
+sanitize        = require("sanitize-filename")
 debug           = require("debug")("cypress:server:screenshot")
 plugins         = require("./plugins")
 fs              = require("./util/fs")
@@ -14,7 +15,6 @@ pathHelpers     = require("./util/path_helpers")
 
 RUNNABLE_SEPARATOR = " -- "
 pathSeparatorRe = /[\\\/]/g
-invalidCharsRe = /[^0-9a-zA-Z-_\s\(\)]/g
 
 ## internal id incrementor
 __ID__ = null
@@ -23,9 +23,6 @@ __ID__ = null
 ## a semaphore to access the file system when we write
 ## screenshots since its possible two screenshots with
 ## the same name will be written to the file system
-
-replaceInvalidChars = (str) ->
-  str.replace(invalidCharsRe, "")
 
 ## when debugging logs automatically prefix the
 ## screenshot id to the debug logs for easier association
@@ -310,9 +307,9 @@ getPath = (data, ext, screenshotsFolder) ->
   .split(pathSeparatorRe)
 
   if data.name
-    names = data.name.split(pathSeparatorRe).map(replaceInvalidChars)
+    names = data.name.split(pathSeparatorRe).map(sanitize)
   else
-    names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
+    names = [data.titles.map(sanitize).join(RUNNABLE_SEPARATOR)]
 
   # truncate file names to be less than 220 characters
   # to accomodate filename size limits

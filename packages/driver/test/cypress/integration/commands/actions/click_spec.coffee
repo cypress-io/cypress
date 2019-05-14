@@ -420,6 +420,10 @@ describe "src/cy/commands/actions/click", ->
         expect(onClick).to.be.calledOnce
 
     describe "actionability", ->
+
+      it 'can click on inline elements that wrap lines', ->
+        cy.get('#overflow-link').find('.wrapped').click()
+
       it "can click elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").click()
 
@@ -1105,7 +1109,7 @@ describe "src/cy/commands/actions/click", ->
         num = cy.$$("button").length
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 15 elements. Pass { multiple: true } if you want to serially click each element."
+          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 17 elements. Pass { multiple: true } if you want to serially click each element."
           done()
 
         cy.get("button").click()

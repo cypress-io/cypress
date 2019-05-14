@@ -1,8 +1,12 @@
 SseStream = require("ssestream")
-EventSource = require("eventsource")
 e2e = require("../support/helpers/e2e")
 
-onServer = (app) ->
+clients = 0
+
+onServer = (app, srv) ->
+  app.get "/clients", (req, res) ->
+    res.json({ clients })
+
   app.get "/foo", (req, res) ->
     res.send("<html>foo></html>")
 
@@ -11,6 +15,12 @@ onServer = (app) ->
 
 onSSEServer = (app) ->
   app.get "/sse", (req, res) ->
+    clients += 1
+
+    res.on "close", ->
+      clearInterval(int)
+      clients -= 1
+
     res.set({
       "Access-Control-Allow-Origin": "*"
     })

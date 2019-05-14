@@ -100,16 +100,18 @@ describe "xhrs", ->
 
     it "aborts", ->
       cy
-        .route({
-          method: "POST",
-          url: /users/,
-          response: {name: "b"},
-          delay: 200
-        }).as("createUser")
-        .get("#create").click()
-        .then ->
-          ## simulate an open request which should become
-          ## aborted due to window:unload event
-          Cypress.action("app:window:unload", {})
+        .window()
+        .then (win) ->
+          cy
+          .route({
+            method: "POST",
+            url: /users/,
+            response: {name: "b"},
+            delay: 2000
+          })
+          .as("createUser")
+          .get("#create").click()
+          .then ->
+            win.location.href = '/index.html'
 
-        .wait("@createUser").its("aborted").should("be.true")
+          .wait("@createUser").its("canceled").should("be.true")

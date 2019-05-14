@@ -15,6 +15,19 @@ create = (win, now, methods) ->
     clock.tick(ms)
 
   restore = ->
+    _.each clock.methods, (method) ->
+      try
+        ## before restoring the clock, we need to
+        ## reset the hadOwnProperty in case a
+        ## the application code eradicated the
+        ## overridden clock method at a later time.
+        ## this is a property that lolex using internally
+        ## when restoring the global methods.
+        ## https://github.com/cypress-io/cypress/issues/2850
+        fn = clock[method]
+        if fn and fn.hadOwnProperty and win[method]
+          win[method].hadOwnProperty = true
+
     clock.uninstall()
 
   bind = (win) ->

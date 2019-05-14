@@ -32,8 +32,8 @@ Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 zlib = Promise.promisifyAll(zlib)
 
-## force supertest-session to use supertest-as-promised, hah
-Session       = proxyquire("supertest-session", {supertest: supertest})
+## force supertest-session to use promises provided in supertest
+Session = proxyquire("supertest-session", {supertest: supertest})
 
 removeWhitespace = (c) ->
   c = str.clean(c)
@@ -2013,6 +2013,24 @@ describe "Routes", ->
           expect(res.body).to.include "<head> <script"
           expect(res.body).to.include "</head><div>hello from bar!</div>"
 
+      it "injects after DOCTYPE declaration when no other content", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<!DOCTYPE>", {
+          "Content-Type": "text/html"
+        }
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<!DOCTYPE><head> <script"
+
       it "injects superdomain even when head tag is missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
@@ -3043,49 +3061,101 @@ describe "Routes", ->
           expectedHeader(responses[3], "localhost:6666")
           expectedHeader(responses[4], "*adwords.com")
 
-    # context "event source / server sent events / SSE", ->
-    #   beforeEach ->
-    #     @setup("http://localhost:5959", {
-    #       config: {
-    #         responseTimeout: 50
-    #       }
-    #     })
-    #     .then =>
-    #       @srv = http.createServer (req, res) =>
-    #         @sseStream = new SseStream(req)
-    #         @sseStream.pipe(res)
-    #
-    #         @sseStream.close = =>
-    #           @sseStream.end()
-    #           req.socket.destroy()
-    #
-    #       Promise.promisifyAll(@srv)
-    #
-    #       @srv.listenAsync()
-    #       .then =>
-    #         @port = @srv.address().port
-    #
-    #   afterEach ->
-    #     @srv.closeAsync()
-    #
-    #   it "receives event source messages through the proxy", (done) ->
-    #     es = new EventSource("http://localhost:#{@port}/sse", {
-    #       proxy: @proxy
-    #     })
-    #
-    #     es.onopen = =>
-    #       Promise
-    #       .delay(100)
-    #       .then =>
-    #         @sseStream.write({
-    #           data: "hey"
-    #         })
-    #
-    #     es.onmessage = (m) =>
-    #       expect(m.data).to.eq("hey")
-    #       es.close()
-    #       @sseStream.close()
-    #       done()
+    context "client aborts", ->
+      beforeEach ->
+        @setup("http://localhost:6565")
+
+      it "aborts the proxied request", (done) ->
+        fs
+        .readFileAsync(Fixtures.path("server/libs/huge_app.js"), "utf8")
+        .then (str) =>
+          server = http.createServer (req, res) ->
+            ## when the incoming message to our
+            ## 3rd party server is aborted then
+            ## we know we've juggled up the event
+            ## properly
+            req.on "aborted", ->
+              server.close -> done()
+
+            res.writeHead(200, {
+              "Content-Type": "application/javascript"
+            })
+
+            ## write some bytes, causing
+            ## the response event to fire
+            ## on our request
+            res.write(str.slice(0, 10000))
+
+          server.listen 6565, =>
+            abort = ->
+              r.abort()
+
+            r = @r({
+              url: "http://localhost:6565/app.js"
+            })
+            ## abort when we get the
+            ## response headers
+            .on "response", abort
+
+    context "event source / server sent events / SSE", ->
+      onRequest = null
+
+      beforeEach ->
+        onRequest = ->
+
+        @setup("http://localhost:5959", {
+          config: {
+            responseTimeout: 50
+          }
+        })
+        .then =>
+          @srv = http.createServer (req, res) =>
+            onRequest(req, res)
+
+            @sseStream = new SseStream(req)
+            @sseStream.pipe(res)
+
+          Promise.promisifyAll(@srv)
+
+          @srv.listenAsync()
+          .then =>
+            @port = @srv.address().port
+
+      afterEach ->
+        @srv.closeAsync()
+
+      it "receives event source messages through the proxy", (done) ->
+        onRequest = (req, res) ->
+          ## when the request is finally
+          ## aborted then we know we've closed
+          ## the connection correctly
+          closed = new Promise (resolve) ->
+            res.on "close", ->
+              resolve()
+
+          aborted = new Promise (resolve) ->
+            req.on "aborted", ->
+              resolve()
+
+          Promise.join(aborted, closed)
+          .then ->
+            done()
+
+        es = new EventSource("http://localhost:#{@port}/sse", {
+          proxy: @proxy
+        })
+
+        es.onopen = =>
+          Promise
+          .delay(100)
+          .then =>
+            @sseStream.write({
+              data: "hey"
+            })
+
+        es.onmessage = (m) =>
+          expect(m.data).to.eq("hey")
+          es.close()
     #
     #   it "handles errors when the event source connection cannot be made", (done) ->
     #     ## it should call req.socket.destroy() when receiving error

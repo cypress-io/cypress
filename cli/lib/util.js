@@ -1,6 +1,8 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 const tty = require('tty')
 const path = require('path')
 const isCi = require('is-ci')
@@ -15,7 +17,8 @@ const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
-const compareVersions = require('compare-versions')
+
+const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
 const getosAsync = Promise.promisify(getos)
 
@@ -25,6 +28,14 @@ const stringify = (val) => {
 
 function normalizeModuleOptions (options = {}) {
   return _.mapValues(options, stringify)
+}
+
+/**
+ * Returns true if the platform is Linux. We do a lot of different
+ * stuff on Linux (like XVFB) and it helps to has readable code
+ */
+const isLinux = () => {
+  return os.platform() === 'linux'
 }
 
 function stdoutLineMatches (expectedLine, stdout) {
@@ -68,7 +79,6 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
-    .extend(util.getNode11WindowsFix()) // the value has to be falsy, '0' as a string not good enoughs
     .value()
   },
 
@@ -80,14 +90,6 @@ const util = {
     }
   },
 
-  getNode11WindowsFix () {
-    if (compareVersions(util.getNodeVersion(), 'v11') >= 0 && util.isPlatform('win32')) {
-      return {
-        windowsHide: false,
-      }
-    }
-  },
-
   getEnvColors () {
     const sc = util.supportsColor()
 
@@ -96,14 +98,6 @@ const util = {
       DEBUG_COLORS: sc,
       MOCHA_COLORS: sc ? true : undefined,
     }
-  },
-
-  getNodeVersion () {
-    return process.version
-  },
-
-  isPlatform (platform) {
-    return os.platform() === platform
   },
 
   isTty (fd) {
@@ -177,7 +171,7 @@ const util = {
 
   setTaskTitle (task, title, renderer) {
     // only update the renderer title when not running in CI
-    if (renderer === 'default') {
+    if (renderer === 'default' && task.title !== title) {
       task.title = title
     }
   },
@@ -194,9 +188,11 @@ const util = {
     return Promise.resolve(executable(filePath))
   },
 
+  isLinux,
+
   getOsVersionAsync () {
     return Promise.try(() => {
-      if (os.platform() === 'linux') {
+      if (isLinux()) {
         return getosAsync()
         .then((osInfo) => {
           return [osInfo.dist, osInfo.release].join(' - ')
@@ -261,6 +257,26 @@ const util = {
   exec: execa,
 
   stdoutLineMatches,
+
+  issuesUrl,
+
+  getGitHubIssueUrl (number) {
+    la(is.positive(number), 'github issue should be a positive number', number)
+    la(_.isInteger(number), 'github issue should be an integer', number)
+
+    return `${issuesUrl}/${number}`
+  },
+
+  /**
+   * If the DISPLAY variable is set incorrectly, when trying to spawn
+   * Cypress executable we get an error like this:
+  ```
+  [1005:0509/184205.663837:WARNING:browser_main_loop.cc(258)] Gtk: cannot open display: 99
+  ```
+   */
+  isDisplayError (errorMessage) {
+    return isLinux() && errorMessage.includes('cannot open display:')
+  },
 }
 
 module.exports = util

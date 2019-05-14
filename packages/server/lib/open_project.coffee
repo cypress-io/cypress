@@ -2,6 +2,8 @@ _         = require("lodash")
 la        = require("lazy-ass")
 debug     = require("debug")("cypress:server:openproject")
 Promise   = require("bluebird")
+path      = require("path")
+chokidar  = require("chokidar")
 files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
@@ -11,8 +13,8 @@ preprocessor = require("./plugins/preprocessor")
 
 create = ->
   openProject     = null
-  specIntervalId  = null
   relaunchBrowser = null
+  specsWatcher    = null
 
   reset = ->
     openProject     = null
@@ -46,8 +48,6 @@ create = ->
       debug("resetting project state, preparing to launch browser")
 
       la(_.isPlainObject(browser), "expected browser object:", browser)
-
-      browserName = browser.name
 
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
@@ -106,12 +106,12 @@ create = ->
 
           do relaunchBrowser = ->
             debug(
-              "launching browser: %s, spec: %s",
-              browserName,
+              "launching browser: %o, spec: %s",
+              browser,
               spec.relative
             )
 
-            browsers.open(browserName, options, automation)
+            browsers.open(browser, options, automation)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
@@ -128,17 +128,34 @@ create = ->
         currentSpecs = specs
         options.onChange(specs)
 
-      checkForSpecUpdates = =>
+      checkForSpecUpdates = _.debounce =>
         if not openProject
-          return @clearSpecInterval()
+          return @stopSpecsWatcher()
+
+        debug("check for spec updates")
 
         get()
         .then(sendIfChanged)
         .catch(options.onError)
+      , 250, { leading: true }
+
+      createSpecsWatcher = (cfg) ->
+        return if specsWatcher
+
+        debug("watch test files: %s in %s", cfg.testFiles, cfg.integrationFolder)
+
+        specsWatcher = chokidar.watch(cfg.testFiles, {
+          cwd: cfg.integrationFolder
+          ignored: cfg.ignoreTestFiles
+          ignoreInitial: true
+        })
+        specsWatcher.on("add", checkForSpecUpdates)
+        specsWatcher.on("unlink", checkForSpecUpdates)
 
       get = ->
         openProject.getConfig()
         .then (cfg) ->
+          createSpecsWatcher(cfg)
           specsUtil.find(cfg)
         .then (specs = []) ->
           ## TODO: put back 'integration' property
@@ -147,15 +164,13 @@ create = ->
             integration: specs
           }
 
-      specIntervalId = setInterval(checkForSpecUpdates, 2500)
-
       ## immediately check the first time around
       checkForSpecUpdates()
 
-    clearSpecInterval: ->
-      if specIntervalId
-        clearInterval(specIntervalId)
-        specIntervalId = null
+    stopSpecsWatcher: ->
+      debug("stop spec watcher")
+      Promise.try ->
+        specsWatcher?.close()
 
     closeBrowser: ->
       browsers.close()
@@ -173,7 +188,7 @@ create = ->
     close:  ->
       debug("closing opened project")
 
-      @clearSpecInterval()
+      @stopSpecsWatcher()
       @closeOpenProjectAndBrowsers()
 
     create: (path, args = {}, options = {}) ->
@@ -188,15 +203,11 @@ create = ->
 
       options = _.extend {}, args.config, options
 
-      browsers.get()
-      .then (b = []) ->
-        options.browsers = b
+      ## open the project and return
+      ## the config for the project instance
+      debug("opening project %s", path)
 
-        ## open the project and return
-        ## the config for the project instance
-        debug("opening project %s", path)
-
-        openProject.open(options)
+      openProject.open(options)
       .return(@)
   }
 

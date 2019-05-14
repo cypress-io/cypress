@@ -37,6 +37,23 @@ describe('driver/src/cy/timers', () => {
     })
   })
 
+  it('setTimeout can pass multiple parameters to the target function', () => {
+    cy
+    .log('setTimeout should call target with two parameters')
+    .window()
+    .then((win) => {
+      win.foo = null
+      win.setFoo = (bar, baz) => {
+        win.foo = bar + baz
+      }
+
+      win.setTimeout(win.setFoo, 0, 'bar', 'baz')
+
+      cy
+      .window().its('foo').should('eq', 'barbaz')
+    })
+  })
+
   it('setInterval is called through', () => {
     cy
     .log('setInterval should be called')
@@ -73,16 +90,38 @@ describe('driver/src/cy/timers', () => {
     })
   })
 
+  it('setInterval can pass multiple parameters to the target function', () => {
+    cy
+    .log('setInterval should call target with two parameters')
+    .window()
+    .then((win) => {
+      win.foo = null
+      win.setFoo = (bar, baz) => {
+        win.foo = bar + baz
+      }
+
+      const id1 = win.setInterval(win.setFoo, 1, 'bar', 'baz')
+
+      cy
+      .window().its('foo').should('eq', 'barbaz')
+      .then(() => {
+        win.clearInterval(id1)
+      })
+    })
+  })
+
   it('requestAnimationFrame is called through', () => {
     cy
     .log('requestAnimationFrame should be called')
     .window()
     .then((win) => {
-      win.setBar = () => {
+      const rafStub = cy
+      .stub()
+      .callsFake(() => {
         win.bar = 'bar'
-      }
+      })
 
-      const id1 = win.requestAnimationFrame(win.setBar, 1)
+      const id1 = win.requestAnimationFrame(rafStub, 'foo', 'bar', 'baz')
 
       // the timer id is 1 by default since
       // timers increment and always start at 0
@@ -92,9 +131,14 @@ describe('driver/src/cy/timers', () => {
       .window().its('bar').should('eq', 'bar')
       .log('requestAnimationFrame should not be called')
       .then(() => {
+        // requestAnimationFrame should have passed through
+        // its high res timestamp from performance.now()
+        expect(rafStub).to.be.calledWithMatch(Number)
+        expect(rafStub.firstCall.args.length).to.eq(1)
+
         win.bar = null
 
-        const id2 = win.requestAnimationFrame(win.setBar, 2)
+        const id2 = win.requestAnimationFrame(rafStub)
 
         expect(id2).to.eq(2)
 
@@ -104,6 +148,60 @@ describe('driver/src/cy/timers', () => {
       })
       .wait(100)
       .window().its('bar').should('be.null')
+    })
+  })
+
+  it('delays calls to requestAnimationFrame when paused', () => {
+    cy
+    .window()
+    .then((win) => {
+      win.bar = null
+
+      const rafStub = cy
+      .stub()
+      .callsFake(() => {
+        win.bar = 'bar'
+      })
+
+      // prevent timers from firing, add to queue
+      cy.pauseTimers(true)
+
+      const id1 = win.requestAnimationFrame(rafStub)
+
+      expect(id1).to.eq(1)
+
+      cy
+      .wait(100)
+      .log('requestAnimationFrame should NOT have fired when paused')
+      .window().its('bar').should('be.null')
+      .log('requestAnimationFrame should now fire when unpaused')
+      .then(() => {
+        // now go ahead and run all the queued timers
+        cy.pauseTimers(false)
+
+        expect(win.bar).to.eq('bar')
+
+        // requestAnimationFrame should have passed through
+        // its high res timestamp from performance.now()
+        expect(rafStub).to.be.calledWithMatch(Number)
+      })
+      .then(() => {
+        win.bar = 'foo'
+
+        cy.pauseTimers(true)
+
+        const id2 = win.requestAnimationFrame(rafStub)
+
+        expect(id2).to.eq(2)
+
+        const ret = win.cancelAnimationFrame(id2)
+
+        expect(ret).to.be.undefined
+
+        cy.pauseTimers(false)
+      })
+      .wait(100)
+      .window().its('bar').should('eq', 'foo')
     })
   })
 
@@ -298,7 +396,6 @@ describe('driver/src/cy/timers', () => {
       })
     })
 
-
     //
     // setInterval(cb, 100)
     // cb() 100
@@ -327,12 +424,17 @@ describe('driver/src/cy/timers', () => {
     .then((win) => {
       const stub1 = cy.stub()
 
-      win.setTimeout(stub1, 200)
+      // we're setting setTimeout to 500ms because
+      // there were times where the driver's webserver
+      // was sending bytes after 200ms (TTFB) that caused
+      // this test to be flaky.
+      win.setTimeout(stub1, 500)
 
+      // force the window to sync reload
       win.location.reload()
 
       cy
-      .wait(400)
+      .wait(800)
       .then(() => {
         expect(stub1).not.to.be.called
       })

@@ -1,5 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../../../dom")
@@ -72,7 +71,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## push the value in values array if its
           ## found within the valueOrText
           value = $elements.getNativeProp(el, "value")
-          optEl = $(el)
+          optEl = $dom.wrap(el)
 
           if value in valueOrText
             optionEls.push optEl

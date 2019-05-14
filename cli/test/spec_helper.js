@@ -5,6 +5,20 @@ const sinon = require('sinon')
 const mockfs = require('mock-fs')
 const Promise = require('bluebird')
 const util = require('../lib/util')
+const { MockChildProcess } = require('spawn-mock')
+const _kill = MockChildProcess.prototype.kill
+
+const patchMockSpawn = () => {
+
+  MockChildProcess.prototype.kill = function (...args) {
+
+    this.emit('exit')
+
+    return _kill.apply(this, args)
+  }
+}
+
+patchMockSpawn()
 
 global.sinon = sinon
 global.expect = require('chai').expect
@@ -13,6 +27,7 @@ global.lib = path.join(__dirname, '..', 'lib')
 require('chai')
 .use(require('@cypress/sinon-chai'))
 .use(require('chai-string'))
+.use(require('chai-as-promised'))
 
 sinon.usingPromise(Promise)
 
@@ -89,7 +104,7 @@ beforeEach(function () {
 })
 
 afterEach(function () {
+  mockfs.restore()
   process.env = _.clone(env)
   sinon.restore()
-  mockfs.restore()
 })

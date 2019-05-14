@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const tty = require('tty')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
 
@@ -13,6 +13,36 @@ describe('util', () => {
   beforeEach(() => {
     sinon.stub(process, 'exit')
     sinon.stub(logger, 'error')
+  })
+
+  context('.isDisplayError', () => {
+    it('detects only GTK message', () => {
+      os.platform.returns('linux')
+      const text = '[some noise here] Gtk: cannot open display: 99'
+      expect(util.isDisplayError(text)).to.be.true
+      // and not for the other messages
+      expect(util.isDisplayError('display was set incorrectly')).to.be.false
+    })
+  })
+
+  context('.getGitHubIssueUrl', () => {
+    it('returls url for issue number', () => {
+      const url = util.getGitHubIssueUrl(4034)
+
+      expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')
+    })
+
+    it('throws for anything but a positive integer', () => {
+      expect(() => {
+        return util.getGitHubIssueUrl('4034')
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(-5)
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(5.19)
+      }).to.throw
+    })
   })
 
   context('.stdoutLineMatches', () => {
@@ -58,7 +88,7 @@ describe('util', () => {
         foo: 'bar',
       }
 
-      snapshot('others_unchanged', normalizeModuleOptions(options))
+      snapshot('others_unchanged 1', normalizeModuleOptions(options))
     })
 
     it('passes string env unchanged', () => {
@@ -66,7 +96,7 @@ describe('util', () => {
         env: 'foo=bar',
       }
 
-      snapshot('env_as_string', normalizeModuleOptions(options))
+      snapshot('env_as_string 1', normalizeModuleOptions(options))
     })
 
     it('converts environment object', () => {
@@ -78,7 +108,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('env_as_object', normalizeModuleOptions(options))
+      snapshot('env_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts config object', () => {
@@ -89,7 +119,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('config_as_object', normalizeModuleOptions(options))
+      snapshot('config_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts reporterOptions object', () => {
@@ -100,7 +130,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('reporter_options_as_object', normalizeModuleOptions(options))
+      snapshot('reporter_options_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts specs array', () => {
@@ -110,7 +140,7 @@ describe('util', () => {
         ],
       }
 
-      snapshot('spec_as_array', normalizeModuleOptions(options))
+      snapshot('spec_as_array 1', normalizeModuleOptions(options))
     })
 
     it('does not convert spec when string', () => {
@@ -118,7 +148,7 @@ describe('util', () => {
         spec: 'x,y,z',
       }
 
-      snapshot('spec_as_string', normalizeModuleOptions(options))
+      snapshot('spec_as_string 1', normalizeModuleOptions(options))
     })
   })
 
@@ -189,36 +219,6 @@ describe('util', () => {
         FORCE_STDERR_TTY: '0',
         FORCE_COLOR: '0',
         DEBUG_COLORS: '0',
-      })
-    })
-
-    context('.windowsHide', () => {
-      it('is false on windows with node 11', () => {
-        os.platform.returns('win32')
-        sinon.stub(process, 'version').value('v11.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.false
-      })
-
-      it('is false on windows with node > 11', () => {
-        os.platform.returns('win32')
-        sinon.stub(process, 'version').value('v12.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.false
-      })
-
-      it('is undefined on windows with node < 11', () => {
-        os.platform.returns('win32')
-        sinon.stub(process, 'version').value('v8.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.undefined
-
-        os.platform.returns('win32')
-        sinon.stub(process, 'version').value('v10.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.undefined
-      })
-
-      it('is undefined on non-windows with node 11', () => {
-        os.platform.returns('darwin')
-        sinon.stub(process, 'version').value('v11.0.0')
-        expect(util.getEnvOverrides().windowsHide).to.be.undefined
       })
     })
   })

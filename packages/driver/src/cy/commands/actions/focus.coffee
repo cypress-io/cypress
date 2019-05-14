@@ -3,7 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
-$elements = require("../../../dom/elements.coffee")
+$elements = require("../../../dom/elements")
 $actionability = require("../../actionability")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
