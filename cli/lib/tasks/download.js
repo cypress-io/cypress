@@ -84,6 +84,10 @@ const getFileSize = (filename) => {
   return fs.statAsync(filename).get('size')
 }
 
+/**
+ * Checks checksum and file size for the given file. Allows both
+ * values or just one of them to be checked.
+ */
 const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
   if (expectedSize && expectedChecksum) {
     debug('verifying checksum and file size')
@@ -107,6 +111,31 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 
         Expected downloaded file to have size: ${expectedSize}
         Computed size: ${filesize}
+      `
+
+      debug(text)
+
+      throw new Error(text)
+    })
+  }
+
+  if (expectedChecksum) {
+    debug('only checking expected file checksum %d', expectedChecksum)
+
+    return hasha.fromFile(filename)
+    .then((checksum) => {
+      if (checksum === expectedChecksum) {
+        debug('downloaded file has the expected checksum ✅')
+
+        return
+      }
+
+      debug('raising error: file checksum mismatch')
+      const text = stripIndent`
+        Corrupted download
+
+        Expected downloaded file to have checksum: ${expectedChecksum}
+        Computed checksum: ${checksum}
       `
 
       throw new Error(text)
@@ -184,10 +213,15 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
       expectedSize = response.headers['x-amz-meta-size'] ||
         response.headers['content-length']
       expectedChecksum = response.headers['x-amz-meta-checksum']
-      if (expectedSize && expectedChecksum) {
+
+      if (expectedChecksum) {
+        debug('expected checksum %s', expectedChecksum)
+      }
+
+      if (expectedSize) {
         // convert from string (all Amazon custom headers are strings)
         expectedSize = Number(expectedSize)
-        debug('expected checksum %s and file size %d', expectedChecksum, expectedSize)
+        debug('expected file size %d', expectedSize)
       }
 
       // start counting now once we've gotten
