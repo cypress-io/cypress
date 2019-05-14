@@ -405,6 +405,42 @@ describe "lib/util/ci_provider", ->
 
     expectsName("gitlab")
 
+  it "google cloud", ->
+    resetEnv = mockedEnv({
+      GCP_PROJECT: "123"
+
+      BUILD_ID: "buildId"
+
+      PROJECT_ID: "projectId"
+
+      COMMIT_SHA: "commitSha"
+      BRANCH_NAME: "branchName"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+    expectsCiParams({
+      buildId: "buildId"
+      projectId: "projectId"
+      commitSha: "commitSha"
+      branchName: "branchName"
+    })
+    expectsCommitParams({
+      sha: "commitSha"
+      branch: "branchName"
+    })
+
+    resetEnv = mockedEnv({
+      GCLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+
+    resetEnv = mockedEnv({
+      GOOGLE_CLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+
   it "jenkins", ->
     resetEnv = mockedEnv({
       JENKINS_URL: "true"
