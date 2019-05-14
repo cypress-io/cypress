@@ -8,7 +8,7 @@ const Promise = require('bluebird')
 const fs = Promise.promisifyAll(fse)
 const glob = Promise.promisify(globber)
 
-const pathToPackages = path.join(__dirname, 'node_modules', '@packages')
+const pathToPackages = path.join(__dirname, '..', 'node_modules', '@packages')
 
 function deleteOutputFolder () {
 
