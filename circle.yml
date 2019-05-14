@@ -83,7 +83,7 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
+          key: v6-{{ arch }}-{{ .Branch }}-deps-launcher
       - restore_cache:
           key: v1-{{ arch }}-{{ .Branch }}-deps-network
       - restore_cache:
