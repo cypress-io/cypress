@@ -32,59 +32,6 @@ const config: webpack.Configuration = {
       'react': path.resolve('./node_modules/react')
     },
     extensions: [ '.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
-    // plugins: [
-    //   new (class Plugin {
-
-    //       apply(resolver) {
-            
-    //         resolver.getHook("before-existing-directory")
-    //         .tapAsync("DirectoryNamedWebpackPlugin", (request, resolveContext, callback) => {
-    //           const dirPath = request.path;
-    //           console.log(resolveContext)
-    //           console.log(dirPath)
-    //              if (!dirPath.match(/node_modules/)) {
-    //             reqs.push('|' + dirPath)
-    //   }
-    //     // console.log(dirPath)
-    //   if (dirPath.includes('coffee')) console.log([...reqs, dirPath].join('\n'))
-    //   if (reqs.length > 8) reqs = []
-    //           callback()
-    //         })
-
-    //       }
-
-    //     })()
-    // ]
-    // cachePredicate: function (a1) {
-    //   if (!a1.path.match(/node_modules/)) {
-    //     reqs.push(a1.request)
-    //   }
-    //     // console.log(a1.path)
-    //   if (a1.path.includes('coffee')) console.log([...reqs, a1.path].join('\n'))
-    //   if (reqs.length > 50) reqs = []
-    //   return true
-    // }
-    // plugins: [
-    //   function () {
-    //   return {
-    //     apply(options, resolver) {
-    //       // file type taken from: https://github.com/webpack/enhanced-resolve/blob/v4.0.0/test/plugins.js
-    //       var target = resolver.ensureHook("undescribed-raw-file");
-          
-    //       resolver.getHook("before-existing-directory")
-    //         .tapAsync("DirectoryNamedWebpackPlugin", (request, resolveContext, callback) => {
-    //           if (options.ignoreFn && options.ignoreFn(request)) {
-    //             return callback();
-    //           }
-          
-    //           var dirPath = request.path;
-    //           console.log(dirPath)
-    //           return dirPath
-    //         })
-    //       }
-    //   }
-    // }
-    // ]
   },
   output: {
     path: path.resolve('./dist'),
@@ -189,10 +136,10 @@ const config: webpack.Configuration = {
       builtAt: true,
       colors: true,
       modules: true,
-      excludeModules: /main.scss/,
+      excludeModules: /main\.scss/,
     },
     noInfo: true,
-    writeToDisk: (filepath) => /index.html/.test(filepath),
+    writeToDisk: (filepath) => /index\.html/.test(filepath),
     headers: {
       "Access-Control-Allow-Origin": "*",
     }
@@ -200,28 +147,28 @@ const config: webpack.Configuration = {
 
 }
 
-// if (mode === 'reporter') {
-//   const reporterConfig: webpack.Configuration = {
-//     entry: {
-//       cypress_reporter: ['../reporter/src']
-//     },
-//     output: {
-//       path: path.resolve('../reporter/dist'),
-//       filename: '[name].js'
-//     },
-//     plugins: [
-//       new HtmlWebpackPlugin({
-//         template: './static/index.reporter.html',
-//         chunks: ['cypress_reporter']
-//       }),
-//       new CleanWebpackPlugin(),
-//       new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
-//       new MiniCSSExtractWebpackPlugin('[name].css'),
-//     ]
-//   }
+if (mode === 'reporter') {
+  const reporterConfig: webpack.Configuration = {
+    entry: {
+      cypress_reporter: ['../reporter/src']
+    },
+    output: {
+      path: path.resolve('../reporter/dist'),
+      filename: '[name].js'
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './static/index.reporter.html',
+        chunks: ['cypress_reporter']
+      }),
+      new CleanWebpackPlugin(),
+      new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
+      new MiniCSSExtractWebpackPlugin('[name].css'),
+    ]
+  }
 
-//   _.extend(config, reporterConfig)
-// }
+  _.extend(config, reporterConfig)
+}
 
 
 

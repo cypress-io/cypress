@@ -1,6 +1,0 @@
-{
-  "name": "@packages/resolver",
-  "version": "0.0.0",
-  "description": "resolves path to @packages",
-  "main": "index.js"
-}

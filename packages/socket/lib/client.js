@@ -1,1 +1,1 @@
-module.exports = require('socket.io/lib/client')
+module.exports = require('socket.io-client')

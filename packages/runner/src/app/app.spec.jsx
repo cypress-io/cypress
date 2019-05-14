@@ -2,7 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
-import reporter from '@packages/reporter/src'
+import * as reporter from '@packages/reporter'
 import Message from '../message/message'
 import State from '../lib/state'
 

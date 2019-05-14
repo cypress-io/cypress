@@ -93,7 +93,6 @@
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.3.1",
     "webpack-node-externals": "^1.7.2",
-    "zunder": "6.4.1",
-    "@packages/socket": "0.0.0"
+    "zunder": "6.4.1"
   }
 }

@@ -73,7 +73,7 @@ const overrideRequire = () => {
 
 overrideRequire()
 const driver = returnMockRequire('@packages/driver')
-const io = returnMockRequire(require('@packages/resolver').resolve('@packages/socket/lib/client'), {})
+const io = returnMockRequire('@packages/socket/lib/client', {})
 
 io.connect = sinon.stub().returns({ emit: () => {}, on: () => {} })
 
