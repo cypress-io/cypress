@@ -453,7 +453,7 @@ create = (Cypress, cy, state, config) ->
 
     logs[id] = true
 
-  logFn = (options) ->
+  logFn = (options = {}) ->
     if !_.isObject(options)
       $utils.throwErrByPath "log.invalid_argument", {args: { arg: options }}
 
