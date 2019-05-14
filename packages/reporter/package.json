@@ -42,6 +42,7 @@
     "markdown-it": "6.1.1",
     "mobx": "3.6.2",
     "mobx-react": "4.4.3",
+    "mocha": "^6.1.4",
     "mock-require": "^3.0.3",
     "prop-types": "15.7.2",
     "react": "16.8.6",
