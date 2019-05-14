@@ -71,7 +71,7 @@ jobs:
       - restore_cache:
           key: v5-{{ arch }}-{{ .Branch }}-deps-coffee
       - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
+          key: v6-{{ arch }}-{{ .Branch }}-deps-desktop-gui
       - restore_cache:
           key: v6-{{ arch }}-{{ .Branch }}-deps-driver
       - restore_cache:
