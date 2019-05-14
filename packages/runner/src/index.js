@@ -1,2 +1,2 @@
 // import './main.scss'
-// import './main.jsx'
+import './main.jsx'

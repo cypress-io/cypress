@@ -1,6 +1,8 @@
 _ = require("lodash")
 send = require("send")
-reporter = require("@packages/reporter")
+
+pathToReporter = require.resolve("@packages/reporter")
+reporter = require("#{pathToReporter}/lib/resolve-dist")
 
 module.exports = {
   handle: (req, res) ->

@@ -2,14 +2,13 @@ import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
-import io from '@packages/socket'
+
+const io = require('@packages/socket/lib/client')
 
 import automation from './automation'
 import logger from './logger'
 
-import $Cypress from '@packages/driver'
-
-const $ = $Cypress.$
+import $Cypress, { $ } from '@packages/driver'
 
 const channel = io.connect({
   path: '/__socket.io',

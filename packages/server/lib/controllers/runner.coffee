@@ -2,8 +2,10 @@ _      = require("lodash")
 send   = require("send")
 os     = require("os")
 debug  = require("debug")("cypress:server:runner")
-runner = require("@packages/runner")
 pkg    = require("@packages/root")
+
+pathToRunner = require.resolve("@packages/runner")
+runner = require("#{pathToRunner}/lib/resolve-dist")
 
 module.exports = {
   serve: (req, res, options = {}) ->

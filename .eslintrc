@@ -55,6 +55,7 @@
     "node": true
   },
   "parserOptions": {
+    "sourceType": "module",
     "ecmaFeatures": {
       "legacyDecorators": true
     }

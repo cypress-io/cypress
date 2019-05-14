@@ -1,10 +1,8 @@
 import _ from 'lodash'
-import $Cypress from '@packages/driver'
+import { $ } from '@packages/driver'
 import Promise from 'bluebird'
 
 import selectorPlaygroundHighlight from '../selector-playground/highlight'
-
-const $ = $Cypress.$
 
 const styles = (styleString) => {
   return styleString.replace(/\s*\n\s*/g, '')

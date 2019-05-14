@@ -31,9 +31,9 @@ function deleteOutputFolder () {
 }
 
 function proxyModule (name, pathToMain, pathToBrowser) {
-  la(is.unemptyString(name), 'missing name')
-  la(is.unemptyString(pathToMain), 'missing path to main', pathToMain)
-  la(isRelative(pathToMain), 'path to main should be relative', pathToMain)
+  // la(is.unemptyString(name), 'missing name')
+  // la(is.unemptyString(pathToMain), 'missing path to main', pathToMain)
+  // la(isRelative(pathToMain), 'path to main should be relative', pathToMain)
 
   const pkg = {
     name,
@@ -69,47 +69,38 @@ function makeProxies () {
   }
   )
   .map(({ filename, json }) => {
-    if (!json.main) {
-      throw new Error(`Package ${json.name} is missing main`)
-    }
+    // if (!json.main) {
+    //   throw new Error(`Package ${json.name} is missing main`)
+    // }
 
     const dirname = path.dirname(filename)
-    const bareName = json.name.split('/')[1]
+    const basename = path.basename(dirname)
 
-    debug(json.name, 'bare name', bareName, 'main', json.main)
-    const destinationFolder = path.join(pathToPackages, bareName)
-    const destPackageFilename = path.join(destinationFolder, 'package.json')
-    const registerPath = path.join(destinationFolder, 'register.js')
-    const fullMain = path.resolve(dirname, json.main)
+    const destinationLink = path.join(pathToPackages, basename)
+    // const registerPath = path.join(destinationFolder, 'register.js')
+    // const fullMain = path.resolve(dirname, json.main)
 
-    debug('full name', fullMain)
-    const relativePathToMain = path.relative(destinationFolder, fullMain)
+    // debug('full name', fullMain)
+    // const relativePathToMain = path.relative(destinationFolder, fullMain)
 
-    debug('relative path to main', relativePathToMain)
+    // debug('relative path to main', relativePathToMain)
+    console.log(`${destinationLink} -> ${dirname}`)
+    const relativePathToDest = path.relative(path.dirname(destinationLink), dirname)
 
-    // for browserify, some packages use "browser" field
-    // need to pass it as well
-    let relativePathToBrowser
+    console.log(dirname, '->', relativePathToDest)
 
-    if (is.unemptyString(json.browser)) {
-      debug('package has browser field %s', json.browser)
-      relativePathToBrowser = path.relative(destinationFolder,
-        path.resolve(dirname, json.browser)
-      )
-      debug('relative path to browser', relativePathToBrowser)
-    }
+    // const proxy = proxyModule(json.name, relativePathToMain, relativePathToBrowser)
 
-    const proxy = proxyModule(json.name, relativePathToMain, relativePathToBrowser)
+    fs.mkdirp(path.dirname(destinationLink))
 
-    console.log(path.dirname(destPackageFilename), '->', relativePathToMain)
-
-    return fs.outputJsonAsync(destPackageFilename, proxy)
+    return fs.symlink(relativePathToDest, path.join(pathToPackages, basename))
+    // return fs.outputJsonAsync(destPackageFilename, proxy)
     .then(() => {
-      if (needsRegister(json.name)) {
-        console.log('adding register file', registerPath)
+      // if (needsRegister(json.name)) {
+      // console.log('adding register file', registerPath)
 
-        return fs.outputFileAsync(registerPath, proxyRegister(bareName), 'utf8')
-      }
+      // return fs.outputFileAsync(registerPath, proxyRegister(bareName), 'utf8')
+      // }
     })
   })
 }

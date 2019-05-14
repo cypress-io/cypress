@@ -1,8 +1,9 @@
-import webpack, { Configuration, optimize } from 'webpack'
+import webpack, { Configuration, optimize, ResolvePlugin } from 'webpack'
 import path from 'path'
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import CopyWebpackPlugin = require('copy-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
+import DynamicCDNPlugin = require('dynamic-cdn-webpack-plugin')
 import CleanWebpackPlugin from 'clean-webpack-plugin'
 import _ from 'lodash'
 
@@ -12,10 +13,11 @@ const mode = process.env.NODE_ENV as ('development' | 'production' | 'test' | 'r
 const webpackmode = mode === 'production' ? mode : 'development'
 
 const isDevServer = !!process.env.DEV_SERVER
-
+let reqs:string[] = []
+let currentPath
 const config: webpack.Configuration = {
   entry: {
-    cypress_runner: ['./src/main.jsx'],
+    cypress_runner: ['./src/index.js'],
   },
   mode: webpackmode,
   node: {
@@ -29,15 +31,69 @@ const config: webpack.Configuration = {
     alias: {
       'react': path.resolve('./node_modules/react')
     },
-    extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss'],
+    extensions: [ '.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
+    // plugins: [
+    //   new (class Plugin {
+
+    //       apply(resolver) {
+            
+    //         resolver.getHook("before-existing-directory")
+    //         .tapAsync("DirectoryNamedWebpackPlugin", (request, resolveContext, callback) => {
+    //           const dirPath = request.path;
+    //           console.log(resolveContext)
+    //           console.log(dirPath)
+    //              if (!dirPath.match(/node_modules/)) {
+    //             reqs.push('|' + dirPath)
+    //   }
+    //     // console.log(dirPath)
+    //   if (dirPath.includes('coffee')) console.log([...reqs, dirPath].join('\n'))
+    //   if (reqs.length > 8) reqs = []
+    //           callback()
+    //         })
+
+    //       }
+
+    //     })()
+    // ]
+    // cachePredicate: function (a1) {
+    //   if (!a1.path.match(/node_modules/)) {
+    //     reqs.push(a1.request)
+    //   }
+    //     // console.log(a1.path)
+    //   if (a1.path.includes('coffee')) console.log([...reqs, a1.path].join('\n'))
+    //   if (reqs.length > 50) reqs = []
+    //   return true
+    // }
+    // plugins: [
+    //   function () {
+    //   return {
+    //     apply(options, resolver) {
+    //       // file type taken from: https://github.com/webpack/enhanced-resolve/blob/v4.0.0/test/plugins.js
+    //       var target = resolver.ensureHook("undescribed-raw-file");
+          
+    //       resolver.getHook("before-existing-directory")
+    //         .tapAsync("DirectoryNamedWebpackPlugin", (request, resolveContext, callback) => {
+    //           if (options.ignoreFn && options.ignoreFn(request)) {
+    //             return callback();
+    //           }
+          
+    //           var dirPath = request.path;
+    //           console.log(dirPath)
+    //           return dirPath
+    //         })
+    //       }
+    //   }
+    // }
+    // ]
   },
   output: {
     path: path.resolve('./dist'),
     filename: '[name].js',
+    // devtoolModuleFilenameTemplate: ''
   },
 
   // Enable source maps
-  devtool: 'inline-cheap-module-source-map',
+  // devtool: 'inline-cheap-module-source-map',
 
   stats: {
     errors: true,
@@ -47,7 +103,7 @@ const config: webpack.Configuration = {
     builtAt: true,
     colors: true,
     modules: true,
-    maxModules: 400,
+    maxModules: 20,
     excludeModules: /main.scss/,
   },
 
@@ -112,6 +168,8 @@ const config: webpack.Configuration = {
   },
 
   plugins: [
+    // new DebugWebpackPlugin(),
+    // new debugPlugin(),
     new HtmlWebpackPlugin({
       template: isDevServer ? './static/index.dev.html' : './static/index.html',
       inject: false,
@@ -142,54 +200,31 @@ const config: webpack.Configuration = {
 
 }
 
-if (mode === 'reporter') {
-  const reporterConfig: webpack.Configuration = {
-    entry: {
-      cypress_reporter: ['../reporter/src']
-    },
-    output: {
-      path: path.resolve('../reporter/dist'),
-      filename: '[name].js'
-    },
-    plugins: [
-      new HtmlWebpackPlugin({
-        template: './static/index.reporter.html',
-        chunks: ['cypress_reporter']
-      }),
-      new CleanWebpackPlugin(),
-      new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
-      new MiniCSSExtractWebpackPlugin('[name].css'),
-    ]
-  }
+// if (mode === 'reporter') {
+//   const reporterConfig: webpack.Configuration = {
+//     entry: {
+//       cypress_reporter: ['../reporter/src']
+//     },
+//     output: {
+//       path: path.resolve('../reporter/dist'),
+//       filename: '[name].js'
+//     },
+//     plugins: [
+//       new HtmlWebpackPlugin({
+//         template: './static/index.reporter.html',
+//         chunks: ['cypress_reporter']
+//       }),
+//       new CleanWebpackPlugin(),
+//       new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
+//       new MiniCSSExtractWebpackPlugin('[name].css'),
+//     ]
+//   }
 
-  _.extend(config, reporterConfig)
-}
+//   _.extend(config, reporterConfig)
+// }
 
 
-if (mode === 'test') {
-  const testConfig: webpack.Configuration = {
-    devtool: 'inline-cheap-module-source-map',
-    target: 'node',
-    entry: {
-      cypress_test: ['../reporter/test/index.spec.js']
-    },
-    output: {
-      path: path.resolve('../reporter/dist-test'),
-      filename: '[name].js',
-      devtoolModuleFilenameTemplate: '[absolute-resource-path]',
-      // devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
-    },
-    optimization: undefined,
-    plugins: [
-      new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
-    ],
 
-    externals: [require('webpack-node-externals')()],
-
-  }
-
-  _.extend(config, testConfig)
-
-}
 
 export default config
+
