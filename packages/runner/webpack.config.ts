@@ -1,20 +1,16 @@
 import webpack, { Configuration, optimize, ResolvePlugin } from 'webpack'
+import _ from 'lodash'
 import path from 'path'
+import CleanWebpackPlugin from 'clean-webpack-plugin'
+import sassGlobImporter = require('node-sass-globbing')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import CopyWebpackPlugin = require('copy-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
-import DynamicCDNPlugin = require('dynamic-cdn-webpack-plugin')
-import CleanWebpackPlugin from 'clean-webpack-plugin'
-import _ from 'lodash'
-
-import sassGlobImporter = require('node-sass-globbing')
 
 const mode = process.env.NODE_ENV as ('development' | 'production' | 'test' | 'reporter') || 'development'
 const webpackmode = mode === 'production' ? mode : 'development'
 
 const isDevServer = !!process.env.DEV_SERVER
-let reqs:string[] = []
-let currentPath
 const config: webpack.Configuration = {
   entry: {
     cypress_runner: ['./src/index.js'],
@@ -36,7 +32,6 @@ const config: webpack.Configuration = {
   output: {
     path: path.resolve('./dist'),
     filename: '[name].js',
-    // devtoolModuleFilenameTemplate: ''
   },
 
   // Enable source maps
@@ -123,7 +118,7 @@ const config: webpack.Configuration = {
     }),
     new CleanWebpackPlugin(),
     new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
-    new MiniCSSExtractWebpackPlugin('[name].css'),
+    new MiniCSSExtractWebpackPlugin(),
   ],
 
   devServer: {
@@ -148,12 +143,15 @@ const config: webpack.Configuration = {
 }
 
 if (mode === 'reporter') {
+
+  const { getPathToDist } = require("@packages/reporter/lib/resolve-dist")
+
   const reporterConfig: webpack.Configuration = {
     entry: {
-      cypress_reporter: ['../reporter/src']
+      cypress_reporter: [require.resolve('@packages/reporter/src')]
     },
     output: {
-      path: path.resolve('../reporter/dist'),
+      path: getPathToDist(),
       filename: '[name].js'
     },
     plugins: [
@@ -163,7 +161,7 @@ if (mode === 'reporter') {
       }),
       new CleanWebpackPlugin(),
       new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
-      new MiniCSSExtractWebpackPlugin('[name].css'),
+      new MiniCSSExtractWebpackPlugin(),
     ]
   }
 

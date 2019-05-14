@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "echo '@packages/runner needs: npm run build'",
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "webpack --progress",
+    "build": "webpack",
     "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "webpack --mode=production",
     "prewatch": "npm run check-deps-pre",

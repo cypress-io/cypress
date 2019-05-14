@@ -1,5 +1,3 @@
->>>>>>>
-
 require('../../coffee/register')
 
 require('@babel/register')({
