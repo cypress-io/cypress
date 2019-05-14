@@ -32,6 +32,7 @@ const config: webpack.Configuration = {
   output: {
     path: path.resolve('./dist'),
     filename: '[name].js',
+    devtoolModuleFilenameTemplate: '[namespace]/[resource-path]'
   },
 
   // Enable source maps
