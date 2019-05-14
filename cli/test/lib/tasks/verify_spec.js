@@ -2,9 +2,12 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const mockfs = require('mock-fs')
+const cp = require('child_process')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
+
+const { mockSpawn } = require('spawn-mock')
+const mockfs = require('mock-fs')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -53,7 +56,7 @@ context('lib/tasks/verify', () => {
     sinon.stub(_, 'random').returns('222')
 
     util.exec
-    .withArgs(executablePath, ['--smoke-test', '--ping=222'])
+    .withArgs(executablePath, ['--smoke-test', '--ping=222', '--enable-logging'])
     .resolves(spawnedProcess)
   })
 
@@ -128,6 +131,84 @@ context('lib/tasks/verify', () => {
     })
   })
 
+  it('logs error when child process hangs', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+      cp.stderr.write('some stderr')
+      cp.stdout.write('some stdout')
+    }))
+
+    util.exec.restore()
+
+    return verify
+    .start({ smokeTestTimeout: 1 })
+    .catch((err) => {
+      logger.error(err)
+    })
+    .then(() => {
+      snapshot(normalize(slice(stdout.toString())))
+    })
+
+  })
+
+  it('logs error when child process returns incorrect stdout (stderr when exists)', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+      cp.stderr.write('some stderr')
+      cp.stdout.write('some stdout')
+      cp.emit('exit', 0, null)
+      cp.end()
+    }))
+
+    util.exec.restore()
+
+    return verify
+    .start()
+    .catch((err) => {
+      logger.error(err)
+    })
+    .then(() => {
+      snapshot(normalize(slice(stdout.toString())))
+    })
+
+  })
+
+  it('logs error when child process returns incorrect stdout (stdout when no stderr)', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
+      cp.stdout.write('some stdout')
+      cp.emit('exit', 0, null)
+      cp.end()
+    }))
+
+    util.exec.restore()
+
+    return verify
+    .start()
+    .catch((err) => {
+      logger.error(err)
+    })
+    .then(() => {
+      snapshot(normalize(slice(stdout.toString())))
+    })
+
+  })
+
   describe('with force: true', () => {
     beforeEach(() => {
       createfs({
@@ -199,6 +280,96 @@ context('lib/tasks/verify', () => {
     it('finds ping value in the verbose output', () => {
       return verify.start().then(() => {
         snapshot('verbose stdout output 1', normalize(stdout.toString()))
+      })
+    })
+  })
+
+  describe('smoke test retries on bad display with our XVFB', () => {
+    beforeEach(() => {
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0777 }),
+        packageVersion,
+      })
+
+      util.exec.restore()
+      sinon.spy(logger, 'warn')
+    })
+
+    it('successfully retries with our XVFB on Linux', () => {
+      // initially we think the user has everything set
+      xvfb.isNeeded.returns(false)
+
+      sinon.stub(util, 'exec').callsFake(() => {
+        // using .callsFake to set platform to Linux
+        // to allow retry logic to work
+        os.platform.returns('linux')
+        const firstSpawnError = new Error('')
+
+        // this message contains typical Gtk error shown if X11 is incorrect
+        // like in the case of DISPLAY=987
+        firstSpawnError.stderr = stripIndent`
+          [some noise here] Gtk: cannot open display: 987
+            and maybe a few other lines here with weird indent
+        `
+        firstSpawnError.stdout = ''
+
+        // the second time the binary returns expected ping
+        util.exec.withArgs(executablePath).resolves({
+          stdout: '222',
+        })
+
+        return Promise.reject(firstSpawnError)
+      })
+
+      return verify.start().then(() => {
+        expect(util.exec).to.have.been.calledTwice
+        // user should have been warned
+        expect(logger.warn).to.have.been.calledOnce
+      })
+    })
+
+    it('fails on both retries with our XVFB on Linux', () => {
+      // initially we think the user has everything set
+      xvfb.isNeeded.returns(false)
+
+      sinon.stub(util, 'exec').callsFake(() => {
+        expect(xvfb.start).to.not.have.been.called
+
+        os.platform.returns('linux')
+        const firstSpawnError = new Error('')
+
+        // this message contains typical Gtk error shown if X11 is incorrect
+        // like in the case of DISPLAY=987
+        firstSpawnError.stderr = stripIndent`
+          [some noise here] Gtk: cannot open display: 987
+            and maybe a few other lines here with weird indent
+        `
+        firstSpawnError.stdout = ''
+
+        // the second time it runs, it fails for some other reason
+        const secondMessage = stripIndent`
+          some other error
+            again with
+              some weird indent
+        `
+        util.exec.withArgs(executablePath).rejects(new Error(secondMessage))
+
+        return Promise.reject(firstSpawnError)
+      })
+
+      return verify.start().then(() => {
+        throw new Error('Should have failed')
+      }, (e) => {
+        expect(util.exec).to.have.been.calledTwice
+        // second time around we should have called XVFB
+        expect(xvfb.start).to.have.been.calledOnce
+        expect(xvfb.stop).to.have.been.calledOnce
+
+        // user should have been warned
+        expect(logger.warn).to.have.been.calledOnce
+
+        snapshot('tried to verify twice, on the first try got the DISPLAY error', e.message)
       })
     })
   })
@@ -419,7 +590,7 @@ context('lib/tasks/verify', () => {
         customDir: '/real/custom',
       })
       util.exec
-      .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222'])
+      .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222', '--enable-logging'])
       .resolves(spawnedProcess)
 
       return verify.start().then(() => {

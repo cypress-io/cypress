@@ -2,6 +2,7 @@ const snapshot = require('snap-shot-it')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const uploadUtils = require('../../binary/util/upload')
+const s3helpers = require('../../binary/s3-api').s3helpers
 
 /* eslint-env mocha */
 /* global sinon */
@@ -120,14 +121,14 @@ describe('move-binaries', () => {
       // fake S3 api
       const s3 = {}
 
-      sinon.stub(moveBinaries.s3helpers, 'makeS3').returns(s3)
+      sinon.stub(s3helpers, 'makeS3').returns(s3)
       sinon
-      .stub(moveBinaries.s3helpers, 'listS3Objects')
+      .stub(s3helpers, 'listS3Objects')
       .withArgs('beta/binary/3.3.0/darwin-x64', aws.bucket)
       .resolves(darwinBuilds)
 
       sinon
-      .stub(moveBinaries.s3helpers, 'verifyZipFileExists')
+      .stub(s3helpers, 'verifyZipFileExists')
       .withArgs(`${latestMacBuild}cypress.zip`, aws.bucket)
       .resolves()
 
@@ -135,7 +136,7 @@ describe('move-binaries', () => {
       sinon.stub(moveBinaries.prompts, 'shouldCopy').resolves()
 
       sinon
-      .stub(moveBinaries.s3helpers, 'copyS3')
+      .stub(s3helpers, 'copyS3')
       .withArgs(
         `${latestMacBuild}cypress.zip`,
         'desktop/3.3.0/darwin-x64/cypress.zip',

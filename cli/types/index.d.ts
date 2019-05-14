@@ -62,6 +62,20 @@ declare namespace Cypress {
     isHeadless: boolean
   }
 
+  interface LocalStorage {
+    /**
+     * Called internally to clear `localStorage` in two situations.
+     *
+     * 1. Before every test, this is called with no argument to clear all keys.
+     * 2. On `cy.clearLocalStorage(keys)` this is called with `keys` as an argument.
+     *
+     * You should not call this method directly to clear `localStorage`; instead, use `cy.clearLocalStorage(key)`.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     */
+    clear: (keys?: string[]) => void
+  }
+
   /**
    * Several libraries are bundled with Cypress by default.
    *
@@ -170,6 +184,11 @@ declare namespace Cypress {
      * Information about the browser currently running the tests
      */
     browser: Browser
+
+    /**
+     * Internal class for LocalStorage management.
+     */
+    LocalStorage: LocalStorage
 
     /**
      * Returns all configuration objects.
@@ -510,7 +529,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable<Clock>
+    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *

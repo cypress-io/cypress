@@ -78,6 +78,12 @@ namespace CypressLogsTest {
   log.get('$el') // $ExpectType JQuery<HTMLElement>
 }
 
+namespace CypressLocalStorageTest {
+  Cypress.LocalStorage.clear = function(keys) {
+    keys // $ExpectType string[] | undefined
+  }
+}
+
 cy.wrap({ foo: [1, 2, 3] })
   .its('foo')
   .each((s: number) => {
@@ -271,3 +277,6 @@ namespace CypressTriggerTests {
       arbitraryProperty: 0
     })
 }
+
+const now = new Date(2019, 3, 2).getTime()
+cy.clock(now, ['Date'])
