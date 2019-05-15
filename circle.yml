@@ -65,39 +65,39 @@ jobs:
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: _v8-{{ arch }}-{{ .Branch }}-cli-deps
+          key: v8-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-root-deps
+          key: v5-{{ arch }}-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-coffee
+          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
+          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
       - restore_cache:
-          key: _v6-{{ arch }}-{{ .Branch }}-deps-driver
+          key: v6-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-example
+          key: v5-{{ arch }}-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
       - restore_cache:
-          key: _v7-{{ arch }}-{{ .Branch }}-deps-electron
+          key: v7-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-extension
+          key: v5-{{ arch }}-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
+          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-launcher
+          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
       - restore_cache:
-          key: _v1-{{ arch }}-{{ .Branch }}-deps-network
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
       - restore_cache:
-          key: _v8-{{ arch }}-{{ .Branch }}-deps-reporter
+          key: v8-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
       - restore_cache:
-          key: _v8-{{ arch }}-{{ .Branch }}-deps-runner
+          key: v8-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
       - restore_cache:
-          key: _v8-{{ arch }}-{{ .Branch }}-deps-server
+          key: v8-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-socket
+          key: v5-{{ arch }}-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-static
+          key: v5-{{ arch }}-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
       - restore_cache:
-          key: _v5-{{ arch }}-{{ .Branch }}-deps-ts
+          key: v5-{{ arch }}-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
