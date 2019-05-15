@@ -1,10 +1,10 @@
 // this file is used when developing the reporter in isolation via cypress tests
 // if you update this file, also update main-runner.scss
-@import 'lib/variables';
-@import 'lib/fonts';
-@import 'lib/base';
-@import 'lib/tooltip';
-@import '!(lib)*/**/*';
+@import './lib/variables';
+@import './lib/fonts';
+@import './lib/base';
+@import './lib/tooltip';
+@import './!(lib)*/**/*';
 
 /* Used to provide additional context for screen readers */
 .visually-hidden { 
