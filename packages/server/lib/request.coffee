@@ -50,10 +50,10 @@ getDelayForRetry = (options = {}) ->
   ## if this ECONNREFUSED and we are
   ## retrying greater than 1 second
   ## then divide the delay interval
-  ## by 100 so it doesn't wait as long to retry
+  ## by 10 so it doesn't wait as long to retry
   ## TODO: do we really want to do this?
   if delay >= 1000 and _.get(err, "code") is "ECONNREFUSED"
-    delay = delay / 100
+    delay = delay / 10
 
   debug("retrying request %o", merge(opts, {
     delay,
@@ -442,9 +442,11 @@ module.exports = (options = {}) ->
 
     rp: require("request-promise")
 
-    reduceCookieToArray: reduceCookieToArray
+    getDelayForRetry
 
-    createCookieString: createCookieString
+    reduceCookieToArray
+
+    createCookieString
 
     create: (strOrOpts, promise) ->
       switch

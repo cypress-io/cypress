@@ -18,6 +18,70 @@ describe "lib/request", ->
 
       expect(request.reduceCookieToArray(obj)).to.deep.eq(["foo=bar", "baz=quux"])
 
+  context "#getDelayForRetry", ->
+    it "divides by 10 when delay >= 1000 and err.code = ECONNREFUSED", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = [0, 999, 1000, 2000]
+
+      err = {
+        code: "ECONNREFUSED"
+      }
+
+      onNext = sinon.stub()
+
+      retryIntervals.forEach ->
+        request.getDelayForRetry({
+          err,
+          onNext,
+          retryIntervals,
+          delaysRemaining,
+        })
+
+      expect(delaysRemaining).to.be.empty
+      expect(onNext.args).to.deep.eq([
+        [0, 1]
+        [999, 2]
+        [100, 3]
+        [200, 4]
+      ])
+
+    it "does not divide by 10 when err.code != ECONNREFUSED", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = [2000, 2000, 2000, 2000]
+
+      err = {
+        code: "ECONNRESET"
+      }
+
+      onNext = sinon.stub()
+
+      request.getDelayForRetry({
+        err,
+        onNext,
+        retryIntervals,
+        delaysRemaining,
+      })
+
+      expect(delaysRemaining).to.have.length(3)
+      expect(onNext).to.be.calledWith(2000, 1)
+
+    it "calls onElse when delaysRemaining is exhausted", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = []
+
+      onNext = sinon.stub()
+      onElse = sinon.stub()
+
+      request.getDelayForRetry({
+        onElse
+        onNext,
+        retryIntervals,
+        delaysRemaining,
+      })
+
+      expect(onElse).to.be.calledWithExactly()
+      expect(onNext).not.to.be.called
+
   context "#createCookieString", ->
     it "joins array by '; '", ->
       obj = {
@@ -233,7 +297,9 @@ describe "lib/request", ->
     it "catches errors", ->
       nock.enableNetConnect()
 
-      request.sendPromise({}, @fn, {
+      req = Request({ timeout: 2000 })
+
+      req.sendPromise({}, @fn, {
         url: "http://localhost:1111/foo"
         cookies: false
       })
