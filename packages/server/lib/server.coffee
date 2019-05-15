@@ -558,7 +558,7 @@ class Server
 
   _retryBaseUrlCheck: (baseUrl, onWarning) ->
     ensureUrl.retryIsListening(baseUrl, {
-      retryInterval: [3000, 3000, 4000],
+      retryIntervals: [3000, 3000, 4000],
       onRetry: ({ attempt, delay, remaining }) ->
         warning = errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
           remaining
