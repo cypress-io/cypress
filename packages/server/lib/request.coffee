@@ -38,7 +38,7 @@ getDelayForRetry = (options = {}) ->
   if not intervals.length
     return onElse()
 
-  delay = intervals.pop()
+  delay = intervals.shift()
 
   if not _.isNumber(delay)
     ## no more delays, bailing
@@ -97,8 +97,7 @@ maybeRetryOnNetworkFailure = (err, options = {}) ->
 
   debug("received an error making http request %o", { requestId, opts, err })
 
-  ## rp wraps network errors in a RequestError, so might need to unwrap it to check
-  if not isRetriableError(err.error or err, retryOnNetworkFailure)
+  if not isRetriableError(err, retryOnNetworkFailure)
     return onElse()
 
   ## else see if we have more delays left...
@@ -253,12 +252,11 @@ createCookieString = (c) ->
 createRetryingRequestPromise = (opts) ->
   {
     requestId,
+    intervals,
     retryIntervals,
     retryOnNetworkFailure,
     retryOnStatusCodeFailure
   } = opts
-
-  intervals = _.clone(retryIntervals)
 
   retry = (delay) ->
     return Promise.delay(delay)
@@ -267,7 +265,9 @@ createRetryingRequestPromise = (opts) ->
 
   return rp(opts)
   .catch (err) ->
-    maybeRetryOnNetworkFailure(err, {
+
+    ## rp wraps network errors in a RequestError, so might need to unwrap it to check
+    maybeRetryOnNetworkFailure(err.error or err, {
       opts,
       intervals,
       requestId,
@@ -296,6 +296,7 @@ pipeEvent = (source, destination, event) ->
 createRetryingRequestStream = (opts = {}) ->
   {
     requestId,
+    intervals,
     retryIntervals,
     retryOnNetworkFailure,
     retryOnStatusCodeFailure
@@ -303,7 +304,6 @@ createRetryingRequestStream = (opts = {}) ->
 
   req = null
   didAbort = false
-  intervals = _.clone(retryIntervals)
 
   delayStream = stream.PassThrough()
   reqBodyBuffer = streamBuffer()
@@ -462,9 +462,12 @@ module.exports = (options = {}) ->
         else
           opts = strOrOpts
 
+      retryIntervals = [0, 1000, 2000, 2000]
+
       _.defaults(opts, {
+        retryIntervals,
+        intervals: _.clone(retryIntervals)
         requestId: _.uniqueId('request')
-        retryIntervals: [0, 1000, 2000, 2000]
         retryOnNetworkFailure: true
         retryOnStatusCodeFailure: false
       })

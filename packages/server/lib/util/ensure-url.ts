@@ -17,7 +17,7 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
   const run = () => {
     return isListening(urlStr)
     .catch((err) => {
-      const delay = intervals.pop()
+      const delay = intervals.shift()
 
       if (!delay) {
         throw err
