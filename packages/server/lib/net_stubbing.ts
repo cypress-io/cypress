@@ -5,9 +5,12 @@ import minimatch from 'minimatch'
 import url from 'url'
 // TODO: figure out the right way to make these types accessible in server and driver
 import {
-  NetEventMessages,
+  CyHttpMessages,
+  NetEventFrames,
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
+  SERIALIZABLE_REQ_PROPS,
+  SERIALIZABLE_RES_PROPS,
   StaticResponse,
 } from '../../driver/src/cy/commands/net_stubbing'
 
@@ -20,6 +23,7 @@ interface BackendRoute {
 interface ProxyIncomingMessage extends IncomingMessage {
   proxiedUrl: string
   webSocket: boolean // TODO: populate
+  requestId: string
 }
 
 const debug = debugModule('cypress:server:net_stubbing')
@@ -68,7 +72,7 @@ function _restoreMatcherOptionsTypes(options: AnnotatedRouteMatcherOptions) {
 // TODO: clear between specs
 let routes : BackendRoute[] = []
 
-function _onRouteAdded(options: NetEventMessages.AddRouteFrame) {
+function _onRouteAdded(options: NetEventFrames.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
 
   debug('adding route %o', { routeMatcher, options })
@@ -182,15 +186,23 @@ function _emit(socket: any, eventName: string, data: any) {
 }
 
 function _sendStaticResponse(res: ServerResponse, staticResponse: StaticResponse) {
-  const { headers, body, statusCode } = staticResponse
-  if (headers) {
-    _.keys(headers).forEach(key => {
-      res.setHeader(key, headers[key])
+  if (staticResponse.destroySocket) {
+    res.connection.destroy()
+    res.destroy()
+    return
+  }
+
+  if (staticResponse.headers) {
+    _.keys(staticResponse.headers).forEach(key => {
+      res.setHeader(key, (<StaticResponse>staticResponse.headers)[key])
     })
   }
 
-  res.statusCode = statusCode || 200
-  res.write(body)
+  if (staticResponse.body) {
+    res.write(staticResponse.body)
+  }
+
+  res.statusCode = staticResponse.statusCode || 200
   res.end()
 }
 
@@ -199,12 +211,18 @@ export function onDriverEvent(socket: any, eventName: string, ...args: any[]) {
 
   switch(eventName) {
     case 'route:added':
-      _onRouteAdded(<NetEventMessages.AddRouteFrame>args[0])
+      _onRouteAdded(<NetEventFrames.AddRoute>args[0])
+      break
+    case 'clear:routes':
+      // TODO: initiate this from an existing point in the server, not a new request
+      requests = {}
+      routes = []
       break
     case 'http:request:continue':
-      _onRequestContinue(<NetEventMessages.HttpRequestContinueFrame>args[0], socket)
+      _onRequestContinue(<NetEventFrames.HttpRequestContinue>args[0], socket)
       break
     case 'http:response:continue':
+      _onResponseContinue(<NetEventFrames.HttpResponseContinue>args[0])
       break
     case 'ws:connect:continue':
       break
@@ -217,10 +235,15 @@ export function onDriverEvent(socket: any, eventName: string, ...args: any[]) {
 
 interface BackendRequest {
   requestId: string
+  route: BackendRoute
   /**
    * A callback that can be used to make the request go outbound.
    */
-  continue: Function
+  continueRequest: Function
+  /**
+   * A callback that can be used to send the response through the proxy.
+   */
+  continueResponse?: Function
   req: ProxyIncomingMessage
   res: ServerResponse
 }
@@ -244,26 +267,29 @@ export function onProxiedRequest(project: any, req: ProxyIncomingMessage, res: S
 
   const request : BackendRequest = {
     requestId,
-    continue: cb,
+    route,
+    continueRequest: cb,
     req,
     res
   }
 
+  req.requestId = requestId
+
   requests[requestId] = request
 
-  const frame : NetEventMessages.HttpRequestReceivedFrame = {
-    routeHandlerId: <string>route.handlerId,
+  const frame : NetEventFrames.HttpRequestReceived = {
+    routeHandlerId: route.handlerId!,
     requestId,
-    req: {
-      headers: <any>req.headers,
+    req: _.extend(_.pick(req, SERIALIZABLE_REQ_PROPS), {
+      url: req.proxiedUrl,
       body: "not implemented... yet" // TODO: buffer the body here with the stream-buffer from net-retries
-    }
+    }) as CyHttpMessages.IncomingRequest
   }
 
   _emit(project.server._socket, 'http:request:received', frame)
 }
 
-function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame, socket: any) {
+function _onRequestContinue(frame: NetEventFrames.HttpRequestContinue, socket: any) {
   const backendRequest = requests[frame.requestId]
 
   if (!backendRequest) {
@@ -271,7 +297,7 @@ function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame, so
   }
 
   // modify the original paused request object using what the client returned
-  _.assign(backendRequest.req, _.pick(frame.req, ['headers', 'body']))
+  _.assign(backendRequest.req, _.pick(frame.req, SERIALIZABLE_REQ_PROPS))
 
   if (frame.tryNextRoute) {
     // frame.req has been modified, now pass this to the next available route handler
@@ -281,7 +307,7 @@ function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame, so
 
     if (!route) {
       // no "next route" available, so just continue that bad boy
-      backendRequest.continue()
+      backendRequest.continueRequest()
       return
     }
 
@@ -290,7 +316,7 @@ function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame, so
       return
     }
 
-    const nextFrame : NetEventMessages.HttpRequestReceivedFrame = {
+    const nextFrame : NetEventFrames.HttpRequestReceived = {
       routeHandlerId: <string>route.handlerId,
       requestId: backendRequest.requestId,
       req: frame.req!
@@ -310,4 +336,40 @@ function _onRequestContinue(frame: NetEventMessages.HttpRequestContinueFrame, so
     // TODO: send the request outbound, buffer the response, send it to the client
     return
   }
+}
+
+export function onProxiedResponse(project: any, req: ProxyIncomingMessage, resStream: ReadableStream, incomingRes: IncomingMessage, cb: Function) {
+  if (!req.requestId) {
+    // original request was not intercepted, so response should not be either
+    return
+  }
+
+  const backendRequest = requests[req.requestId]
+  backendRequest.continueResponse = cb
+
+  const frame : NetEventFrames.HttpResponseReceived = {
+    routeHandlerId: backendRequest.route.handlerId!,
+    requestId: backendRequest.requestId,
+    res: _.extend(_.pick(incomingRes, SERIALIZABLE_RES_PROPS), {
+      url: req.proxiedUrl,
+      body: "not implemented... yet" // TODO: buffer the body here with the stream-buffer from net-retries
+    }) as CyHttpMessages.IncomingResponse
+  }
+
+  _emit(project.server._socket, 'http:response:received', frame)
+}
+
+function _onResponseContinue(frame: NetEventFrames.HttpResponseContinue) {
+  const backendRequest = requests[frame.requestId]
+
+  if (frame.staticResponse) {
+    _sendStaticResponse(backendRequest.res, frame.staticResponse)
+    return
+  }
+
+  // merge the changed response attributes with our response and continue
+  _.assign(backendRequest.res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
+
+  // TODO: do something with the changed body
+  backendRequest.continueResponse!()
 }

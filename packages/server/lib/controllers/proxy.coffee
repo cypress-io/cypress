@@ -85,10 +85,10 @@ module.exports = {
 
     ## immediately before sending the request, offer it to netStubbing for interception
     netStubbing.onProxiedRequest project, req, res, =>
-      @getHttpContent(thr, req, res, remoteState, config, request)
+      @getHttpContent(thr, req, res, remoteState, config, request, project)
       .pipe(res)
 
-  getHttpContent: (thr, req, res, remoteState, config, request) ->
+  getHttpContent: (thr, req, res, remoteState, config, request, project) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
     ## prepends req.url with remoteState.origin
@@ -263,6 +263,10 @@ module.exports = {
       str.end(getErrorHtml(err))
 
     onResponse = (str, incomingRes) =>
+      netStubbing.onProxiedResponse project, str, incomingRes, =>
+        handleResponse(str, incomingRes)
+
+    handleResponse = (str, incomingRes) =>
       {headers, statusCode} = incomingRes
 
       wantsInjection ?= do ->

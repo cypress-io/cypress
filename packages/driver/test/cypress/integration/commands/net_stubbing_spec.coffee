@@ -176,11 +176,36 @@ describe "src/cy/commands/net_stubbing", ->
         xhr.send()
 
     context "stubbing with dynamic response", ->
-      it.only "receives the original request in handler", (done) ->
+      it "receives the original request in handler", (done) ->
         cy.route "/abc123", (req) ->
-          expect(req.url).to.eq("/abc123")
+          req.reply({
+            statusCode: 404
+          })
+
+          expect(req).to.include({
+            url: "http://localhost:3500/abc123",
+            body: "not implemented... yet",
+            method: "GET",
+            httpVersion: "1.1"
+          })
+
           done()
         .then ->
           xhr = new XMLHttpRequest()
           xhr.open("GET", "/abc123")
+          xhr.send()
+
+    context "intercepting response", ->
+      it.only "receives the original response in handler", (done) ->
+        cy.route "/json-content-type", (req) ->
+          req.reply (res) ->
+            expect(res.body).to.eq('{}')
+            done()
+
+          expect(req).to.include({
+            url: "http://localhost:3500/json-content-type",
+          })
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "/json-content-type")
           xhr.send()

@@ -1,5 +1,19 @@
 import * as _ from 'lodash'
 
+export const SERIALIZABLE_REQ_PROPS = [
+  'headers',
+  'body', // doesn't exist on the OG message, but will be attached by the backend
+  'url',
+  'method',
+  'httpVersion'
+]
+
+export const SERIALIZABLE_RES_PROPS = _.concat(
+  SERIALIZABLE_REQ_PROPS,
+  "statusCode",
+  "statusMessage"
+)
+
 type GlobPattern = string
 type StringMatcher = GlobPattern | RegExp
 type DictMatcher<T> = { [key: string]: T }
@@ -51,43 +65,67 @@ interface RouteMatcherCompatOptions {
 }
 
 /** Types for Route Responses **/
+namespace CyHttpMessages {
+  interface BaseMessage {
+    // as much stuff from `incomingmessage` as makes sense to serialize and send
+    body: any
+    headers: { [key: string]: string }
+    url: string
+    method: string
+    httpVersion: string
+  }
 
-interface CyIncomingResponse {
-  /**
-   * Wait for `delayMs` milliseconds before sending the response to the client.
-   */
-  delay: (delayMs: number) => CyIncomingResponse
-  /**
-   * Serve the response at a maximum of `throttleKbps` kilobytes per second.
-   */
-  throttle: (throttleKbps: number) => CyIncomingResponse
+  export interface IncomingResponse extends BaseMessage {
+    statusCode: number
+    statusMessage: string
+  }
+
+  export interface IncomingHttpResponse extends IncomingResponse {
+    send: (staticResponse?: StaticResponse) => void
+    /**
+     * Wait for `delayMs` milliseconds before sending the response to the client.
+     */
+    delay: (delayMs: number) => IncomingHttpResponse
+    delayMs?: number
+    /**
+     * Serve the response at a maximum of `throttleKbps` kilobytes per second.
+     */
+    throttle: (throttleKbps: number) => IncomingHttpResponse
+    throttleKbps?: number
+  }
+
+  export interface IncomingRequest extends BaseMessage {
+
+  }
+
+  export interface IncomingHTTPRequest extends IncomingRequest {
+    destroy: () => void
+    // if `responseOrInterceptor` is undefined, just forward the modified request to the destination
+    reply: (responseOrInterceptor?: StaticResponse | CyResponseInterceptor) => void
+    redirect: (location: string, statusCode: 301 | 302 | 303 | 307 | number) => void
+  }
 }
 
-interface CyIncomingResponseOptions {
-  delayMs?: number
-}
-
-interface CyIncomingRequest {
-  // as much stuff from `incomingmessage` as makes sense to serialize and send
-  headers: { [key: string]: string }
-  body: any
-}
-
+/**
+ * Describes a response that will be sent back to the client.
+ */
 export interface StaticResponse {
   body?: string
   headers?: { [key: string]: string }
   statusCode?: number
+  /**
+   * If `destroySocket` is truthy, Cypress will destroy the connection to the browser and send no response.
+   *
+   * Useful for simulating a server that is not reachable.
+   */
+  destroySocket?: boolean
+  // TODO: add some additional fields to customize the response?
+  // ideas: delayMs, throttleKbps
 }
 
-type CyResponseInterceptor = (res: CyIncomingResponse, send?: () => void) => void
+type CyResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse, send?: () => void) => void
 
-interface CyIncomingHTTPRequest extends CyIncomingRequest {
-  // if `responseOrInterceptor` is undefined, just forward the modified request to the destination
-  reply: (responseOrInterceptor?: StaticResponse | CyResponseInterceptor) => void
-  redirect: (location: string, statusCode: 301 | 302 | 303 | 307 | number) => void
-}
-
-type HTTPController = (req: CyIncomingHTTPRequest, next: () => void) => void
+type HTTPController = (req: CyHttpMessages.IncomingHTTPRequest, next: () => void) => void
 
 interface CyWebSocket {
 
@@ -98,7 +136,7 @@ interface CyWebSocketFrame {
 }
 
 interface WebSocketController {
-  onConnect?: (req: CyIncomingRequest, socket: CyWebSocket) => void
+  onConnect?: (req: CyHttpMessages.IncomingRequest, socket: CyWebSocket) => void
   onIncomingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
   onOutgoingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
   onDisconnect?: (socket: CyWebSocket) => void
@@ -114,28 +152,36 @@ type RouteHandler = string | object | RouteHandlerController
 
 /** Types for messages between driver and server */
 
-export namespace NetEventMessages {
-  export interface AddRouteFrame {
+export namespace NetEventFrames {
+  export interface AddRoute {
     routeMatcher: AnnotatedRouteMatcherOptions
     staticResponse?: StaticResponse
     handlerId?: string
   }
 
-  export interface BaseHttpFrame {
+  interface BaseHttp {
     requestId: string
     routeHandlerId: string
   }
 
-  export interface HttpRequestReceivedFrame extends BaseHttpFrame {
-    req: CyIncomingRequest
+  export interface HttpRequestReceived extends BaseHttp {
+    req: CyHttpMessages.IncomingRequest
   }
 
-  export interface HttpRequestContinueFrame extends BaseHttpFrame {
-    req?: CyIncomingRequest
+  export interface HttpRequestContinue extends BaseHttp {
+    req?: CyHttpMessages.IncomingRequest
     staticResponse?: StaticResponse
     hasResponseHandler?: boolean
-    responseOptions?: CyIncomingResponseOptions
     tryNextRoute?: boolean
+  }
+
+  export interface HttpResponseReceived extends BaseHttp {
+    res: CyHttpMessages.IncomingResponse
+  }
+
+  export interface HttpResponseContinue extends BaseHttp {
+    res?: CyHttpMessages.IncomingResponse
+    staticResponse?: StaticResponse
   }
 }
 
@@ -217,7 +263,7 @@ let requests : { [key: string]: Request } = {}
 function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Function) : void {
   const handlerId = _getUniqueId()
 
-  const frame: NetEventMessages.AddRouteFrame = {
+  const frame: NetEventFrames.AddRoute = {
     handlerId,
     routeMatcher: _annotateMatcherOptionsTypes(options),
   }
@@ -273,25 +319,25 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
 
   }
 
-  function _onRequestReceived(frame: NetEventMessages.HttpRequestReceivedFrame) {
-    // TODO: add some vanity methods to the CyIncomingHttpRequest and pass it to the cb
+  function _onRequestReceived(frame: NetEventFrames.HttpRequestReceived) {
     const route = routes[frame.routeHandlerId]
     const { req, requestId, routeHandlerId } = frame
 
-    const continueFrame : NetEventMessages.HttpRequestContinueFrame = {
+    const continueFrame : NetEventFrames.HttpRequestContinue = {
       routeHandlerId,
       requestId
     }
 
     const sendContinueFrame = () => {
       // copy changeable attributes of userReq to req in frame
+      // @ts-ignore
       continueFrame.req = {
-        ..._.pick(userReq, 'body', 'headers')
+        ..._.pick(userReq, SERIALIZABLE_REQ_PROPS)
       }
       _emit('http:request:continue', continueFrame)
     }
 
-    const userReq : CyIncomingHTTPRequest = {
+    const userReq : CyHttpMessages.IncomingHTTPRequest = {
       ...req,
       reply: function (responseHandler) {
         // TODO: this can only be called once
@@ -313,6 +359,11 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
           headers: { location },
           statusCode
         })
+      },
+      destroy: function () {
+        this.reply({
+          destroySocket: true
+        })
       }
     }
 
@@ -324,33 +375,77 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
 
     const { handler } = route
 
-    if ((<Function>handler).length === 2) {
-      // next() will be called to pass this to the next route
-      const next = () => {
-        // TODO: this can only be called once
-        continueFrame.tryNextRoute = true
-        sendContinueFrame()
-      }
-
-      return (<Function>handler)(req, next)
+    // next() can be called to pass this to the next route
+    const next = () => {
+      // TODO: this can only be called once
+      continueFrame.tryNextRoute = true
+      sendContinueFrame()
     }
 
-    // req.reply must be used in handler to complete the route
-    return (<Function>handler)(req)
+    (<Function>handler)(userReq, next)
+  }
+
+  function _onResponseReceived(frame: NetEventFrames.HttpResponseReceived) {
+    const { res, requestId, routeHandlerId } = frame
+    const request = requests[requestId]
+
+    const continueFrame : NetEventFrames.HttpResponseContinue = {
+      routeHandlerId,
+      requestId
+    }
+
+    const sendContinueFrame = () => {
+      // copy changeable attributes of userReq to req in frame
+      // @ts-ignore
+      continueFrame.res = {
+        ..._.pick(userRes, SERIALIZABLE_RES_PROPS)
+      }
+      _emit('http:request:continue', continueFrame)
+    }
+
+    const userRes : CyHttpMessages.IncomingHttpResponse = {
+      ...res,
+      send: function (staticResponse) {
+        if (staticResponse) {
+          continueFrame.staticResponse = staticResponse
+        }
+
+        return sendContinueFrame()
+      },
+      delay: function (delayMs) {
+        this.delayMs = delayMs
+        return this
+      },
+      throttle: function (throttleKbps) {
+        this.throttleKbps = throttleKbps
+        return this
+      }
+    }
+
+    if (!request) {
+      // TODO: remove this logging once we're done
+      console.log('no handler for frame', { frame })
+      return sendContinueFrame()
+    }
+
+    request.responseHandler(userRes)
   }
 
   Cypress.on("test:before:run", () => {
     // wipe out callbacks and routes when tests start
     routes = {}
     Cypress.routes = routes
+    // TODO: there is probably a better way to do this without remitting an event to the server
+    _emit('clear:routes')
   })
 
   Cypress.on("net:event", (eventName, ...args) => {
     switch (eventName) {
       case 'http:request:received':
-        _onRequestReceived(<NetEventMessages.HttpRequestReceivedFrame>args[0])
+        _onRequestReceived(<NetEventFrames.HttpRequestReceived>args[0])
         break
       case 'http:response:received':
+        _onResponseReceived(<NetEventFrames.HttpResponseReceived>args[0])
         break
       case 'ws:connect':
         break
