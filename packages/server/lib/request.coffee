@@ -20,6 +20,7 @@ CookieJar = tough.CookieJar
 serializableProperties = Cookie.serializableProperties.slice(0)
 
 NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN".split(" ")
+VERBOSE_REQUEST_OPTS = "followRedirect jar strictSSL".split(" ")
 HTTP_CLIENT_REQUEST_EVENTS = "abort connect continue information socket timeout upgrade".split(" ")
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
@@ -33,7 +34,7 @@ getOriginalHeaders = (req = {}) ->
   _.get(req, 'req.headers', req.headers)
 
 getDelayForRetry = (options = {}) ->
-  { err, opts, requestId, intervals, retryIntervals, onNext, onElse } = options
+  { err, opts, intervals, retryIntervals, onNext, onElse } = options
 
   if not intervals.length
     return onElse()
@@ -42,11 +43,7 @@ getDelayForRetry = (options = {}) ->
 
   if not _.isNumber(delay)
     ## no more delays, bailing
-    debug("exhausted all attempts retrying request %o", {
-      requestId,
-      err,
-      opts,
-    })
+    debug("exhausted all attempts retrying request %o", merge(opts, err))
 
     return onElse()
 
@@ -61,12 +58,10 @@ getDelayForRetry = (options = {}) ->
   if delay >= 1000 and _.get(err, "code") is "ECONNREFUSED"
     delay = delay / 100
 
-  debug("retrying request %o", {
-    requestId
-    attempt
-    delay
-    opts
-  })
+  debug("retrying request %o", merge(opts, {
+    delay,
+    attempt,
+  }))
 
   return onNext(delay, attempt)
 
@@ -88,14 +83,13 @@ maybeRetryOnNetworkFailure = (err, options = {}) ->
   {
     opts,
     intervals,
-    requestId,
     retryIntervals,
     retryOnNetworkFailure,
     onNext,
     onElse,
   } = options
 
-  debug("received an error making http request %o", { requestId, opts, err })
+  debug("received an error making http request %o", merge(opts, err))
 
   if not isRetriableError(err, retryOnNetworkFailure)
     return onElse()
@@ -104,7 +98,6 @@ maybeRetryOnNetworkFailure = (err, options = {}) ->
   getDelayForRetry({
     err,
     opts,
-    requestId,
     intervals,
     retryIntervals,
     onNext,
@@ -123,7 +116,7 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
     onElse,
   } = options
 
-  debug("received failing status code on request  %o", {
+  debug("received failing status code on request %o", {
     requestId,
     statusCode: res.statusCode
   })
@@ -137,12 +130,17 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
   getDelayForRetry({
     err,
     opts,
-    requestId,
     intervals,
     retryIntervals,
     onNext,
     onElse,
   })
+
+merge = (args...) ->
+  _.chain({})
+  .extend(args...)
+  .omit(VERBOSE_REQUEST_OPTS)
+  .value()
 
 pick = (resp = {}) ->
   req = resp.request ? {}
@@ -270,7 +268,6 @@ createRetryingRequestPromise = (opts) ->
     maybeRetryOnNetworkFailure(err.error or err, {
       opts,
       intervals,
-      requestId,
       retryIntervals,
       retryOnNetworkFailure,
       onNext: retry
@@ -368,7 +365,7 @@ createRetryingRequestStream = (opts = {}) ->
         ## response, then that means we failed during transit
         ## and its no longer safe to retry. all we can do now
         ## is propogate the error upwards
-        debug("received an error on request after response started %o", { requestId, opts, err })
+        debug("received an error on request after response started %o", merge(opts, err))
 
         return emitError(err)
 
@@ -376,7 +373,6 @@ createRetryingRequestStream = (opts = {}) ->
       maybeRetryOnNetworkFailure(err, {
         opts,
         intervals,
-        requestId,
         retryIntervals,
         retryOnNetworkFailure,
         onNext: retry

@@ -61,9 +61,11 @@ controllers = {
 
   printBodyThirdTime: (req, res) ->
     console.log(req.body)
+
     res.type('html')
     if counts[req.url] == 3
       return res.send(JSON.stringify(req.body))
+
     req.socket.destroy()
 
   immediateReset: (req, res) ->
@@ -72,6 +74,7 @@ controllers = {
   afterHeadersReset: (req, res) ->
     res.writeHead(200)
     res.write('')
+
     setTimeout ->
       req.socket.destroy()
     , 1000
@@ -86,11 +89,13 @@ controllers = {
   worksThirdTime: (req, res) ->
     if counts[req.url] == 3
       return res.send('ok')
+
     req.socket.destroy()
 
   worksThirdTimeElse500: (req, res) ->
     if counts[req.url] == 3
       return res.send('ok')
+
     res.sendStatus(500)
 
   proxyInternalServerError: (req, res) ->
