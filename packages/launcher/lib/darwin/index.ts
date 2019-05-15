@@ -19,6 +19,11 @@ const detectChromium = partial(findApp, [
   'org.chromium.Chromium',
   'CFBundleShortVersionString'
 ])
+const detectEdge = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge Canary',
+  'com.microsoft.Edge.Canary',
+  'CFBundleShortVersionString'
+])
 
 type Detectors = {
   [index: string]: Function
@@ -27,7 +32,8 @@ type Detectors = {
 const browsers: Detectors = {
   chrome: detectChrome,
   canary: detectCanary,
-  chromium: detectChromium
+  chromium: detectChromium,
+  edge: detectEdge
 }
 
 export function getVersionString(path: string) {
