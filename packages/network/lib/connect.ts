@@ -54,9 +54,11 @@ interface RetryingOptions {
 
 function createSocket(opts: RetryingOptions, onConnect): net.Socket {
   const netOpts = _.pick(opts, 'host', 'port')
+
   if (opts.useTls) {
     return tls.connect(netOpts, onConnect)
   }
+
   return net.connect(netOpts, onConnect)
 }
 

@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird'
 import chai from 'chai'
+import { EventEmitter } from 'events'
 import http from 'http'
 import https from 'https'
 import net from 'net'
@@ -15,7 +16,6 @@ import {
     regenerateRequestHead, CombinedAgent
 } from '../../lib/agent'
 import { AsyncServer, Servers } from '../support/servers'
-import { EventEmitter } from 'events';
 
 const expect = chai.expect
 chai.use(sinonChai)
@@ -207,7 +207,7 @@ describe('lib/agent', function() {
     })
 
     context('HttpsAgent', function() {
-      it("#createProxiedConnection calls to super for caching, TLS-ifying", function() {
+      it("#createUpstreamProxyConnection calls to super for caching, TLS-ifying", function() {
         const combinedAgent = new CombinedAgent()
         const spy = sinon.spy(https.Agent.prototype, 'createConnection')
 
@@ -236,7 +236,7 @@ describe('lib/agent', function() {
         })
       })
 
-      it("#createProxiedConnection throws when connection is accepted then closed", function() {
+      it("#createUpstreamProxyConnection throws when connection is accepted then closed", function() {
         const combinedAgent = new CombinedAgent()
 
         const proxy = Bluebird.promisifyAll(

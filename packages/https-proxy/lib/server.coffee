@@ -131,7 +131,7 @@ class Server
         proxy: upstreamProxy,
       })
 
-      agent.httpsAgent.createProxiedConnection {
+      return agent.httpsAgent.createUpstreamProxyConnection {
         proxy: upstreamProxy
         href: "https://#{hostname}:#{port}"
         uri: {
@@ -140,8 +140,8 @@ class Server
         }
         shouldRetry: true
       }, onSocket
-    else
-      connect.createRetryingSocket({ port, host: hostname }, onSocket)
+
+    return connect.createRetryingSocket({ port, host: hostname }, onSocket)
 
   _onServerConnectData: (req, browserSocket, head) ->
     firstBytes = head[0]

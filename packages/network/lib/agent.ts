@@ -243,7 +243,7 @@ class HttpsAgent extends https.Agent {
       if (typeof proxy === "string") {
         options.proxy = <string>proxy
 
-        return this.createProxiedConnection(<RequestOptionsWithProxy>options, cb)
+        return this.createUpstreamProxyConnection(<RequestOptionsWithProxy>options, cb)
       }
     }
 
@@ -251,7 +251,7 @@ class HttpsAgent extends https.Agent {
     cb(null, super.createConnection(options))
   }
 
-  createProxiedConnection (options: RequestOptionsWithProxy, cb: http.SocketCallback) {
+  createUpstreamProxyConnection (options: RequestOptionsWithProxy, cb: http.SocketCallback) {
     // heavily inspired by
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
@@ -264,7 +264,7 @@ class HttpsAgent extends https.Agent {
       if (originalErr) {
         const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
         err[0] = originalErr
-        err.fromProxy = true
+        err.upstreamProxyConnect = true
         return cb(err, undefined)
       }
 
