@@ -589,6 +589,15 @@ module.exports = {
     invalid_arguments: "#{cmd('reload')} can only accept a boolean or options as its arguments."
 
   request:
+    status_code_flags_invalid: """
+    #{cmd('request')} was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }.
+
+    These options are incompatible with each other.
+
+     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
+    """
     auth_invalid: "#{cmd('request')} must be passed an object literal for the 'auth' option."
     gzip_invalid: "#{cmd('request')} requires the 'gzip' option to be a boolean."
     headers_invalid: "#{cmd('request')} requires the 'headers' option to be an object literal."
@@ -918,6 +927,15 @@ module.exports = {
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
 
   visit:
+    status_code_flags_invalid: """
+    #{cmd('visit')} was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }.
+
+    These options are incompatible with each other.
+
+     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
+    """
     invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
     invalid_method: "#{cmd('visit')} was called with an invalid method: '{{method}}'. Method can only be GET or POST."
     invalid_headers: "#{cmd('visit')} requires the 'headers' option to be an object."
