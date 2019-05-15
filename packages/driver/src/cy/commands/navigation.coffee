@@ -247,11 +247,11 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
 
 normalizeTimeoutOptions = (options) ->
   ## there are really two timeout values - pageLoadTimeout
-  ## and the underlying requestTimeout. for the purposes
+  ## and the underlying responseTimeout. for the purposes
   ## of resolving resolving the url, we only care about
-  ## requestTimeout - since pageLoadTimeout is a driver
+  ## responseTimeout - since pageLoadTimeout is a driver
   ## and browser concern. therefore we normalize the options
-  ## object and send 'requestTimeout' as options.timeout
+  ## object and send 'responseTimeout' as options.timeout
   ## for the backend.
   _
   .chain(options)
@@ -507,7 +507,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         body: null
         headers: {}
         log: true
-        requestTimeout: config('requestTimeout')
+        responseTimeout: config('responseTimeout')
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
