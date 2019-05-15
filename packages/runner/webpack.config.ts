@@ -91,7 +91,12 @@ const config: webpack.Configuration = {
             loader: 'sass-loader',
             options: {
               sourceMap: true,
-              importer: sassGlobImporter,
+              importer: function(...args) {
+								args[0] = args[0].replace(/\\/g, '/')
+								args[1] = args[1].replace(/\\/g, '/')
+								console.log(args)
+								return sassGlobImporter.apply(this, args)
+              },
             },
           }, // compiles Sass to CSS, using Node Sass by default
         ],
