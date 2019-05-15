@@ -113,8 +113,11 @@ describe "e2e visit", ->
         spec: "issue_2196_spec.coffee"
       })
 
-  context "normal pageLoadTimeout", ->
+  context "low responseTimeout, normal pageLoadTimeout", ->
     e2e.setup({
+      settings: {
+        responseTimeout: 2000
+      }
       servers: {
         port: 3434,
         static: true,
