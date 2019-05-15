@@ -72,7 +72,7 @@ describe "lib/request", ->
 
       expect(@push).to.be.calledOnce
 
-  context "#send", ->
+  context "#sendPromise", ->
     beforeEach ->
       @fn = sinon.stub()
 
@@ -295,7 +295,7 @@ describe "lib/request", ->
       headers = {}
       headers["user-agent"] = "foobarbaz"
 
-      request.sendPromiseheaders, @fn, {
+      request.sendPromise(headers, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
       })
@@ -324,7 +324,7 @@ describe "lib/request", ->
       headers = {}
       headers["user-agent"] = "foobarbaz"
 
-      request.sendPromiseheaders, @fn, {
+      request.sendPromise(headers, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false,
         headers: {
@@ -342,7 +342,7 @@ describe "lib/request", ->
 
       headers = {'user-agent': 'test'}
 
-      request.sendPromiseheaders, @fn, {
+      request.sendPromise(headers, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false,
         headers: {
