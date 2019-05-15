@@ -11,10 +11,9 @@
     "clean-deps": "rm -rf node_modules"
   },
   "devDependencies": {
-    "ts-node": "3.3.0",
-    "typescript": "2.5.2"
+    "ts-node": "3.3.0"
   },
   "dependencies": {
-    "debug": "2.6.9"
+    "debug": "4.1.1"
   }
 }

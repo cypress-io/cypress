@@ -33,19 +33,19 @@ Promise.config({
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
-stackTraceLinesRe = /(\s+)at\s(.+)/g
-browserNameVersionRe = /(Browser\:\s+)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
+stackTraceLinesRe = /^(\s+)at\s(.+)/gm
+browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
 replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, "$1at stack trace line")
 
-replaceBrowserName = (str, p1, p2, p3, p4, p5) ->
+replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
-  lengthOfExistingBrowserString = _.sum([p2.length, p3.length, _.get(p4, "length", 0), p5.length])
+  lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, "length", 0), whitespace.length])
 
   ## this ensures we add whitespace so the border is not shifted
-  p1 + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
+  key + customBrowserPath + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
 
 replaceDurationSeconds = (str, p1, p2, p3, p4) ->
   ## get the padding for the existing duration
@@ -304,7 +304,7 @@ module.exports = {
 
     exit = (code) ->
       if (expected = options.expectedExitCode)?
-        expect(expected).to.eq(code, "expected exit code")
+        expect(code).to.eq(expected, "expected exit code")
 
       ## snapshot the stdout!
       if options.snapshot
@@ -315,16 +315,18 @@ module.exports = {
         ## if we have browser in the stdout make
         ## sure its legit
         if matches = browserNameVersionRe.exec(stdout)
-          [str, key, browserName, version, headless] = matches
+          [str, key, customBrowserPath, browserName, version, headless] = matches
 
-          if b = options.browser
-            expect(_.capitalize(b)).to.eq(browserName)
+          browser = options.browser
+
+          if browser and not customBrowserPath
+            expect(_.capitalize(browser)).to.eq(browserName)
 
           expect(parseFloat(version)).to.be.a.number
 
           ## if we are in headed mode or in a browser other
           ## than electron
-          if options.headed or (b and b isnt "electron")
+          if options.headed or (browser and browser isnt "electron")
             expect(headless).not.to.exist
           else
             expect(headless).to.include("(headless)")

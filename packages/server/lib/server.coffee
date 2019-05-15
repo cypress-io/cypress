@@ -13,10 +13,11 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
+agent        = require("@packages/network").agent
 cors         = require("./util/cors")
 uri          = require("./util/uri")
 origin       = require("./util/origin")
-connect      = require("./util/connect")
+ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 blacklist    = require("./util/blacklist")
@@ -116,7 +117,7 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project) ->
+  open: (config = {}, project, onWarning) ->
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -140,13 +141,13 @@ class Server
 
       @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
-      @createServer(app, config, @_request)
+      @createServer(app, config, project, @_request, onWarning)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
 
-  createServer: (app, config, request) ->
+  createServer: (app, config, project, request, onWarning) ->
     new Promise (resolve, reject) =>
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
@@ -232,13 +233,17 @@ class Server
           if baseUrl
             @_baseUrl = baseUrl
 
-            connect.ensureUrl(baseUrl)
-            .return(null)
-            .catch (err) =>
-              if config.isTextTerminal
+            if config.isTextTerminal
+              return @_retryBaseUrlCheck(baseUrl, onWarning)
+              .return(null)
+              .catch (e) ->
+                debug(e)
                 reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
-              else
-                errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+
+            ensureUrl.isListening(baseUrl)
+            .return(null)
+            .catch (err) ->
+              errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
 
         .then (warning) =>
           ## once we open set the domain
@@ -255,20 +260,17 @@ class Server
   _listen: (port, onError) ->
     new Promise (resolve) =>
       listener = =>
-        port = @_server.address().port
+        address = @_server.address()
 
         @isListening = true
 
-        debug("Server listening on port %s", port)
+        debug("Server listening on ", address)
 
         @_server.removeListener "error", onError
 
-        resolve(port)
+        resolve(address.port)
 
-      ## nuke port from our args if its falsy
-      args = _.compact([port, listener])
-
-      @_server.listen.apply(@_server, args)
+      @_server.listen(port || 0, '127.0.0.1', listener)
 
   _getRemoteState: ->
     # {
@@ -305,7 +307,7 @@ class Server
     return props
 
   _onRequest: (headers, automationRequest, options) ->
-    @_request.send(headers, automationRequest, options)
+    @_request.sendPromise(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
     debug("resolving visit %o", {
@@ -458,15 +460,19 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
-        request.sendStream(headers, automationRequest, {
+        # if they're POSTing an object, querystringify their POST body
+        if options.method == 'POST' and _.isObject(options.body)
+          options.form = options.body
+          delete options.body
+
+        _.assign(options, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
-          auth: options.auth
           gzip: false
           url: urlFile ? urlStr
-          headers: {
+          headers: _.assign({
             accept: "text/html,*/*"
-          }
+          }, options.headers)
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
@@ -479,6 +485,10 @@ class Server
 
             return true
         })
+
+        debug('sending request with options %o', options)
+
+        request.sendStream(headers, automationRequest, options)
         .then(handleReqStream)
         .catch(error)
 
@@ -546,6 +556,20 @@ class Server
 
       @_callRequestListeners(server, listeners, req, res)
 
+  _retryBaseUrlCheck: (baseUrl, onWarning) ->
+    ensureUrl.retryIsListening(baseUrl, {
+      retryIntervals: [3000, 3000, 4000],
+      onRetry: ({ attempt, delay, remaining }) ->
+        warning = errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
+          remaining
+          attempt
+          delay
+          baseUrl
+        })
+
+        onWarning(warning)
+    })
+
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
     return if req.url.startsWith(socketIoRoute)
@@ -591,6 +615,7 @@ class Server
           port: port
           protocol: protocol
         }
+        agent: agent
       }, onProxyErr)
     else
       ## we can't do anything with this socket
