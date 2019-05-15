@@ -82,6 +82,27 @@ describe "lib/request", ->
       expect(onElse).to.be.calledWithExactly()
       expect(onNext).not.to.be.called
 
+  context "#setDefaults", ->
+    it "delaysRemaining to retryIntervals clone", ->
+      retryIntervals = [1,2,3,4]
+
+      opts = request.setDefaults({ retryIntervals })
+
+      expect(opts.retryIntervals).to.eq(retryIntervals)
+      expect(opts.delaysRemaining).not.to.eq(retryIntervals)
+      expect(opts.delaysRemaining).to.deep.eq(retryIntervals)
+
+    it "retryIntervals to [0, 1000, 2000, 2000] by default", ->
+      opts = request.setDefaults({})
+
+      expect(opts.retryIntervals).to.deep.eq([0, 1000, 2000, 2000])
+
+    it "delaysRemaining can be overridden", ->
+      delaysRemaining = [1]
+      opts = request.setDefaults({ delaysRemaining })
+
+      expect(opts.delaysRemaining).to.eq(delaysRemaining)
+
   context "#createCookieString", ->
     it "joins array by '; '", ->
       obj = {

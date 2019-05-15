@@ -40,7 +40,7 @@ getDelayForRetry = (options = {}) ->
 
   if not _.isNumber(delay)
     ## no more delays, bailing
-    debug("exhausted all attempts retrying request %o", merge(opts, err))
+    debug("exhausted all attempts retrying request %o", merge(opts, { err }))
 
     return onElse()
 
@@ -86,7 +86,7 @@ maybeRetryOnNetworkFailure = (err, options = {}) ->
     onElse,
   } = options
 
-  debug("received an error making http request %o", merge(opts, err))
+  debug("received an error making http request %o", merge(opts, { err }))
 
   if not isRetriableError(err, retryOnNetworkFailure)
     return onElse()
@@ -362,7 +362,7 @@ createRetryingRequestStream = (opts = {}) ->
         ## response, then that means we failed during transit
         ## and its no longer safe to retry. all we can do now
         ## is propogate the error upwards
-        debug("received an error on request after response started %o", merge(opts, err))
+        debug("received an error on request after response started %o", merge(opts, { err }))
 
         return emitError(err)
 
@@ -422,6 +422,21 @@ caseInsensitiveGet = (obj, property) ->
     if key.toLowerCase() == lowercaseProperty
       return obj[key]
 
+setDefaults = (opts) ->
+  _
+  .chain(opts)
+  .defaults({
+    requestId: _.uniqueId('request')
+    retryIntervals: [0, 1000, 2000, 2000]
+    retryOnNetworkFailure: true
+    retryOnStatusCodeFailure: false
+  })
+  .thru (opts) ->
+    _.defaults(opts, {
+      delaysRemaining: _.clone(opts.retryIntervals)
+    })
+  .value()
+
 module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout ? 20000
@@ -448,6 +463,8 @@ module.exports = (options = {}) ->
 
     createCookieString
 
+    setDefaults
+
     create: (strOrOpts, promise) ->
       switch
         when _.isString(strOrOpts)
@@ -457,15 +474,7 @@ module.exports = (options = {}) ->
         else
           opts = strOrOpts
 
-      retryIntervals = [0, 1000, 2000, 2000]
-
-      _.defaults(opts, {
-        retryIntervals,
-        requestId: _.uniqueId('request')
-        delaysRemaining: _.clone(retryIntervals)
-        retryOnNetworkFailure: true
-        retryOnStatusCodeFailure: false
-      })
+      opts = setDefaults(opts)
 
       if promise
         createRetryingRequestPromise(opts)
@@ -615,7 +624,7 @@ module.exports = (options = {}) ->
           followRedirect.call(req, incomingRes)
 
       send = =>
-        debug("sending request as stream %o", _.omit(options, "jar"))
+        debug("sending request as stream %o", merge(options))
 
         str = @create(options)
         str.getJar = -> options.jar
