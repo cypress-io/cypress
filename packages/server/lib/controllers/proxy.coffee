@@ -337,11 +337,12 @@ module.exports = {
 
       onResponse(obj.stream, obj.response)
     else
-      # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
-      opts = {followRedirect: false, strictSSL: false}
-
-      if isEventStream
-        opts.timeout = null
+      opts = {
+        timeout: null
+        strictSSL: false
+        followRedirect: false
+        retryIntervals: [0, 100, 200, 200]
+      }
 
       ## strip unsupported accept-encoding headers
       encodings = accept.parser(req.headers["accept-encoding"]) ? []
