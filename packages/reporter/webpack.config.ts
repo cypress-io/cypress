@@ -92,6 +92,7 @@ const config: webpack.Configuration = {
             options: {
               sourceMap: true,
               importer: function(...args) {
+								args[0] = args[0].replace(/\\/g, '/')
 								console.log(args)
 								return sassGlobImporter.apply(this, args)
 							},
