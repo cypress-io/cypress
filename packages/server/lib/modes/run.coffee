@@ -352,7 +352,6 @@ openProjectCreate = (projectRoot, socketId, options) ->
     report:       true
     isTextTerminal: options.isTextTerminal
     onWarning: (err) ->
-      console.log("")
       console.log(err.message)
     onError: (err) ->
       console.log("")

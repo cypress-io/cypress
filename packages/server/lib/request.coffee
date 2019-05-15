@@ -19,9 +19,9 @@ CookieJar = tough.CookieJar
 ## shallow clone the original
 serializableProperties = Cookie.serializableProperties.slice(0)
 
-MAX_REQUEST_RETRIES = 4
-
-requestIdCounter = 0
+NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN".split(" ")
+VERBOSE_REQUEST_OPTS = "followRedirect jar strictSSL".split(" ")
+HTTP_CLIENT_REQUEST_EVENTS = "abort connect continue information socket timeout upgrade".split(" ")
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -29,20 +29,115 @@ getOriginalHeaders = (req = {}) ->
   ## the request instance holds an instance
   ## of the original ClientRequest
   ## as the 'req' property which holds the
-  ## original headers
-  req.req?.headers ? req.headers
+  ## original headers else fall back to
+  ## the normal req.headers
+  _.get(req, 'req.headers', req.headers)
 
-getDelayForRetry = (iteration, err, opts) ->
-  increment = 1000
-  if opts.fromProxy || (err && err.code == 'ECONNREFUSED')
-    increment = 100
-  _.get([0, 1, 2, 2], iteration) * increment
+getDelayForRetry = (options = {}) ->
+  { err, opts, delaysRemaining, retryIntervals, onNext, onElse } = options
 
-hasRetriableStatusCodeFailure = (res, opts) ->
-  opts.failOnStatusCode && opts.retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
+  delay = delaysRemaining.shift()
 
-isRetriableError = (err = {}, opts) ->
-  opts.retryOnNetworkFailure && ['ECONNREFUSED', 'ECONNRESET', 'EPIPE', 'EHOSTUNREACH', 'EAI_AGAIN'].includes(err.code)
+  if not _.isNumber(delay)
+    ## no more delays, bailing
+    debug("exhausted all attempts retrying request %o", merge(opts, { err }))
+
+    return onElse()
+
+  ## figure out which attempt we're on...
+  attempt = retryIntervals.length - delaysRemaining.length
+
+  ## if this ECONNREFUSED and we are
+  ## retrying greater than 1 second
+  ## then divide the delay interval
+  ## by 10 so it doesn't wait as long to retry
+  ## TODO: do we really want to do this?
+  if delay >= 1000 and _.get(err, "code") is "ECONNREFUSED"
+    delay = delay / 10
+
+  debug("retrying request %o", merge(opts, {
+    delay,
+    attempt,
+  }))
+
+  return onNext(delay, attempt)
+
+hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) ->
+  ## everything must be true in order to
+  ## retry a status code failure
+  _.every([
+    retryOnStatusCodeFailure,
+    !statusCode.isOk(res.statusCode)
+  ])
+
+isRetriableError = (err = {}, retryOnNetworkFailure) ->
+  _.every([
+    retryOnNetworkFailure,
+    _.includes(NETWORK_ERRORS, err.code)
+  ])
+
+maybeRetryOnNetworkFailure = (err, options = {}) ->
+  {
+    opts,
+    retryIntervals,
+    delaysRemaining,
+    retryOnNetworkFailure,
+    onNext,
+    onElse,
+  } = options
+
+  debug("received an error making http request %o", merge(opts, { err }))
+
+  if not isRetriableError(err, retryOnNetworkFailure)
+    return onElse()
+
+  ## else see if we have more delays left...
+  getDelayForRetry({
+    err,
+    opts,
+    retryIntervals,
+    delaysRemaining,
+    onNext,
+    onElse,
+  })
+
+maybeRetryOnStatusCodeFailure = (res, options = {}) ->
+  {
+    err,
+    opts,
+    requestId,
+    retryIntervals,
+    delaysRemaining,
+    retryOnStatusCodeFailure,
+    onNext,
+    onElse,
+  } = options
+
+  debug("received failing status code on request %o", {
+    requestId,
+    statusCode: res.statusCode
+  })
+
+  ## is this a retryable status code failure?
+  if not hasRetriableStatusCodeFailure(res, retryOnStatusCodeFailure)
+    ## if not then we're done here
+    return onElse()
+
+  ## else see if we have more delays left...
+  getDelayForRetry({
+    err,
+    opts,
+    retryIntervals,
+    delaysRemaining,
+    onNext,
+    onElse,
+  })
+
+merge = (args...) ->
+  _.chain({})
+  .extend(args...)
+  .omit(VERBOSE_REQUEST_OPTS)
+  .value()
 
 pick = (resp = {}) ->
   req = resp.request ? {}
@@ -149,52 +244,64 @@ reduceCookieToArray = (c) ->
 createCookieString = (c) ->
   reduceCookieToArray(c).join("; ")
 
-createRetryingRequestPromise = (opts, iteration = 0) ->
-  requestId = requestIdCounter++
+createRetryingRequestPromise = (opts) ->
+  {
+    requestId,
+    retryIntervals,
+    delaysRemaining,
+    retryOnNetworkFailure,
+    retryOnStatusCodeFailure
+  } = opts
 
-  retry = (err) ->
-    delay = getDelayForRetry(iteration, err, opts)
+  retry = (delay) ->
+    return Promise.delay(delay)
+    .then ->
+      createRetryingRequestPromise(opts)
 
-    debug("retry %o", { iteration, delay, requestId })
-
-    Promise.delay(delay).then ->
-      createRetryingRequestPromise(opts, iteration + 1)
-
-  rp(opts)
+  return rp(opts)
   .catch (err) ->
-    debug("received an error creating request %o", { err, requestId })
 
     ## rp wraps network errors in a RequestError, so might need to unwrap it to check
-    if not isRetriableError(err.error || err, opts)
-      throw err
-
-    if iteration >= MAX_REQUEST_RETRIES
-      debug("retried %dx and still network error, not retrying", { MAX_REQUEST_RETRIES, requestId })
-      throw err
-
-    retry()
+    maybeRetryOnNetworkFailure(err.error or err, {
+      opts,
+      retryIntervals,
+      delaysRemaining,
+      retryOnNetworkFailure,
+      onNext: retry
+      onElse: ->
+        throw err
+    })
   .then (res) ->
     ## ok, no net error, but what about a bad status code?
-    if hasRetriableStatusCodeFailure(res, opts) && iteration < MAX_REQUEST_RETRIES
-      debug("received failing status code on res, retrying %o", _.pick(res, "statusCode"))
-
-      return retry()
-
-    res
+    maybeRetryOnStatusCodeFailure(res, {
+      opts,
+      requestId,
+      retryIntervals,
+      delaysRemaining,
+      retryOnStatusCodeFailure,
+      onNext: retry
+      onElse: _.constant(res)
+    })
 
 pipeEvent = (source, destination, event) ->
   source.on event, (args...) ->
     destination.emit(event, args...)
 
 createRetryingRequestStream = (opts = {}) ->
-  delayStream = stream.PassThrough()
-  reqBodyBuffer = streamBuffer()
+  {
+    requestId,
+    retryIntervals,
+    delaysRemaining,
+    retryOnNetworkFailure,
+    retryOnStatusCodeFailure
+  } = opts
 
-  retryStream = duplexify(reqBodyBuffer, delayStream)
-
-  requestId = requestIdCounter++
   req = null
   didAbort = false
+
+  delayStream = stream.PassThrough()
+  reqBodyBuffer = streamBuffer()
+  retryStream = duplexify(reqBodyBuffer, delayStream)
 
   emitError = (err) ->
     retryStream.emit("error", err)
@@ -204,7 +311,7 @@ createRetryingRequestStream = (opts = {}) ->
     ## temporarily until we finish implementation
     # retryStream.destroy(err)
 
-  tryStartStream = (iteration = 0) ->
+  tryStartStream = ->
     ## if our request has been aborted
     ## in the time that we were waiting to retry
     ## then immediately bail
@@ -214,26 +321,10 @@ createRetryingRequestStream = (opts = {}) ->
     reqStream = r(opts)
     didReceiveResponse = false
 
-    retry = (err) ->
-      attempts = iteration + 1
+    retry = (delay, attempt) ->
+      retryStream.emit("retry", { attempt, delay })
 
-      delay = getDelayForRetry(iteration, err, opts)
-
-      reqStream.abort()
-
-      debug("received an error on request. retrying after '#{delay}ms' %o", {
-        opts
-        attempts
-        delay
-        err
-        requestId
-      })
-
-      retryStream.emit("retry", { attempts, delay })
-
-      setTimeout ->
-        tryStartStream(attempts)
-      , delay
+      setTimeout(tryStartStream, delay)
 
     ## if we're retrying and we previous piped
     ## into the reqStream, then reapply this now
@@ -271,28 +362,20 @@ createRetryingRequestStream = (opts = {}) ->
         ## response, then that means we failed during transit
         ## and its no longer safe to retry. all we can do now
         ## is propogate the error upwards
-        debug("received an error on request after response started %o", { requestId, opts, err })
+        debug("received an error on request after response started %o", merge(opts, { err }))
 
         return emitError(err)
 
       ## otherwise, see if we can retry another request under the hood...
-
-      if not isRetriableError(err, opts)
-        debug("received a non-retryable request error %o", { requestId, opts, err })
-
-        return emitError(err)
-
-      if iteration >= MAX_REQUEST_RETRIES
-        debug("exhausted all attempts to retry request %o", {
-          requestId,
-          iteration,
-          opts,
-          err,
-        })
-
-        return emitError(err)
-
-      return retry(err)
+      maybeRetryOnNetworkFailure(err, {
+        opts,
+        retryIntervals,
+        delaysRemaining,
+        retryOnNetworkFailure,
+        onNext: retry
+        onElse: ->
+          emitError(err)
+      })
 
     reqStream.once "request", (req) ->
       ## remove the pipe listener since once the request has
@@ -303,32 +386,30 @@ createRetryingRequestStream = (opts = {}) ->
       didReceiveResponse = true
 
       ## ok, no net error, but what about a bad status code?
-      if hasRetriableStatusCodeFailure(incomingRes, opts) && iteration < MAX_REQUEST_RETRIES
-        debug("received failing status code on res, retrying %o", _.pick(incomingRes, "statusCode"))
+      maybeRetryOnStatusCodeFailure(incomingRes, {
+        opts,
+        requestId,
+        delaysRemaining,
+        retryIntervals,
+        retryOnStatusCodeFailure,
+        onNext: retry
+        onElse: ->
+          debug("successful response received", { requestId })
 
-        return retry()
+          ## null req body out to free memory
+          reqBodyBuffer.unpipeAll()
+          reqBodyBuffer = null
 
-      debug("successful response received", { requestId })
+          ## forward the response event upwards which should happen
+          ## prior to the pipe event, same as what request does
+          ## https://github.com/request/request/blob/master/request.js#L1059
+          retryStream.emit("response", incomingRes)
 
-      ## null req body out to free memory
-      reqBodyBuffer.unpipeAll()
-      reqBodyBuffer = null
+          reqStream.pipe(delayStream)
 
-      ## forward the response event upwards which should happen
-      ## prior to the pipe event, same as what request does
-      ## https://github.com/request/request/blob/master/request.js#L1059
-      retryStream.emit("response", incomingRes)
-
-      reqStream.pipe(delayStream)
-
-      # also need to pipe all the non-data events
-      _.map(
-        [
-          # `http.ClientRequest` events
-          "abort", "connect", "continue", "information", "socket", "timeout", "upgrade"
-        ],
-        _.partial(pipeEvent, reqStream, retryStream)
-      )
+          ## `http.ClientRequest` events
+          _.map(HTTP_CLIENT_REQUEST_EVENTS, _.partial(pipeEvent, reqStream, retryStream))
+      })
 
   tryStartStream()
 
@@ -340,6 +421,21 @@ caseInsensitiveGet = (obj, property) ->
   for key in Object.keys(obj)
     if key.toLowerCase() == lowercaseProperty
       return obj[key]
+
+setDefaults = (opts) ->
+  _
+  .chain(opts)
+  .defaults({
+    requestId: _.uniqueId('request')
+    retryIntervals: [0, 1000, 2000, 2000]
+    retryOnNetworkFailure: true
+    retryOnStatusCodeFailure: false
+  })
+  .thru (opts) ->
+    _.defaults(opts, {
+      delaysRemaining: _.clone(opts.retryIntervals)
+    })
+  .value()
 
 module.exports = (options = {}) ->
   defaults = {
@@ -361,9 +457,13 @@ module.exports = (options = {}) ->
 
     rp: require("request-promise")
 
-    reduceCookieToArray: reduceCookieToArray
+    getDelayForRetry
 
-    createCookieString: createCookieString
+    reduceCookieToArray
+
+    createCookieString
+
+    setDefaults
 
     create: (strOrOpts, promise) ->
       switch
@@ -373,6 +473,8 @@ module.exports = (options = {}) ->
           }
         else
           opts = strOrOpts
+
+      opts = setDefaults(opts)
 
       if promise
         createRetryingRequestPromise(opts)
@@ -522,7 +624,7 @@ module.exports = (options = {}) ->
           followRedirect.call(req, incomingRes)
 
       send = =>
-        debug("sending request as stream %o", _.omit(options, "jar"))
+        debug("sending request as stream %o", merge(options))
 
         str = @create(options)
         str.getJar = -> options.jar
@@ -534,7 +636,7 @@ module.exports = (options = {}) ->
         setCookies(cookies, options.jar, options.headers, options.url)
       .then(send)
 
-    send: (headers, automationFn, options = {}) ->
+    sendPromise: (headers, automationFn, options = {}) ->
       _.defaults options, {
         headers: {}
         gzip: true
