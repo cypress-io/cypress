@@ -1,7 +1,7 @@
 require("../lib/environment")
 
 global.root      = "../../"
-global.supertest = require("supertest-as-promised")
+global.supertest = require("supertest")
 global.nock      = require("nock")
 global.expect    = require("chai").expect
 global.mockery   = require("mockery")
