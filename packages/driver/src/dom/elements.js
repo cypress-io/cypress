@@ -1,21 +1,8 @@
 /* eslint-disable
-    default-case,
-    no-case-declarations,
-    no-cond-assign,
-    no-const-assign,
     no-dupe-keys,
     no-undef,
-    one-var,
-    prefer-rest-params,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+// TODO: Fix any style issues and re-enable lint.
 const _ = require('lodash')
 const $ = require('jquery')
 const $jquery = require('./jquery')
@@ -55,8 +42,9 @@ const _getValue = function () {
     return descriptor('HTMLButtonElement', 'value').get
   }
 
-  // is an option element
-  return descriptor('HTMLOptionElement', 'value').get
+  if (isOption(this)) {
+    return descriptor('HTMLOptionElement', 'value').get
+  }
 }
 
 const _setValue = function () {
@@ -76,8 +64,9 @@ const _setValue = function () {
     return descriptor('HTMLButtonElement', 'value').set
   }
 
-  // is an options element
-  return descriptor('HTMLOptionElement', 'value').set
+  if (isOption(this)) {
+    return descriptor('HTMLOptionElement', 'value').set
+  }
 }
 
 const _getSelectionStart = function () {
@@ -305,6 +294,10 @@ const isButton = (el) => {
 
 const isSelect = (el) => {
   return getTagName(el) === 'select'
+}
+
+const isOption = (el) => {
+  return getTagName(el) === 'option'
 }
 
 const isBody = (el) => {
