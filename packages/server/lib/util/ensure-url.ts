@@ -12,12 +12,12 @@ type RetryOptions = {
 export const retryIsListening = (urlStr: string, options: RetryOptions) => {
   const { retryIntervals, onRetry } = options
 
-  const intervals = _.clone(retryIntervals)
+  const delaysRemaining = _.clone(retryIntervals)
 
   const run = () => {
     return isListening(urlStr)
     .catch((err) => {
-      const delay = intervals.shift()
+      const delay = delaysRemaining.shift()
 
       if (!delay) {
         throw err
@@ -25,8 +25,8 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
 
       onRetry({
         delay,
-        attempt: retryIntervals.length - intervals.length,
-        remaining: intervals.length + 1,
+        attempt: retryIntervals.length - delaysRemaining.length,
+        remaining: delaysRemaining.length + 1,
       })
 
       return Bluebird.delay(delay)

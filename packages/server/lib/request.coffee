@@ -34,12 +34,9 @@ getOriginalHeaders = (req = {}) ->
   _.get(req, 'req.headers', req.headers)
 
 getDelayForRetry = (options = {}) ->
-  { err, opts, intervals, retryIntervals, onNext, onElse } = options
+  { err, opts, delaysRemaining, retryIntervals, onNext, onElse } = options
 
-  if not intervals.length
-    return onElse()
-
-  delay = intervals.shift()
+  delay = delaysRemaining.shift()
 
   if not _.isNumber(delay)
     ## no more delays, bailing
@@ -48,7 +45,7 @@ getDelayForRetry = (options = {}) ->
     return onElse()
 
   ## figure out which attempt we're on...
-  attempt = retryIntervals.length - intervals.length
+  attempt = retryIntervals.length - delaysRemaining.length
 
   ## if this ECONNREFUSED and we are
   ## retrying greater than 1 second
@@ -82,8 +79,8 @@ isRetriableError = (err = {}, retryOnNetworkFailure) ->
 maybeRetryOnNetworkFailure = (err, options = {}) ->
   {
     opts,
-    intervals,
     retryIntervals,
+    delaysRemaining,
     retryOnNetworkFailure,
     onNext,
     onElse,
@@ -98,8 +95,8 @@ maybeRetryOnNetworkFailure = (err, options = {}) ->
   getDelayForRetry({
     err,
     opts,
-    intervals,
     retryIntervals,
+    delaysRemaining,
     onNext,
     onElse,
   })
@@ -108,9 +105,9 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
   {
     err,
     opts,
-    intervals,
     requestId,
     retryIntervals,
+    delaysRemaining,
     retryOnStatusCodeFailure,
     onNext,
     onElse,
@@ -130,8 +127,8 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
   getDelayForRetry({
     err,
     opts,
-    intervals,
     retryIntervals,
+    delaysRemaining,
     onNext,
     onElse,
   })
@@ -250,8 +247,8 @@ createCookieString = (c) ->
 createRetryingRequestPromise = (opts) ->
   {
     requestId,
-    intervals,
     retryIntervals,
+    delaysRemaining,
     retryOnNetworkFailure,
     retryOnStatusCodeFailure
   } = opts
@@ -267,8 +264,8 @@ createRetryingRequestPromise = (opts) ->
     ## rp wraps network errors in a RequestError, so might need to unwrap it to check
     maybeRetryOnNetworkFailure(err.error or err, {
       opts,
-      intervals,
       retryIntervals,
+      delaysRemaining,
       retryOnNetworkFailure,
       onNext: retry
       onElse: ->
@@ -278,9 +275,9 @@ createRetryingRequestPromise = (opts) ->
     ## ok, no net error, but what about a bad status code?
     maybeRetryOnStatusCodeFailure(res, {
       opts,
-      intervals,
       requestId,
       retryIntervals,
+      delaysRemaining,
       retryOnStatusCodeFailure,
       onNext: retry
       onElse: _.constant(res)
@@ -293,8 +290,8 @@ pipeEvent = (source, destination, event) ->
 createRetryingRequestStream = (opts = {}) ->
   {
     requestId,
-    intervals,
     retryIntervals,
+    delaysRemaining,
     retryOnNetworkFailure,
     retryOnStatusCodeFailure
   } = opts
@@ -372,8 +369,8 @@ createRetryingRequestStream = (opts = {}) ->
       ## otherwise, see if we can retry another request under the hood...
       maybeRetryOnNetworkFailure(err, {
         opts,
-        intervals,
         retryIntervals,
+        delaysRemaining,
         retryOnNetworkFailure,
         onNext: retry
         onElse: ->
@@ -391,8 +388,8 @@ createRetryingRequestStream = (opts = {}) ->
       ## ok, no net error, but what about a bad status code?
       maybeRetryOnStatusCodeFailure(incomingRes, {
         opts,
-        intervals,
         requestId,
+        delaysRemaining,
         retryIntervals,
         retryOnStatusCodeFailure,
         onNext: retry
@@ -462,8 +459,8 @@ module.exports = (options = {}) ->
 
       _.defaults(opts, {
         retryIntervals,
-        intervals: _.clone(retryIntervals)
         requestId: _.uniqueId('request')
+        delaysRemaining: _.clone(retryIntervals)
         retryOnNetworkFailure: true
         retryOnStatusCodeFailure: false
       })
