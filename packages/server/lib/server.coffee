@@ -117,7 +117,7 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project) ->
+  open: (config = {}, project, onWarning) ->
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -141,13 +141,13 @@ class Server
 
       @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
-      @createServer(app, config, @_request)
+      @createServer(app, config, project, @_request, onWarning)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
 
-  createServer: (app, config, request) ->
+  createServer: (app, config, project, request, onWarning) ->
     new Promise (resolve, reject) =>
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
@@ -233,13 +233,17 @@ class Server
           if baseUrl
             @_baseUrl = baseUrl
 
+            if config.isTextTerminal
+              return @_retryBaseUrlCheck(baseUrl, onWarning)
+              .return(null)
+              .catch (e) ->
+                debug(e)
+                reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
+
             ensureUrl.isListening(baseUrl)
             .return(null)
-            .catch (err) =>
-              if config.isTextTerminal
-                reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
-              else
-                errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+            .catch (err) ->
+              errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
 
         .then (warning) =>
           ## once we open set the domain
@@ -303,7 +307,7 @@ class Server
     return props
 
   _onRequest: (headers, automationRequest, options) ->
-    @_request.send(headers, automationRequest, options)
+    @_request.sendPromise(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
     debug("resolving visit %o", {
@@ -551,6 +555,20 @@ class Server
       setProxiedUrl(req)
 
       @_callRequestListeners(server, listeners, req, res)
+
+  _retryBaseUrlCheck: (baseUrl, onWarning) ->
+    ensureUrl.retryIsListening(baseUrl, {
+      retryIntervals: [3000, 3000, 4000],
+      onRetry: ({ attempt, delay, remaining }) ->
+        warning = errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
+          remaining
+          attempt
+          delay
+          baseUrl
+        })
+
+        onWarning(warning)
+    })
 
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
