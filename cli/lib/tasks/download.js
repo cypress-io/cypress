@@ -205,6 +205,10 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
       throttle: progress.throttle,
     })
     .on('response', (response) => {
+      // we have computed checksum and filesize during test runner binary build
+      // and have set it on the S3 object as user meta data, available via
+      // these custom headers "x-amz-meta-..."
+      // see https://github.com/cypress-io/cypress/pull/4092
       expectedSize = response.headers['x-amz-meta-size'] ||
         response.headers['content-length']
       expectedChecksum = response.headers['x-amz-meta-checksum']
