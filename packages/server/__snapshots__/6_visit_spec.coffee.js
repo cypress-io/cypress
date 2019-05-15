@@ -31,21 +31,18 @@ exports['e2e visit low response timeout passes 1'] = `
       ✓ submits user agent on cy.request
     issue #255: url with like two domain
       ✓ passes
-    issue #272: responses which are never ended still send valid html
-      ✓ handles no response errors on the initial visit
-      ✓ handles no response errors when not initially visiting
     issue #309: request accept header not set
       ✓ sets accept header to text/html,*/*
 
 
-  13 passing
+  11 passing
 
 
   (Results)
 
   ┌─────────────────────────────────┐
-  │ Tests:        13                │
-  │ Passing:      13                │
+  │ Tests:        11                │
+  │ Passing:      11                │
   │ Failing:      0                 │
   │ Pending:      0                 │
   │ Skipped:      0                 │
@@ -69,9 +66,9 @@ exports['e2e visit low response timeout passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ visit_spec.coffee                         XX:XX       13       13        -        -        - │
+  │ ✔ visit_spec.coffee                         XX:XX       11       11        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       13       13        -        -        -  
+    All specs passed!                           XX:XX       11       11        -        -        -  
 
 
 `
