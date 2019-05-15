@@ -338,11 +338,10 @@ module.exports = {
       onResponse(obj.stream, obj.response)
     else
       opts = {
-        followRedirect: false
-        strictSSL: false
-        retryOnNetworkFailure: true
         timeout: null
-        fromProxy: true
+        strictSSL: false
+        followRedirect: false
+        retryIntervals: [0, 100, 200, 200]
       }
 
       ## strip unsupported accept-encoding headers

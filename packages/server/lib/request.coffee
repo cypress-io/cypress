@@ -374,6 +374,13 @@ module.exports = (options = {}) ->
         else
           opts = strOrOpts
 
+      _.defaults(opts, {
+        requestId: _.uniqueId('request')
+        retryIntervals: [0, 1000, 2000, 2000]
+        retryOnNetworkFailure: true
+        retryOnStatusCodeFailure: false
+      })
+
       if promise
         createRetryingRequestPromise(opts)
       else
