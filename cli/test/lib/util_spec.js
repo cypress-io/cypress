@@ -5,6 +5,8 @@ const tty = require('tty')
 const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
+const hasha = require('hasha')
+const la = require('lazy-ass')
 
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
@@ -19,6 +21,7 @@ describe('util', () => {
     it('detects only GTK message', () => {
       os.platform.returns('linux')
       const text = '[some noise here] Gtk: cannot open display: 99'
+
       expect(util.isDisplayError(text)).to.be.true
       // and not for the other messages
       expect(util.isDisplayError('display was set incorrectly')).to.be.false
@@ -377,6 +380,18 @@ describe('util', () => {
       process.env.npm_package_config_CYPRESS_FOO = 'baz'
       process.env.npm_config_CYPRESS_FOO = 'bloop'
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bloop')
+    })
+  })
+
+  context('.getFileChecksum', () => {
+    it('computes same hash as Hasha SHA512', () => {
+      return Promise.all([
+        util.getFileChecksum(__filename),
+        hasha.fromFile(__filename, { algorithm: 'sha512' }),
+      ]).then(([checksum, expectedChecksum]) => {
+        la(checksum === expectedChecksum, 'our computed checksum', checksum,
+          'is different from expected', expectedChecksum)
+      })
     })
   })
 })
