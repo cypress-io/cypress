@@ -143,34 +143,5 @@ const config: webpack.Configuration = {
 
 }
 
-if (mode === 'reporter') {
-
-  const { getPathToDist } = require("@packages/reporter/lib/resolve-dist")
-
-  const reporterConfig: webpack.Configuration = {
-    entry: {
-      cypress_reporter: [require.resolve('@packages/reporter/src')]
-    },
-    output: {
-      path: getPathToDist(),
-      filename: '[name].js'
-    },
-    plugins: [
-      new HtmlWebpackPlugin({
-        template: './static/index.reporter.html',
-        chunks: ['cypress_reporter']
-      }),
-      new CleanWebpackPlugin(),
-      new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
-      new MiniCSSExtractWebpackPlugin(),
-    ]
-  }
-
-  _.extend(config, reporterConfig)
-}
-
-
-
-
 export default config
 
