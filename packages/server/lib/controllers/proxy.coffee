@@ -225,7 +225,7 @@ module.exports = {
         return str.pipe(thr)
 
     endWithNetworkErr = (err) ->
-      debug('request failed in proxy layer', {
+      debug('request failed in proxy layer %o', {
         res: _.pick(res, 'headersSent', 'statusCode', 'headers')
         req: _.pick(req, 'url', 'proxiedUrl', 'headers', 'method')
         err
