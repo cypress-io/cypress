@@ -17,10 +17,24 @@ const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
+const hasha = require('hasha')
+const fs = require('./fs')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
 const getosAsync = Promise.promisify(getos)
+
+const getFileChecksum = (filename) => {
+  la(is.unemptyString(filename), 'expected filename', filename)
+
+  return hasha.fromFile(filename, { algorithm: 'sha512' })
+}
+
+const getFileSize = (filename) => {
+  la(is.unemptyString(filename), 'expected filename', filename)
+
+  return fs.statAsync(filename).get('size')
+}
 
 const stringify = (val) => {
   return _.isObject(val) ? JSON.stringify(val) : val
@@ -277,6 +291,10 @@ const util = {
   isDisplayError (errorMessage) {
     return isLinux() && errorMessage.includes('cannot open display:')
   },
+
+  getFileChecksum,
+
+  getFileSize,
 }
 
 module.exports = util

@@ -9,7 +9,6 @@ const request = require('request')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
 const { stripIndent } = require('common-tags')
-const hasha = require('hasha')
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
@@ -80,10 +79,6 @@ const prettyDownloadErr = (err, version) => {
   return throwFormErrorText(errors.failedDownload)(msg)
 }
 
-const getFileSize = (filename) => {
-  return fs.statAsync(filename).get('size')
-}
-
 /**
  * Checks checksum and file size for the given file. Allows both
  * values or just one of them to be checked.
@@ -93,8 +88,8 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
     debug('verifying checksum and file size')
 
     return Promise.join(
-      hasha.fromFile(filename),
-      getFileSize(filename)
+      util.getFileChecksum(filename),
+      util.getFileSize(filename)
     ).spread((checksum, filesize) => {
       if (checksum === expectedChecksum && filesize === expectedSize) {
         debug('downloaded file has the expected checksum and size ✅')
@@ -122,7 +117,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
   if (expectedChecksum) {
     debug('only checking expected file checksum %d', expectedChecksum)
 
-    return hasha.fromFile(filename)
+    return util.getFileChecksum(filename)
     .then((checksum) => {
       if (checksum === expectedChecksum) {
         debug('downloaded file has the expected checksum ✅')
@@ -147,7 +142,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
     // which we can check against the file size
     debug('only checking expected file size %d', expectedSize)
 
-    return getFileSize(filename)
+    return util.getFileSize(filename)
     .then((filesize) => {
       if (filesize === expectedSize) {
         debug('downloaded file has the expected size ✅')
