@@ -85,7 +85,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       }
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
       })
@@ -99,7 +99,7 @@ describe "lib/request", ->
 
       ## should not bomb on 500
       ## because simple = false
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
       })
@@ -111,7 +111,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       })
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
         body: "foobarbaz"
@@ -158,7 +158,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       })
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/dashboard"
         cookies: false
       })
@@ -216,7 +216,7 @@ describe "lib/request", ->
       })
       .reply(200, {id: 1})
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: {foo: "bar", baz: "quux"}
@@ -233,7 +233,7 @@ describe "lib/request", ->
     it "catches errors", ->
       nock.enableNetConnect()
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:1111/foo"
         cookies: false
       })
@@ -249,7 +249,7 @@ describe "lib/request", ->
         "Content-Type": "application/json"
       })
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/status.json"
         cookies: false
       })
@@ -263,7 +263,7 @@ describe "lib/request", ->
         "Content-Type": "application/json"
       })
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/status.json"
         cookies: false
       })
@@ -278,7 +278,7 @@ describe "lib/request", ->
         "Content-Type": "text/plain"
       })
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
       })
@@ -308,7 +308,7 @@ describe "lib/request", ->
       .get("/foo")
       .reply(200, "it worked")
 
-      request.sendPromise{}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
       })
@@ -359,7 +359,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
         })
@@ -372,7 +372,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
           headers: {
@@ -388,7 +388,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
           headers: {
@@ -404,7 +404,7 @@ describe "lib/request", ->
         .get("/foo?bar=baz&q=1")
         .reply(200)
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/foo"
           cookies: false
           qs: {
@@ -425,7 +425,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: true
@@ -444,7 +444,7 @@ describe "lib/request", ->
         .get("/dashboard")
         .reply(200, "dashboard")
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           method: "POST"
           url: "http://localhost:8080/login"
           cookies: false
@@ -463,7 +463,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -482,7 +482,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -500,7 +500,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -518,7 +518,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
         })
@@ -534,7 +534,7 @@ describe "lib/request", ->
         .reply(200, "<html></html>")
 
       it "takes converts body to x-www-form-urlencoded and sets header", ->
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -556,7 +556,7 @@ describe "lib/request", ->
           baz: "quux"
         }
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -572,7 +572,7 @@ describe "lib/request", ->
       it "does not set json=true", ->
         init = sinon.spy(request.rp.Request.prototype, "init")
 
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -600,7 +600,7 @@ describe "lib/request", ->
         @srv.close()
 
       it "recovers from bad headers", ->
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:9988/foo"
           cookies: false
           headers: {
@@ -613,7 +613,7 @@ describe "lib/request", ->
           expect(err.message).to.eq "TypeError: The header content contains invalid characters"
 
       it "handles weird content in the body just fine", ->
-        request.sendPromise{}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:9988/foo"
           cookies: false
           json: true
