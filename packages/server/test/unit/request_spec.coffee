@@ -158,57 +158,7 @@ describe "lib/request", ->
 
       expect(@push).to.be.calledOnce
 
-  context "#createRetryingRequestStream", ->
-    beforeEach (done) ->
-      @srv = http.createServer (req, res) ->
-        switch req.url
-          when "/never-ends"
-            res.writeHead(200)
-            res.write("foo\n")
-          when "/econnreset"
-            req.socket.destroy()
-
-      @srv.listen(9988, done)
-
-    afterEach ->
-      @srv.close()
-
-    it "does not retry on a timeout", (done) ->
-      opts = request.setDefaults({
-        url: "http://localhost:9988/never-ends"
-        timeout: 100
-      })
-
-      stream = request._createRetryingRequestStream(opts)
-
-      retries = 0
-
-      stream.on "retry", ->
-        retries++
-
-      stream.on "error", (err) ->
-        expect(err.code).to.eq('ESOCKETTIMEDOUT')
-        expect(retries).to.eq(0)
-        done()
-
-    it "retries 4x on a connection reset", (done) ->
-      opts = request.setDefaults({
-        url: "http://localhost:9988/econnreset"
-      })
-
-      stream = request._createRetryingRequestStream(opts)
-
-      retries = 0
-
-      stream.on "retry", ->
-        retries++
-
-      stream.on "error", (err) ->
-        expect(err.code).to.eq('ECONNRESET')
-        expect(retries).to.eq(4)
-        done()
-
-  context "#createRetryingRequestPromise", ->
+  context "#create", ->
     beforeEach (done) ->
       @hits = 0
 
@@ -220,7 +170,6 @@ describe "lib/request", ->
             res.writeHead(200)
             res.write("foo\n")
           when "/econnreset"
-
             req.socket.destroy()
 
       @srv.listen(9988, done)
@@ -228,30 +177,67 @@ describe "lib/request", ->
     afterEach ->
       @srv.close()
 
-    it "does not retry on a timeout", ->
-      opts = request.setDefaults({
-        url: "http://localhost:9988/never-ends"
-        timeout: 100
-      })
+    context "retries for streams", ->
+      it "does not retry on a timeout", (done) ->
+        opts = request.setDefaults({
+          url: "http://localhost:9988/never-ends"
+          timeout: 100
+        })
 
-      request._createRetryingRequestPromise(opts)
-      .then ->
-        throw new Error('should not reach')
-      .catch (err) =>
-        expect(err.error.code).to.eq('ESOCKETTIMEDOUT')
-        expect(@hits).to.eq(1)
+        stream = request.create(opts)
 
-    it "retries 4x on a connection reset", ->
-      opts = request.setDefaults({
-        url: "http://localhost:9988/econnreset"
-      })
+        retries = 0
 
-      request._createRetryingRequestPromise(opts)
-      .then ->
-        throw new Error('should not reach')
-      .catch (err) =>
-        expect(err.error.code).to.eq('ECONNRESET')
-        expect(@hits).to.eq(5)
+        stream.on "retry", ->
+          retries++
+
+        stream.on "error", (err) ->
+          expect(err.code).to.eq('ESOCKETTIMEDOUT')
+          expect(retries).to.eq(0)
+          done()
+
+      it "retries 4x on a connection reset", (done) ->
+        opts = {
+          url: "http://localhost:9988/econnreset"
+        }
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        stream.on "error", (err) ->
+          expect(err.code).to.eq('ECONNRESET')
+          expect(retries).to.eq(4)
+          done()
+
+    context "retries for promises", ->
+      it "does not retry on a timeout", ->
+        opts = {
+          url: "http://localhost:9988/never-ends"
+          timeout: 100
+        }
+
+        request.create(opts, true)
+        .then ->
+          throw new Error('should not reach')
+        .catch (err) =>
+          expect(err.error.code).to.eq('ESOCKETTIMEDOUT')
+          expect(@hits).to.eq(1)
+
+      it "retries 4x on a connection reset", ->
+        opts = {
+          url: "http://localhost:9988/econnreset"
+        }
+
+        request.create(opts, true)
+        .then ->
+          throw new Error('should not reach')
+        .catch (err) =>
+          expect(err.error.code).to.eq('ECONNRESET')
+          expect(@hits).to.eq(5)
 
   context "#sendPromise", ->
     beforeEach ->

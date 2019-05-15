@@ -465,10 +465,6 @@ module.exports = (options = {}) ->
 
     setDefaults
 
-    _createRetryingRequestStream: createRetryingRequestStream
-
-    _createRetryingRequestPromise: createRetryingRequestPromise
-
     create: (strOrOpts, promise) ->
       switch
         when _.isString(strOrOpts)
