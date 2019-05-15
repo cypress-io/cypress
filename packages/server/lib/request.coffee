@@ -70,11 +70,11 @@ getDelayForRetry = (options = {}) ->
 
   return onNext(delay, attempt)
 
-hasRetriableStatusCodeFailure = (res, opts) ->
+hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) ->
   ## everything must be true in order to
   ## retry a status code failure
   _.every([
-    opts.retryOnStatusCodeFailure,
+    retryOnStatusCodeFailure,
     !statusCode.isOk(res.statusCode)
   ])
 
