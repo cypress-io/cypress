@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const tty = require('tty')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
 
@@ -13,6 +13,36 @@ describe('util', () => {
   beforeEach(() => {
     sinon.stub(process, 'exit')
     sinon.stub(logger, 'error')
+  })
+
+  context('.isDisplayError', () => {
+    it('detects only GTK message', () => {
+      os.platform.returns('linux')
+      const text = '[some noise here] Gtk: cannot open display: 99'
+      expect(util.isDisplayError(text)).to.be.true
+      // and not for the other messages
+      expect(util.isDisplayError('display was set incorrectly')).to.be.false
+    })
+  })
+
+  context('.getGitHubIssueUrl', () => {
+    it('returls url for issue number', () => {
+      const url = util.getGitHubIssueUrl(4034)
+
+      expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')
+    })
+
+    it('throws for anything but a positive integer', () => {
+      expect(() => {
+        return util.getGitHubIssueUrl('4034')
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(-5)
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(5.19)
+      }).to.throw
+    })
   })
 
   context('.stdoutLineMatches', () => {
