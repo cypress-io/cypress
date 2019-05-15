@@ -541,7 +541,7 @@ module.exports = (options = {}) ->
         setCookies(cookies, options.jar, options.headers, options.url)
       .then(send)
 
-    send: (headers, automationFn, options = {}) ->
+    sendPromise: (headers, automationFn, options = {}) ->
       _.defaults options, {
         headers: {}
         gzip: true
