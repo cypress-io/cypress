@@ -421,8 +421,10 @@ class Server
               str.pipe(responseBuffer)
 
               str.on "end", =>
-                ## buffer the entire response before resolving. this allows us to detect & reject ETIMEDOUT errors
-                ## where the headers have been sent but the connection hangs before receiving a body.
+                ## buffer the entire response before resolving.
+                ## this allows us to detect & reject ETIMEDOUT errors
+                ## where the headers have been sent but the
+                ## connection hangs before receiving a body.
                 debug("resolve:url response ended, setting buffer %o", { newUrl, details })
 
                 ## TODO: think about moving this logic back into the
