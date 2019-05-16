@@ -405,20 +405,6 @@ class Server
                 originalUrl
               }
 
-              onEnd = ->
-                debug("resolve:url response ended, setting buffer %o", { newUrl, details })
-
-                buffers.set({
-                  url: newUrl
-                  jar: jar
-                  stream: responseBuffer
-                  details: details
-                  originalUrl: originalUrl
-                  response: incomingRes
-                })
-
-                resolve(details)
-
               ## does this response have this cypress header?
               if fp = incomingRes.headers["x-cypress-file-path"]
                 ## if so we know this is a local file request
@@ -426,33 +412,42 @@ class Server
 
               debug("setting details resolving url %o", details)
 
-              ## TODO: think about moving this logic back into the
-              ## frontend so that the driver can be in control of
-              ## when the server should cache the request buffer
-              ## and set the domain vs not
-              if isOk and isHtml
-                ## reset the domain to the new url if we're not
-                ## handling a local file
-                @_onDomainSet(newUrl, options) if not handlingLocalFile
-
-              else
-                ## TODO: move this logic to the driver too for
-                ## the same reasons listed above
-                restorePreviousState()
-
               ## this will allow us to listen to `str`'s `end` event by putting it in flowing mode
               responseBuffer = stream.PassThrough({
                 ## buffer forever - node's default is only to buffer 16kB
                 highWaterMark: Infinity
               })
 
-              ## buffer the entire response before resolving.
-              ## this allows us to detect & reject ETIMEDOUT errors
-              ## where the headers have been sent but the
-              ## connection hangs before receiving a body.
-              str
-              .on("end", onEnd)
-              .pipe(responseBuffer)
+              str.pipe(responseBuffer)
+
+              str.on "end", =>
+                ## buffer the entire response before resolving. this allows us to detect & reject ETIMEDOUT errors
+                ## where the headers have been sent but the connection hangs before receiving a body.
+                debug("resolve:url response ended, setting buffer %o", { newUrl, details })
+
+                ## TODO: think about moving this logic back into the
+                ## frontend so that the driver can be in control of
+                ## when the server should cache the request buffer
+                ## and set the domain vs not
+                if isOk and isHtml
+                  ## reset the domain to the new url if we're not
+                  ## handling a local file
+                  @_onDomainSet(newUrl, options) if not handlingLocalFile
+
+                  buffers.set({
+                    url: newUrl
+                    jar: jar
+                    stream: responseBuffer
+                    details: details
+                    originalUrl: originalUrl
+                    response: incomingRes
+                  })
+                else
+                  ## TODO: move this logic to the driver too for
+                  ## the same reasons listed above
+                  restorePreviousState()
+
+                resolve(details)
 
             .catch(onReqError)
 
