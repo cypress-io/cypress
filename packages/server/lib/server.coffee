@@ -441,7 +441,10 @@ class Server
                 restorePreviousState()
 
               ## this will allow us to listen to `str`'s `end` event by putting it in flowing mode
-              responseBuffer = stream.PassThrough()
+              responseBuffer = stream.PassThrough({
+                ## buffer forever - node's default is only to buffer 16kB
+                highWaterMark: Infinity
+              })
 
               ## buffer the entire response before resolving.
               ## this allows us to detect & reject ETIMEDOUT errors
