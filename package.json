@@ -151,7 +151,7 @@
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",
-    "typescript": "2.9.2",
+    "typescript": "3.4.5",
     "vinyl-paths": "2.1.0"
   },
   "author": "Brian Mann",
