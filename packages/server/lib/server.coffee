@@ -394,6 +394,8 @@ class Server
               contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
 
+              responseBuffer = streamBuffer()
+
               details = {
                 isOkStatusCode: isOk
                 isHtml
@@ -422,19 +424,7 @@ class Server
                 ## handling a local file
                 @_onDomainSet(newUrl, options) if not handlingLocalFile
 
-                debug("setting buffer for url:", newUrl)
-
-                buffer = streamBuffer()
-                str.pipe(buffer)
-
-                buffers.set({
-                  url: newUrl
-                  jar: jar
-                  stream: buffer.reader()
-                  details: details
-                  originalUrl: originalUrl
-                  response: incomingRes
-                })
+                str.pipe(responseBuffer)
               else
                 ## TODO: move this logic to the driver too for
                 ## the same reasons listed above
@@ -443,7 +433,17 @@ class Server
               str.on "end", ->
                 ## buffer the entire response before resolving. this allows us to detect & reject ETIMEDOUT errors
                 ## where the headers have been sent but the connection hangs before receiving a body.
-                debug("resolve:url response ended %o", details)
+                debug("resolve:url response ended, setting buffer %o", { newUrl, details })
+
+                buffers.set({
+                  url: newUrl
+                  jar: jar
+                  stream: responseBuffer.reader()
+                  details: details
+                  originalUrl: originalUrl
+                  response: incomingRes
+                })
+
                 resolve(details)
 
             .catch(onError)
