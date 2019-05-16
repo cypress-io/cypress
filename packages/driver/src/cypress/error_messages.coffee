@@ -378,6 +378,9 @@ module.exports = {
   location:
     invalid_key: "Location object does not have key: {{key}}"
 
+  log:
+    invalid_argument: "Cypress.log() can only be called with an options object. Your argument was: '{{arg}}'"
+
   miscellaneous:
     custom_command_interface_changed: (obj) ->
       """
@@ -470,6 +473,7 @@ module.exports = {
 
       Please update your code. You should be able to safely do a find/replace.
     """
+
     dangling_commands: """
       Oops, Cypress detected something wrong with your test code.
 

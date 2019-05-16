@@ -99,7 +99,7 @@ class Command extends Component {
       <li
         className={cs(
           'command',
-          `command-name-${nameClassName(model.name)}`,
+          `command-name-${model.name ? nameClassName(model.name) : ''}`,
           `command-state-${model.state}`,
           `command-type-${model.type}`,
           {

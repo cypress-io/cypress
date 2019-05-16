@@ -63,3 +63,16 @@ describe "driver/src/cypress/index", ->
         Cypress.Log.command({})
 
       expect(fn).to.throw(/has been renamed to Cypress.log/)
+
+    it "throws when passing non-object to Cypress.log()", ->
+      fn = ->
+        Cypress.log('My Log')
+
+      expect(fn).to.throw(/Cypress.log() can only be called with an options object. Your argument was/)
+      expect(fn).to.throw(/My Log/)
+
+    it "does not throw when Cypress.log() called outside of command", ->
+      fn = ->
+        Cypress.log({ message: 'My Log' })
+
+      expect(fn).to.not.throw()
