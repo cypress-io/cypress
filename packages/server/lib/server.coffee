@@ -393,8 +393,6 @@ class Server
               contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
 
-              responseBuffer = stream.PassThrough()
-
               details = {
                 isOkStatusCode: isOk
                 isHtml
@@ -423,11 +421,14 @@ class Server
                 ## handling a local file
                 @_onDomainSet(newUrl, options) if not handlingLocalFile
 
-                str.pipe(responseBuffer)
               else
                 ## TODO: move this logic to the driver too for
                 ## the same reasons listed above
                 restorePreviousState()
+
+              ## this will allow us to listen to `str`'s `end` event by putting it in flowing mode
+              responseBuffer = stream.PassThrough()
+              str.pipe(responseBuffer)
 
               str.on "end", ->
                 ## buffer the entire response before resolving. this allows us to detect & reject ETIMEDOUT errors
