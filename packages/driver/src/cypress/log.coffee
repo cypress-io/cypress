@@ -493,7 +493,7 @@ create = (Cypress, cy, state, config) ->
     if _.isFunction(onBeforeLog)
       return if onBeforeLog.call(cy, log) is false
 
-    ## set the log on the command 
+    ## set the log on the command
     state("current")?.log(log)
 
     addToLogs(log)
