@@ -96,7 +96,7 @@
     "vue-loader": "14.2.4",
     "vue-router": "3.0.5",
     "vue-template-compiler": "2.6.10",
-    "vuex": "3.1.0"
+    "vuex": "3.1.1"
   },
   "standard": {
     "globals": [
