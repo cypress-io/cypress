@@ -815,6 +815,7 @@ describe "lib/request", ->
       }
 
       request.sendStream(headers, @fn, options)
-      .then ->
+      .then (beginFn) ->
+        beginFn()
         expect(request.create).to.be.calledOnce
         expect(request.create).to.be.calledWith(options)
