@@ -582,6 +582,7 @@ module.exports = (options = {}) ->
       _.defaults options, {
         headers: {}
         jar: true
+        onBeforeReqInit: (fn) -> fn()
       }
 
       if not caseInsensitiveGet(options.headers, "user-agent") and (ua = headers["user-agent"])
@@ -612,14 +613,15 @@ module.exports = (options = {}) ->
           ## first set the existing jar cookies on the browser
           ## and then grab the cookies for the new url
           req.init = _.wrap req.init, (orig, opts) =>
-            self.setJarCookies(jar, automationFn)
-            .then ->
-              automationFn("get:cookies", {url: newUrl, includeHostOnly: true})
-            .then(convertToJarCookie)
-            .then (cookies) ->
-              setCookies(cookies, jar, null, newUrl)
-            .then ->
-              orig.call(req, opts)
+            options.onBeforeReqInit ->
+              self.setJarCookies(jar, automationFn)
+              .then ->
+                automationFn("get:cookies", {url: newUrl, includeHostOnly: true})
+              .then(convertToJarCookie)
+              .then (cookies) ->
+                setCookies(cookies, jar, null, newUrl)
+              .then ->
+                orig.call(req, opts)
 
           followRedirect.call(req, incomingRes)
 

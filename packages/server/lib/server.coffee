@@ -65,6 +65,7 @@ class Server
     @_nodeProxy  = null
     @_fileServer = null
     @_httpsProxy = null
+    @_urlResolver = null
 
   createExpressApp: (morgan) ->
     app = express()
@@ -316,6 +317,11 @@ class Server
       options
     })
 
+    ## if we have an existing url resolver
+    ## in flight then cancel it
+    if @_urlResolver
+      @_urlResolver.cancel()
+
     request = @_request
 
     handlingLocalFile = false
@@ -330,54 +336,70 @@ class Server
 
     originalUrl = urlStr
 
-    ## if we have a buffer for this url
-    ## then just respond with its details
-    ## so we are idempotant and do not make
-    ## another request
-    if obj = buffers.getByOriginalUrl(urlStr)
-      debug("got previous request buffer for url:", urlStr)
+    reqStream = null
+    currentPromisePhase = null
 
-      ## reset the cookies from the existing stream's jar
-      request.setJarCookies(obj.jar, automationRequest)
-      .then (c) ->
-        return obj.details
-    else
-      p = new Promise (resolve, reject) =>
-        redirects = []
-        newUrl = null
+    runPhase = (fn) ->
+      return currentPromisePhase = fn()
 
-        if not fullyQualifiedRe.test(urlStr)
-          handlingLocalFile = true
+    return @_urlResolver = p = new Promise (resolve, reject, onCancel) =>
+      onCancel ->
+        _.invoke(reqStream, "abort")
+        _.invoke(currentPromisePhase, "cancel")
 
-          @_remoteVisitingUrl = true
+      ## if we have a buffer for this url
+      ## then just respond with its details
+      ## so we are idempotant and do not make
+      ## another request
+      if obj = buffers.getByOriginalUrl(urlStr)
+        debug("got previous request buffer for url:", urlStr)
 
-          @_onDomainSet(urlStr, options)
+        ## reset the cookies from the existing stream's jar
+        return runPhase ->
+          resolve(
+            request.setJarCookies(obj.jar, automationRequest)
+            .then (c) ->
+              return obj.details
+          )
 
-          ## TODO: instead of joining remoteOrigin here
-          ## we can simply join our fileServer origin
-          ## and bypass all the remoteState.visiting shit
-          urlFile = url.resolve(@_remoteFileServer, urlStr)
-          urlStr  = url.resolve(@_remoteOrigin, urlStr)
+      redirects = []
+      newUrl = null
 
-        onReqError = (err) ->
-          ## only restore the previous state
-          ## if our promise is still pending
-          if p.isPending()
-            restorePreviousState()
+      if not fullyQualifiedRe.test(urlStr)
+        handlingLocalFile = true
 
-          reject(err)
+        @_remoteVisitingUrl = true
 
-        onReqStreamReady = (str) =>
-          str
-          .on("error", onReqError)
-          .on "response", (incomingRes) =>
-            debug(
-              "resolve:url headers received, buffering response %o",
-              _.pick(incomingRes, "headers", "statusCode")
-            )
+        @_onDomainSet(urlStr, options)
 
-            jar = str.getJar()
+        ## TODO: instead of joining remoteOrigin here
+        ## we can simply join our fileServer origin
+        ## and bypass all the remoteState.visiting shit
+        urlFile = url.resolve(@_remoteFileServer, urlStr)
+        urlStr  = url.resolve(@_remoteOrigin, urlStr)
 
+      onReqError = (err) =>
+        ## only restore the previous state
+        ## if our promise is still pending
+        if p.isPending()
+          restorePreviousState()
+
+        reject(err)
+
+      onReqStreamReady = (str) =>
+        reqStream = str
+
+        str
+        .on("error", onReqError)
+        .on "response", (incomingRes) =>
+          debug(
+            "resolve:url headers received, buffering response %o",
+            _.pick(incomingRes, "headers", "statusCode")
+          )
+
+          jar = str.getJar()
+
+          runPhase =>
             request.setJarCookies(jar, automationRequest)
             .then (c) =>
               @_remoteVisitingUrl = false
@@ -448,46 +470,47 @@ class Server
                   restorePreviousState()
 
                 resolve(details)
-
             .catch(onReqError)
 
-        restorePreviousState = =>
-          @_remoteAuth         = previousState.auth
-          @_remoteProps        = previousState.props
-          @_remoteOrigin       = previousState.origin
-          @_remoteStrategy     = previousState.strategy
-          @_remoteFileServer   = previousState.fileServer
-          @_remoteDomainName   = previousState.domainName
-          @_remoteVisitingUrl  = previousState.visiting
+      restorePreviousState = =>
+        @_remoteAuth         = previousState.auth
+        @_remoteProps        = previousState.props
+        @_remoteOrigin       = previousState.origin
+        @_remoteStrategy     = previousState.strategy
+        @_remoteFileServer   = previousState.fileServer
+        @_remoteDomainName   = previousState.domainName
+        @_remoteVisitingUrl  = previousState.visiting
 
-        # if they're POSTing an object, querystringify their POST body
-        if options.method == 'POST' and _.isObject(options.body)
-          options.form = options.body
-          delete options.body
+      # if they're POSTing an object, querystringify their POST body
+      if options.method == 'POST' and _.isObject(options.body)
+        options.form = options.body
+        delete options.body
 
-        _.assign(options, {
-          ## turn off gzip since we need to eventually
-          ## rewrite these contents
-          gzip: false
-          url: urlFile ? urlStr
-          headers: _.assign({
-            accept: "text/html,*/*"
-          }, options.headers)
-          followRedirect: (incomingRes) ->
-            status = incomingRes.statusCode
-            next = incomingRes.headers.location
+      _.assign(options, {
+        ## turn off gzip since we need to eventually
+        ## rewrite these contents
+        gzip: false
+        url: urlFile ? urlStr
+        headers: _.assign({
+          accept: "text/html,*/*"
+        }, options.headers)
+        onBeforeReqInit: runPhase
+        followRedirect: (incomingRes) ->
+          status = incomingRes.statusCode
+          next = incomingRes.headers.location
 
-            curr = newUrl ? urlStr
+          curr = newUrl ? urlStr
 
-            newUrl = url.resolve(curr, next)
+          newUrl = url.resolve(curr, next)
 
-            redirects.push([status, newUrl].join(": "))
+          redirects.push([status, newUrl].join(": "))
 
-            return true
-        })
+          return true
+      })
 
-        debug('sending request with options %o', options)
+      debug('sending request with options %o', options)
 
+      runPhase ->
         request.sendStream(headers, automationRequest, options)
         .then (createReqStream) ->
           onReqStreamReady(createReqStream())
