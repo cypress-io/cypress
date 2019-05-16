@@ -24,7 +24,6 @@ blacklist    = require("./util/blacklist")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
-streamBuffer = require("./util/stream_buffer").streamBuffer
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -394,7 +393,7 @@ class Server
               contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
 
-              responseBuffer = streamBuffer()
+              responseBuffer = stream.PassThrough()
 
               details = {
                 isOkStatusCode: isOk
@@ -438,7 +437,7 @@ class Server
                 buffers.set({
                   url: newUrl
                   jar: jar
-                  stream: responseBuffer.reader()
+                  stream: responseBuffer
                   details: details
                   originalUrl: originalUrl
                   response: incomingRes
