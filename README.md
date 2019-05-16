@@ -464,7 +464,7 @@ because it is really running!
 
 Let us test a complex example. Let us test a [single file Vue component](https://vuejs.org/v2/guide/single-file-components.html). Here is the [Hello.vue](Hello.vue) file
 
-```
+```vue
 <template>
   <p>{{ greeting }} World!</p>
 </template>
@@ -521,7 +521,7 @@ describe('Several components', () => {
 
 Button counter component is used in several Vue doc examples
 
-```
+```vue
 <template>
   <button v-on:click="incrementCounter">{{ counter }}</button>
 </template>
@@ -714,7 +714,7 @@ describe('Hello.vue', () => {
 
 To see all local tests, install dependencies and open Cypress in GUI mode
 
-```
+```sh
 npm install
 npm run cy:open
 ```
