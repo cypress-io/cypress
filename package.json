@@ -140,7 +140,7 @@
     "obfuscator": "0.5.4",
     "parse-github-repo-url": "1.4.1",
     "plist": "2.1.0",
-    "pluralize": "6.0.0",
+    "pluralize": "7.0.0",
     "prefixed-list": "1.0.1",
     "pretty-ms": "5.0.0",
     "print-arch": "1.0.0",
@@ -151,7 +151,7 @@
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",
-    "typescript": "2.9.2",
+    "typescript": "3.4.5",
     "vinyl-paths": "2.1.0"
   },
   "author": "Brian Mann",
