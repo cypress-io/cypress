@@ -109,8 +109,8 @@
     ]
   },
   "peerDependencies": {
-    "vue": "^2.5.13",
-    "cypress": "^3.0.1"
+    "vue": "2",
+    "cypress": "*"
   },
   "dependencies": {
     "@cypress/webpack-preprocessor": "2.0.1",
