@@ -367,24 +367,19 @@ class Server
 
           reject(err)
 
-        handleReqStream = (str) =>
-          pt = str
+        beginRequestStream = (beginFn) =>
+          str = beginFn()
           .on("error", error)
           .on "response", (incomingRes) =>
             debug(
-              "got resolve:url response %o",
+              "resolve:url headers received, buffering response %o",
               _.pick(incomingRes, "headers", "statusCode")
             )
 
             str.removeListener("error", error)
             str.on "error", (err) ->
-              ## if we have listeners on our
-              ## passthru stream just emit error
-              if pt.listeners("error").length
-                pt.emit("error", err)
-              else
-                ## else store the error for later
-                pt.error = err
+              ## store the error for later
+              str.error = err
 
             jar = str.getJar()
 
@@ -405,14 +400,14 @@ class Server
 
               details = {
                 isOkStatusCode: isOk
-                isHtml: isHtml
-                contentType: contentType
+                isHtml
+                contentType
                 url: newUrl
                 status: incomingRes.statusCode
                 cookies: c
                 statusText: statusCode.getText(incomingRes.statusCode)
-                redirects: redirects
-                originalUrl: originalUrl
+                redirects
+                originalUrl
               }
 
               ## does this response have this cypress header?
@@ -436,7 +431,7 @@ class Server
                 buffers.set({
                   url: newUrl
                   jar: jar
-                  stream: pt
+                  stream: str
                   details: details
                   originalUrl: originalUrl
                   response: incomingRes
@@ -449,7 +444,6 @@ class Server
               resolve(details)
 
             .catch(error)
-          .pipe(stream.PassThrough())
 
         restorePreviousState = =>
           @_remoteAuth         = previousState.auth
@@ -489,7 +483,7 @@ class Server
         debug('sending request with options %o', options)
 
         request.sendStream(headers, automationRequest, options)
-        .then(handleReqStream)
+        .then(beginRequestStream)
         .catch(error)
 
   _onDomainSet: (fullyQualifiedUrl, options = {}) ->

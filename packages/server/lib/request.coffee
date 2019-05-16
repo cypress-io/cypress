@@ -623,18 +623,17 @@ module.exports = (options = {}) ->
 
           followRedirect.call(req, incomingRes)
 
-      send = =>
-        debug("sending request as stream %o", merge(options))
-
-        str = @create(options)
-        str.getJar = -> options.jar
-        str
-
       automationFn("get:cookies", {url: options.url, includeHostOnly: true})
       .then(convertToJarCookie)
       .then (cookies) ->
         setCookies(cookies, options.jar, options.headers, options.url)
-      .then(send)
+      .then =>
+        return =>
+          debug("sending request as stream %o", merge(options))
+
+          str = @create(options)
+          str.getJar = -> options.jar
+          str
 
     sendPromise: (headers, automationFn, options = {}) ->
       _.defaults options, {
