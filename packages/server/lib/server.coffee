@@ -359,7 +359,7 @@ class Server
           urlFile = url.resolve(@_remoteFileServer, urlStr)
           urlStr  = url.resolve(@_remoteOrigin, urlStr)
 
-        onError = (err) ->
+        onReqError = (err) ->
           ## only restore the previous state
           ## if our promise is still pending
           if p.isPending()
@@ -367,9 +367,9 @@ class Server
 
           reject(err)
 
-        beginRequestStream = (beginFn) =>
-          str = beginFn()
-          .on("error", onError)
+        onReqStreamReady = (str) =>
+          str
+          .on("error", onReqError)
           .on "response", (incomingRes) =>
             debug(
               "resolve:url headers received, buffering response %o",
@@ -405,6 +405,20 @@ class Server
                 originalUrl
               }
 
+              onEnd = ->
+                debug("resolve:url response ended, setting buffer %o", { newUrl, details })
+
+                buffers.set({
+                  url: newUrl
+                  jar: jar
+                  stream: responseBuffer
+                  details: details
+                  originalUrl: originalUrl
+                  response: incomingRes
+                })
+
+                resolve(details)
+
               ## does this response have this cypress header?
               if fp = incomingRes.headers["x-cypress-file-path"]
                 ## if so we know this is a local file request
@@ -428,25 +442,16 @@ class Server
 
               ## this will allow us to listen to `str`'s `end` event by putting it in flowing mode
               responseBuffer = stream.PassThrough()
-              str.pipe(responseBuffer)
 
-              str.on "end", ->
-                ## buffer the entire response before resolving. this allows us to detect & reject ETIMEDOUT errors
-                ## where the headers have been sent but the connection hangs before receiving a body.
-                debug("resolve:url response ended, setting buffer %o", { newUrl, details })
+              ## buffer the entire response before resolving.
+              ## this allows us to detect & reject ETIMEDOUT errors
+              ## where the headers have been sent but the
+              ## connection hangs before receiving a body.
+              str
+              .on("end", onEnd)
+              .pipe(responseBuffer)
 
-                buffers.set({
-                  url: newUrl
-                  jar: jar
-                  stream: responseBuffer
-                  details: details
-                  originalUrl: originalUrl
-                  response: incomingRes
-                })
-
-                resolve(details)
-
-            .catch(onError)
+            .catch(onReqError)
 
         restorePreviousState = =>
           @_remoteAuth         = previousState.auth
@@ -486,8 +491,9 @@ class Server
         debug('sending request with options %o', options)
 
         request.sendStream(headers, automationRequest, options)
-        .then(beginRequestStream)
-        .catch(onError)
+        .then (createReqStream) ->
+          onReqStreamReady(createReqStream())
+        .catch(onReqError)
 
   _onDomainSet: (fullyQualifiedUrl, options = {}) ->
     l = (type, val) ->
