@@ -948,8 +948,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## When the function returns true, this prevents the firing of the default event handler.
       return true
 
-    getStyles: ->
-      snapshots.getStyles()
+    detachDom: (args...) ->
+      snapshots.detachDom(args...)
+
+    getStyles: (args...) ->
+      snapshots.getStyles(args...)
 
     setRunnable: (runnable, hookName) ->
       ## when we're setting a new runnable

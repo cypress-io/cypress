@@ -270,20 +270,12 @@ Log = (state, config, obj) ->
         at: null
         next: null
 
-      {body, htmlAttrs, headStyles, bodyStyles} = cy.createSnapshot(@get("$el"))
-
-      obj = {
-        name: name
-        body: body
-        htmlAttrs: htmlAttrs
-        headStyles: headStyles
-        bodyStyles: bodyStyles
-      }
+      snapshot = cy.createSnapshot(name, @get("$el"))
 
       snapshots = @get("snapshots") ? []
 
       ## insert at index 'at' or whatever is the next position
-      snapshots[options.at or snapshots.length] = obj
+      snapshots[options.at or snapshots.length] = snapshot
 
       @set("snapshots", snapshots)
 

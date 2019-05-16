@@ -29,7 +29,7 @@ $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
-  cy: "getStyles".split(" ")
+  cy: "detachDom getStyles".split(" ")
 }
 
 jqueryProxyFn = ->

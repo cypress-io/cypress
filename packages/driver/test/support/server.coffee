@@ -93,8 +93,7 @@ niv.install("react-dom@15.6.1")
 
   css2366 = ""
   makeCss2366 = ->
-    css = "#external:after { content: ' (before change)'; } #external { margin-right: 2px; }"
-    css += _.range(1, 2501).map((n) -> ".c#{n} { font-size: #{Math.round n/10}px; }").join("\n")
+    css = _.range(1, 2501).map((n) -> ".c#{n} { font-size: #{Math.round(n / 10)}px; }").join("\n")
 
   app.get "/dynamically-server-generated/issue-2366.css", (req, res) ->
     res.setHeader('Content-Type', 'text/css')

@@ -1,119 +1,26 @@
-path = require("path")
-url = require("url")
 _ = require("lodash")
 $ = require("jquery")
 
-anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
+$SnapshotsCss = require("./snapshots_css")
+
 HIGHLIGHT_ATTR = "data-cypress-el"
 
-reduceText = (arr, fn) ->
-  _.reduce arr, ((memo, item) -> memo += fn(item)), ""
-
-screenStylesheetRe = /(screen|all)/
-
-isScreenStylesheet = (stylesheet) ->
-  media = stylesheet.getAttribute("media")
-  return not _.isString(media) or screenStylesheetRe.test(media)
-
-getDocumentStylesheets = (document = {}) ->
-  _.reduce document.styleSheets, (memo, stylesheet) ->
-    memo[stylesheet.href] = stylesheet
-    return memo
-  , {}
-
-makePathsAbsoluteToDoc = (doc, styles) ->
-  return styles if not _.isString(styles)
-
-  styles.replace anyUrlInCssRe, (_1, _2, filePath) ->
-    ## the href getter will always resolve an absolute path taking into
-    ## account things like the current URL and the <base> tag
-    a = doc.createElement("a")
-    a.href = filePath
-    return "url('#{a.href}')"
-
 create = (Cypress, $$, state) ->
-  externalCssCache = {}
-  newWindow = false
+  snapshotsCss = $SnapshotsCss.create(Cypress, $$, state)
+  snapshotsMap = new WeakMap()
 
-  ## we invalidate the cache when css is modified by javascript
-  Cypress.on "css:modified", (href) ->
-    externalCssCache[href]?.valid = false
+  getHtmlAttrs = (htmlEl) ->
+    tmpHtmlEl = document.createElement("html")
 
-  ## the lifecycle of a stylesheet is the lifecycle of the window
-  ## so track this to know when to re-evaluate the cache in case
-  ## of css being modified by javascript
-  Cypress.on "window:before:load", ->
-    newWindow = true
+    _.transform htmlEl.attributes, (memo, attr) ->
+      return if not attr.specified
 
-  makePathsAbsoluteToStylesheet = _.memoize (styles, href) ->
-    return styles if not _.isString(styles)
-
-    stylesheetPath = href.replace(path.basename(href), '')
-    styles.replace anyUrlInCssRe, (_1, _2, filePath) ->
-      absPath = url.resolve(stylesheetPath, filePath)
-      return "url('#{absPath}')"
-
-  getCssRulesString = (href, stylesheet) ->
-    ## if we've loaded a new window and the css was invalidated due to javascript
-    ## we need to re-evaluate since this time around javascript might not change the css
-    if not (newWindow and externalCssCache[href]?.invalidLast) and externalCssCache[href]?.valid
-      return _.last(externalCssCache[href].styles)
-
-    ## some browsers may throw a SecurityError if the stylesheet is cross-domain
-    ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
-    ## for others, it will just be null
-    cssString = try
-      if rules = stylesheet.rules or stylesheet.cssRules
-        makePathsAbsoluteToStylesheet(reduceText(rules, (rule) -> rule.cssText), href)
-      else
-        null
-    catch e
-      null
-
-    externalCssCache[href] ?= {
-      styles: []
-      valid: true
-    }
-    externalCssCache[href].styles.push(cssString)
-
-    if not externalCssCache[href].valid
-      externalCssCache[href].invalidLast = true
-    else if newWindow
-      externalCssCache[href].invalidLast = false
-
-    externalCssCache[href].valid = true
-
-    return cssString
-
-  getStylesFor = (doc, $$, stylesheets, location) ->
-    styles = $$(location).find("link[rel='stylesheet'],style")
-    styles = _.filter(styles, isScreenStylesheet)
-
-    _.map styles, (stylesheet) =>
-      ## in cases where we can get the CSS as a string, make the paths
-      ## absolute so that when they're restored by appending them to the page
-      ## in <style> tags, background images and fonts still properly load
-      if href = stylesheet.href
-        ## if there's an href, it's a link tag
-        ## return the CSS rules as a string, or, if cross-domain,
-        ## a reference to the stylesheet's href
-        getCssRulesString(href, stylesheets[href]) or { href }
-      else
-        ## otherwise, it's a style tag, and we can just grab its content
-        styleRules = if stylesheet.sheet
-        then Array.prototype.slice.call(stylesheet.sheet.cssRules).map((rule) -> rule.cssText).join("")
-        else $$(stylesheet).text()
-
-        makePathsAbsoluteToDoc(doc, styleRules)
-
-  getStyles = ->
-    doc = state("document")
-    stylesheets = getDocumentStylesheets(doc)
-
-    return {
-      headStyles: getStylesFor(doc, $$, stylesheets, "head")
-      bodyStyles: getStylesFor(doc, $$, stylesheets, "body")
-    }
+      try
+        ## if we can successfully set the attributethen set it on memo
+        ## because it's possible the attribute is completely invalid
+        tmpHtmlEl.setAttribute(attr.name, attr.value)
+        memo[attr.name] = attr.value
+    , {}
 
   replaceIframes = (body) ->
     ## remove iframes because we don't want extra requests made, JS run, etc
@@ -178,26 +85,52 @@ create = (Cypress, $$, state) ->
       """
       $placeholder[0].src = "data:text/html;charset=utf-8,#{encodeURI(contents)}"
 
-  createSnapshot = ($el) ->
+  getStyles = (snapshot) ->
+    styleIds = snapshotsMap.get(snapshot)
+
+    return {} if not styleIds
+
+    return {
+      headStyles: snapshotsCss.getStylesByIds(styleIds.headStyleIds)
+      bodyStyles: snapshotsCss.getStylesByIds(styleIds.bodyStyleIds)
+    }
+
+  detachDom = (iframeContents) ->
+    { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
+    htmlAttrs = getHtmlAttrs(iframeContents.find('html')[0])
+    $body = iframeContents.find('body')
+
+    $body.find('script,link[rel="stylesheet"],style').remove()
+
+    snapshot = {
+      name: "final state"
+      htmlAttrs
+      body: $body.detach()
+    }
+
+    snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
+
+    return snapshot
+
+  createSnapshot = (name, $elToHighlight) ->
     ## create a unique selector for this el
-    $el.attr(HIGHLIGHT_ATTR, true) if $el?.attr
+    $elToHighlight.attr(HIGHLIGHT_ATTR, true) if $elToHighlight?.attr
 
     ## TODO: throw error here if cy is undefined!
 
-    body = $$("body").clone()
+    $body = $$("body").clone()
 
     ## for the head and body, get an array of all CSS,
     ## whether it's links or style tags
     ## if it's same-origin, it will get the actual styles as a string
     ## it it's cross-domain, it will get a reference to the link's href
-    {headStyles, bodyStyles} = getStyles()
-    newWindow = false
+    { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
 
     ## replaces iframes with placeholders
-    replaceIframes(body)
+    replaceIframes($body)
 
     ## remove tags we don't want in body
-    body.find("script,link[rel='stylesheet'],style").remove()
+    $body.find("script,link[rel='stylesheet'],style").remove()
 
     ## here we need to figure out if we're in a remote manual environment
     ## if so we need to stringify the DOM:
@@ -213,32 +146,27 @@ create = (Cypress, $$, state) ->
     ## which would reduce memory, and some CPU operations
 
     ## now remove it after we clone
-    $el.removeAttr(HIGHLIGHT_ATTR) if $el?.removeAttr
-
-    tmpHtmlEl = document.createElement("html")
+    $elToHighlight.removeAttr(HIGHLIGHT_ATTR) if $elToHighlight?.removeAttr
 
     ## preserve attributes on the <html> tag
-    htmlAttrs = _.reduce $$("html")[0].attributes, (memo, attr) ->
-      if attr.specified
-        try
-          ## if we can successfully set the attribute
-          ## then set it on memo because its possible
-          ## the attribute is completely invalid
-          tmpHtmlEl.setAttribute(attr.name, attr.value)
-          memo[attr.name] = attr.value
+    htmlAttrs = getHtmlAttrs($$("html")[0])
 
-      memo
-    , {}
+    snapshot = {
+      name
+      htmlAttrs
+      body: $body
+    }
 
-    return {body, htmlAttrs, headStyles, bodyStyles}
+    snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
+
+    return snapshot
 
   return {
     createSnapshot
 
-    ## careful renaming or removing this method, the runner depends on it
-    getStyles
+    detachDom
 
-    getDocumentStylesheets
+    getStyles
   }
 
 module.exports = {

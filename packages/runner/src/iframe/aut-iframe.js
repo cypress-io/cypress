@@ -51,33 +51,22 @@ export default class AutIframe {
     return this._contents() && this._contents().find('body')
   }
 
-  detachDom = (Cypress) => {
-    const contents = this._contents()
-    const { headStyles, bodyStyles } = Cypress.getStyles()
-    const htmlAttrs = _.transform(contents.find('html')[0].attributes, (memo, attr) => {
-      if (attr.specified) {
-        memo[attr.name] = attr.value
-      }
-    }, {})
-    const $body = contents.find('body')
+  detachDom = () => {
+    const Cypress = eventManager.getCypress()
 
-    $body.find('script,link[rel="stylesheet"],style').remove()
+    if (!Cypress) return
 
-    return {
-      body: $body.detach(),
-      htmlAttrs,
-      headStyles,
-      bodyStyles,
-    }
+    return Cypress.detachDom(this._contents())
   }
 
-  restoreDom = ({ body, htmlAttrs, headStyles, bodyStyles }) => {
+  restoreDom = (snapshot) => {
+    const Cypress = eventManager.getCypress()
+    const { headStyles, bodyStyles } = Cypress ? Cypress.getStyles(snapshot) : {}
+    const { body, htmlAttrs } = snapshot
     const contents = this._contents()
-
     const $html = contents.find('html')
 
     this._replaceHtmlAttrs($html, htmlAttrs)
-
     this._replaceHeadStyles(headStyles)
 
     // remove the old body and replace with restored one
@@ -104,7 +93,7 @@ export default class AutIframe {
     })
   }
 
-  _replaceHeadStyles (styles) {
+  _replaceHeadStyles (styles = []) {
     const $head = this._contents().find('head')
     const existingStyles = $head.find('link[rel="stylesheet"],style')
 
@@ -156,7 +145,7 @@ export default class AutIframe {
     }
   }
 
-  _insertBodyStyles ($body, styles) {
+  _insertBodyStyles ($body, styles = []) {
     _.each(styles, (style) => {
       $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
     })
