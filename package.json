@@ -90,7 +90,7 @@
     "prettier-standard": "8.0.1",
     "semantic-release": "15.13.12",
     "simple-commit-message": "4.0.3",
-    "standard": "11.0.1",
+    "standard": "12.0.1",
     "vue": "2.6.10",
     "vue-i18n": "7.8.1",
     "vue-loader": "14.2.4",
