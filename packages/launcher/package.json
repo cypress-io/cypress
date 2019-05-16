@@ -33,7 +33,7 @@
     "sinon": "2.4.1",
     "sinon-chai": "3.3.0",
     "tslint": "5.16.0",
-    "tslint-config-standard": "7.1.0"
+    "tslint-config-standard": "8.0.1"
   },
   "dependencies": {
     "bluebird": "3.5.3",
