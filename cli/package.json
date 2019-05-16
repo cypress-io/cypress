@@ -66,7 +66,7 @@
     "ramda": "0.24.1",
     "request": "2.88.0",
     "request-progress": "0.4.0",
-    "supports-color": "5.5.0",
+    "supports-color": "6.1.0",
     "tmp": "0.1.0",
     "url": "0.11.0",
     "yauzl": "2.10.0"
