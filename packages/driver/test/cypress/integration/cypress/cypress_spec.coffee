@@ -47,7 +47,17 @@ describe "driver/src/cypress/index", ->
 
         done()
 
-  context "Log", ->
+  context ".isCy", ->
+    it "returns true on cy, cy chainable", ->
+      expect(Cypress.isCy(cy)).to.be.true
+      chainer = cy.wrap().then ->
+        expect(Cypress.isCy(chainer)).to.be.true
+
+    it "returns false on non-cy objects", ->
+      expect(Cypress.isCy(undefined)).to.be.false
+      expect(Cypress.isCy(() => {})).to.be.false
+
+  context ".Log", ->
     it "throws when using Cypress.Log.command()", ->
       fn = ->
         Cypress.Log.command({})
