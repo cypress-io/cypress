@@ -285,16 +285,6 @@ module.exports = {
     if obj = buffers.take(remoteUrl)
       wantsInjection = "full"
 
-      ## if we already have an error
-      ## on our stream just immediately
-      ## end with this
-      if err = obj.stream.error
-        endWithNetworkErr(err)
-      else
-        ## else listen for the error even which
-        ## could happen at any time
-        obj.stream.on("error", endWithNetworkErr)
-
       onResponse(obj.stream, obj.response)
     else
       opts = {

@@ -24,6 +24,7 @@ blacklist    = require("./util/blacklist")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
+streamBuffer = require("./util/stream_buffer").streamBuffer
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -359,7 +360,7 @@ class Server
           urlFile = url.resolve(@_remoteFileServer, urlStr)
           urlStr  = url.resolve(@_remoteOrigin, urlStr)
 
-        error = (err) ->
+        onError = (err) ->
           ## only restore the previous state
           ## if our promise is still pending
           if p.isPending()
@@ -369,17 +370,12 @@ class Server
 
         beginRequestStream = (beginFn) =>
           str = beginFn()
-          .on("error", error)
+          .on("error", onError)
           .on "response", (incomingRes) =>
             debug(
               "resolve:url headers received, buffering response %o",
               _.pick(incomingRes, "headers", "statusCode")
             )
-
-            str.removeListener("error", error)
-            str.on "error", (err) ->
-              ## store the error for later
-              str.error = err
 
             jar = str.getJar()
 
@@ -428,10 +424,13 @@ class Server
 
                 debug("setting buffer for url:", newUrl)
 
+                buffer = streamBuffer()
+                str.pipe(buffer)
+
                 buffers.set({
                   url: newUrl
                   jar: jar
-                  stream: str
+                  stream: buffer.reader()
                   details: details
                   originalUrl: originalUrl
                   response: incomingRes
@@ -441,9 +440,13 @@ class Server
                 ## the same reasons listed above
                 restorePreviousState()
 
-              resolve(details)
+              str.on "end", ->
+                ## buffer the entire response before resolving. this allows us to detect & reject ETIMEDOUT errors
+                ## where the headers have been sent but the connection hangs before receiving a body.
+                debug("resolve:url response ended %o", details)
+                resolve(details)
 
-            .catch(error)
+            .catch(onError)
 
         restorePreviousState = =>
           @_remoteAuth         = previousState.auth
@@ -484,7 +487,7 @@ class Server
 
         request.sendStream(headers, automationRequest, options)
         .then(beginRequestStream)
-        .catch(error)
+        .catch(onError)
 
   _onDomainSet: (fullyQualifiedUrl, options = {}) ->
     l = (type, val) ->

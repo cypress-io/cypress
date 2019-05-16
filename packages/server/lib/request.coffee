@@ -113,7 +113,7 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
     onElse,
   } = options
 
-  debug("received failing status code on request %o", {
+  debug("received status code on request %o", {
     requestId,
     statusCode: res.statusCode
   })
