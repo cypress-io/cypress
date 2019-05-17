@@ -1307,7 +1307,7 @@ describe "Routes", ->
         .then ->
           throw new Error("should not reach")
         .catch (err) ->
-          expect(err.message).to.eq('Error: incorrect header check')
+          expect(err.error.code).to.eq("ECONNRESET")
 
     context "headers", ->
       beforeEach ->
@@ -2525,8 +2525,6 @@ describe "Routes", ->
             "Content-Encoding": "gzip"
           })
 
-          gotResponse = false
-
           @r({
             url: "http://www.google.com/app.js"
             gzip: true
@@ -2536,7 +2534,7 @@ describe "Routes", ->
 
             done()
 
-        it "transparently proxies bad gzip responses when injecting", ->
+        it "ECONNRESETs bad gzip responses when injecting", ->
           nock(@server._remoteOrigin)
           .get("/index.html")
           .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
@@ -2554,7 +2552,7 @@ describe "Routes", ->
           .then ->
             throw new Error("should not reach")
           .catch (err) ->
-            expect(err.message).to.eq('Error: incorrect header check')
+            expect(err.error.code).to.eq("ECONNRESET")
 
         it "does not die rewriting a huge JS file", ->
           pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")

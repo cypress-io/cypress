@@ -182,9 +182,13 @@ module.exports = {
             .then(rewrite)
             .then(zlib.gzipAsync)
             .then(thr.end)
-            .catch (err) ->
-              debug('received error while ungzipping response, letting browser handle response %o', { err })
-              thr.end body
+            ## if we have an error here there's nothing
+            ## to do but log it out and end the socket
+            ## because we cannot inject into content
+            ## that failed rewriting gzip
+            ## which is the same thing we do below
+            ## on regular proxied network requests
+            .catch(endWithNetworkErr)
           else
             thr.end rewrite(body)
 
