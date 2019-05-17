@@ -1,11 +1,10 @@
 const _ = require('lodash')
-const la = require('lazy-ass')
-const is = require('check-more-types')
 const os = require('os')
 const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
+const debugElectron = require('debug')('cypress:electron')
 const { stripIndent } = require('common-tags')
 
 const util = require('../util')
@@ -17,13 +16,28 @@ const { throwFormErrorText, errors } = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
+const isBrokenGtkDisplayRe = /Gtk: cannot open display/
+
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe]
+
+const isGarbageLineWarning = (str) => {
+  return _.some(GARBAGE_WARNINGS, (re) => {
+    return re.test(str)
+  })
+}
 
 function isPlatform (platform) {
   return os.platform() === platform
 }
 
 function needsStderrPiped (needsXvfb) {
-  return isPlatform('darwin') || (needsXvfb && isPlatform('linux'))
+  return _.some([
+    isPlatform('darwin'),
+
+    (needsXvfb && isPlatform('linux')),
+
+    isPossibleLinuxWithIncorrectDisplay(),
+  ])
 }
 
 function needsEverythingPipedDirectly () {
@@ -48,16 +62,8 @@ function getStdio (needsXvfb) {
   return 'inherit'
 }
 
-/**
- * Returns true if DISPLAY is set for Linux platform
- * and the application exits really quickly.
- */
-const isPotentialDisplayProblem = (platform, display, code, elapsedMs) => {
-  la(is.unemptyString(platform), 'missing platform', platform)
-  la(is.number(code), 'expected exit code to be a number', code)
-  la(elapsedMs >= 0, 'elapsed ms should be >= 0', elapsedMs)
-
-  return platform === 'linux' && display && code === 1 && elapsedMs < 1000
+const isPossibleLinuxWithIncorrectDisplay = () => {
+  return isPlatform('linux') && process.env.DISPLAY
 }
 
 module.exports = {
@@ -75,13 +81,19 @@ module.exports = {
     args = [].concat(args, '--cwd', process.cwd())
 
     _.defaults(options, {
+      dev: false,
       env: process.env,
       detached: false,
       stdio: getStdio(needsXvfb),
     })
 
-    const spawn = () => {
+    const spawn = (overrides = {}) => {
       return new Promise((resolve, reject) => {
+        _.defaults(overrides, {
+          onStderrData: false,
+          electronLogging: false,
+        })
+
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
@@ -91,32 +103,37 @@ module.exports = {
           )
         }
 
-        const overrides = util.getEnvOverrides()
+        const { onStderrData, electronLogging } = overrides
+        const envOverrides = util.getEnvOverrides()
+        const electronArgs = _.clone(args)
         const node11WindowsFix = isPlatform('win32')
 
-        debug('spawning Cypress with executable: %s', executable)
-        debug('spawn forcing env overrides %o', overrides)
-        debug('spawn args %o %o', args, _.omit(options, 'env'))
-
         // strip dev out of child process options
-        options = _.omit(options, 'dev')
-        options = _.omit(options, 'binaryFolder')
+        let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
 
         // figure out if we're going to be force enabling or disabling colors.
         // also figure out whether we should force stdout and stderr into thinking
         // it is a tty as opposed to a pipe.
-        options.env = _.extend({}, options.env, overrides)
+        stdioOptions.env = _.extend({}, stdioOptions.env, envOverrides)
+
         if (node11WindowsFix) {
-          options = _.extend({}, options, { windowsHide: false })
+          stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
         }
 
-        if (os.platform() === 'linux' && process.env.DISPLAY) {
+        if (electronLogging) {
+          stdioOptions.env.ELECTRON_ENABLE_LOGGING = true
+        }
+
+        if (isPossibleLinuxWithIncorrectDisplay()) {
           // make sure we use the latest DISPLAY variable if any
           debug('passing DISPLAY', process.env.DISPLAY)
-          options.env.DISPLAY = process.env.DISPLAY
+          stdioOptions.env.DISPLAY = process.env.DISPLAY
         }
 
-        const child = cp.spawn(executable, args, options)
+        debug('spawning Cypress with executable: %s', executable)
+        debug('spawn args %o %o', electronArgs, _.omit(stdioOptions, 'env'))
+
+        const child = cp.spawn(executable, electronArgs, stdioOptions)
 
         child.on('close', resolve)
         child.on('error', reject)
@@ -131,10 +148,13 @@ module.exports = {
             const str = data.toString()
 
             // bail if this is warning line garbage
-            if (
-              isXlibOrLibudevRe.test(str) ||
-              isHighSierraWarningRe.test(str)
-            ) {
+            if (isGarbageLineWarning(str)) {
+              return
+            }
+
+            // if we have a callback and this explictly returns
+            // false then bail
+            if (onStderrData && onStderrData(str) === false) {
               return
             }
 
@@ -156,7 +176,7 @@ module.exports = {
           throw err
         })
 
-        if (options.detached) {
+        if (stdioOptions.detached) {
           child.unref()
         }
       })
@@ -176,36 +196,50 @@ module.exports = {
       .finally(xvfb.stop)
     }
 
-    const userFriendlySpawn = (shouldRetryOnDisplayProblem) => {
-      debug('spawning, should retry on display problem?', Boolean(shouldRetryOnDisplayProblem))
-      if (os.platform() === 'linux') {
-        debug('DISPLAY is %s', process.env.DISPLAY)
+    const userFriendlySpawn = (linuxWithDisplayEnv) => {
+      debug('spawning, should retry on display problem?', Boolean(linuxWithDisplayEnv))
+
+      let brokenGtkDisplay
+
+      const overrides = {}
+
+      if (linuxWithDisplayEnv) {
+        _.extend(overrides, {
+          electronLogging: true,
+          onStderrData (str) {
+            // if we receive a broken pipe anywhere
+            // then we know that's why cypress exited early
+            if (isBrokenGtkDisplayRe.test(str)) {
+              brokenGtkDisplay = true
+            }
+
+            // we should attempt to always slurp up
+            // the stderr logs unless we've explicitly
+            // enabled the electron debug logging
+            if (!debugElectron.enabled) {
+              return false
+            }
+          },
+        })
       }
 
-      const electronStarted = Number(new Date())
-
-      return spawn()
+      return spawn(overrides)
       .then((code) => {
-        const electronFinished = Number(new Date())
-        const elapsed = electronFinished - electronStarted
-
-        debug('electron open returned %d after %d ms', code, elapsed)
-
-        if (shouldRetryOnDisplayProblem &&
-          isPotentialDisplayProblem(os.platform(), process.env.DISPLAY, code, elapsed)) {
-          debug('Cypress thinks there is a potential display or OS problem')
-          debug('retrying the command with our XVFB')
+        if (code !== 0 && brokenGtkDisplay) {
+          debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting XVFB')
 
           // if we get this error, we are on Linux and DISPLAY is set
-          logger.warn(`${stripIndent`
+          logger.warn(stripIndent`
 
-            ${logSymbols.warning} Warning: Cypress process has finished very quickly with an error,
-            which might be related to a potential problem with how the DISPLAY is configured.
+            ${logSymbols.warning} Warning: Cypress failed to start.
 
-            DISPLAY was set to "${process.env.DISPLAY}"
+            This is likely due to a misconfigured DISPLAY environment variable.
 
-            We will attempt to spin our XVFB server and run Cypress again.
-          `}\n`)
+            DISPLAY was set to: "${process.env.DISPLAY}"
+
+            Cypress will attempt to fix the problem and rerun.
+          `)
+          logger.warn()
 
           return spawnInXvfb()
         }
@@ -219,10 +253,11 @@ module.exports = {
       return spawnInXvfb()
     }
 
-    // if we have problems spawning Cypress, maybe user DISPLAY setting is incorrect
-    // in that case retry with our own XVFB
-    const shouldRetryOnDisplayProblem = os.platform() === 'linux'
+    // if we are on linux and there's already a DISPLAY
+    // set, then we may need to rerun cypress after
+    // spawning our own XVFB server
+    const linuxWithDisplayEnv = isPossibleLinuxWithIncorrectDisplay()
 
-    return userFriendlySpawn(shouldRetryOnDisplayProblem)
+    return userFriendlySpawn(linuxWithDisplayEnv)
   },
 }
