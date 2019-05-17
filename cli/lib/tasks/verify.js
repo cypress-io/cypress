@@ -85,7 +85,6 @@ const runSmokeTest = (binaryDir, options) => {
       args.unshift(
         path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
       )
-      // args.unshift('--inspect-brk=5566')
     }
 
     const smokeTestCommand = `${executable} ${args.join(' ')}`

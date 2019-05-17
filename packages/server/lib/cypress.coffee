@@ -183,7 +183,6 @@ module.exports = {
         .catch(exitErr)
 
       when "smokeTest"
-        debugger
         @runElectron(mode, options)
         .then (pong) =>
           if not @isCurrentlyRunningElectron()
