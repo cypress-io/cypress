@@ -30,8 +30,7 @@ onRequest = (req, res, fileServerFolder) ->
   .on "error", (err) ->
     res.setHeader("x-cypress-file-server-error", true)
     res.statusCode = err.status
-    res.write(networkFailures.get(file, err.status))
-    res.end()
+    res.end(networkFailures.get(file, err.status))
   .pipe(res)
 
 module.exports = {
