@@ -344,6 +344,9 @@ class Server
 
     return @_urlResolver = p = new Promise (resolve, reject, onCancel) =>
       onCancel ->
+        p.currentPromisePhase = currentPromisePhase
+        p.reqStream = reqStream
+
         _.invoke(reqStream, "abort")
         _.invoke(currentPromisePhase, "cancel")
 

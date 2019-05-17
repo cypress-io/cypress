@@ -310,13 +310,15 @@ describe "Server", ->
             done()
 
           @runOneReqTest = (path) =>
-            requestCreate = sinon.spy(@server._request, "create")
-
             ## put the first request in flight
             p1 = @server._onResolveUrl("http://localhost:#{@httpPort}/#{path}/1000", {}, @automationRequest)
 
             Promise.delay(100)
             .then =>
+              ## the p1 should not have a current promise phase or reqStream until it's cancelled
+              expect(p1).not.to.have.property('currentPromisePhase')
+              expect(p1).not.to.have.property('reqStream')
+
               ## fire the 2nd request now that the first one has had some time to reach out
               @server._onResolveUrl("http://localhost:#{@httpPort}/#{path}/100", {}, @automationRequest)
             .then (obj) =>
@@ -333,7 +335,8 @@ describe "Server", ->
               })
 
               expect(p1.isCancelled()).to.be.true
-              expect(requestCreate.getCall(0).returnValue.aborted).to.be.true
+              expect(p1).to.have.property('currentPromisePhase')
+              expect(p1.reqStream.aborted).to.be.true
 
         it "cancels and aborts the 1st request when it hasn't loaded headers and a 2nd request is made", ->
           @runOneReqTest('pause-before-headers')
