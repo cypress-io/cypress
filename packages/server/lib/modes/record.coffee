@@ -264,7 +264,7 @@ createRun = (options = {}) ->
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
   if not recordKey
-    ## are we a forked PR and are we NOT running our own internal
+    ## are we a forked pull request (forked PR) and are we NOT running our own internal
     ## e2e tests? currently some e2e tests fail when a user submits
     ## a PR because this logic triggers unintended here
     if isForkPr.isForkPr() and not runningInternalTests()

@@ -32,8 +32,8 @@ Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 zlib = Promise.promisifyAll(zlib)
 
-## force supertest-session to use supertest-as-promised, hah
-Session       = proxyquire("supertest-session", {supertest: supertest})
+## force supertest-session to use promises provided in supertest
+Session = proxyquire("supertest-session", {supertest: supertest})
 
 removeWhitespace = (c) ->
   c = str.clean(c)
@@ -2974,56 +2974,6 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(204)
 
           expect(res.body).to.eq("")
-
-      # it "handles protocol-less proxies", ->
-      #   nock("http://www.cdnjs.com")
-      #     .get("backbone.js")
-      #     .reply 200, "var foo;", {
-      #       "Content-Type" : "text/javascript"
-      #     }
-
-      #   supertest(@srv)
-      #   .get("/www.cdnjs.com/backbone.js")
-      #   .expect(200)
-
-    context "without finishing responses", ->
-      beforeEach (done) ->
-        @setup("http://localhost:5959", {
-          config: {
-            responseTimeout: 50
-          }
-        })
-        .then =>
-          @srv = http.createServer (req, res) =>
-            @onRequest?.call(@, req, res)
-
-          @srv.listen =>
-            @port = @srv.address().port
-
-            done()
-
-      afterEach ->
-        @srv.close()
-
-      it "gracefully handles responses without headers", ->
-        @onRequest = (req, res) ->
-
-        @rp("http://localhost:#{@port}/")
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
-
-      it "gracefully handles responses with headers + incomplete body", ->
-        @onRequest = (req, res) ->
-          res.writeHead(401)
-          res.write("foo\n")
-
-        @rp("http://localhost:#{@port}/")
-        .then (res) ->
-          expect(res.statusCode).to.eq(401)
-
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
 
     context "blacklisted hosts", ->
       beforeEach ->
