@@ -9,15 +9,7 @@ const _ = Cypress._
 
 describe('issue #2366 - snapshot CSS memory and performance improvements', () => {
   beforeEach(() => {
-    cy.visit('/fixtures/issue-2366-external-css.html')
-  })
-
-  describe('lots of assertions run against an HTML page with a large external stylesheet', () => {
-    _.range(1, 101).forEach((n) => {
-      it(`assertion ${n}`, () => {
-        cy.get('#lots-of-css').should('be.visible')
-      })
-    })
+    cy.visit('/fixtures/issue-2366.html')
   })
 
   describe('CSS changes via JavaScript', () => {
@@ -59,6 +51,14 @@ describe('issue #2366 - snapshot CSS memory and performance improvements', () =>
 
     it('does not change the rules, so they should be back to the originals', () => {
       cy.get('#external-1').should('be.visible')
+    })
+  })
+
+  describe('lots of assertions run against an HTML page with a large external stylesheet', () => {
+    _.range(1, 101).forEach((n) => {
+      it(`assertion ${n}`, () => {
+        cy.get('#lots-of-css').should('be.visible')
+      })
     })
   })
 })
