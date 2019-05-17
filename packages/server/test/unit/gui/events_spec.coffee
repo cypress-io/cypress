@@ -18,7 +18,7 @@ logs     = require("#{root}../lib/gui/logs")
 events   = require("#{root}../lib/gui/events")
 dialog   = require("#{root}../lib/gui/dialog")
 Windows  = require("#{root}../lib/gui/windows")
-connect  = require("#{root}../lib/util/connect")
+ensureUrl = require("#{root}../lib/util/ensure-url")
 konfig   = require("#{root}../lib/konfig")
 
 describe "lib/gui/events", ->
@@ -663,15 +663,15 @@ describe "lib/gui/events", ->
 
     describe "ping:api:server", ->
       it "returns ensures url", ->
-        sinon.stub(connect, "ensureUrl").resolves()
+        sinon.stub(ensureUrl, "isListening").resolves()
 
         @handleEvent("ping:api:server").then (assert) =>
-          expect(connect.ensureUrl).to.be.calledWith(konfig("api_url"))
+          expect(ensureUrl.isListening).to.be.calledWith(konfig("api_url"))
           assert.sendCalledWith()
 
       it "catches errors", ->
         err = new Error("foo")
-        sinon.stub(connect, "ensureUrl").rejects(err)
+        sinon.stub(ensureUrl, "isListening").rejects(err)
 
         @handleEvent("ping:api:server").then (assert) =>
           assert.sendErrCalledWith(err)
@@ -686,7 +686,7 @@ describe "lib/gui/events", ->
           address: "127.0.0.1"
         }
         err.length = 1
-        sinon.stub(connect, "ensureUrl").rejects(err)
+        sinon.stub(ensureUrl, "isListening").rejects(err)
 
         @handleEvent("ping:api:server").then (assert) =>
           assert.sendErrCalledWith(err)

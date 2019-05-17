@@ -502,6 +502,7 @@ describe "e2e record", ->
         expect(getRequestUrls()).to.be.empty
 
     it "warns but does not exit when is forked pr", ->
+      process.env.CIRCLECI = "true"
       process.env.CIRCLE_PR_NUMBER = "123"
       process.env.CIRCLE_PR_USERNAME = "brian-mann"
       process.env.CIRCLE_PR_REPONAME = "cypress"
@@ -517,7 +518,7 @@ describe "e2e record", ->
         expect(getRequestUrls()).to.be.empty
 
     it "warns but does not exit when is forked pr and parallel", ->
-      process.env.CIRCLECI = "1"
+      process.env.CIRCLECI = "true"
       process.env.CIRCLE_WORKFLOW_ID = "123"
       process.env.CIRCLE_PR_NUMBER = "123"
       process.env.CIRCLE_PR_USERNAME = "brian-mann"
@@ -820,6 +821,30 @@ describe "e2e record", ->
       }])
 
       it "errors and exits when on free plan and over recorded runs limit", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - free plan exceeds monthly tests", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+          payload: {
+            used: 600
+            limit: 500
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when on free plan and over recorded tests limit", ->
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
@@ -1163,7 +1188,7 @@ describe "e2e record", ->
   describe "api interaction warnings", ->
 
     describe "create run warnings", ->
-      describe "grace period - over limit", ->
+      describe "grace period - over private tests limit", ->
         routes = defaultRoutes.slice()
         routes[0] = {
           method: "post"
@@ -1186,6 +1211,37 @@ describe "e2e record", ->
         setup(routes)
 
         it "warns when over private test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "grace period - over tests limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+              limit: 500
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over test recordings", ->
           e2e.exec(@, {
             key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
             spec: "record_pass*"
@@ -1254,7 +1310,7 @@ describe "e2e record", ->
             expectedExitCode: 0
           })
 
-      describe "paid plan - over limit", ->
+      describe "paid plan - over private tests limit", ->
         routes = defaultRoutes.slice()
         routes[0] = {
           method: "post"
@@ -1277,6 +1333,37 @@ describe "e2e record", ->
         setup(routes)
 
         it "warns when over private test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "paid plan - over tests limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+              used: 700
+              limit: 500
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over test recordings", ->
           e2e.exec(@, {
             key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
             spec: "record_pass*"
