@@ -12,6 +12,7 @@
     "start": "node ./cli/bin/cypress open --dev --global",
     "cypress:open": "node ./cli/bin/cypress open --dev --global",
     "cypress:run": "node ./cli/bin/cypress run --dev",
+    "cypress:verify": "node ./cli/bin/cypress verify --dev",
     "cypress:open:debug": "node ./scripts/debug.js cypress:open",
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
     "dev": "node ./scripts/start.js",
