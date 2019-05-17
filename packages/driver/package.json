@@ -46,7 +46,7 @@
     "lodash": "4.17.11",
     "lolex": "3.1.0",
     "md5": "2.2.1",
-    "method-override": "2.3.10",
+    "method-override": "3.0.0",
     "methods": "1.1.2",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
