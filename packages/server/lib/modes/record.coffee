@@ -231,15 +231,9 @@ getCommitFromGitOrCi = (git) ->
     defaultBranch: null
   })
 
-usedPrivateTestsMessage = (limit) ->
+usedTestsMessage = (limit, phrase) ->
   if _.isFinite(limit)
-    "The limit is #{chalk.blue(limit)} private test recordings."
-  else
-    ""
-
-usedTestsMessage = (limit) ->
-  if _.isFinite(limit)
-    "The limit is #{chalk.blue(limit)} test recordings."
+    "The limit is #{chalk.blue(limit)} #{phrase} recordings."
   else
     ""
 
@@ -313,13 +307,13 @@ createRun = (options = {}) ->
       switch warning.code
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-            usedMessage: usedPrivateTestsMessage(warning.limit)
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
           errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS", {
-            usedMessage: usedTestsMessage(warning.limit)
+            usedTestsMessage: usedTestsMessage(warning.limit, "test")
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
@@ -330,12 +324,12 @@ createRun = (options = {}) ->
           })
         when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-            usedMessage: usedPrivateTestsMessage(warning.limit)
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
             link: billingLink(warning.orgId)
           })
         when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
           errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_TESTS", {
-            usedMessage: usedTestsMessage(warning.limit)
+            usedTestsMessage: usedTestsMessage(warning.limit, "test")
             link: billingLink(warning.orgId)
           })
         when "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
@@ -362,12 +356,12 @@ createRun = (options = {}) ->
         switch code
           when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
             errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-              usedMessage: usedPrivateTestsMessage(limit)
+              usedTestsMessage: usedTestsMessage(limit, "private test")
               link: billingLink(orgId)
             })
           when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
             errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_TESTS", {
-              usedMessage: usedTestsMessage(limit)
+              usedTestsMessage: usedTestsMessage(limit, "test")
               link: billingLink(orgId)
             })
           when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
