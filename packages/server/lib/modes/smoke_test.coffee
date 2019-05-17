@@ -1,2 +1,4 @@
-module.exports = (options) ->
-  Promise.resolve(options.pong)
+module.exports = {
+  run: (options) ->
+    return options.pong
+}

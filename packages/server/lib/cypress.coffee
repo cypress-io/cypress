@@ -60,6 +60,10 @@ module.exports = {
             ## juggle up the totalFailed since our outer
             ## promise is expecting this object structure
             debug("electron finished with", code)
+
+            if mode is "smokeTest"
+              return resolve(code)
+
             resolve({totalFailed: code})
 
           args = require("./util/args").toArray(options)
@@ -179,10 +183,17 @@ module.exports = {
         .catch(exitErr)
 
       when "smokeTest"
-        require("./modes/smoke_test")(options)
-        .then (pong) ->
-          console.log(pong)
-        .then(exit0)
+        debugger
+        @runElectron(mode, options)
+        .then (pong) =>
+          if not @isCurrentlyRunningElectron()
+            return pong
+
+          if pong is options.ping
+            return 0
+
+          return 1
+        .then(exit)
         .catch(exitErr)
 
       when "returnPkg"

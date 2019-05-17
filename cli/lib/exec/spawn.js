@@ -5,18 +5,14 @@ const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
 const debugElectron = require('debug')('cypress:electron')
-const { stripIndent } = require('common-tags')
 
 const util = require('../util')
 const state = require('../tasks/state')
 const xvfb = require('./xvfb')
-const logger = require('../logger')
-const logSymbols = require('log-symbols')
 const { throwFormErrorText, errors } = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
-const isBrokenGtkDisplayRe = /Gtk: cannot open display/
 
 const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe]
 
@@ -60,10 +56,6 @@ function getStdio (needsXvfb) {
   }
 
   return 'inherit'
-}
-
-const isPossibleLinuxWithIncorrectDisplay = () => {
-  return isPlatform('linux') && process.env.DISPLAY
 }
 
 module.exports = {
@@ -124,7 +116,7 @@ module.exports = {
           stdioOptions.env.ELECTRON_ENABLE_LOGGING = true
         }
 
-        if (isPossibleLinuxWithIncorrectDisplay()) {
+        if (util.isPossibleLinuxWithIncorrectDisplay()) {
           // make sure we use the latest DISPLAY variable if any
           debug('passing DISPLAY', process.env.DISPLAY)
           stdioOptions.env.DISPLAY = process.env.DISPLAY
@@ -185,14 +177,7 @@ module.exports = {
     const spawnInXvfb = () => {
       return xvfb
       .start()
-      .then(() => {
-        // call userFriendlySpawn ourselves
-        // to prevent result of previous promise
-        // from becoming a parameter to userFriendlySpawn
-        debug('spawning Cypress after starting XVFB')
-
-        return userFriendlySpawn()
-      })
+      .then(userFriendlySpawn)
       .finally(xvfb.stop)
     }
 
@@ -209,7 +194,7 @@ module.exports = {
           onStderrData (str) {
             // if we receive a broken pipe anywhere
             // then we know that's why cypress exited early
-            if (isBrokenGtkDisplayRe.test(str)) {
+            if (util.isBrokenGtkDisplay(str)) {
               brokenGtkDisplay = true
             }
 
@@ -226,20 +211,7 @@ module.exports = {
       return spawn(overrides)
       .then((code) => {
         if (code !== 0 && brokenGtkDisplay) {
-          debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting XVFB')
-
-          // if we get this error, we are on Linux and DISPLAY is set
-          logger.warn(stripIndent`
-
-            ${logSymbols.warning} Warning: Cypress failed to start.
-
-            This is likely due to a misconfigured DISPLAY environment variable.
-
-            DISPLAY was set to: "${process.env.DISPLAY}"
-
-            Cypress will attempt to fix the problem and rerun.
-          `)
-          logger.warn()
+          util.logBrokenGtkDisplayWarning()
 
           return spawnInXvfb()
         }
@@ -256,7 +228,7 @@ module.exports = {
     // if we are on linux and there's already a DISPLAY
     // set, then we may need to rerun cypress after
     // spawning our own XVFB server
-    const linuxWithDisplayEnv = isPossibleLinuxWithIncorrectDisplay()
+    const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
 
     return userFriendlySpawn(linuxWithDisplayEnv)
   },

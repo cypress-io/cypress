@@ -11,7 +11,9 @@ const getos = require('getos')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const cachedir = require('cachedir')
+const logSymbols = require('log-symbols')
 const executable = require('executable')
+const { stripIndent } = require('common-tags')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
@@ -21,6 +23,8 @@ const debug = require('debug')('cypress:cli')
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
 const getosAsync = Promise.promisify(getos)
+
+const isBrokenGtkDisplayRe = /Gtk: cannot open display/
 
 const stringify = (val) => {
   return _.isObject(val) ? JSON.stringify(val) : val
@@ -36,6 +40,31 @@ function normalizeModuleOptions (options = {}) {
  */
 const isLinux = () => {
   return os.platform() === 'linux'
+}
+
+const isBrokenGtkDisplay = (str) => {
+  return isBrokenGtkDisplayRe.test(str)
+}
+
+const isPossibleLinuxWithIncorrectDisplay = () => {
+  return isLinux() && process.env.DISPLAY
+}
+
+const logBrokenGtkDisplayWarning = () => {
+  debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting XVFB')
+
+  // if we get this error, we are on Linux and DISPLAY is set
+  logger.warn(stripIndent`
+
+    ${logSymbols.warning} Warning: Cypress failed to start.
+
+    This is likely due to a misconfigured DISPLAY environment variable.
+
+    DISPLAY was set to: "${process.env.DISPLAY}"
+
+    Cypress will attempt to fix the problem and rerun.
+  `)
+  logger.warn()
 }
 
 function stdoutLineMatches (expectedLine, stdout) {
@@ -259,6 +288,12 @@ const util = {
   stdoutLineMatches,
 
   issuesUrl,
+
+  isBrokenGtkDisplay,
+
+  logBrokenGtkDisplayWarning,
+
+  isPossibleLinuxWithIncorrectDisplay,
 
   getGitHubIssueUrl (number) {
     la(is.positive(number), 'github issue should be a positive number', number)
