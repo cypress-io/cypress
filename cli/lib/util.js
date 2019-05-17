@@ -42,6 +42,13 @@ const isLinux = () => {
   return os.platform() === 'linux'
 }
 
+/**
+   * If the DISPLAY variable is set incorrectly, when trying to spawn
+   * Cypress executable we get an error like this:
+  ```
+  [1005:0509/184205.663837:WARNING:browser_main_loop.cc(258)] Gtk: cannot open display: 99
+  ```
+   */
 const isBrokenGtkDisplay = (str) => {
   return isBrokenGtkDisplayRe.test(str)
 }
@@ -302,16 +309,6 @@ const util = {
     return `${issuesUrl}/${number}`
   },
 
-  /**
-   * If the DISPLAY variable is set incorrectly, when trying to spawn
-   * Cypress executable we get an error like this:
-  ```
-  [1005:0509/184205.663837:WARNING:browser_main_loop.cc(258)] Gtk: cannot open display: 99
-  ```
-   */
-  isDisplayError (errorMessage) {
-    return isLinux() && errorMessage.includes('cannot open display:')
-  },
 }
 
 module.exports = util

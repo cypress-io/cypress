@@ -115,10 +115,12 @@ const runSmokeTest = (binaryDir, options) => {
     })
   }
 
-  const spawnInXvfb = () => {
+  const spawnInXvfb = (linuxWithDisplayEnv) => {
     return xvfb
     .start()
-    .then(spawn)
+    .then(() => {
+      return spawn(linuxWithDisplayEnv)
+    })
     .finally(xvfb.stop)
   }
 
@@ -126,7 +128,9 @@ const runSmokeTest = (binaryDir, options) => {
     debug('spawning, should retry on display problem?', Boolean(linuxWithDisplayEnv))
 
     return spawn(linuxWithDisplayEnv)
-    .catch({ code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR' }, spawn)
+    .catch({ code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR' }, () => {
+      return spawnInXvfb(linuxWithDisplayEnv)
+    })
   }
 
   if (needsXvfb) {
