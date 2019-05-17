@@ -24,18 +24,17 @@ exports['e2e iframes passes 1'] = `
     ✓ does not throw on cross origin iframes
     ✓ continues to inject even on 5xx responses
     ✓ injects on file server 4xx errors
-    ✓ injects on http request errors
     ✓ does not inject into xhr's
 
 
-  8 passing
+  7 passing
 
 
   (Results)
 
   ┌──────────────────────────────────┐
-  │ Tests:        8                  │
-  │ Passing:      8                  │
+  │ Tests:        7                  │
+  │ Passing:      7                  │
   │ Failing:      0                  │
   │ Pending:      0                  │
   │ Skipped:      0                  │
@@ -59,9 +58,9 @@ exports['e2e iframes passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ iframe_spec.coffee                        XX:XX        8        8        -        -        - │
+  │ ✔ iframe_spec.coffee                        XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        8        8        -        -        -  
+    All specs passed!                           XX:XX        7        7        -        -        -  
 
 
 `

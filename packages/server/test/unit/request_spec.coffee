@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_       = require("lodash")
 http    = require("http")
 Request = require("#{root}lib/request")
 
@@ -156,6 +157,87 @@ describe "lib/request", ->
       })
 
       expect(@push).to.be.calledOnce
+
+  context "#create", ->
+    beforeEach (done) ->
+      @hits = 0
+
+      @srv = http.createServer (req, res) =>
+        @hits++
+
+        switch req.url
+          when "/never-ends"
+            res.writeHead(200)
+            res.write("foo\n")
+          when "/econnreset"
+            req.socket.destroy()
+
+      @srv.listen(9988, done)
+
+    afterEach ->
+      @srv.close()
+
+    context "retries for streams", ->
+      it "does not retry on a timeout", (done) ->
+        opts = request.setDefaults({
+          url: "http://localhost:9988/never-ends"
+          timeout: 100
+        })
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        stream.on "error", (err) ->
+          expect(err.code).to.eq('ESOCKETTIMEDOUT')
+          expect(retries).to.eq(0)
+          done()
+
+      it "retries 4x on a connection reset", (done) ->
+        opts = {
+          url: "http://localhost:9988/econnreset"
+        }
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        stream.on "error", (err) ->
+          expect(err.code).to.eq('ECONNRESET')
+          expect(retries).to.eq(4)
+          done()
+
+    context "retries for promises", ->
+      it "does not retry on a timeout", ->
+        opts = {
+          url: "http://localhost:9988/never-ends"
+          timeout: 100
+        }
+
+        request.create(opts, true)
+        .then ->
+          throw new Error('should not reach')
+        .catch (err) =>
+          expect(err.error.code).to.eq('ESOCKETTIMEDOUT')
+          expect(@hits).to.eq(1)
+
+      it "retries 4x on a connection reset", ->
+        opts = {
+          url: "http://localhost:9988/econnreset"
+        }
+
+        request.create(opts, true)
+        .then ->
+          throw new Error('should not reach')
+        .catch (err) =>
+          expect(err.error.code).to.eq('ECONNRESET')
+          expect(@hits).to.eq(5)
 
   context "#sendPromise", ->
     beforeEach ->
@@ -709,7 +791,7 @@ describe "lib/request", ->
           }
         })
 
-  context '#sendStream', ->
+  context "#sendStream", ->
     beforeEach ->
       @fn = sinon.stub()
 
@@ -733,6 +815,7 @@ describe "lib/request", ->
       }
 
       request.sendStream(headers, @fn, options)
-      .then ->
+      .then (beginFn) ->
+        beginFn()
         expect(request.create).to.be.calledOnce
         expect(request.create).to.be.calledWith(options)

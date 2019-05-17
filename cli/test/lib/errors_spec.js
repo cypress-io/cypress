@@ -67,7 +67,7 @@ describe('errors', function () {
     })
 
     it('forms full text for invalid display error', () => {
-      return formErrorText(errors.invalidDisplayError, 'current message', 'prev message')
+      return formErrorText(errors.invalidSmokeTestDisplayError, 'current message', 'prev message')
       .then((text) => {
         snapshot('invalid display error', text)
       })
