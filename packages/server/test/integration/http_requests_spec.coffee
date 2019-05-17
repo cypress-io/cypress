@@ -2888,6 +2888,12 @@ describe "Routes", ->
         @setup("http://localhost:6565")
 
       it "makes requests to ipv6 when ipv4 fails", (done) ->
+        ## make sure that this test times out relatively fast
+        ## to ensure that requests are fast, the retrying functionality
+        ## does not extend them, and that the server closes quickly
+        ## due to the reduced keep alive timeout
+        @timeout(1500)
+
         dns.lookup "localhost", {all: true}, (err, addresses) =>
           return done(err) if err
 
@@ -2901,11 +2907,14 @@ describe "Routes", ->
             res.writeHead(200)
             res.end()
 
+          ## reduce this down from 5000ms to 100ms
+          ## so that our server closes much faster
+          server.keepAliveTimeout = 100
+
           ## start the server listening on ipv6 only
           ## for demo how to bind to localhost via ipv6 see project
           ## https://github.com/bahmutov/docker-ip6
           server.listen 6565, "::", =>
-
             @rp("http://localhost:6565/#/foo")
             .then (res) ->
               expect(res.statusCode).to.eq(200)
