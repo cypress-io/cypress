@@ -7,6 +7,7 @@ path         = require("path")
 send         = require("send")
 errors       = require("./errors")
 allowDestroy = require("./util/server_destroy")
+networkFailures = require("./util/network_failures")
 
 onRequest = (req, res, fileServerFolder) ->
   args = _.compact([
@@ -29,7 +30,7 @@ onRequest = (req, res, fileServerFolder) ->
   .on "error", (err) ->
     res.setHeader("x-cypress-file-server-error", true)
     res.statusCode = err.status
-    res.end()
+    res.end(networkFailures.get(file, err.status))
   .pipe(res)
 
 module.exports = {
