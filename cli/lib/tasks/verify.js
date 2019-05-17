@@ -100,6 +100,19 @@ const runSmokeTest = (binaryDir, options) => {
       { timeout: options.smokeTestTimeout }
     ))
     .catch(onSmokeTestError(smokeTestCommand, linuxWithDisplayEnv))
+    .then((result) => {
+      // TODO: when execa > 1.1 is released
+      // change this to `result.all` for both stderr and stdout
+      const smokeTestReturned = result.stdout
+
+      debug('smoke test stdout "%s"', smokeTestReturned)
+
+      if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
+        debug('Smoke test failed because could not find %d in:', random, result)
+
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(result.stderr || result.stdout)
+      }
+    })
   }
 
   const spawnInXvfb = () => {

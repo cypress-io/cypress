@@ -8,6 +8,7 @@ const { stripIndent } = require('common-tags')
 
 const { mockSpawn } = require('spawn-mock')
 const mockfs = require('mock-fs')
+const mockedEnv = require('mocked-env')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -56,7 +57,7 @@ context('lib/tasks/verify', () => {
     sinon.stub(_, 'random').returns('222')
 
     util.exec
-    .withArgs(executablePath, ['--smoke-test', '--ping=222', '--enable-logging'])
+    .withArgs(executablePath, ['--smoke-test', '--ping=222'])
     .resolves(spawnedProcess)
   })
 
@@ -285,6 +286,8 @@ context('lib/tasks/verify', () => {
   })
 
   describe('smoke test retries on bad display with our XVFB', () => {
+    let restore
+
     beforeEach(() => {
       createfs({
         alreadyVerified: false,
@@ -292,18 +295,24 @@ context('lib/tasks/verify', () => {
         packageVersion,
       })
 
+      restore = mockedEnv({
+        DISPLAY: 'test-display',
+      })
+
       util.exec.restore()
       sinon.spy(logger, 'warn')
     })
 
-    it('successfully retries with our XVFB on Linux', () => {
+    afterEach(() => {
+      restore()
+    })
+
+    it.only('successfully retries with our XVFB on Linux', () => {
       // initially we think the user has everything set
       xvfb.isNeeded.returns(false)
+      os.platform.returns('linux')
 
       sinon.stub(util, 'exec').callsFake(() => {
-        // using .callsFake to set platform to Linux
-        // to allow retry logic to work
-        os.platform.returns('linux')
         const firstSpawnError = new Error('')
 
         // this message contains typical Gtk error shown if X11 is incorrect
@@ -353,6 +362,7 @@ context('lib/tasks/verify', () => {
             again with
               some weird indent
         `
+
         util.exec.withArgs(executablePath).rejects(new Error(secondMessage))
 
         return Promise.reject(firstSpawnError)

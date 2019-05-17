@@ -32,7 +32,7 @@ function needsStderrPiped (needsXvfb) {
 
     (needsXvfb && isPlatform('linux')),
 
-    isPossibleLinuxWithIncorrectDisplay(),
+    util.isPossibleLinuxWithIncorrectDisplay(),
   ])
 }
 
