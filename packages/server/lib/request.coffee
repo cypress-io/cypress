@@ -297,7 +297,6 @@ createRetryingRequestStream = (opts = {}) ->
   } = opts
 
   req = null
-  didAbort = false
 
   delayStream = stream.PassThrough()
   reqBodyBuffer = streamBuffer()
@@ -315,7 +314,7 @@ createRetryingRequestStream = (opts = {}) ->
     ## if our request has been aborted
     ## in the time that we were waiting to retry
     ## then immediately bail
-    if didAbort
+    if retryStream.aborted
       return
 
     reqStream = r(opts)
@@ -335,7 +334,7 @@ createRetryingRequestStream = (opts = {}) ->
     ## forward the abort call to the underlying request
     retryStream.abort = ->
       debug('aborting', { requestId })
-      didAbort = true
+      retryStream.aborted = true
 
       reqStream.abort()
 
