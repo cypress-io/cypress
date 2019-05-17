@@ -62,7 +62,7 @@
   },
   "lint-staged": {
     "*.js": [
-      "precommit-lint"
+      "npm run precommit-lint"
     ]
   },
   "devDependencies": {
