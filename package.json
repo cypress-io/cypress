@@ -62,7 +62,7 @@
   },
   "lint-staged": {
     "*.js": [
-      "precommit-lint"
+      "npm run precommit-lint"
     ]
   },
   "devDependencies": {
@@ -130,7 +130,7 @@
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
-    "lint-staged": "4.3.0",
+    "lint-staged": "7.3.0",
     "lodash": "4.17.11",
     "make-empty-github-commit": "1.2.0",
     "mocha": "3.5.3",
