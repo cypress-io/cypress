@@ -369,6 +369,15 @@ describe "lib/util/args", ->
       expect(options.proxyBypassList).to.eq "localhost"
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
+    it "doesn't set a default NO_PROXY if NO_PROXY = ''", ->
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
+      process.env.NO_PROXY = ""
+      options = @setup()
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyBypassList).to.eq ""
+      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
     it "copies lowercase proxy vars to uppercase", ->
       process.env.http_proxy = "http://foo-bar.baz:123"
       process.env.https_proxy = "https://foo-bar.baz:123"
