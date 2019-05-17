@@ -187,7 +187,6 @@ module.exports = {
         @runElectron(mode, options)
         .then (pong) =>
           if not @isCurrentlyRunningElectron()
-            console.log(pong)
             return pong
 
           if pong is options.ping
