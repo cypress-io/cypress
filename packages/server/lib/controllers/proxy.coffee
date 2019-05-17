@@ -107,7 +107,6 @@ module.exports = {
 
     wantsInjection = null
     wantsSecurityRemoved = null
-    isEventStream = req.headers.accept is "text/event-stream"
 
     resContentTypeIs = (respHeaders, str) ->
       contentType = respHeaders["content-type"]
@@ -135,7 +134,7 @@ module.exports = {
         when "file"
           remoteUrl.startsWith(remoteState.origin)
 
-    setCookies = (value) =>
+    setCookies = (value) ->
       ## dont modify any cookies if we're trying to clear
       ## the initial cookie and we're not injecting anything
       return if (not value) and (not wantsInjection)
@@ -145,7 +144,7 @@ module.exports = {
 
       setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
-    setBody = (str, statusCode, headers) =>
+    setBody = (str, statusCode, headers) ->
       ## set the status to whatever the incomingRes statusCode is
       res.status(statusCode)
 
@@ -284,6 +283,7 @@ module.exports = {
       else
         if headers["x-cypress-file-server-error"]
           wantsInjection or= "partial"
+
         setBody(str, statusCode, headers)
 
     if obj = buffers.take(remoteUrl)

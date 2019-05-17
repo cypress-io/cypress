@@ -58,7 +58,8 @@ function streamBuffer (initialSize = 2048) {
           return this.push(bytes)
         }
 
-        // if there are no unread bytes, but the bufferer is still writing in, send an empty string
+        // if there are no unread bytes, but the bufferer
+        // is still writing in, send an empty string
         if (!finished) {
           debug('no unread bytes, sending empty string %o', { bytesRead, bytesWritten })
 
