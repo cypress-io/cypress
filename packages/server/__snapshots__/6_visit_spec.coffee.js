@@ -622,10 +622,11 @@ exports['e2e visit low responseTimeout, normal pageLoadTimeout fails when respon
   response timeouts result in an error
     1) handles no response errors on the initial visit
     2) handles no response errors when not initially visiting
+    3) fails after reducing the responseTimeout option
 
 
   0 passing
-  2 failing
+  3 failing
 
   1) response timeouts result in an error handles no response errors on the initial visit:
      CypressError: cy.visit() failed trying to load:
@@ -725,18 +726,67 @@ Error: ESOCKETTIMEDOUT
       at stack trace line
       at stack trace line
 
+  3) response timeouts result in an error fails after reducing the responseTimeout option:
+     CypressError: cy.visit() failed trying to load:
+
+http://localhost:3434/timeout?ms=1000
+
+We attempted to make an http request to this URL but the request failed without a response.
+
+We received this error at the network level:
+
+  > Error: ESOCKETTIMEDOUT
+
+Common situations why this would fail:
+  - you don't have internet access
+  - you forgot to run / boot your web server
+  - your web server isn't accessible
+  - you have weird network configuration settings on your computer
+
+The stack trace for this error is:
+
+Error: ESOCKETTIMEDOUT
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
 
 
 
   (Results)
 
   ┌─────────────────────────────────────────────────────────┐
-  │ Tests:        2                                         │
+  │ Tests:        3                                         │
   │ Passing:      0                                         │
-  │ Failing:      2                                         │
+  │ Failing:      3                                         │
   │ Pending:      0                                         │
   │ Skipped:      0                                         │
-  │ Screenshots:  2                                         │
+  │ Screenshots:  3                                         │
   │ Video:        true                                      │
   │ Duration:     X seconds                                 │
   │ Spec Ran:     visit_response_never_ends_failing_spec.js │
@@ -747,6 +797,7 @@ Error: ESOCKETTIMEDOUT
 
   - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors on the initial visit (failed).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors when not initially visiting (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- fails after reducing the responseTimeout option (failed).png (1280x720)
 
 
   (Video)
@@ -762,9 +813,9 @@ Error: ESOCKETTIMEDOUT
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_response_never_ends_failing_sp…     XX:XX        2        -        2        -        - │
+  │ ✖ visit_response_never_ends_failing_sp…     XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+    1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
 
 
 `

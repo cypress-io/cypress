@@ -129,7 +129,7 @@ describe "e2e visit", ->
       e2e.exec(@, {
         spec: "visit_response_never_ends_failing_spec.js",
         snapshot: true,
-        expectedExitCode: 2
+        expectedExitCode: 3
       })
 
   context "normal response timeouts", ->
