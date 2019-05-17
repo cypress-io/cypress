@@ -1,7 +1,6 @@
 const os = require('os')
 const Promise = require('bluebird')
 const Xvfb = require('@cypress/xvfb')
-const R = require('ramda')
 const { stripIndent } = require('common-tags')
 const debug = require('debug')('cypress:cli')
 const debugXvfb = require('debug')('cypress:xvfb')
@@ -26,6 +25,7 @@ module.exports = {
     debug('Starting XVFB')
 
     return xvfb.startAsync()
+    .return(null)
     .catch({ nonZeroExitCode: true }, throwFormErrorText(errors.nonZeroExitCodeXvfb))
     .catch((err) => {
       if (err.known) {
@@ -40,6 +40,10 @@ module.exports = {
     debug('Stopping XVFB')
 
     return xvfb.stopAsync()
+    .return(null)
+    .catch(() => {
+      // noop
+    })
   },
 
   isNeeded () {
@@ -75,7 +79,7 @@ module.exports = {
   // async method, resolved with Boolean
   verify () {
     return xvfb.startAsync()
-    .then(R.T)
+    .return(true)
     .catch((err) => {
       debug('Could not verify xvfb: %s', err.message)
 
