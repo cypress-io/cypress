@@ -9,7 +9,6 @@ import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
-import eventManager from '../lib/event-manager'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
