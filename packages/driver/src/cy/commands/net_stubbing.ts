@@ -65,7 +65,7 @@ interface RouteMatcherCompatOptions {
 }
 
 /** Types for Route Responses **/
-namespace CyHttpMessages {
+export namespace CyHttpMessages {
   interface BaseMessage {
     // as much stuff from `incomingmessage` as makes sense to serialize and send
     body: any
@@ -341,6 +341,23 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
       ...req,
       reply: function (responseHandler) {
         // TODO: this can only be called once
+        if (_.isNumber(responseHandler)) {
+          // responseHandler is a status code
+          const staticResponse : StaticResponse = {
+            statusCode: responseHandler
+          }
+
+          if (!_.isUndefined(arguments[1])) {
+            staticResponse.body = arguments[1]
+          }
+
+          if (!_.isUndefined(arguments[2])) {
+            staticResponse.headers = arguments[2]
+          }
+
+          responseHandler = staticResponse
+        }
+
         if (_.isFunction(responseHandler)) {
           // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
           requests[requestId] = {
@@ -400,7 +417,7 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
       continueFrame.res = {
         ..._.pick(userRes, SERIALIZABLE_RES_PROPS)
       }
-      _emit('http:request:continue', continueFrame)
+      _emit('http:response:continue', continueFrame)
     }
 
     const userRes : CyHttpMessages.IncomingHttpResponse = {

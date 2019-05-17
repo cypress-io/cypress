@@ -1,7 +1,9 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
+import concatStream from 'concat-stream'
 import debugModule from 'debug'
 import { IncomingMessage, ServerResponse } from 'http'
 import minimatch from 'minimatch'
+import { Readable } from 'stream'
 import url from 'url'
 // TODO: figure out the right way to make these types accessible in server and driver
 import {
@@ -246,6 +248,7 @@ interface BackendRequest {
   continueResponse?: Function
   req: ProxyIncomingMessage
   res: ServerResponse
+  sendResponseToDriver?: boolean
 }
 
 // TODO: clear on each test
@@ -263,7 +266,7 @@ export function onProxiedRequest(project: any, req: ProxyIncomingMessage, res: S
     return // don't call cb since we've satisfied the response here
   }
 
-  const requestId = _.uniqueId()
+  const requestId = _.uniqueId('interceptedRequest')
 
   const request : BackendRequest = {
     requestId,
@@ -282,17 +285,21 @@ export function onProxiedRequest(project: any, req: ProxyIncomingMessage, res: S
     requestId,
     req: _.extend(_.pick(req, SERIALIZABLE_REQ_PROPS), {
       url: req.proxiedUrl,
-      body: "not implemented... yet" // TODO: buffer the body here with the stream-buffer from net-retries
+      // body: "not implemented... yet" // TODO: buffer the body here with the stream-buffer from net-retries
     }) as CyHttpMessages.IncomingRequest
   }
 
-  _emit(project.server._socket, 'http:request:received', frame)
+  req.pipe(concatStream(reqBody => {
+    frame.req.body = reqBody.toString()
+    _emit(project.server._socket, 'http:request:received', frame)
+  }))
 }
 
 function _onRequestContinue(frame: NetEventFrames.HttpRequestContinue, socket: any) {
   const backendRequest = requests[frame.requestId]
 
   if (!backendRequest) {
+    return
     // TODO
   }
 
@@ -333,18 +340,26 @@ function _onRequestContinue(frame: NetEventFrames.HttpRequestContinue, socket: a
   }
 
   if (frame.hasResponseHandler) {
-    // TODO: send the request outbound, buffer the response, send it to the client
-    return
+    backendRequest.sendResponseToDriver = true
   }
+
+  backendRequest.continueRequest()
 }
 
-export function onProxiedResponse(project: any, req: ProxyIncomingMessage, resStream: ReadableStream, incomingRes: IncomingMessage, cb: Function) {
+export function onProxiedResponse(project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
   if (!req.requestId) {
     // original request was not intercepted, so response should not be either
     return
   }
 
   const backendRequest = requests[req.requestId]
+
+  if (!backendRequest.sendResponseToDriver) {
+    cb()
+  }
+
+  // this may get set back to `true` by another route
+  backendRequest.sendResponseToDriver = false
   backendRequest.continueResponse = cb
 
   const frame : NetEventFrames.HttpResponseReceived = {
@@ -352,11 +367,13 @@ export function onProxiedResponse(project: any, req: ProxyIncomingMessage, resSt
     requestId: backendRequest.requestId,
     res: _.extend(_.pick(incomingRes, SERIALIZABLE_RES_PROPS), {
       url: req.proxiedUrl,
-      body: "not implemented... yet" // TODO: buffer the body here with the stream-buffer from net-retries
     }) as CyHttpMessages.IncomingResponse
   }
 
-  _emit(project.server._socket, 'http:response:received', frame)
+  resStream.pipe(concatStream(resBody => {
+    frame.res.body = resBody.toString()
+    _emit(project.server._socket, 'http:response:received', frame)
+  }))
 }
 
 function _onResponseContinue(frame: NetEventFrames.HttpResponseContinue) {

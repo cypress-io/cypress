@@ -195,8 +195,44 @@ describe "src/cy/commands/net_stubbing", ->
           xhr.open("GET", "/abc123")
           xhr.send()
 
+    context "intercepting request", ->
+      it.only "receives the original request body in handler", (done) ->
+        cy.route "/aaa", (req) ->
+          expect(req.body).to.eq("foo-bar-baz")
+
+          req.reply(200, 'aight')
+          done()
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("POST", "/aaa")
+          xhr.send("foo-bar-baz")
+
+      it.only "can modify original request body and have it passed to next handler", (done) ->
+        cy.route "/post-only", (req, next) ->
+          expect(req.body).to.eq("foo-bar-baz")
+
+          req.body = 'quuz'
+
+          next()
+        .then ->
+          cy.route "/post-only", (req, next) ->
+            expect(req.body).to.eq('quuz')
+
+            req.body = 'quux'
+
+            next()
+        .then ->
+          cy.route "/post-only", (req) ->
+            expect(req.body).to.eq('quux')
+
+            req.reply()
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("POST", "/post-only")
+          xhr.send("foo-bar-baz")
+
     context "intercepting response", ->
-      it.only "receives the original response in handler", (done) ->
+      it "receives the original response in handler", (done) ->
         cy.route "/json-content-type", (req) ->
           req.reply (res) ->
             expect(res.body).to.eq('{}')

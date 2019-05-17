@@ -291,7 +291,7 @@ class Socket
 
         debug("backend:request %o", { eventName, args })
 
-        backendRequest = ->
+        backendRequest = =>
           switch eventName
             when "preserve:run:state"
               existingState = args[0]
@@ -308,7 +308,7 @@ class Socket
             when "write:file"
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "net"
-              netStubbing.onDriverEvent(socket, args...)
+              netStubbing.onDriverEvent(@, args...)
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"
