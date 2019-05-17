@@ -99,7 +99,7 @@
     "proxyquire": "2.1.0",
     "shelljs": "0.8.3",
     "sinon": "7.2.2",
-    "snap-shot-it": "7.0.1",
+    "snap-shot-it": "7.4.4",
     "spawn-mock": "1.0.0"
   },
   "files": [
