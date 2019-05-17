@@ -13,6 +13,13 @@ hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
+REQUEST_URL_OPTS = "auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers"
+.split(" ")
+
+VISIT_OPTS = "url log onBeforeLoad onLoad timeout requestTimeout"
+.split(" ")
+.concat(REQUEST_URL_OPTS)
+
 reset = (test = {}) ->
   knownCommandCausedInstability = false
 
@@ -238,6 +245,20 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
     catch err
       reject(err)
 
+normalizeTimeoutOptions = (options) ->
+  ## there are really two timeout values - pageLoadTimeout
+  ## and the underlying responseTimeout. for the purposes
+  ## of resolving resolving the url, we only care about
+  ## responseTimeout - since pageLoadTimeout is a driver
+  ## and browser concern. therefore we normalize the options
+  ## object and send 'responseTimeout' as options.timeout
+  ## for the backend.
+  _
+  .chain(options)
+  .pick(REQUEST_URL_OPTS)
+  .extend({ timeout: options.responseTimeout })
+  .value()
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
@@ -265,7 +286,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, "auth", "failOnStatusCode", "method", "body", "headers")
+      normalizeTimeoutOptions(options)
     )
     .then (resp = {}) ->
       switch
@@ -472,25 +493,34 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
 
+      consoleProps = {}
+
+      if not _.isEmpty(options)
+        consoleProps["Options"] = _.pick(options, VISIT_OPTS)
+
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
+        retryOnNetworkFailure: true
+        retryOnStatusCodeFailure: false
         method: 'GET'
         body: null
         headers: {}
         log: true
+        responseTimeout: config('responseTimeout')
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
       })
+
+      if options.retryOnStatusCodeFailure and not options.failOnStatusCode
+        $utils.throwErrByPath("visit.status_code_flags_invalid")
 
       if not isValidVisitMethod(options.method)
         $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
 
       if not _.isObject(options.headers)
         $utils.throwErrByPath("visit.invalid_headers")
-
-      consoleProps = {}
 
       if options.log
         message = url

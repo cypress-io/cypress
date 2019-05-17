@@ -32,6 +32,16 @@ firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
 
+setWindowProxy = (win) ->
+  if not process.env.HTTP_PROXY
+    return
+
+  return new Promise (resolve) ->
+    win.webContents.session.setProxy({
+      proxyRules: process.env.HTTP_PROXY
+      proxyBypassRules: process.env.NO_PROXY
+    }, resolve)
+
 module.exports = {
   reset: ->
     windows = {}
@@ -199,9 +209,7 @@ module.exports = {
     if options.contextMenu
       ## adds context menu with copy, paste, inspect element, etc
       contextMenu({
-        ## don't show inspect element until this fix is released
-        ## and we upgrade electron: https://github.com/electron/electron/pull/8688
-        showInspectElement: false
+        showInspectElement: true
         window: win
       })
 
@@ -280,9 +288,11 @@ module.exports = {
 
     ## enable our url to be a promise
     ## and wait for this to be resolved
-    Promise
-    .resolve(options.url)
-    .then (url) ->
+    Promise.join(
+      options.url,
+      setWindowProxy(win)
+    )
+    .spread (url) ->
       if options.type is "GITHUB_LOGIN"
         ## remove the GitHub warning banner about an outdated browser
         ## TODO: remove this once we have upgraded Electron or added native browser auth

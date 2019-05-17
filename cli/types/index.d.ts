@@ -22,6 +22,10 @@
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 
+// load ambient declaration for "cypress" NPM module
+// hmm, how to load it better?
+/// <reference path="./cypress-npm-api.d.ts" />
+
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
 declare const assert: Chai.AssertStatic
@@ -29,7 +33,7 @@ declare const assert: Chai.AssertStatic
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = "back" | "forward"
-  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "PATCH"
+  type HttpMethod = string
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
@@ -56,6 +60,20 @@ declare namespace Cypress {
     path: string
     isHeaded: boolean
     isHeadless: boolean
+  }
+
+  interface LocalStorage {
+    /**
+     * Called internally to clear `localStorage` in two situations.
+     *
+     * 1. Before every test, this is called with no argument to clear all keys.
+     * 2. On `cy.clearLocalStorage(keys)` this is called with `keys` as an argument.
+     *
+     * You should not call this method directly to clear `localStorage`; instead, use `cy.clearLocalStorage(key)`.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     */
+    clear: (keys?: string[]) => void
   }
 
   /**
@@ -168,6 +186,11 @@ declare namespace Cypress {
     browser: Browser
 
     /**
+     * Internal class for LocalStorage management.
+     */
+    LocalStorage: LocalStorage
+
+    /**
      * Returns all configuration objects.
      * @see https://on.cypress.io/config
      * @example
@@ -240,6 +263,16 @@ declare namespace Cypress {
      *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
      */
     env(object: ObjectLike): void
+
+    /**
+     * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
+     *
+     * @see https://on.cypress.io/iscy
+     * @example
+     *    Cypress.isCy(cy) // => true
+     */
+    isCy<TSubject = any>(obj: Chainable<TSubject>): obj is Chainable<TSubject>
+    isCy(obj: any): obj is Chainable
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -506,7 +539,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable<Clock>
+    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -766,7 +799,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/hash
      */
-    hash(options?: Partial<Loggable>): Chainable<string>
+    hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
      * Invoke a function on the previously yielded subject.
@@ -1462,19 +1495,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      * Custom events... If the following were `.triggerCustom`,
@@ -1484,7 +1517,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      * Custom events... If the following were `.triggerCustom`,
@@ -1504,7 +1537,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
 
     /**
      * Type into a DOM element.
@@ -1780,6 +1813,29 @@ declare namespace Cypress {
     whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
   }
 
+  interface Failable {
+    /**
+     * Whether to fail on response codes other than 2xx and 3xx
+     *
+     * @default {true}
+     */
+    failOnStatusCode: boolean
+
+    /**
+     * Whether Cypress should automatically retry status code errors under the hood
+     *
+     * @default {false}
+     */
+    retryOnStatusCodeFailure: boolean
+
+    /**
+     * Whether Cypress should automatically retry transient network errors under the hood
+     *
+     * @default {true}
+     */
+    retryOnNetworkFailure: boolean
+  }
+
   /**
    * Options that control how a command is logged in the Reporter
    */
@@ -2030,10 +2086,9 @@ declare namespace Cypress {
   /**
    * Full set of possible options for cy.request call
    */
-  interface RequestOptions extends Loggable, Timeoutable {
+  interface RequestOptions extends Loggable, Timeoutable, Failable {
     auth: object
     body: RequestBody
-    failOnStatusCode: boolean
     followRedirect: boolean
     form: boolean
     gzip: boolean
@@ -2163,7 +2218,47 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/visit
    */
-  interface VisitOptions extends Loggable, Timeoutable {
+  interface VisitOptions extends Loggable, Timeoutable, Failable {
+    /**
+     * The URL to visit. Behaves the same as the `url` argument.
+     */
+    url: string
+
+    /**
+     * The HTTP method to use in the visit. Can be `GET` or `POST`.
+     *
+     * @default "GET"
+     */
+    method: 'GET' | 'POST'
+
+    /**
+     * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-urlencoded` header.
+     *
+     * @example
+     *    cy.visit({
+     *      url: 'http://www.example.com/form.html',
+     *      method: 'POST',
+     *      body: {
+     *        "field1": "foo",
+     *        "field2": "bar"
+     *      }
+     *    })
+     */
+    body: RequestBody
+
+    /**
+     * An object that maps HTTP header names to values to be sent along with the request.
+     *
+     * @example
+     *    cy.visit({
+     *      url: 'http://www.example.com',
+     *      headers: {
+     *        'Accept-Language': 'en-US'
+     *      }
+     *    })
+     */
+    headers: { [header: string]: string }
+
     /**
      * Called before your page has loaded all of its resources.
      *
@@ -2177,13 +2272,6 @@ declare namespace Cypress {
      * @param {Window} contentWindow the remote page's window object
      */
     onLoad(win: Window): void
-
-    /**
-     * Whether to fail on response codes other than 2xx and 3xx
-     *
-     * @default {true}
-     */
-    failOnStatusCode: boolean
 
     /**
      * Cypress will automatically apply the right authorization headers
@@ -2682,7 +2770,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_match
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'match', value: string | RegExp): Chainable<Subject>
+    (chainer: 'match', value: RegExp): Chainable<Subject>
     /**
      * When the target is a non-function object, `.respondTo` asserts that the target has a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
      * @example
@@ -3182,7 +3270,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_match
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.match', value: string | RegExp): Chainable<Subject>
+    (chainer: 'not.match', value: RegExp): Chainable<Subject>
     /**
      * When the target is a non-function object, `.respondTo` asserts that the target does not have a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
      * @example

@@ -2,10 +2,12 @@ require("../spec_helper")
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+_           = require("lodash")
+DebugProxy  = require("@cypress/debugging-proxy")
+net         = require("net")
 path        = require("path")
 Promise     = require("bluebird")
 proxy       = require("../helpers/proxy")
-mitmProxy   = require("../helpers/mitm")
 httpServer  = require("../helpers/http_server")
 httpsServer = require("../helpers/https_server")
 
@@ -13,8 +15,6 @@ describe "Proxy", ->
   beforeEach ->
     Promise.join(
       httpServer.start()
-
-      # mitmProxy.start()
 
       httpsServer.start(8443)
 
@@ -91,6 +91,38 @@ describe "Proxy", ->
     .then (html) ->
       expect(html).to.include("https server")
 
+  it "retries 5 times", ->
+    @sandbox.spy(net, 'connect')
+
+    request({
+      strictSSL: false
+      url: "https://localhost:12344"
+      proxy: "http://localhost:3333"
+    })
+    .then ->
+      throw new Error("should not reach")
+    .catch ->
+      expect(net.connect).to.have.callCount(5)
+
+  it "closes outgoing connections when client disconnects", ->
+    @sandbox.spy(net, 'connect')
+
+    request({
+      strictSSL: false
+      url: "https://localhost:8444/replace"
+      proxy: "http://localhost:3333"
+      resolveWithFullResponse: true
+    })
+    .then (res) =>
+      ## ensure client has disconnected
+      expect(res.socket.destroyed).to.be.true
+      ## ensure the outgoing socket created for this connection was destroyed
+      socket = net.connect.getCalls()
+      .find (call) =>
+        call.args[0].port == "8444" && call.args[0].host == "localhost"
+      .returnValue
+      expect(socket.destroyed).to.be.true
+
   it "can boot the httpServer", ->
     request({
       strictSSL: false
@@ -139,3 +171,78 @@ describe "Proxy", ->
           url: "https://localhost:8443/"
           proxy: "http://localhost:3333"
         })
+
+  context "with an upstream proxy", ->
+    beforeEach ->
+      process.env.NO_PROXY = ""
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = "http://localhost:9001"
+
+      @upstream = new DebugProxy({
+        keepRequests: true
+      })
+
+      @upstream.start(9001)
+
+    it "passes a request to an https server through the upstream", ->
+      @upstream._onConnect = (domain, port) ->
+        expect(domain).to.eq('localhost')
+        expect(port).to.eq('8444')
+        return true
+
+      request({
+        strictSSL: false
+        url: "https://localhost:8444/"
+        proxy: "http://localhost:3333"
+      }).then (res) =>
+        expect(res).to.contain("https server")
+
+    it "uses HTTP basic auth when provided", ->
+      @upstream.setAuth({
+        username: 'foo'
+        password: 'bar'
+      })
+
+      @upstream._onConnect = (domain, port) ->
+        expect(domain).to.eq('localhost')
+        expect(port).to.eq('8444')
+        return true
+
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = "http://foo:bar@localhost:9001"
+
+      request({
+        strictSSL: false
+        url: "https://localhost:8444/"
+        proxy: "http://localhost:3333"
+      }).then (res) =>
+        expect(res).to.contain("https server")
+
+    it "closes outgoing connections when client disconnects", ->
+      @sandbox.spy(net, 'connect')
+
+      request({
+        strictSSL: false
+        url: "https://localhost:8444/replace"
+        proxy: "http://localhost:3333"
+        resolveWithFullResponse: true
+        forever: false
+      })
+      .then (res) =>
+        ## ensure client has disconnected
+        expect(res.socket.destroyed).to.be.true
+
+        ## ensure the outgoing socket created for this connection was destroyed
+        socket = net.connect.getCalls()
+        .find (call) =>
+          call.args[0].port == 9001 && call.args[0].host == "localhost"
+        .returnValue
+
+        new Promise (resolve) ->
+          socket.on 'close', =>
+            expect(socket.destroyed).to.be.true
+            resolve()
+
+    afterEach ->
+      @upstream.stop()
+      delete process.env.HTTP_PROXY
+      delete process.env.HTTPS_PROXY
+      delete process.env.NO_PROXY

@@ -1,11 +1,11 @@
-import { log } from '../log'
-import { FoundBrowser, Browser } from '../types'
-import { notInstalledErr } from '../errors'
-import * as execa from 'execa'
-import { normalize, join } from 'path'
-import { trim, tap } from 'ramda'
+import execa from 'execa'
 import { pathExists } from 'fs-extra'
 import { homedir } from 'os'
+import { join, normalize } from 'path'
+import { tap, trim } from 'ramda'
+import { notInstalledErr } from '../errors'
+import { log } from '../log'
+import { Browser, FoundBrowser } from '../types'
 
 function formFullAppPath(name: string) {
   const prefix = 'C:/Program Files (x86)/Google/Chrome/Application'

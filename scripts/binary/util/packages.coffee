@@ -130,6 +130,7 @@ npmInstallAll = (pathToPackages) ->
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
     npmInstall = _.partial(npmRun, ["install", "--only=production", "--quiet"])
+
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
       Promise
