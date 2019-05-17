@@ -122,7 +122,7 @@
     "gulp-typescript": "3.2.4",
     "hasha": "5.0.0",
     "human-interval": "0.1.6",
-    "husky": "0.14.3",
+    "husky": "2.3.0",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
     "js-codemod": "cpojer/js-codemod#29dafed",
