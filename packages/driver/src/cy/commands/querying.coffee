@@ -131,7 +131,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if selector.slice(1) in _.keys(cy.state("aliases"))
          toSelect = selector
       else
-         toSelect = selector.split(".")[0]
+         allParts = _.split(selector, '.')
+         toSelect = _.join(_.dropRight(allParts, 1), '.')
 
       if aliasObj = cy.getAlias(toSelect)
         {subject, alias, command} = aliasObj

@@ -41,8 +41,8 @@ create = (state) ->
       [alias, prop] = alias.split(".")
 
       if prop and not validAliasApiRe.test(prop)
-        if alias + "." + prop in _.keys(cy.state("aliases"))
-           [alias, prop] = [alias + "." + prop, null]
+        if _.join([alias, prop], '.') in _.keys(cy.state("aliases"))
+           [alias, prop] = [_.join([alias, prop], '.'), null]
         else
           $utils.throwErrByPath "get.alias_invalid", {
             args: { prop }
