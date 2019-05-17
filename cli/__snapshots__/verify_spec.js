@@ -159,7 +159,7 @@ Error: Cypress verification timed out.
 
 This command failed with the following output:
 
-/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222 --enable-logging
 
 ----------
 
@@ -181,7 +181,7 @@ Error: Cypress verification failed.
 
 This command failed with the following output:
 
-/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222 --enable-logging
 
 ----------
 
@@ -203,7 +203,7 @@ Error: Cypress verification failed.
 
 This command failed with the following output:
 
-/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222 --enable-logging
 
 ----------
 
@@ -383,4 +383,42 @@ Caught error trying to run XVFB: "test without xvfb"
 Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
+`
+
+exports['tried to verify twice, on the first try got the DISPLAY error'] = `
+Cypress failed to start.
+
+First, we have tried to start Cypress using your DISPLAY settings
+but encountered the following problem:
+
+----------
+
+[some noise here] Gtk: cannot open display: 987
+and maybe a few other lines here with weird indent
+
+----------
+
+Then we started our own XVFB and tried to start Cypress again, but
+got the following error:
+
+----------
+
+some other error
+again with
+some weird indent
+
+----------
+
+This is usually caused by a missing library or dependency.
+
+The error above should indicate which dependency is missing.
+
+[34mhttps://on.cypress.io/required-dependencies[39m
+
+If you are using Docker, we provide containers with all required dependencies installed.
+
+----------
+
+Platform: linux (Foo-OsVersion)
+Cypress Version: 1.2.3
 `
