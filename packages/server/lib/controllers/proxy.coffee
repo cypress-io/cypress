@@ -23,7 +23,7 @@ zlibOptions = {
 }
 
 isGzipError = (err) ->
-  _.keys(zlib.constants).includes(err.code)
+  Object.prototype.hasOwnProperty.call(zlib.constants, err.code)
 
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
