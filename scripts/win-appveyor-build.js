@@ -21,10 +21,6 @@ shell.set('-e') // any error is fatal
 const isRightBranch = () => {
   const branch = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH || process.env.APPVEYOR_REPO_BRANCH
 
-  console.log('head branch:', process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH)
-  console.log('repo branch:', process.env.APPVEYOR_REPO_BRANCH)
-  console.log('branch branch:', branch)
-
   return branch === 'develop'
 }
 
