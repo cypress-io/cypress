@@ -1,21 +1,31 @@
 bodyParser = require("body-parser")
 e2e = require("../support/helpers/e2e")
 
-HTTPS_PORT = 11112
-HTTP_PORT = 11113
+HTTPS_PORT = 11443
+HTTP_PORT = 11180
+
+getFormHtml = (formAttrs) =>
+  "<html><body><form action=\"/dump-body\" method=\"POST\" #{formAttrs}><input name=\"foo\" type=\"text\"/><input type=\"submit\"/></form></body></html>"
 
 onServer = (app) =>
-  app.use(bodyParser.urlencoded())
+  app.use(bodyParser.text({
+    type: '*/*' ## parse any content-type
+  }))
 
   app.get "/", (req, res) =>
     res
     .type('html')
-    .send('<html><body><form action="/dump-body" method="POST"><input name="foo" type="text"/><input type="submit"/></form></body></html>')
+    .send(getFormHtml())
+
+  app.get "/multipart-form-data", (req, res) =>
+    res
+    .type('html')
+    .send(getFormHtml('enctype="multipart/form-data"'))
 
   app.post "/dump-body", (req, res) =>
     res
     .type('html')
-    .send(JSON.stringify(req.body))
+    .send(req.body)
 
 describe "e2e <form> submissions", ->
   e2e.setup({
