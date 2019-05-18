@@ -1,6 +1,6 @@
 e2e = require("../support/helpers/e2e")
 
-describe "e2e form submissions", ->
+describe "e2e form submissions with jquery XHR POST", ->
   e2e.setup()
 
   it "passing", ->
