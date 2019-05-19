@@ -22,7 +22,7 @@ const normalizeEnvironmentProxy = () => {
     process.env.HTTPS_PROXY = process.env.HTTP_PROXY
   }
 
-  if (!process.env.NO_PROXY) {
+  if (!process.env.hasOwnProperty('NO_PROXY')) {
     // don't proxy localhost, to match Chrome's default behavior and user expectation
     process.env.NO_PROXY = 'localhost'
   }

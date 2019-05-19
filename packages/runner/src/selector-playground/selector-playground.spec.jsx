@@ -145,7 +145,7 @@ describe('<SelectorPlayground />', () => {
       expect(component.find(Tooltip).at(2)).to.have.prop('title', 'Copied!')
     })
 
-    it('sets tooltip text to "Oop, unable to copy" when it fails', () => {
+    it('sets tooltip text to "Oops, unable to copy" when it fails', () => {
       document.execCommand.returns(false)
       const component = mount(<SelectorPlayground model={model} />)
 
@@ -153,7 +153,7 @@ describe('<SelectorPlayground />', () => {
       expect(component.find(Tooltip).at(2)).to.have.prop('title', 'Oops, unable to copy')
     })
 
-    it('sets tooltip text to "Oop, unable to copy" when it throws an error', () => {
+    it('sets tooltip text to "Oops, unable to copy" when it throws an error', () => {
       document.execCommand.throws()
       const component = mount(<SelectorPlayground model={model} />)
 

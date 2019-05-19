@@ -6,3 +6,5 @@ module.exports = (mode, options) ->
       require("./run").run(options)
     when "interactive"
       require("./interactive").run(options)
+    when "smokeTest"
+      require("./smoke_test").run(options)

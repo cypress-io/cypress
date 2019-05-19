@@ -1,4 +1,23 @@
-exports['e2e iframes passes 1'] = `
+exports['e2e network error handling Cypress baseurl check tries 5 times in run mode 1'] = `
+Cypress could not verify that this server is running:
+
+  > http://never-gonna-exist.invalid
+
+We are verifying this server because it has been configured as your \`baseUrl\`.
+
+Cypress automatically waits until your server is accessible before running tests.
+
+We will try connecting to it 3 more times...
+We will try connecting to it 2 more times...
+We will try connecting to it 1 more time...
+
+Cypress failed to verify that your server is running.
+
+Please start this server and then run Cypress again.
+
+`
+
+exports['e2e network error handling Cypress retries HTTPS passthrough behind a proxy 1'] = `
 
 ====================================================================================================
 
@@ -7,42 +26,37 @@ exports['e2e iframes passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (iframe_spec.coffee)                                                       │
-  │ Searched:   cypress/integration/iframe_spec.coffee                                             │
+  │ Specs:      1 found (https_passthru_spec.js)                                                   │
+  │ Searched:   cypress/integration/https_passthru_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: iframe_spec.coffee...                                                           (1 of 1) 
+  Running: https_passthru_spec.js...                                                       (1 of 1) 
 
 
-  iframes
-    ✓ can snapshot iframes which arent loaded
-    ✓ can access nested iframes over http server
-    ✓ can access iframes over file server
-    ✓ does not throw on cross origin iframes
-    ✓ continues to inject even on 5xx responses
-    ✓ injects on file server 4xx errors
-    ✓ does not inject into xhr's
+  https passthru retries
+    ✓ retries when visiting a non-test domain
+    ✓ passes through the network error when it cannot connect to the proxy
 
 
-  7 passing
+  2 passing
 
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        7                  │
-  │ Passing:      7                  │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        true               │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     iframe_spec.coffee │
-  └──────────────────────────────────┘
+  ┌──────────────────────────────────────┐
+  │ Tests:        2                      │
+  │ Passing:      2                      │
+  │ Failing:      0                      │
+  │ Pending:      0                      │
+  │ Skipped:      0                      │
+  │ Screenshots:  0                      │
+  │ Video:        true                   │
+  │ Duration:     X seconds              │
+  │ Spec Ran:     https_passthru_spec.js │
+  └──────────────────────────────────────┘
 
 
   (Video)
@@ -58,9 +72,9 @@ exports['e2e iframes passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ iframe_spec.coffee                        XX:XX        7        7        -        -        - │
+  │ ✔ https_passthru_spec.js                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        7        7        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 
 `
