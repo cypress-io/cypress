@@ -46,7 +46,7 @@
     "lodash": "4.17.11",
     "lolex": "3.1.0",
     "methods": "1.1.2",
-    "method-override": "2.3.10",
+    "method-override": "3.0.0",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
     "mocha": "cypress-io/mocha#58f6eac05e664fc6b69aa9fba70f1f6b5531a900",

@@ -113,7 +113,7 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
     onElse,
   } = options
 
-  debug("received failing status code on request %o", {
+  debug("received status code on request %o", {
     requestId,
     statusCode: res.statusCode
   })
@@ -297,7 +297,6 @@ createRetryingRequestStream = (opts = {}) ->
   } = opts
 
   req = null
-  didAbort = false
 
   delayStream = stream.PassThrough()
   reqBodyBuffer = streamBuffer()
@@ -315,7 +314,7 @@ createRetryingRequestStream = (opts = {}) ->
     ## if our request has been aborted
     ## in the time that we were waiting to retry
     ## then immediately bail
-    if didAbort
+    if retryStream.aborted
       return
 
     reqStream = r(opts)
@@ -335,7 +334,7 @@ createRetryingRequestStream = (opts = {}) ->
     ## forward the abort call to the underlying request
     retryStream.abort = ->
       debug('aborting', { requestId })
-      didAbort = true
+      retryStream.aborted = true
 
       reqStream.abort()
 
@@ -439,7 +438,7 @@ setDefaults = (opts) ->
 
 module.exports = (options = {}) ->
   defaults = {
-    timeout: options.timeout ? 20000
+    timeout: options.timeout
     agent: agent
     ## send keep-alive with requests since Chrome won't send it in proxy mode
     ## https://github.com/cypress-io/cypress/pull/3531#issuecomment-476269041
@@ -582,6 +581,7 @@ module.exports = (options = {}) ->
       _.defaults options, {
         headers: {}
         jar: true
+        onBeforeReqInit: (fn) -> fn()
       }
 
       if not caseInsensitiveGet(options.headers, "user-agent") and (ua = headers["user-agent"])
@@ -612,29 +612,29 @@ module.exports = (options = {}) ->
           ## first set the existing jar cookies on the browser
           ## and then grab the cookies for the new url
           req.init = _.wrap req.init, (orig, opts) =>
-            self.setJarCookies(jar, automationFn)
-            .then ->
-              automationFn("get:cookies", {url: newUrl, includeHostOnly: true})
-            .then(convertToJarCookie)
-            .then (cookies) ->
-              setCookies(cookies, jar, null, newUrl)
-            .then ->
-              orig.call(req, opts)
+            options.onBeforeReqInit ->
+              self.setJarCookies(jar, automationFn)
+              .then ->
+                automationFn("get:cookies", {url: newUrl, includeHostOnly: true})
+              .then(convertToJarCookie)
+              .then (cookies) ->
+                setCookies(cookies, jar, null, newUrl)
+              .then ->
+                orig.call(req, opts)
 
           followRedirect.call(req, incomingRes)
-
-      send = =>
-        debug("sending request as stream %o", merge(options))
-
-        str = @create(options)
-        str.getJar = -> options.jar
-        str
 
       automationFn("get:cookies", {url: options.url, includeHostOnly: true})
       .then(convertToJarCookie)
       .then (cookies) ->
         setCookies(cookies, options.jar, options.headers, options.url)
-      .then(send)
+      .then =>
+        return =>
+          debug("sending request as stream %o", merge(options))
+
+          str = @create(options)
+          str.getJar = -> options.jar
+          str
 
     sendPromise: (headers, automationFn, options = {}) ->
       _.defaults options, {

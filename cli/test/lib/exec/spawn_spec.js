@@ -57,7 +57,8 @@ describe('lib/exec/spawn', function () {
           '--cwd',
           cwd,
         ], {
-          foo: 'bar',
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
         })
       })
     })
@@ -75,7 +76,8 @@ describe('lib/exec/spawn', function () {
           '--cwd',
           cwd,
         ], {
-          foo: 'bar',
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
         })
       })
     })
@@ -137,6 +139,12 @@ describe('lib/exec/spawn', function () {
       it('retries with xvfb if fails with display exit code', function () {
         this.spawnedProcess.on.withArgs('close').onFirstCall().yieldsAsync(1)
         this.spawnedProcess.on.withArgs('close').onSecondCall().yieldsAsync(0)
+
+        const buf1 = '[some noise here] Gtk: cannot open display: 987'
+
+        this.spawnedProcess.stderr.on
+        .withArgs('data')
+        .yields(buf1)
 
         os.platform.returns('linux')
 

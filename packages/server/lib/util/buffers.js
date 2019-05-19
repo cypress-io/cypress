@@ -58,7 +58,7 @@ module.exports = {
     if (buffer) {
       buffers = _.without(buffers, buffer)
 
-      debug('found request buffer %o', _.pick(buffer, 'url', 'originalUrl'))
+      debug('found request buffer %o', { buffer: _.pick(buffer, 'url', 'originalUrl'), bufferCount: buffers.length })
     }
 
     return buffer
