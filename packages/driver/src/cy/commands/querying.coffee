@@ -9,6 +9,8 @@ $expr = $.expr[":"]
 
 $contains = $expr.contains
 
+validAliasApiRe = /^(\d+|all)$/
+
 restoreContains = ->
   $expr.contains = $contains
 
@@ -126,7 +128,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set(obj)
 
-      ## We want to strip everything after the first '.'
+      ## We want to strip everything after the last '.'
       ## only when it is potentially a number or 'all'
       if selector.slice(1) in _.keys(cy.state("aliases"))
          toSelect = selector
@@ -182,7 +184,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             ## if this is a route command
             when command.get("name") is "route"
-              alias = _.compact([alias, selector.split(".")[1]]).join(".")
+              allParts = _.split(selector, ".")
+              if selector.slice(1) in _.keys(cy.state("aliases"))
+                index = null
+              else
+                index = _.last(allParts)
+              alias = _.compact([alias, index]).join(".")
               requests = cy.getRequestsByAlias(alias) ? null
               log(requests, "route")
               return requests
