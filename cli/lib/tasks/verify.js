@@ -3,9 +3,10 @@ const chalk = require('chalk')
 const Listr = require('listr')
 const debug = require('debug')('cypress:cli')
 const verbose = require('@cypress/listr-verbose-renderer')
-const { stripIndent, stripIndents } = require('common-tags')
+const { stripIndent } = require('common-tags')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
+const path = require('path')
 
 const { throwFormErrorText, errors } = require('../errors')
 const util = require('../util')
@@ -37,18 +38,9 @@ const checkExecutable = (binaryDir) => {
 }
 
 const runSmokeTest = (binaryDir, options) => {
-  debug('running smoke test')
-  const cypressExecPath = state.getPathToExecutable(binaryDir)
+  let executable = state.getPathToExecutable(binaryDir)
 
-  debug('using Cypress executable %s', cypressExecPath)
-
-  const onXvfbError = (err) => {
-    debug('caught xvfb error %s', err.message)
-
-    return throwFormErrorText(errors.missingXvfb)(`Caught error trying to run XVFB: "${err.message}"`)
-  }
-
-  const onSmokeTestError = (smokeTestCommand, runningWithOurXvfb, prevDisplayError) => {
+  const onSmokeTestError = (smokeTestCommand, linuxWithDisplayEnv) => {
     return (err) => {
       debug('Smoke test failed:', err)
 
@@ -59,42 +51,16 @@ const runSmokeTest = (binaryDir, options) => {
       if (err.timedOut) {
         debug('error timedOut is true')
 
-        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, true))(errMessage)
+        return throwFormErrorText(
+          errors.smokeTestFailure(smokeTestCommand, true)
+        )(errMessage)
       }
 
-      if (!runningWithOurXvfb && !prevDisplayError && util.isDisplayError(errMessage)) {
-        // running without our XVFB
-        // for the very first time
-        // and we hit invalid display error
-        debug('Smoke test hit Linux display problem: %s', errMessage)
+      if (linuxWithDisplayEnv && util.isBrokenGtkDisplay(errMessage)) {
+        util.logBrokenGtkDisplayWarning()
 
-        logger.warn(`${stripIndents`
-
-          ${logSymbols.warning} Warning: we have caught a display problem:
-
-          ${stripIndents(errMessage)}
-
-          We will attempt to spin our XVFB server and verify again.
-        `}\n`)
-
-        const err = new Error(errMessage)
-
-        err.displayError = true
-        err.platform = 'linux'
-        throw err
+        return throwFormErrorText(errors.invalidSmokeTestDisplayError)(errMessage)
       }
-
-      if (prevDisplayError) {
-        debug('this was our 2nd attempt at verifying')
-        debug('first we tried with user-given DISPLAY')
-        debug('now we have tried spinning our own XVFB')
-        debug('and yet it still has failed with')
-        debug(errMessage)
-
-        return throwFormErrorText(errors.invalidDisplayError)(errMessage, prevDisplayError.message)
-      }
-
-      debug('throwing missing dependency error')
 
       return throwFormErrorText(errors.missingDependency)(errMessage)
     }
@@ -108,21 +74,32 @@ const runSmokeTest = (binaryDir, options) => {
    * Spawn Cypress running smoke test to check if all operating system
    * dependencies are good.
    */
-  const spawn = (runningWithOurXvfb, prevDisplayError) => {
+  const spawn = (linuxWithDisplayEnv) => {
     const random = _.random(0, 1000)
-    const args = ['--smoke-test', `--ping=${random}`, '--enable-logging']
-    const smokeTestCommand = `${cypressExecPath} ${args.join(' ')}`
+    const args = ['--smoke-test', `--ping=${random}`]
 
+    process.env.ELECTRON_ENABLE_LOGGING = true
+
+    if (options.dev) {
+      executable = 'node'
+      args.unshift(
+        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+      )
+    }
+
+    const smokeTestCommand = `${executable} ${args.join(' ')}`
+
+    debug('running smoke test')
+    debug('using Cypress executable %s', executable)
     debug('smoke test command:', smokeTestCommand)
 
     return Promise.resolve(util.exec(
-      cypressExecPath,
+      executable,
       args,
       { timeout: options.smokeTestTimeout }
     ))
-    .catch(onSmokeTestError(smokeTestCommand, runningWithOurXvfb, prevDisplayError))
+    .catch(onSmokeTestError(smokeTestCommand, linuxWithDisplayEnv))
     .then((result) => {
-
       // TODO: when execa > 1.1 is released
       // change this to `result.all` for both stderr and stdout
       const smokeTestReturned = result.stdout
@@ -137,27 +114,34 @@ const runSmokeTest = (binaryDir, options) => {
     })
   }
 
-  const spinXvfbAndVerify = (prevDisplayError) => {
-    return xvfb.start()
-    .catch(onXvfbError)
-    .then(spawn.bind(null, true, prevDisplayError))
-    .finally(() => {
-      return xvfb.stop()
-      .catch(onXvfbError)
+  const spawnInXvfb = (linuxWithDisplayEnv) => {
+    return xvfb
+    .start()
+    .then(() => {
+      return spawn(linuxWithDisplayEnv)
+    })
+    .finally(xvfb.stop)
+  }
+
+  const userFriendlySpawn = (linuxWithDisplayEnv) => {
+    debug('spawning, should retry on display problem?', Boolean(linuxWithDisplayEnv))
+
+    return spawn(linuxWithDisplayEnv)
+    .catch({ code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR' }, () => {
+      return spawnInXvfb(linuxWithDisplayEnv)
     })
   }
 
   if (needsXvfb) {
-    return spinXvfbAndVerify()
+    return spawnInXvfb()
   }
 
-  return spawn()
-  .catch({ displayError: true, platform: 'linux' }, (e) => {
-    debug('there was a display error')
-    debug('will try spinning our own XVFB and verify Cypress')
+  // if we are on linux and there's already a DISPLAY
+  // set, then we may need to rerun cypress after
+  // spawning our own XVFB server
+  const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
 
-    return spinXvfbAndVerify(e)
-  })
+  return userFriendlySpawn(linuxWithDisplayEnv)
 }
 
 function testBinary (version, binaryDir, options) {
@@ -248,10 +232,15 @@ const start = (options = {}) => {
   let binaryDir = state.getBinaryDir(packageVersion)
 
   _.defaults(options, {
+    dev: false,
     force: false,
     welcomeMessage: true,
     smokeTestTimeout: 10000,
   })
+
+  if (options.dev) {
+    return runSmokeTest('', options)
+  }
 
   const parseBinaryEnvVar = () => {
     const envBinaryPath = util.getEnv('CYPRESS_RUN_BINARY')

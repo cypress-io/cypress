@@ -8,6 +8,7 @@ const { stripIndent } = require('common-tags')
 
 const { mockSpawn } = require('spawn-mock')
 const mockfs = require('mock-fs')
+const mockedEnv = require('mocked-env')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -56,7 +57,7 @@ context('lib/tasks/verify', () => {
     sinon.stub(_, 'random').returns('222')
 
     util.exec
-    .withArgs(executablePath, ['--smoke-test', '--ping=222', '--enable-logging'])
+    .withArgs(executablePath, ['--smoke-test', '--ping=222'])
     .resolves(spawnedProcess)
   })
 
@@ -285,7 +286,13 @@ context('lib/tasks/verify', () => {
   })
 
   describe('smoke test retries on bad display with our XVFB', () => {
+    let restore
+
     beforeEach(() => {
+      restore = mockedEnv({
+        DISPLAY: 'test-display',
+      })
+
       createfs({
         alreadyVerified: false,
         executable: mockfs.file({ mode: 0777 }),
@@ -296,14 +303,16 @@ context('lib/tasks/verify', () => {
       sinon.spy(logger, 'warn')
     })
 
+    afterEach(() => {
+      restore()
+    })
+
     it('successfully retries with our XVFB on Linux', () => {
       // initially we think the user has everything set
       xvfb.isNeeded.returns(false)
+      sinon.stub(util, 'isPossibleLinuxWithIncorrectDisplay').returns(true)
 
       sinon.stub(util, 'exec').callsFake(() => {
-        // using .callsFake to set platform to Linux
-        // to allow retry logic to work
-        os.platform.returns('linux')
         const firstSpawnError = new Error('')
 
         // this message contains typical Gtk error shown if X11 is incorrect
@@ -325,7 +334,9 @@ context('lib/tasks/verify', () => {
       return verify.start().then(() => {
         expect(util.exec).to.have.been.calledTwice
         // user should have been warned
-        expect(logger.warn).to.have.been.calledOnce
+        expect(logger.warn).to.have.been.calledWithMatch(
+          'This is likely due to a misconfigured DISPLAY environment variable.'
+        )
       })
     })
 
@@ -333,10 +344,12 @@ context('lib/tasks/verify', () => {
       // initially we think the user has everything set
       xvfb.isNeeded.returns(false)
 
+      sinon.stub(util, 'isPossibleLinuxWithIncorrectDisplay').returns(true)
+
       sinon.stub(util, 'exec').callsFake(() => {
+        os.platform.returns('linux')
         expect(xvfb.start).to.not.have.been.called
 
-        os.platform.returns('linux')
         const firstSpawnError = new Error('')
 
         // this message contains typical Gtk error shown if X11 is incorrect
@@ -349,10 +362,12 @@ context('lib/tasks/verify', () => {
 
         // the second time it runs, it fails for some other reason
         const secondMessage = stripIndent`
+          [some noise here] Gtk: cannot open display: 987
           some other error
             again with
               some weird indent
         `
+
         util.exec.withArgs(executablePath).rejects(new Error(secondMessage))
 
         return Promise.reject(firstSpawnError)
@@ -360,14 +375,15 @@ context('lib/tasks/verify', () => {
 
       return verify.start().then(() => {
         throw new Error('Should have failed')
-      }, (e) => {
+      })
+      .catch((e) => {
         expect(util.exec).to.have.been.calledTwice
         // second time around we should have called XVFB
         expect(xvfb.start).to.have.been.calledOnce
         expect(xvfb.stop).to.have.been.calledOnce
 
         // user should have been warned
-        expect(logger.warn).to.have.been.calledOnce
+        expect(logger.warn).to.have.been.calledWithMatch('DISPLAY was set to: "test-display"')
 
         snapshot('tried to verify twice, on the first try got the DISPLAY error', e.message)
       })
@@ -511,6 +527,7 @@ context('lib/tasks/verify', () => {
   describe('on linux', () => {
     beforeEach(() => {
       xvfb.isNeeded.returns(true)
+
       createfs({
         alreadyVerified: false,
         executable: mockfs.file({ mode: 0777 }),
@@ -533,10 +550,17 @@ context('lib/tasks/verify', () => {
     it('logs error and exits when starting xvfb fails', () => {
       const err = new Error('test without xvfb')
 
-      err.stack = 'xvfb? no dice'
-      xvfb.start.rejects(err)
+      xvfb.start.restore()
 
-      return verify.start().catch((err) => {
+      err.nonZeroExitCode = true
+      err.stack = 'xvfb? no dice'
+      sinon.stub(xvfb._xvfb, 'startAsync').rejects(err)
+
+      return verify.start()
+      .then(() => {
+        throw new Error('should have thrown')
+      })
+      .catch((err) => {
         expect(xvfb.stop).to.be.calledOnce
 
         logger.error(err)
@@ -590,7 +614,7 @@ context('lib/tasks/verify', () => {
         customDir: '/real/custom',
       })
       util.exec
-      .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222', '--enable-logging'])
+      .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222'])
       .resolves(spawnedProcess)
 
       return verify.start().then(() => {
@@ -598,7 +622,8 @@ context('lib/tasks/verify', () => {
         snapshot('valid CYPRESS_RUN_BINARY 1', normalize(stdout.toString()))
       })
     })
-    ;['darwin', 'linux', 'win32'].forEach((platform) => {
+
+    _.each(['darwin', 'linux', 'win32'], (platform) => {
       return it('can log error to user', () => {
         process.env.CYPRESS_RUN_BINARY = '/custom/'
         os.platform.returns(platform)

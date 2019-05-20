@@ -17,14 +17,14 @@ describe('util', () => {
     sinon.stub(logger, 'error')
   })
 
-  context('.isDisplayError', () => {
+  context('.isBrokenGtkDisplay', () => {
     it('detects only GTK message', () => {
       os.platform.returns('linux')
       const text = '[some noise here] Gtk: cannot open display: 99'
 
-      expect(util.isDisplayError(text)).to.be.true
+      expect(util.isBrokenGtkDisplay(text)).to.be.true
       // and not for the other messages
-      expect(util.isDisplayError('display was set incorrectly')).to.be.false
+      expect(util.isBrokenGtkDisplay('display was set incorrectly')).to.be.false
     })
   })
 
