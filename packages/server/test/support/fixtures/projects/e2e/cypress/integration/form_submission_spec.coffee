@@ -56,6 +56,11 @@ describe "<form> submissions", =>
     it "image/jpeg", =>
       testUpload("sample.jpg")
 
+    ## https://github.com/cypress-io/cypress/issues/4253
+    it "large application/pdf", =>
+      testUpload("bigger-sample.pdf")
+
+    ## https://github.com/cypress-io/cypress/issues/4240
     it "large image/jpeg", =>
       ## 16MB image, too big to include with git repo
       cy.exec("curl https://test-page-speed.cypress.io/files/huge-image.jpg -o cypress/fixtures/huge-image.jpg")
