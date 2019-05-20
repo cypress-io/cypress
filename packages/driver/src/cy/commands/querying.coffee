@@ -126,9 +126,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set(obj)
 
+      if _.indexOf(selector, ".") == -1
+        toSelect = selector
       ## We want to strip everything after the last '.'
       ## only when it is potentially a number or 'all'
-      if selector.slice(1) in _.keys(cy.state("aliases"))
+      else if selector.slice(1) in _.keys(cy.state("aliases"))
          toSelect = selector
       else
          allParts = _.split(selector, '.')
