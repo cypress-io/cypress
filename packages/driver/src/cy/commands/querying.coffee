@@ -9,8 +9,6 @@ $expr = $.expr[":"]
 
 $contains = $expr.contains
 
-validAliasApiRe = /^(\d+|all)$/
-
 restoreContains = ->
   $expr.contains = $contains
 
