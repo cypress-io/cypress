@@ -283,6 +283,10 @@ const _providerCommitParams = function () {
     appveyor: {
       sha: env.APPVEYOR_REPO_COMMIT,
       // since APPVEYOR_REPO_BRANCH will be the target branch on a PR
+      // we need to use PULL_REQUEST_HEAD_REPO_BRANCH if it exists.
+      // e.g. if you have a PR: develop <- my-feature-branch
+      // my-feature-branch is APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH
+      // develop           is APPVEYOR_REPO_BRANCH
       branch: env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH || env.APPVEYOR_REPO_BRANCH,
       message: join('\n', env.APPVEYOR_REPO_COMMIT_MESSAGE, env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED),
       authorName: env.APPVEYOR_REPO_COMMIT_AUTHOR,
