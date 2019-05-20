@@ -13,7 +13,7 @@ const snapshot = (...args) => {
   return _snapshot(...args)
 }
 
-describe.only('packages', () => {
+describe('packages', () => {
   it('can copy files from package.json', async () => {
     mockfs({
       'packages': {
@@ -26,18 +26,10 @@ describe.only('packages', () => {
     })
 
     await packages.copyAllToDist(os.tmpdir())
-    const recurse = (dir) => {
 
-      return _.extend({}, ..._.map(dir, (val, key) => {
-        return {
-          [key]: recurse(val._items),
-        }
-      }))
-    }
+    const files = getFs()
 
-    const dir = JSON.stringify(recurse({ files: mockfs.getMockRoot() }).files, null, ' ')
-
-    snapshot(dir)
+    snapshot(files)
   })
 })
 
@@ -45,3 +37,37 @@ afterEach(() => {
   mockfs.restore()
 })
 
+const getFs = () => {
+  const cwd = process.cwd().split('/').slice(1)
+
+  const recurse = (dir, d) => {
+
+    return _.extend({}, ..._.map(dir, (val, key) => {
+      let nextDepth = null
+
+      if (d !== null) {
+
+        if (d === -1) {
+          nextDepth = d + 1
+        } else if (!(d > cwd.length) && key === cwd[d]) {
+          key = 'foo'
+          nextDepth = d + 1
+
+          if (d === cwd.length - 1) {
+            return { '[cwd]': recurse(val._items, nextDepth) }
+          }
+
+          return recurse(val._items, nextDepth)
+        } else {
+          nextDepth = null
+        }
+      }
+
+      return {
+        [key]: recurse(val._items, nextDepth),
+      }
+    }))
+  }
+
+  return JSON.stringify(recurse({ root: mockfs.getMockRoot() }, -1).root, null, ' ')
+}
