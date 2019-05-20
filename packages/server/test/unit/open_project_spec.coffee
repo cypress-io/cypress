@@ -67,7 +67,6 @@ describe "lib/open_project", ->
         expect(@browser.isHeaded).to.be.true
         expect(@browser.isHeadless).to.be.false
 
-<<<<<<< HEAD
     it "executes 'spec:start' event if in interactive mode", ->
       openProject.create("/project/root", {}, { isTextTerminal: false })
       sinon.stub(serverEvents, "execute")
@@ -127,7 +126,7 @@ describe "lib/open_project", ->
       openProject.__reset()
       openProject.close().then ->
         expect(project.close).not.to.be.called
-=======
+
   context "#getSpecChanges", ->
     beforeEach ->
       @watcherStub = {
@@ -163,4 +162,3 @@ describe "lib/open_project", ->
       @watcherStub.on.withArgs("add").yields()
       openProject.getSpecChanges({ onChange }).then =>
         expect(onChange).to.be.calledOnce
->>>>>>> develop
