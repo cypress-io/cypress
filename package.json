@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
@@ -12,6 +12,7 @@
     "start": "node ./cli/bin/cypress open --dev --global",
     "cypress:open": "node ./cli/bin/cypress open --dev --global",
     "cypress:run": "node ./cli/bin/cypress run --dev",
+    "cypress:verify": "node ./cli/bin/cypress verify --dev",
     "cypress:open:debug": "node ./scripts/debug.js cypress:open",
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
     "dev": "node ./scripts/start.js",
@@ -63,7 +64,7 @@
   },
   "lint-staged": {
     "*.js": [
-      "precommit-lint"
+      "npm run precommit-lint"
     ]
   },
   "devDependencies": {
@@ -123,7 +124,7 @@
     "gulp-typescript": "3.2.4",
     "hasha": "5.0.0",
     "human-interval": "0.1.6",
-    "husky": "0.14.3",
+    "husky": "2.3.0",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
     "js-codemod": "cpojer/js-codemod#29dafed",
@@ -131,7 +132,7 @@
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
-    "lint-staged": "4.3.0",
+    "lint-staged": "7.3.0",
     "lodash": "4.17.11",
     "make-empty-github-commit": "1.2.0",
     "mocha": "^6.1.4",
@@ -149,7 +150,7 @@
     "ramda": "0.24.1",
     "shelljs": "0.8.3",
     "sinon": "7.3.2",
-    "snap-shot-it": "7.0.1",
+    "snap-shot-it": "7.4.4",
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",

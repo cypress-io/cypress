@@ -282,7 +282,8 @@ const _providerCommitParams = function () {
   return {
     appveyor: {
       sha: env.APPVEYOR_REPO_COMMIT,
-      branch: env.APPVEYOR_REPO_BRANCH,
+      // since APPVEYOR_REPO_BRANCH will be the target branch on a PR
+      branch: env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH || env.APPVEYOR_REPO_BRANCH,
       message: join('\n', env.APPVEYOR_REPO_COMMIT_MESSAGE, env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED),
       authorName: env.APPVEYOR_REPO_COMMIT_AUTHOR,
       authorEmail: env.APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL,
