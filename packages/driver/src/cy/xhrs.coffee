@@ -24,7 +24,11 @@ xhrNotWaitedOnByIndex = (state, alias, index, prop) ->
 create = (state) ->
   return {
     getIndexedXhrByAlias: (alias, index) ->
-      [str, prop] = alias.split(".")
+      allParts = _.split(alias, '.')
+      if _.size(allParts) > 1
+        [str, prop] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
+      else
+        [str, prop] = [alias, null]
 
       if prop
         if prop is "request"
@@ -38,15 +42,27 @@ create = (state) ->
       xhrNotWaitedOnByIndex(state, str, index, "responses")
 
     getRequestsByAlias: (alias) ->
-      [alias, prop] = alias.split(".")
+      console.log(alias)
+      allParts = _.split(alias, '.')
+      if _.size(allParts) > 1
+        if alias in _.keys(cy.state("aliases"))
+          [alias, prop] = [alias, null]
+        else # potentially valid prop
+          console.log("hello?")
+          [alias, prop] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
+      else
+        [alias, prop] = [alias, null]
+
+      console.log("getRequestsByAlias")
+      console.log(allParts)
+      console.log(_.keys(cy.state("aliases")))
+      console.log(alias in _.keys(cy.state("aliases")))
+      console.log([alias, prop])
 
       if prop and not validAliasApiRe.test(prop)
-        if _.join([alias, prop], '.') in _.keys(cy.state("aliases"))
-           [alias, prop] = [_.join([alias, prop], '.'), null]
-        else
-          $utils.throwErrByPath "get.alias_invalid", {
-            args: { prop }
-          }
+        $utils.throwErrByPath "get.alias_invalid", {
+          args: { prop }
+        }
 
       if prop is "0"
         $utils.throwErrByPath "get.alias_zero", {
