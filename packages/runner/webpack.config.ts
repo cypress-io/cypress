@@ -25,7 +25,7 @@ const config: webpack.Configuration = {
   },
   resolve: {
     alias: {
-      'react': path.resolve('./node_modules/react')
+      'react': require.resolve('react')
     },
     extensions: [ '.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
   },

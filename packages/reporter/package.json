@@ -2,7 +2,7 @@
   "name": "@packages/reporter",
   "version": "0.0.0",
   "private": true,
-  "main": "src/main",
+  "main": "src/main.jsx",
   "scripts": {
     "postinstall": "echo '@packages/reporter needs: npm run build'",
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
@@ -24,7 +24,7 @@
     "cypress:run": "node ../../scripts/cypress run --project ."
   },
   "files": [
-    "dist"
+    "lib"
   ],
   "devDependencies": {
     "@babel/core": "^7.4.4",

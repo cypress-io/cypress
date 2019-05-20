@@ -1,7 +1,7 @@
 {
   "name": "@packages/runner",
   "version": "0.0.0",
-  "main": "src",
+  "main": "src/index.js",
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/runner needs: npm run build'",
