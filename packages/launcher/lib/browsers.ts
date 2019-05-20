@@ -29,12 +29,20 @@ export const browsers: Browser[] = [
     binary: 'google-chrome-canary'
   },
   {
-    name: 'edge',
+    name: 'edgeCanary',
     family: 'chrome',
-    displayName: 'Edge',
+    displayName: 'Edge Canary',
     versionRegex: /Microsoft Edge Canary (\S+)/,
     profile: true,
-    binary: 'edge'
+    binary: 'edge-canary'
+  },
+  {
+    name: 'edgeDev',
+    family: 'chrome',
+    displayName: 'Edge Dev',
+    versionRegex: /Microsoft Edge Dev (\S+)/,
+    profile: true,
+    binary: 'edge-dev'
   }
 ]
 
