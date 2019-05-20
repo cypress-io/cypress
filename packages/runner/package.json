@@ -1,7 +1,7 @@
 {
   "name": "@packages/runner",
   "version": "0.0.0",
-  "main": "src",
+  "main": "src/index.js",
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/runner needs: npm run build'",
@@ -11,7 +11,7 @@
     "build-prod": "webpack --mode=production",
     "prewatch": "npm run check-deps-pre",
     "watch": "webpack --watch",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",

@@ -11,7 +11,7 @@
     "pretest": "npm run check-deps-pre && npm run lint",
     "test": "npm run unit",
     "unit": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "preclean": "npm run check-deps-pre",

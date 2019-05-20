@@ -10,7 +10,7 @@
     "register.js"
   ],
   "scripts": {
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "clean-deps": "rm -rf node_modules"
   }
 }

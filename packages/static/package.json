@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "echo '@packages/static needs: npm run build'",
     "clean-deps": "rm -rf node_modules",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "prebuild": "npm run check-deps-pre",
     "build": "gulp build",

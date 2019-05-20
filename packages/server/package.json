@@ -8,7 +8,7 @@
     "start": "node ../../cli/bin/cypress open --dev --global",
     "dev": "node index.js",
     "repl": "node repl.js",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "build-js": "tsc",

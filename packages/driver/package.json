@@ -7,7 +7,7 @@
     "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee",
     "cypress:open": "node ../../scripts/cypress open --project ./test",
     "cypress:run": "node ../../scripts/cypress run --project ./test",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules"
   },

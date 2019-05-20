@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "echo '@packages/example needs: npm run build'",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre && npm run lint",

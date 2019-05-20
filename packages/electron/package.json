@@ -6,13 +6,13 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "echo '@packages/electron needs: npm run build'",
-    "prestart": "npm run check-deps-pre",
+    "prestart": "yarn check",
     "start": "./bin/cypress-electron",
-    "pretest": "npm run check-deps-pre",
+    "pretest": "yarn check",
     "test": "mocha --compilers coffee:@packages/coffee/register",
-    "prebuild": "npm run check-deps-pre",
+    "prebuild": "yarn check",
     "build": "node ./bin/cypress-electron --install",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules"
   },

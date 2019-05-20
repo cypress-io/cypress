@@ -7,6 +7,15 @@
   "engines": {
     "node": ">=8.9.3"
   },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/cypress-example-kitchensink",
+      "**/@cypress/react-tooltip"
+    ]
+  },
   "scripts": {
     "prestart": "npm run check-deps-pre",
     "start": "node ./cli/bin/cypress open --dev --global",
@@ -21,15 +30,15 @@
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "decaffeinate": "decaffeinate --use-cs2 --loose",
     "decaffeinate-bulk": "bulk-decaffeinate",
-    "check-deps": "node ./scripts/check-deps.js --verbose",
-    "check-deps-pre": "node ./scripts/check-deps.js --verbose --prescript",
+    "check-deps": "yarn check",
+    "check-deps-pre": "yarn check",
     "prebuild": "npm run check-deps-pre && npm run all prebuild",
     "build": "npm run all build",
     "all": "node ./scripts/run.js",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "link": "node ./scripts/link-packages.js",
     "install-filtered": "npm run all install -- --package $(node ./scripts/check-deps.js --list)",
-    "postinstall": "echo 'root postinstall' && npm run link && npm run all install && npm run build",
+    "postinstall": "echo 'root postinstall' && npm run build",
     "clean-deps": "npm run all clean-deps && rm -rf node_modules",
     "docker": "./scripts/run-docker-local.sh",
     "lint-js": "eslint --fix scripts/*.js packages/ts/*.js cli/*.js cli/**/*.js",
@@ -53,6 +62,7 @@
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "binary-release": "node ./scripts/binary.js release",
     "test-scripts": "mocha -r packages/coffee/register -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
+    "test-scripts-watch": "npm run test-scripts -- --watch --watch-extensions 'ts,js,coffee'",
     "test-s3-api": "node -r ./packages/coffee/register -r ./packages/ts/register scripts/binary/s3-api-demo.ts",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js",
@@ -108,7 +118,7 @@
     "eslint-plugin-cypress-dev": "2.1.0",
     "eslint-plugin-mocha": "5.3.0",
     "eslint-plugin-react": "7.12.4",
-    "execa": "1.0.0",
+    "execa": "^1.0.0",
     "execa-wrap": "1.4.0",
     "filesize": "4.1.2",
     "find-package-json": "1.2.0",
@@ -133,10 +143,11 @@
     "lint-staged": "4.3.0",
     "lodash": "4.17.11",
     "make-empty-github-commit": "1.2.0",
-    "mocha": "3.5.3",
+    "mocha": "^6.1.4",
     "mocha-banner": "1.1.2",
     "mocha-junit-reporter": "1.18.0",
     "mocha-multi-reporters": "1.1.7",
+    "mock-fs": "^4.9.0",
     "obfuscator": "0.5.4",
     "parse-github-repo-url": "1.4.1",
     "plist": "2.1.0",
@@ -178,5 +189,8 @@
     "runner",
     "spies",
     "stubs"
-  ]
+  ],
+  "dependencies": {
+    "node-sass": "^4.12.0"
+  }
 }

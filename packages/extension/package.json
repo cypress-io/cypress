@@ -15,7 +15,7 @@
     "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run test -- --watch",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean": "gulp clean",
     "clean-deps": "rm -rf node_modules"

@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "npm run check-deps-pre",
     "start": "node index.js",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps": "yarn check",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
