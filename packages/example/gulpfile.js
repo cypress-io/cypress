@@ -4,15 +4,15 @@ const gulpClean = require('gulp-clean')
 const RevAll = require('gulp-rev-all')
 
 const assets = () => {
-  const revAll = new RevAll({
+  const revAllOpts = {
     dontGlobal: ['.ico', 'fira.css', 'javascript-logo.png'],
     dontRenameFile: ['.ico', '.html', /fonts/],
     dontSearchFile: ['.js'],
     debug: false,
-  })
+  }
 
   return gulp.src('./app/**/*')
-  .pipe(revAll.revision())
+  .pipe(RevAll.revision(revAllOpts))
   .pipe(gulp.dest('build'))
 }
 

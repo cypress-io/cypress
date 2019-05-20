@@ -472,17 +472,19 @@ describe "src/cy/commands/querying", ->
       cy.on "internal:commandRetry", _.after 2, ->
         cy.$$("body").append(missingEl)
 
-      ## in this example our test has been running 200ms
-      ## but the timeout is below this amount, and it
-      ## still passes because the total running time is
-      ## not factored in (which is correct)
+      defaultCommandTimeout = Cypress.config('defaultCommandTimeout')
+
+      ## in this example our test has been running 300ms
+      ## but the default command timeout is below this amount,
+      ## and the test still passes because the timeout is only
+      ## into each command and not the total overall running time
       cy
-        .wait(400)
-        .get("#missing-el", {timeout: 225})
+        .wait(defaultCommandTimeout + 100)
+        .get("#missing-el", { timeout: defaultCommandTimeout + 50 })
         .then ->
           ## it should reset the timeout back
-          ## to 200 after successfully finished get method
-          expect(cy.timeout()).to.eq(200)
+          ## to 200 after successfully finishing 'get' method
+          expect(cy.timeout()).to.eq(defaultCommandTimeout)
 
     it "cancels existing promises", (done) ->
       cy.stub(Cypress.runner, "stop")
@@ -1203,6 +1205,29 @@ describe "src/cy/commands/querying", ->
 
       cy.contains("form", "click me").then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
+
+    it "searches all els in comma separated filter", ->
+      cy.contains("a,button", "Naruto").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("a")
+
+      cy.contains("a,button", "Boruto").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("button")
+
+    it "searches all els in comma separated filter with spaces", ->
+      aText = "Naruto"
+      bText = "Boruto"
+
+      cy.contains("a, button", aText).then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("a")
+        expect($el.text()).to.eq(aText)
+
+      cy.contains("a, button", bText).then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("button")
+        expect($el.text()).to.eq(bText)
 
     it "favors input type=submit", ->
       input = cy.$$("#input-type-submit input")
