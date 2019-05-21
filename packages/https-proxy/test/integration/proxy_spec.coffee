@@ -254,7 +254,9 @@ describe "Proxy", ->
         resolveWithFullResponse: true
         forever: false
       })
-      .catch (res) =>
+      .then =>
+        throw new Error('should not succeed')
+      .catch { message: 'Error: socket hang up' }, =>
         expect(createProxyConn).to.not.be.called
         expect(createSocket).to.be.calledWith({
           port: @proxy._sniPort
