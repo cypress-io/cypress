@@ -440,7 +440,7 @@ class Server
               ## this will allow us to listen to `str`'s `end` event by putting it in flowing mode
               responseBuffer = stream.PassThrough({
                 ## buffer forever - node's default is only to buffer 16kB
-                highWaterMark: Infinity
+                highWaterMark: Number.MAX_SAFE_INTEGER
               })
 
               str.pipe(responseBuffer)
