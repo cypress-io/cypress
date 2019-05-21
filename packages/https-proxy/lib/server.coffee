@@ -31,7 +31,7 @@ class Server
     ## https://github.com/cypress-io/cypress/issues/3192
     browserSocket.setNoDelay(true)
 
-    debug("Writing browserSocket connection headers %o", { url: req.url })
+    debug("Writing browserSocket connection headers %o", { url: req.url, headLength: _.get(head, 'length'), headers: req.headers })
 
     browserSocket.on "error", (err) =>
       ## TODO: shouldn't we destroy the upstream socket here?
@@ -62,6 +62,8 @@ class Server
       @_onFirstHeadBytes(req, browserSocket, data, options)
 
   _onFirstHeadBytes: (req, browserSocket, head, options) ->
+    debug("Got first head bytes %o", { url: req.url, head: _.chain(head).invoke('toString').slice(0, 64).join('').value() })
+
     browserSocket.pause()
 
     if odc = options.onDirectConnection
