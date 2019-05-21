@@ -2,6 +2,8 @@
 
 const os = require('os')
 const _ = require('lodash')
+const path = require('path')
+const proxyquire = require('proxyquire')
 const mockfs = require('mock-fs')
 const _snapshot = require('snap-shot-it')
 
@@ -63,6 +65,35 @@ describe('transformRequires', () => {
 
     snapshot(getFs())
   })
+
+  it('can find and replace symlink requires on win32', async () => {
+    const { transformRequires } = proxyquire('../../../binary/util/transform-requires', { path: path.win32 })
+    const buildRoot = 'build/linux/Cypress/resources/app'
+
+    mockfs({
+      [buildRoot]: { 'packages': {
+        'foo': {
+          'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
+          'src': { 'main.js': new Buffer('console.log()') },
+          'lib': { 'foo.js': /*js*/`require("@packages/bar/src/main")${''}` },
+        },
+        'bar': {
+          'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
+          'src': { 'main.js': new Buffer('console.log()') },
+          'lib': { 'foo.js': `require("@packages/foo/lib/somefoo")${''}` },
+          'node_modules': { 'no-search.js': '' },
+          'dist': { 'no-search.js': '' },
+        },
+      },
+      },
+    })
+
+    await transformRequires(buildRoot)
+
+    console.dir(getFs(), { depth: null })
+
+    snapshot(getFs())
+  })
 })
 
 afterEach(() => {
@@ -105,5 +136,5 @@ const getFs = () => {
     }))
   }
 
-  return JSON.stringify(recurse({ root: mockfs.getMockRoot() }, -1).root, null, ' ')
+  return recurse({ root: mockfs.getMockRoot() }, -1).root
 }

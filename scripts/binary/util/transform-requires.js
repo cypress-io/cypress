@@ -33,7 +33,7 @@ const transformRequires = async function (buildResourcePath) {
       const pkg = match[2]
 
       const pkgPath = path.join(buildRoot, `packages/${pkg}`)
-      const replaceWith = path.relative(path.dirname(item), pkgPath)
+      const replaceWith = path.relative(path.dirname(item), pkgPath).replace(/\\/g, '/')
 
       console.log('resolve:', chalk.grey(pkgPath), '\nfrom:', chalk.grey(item))
       console.log(chalk.yellow(`@packages/${pkg}`), '->', chalk.green(replaceWith))
