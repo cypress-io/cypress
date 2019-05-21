@@ -45,8 +45,6 @@ describe "driver/src/cypress/index", ->
         expect(err.backend).to.be.true
         expect(err.stack).not.to.include("From previous event")
 
-        done()
-
   context ".isCy", ->
     it "returns true on cy, cy chainable", ->
       expect(Cypress.isCy(cy)).to.be.true
