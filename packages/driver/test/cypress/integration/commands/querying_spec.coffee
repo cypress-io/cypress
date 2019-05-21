@@ -732,18 +732,17 @@ describe "src/cy/commands/querying", ->
           expect(@lastLog.get("$el").get(0)).not.to.be.ok
 
       it "logs route aliases", ->
-        cy
-          .visit("http://localhost:3500/fixtures/jquery.html")
-          .server()
-          .route(/users/, {}).as("getUsers")
-          .window().then { timeout: 2000 }, (win) ->
-            win.$.get("/users")
-          .get("@getUsers").then ->
-            expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
-              message: "@getUsers"
-              referencesAlias: {name: "getUsers"}
-              aliasType: "route"
-            }
+        cy.visit("http://localhost:3500/fixtures/jquery.html")
+        cy.server()
+        cy.route(/users/, {}).as("get.users")
+        cy.window().then { timeout: 2000 }, (win) ->
+          win.$.get("/users")
+        cy.get("@get.users").then ->
+          expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
+            message: "@get.users"
+            referencesAlias: {name: "get.users"}
+            aliasType: "route"
+          }
 
       it "logs primitive aliases", (done) ->
         cy.on "log:added", (attrs, log) ->
@@ -885,6 +884,15 @@ describe "src/cy/commands/querying", ->
             .get("@getUsers").then (xhr) ->
               expect(xhr.url).to.include "/users"
 
+        it "handles dots in alias name", ->
+          cy.server()
+          cy.route(/users/, {}).as("get.users")
+          cy.visit("http://localhost:3500/fixtures/jquery.html")
+          cy.window().then { timeout: 2000 }, (win) ->
+            win.$.get("/users")
+          cy.get("@get.users").then (xhr) ->
+            expect(xhr.url).to.include "/users"
+
         it "returns null if no xhr is found", ->
           cy
             .server()
@@ -907,6 +915,20 @@ describe "src/cy/commands/querying", ->
               expect(xhrs).to.be.an("array")
               expect(xhrs[0].url).to.include "/users?num=1"
               expect(xhrs[1].url).to.include "/users?num=2"
+
+        it "returns an array of xhrs when dots in alias name", ->
+          cy.visit("http://localhost:3500/fixtures/jquery.html")
+          cy.server()
+          cy.route(/users/, {}).as("get.users")
+          cy.window().then { timeout: 2000 }, (win) ->
+            Promise.all([
+              win.$.get("/users", {num: 1})
+              win.$.get("/users", {num: 2})
+            ])
+          cy.get("@get.users.all").then (xhrs) ->
+            expect(xhrs).to.be.an("array")
+            expect(xhrs[0].url).to.include "/users?num=1"
+            expect(xhrs[1].url).to.include "/users?num=2"
 
         it "returns the 1st xhr", ->
           cy
@@ -933,6 +955,18 @@ describe "src/cy/commands/querying", ->
               ])
             .get("@getUsers.2").then (xhr2) ->
               expect(xhr2.url).to.include "/users?num=2"
+
+        it "returns the 2nd xhr when dots in alias", ->
+          cy.visit("http://localhost:3500/fixtures/jquery.html")
+          cy.server()
+          cy.route(/users/, {}).as("get.users")
+          cy.window().then { timeout: 2000 }, (win) ->
+            Promise.all([
+              win.$.get("/users", {num: 1})
+              win.$.get("/users", {num: 2})
+            ])
+          cy.get("@get.users.2").then (xhr2) ->
+            expect(xhr2.url).to.include "/users?num=2"
 
         it "returns the 3rd xhr as null", ->
           cy
