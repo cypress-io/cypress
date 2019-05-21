@@ -29,3 +29,8 @@ Cypress.Commands.add "logOut", ->
 
 Cypress.Commands.add "shouldBeLoggedOut", ->
   cy.contains(".main-nav a", "Log In")
+
+Cypress.Commands.add "setAppStore", (options = {}) ->
+  cy.window()
+  .then (win) ->
+    win.AppStore.set(options)

@@ -83,7 +83,7 @@ describe "lib/util/ci_provider", ->
     })
     expectsCommitParams({
       sha: "repoCommit"
-      branch: "repoBranch"
+      branch: "appveyorPullRequestHeadRepoBranch"
       message: "repoCommitMessage"
       authorName: "repoCommitAuthor"
       authorEmail: "repoCommitAuthorEmail"
@@ -587,9 +587,43 @@ describe "lib/util/ci_provider", ->
     expectsCiParams(null)
     expectsCommitParams(null)
 
+  it "azure", ->
+    resetEnv = mockedEnv({
+      # these two variables tell us it is Azure CI
+      TF_BUILD: "true"
+      AZURE_HTTP_USER_AGENT: "VSTS_5e0090d5-c5b9-4fab-8fd8-ce288e9fb666_build_2_0"
+
+      BUILD_BUILDID: "buildId"
+      BUILD_BUILDNUMBER: "buildNumber"
+      BUILD_CONTAINERID: "containerId"
+      BUILD_REPOSITORY_URI: "buildRepositoryUri"
+
+      BUILD_SOURCEVERSION: "commit"
+      BUILD_SOURCEBRANCHNAME: "branch"
+      BUILD_SOURCEVERSIONMESSAGE: "message"
+      BUILD_SOURCEVERSIONAUTHOR: "name"
+      BUILD_REQUESTEDFOREMAIL: "email"
+    }, {clear: true})
+
+    expectsName("azure")
+    expectsCiParams({
+      buildBuildid: "buildId"
+      buildBuildnumber: "buildNumber"
+      buildContainerid: "containerId"
+      buildRepositoryUri: "buildRepositoryUri"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+      message: "message"
+      authorName: "name"
+      authorEmail: "email"
+    })
+
   it "teamfoundation", ->
     resetEnv = mockedEnv({
       TF_BUILD: "true"
+      TF_BUILD_BUILDNUMBER: "CIBuild_20130613.6"
 
       BUILD_BUILDID: "buildId"
       BUILD_BUILDNUMBER: "buildNumber"
