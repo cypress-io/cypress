@@ -9,7 +9,7 @@ function drain (stream) {
   let chunk
 
   while ((chunk = stream.read())) {
-    buf += chunk
+    buf += chunk.toString()
   }
 
   return buf
@@ -111,6 +111,37 @@ describe('lib/util/stream_buffer', function () {
 
       done()
     })
+  })
+
+  it('can handle a massive req body', function (done) {
+    const size = 16 * 1024 // 16 kb
+
+    const body = Buffer.alloc(size, '!')
+    const sb = streamBuffer.streamBuffer()
+    const ws = fs.createWriteStream('/dev/null')
+
+    const pt = new stream.PassThrough()
+
+    pt.pipe(sb).pipe(ws)
+
+    pt.write(body)
+    pt.write(body)
+
+    const reader = sb.reader()
+
+    pt.on('end', () => {
+      const buf = drain(reader)
+
+      expect(buf.length).to.eq(body.length * 2)
+
+      expect(buf).to.eq(body.toString().repeat(2))
+      done()
+    })
+
+    pt.end()
+
+    expect(sb._buffer().length).to.eq(16384)
+
   })
 
 })
