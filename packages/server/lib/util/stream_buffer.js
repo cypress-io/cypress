@@ -1,13 +1,13 @@
+const _ = require('lodash')
 const debug = require('debug')('cypress:server:stream_buffer')
 const stream = require('stream')
-const through2 = require('through2')
 
 function streamBuffer (initialSize = 2048) {
   let buffer = Buffer.allocUnsafe(initialSize)
   let bytesWritten = 0
   let finished = false
 
-  const onChunk = (chunk, enc, cb) => {
+  const onWrite = (chunk, enc, cb) => {
     if (chunk.length + bytesWritten > buffer.length) {
       let newBufferLength = buffer.length
 
@@ -30,44 +30,51 @@ function streamBuffer (initialSize = 2048) {
 
     bytesWritten += chunk.copy(buffer, bytesWritten)
 
-    return cb(null, chunk)
+    cb()
   }
 
-  const onFlush = (cb) => {
+  const onFinal = (cb) => {
+    debug('_final called')
     finished = true
     cb()
   }
 
-  const bufferer = through2(onChunk, onFlush)
+  const bufferer = new stream.Writable({
+    write: onWrite,
+    final: onFinal,
+  })
+
   const readers = []
 
   bufferer.reader = () => {
     let bytesRead = 0
+    const readerId = _.uniqueId('sbuf-reader')
 
     const readable = new stream.Readable({
       read (size = initialSize) {
         // if there are unread bytes in the buffer, send up to bytesWritten back
         if (bytesRead < bytesWritten) {
-          const chunkLength = Math.min(size, bytesWritten)
-          const bytes = buffer.slice(bytesRead, chunkLength)
+          const chunkLength = Math.min(size, bytesWritten - bytesRead)
+          const bytes = buffer.slice(bytesRead, bytesRead + chunkLength)
 
-          debug('reading unread bytes from buffer %o', { bytesRead, bytesWritten, readChunkLength: bytes.length, chunkLength, size })
+          debug('reading unread bytes from buffer %o', { readerId, bytesRead, bytesWritten, readChunkLength: bytes.length, chunkLength, size })
 
           bytesRead += bytes.length
 
+          // TODO: what happens if we don't push?
           return this.push(bytes)
         }
 
         // if there are no unread bytes, but the bufferer
         // is still writing in, send an empty string
         if (!finished) {
-          debug('no unread bytes, sending empty string %o', { bytesRead, bytesWritten })
+          debug('no unread bytes, sending empty string %o', { readerId, bytesRead, bytesWritten })
 
           return this.push('')
         }
 
         // if it's finished and there are no unread bytes, EOF
-        debug('buffered stream EOF')
+        debug('buffered stream EOF %o', { readerId })
         this.push(null)
       },
     })
@@ -78,9 +85,7 @@ function streamBuffer (initialSize = 2048) {
   }
 
   bufferer.unpipeAll = () => {
-    readers.forEach((reader) => {
-      reader.unpipe() // unpipes from all destinations
-    })
+    _.invokeMap(readers, 'unpipe')
   }
 
   bufferer._buffer = () => {

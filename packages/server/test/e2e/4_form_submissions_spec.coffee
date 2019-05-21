@@ -92,7 +92,7 @@ describe "e2e <form> submissions", ->
       snapshot: true
       expectedExitCode: 0
       # exit: false
-      # browser: "chrome"
+      # headed: true
     })
 
   it "passes with http on localhost", ->
@@ -103,4 +103,6 @@ describe "e2e <form> submissions", ->
       spec: "form_submission_spec.coffee"
       snapshot: true
       expectedExitCode: 0
+      # exit: false
+      # headed: true
     })

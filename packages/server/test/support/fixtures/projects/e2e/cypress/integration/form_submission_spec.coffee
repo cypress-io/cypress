@@ -38,14 +38,14 @@ describe "<form> submissions", =>
     .contains('hello world')
 
   context "can submit a multipart/form-data form with attachments", =>
-    testUpload = (fixturePath) ->
+    testUpload = (fixturePath, containsOpts) ->
       cy.visit("/multipart-with-attachment?fixturePath=#{fixturePath}")
       .get("input[type=file]")
       .setFile(fixturePath)
       .get("input[type=submit]")
       .click()
       .document()
-      .contains('files match')
+      .contains('files match', containsOpts)
 
     it "image/png", =>
       testUpload("../../static/javascript-logo.png")
@@ -65,4 +65,6 @@ describe "<form> submissions", =>
       ## 16MB image, too big to include with git repo
       cy.exec("curl https://test-page-speed.cypress.io/files/huge-image.jpg -o cypress/fixtures/huge-image.jpg")
 
-      testUpload("huge-image.jpg")
+      testUpload("huge-image.jpg", {
+        timeout: 120000
+      })
