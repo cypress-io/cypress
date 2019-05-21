@@ -217,7 +217,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         try
           $el = cy.$$(selector, options.withinSubject)
         catch e
-          e.onFail = -> options._log.error(e)
+          e.onFail = -> if options.log is false then e else options._log.error(e)
           throw e
 
         ## if that didnt find anything and we have a within subject
