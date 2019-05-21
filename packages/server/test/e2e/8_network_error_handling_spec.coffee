@@ -268,6 +268,10 @@ describe "e2e network error handling", ->
       delete process.env.HTTP_PROXY
       delete process.env.NO_PROXY
 
+    afterEach ->
+      if @debugProxy
+        @debugProxy.stop()
+
     it "baseurl check tries 5 times in run mode", ->
       e2e.exec(@, {
         config: {
@@ -359,9 +363,11 @@ describe "e2e network error handling", ->
             ## server as expected
             return true
 
-      new DebugProxy({
+      @debugProxy = new DebugProxy({
         onConnect
       })
+
+      @debugProxy
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
@@ -382,9 +388,11 @@ describe "e2e network error handling", ->
       onConnect = sinon.spy ->
         true
 
-      debugProxy = new DebugProxy({
+      @debugProxy = new DebugProxy({
         onConnect
       })
+
+      @debugProxy
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
