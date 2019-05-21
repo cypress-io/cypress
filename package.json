@@ -79,6 +79,7 @@
     "@types/debug": "4.1.4",
     "@types/execa": "0.7.2",
     "@types/fs-extra": "3.0.0",
+    "@types/glob": "^7.1.1",
     "@types/lodash": "4.14.122",
     "@types/mocha": "2.2.48",
     "@types/node": "11.12.0",

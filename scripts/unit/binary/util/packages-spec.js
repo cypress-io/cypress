@@ -6,6 +6,7 @@ const mockfs = require('mock-fs')
 const _snapshot = require('snap-shot-it')
 
 const packages = require('../../../binary/util/packages')
+const { transformRequires } = require('../../../binary/util/transform-requires')
 
 const snapshot = (...args) => {
   mockfs.restore()
@@ -31,6 +32,37 @@ describe('packages', () => {
 
     snapshot(files)
   })
+
+})
+describe('transformRequires', () => {
+
+  it('can find and replace symlink requires', async () => {
+    const buildRoot = 'build/linux/Cypress/resources/app'
+
+    mockfs({
+      [buildRoot]: { 'packages': {
+        'foo': {
+          'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
+          'src': { 'main.js': new Buffer('console.log()') },
+          'lib': { 'foo.js': /*js*/`require("@packages/bar/src/main")${''}` },
+        },
+        'bar': {
+          'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
+          'src': { 'main.js': new Buffer('console.log()') },
+          'lib': { 'foo.js': `require("@packages/foo/lib/somefoo")${''}` },
+          'node_modules': { 'no-search.js': '' },
+          'dist': { 'no-search.js': '' },
+        },
+      },
+      },
+    })
+
+    await transformRequires(buildRoot)
+
+    // console.log(getFs())
+
+    snapshot(getFs())
+  })
 })
 
 afterEach(() => {
@@ -41,6 +73,10 @@ const getFs = () => {
   const cwd = process.cwd().split('/').slice(1)
 
   const recurse = (dir, d) => {
+
+    if (_.isString(dir)) {
+      return dir
+    }
 
     return _.extend({}, ..._.map(dir, (val, key) => {
       let nextDepth = null
@@ -64,7 +100,7 @@ const getFs = () => {
       }
 
       return {
-        [key]: recurse(val._items, nextDepth),
+        [key]: recurse(val._content ? val._content.toString() : val._items, nextDepth),
       }
     }))
   }
