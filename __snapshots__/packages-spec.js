@@ -3,12 +3,12 @@ exports['packages can copy files from package.json 1'] = `
  "[cwd]": {
   "packages": {
    "coffee": {
-    "package.json": {},
+    "package.json": "{\\"main\\":\\"src/main.js\\", \\"name\\": \\"foo\\", \\"files\\": [\\"lib\\"]}",
     "src": {
-     "main.js": {}
+     "main.js": "console.log()"
     },
     "lib": {
-     "foo.js": {}
+     "foo.js": "{}"
     }
    }
   }
@@ -16,12 +16,12 @@ exports['packages can copy files from package.json 1'] = `
  "tmp": {
   "packages": {
    "coffee": {
-    "package.json": {},
+    "package.json": "{\\"main\\":\\"src/main.js\\", \\"name\\": \\"foo\\", \\"files\\": [\\"lib\\"]}",
     "src": {
-     "main.js": {}
+     "main.js": "console.log()"
     },
     "lib": {
-     "foo.js": {}
+     "foo.js": "{}"
     }
    }
   }
