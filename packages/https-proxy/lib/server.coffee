@@ -96,8 +96,16 @@ class Server
       res.end()
     .pipe(res)
 
+  _getProxyForUrl: (url) ->
+    if url == "https://localhost:#{@_sniPort}"
+      ## https://github.com/cypress-io/cypress/issues/4257
+      ## this is a tunnel to the SNI server, it should never go through a proxy
+      return undefined
+
+    getProxyForUrl(url)
+
   _makeDirectConnection: (req, browserSocket, head) ->
-    { port, hostname } = url.parse("http://#{req.url}")
+    { port, hostname } = url.parse("https://#{req.url}")
 
     debug("Making connection to #{hostname}:#{port}")
     @_makeConnection(browserSocket, head, port, hostname)
@@ -124,7 +132,7 @@ class Server
 
       browserSocket.resume()
 
-    if upstreamProxy = getProxyForUrl("https://#{hostname}:#{port}")
+    if upstreamProxy = @_getProxyForUrl("https://#{hostname}:#{port}")
       # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
       debug("making proxied connection %o", {
         host: "#{hostname}:#{port}",
@@ -149,7 +157,7 @@ class Server
     makeConnection = (port) =>
       debug("Making intercepted connection to %s", port)
 
-      @_makeConnection(browserSocket, head, port)
+      @_makeConnection(browserSocket, head, port, "localhost")
 
     if firstBytes not in SSL_RECORD_TYPES
       ## if this isn't an SSL request then go
