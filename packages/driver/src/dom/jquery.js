@@ -22,10 +22,17 @@ const unwrap = function (obj) {
 }
 
 const isJquery = (obj) => {
+  let hasJqueryProperty = false
+
+  try {
+    // chai will throw if trying to access jquery on an assertion
+    hasJqueryProperty = obj && ('jquery' in obj || obj.jquery)
+  } catch (e) {} // eslint-disable-line no-empty
+
   // does it have the jquery property and does this
   // instance have a constructor with a jquery property
-  // on it's prototype?
-  return !!(obj && obj.jquery && _.get(obj, 'constructor.prototype.jquery'))
+  // on its prototype?
+  return hasJqueryProperty && _.get(obj, 'constructor.prototype.jquery')
 }
 
 // doing a little jiggle wiggle here
