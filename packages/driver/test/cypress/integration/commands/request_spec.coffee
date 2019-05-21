@@ -668,7 +668,7 @@ describe "src/cy/commands/request", ->
         })
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.contain "cy.request() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
           done()
 
