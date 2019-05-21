@@ -36,7 +36,7 @@ function normalizeModuleOptions (options = {}) {
 
 /**
  * Returns true if the platform is Linux. We do a lot of different
- * stuff on Linux (like XVFB) and it helps to has readable code
+ * stuff on Linux (like Xvfb) and it helps to has readable code
  */
 const isLinux = () => {
   return os.platform() === 'linux'
@@ -58,7 +58,7 @@ const isPossibleLinuxWithIncorrectDisplay = () => {
 }
 
 const logBrokenGtkDisplayWarning = () => {
-  debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting XVFB')
+  debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting Xvfb')
 
   // if we get this error, we are on Linux and DISPLAY is set
   logger.warn(stripIndent`
