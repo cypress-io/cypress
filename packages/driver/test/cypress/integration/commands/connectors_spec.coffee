@@ -740,7 +740,7 @@ describe "src/cy/commands/connectors", ->
           foo:  -> throw err
         }
 
-        cy.wrap(obj).its("foo").should("throw", err)
+        cy.wrap(obj).its("foo").should("throw", "nope cant access me")
 
       it "returns property", ->
         cy.noop({baz: "baz"}).its("baz").then (num) ->
