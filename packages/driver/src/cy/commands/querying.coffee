@@ -126,12 +126,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set(obj)
 
-      if _.indexOf(selector, ".") == -1
-        toSelect = selector
       ## We want to strip everything after the last '.'
       ## only when it is potentially a number or 'all'
-      else if selector.slice(1) in _.keys(cy.state("aliases"))
-         toSelect = selector
+      if _.indexOf(selector, ".") == -1 ||
+      selector.slice(1) in _.keys(cy.state("aliases"))
+        toSelect = selector
       else
          allParts = _.split(selector, '.')
          toSelect = _.join(_.dropRight(allParts, 1), '.')
@@ -184,12 +183,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             ## if this is a route command
             when command.get("name") is "route"
-              allParts = _.split(selector, ".")
-              if selector.slice(1) in _.keys(cy.state("aliases"))
-                index = null
-              else
+              if !(_.indexOf(selector, ".") == -1 ||
+              selector.slice(1) in _.keys(cy.state("aliases")))
+                allParts = _.split(selector, ".")
                 index = _.last(allParts)
-              alias = _.compact([alias, index]).join(".")
+                alias = _.join([alias, index], ".")
               requests = cy.getRequestsByAlias(alias) ? null
               log(requests, "route")
               return requests

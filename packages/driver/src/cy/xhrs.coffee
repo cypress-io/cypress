@@ -24,11 +24,11 @@ xhrNotWaitedOnByIndex = (state, alias, index, prop) ->
 create = (state) ->
   return {
     getIndexedXhrByAlias: (alias, index) ->
-      allParts = _.split(alias, '.')
-      if _.size(allParts) > 1
-        [str, prop] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
-      else
+      if _.indexOf(alias, ".") == -1
         [str, prop] = [alias, null]
+      else
+        allParts = _.split(alias, '.')
+        [str, prop] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
 
       if prop
         if prop is "request"
@@ -42,14 +42,12 @@ create = (state) ->
       xhrNotWaitedOnByIndex(state, str, index, "responses")
 
     getRequestsByAlias: (alias) ->
-      allParts = _.split(alias, '.')
-      if _.size(allParts) > 1
-        if alias in _.keys(cy.state("aliases"))
-          [alias, prop] = [alias, null]
-        else # potentially valid prop
-          [alias, prop] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
-      else
+      if _.indexOf(alias, ".") == -1 || alias in _.keys(cy.state("aliases"))
         [alias, prop] = [alias, null]
+      else
+        # potentially valid prop
+        allParts = _.split(alias, '.')
+        [alias, prop] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
 
       if prop and not validAliasApiRe.test(prop)
         $utils.throwErrByPath "get.alias_invalid", {
