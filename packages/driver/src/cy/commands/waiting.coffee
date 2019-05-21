@@ -66,9 +66,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       , options
 
     waitForXhr = (str, options) ->
-      ## we always want to strip everything after the first '.'
+      ## we always want to strip everything after the last '.'
       ## since we support alias property 'request'
-      [str, str2] = str.split(".")
+      if _.indexOf(str, ".") == -1 ||
+      str.slice(1) in _.keys(cy.state("aliases"))
+        [str, str2] = [str, null]
+      else
+        # potentially request, response or index
+        allParts = _.split(str, '.')
+        [str, str2] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
 
       if not aliasObj = cy.getAlias(str, "wait", log)
         cy.aliasNotFoundFor(str, "wait", log)
@@ -79,7 +85,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       {alias, command} = aliasObj
 
       str = _.compact([alias, str2]).join(".")
-
+ 
       type = cy.getXhrTypeByAlias(str)
 
       [ index, num ] = getNumRequests(state, alias)
