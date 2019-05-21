@@ -5,6 +5,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 _           = require("lodash")
 DebugProxy  = require("@cypress/debugging-proxy")
 net         = require("net")
+network     = require("@packages/network")
 path        = require("path")
 Promise     = require("bluebird")
 proxy       = require("../helpers/proxy")
@@ -240,6 +241,25 @@ describe "Proxy", ->
           socket.on 'close', =>
             expect(socket.destroyed).to.be.true
             resolve()
+
+    ## https://github.com/cypress-io/cypress/issues/4257
+    it "passes through to SNI when it is intercepted and not through proxy", ->
+      createSocket = @sandbox.stub(network.connect, 'createRetryingSocket').callsArgWith(1, new Error('stub'))
+      createProxyConn = @sandbox.spy(network.agent.httpsAgent, 'createUpstreamProxyConnection')
+
+      request({
+        strictSSL: false
+        url: "https://localhost:8443"
+        proxy: "http://localhost:3333"
+        resolveWithFullResponse: true
+        forever: false
+      })
+      .catch (res) =>
+        expect(createProxyConn).to.not.be.called
+        expect(createSocket).to.be.calledWith({
+          port: @proxy._sniPort
+          host: 'localhost'
+        })
 
     afterEach ->
       @upstream.stop()
