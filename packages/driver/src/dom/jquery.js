@@ -32,7 +32,7 @@ const isJquery = (obj) => {
   // does it have the jquery property and does this
   // instance have a constructor with a jquery property
   // on its prototype?
-  return hasJqueryProperty && _.get(obj, 'constructor.prototype.jquery')
+  return hasJqueryProperty && !!_.get(obj, 'constructor.prototype.jquery')
 }
 
 // doing a little jiggle wiggle here
