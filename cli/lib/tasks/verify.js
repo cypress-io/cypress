@@ -68,7 +68,7 @@ const runSmokeTest = (binaryDir, options) => {
 
   const needsXvfb = xvfb.isNeeded()
 
-  debug('needs XVFB?', needsXvfb)
+  debug('needs Xvfb?', needsXvfb)
 
   /**
    * Spawn Cypress running smoke test to check if all operating system
@@ -138,7 +138,7 @@ const runSmokeTest = (binaryDir, options) => {
 
   // if we are on linux and there's already a DISPLAY
   // set, then we may need to rerun cypress after
-  // spawning our own XVFB server
+  // spawning our own Xvfb server
   const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
 
   return userFriendlySpawn(linuxWithDisplayEnv)
