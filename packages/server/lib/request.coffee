@@ -302,8 +302,15 @@ createRetryingRequestStream = (opts = {}) ->
   reqBodyBuffer = streamBuffer()
   retryStream = duplexify(reqBodyBuffer, delayStream)
 
+  cleanup = ->
+    ## null req body out to free memory
+    reqBodyBuffer.unpipeAll()
+    reqBodyBuffer = null
+
   emitError = (err) ->
     retryStream.emit("error", err)
+
+    cleanup()
 
     ## TODO: we probably want to destroy
     ## the stream, but leaving in the error emit
@@ -395,9 +402,7 @@ createRetryingRequestStream = (opts = {}) ->
         onElse: ->
           debug("successful response received", { requestId })
 
-          ## null req body out to free memory
-          reqBodyBuffer.unpipeAll()
-          reqBodyBuffer = null
+          cleanup()
 
           ## forward the response event upwards which should happen
           ## prior to the pipe event, same as what request does
