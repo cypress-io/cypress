@@ -596,6 +596,15 @@ describe "src/cy/commands/navigation", ->
       })
       cy.contains('"x-foo-baz":"bar-quux"')
 
+    it "can send user-agent header", ->
+      cy.visit({
+        url: "http://localhost:3500/dump-headers",
+        headers: {
+          "user-agent": "something special"
+        }
+      })
+      cy.contains('"user-agent":"something special"')
+
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
         cy.visit("http://localhost:3500/post-only", {
@@ -1035,6 +1044,17 @@ describe "src/cy/commands/navigation", ->
         cy.visit({
           url: "http://foobarbaz",
           headers: "quux"
+        })
+
+      it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          failOnStatusCode: false
+          retryOnStatusCodeFailure: true
         })
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->

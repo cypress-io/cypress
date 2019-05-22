@@ -82,173 +82,6 @@ exports['shows help for run --foo 1'] = `
   
 `
 
-exports['cli help command shows help 1'] = `
-
-  command: bin/cypress help
-  code: 0
-  failed: false
-  killed: false
-  signal: null
-  timedOut: false
-
-  stdout:
-  -------
-  Usage: cypress [options] [command]
-
-  Options:
-
-    -v, --version      prints Cypress version
-    -h, --help         output usage information
-
-  Commands:
-
-    help               Shows CLI help and exits
-    version            prints Cypress version
-    run [options]      Runs Cypress tests from the CLI without the GUI
-    open [options]     Opens Cypress in the interactive GUI.
-    install [options]  Installs the Cypress executable matching this package's version
-    verify             Verifies that Cypress is installed correctly and executable
-    cache [options]    Manages the Cypress binary cache
-  -------
-  stderr:
-  -------
-  
-  -------
-  
-`
-
-exports['cli help command shows help for -h 1'] = `
-
-  command: bin/cypress -h
-  code: 0
-  failed: false
-  killed: false
-  signal: null
-  timedOut: false
-
-  stdout:
-  -------
-  Usage: cypress [options] [command]
-
-  Options:
-
-    -v, --version      prints Cypress version
-    -h, --help         output usage information
-
-  Commands:
-
-    help               Shows CLI help and exits
-    version            prints Cypress version
-    run [options]      Runs Cypress tests from the CLI without the GUI
-    open [options]     Opens Cypress in the interactive GUI.
-    install [options]  Installs the Cypress executable matching this package's version
-    verify             Verifies that Cypress is installed correctly and executable
-    cache [options]    Manages the Cypress binary cache
-  -------
-  stderr:
-  -------
-  
-  -------
-  
-`
-
-exports['cli help command shows help for --help 1'] = `
-
-  command: bin/cypress --help
-  code: 0
-  failed: false
-  killed: false
-  signal: null
-  timedOut: false
-
-  stdout:
-  -------
-  Usage: cypress [options] [command]
-
-  Options:
-
-    -v, --version      prints Cypress version
-    -h, --help         output usage information
-
-  Commands:
-
-    help               Shows CLI help and exits
-    version            prints Cypress version
-    run [options]      Runs Cypress tests from the CLI without the GUI
-    open [options]     Opens Cypress in the interactive GUI.
-    install [options]  Installs the Cypress executable matching this package's version
-    verify             Verifies that Cypress is installed correctly and executable
-    cache [options]    Manages the Cypress binary cache
-  -------
-  stderr:
-  -------
-  
-  -------
-  
-`
-
-exports['cli unknown command shows usage and exits 1'] = `
-
-  command: bin/cypress foo
-  code: 1
-  failed: true
-  killed: false
-  signal: null
-  timedOut: false
-
-  stdout:
-  -------
-  Unknown command "foo"
-
-    Usage: cypress [options] [command]
-
-    Options:
-
-      -v, --version      prints Cypress version
-      -h, --help         output usage information
-
-    Commands:
-
-      help               Shows CLI help and exits
-      version            prints Cypress version
-      run [options]      Runs Cypress tests from the CLI without the GUI
-      open [options]     Opens Cypress in the interactive GUI.
-      install [options]  Installs the Cypress executable matching this package's version
-      verify             Verifies that Cypress is installed correctly and executable
-      cache [options]    Manages the Cypress binary cache
-  -------
-  stderr:
-  -------
-  
-  -------
-  
-`
-
-exports['cli version and binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: X.Y.Z
-`
-
-exports['cli version and binary version 2'] = `
-Cypress package version: 1.2.3
-Cypress binary version: X.Y.Z
-`
-
-exports['cli version no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-`
-
-exports['cli --version no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-`
-
-exports['cli -v no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-`
-
 exports['cli unknown option shows help for cache command - unknown option --foo 1'] = `
 
   command: bin/cypress cache --foo
@@ -340,6 +173,173 @@ exports['cli unknown option shows help for cache command - no sub-command 1'] = 
   
   -------
   
+`
+
+exports['cli help command shows help 1'] = `
+
+  command: bin/cypress help
+  code: 0
+  failed: false
+  killed: false
+  signal: null
+  timedOut: false
+
+  stdout:
+  -------
+  Usage: cypress [options] [command]
+
+  Options:
+
+    -v, --version      prints Cypress version
+    -h, --help         output usage information
+
+  Commands:
+
+    help               Shows CLI help and exits
+    version            prints Cypress version
+    run [options]      Runs Cypress tests from the CLI without the GUI
+    open [options]     Opens Cypress in the interactive GUI.
+    install [options]  Installs the Cypress executable matching this package's version
+    verify [options]   Verifies that Cypress is installed correctly and executable
+    cache [options]    Manages the Cypress binary cache
+  -------
+  stderr:
+  -------
+  
+  -------
+  
+`
+
+exports['cli help command shows help for -h 1'] = `
+
+  command: bin/cypress -h
+  code: 0
+  failed: false
+  killed: false
+  signal: null
+  timedOut: false
+
+  stdout:
+  -------
+  Usage: cypress [options] [command]
+
+  Options:
+
+    -v, --version      prints Cypress version
+    -h, --help         output usage information
+
+  Commands:
+
+    help               Shows CLI help and exits
+    version            prints Cypress version
+    run [options]      Runs Cypress tests from the CLI without the GUI
+    open [options]     Opens Cypress in the interactive GUI.
+    install [options]  Installs the Cypress executable matching this package's version
+    verify [options]   Verifies that Cypress is installed correctly and executable
+    cache [options]    Manages the Cypress binary cache
+  -------
+  stderr:
+  -------
+  
+  -------
+  
+`
+
+exports['cli help command shows help for --help 1'] = `
+
+  command: bin/cypress --help
+  code: 0
+  failed: false
+  killed: false
+  signal: null
+  timedOut: false
+
+  stdout:
+  -------
+  Usage: cypress [options] [command]
+
+  Options:
+
+    -v, --version      prints Cypress version
+    -h, --help         output usage information
+
+  Commands:
+
+    help               Shows CLI help and exits
+    version            prints Cypress version
+    run [options]      Runs Cypress tests from the CLI without the GUI
+    open [options]     Opens Cypress in the interactive GUI.
+    install [options]  Installs the Cypress executable matching this package's version
+    verify [options]   Verifies that Cypress is installed correctly and executable
+    cache [options]    Manages the Cypress binary cache
+  -------
+  stderr:
+  -------
+  
+  -------
+  
+`
+
+exports['cli unknown command shows usage and exits 1'] = `
+
+  command: bin/cypress foo
+  code: 1
+  failed: true
+  killed: false
+  signal: null
+  timedOut: false
+
+  stdout:
+  -------
+  Unknown command "foo"
+
+    Usage: cypress [options] [command]
+
+    Options:
+
+      -v, --version      prints Cypress version
+      -h, --help         output usage information
+
+    Commands:
+
+      help               Shows CLI help and exits
+      version            prints Cypress version
+      run [options]      Runs Cypress tests from the CLI without the GUI
+      open [options]     Opens Cypress in the interactive GUI.
+      install [options]  Installs the Cypress executable matching this package's version
+      verify [options]   Verifies that Cypress is installed correctly and executable
+      cache [options]    Manages the Cypress binary cache
+  -------
+  stderr:
+  -------
+  
+  -------
+  
+`
+
+exports['cli version and binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
+`
+
+exports['cli version and binary version 2'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
+`
+
+exports['cli version no binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: not installed
+`
+
+exports['cli --version no binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: not installed
+`
+
+exports['cli -v no binary version 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: not installed
 `
 
 exports['cli cypress run warns with space-separated --specs 1'] = `

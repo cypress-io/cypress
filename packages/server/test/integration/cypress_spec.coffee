@@ -9,7 +9,6 @@ http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
 commitInfo = require("@cypress/commit-info")
-isForkPr   = require("is-fork-pr")
 Fixtures   = require("../support/helpers/fixtures")
 snapshot   = require("snap-shot-it")
 stripAnsi  = require("strip-ansi")
@@ -626,13 +625,6 @@ describe "lib/cypress", ->
         @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "screenshotOnHeadlessFailure")
         @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "You now configure this behavior in your test code")
 
-    it "logs error and exits when baseUrl cannot be verified", ->
-      settings.write(@todosPath, {baseUrl: "http://localhost:90874"})
-      .then =>
-        cypress.start(["--run-project=#{@todosPath}"])
-      .then =>
-        @expectExitWithErr("CANNOT_CONNECT_BASE_URL", "http://localhost:90874")
-
     ## TODO: make sure we have integration tests around this
     ## for headed projects!
     ## also make sure we test the rest of the integration functionality
@@ -840,7 +832,7 @@ describe "lib/cypress", ->
         server = http.createServer()
         server = Promise.promisifyAll(server)
 
-        server.listenAsync(5555)
+        server.listenAsync(5555, "127.0.0.1")
         .then =>
           cypress.start(["--run-project=#{@todosPath}", "--port=5555"])
         .then =>

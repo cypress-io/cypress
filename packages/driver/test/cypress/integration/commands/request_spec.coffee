@@ -15,6 +15,16 @@ describe "src/cy/commands/request", ->
         .resolves({ isOkStatusCode: true, status: 200 })
 
         @expectOptionsToBe = (opts) ->
+          _.defaults(opts, {
+            failOnStatusCode: true
+            retryOnNetworkFailure: true
+            retryOnStatusCodeFailure: false
+            gzip: true
+            followRedirect: true
+            timeout: RESPONSE_TIMEOUT
+            method: "GET"
+          })
+
           options = backend.firstCall.args[1]
 
           _.each options, (value, key) ->
@@ -26,10 +36,6 @@ describe "src/cy/commands/request", ->
         cy.request({url: "http://localhost:8000/foo"}).then ->
           @expectOptionsToBe({
             url: "http://localhost:8000/foo"
-            method: "GET"
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -45,22 +51,16 @@ describe "src/cy/commands/request", ->
             url: "http://github.com/users"
             method: "POST"
             json: true
-            gzip: true
-            followRedirect: true
             body: {name: "brian"}
             headers: {
               "x-token": "abc123"
             }
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts object with url + timeout", ->
         cy.request({url: "http://localhost:8000/foo", timeout: 23456}).then ->
           @expectOptionsToBe({
             url: "http://localhost:8000/foo"
-            method: "GET"
-            gzip: true
-            followRedirect: true
             timeout: 23456
           })
 
@@ -68,10 +68,6 @@ describe "src/cy/commands/request", ->
         cy.request("http://localhost:8080/status").then ->
           @expectOptionsToBe({
             url: "http://localhost:8080/status"
-            method: "GET"
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts method + url", ->
@@ -79,9 +75,6 @@ describe "src/cy/commands/request", ->
           @expectOptionsToBe({
             url: "http://localhost:1234/users/1"
             method: "DELETE"
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts method + url + body", ->
@@ -91,32 +84,21 @@ describe "src/cy/commands/request", ->
             method: "POST"
             body: {name: "brian"}
             json: true
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts url + body", ->
         cy.request("http://www.github.com/projects/foo", {commits: true}).then ->
           @expectOptionsToBe({
             url: "http://www.github.com/projects/foo"
-            method: "GET"
             body: {commits: true}
             json: true
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts url + string body", ->
         cy.request("http://www.github.com/projects/foo", "foo").then ->
           @expectOptionsToBe({
             url: "http://www.github.com/projects/foo"
-            method: "GET"
             body: "foo"
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       context "method normalization", ->
@@ -125,9 +107,6 @@ describe "src/cy/commands/request", ->
             @expectOptionsToBe({
               url: "https://www.foo.com/"
               method: "POST"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "url normalization", ->
@@ -137,30 +116,18 @@ describe "src/cy/commands/request", ->
           cy.request("https://www.foo.com").then ->
             @expectOptionsToBe({
               url: "https://www.foo.com/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "uses localhost urls", ->
           cy.request("localhost:1234").then ->
             @expectOptionsToBe({
               url: "http://localhost:1234/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "uses www urls", ->
           cy.request("www.foo.com").then ->
             @expectOptionsToBe({
               url: "http://www.foo.com/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "prefixes with baseUrl when origin is empty", ->
@@ -170,10 +137,6 @@ describe "src/cy/commands/request", ->
           cy.request("/foo/bar?cat=1").then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/app/foo/bar?cat=1"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "prefixes with baseUrl over current origin", ->
@@ -183,10 +146,6 @@ describe "src/cy/commands/request", ->
           cy.request("foobar?cat=1").then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/app/foobar?cat=1"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "gzip", ->
@@ -197,10 +156,7 @@ describe "src/cy/commands/request", ->
           }).then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/"
-              method: "GET"
               gzip: false
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "auth", ->
@@ -214,14 +170,10 @@ describe "src/cy/commands/request", ->
           }).then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
               auth: {
                 user: "brian"
                 pass: "password"
               }
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "followRedirect", ->
@@ -230,10 +182,6 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "can be set to false", ->
@@ -244,10 +192,7 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               followRedirect: false
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "normalizes followRedirects -> followRedirect", ->
@@ -258,10 +203,7 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               followRedirect: false
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "qs", ->
@@ -275,11 +217,7 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
               qs: {foo: "bar"}
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "form", ->
@@ -294,12 +232,8 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               form: true
-              followRedirect: true
               body: {foo: "bar"}
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "accepts a string for body", ->
@@ -311,12 +245,8 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               form: true
-              followRedirect: true
               body: "foo=bar&baz=quux"
-              timeout: RESPONSE_TIMEOUT
             })
 
         ## https://github.com/cypress-io/cypress/issues/2923
@@ -331,16 +261,12 @@ describe "src/cy/commands/request", ->
           }).then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               form: true
-              followRedirect: true
               headers: {
                 "a": "b"
                 "Content-type": "application/x-www-form-urlencoded"
               }
               body: { foo: "bar" }
-              timeout: RESPONSE_TIMEOUT
             })
 
     describe "failOnStatus", ->
@@ -382,6 +308,16 @@ describe "src/cy/commands/request", ->
           method: 'm-Search'
         }).then (res) =>
           expect(res.body).to.contain('M-SEARCH')
+
+    describe "headers", ->
+      it "can send user-agent header", ->
+        cy.request({
+          url: "http://localhost:3500/dump-headers",
+          headers: {
+            "user-agent": "something special"
+          }
+        }).then (res) ->
+          expect(res.body).to.contain('"user-agent":"something special"')
 
     describe "subjects", ->
       it "resolves with response obj", ->
@@ -729,6 +665,17 @@ describe "src/cy/commands/request", ->
         cy.request({
           url: "http://localhost:1234/foo"
           form: {foo: "bar"}
+        })
+
+      it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.request() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          done()
+
+        cy.request({
+          url: "http://foobarbaz",
+          failOnStatusCode: false
+          retryOnStatusCodeFailure: true
         })
 
       it "throws when status code doesnt start with 2 and failOnStatusCode is true", (done) ->

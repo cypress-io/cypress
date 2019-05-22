@@ -2,6 +2,8 @@ _         = require("lodash")
 la        = require("lazy-ass")
 debug     = require("debug")("cypress:server:openproject")
 Promise   = require("bluebird")
+path      = require("path")
+chokidar  = require("chokidar")
 files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
@@ -11,8 +13,8 @@ preprocessor = require("./plugins/preprocessor")
 
 create = ->
   openProject     = null
-  specIntervalId  = null
   relaunchBrowser = null
+  specsWatcher    = null
 
   reset = ->
     openProject     = null
@@ -126,17 +128,34 @@ create = ->
         currentSpecs = specs
         options.onChange(specs)
 
-      checkForSpecUpdates = =>
+      checkForSpecUpdates = _.debounce =>
         if not openProject
-          return @clearSpecInterval()
+          return @stopSpecsWatcher()
+
+        debug("check for spec updates")
 
         get()
         .then(sendIfChanged)
         .catch(options.onError)
+      , 250, { leading: true }
+
+      createSpecsWatcher = (cfg) ->
+        return if specsWatcher
+
+        debug("watch test files: %s in %s", cfg.testFiles, cfg.integrationFolder)
+
+        specsWatcher = chokidar.watch(cfg.testFiles, {
+          cwd: cfg.integrationFolder
+          ignored: cfg.ignoreTestFiles
+          ignoreInitial: true
+        })
+        specsWatcher.on("add", checkForSpecUpdates)
+        specsWatcher.on("unlink", checkForSpecUpdates)
 
       get = ->
         openProject.getConfig()
         .then (cfg) ->
+          createSpecsWatcher(cfg)
           specsUtil.find(cfg)
         .then (specs = []) ->
           ## TODO: put back 'integration' property
@@ -145,15 +164,13 @@ create = ->
             integration: specs
           }
 
-      specIntervalId = setInterval(checkForSpecUpdates, 2500)
-
       ## immediately check the first time around
       checkForSpecUpdates()
 
-    clearSpecInterval: ->
-      if specIntervalId
-        clearInterval(specIntervalId)
-        specIntervalId = null
+    stopSpecsWatcher: ->
+      debug("stop spec watcher")
+      Promise.try ->
+        specsWatcher?.close()
 
     closeBrowser: ->
       browsers.close()
@@ -171,7 +188,7 @@ create = ->
     close:  ->
       debug("closing opened project")
 
-      @clearSpecInterval()
+      @stopSpecsWatcher()
       @closeOpenProjectAndBrowsers()
 
     create: (path, args = {}, options = {}) ->
