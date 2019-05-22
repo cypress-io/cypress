@@ -77,6 +77,7 @@
     "istanbul": "0.4.5",
     "mocked-env": "1.2.4",
     "mockery": "1.7.0",
+    "multiparty": "4.2.1",
     "nock": "9.6.1",
     "npm-install-version": "6.0.2",
     "obfuscator": "0.5.4",

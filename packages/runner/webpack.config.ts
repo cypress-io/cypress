@@ -138,7 +138,7 @@ const config: webpack.Configuration = {
       excludeModules: /main\.scss/,
     },
     noInfo: true,
-    writeToDisk: true,  
+    writeToDisk: true,
     headers: {
       "Access-Control-Allow-Origin": "*",
     }

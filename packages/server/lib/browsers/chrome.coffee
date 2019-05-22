@@ -189,6 +189,11 @@ module.exports = {
     if majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK
       args.push("--proxy-bypass-list=<-loopback>")
 
+    ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
+    ## https://github.com/cypress-io/cypress/issues/1872
+    if majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK
+      args.push("--proxy-bypass-list=<-loopback>")
+
     args
 
   open: (browser, url, options = {}, automation) ->

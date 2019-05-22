@@ -1,8 +1,11 @@
-import Bluebird from 'bluebird'
 import _ from 'lodash'
+import Bluebird from 'bluebird'
+import debugModule from 'debug'
 import rp from 'request-promise'
 import * as url from 'url'
 import { agent, connect } from '@packages/network'
+
+const debug = debugModule('cypress:server:ensure-url')
 
 type RetryOptions = {
   retryIntervals: number[]
@@ -15,6 +18,12 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
   const delaysRemaining = _.clone(retryIntervals)
 
   const run = () => {
+    debug('checking that baseUrl is available', {
+      baseUrl: urlStr,
+      delaysRemaining,
+      retryIntervals
+    })
+
     return isListening(urlStr)
     .catch((err) => {
       const delay = delaysRemaining.shift()

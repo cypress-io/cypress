@@ -2270,46 +2270,6 @@ declare namespace Cypress {
     headers: { [header: string]: string }
 
     /**
-     * The URL to visit. Behaves the same as the `url` argument.
-     */
-    url: string
-
-    /**
-     * The HTTP method to use in the visit. Can be `GET` or `POST`.
-     *
-     * @default "GET"
-     */
-    method: 'GET' | 'POST'
-
-    /**
-     * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-urlencoded` header.
-     *
-     * @example
-     *    cy.visit({
-     *      url: 'http://www.example.com/form.html',
-     *      method: 'POST',
-     *      body: {
-     *        "field1": "foo",
-     *        "field2": "bar"
-     *      }
-     *    })
-     */
-    body: RequestBody
-
-    /**
-     * An object that maps HTTP header names to values to be sent along with the request.
-     *
-     * @example
-     *    cy.visit({
-     *      url: 'http://www.example.com',
-     *      headers: {
-     *        'Accept-Language': 'en-US'
-     *      }
-     *    })
-     */
-    headers: { [header: string]: string }
-
-    /**
      * Called before your page has loaded all of its resources.
      *
      * @param {Window} contentWindow the remote page's window object
