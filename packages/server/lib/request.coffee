@@ -305,11 +305,6 @@ createRetryingRequestStream = (opts = {}) ->
   emitError = (err) ->
     retryStream.emit("error", err)
 
-    ## TODO: we probably want to destroy
-    ## the stream, but leaving in the error emit
-    ## temporarily until we finish implementation
-    # retryStream.destroy(err)
-
   tryStartStream = ->
     ## if our request has been aborted
     ## in the time that we were waiting to retry
