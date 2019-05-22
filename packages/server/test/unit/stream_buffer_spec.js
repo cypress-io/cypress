@@ -15,7 +15,7 @@ function drain (stream) {
   })
 }
 
-describe('lib/util/stream_buffer', function () {
+describe('lib/util/stream_buffer', () => {
   it('reads out no matter when we write', function (done) {
     done = _.after(2, done)
     const pt = stream.PassThrough()
@@ -70,24 +70,26 @@ describe('lib/util/stream_buffer', function () {
     })
   })
 
-  it('on overflow, enlarges the internal buffer by the smallest power of 2 that can fit the chunk', function () {
+  it('on overflow, enlarges the internal buffer by the smallest power of 2 that can fit the chunk', () => {
     const sb = streamBuffer(64)
 
     sb.write('A'.repeat(65))
 
     expect(sb._buffer().length).to.eq(128)
 
-    sb.write('A'.repeat(1024))
+    sb.end('A'.repeat(1024))
 
     expect(sb._buffer().length).to.eq(2048)
 
     const readable = sb.createReadStream()
-    const buf = drain(readable)
 
-    expect(buf).to.eq('A'.repeat(1089))
+    return drain(readable)
+    .then((buf) => {
+      expect(buf).to.eq('A'.repeat(1089))
+    })
   })
 
-  it('finishes when buffer stream closes while still allowing data to be drained', function () {
+  it('finishes when buffer stream closes while still allowing data to be drained', (done) => {
     const sb = streamBuffer()
 
     sb.write('foo')
@@ -99,14 +101,20 @@ describe('lib/util/stream_buffer', function () {
       expect(sb._finished()).to.be.true
 
       const readable = sb.createReadStream()
-      const buf = drain(readable)
 
-      expect(buf).to.eq('foobar')
+      return drain(readable)
+      .then((buf) => {
+        expect(buf).to.eq('foobar')
 
-      const readable2 = sb.createReadStream()
-      const buf2 = drain(readable2)
+        const readable2 = sb.createReadStream()
 
-      expect(buf2).to.eq('foobar')
+        return drain(readable2)
+        .then((buf2) => {
+          expect(buf2).to.eq('foobar')
+
+          done()
+        })
+      })
     })
   })
 
@@ -120,11 +128,12 @@ describe('lib/util/stream_buffer', function () {
     const readable = sb.createReadStream()
 
     rs.on('end', () => {
-      const buf = drain(readable)
+      return drain(readable)
+      .then((buf) => {
+        expect(buf).to.eq(expected)
 
-      expect(buf).to.eq(expected)
-
-      done()
+        done()
+      })
     })
   })
 
