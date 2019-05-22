@@ -870,3 +870,13 @@ type:
 - if delay:0 and simulated:true, no Promise
 - if simulatedDefault, act as simulated, fire keys
 - 
+
+
+
+
+
+disabled:
+- chrome: only looks at attr existence
+
+readonly:
+- chrome: only looks at attr existence

@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:chrome64
+      - image: cypress/browsers:node8.9.3-chrome73
     environment:
       PLATFORM: linux
 
@@ -216,6 +216,8 @@ jobs:
           at: ~/
       # make sure mocha runs
       - run: npm run test-mocha
+      # test binary build code
+      - run: npm run test-scripts
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
@@ -276,7 +278,12 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
-      - run: DEBUG=test:proxy-performance npm run all test-performance -- --package server
+      - run:
+          command: |
+            set +e # don't exit on non-0 status code - performance tests can be spurious
+            npm run all test-performance -- --package server
+            echo "exited with code: $?"
+            exit 0
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -384,8 +391,6 @@ jobs:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
       - run:
-          environment:
-            DEBUG: cypress:*
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -520,8 +525,6 @@ jobs:
           background: true
       - run:
           name: Run Kitchensink example project
-          environment:
-            DEBUG: cypress:*
           command: |
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
@@ -709,8 +712,6 @@ jobs:
           background: true
       - run:
           working_directory: /tmp/kitchensink
-          environment:
-            DEBUG: cypress:*
           command: npm run e2e
 
 linux-workflow: &linux-workflow
@@ -793,6 +794,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -800,6 +802,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -807,6 +810,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build-npm-package
           - build-binary
@@ -866,6 +870,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - Mac build
 

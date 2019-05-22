@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
+  "types": "./lib/index.ts",
   "files": [
     "lib"
   ],
   "scripts": {
-    "build": "bin-up tsc --project .",
     "build-js": "bin-up tsc --project .",
-    "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "clean-deps": "rm -rf node_modules"
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -18,8 +19,8 @@
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
-    "bin-up": "1.1.0",
-    "@cypress/debugging-proxy": "1.6.0",
+    "bin-up": "1.2.0",
+    "@cypress/debugging-proxy": "2.0.1",
     "express": "4.16.4",
     "request": "2.88.0",
     "request-promise": "4.2.4",

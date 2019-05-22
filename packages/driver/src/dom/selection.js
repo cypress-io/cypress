@@ -13,8 +13,6 @@ const $document = require('./document')
 const $elements = require('./elements')
 const $dom = require('../dom')
 
-const INTERNAL_STATE = '__Cypress_state__'
-
 const _getSelectionBoundsFromTextarea = (el) => {
   return {
     start: $elements.getNativeProp(el, 'selectionStart'),
@@ -23,7 +21,6 @@ const _getSelectionBoundsFromTextarea = (el) => {
 }
 
 const _getSelectionBoundsFromInput = function (el) {
-  let internalState
 
   if ($elements.canSetSelectionRangeElement(el)) {
     return {
@@ -32,46 +29,43 @@ const _getSelectionBoundsFromInput = function (el) {
     }
   }
 
-  if ((internalState = el[INTERNAL_STATE])) {
+  const doc = $document.getDocumentFromElement(el)
+  const range = _getSelectionRange(doc)
+
+  return {
+    start: range.startOffset,
+    end: range.endOffset,
+  }
+
+}
+
+const _getSelectionRange = (doc) => {
+  const sel = doc.getSelection()
+
+  //# selection has at least one range (most always 1; only 0 at page load)
+  if (sel.rangeCount) {
+    //# get the first (usually only) range obj
+    return sel.getRangeAt(0)
+  }
+
+  return doc.createRange()
+}
+
+const _getSelectionBoundsFromContentEditable = function (el) {
+  const doc = $document.getDocumentFromElement(el)
+  const range = _getSelectionRange(doc)
+  const hostContenteditable = getHostContenteditable(range.commonAncestorContainer)
+
+  if (hostContenteditable === el) {
     return {
-      start: internalState.start,
-      end: internalState.end,
+      start: range.startOffset,
+      end: range.endOffset,
     }
   }
 
   return {
     start: 0,
     end: 0,
-  }
-}
-
-const _getSelectionBoundsFromContentEditable = function (el) {
-  const doc = $document.getDocumentFromElement(el)
-
-  if (doc.getSelection) {
-    //# global selection object
-    const sel = doc.getSelection()
-
-    //# selection has at least one range (most always 1; only 0 at page load)
-    if (sel.rangeCount) {
-      //# get the first (usually only) range obj
-      const range = sel.getRangeAt(0)
-
-      //# if div[contenteditable] > text
-      const hostContenteditable = getHostContenteditable(range.commonAncestorContainer)
-
-      if (hostContenteditable === el) {
-        return {
-          start: range.startOffset,
-          end: range.endOffset,
-        }
-      }
-    }
-  }
-
-  return {
-    start: null,
-    end: null,
   }
 }
 
@@ -464,17 +458,17 @@ const selectAll = function (doc) {
 
 const getSelectionBounds = function (el) {
   //# this function works for input, textareas, and contentEditables
-  switch (false) {
-    case !$elements.isInput(el):
+  switch (true) {
+    case !!$elements.isInput(el):
       return _getSelectionBoundsFromInput(el)
-    case !$elements.isTextarea(el):
+    case !!$elements.isTextarea(el):
       return _getSelectionBoundsFromTextarea(el)
-    case !$elements.isContentEditable(el):
+    case !!$elements.isContentEditable(el):
       return _getSelectionBoundsFromContentEditable(el)
     default:
       return {
-        start: null,
-        end: null,
+        start: 0,
+        end: 0,
       }
   }
 }
@@ -551,6 +545,7 @@ const replaceSelectionContents = function (el, key) {
   }
 
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
+    // if ($elements.isRead)
     const { start, end } = getSelectionBounds(el)
 
     const value = $elements.getNativeProp(el, 'value') || ''

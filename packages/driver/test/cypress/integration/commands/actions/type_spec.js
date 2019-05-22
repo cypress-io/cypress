@@ -4,6 +4,8 @@ const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
 
+require('debug').enable('driver:*')
+
 const chaiSubset = require('chai-subset')
 
 chai.use(chaiSubset)
@@ -3934,17 +3936,82 @@ describe('src/cy/commands/actions/type', function () {
         })
       })
 
-      it('throws when text-like but disabled', function (done) {
-        cy.$$('input:first').on('keydown', function () {
-          return this.attr('disabled', true)
+      it('throws when text-like but disabled', function () {
+        cy.$$('input:first').attr('disabled', true)
+
+        const fail = cy.stub().callsFake((err) => {
+          expect(err.message).to.include('element is disabled')
         })
+
         cy.get('input:first').type('foo')
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.type() failed because it targeted a disabled element ')
-
-          done()
+        .then(() => {
+          expect(fail).calledOnce
         })
+
+        cy.on('fail', fail)
+      })
+
+      it('not throw when becomes disabled during type', function () {
+        cy.$$('input:first').on('keydown', function () {
+          $(this).attr('disabled', true)
+        })
+        cy.get('input:first').type('foo', { simulated: true })
+        .should('have.value', 'f')
+      })
+
+      it('move focus during type on keydown', function () {
+        cy.$$('input:first').on('keydown', function () {
+          $(this).next('input').focus()
+        })
+        cy.get('input:first').type('foo', { simulated: true })
+        .should('have.value', '')
+        .next('input').should('have.value', 'foo')
+      })
+
+      it('move focus during type on keypress', function () {
+        cy.$$('input:first').on('keypress', function () {
+          $(this).attr('disabled', true)
+          $(this).next('input').focus()
+        })
+        cy.get('input:first').type('foo', { simulated: false })
+        .should('have.value', 'f')
+        .next('input').should('have.value', 'oo')
+      })
+
+      it('move focus during type on input', function () {
+        cy.$$('input:first').on('input', function () {
+          $(this).next('input').focus()
+        })
+        cy.get('input:first').type('foo', { simulated: false })
+        .should('have.value', 'f')
+        .next('input').should('have.value', 'oo')
+      })
+
+      it('move focus during type on textInput', function () {
+        cy.$$('input:first').on('textInput', function () {
+          $(this).next('input').focus()
+        })
+        cy.get('input:first').type('foo', { simulated: false })
+        .should('have.value', 'f')
+        .next('input').should('have.value', 'oo')
+      })
+
+      it('move focus during type on keyup', function () {
+        cy.$$('input:first').on('keyup', _.after(2, function () {
+          $(this).next('input').focus()
+        }))
+        cy.get('input:first').type('foo', { simulated: false })
+        .should('have.value', 'f')
+        .next('input').should('have.value', 'oo')
+      })
+
+      it('disable during type on textInput', function () {
+        cy.$$('input:first').on('textInput', function () {
+          $(this).next('input').focus()
+        })
+        cy.get('input:first').type('foo', { simulated: false })
+        .should('have.value', 'f')
+        .next('input').should('have.value', 'oo')
       })
 
       it('throws when subject is a collection of elements', function (done) {
@@ -3958,6 +4025,19 @@ describe('src/cy/commands/actions/type', function () {
           expect(err.message).to.include(`cy.type() can only be called on a single element. Your subject contained ${this.num} elements.`)
 
           done()
+        })
+      })
+
+      it('readonly props', () => {
+        const input = cy.$$('<input/>').prependTo(cy.$$('body'))
+
+        cy.wrap(input).should(($el) => {
+          const el = $el[0]
+
+          el.readOnly = true
+          expect(el.getAttribute('readonly')).not.eq(null)
+          expect($el.prop('readonly')).ok
+          expect(el.readOnly).eq(true)
         })
       })
 

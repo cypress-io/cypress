@@ -37,6 +37,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   const $Keyboard = Cypress.dom.$Keyboard
 
   function type (subject, chars, options = {}) {
+    // debugger
+    //
     debug('type:', chars)
     let updateTable
 
@@ -48,6 +50,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
+      simulated: false,
       delay: 10,
       release: true,
       waitForAnimations: config('waitForAnimations'),
@@ -240,18 +243,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const isContentEditable = $elements.isContentEditable(options.$el.get(0))
       const isTextarea = $elements.isTextarea(options.$el.get(0))
 
-      const isSimulated = (el) => {
-        return options.force
-      }
-
       return keyboard.type({
         $el: options.$el,
         chars: charsToType,
         delay: options.delay,
         release: options.release,
         window: win,
-        simulated: isSimulated(options.$el[0]),
         force: options.force,
+        simulated: options.simulated,
 
         updateValue (el, key, charsToType) {
           // in these cases, the value must only be set after all

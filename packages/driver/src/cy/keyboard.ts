@@ -10,7 +10,7 @@ import * as $document from '../dom/document'
 import { keyboardMappings as USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
 import $utils from '../cypress/utils.coffee'
-import $native from '../cypress/native_events'
+import * as $native from '../cypress/native_events'
 import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/elements'
 import Debug from 'debug'
 
@@ -210,11 +210,38 @@ const shouldIgnoreEvent = <T extends KeyEventType, K extends { [key in T]?: bool
   return options[eventName] === false
 }
 
-const getSimulatedDefaultForKey = (el, key: KeyDetails) => {
+const getSimulatedDefaultForKey = (key: KeyDetails) => {
   if (key.simulatedDefault) return key.simulatedDefault
   if (simulatedDefaultKeyMap[key.key]) return simulatedDefaultKeyMap[key.key]
-  return () => {
+  return (el: HTMLElement) => {
     debug('replaceSelectionContents')
+    const shouldUpdateValue = () => {
+      if (!key.text) return true
+
+      const bounds = $selection.getSelectionBounds(el)
+      const noneSelected = bounds.start === bounds.end
+      if ($elements.isInput(el) || $elements.isTextarea(el) && noneSelected) {
+        const ml = $elements.getNativeProp(el, 'maxLength')
+        //# maxlength is -1 by default when omitted
+        //# but could also be null or undefined :-/
+        //# only care if we are trying to type a key
+        if (ml === 0 || ml > 0) {
+          //# check if we should update the value
+          //# and fire the input event
+          //# as long as we're under maxlength
+          if (!($elements.getNativeProp(el, 'value').length < ml)) {
+            return false
+          }
+        }
+      }
+      return true
+    }
+
+    if (!shouldUpdateValue()) {
+      debug('skip typing key', false)
+      return
+    }
+    // noop if not in a text-editable
     $selection.replaceSelectionContents(el, key.text)
   }
 }
@@ -222,7 +249,8 @@ const getSimulatedDefaultForKey = (el, key: KeyDetails) => {
 export type typeOptions = {
   $el: JQuery
   chars: string
-  simulated: boolean
+  force?: boolean
+  simulated?: boolean
   release?: boolean
   _log?: any
   delay?: number
@@ -241,10 +269,10 @@ export type typeOptions = {
 export default class Keyboard {
   constructor(private state: State) { }
   type(opts: typeOptions) {
-    const options = _.defaults(opts, {
+    const options = _.defaults({}, opts, {
       delay: 0,
-      simulated: false,
       force: false,
+      simulated: false,
       onError: _.noop,
       onEvent: _.noop,
       onBeforeEvent: _.noop,
@@ -256,6 +284,11 @@ export default class Keyboard {
       onNoMatchingSpecialChars: _.noop,
       onBeforeSpecialCharAction: _.noop,
     })
+
+    if (options.force) {
+      options.simulated = true
+    }
+
     debug('type:', options.chars, options)
 
     const el = options.$el.get(0)
@@ -379,6 +412,7 @@ export default class Keyboard {
     let data: string | undefined
     let location: number | undefined = keyDetails.location || 0
     let key: string | undefined
+    let code: string | undefined = keyDetails.code
     let eventConstructor = 'KeyboardEvent'
     let cancelable = true
 
@@ -437,11 +471,12 @@ export default class Keyboard {
 
     eventOptions = _.extend(
       eventOptions,
-      _.omit(
+      _.omitBy(
         {
           bubbles: true,
           cancelable,
           key,
+          code,
           charCode,
           location,
           keyCode,
@@ -450,7 +485,7 @@ export default class Keyboard {
           detail: 0,
           view: win,
         },
-        _.isUndefined as any
+        _.isUndefined
       )
     )
 
@@ -527,7 +562,7 @@ export default class Keyboard {
     return $native.keyup(keyWithModifiers)
   }
 
-  typeKey(el: HTMLTextLikeElement, key: KeyDetails, options) {
+  async typeKey(el: HTMLTextLikeElement, key: KeyDetails, options) {
 
     if (isModifier(key)) {
       const didFlag = this.flagModifier(key, true)
@@ -536,11 +571,11 @@ export default class Keyboard {
       }
       const keyWithModifiers = this.getModifierKeyDetails(key)
       debug('keydown:', key.key)
-      return $native.keydown(keyWithModifiers).return(null)
+      return await $native.keydown(keyWithModifiers).return(null)
     }
     debug('native keypress:', key.key)
     const keyWithModifiers = this.getModifierKeyDetails(key)
-    return $native.keypress(keyWithModifiers).return(null)
+    return await $native.keypress(keyWithModifiers).return(null)
 
     // const isDigit = isSingleDigitRe.test(key.text)
 
@@ -614,8 +649,11 @@ export default class Keyboard {
 
     const key = this.getModifierKeyDetails(_key)
 
+    let elToType
+
     debug('typeSimulatedKey options:', _.pick(options, ['keydown', 'keypress', 'textInput', 'input']))
     if (shouldIgnoreEvent('keydown', key.events) || this.fireSimulatedEvent(el, 'keydown', key, options)) {
+      elToType = this.getActiveEl(options)
       if (shouldIgnoreEvent('keypress', key.events) || this.fireSimulatedEvent(el, 'keypress', key, options)) {
         this.performSimulatedDefault(el, key, options)
         shouldIgnoreEvent('textInput', key.events) || this.fireSimulatedEvent(el, 'textInput', key, options)
@@ -681,133 +719,124 @@ export default class Keyboard {
 
   performSimulatedDefault(el: HTMLElement, key: KeyDetails, options: any) {
     debug('performSimulatedDefault', key.key)
-    const simulatedDefault = getSimulatedDefaultForKey(el, key)
+    const simulatedDefault = getSimulatedDefaultForKey(key)
 
 
-    const shouldUpdateValue = () => {
-      if (key.text && ($elements.isInput(el) || $elements.isTextarea(el))) {
-        const ml = el.maxLength
-        //# maxlength is -1 by default when omitted
-        //# but could also be null or undefined :-/
-        //# only care if we are trying to type a key
-        if (ml === 0 || ml > 0) {
-          //# check if we should update the value
-          //# and fire the input event
-          //# as long as we're under maxlength
-          if (!($elements.getNativeProp(el, 'value').length < ml)) {
-            return false
-          }
-        }
-      }
-      return true
-    }
-
-    if (!shouldUpdateValue()) {
-      debug('performSimulatedDefault:shouldUpdateValue?', false)
-      return
-    }
+    
     // const isBody = $elements.isBody(el)
     const isFocusable = $elements.isFocusable($dom.wrap(el))
     const isTextLike = $elements.isTextLike(el)
 
     // const isTypeableButNotTextLike = !isTextLike && isFocusable
 
-    if (isTextLike) {
-      let curText
 
-      let isValueChangeElement = false
+    if ($elements.isTextLike(el)) {
       if ($elements.isInput(el) || $elements.isTextarea(el)) {
-        isValueChangeElement = true
-        curText = $elements.getNativeProp(el, 'value')
+        const curText = $elements.getNativeProp(el, 'value')
+        simulatedDefault(el, key, options)
+        if (key.events.input) {
+          options.onValueChange(curText, el)
+        }
+      } else {
+        // el is contenteditable
+        simulatedDefault(el, key, options)
       }
-
-      simulatedDefault(el, key, options)
-
-      if (!key.text) {
-        key.events.input = false
-        key.events.textInput = false
-      }
-
-      if (options.prevText === null && isValueChangeElement) {
-        options.prevText = curText
-        debugger
-        options.onValueChange(options.prevText, el)
-      }
-
-      return shouldIgnoreEvent('input', key.events) || this.fireSimulatedEvent(el, 'input', key, options)
+      shouldIgnoreEvent('input', key.events) || this.fireSimulatedEvent(el, 'input', key, options)
+      return
     }
-    debug('not textlike', el)
-    return
+    return simulatedDefault(el, key, options)
+
+
+
+
+
+//   if(!key.text) {
+//     key.events.input = false
+//     key.events.textInput = false
+//   }
+
+//   if(key.changedTextFrom) {
+//     // options.prevText = curText
+//     // debugger
+//   }
+
+//   if(options.prevText === null && isValueChangeElement) {
+// }
+
+// return shouldIgnoreEvent('input', key.events) || this.fireSimulatedEvent(el, 'input', key, options)
+//     }
+// debug('not textlike', el)
+// return
   }
 
 
-  // handleSpecialChars (el, chars, options) {
-  //   options.key = chars
-  //   const { simulated } = options
+// handleSpecialChars (el, chars, options) {
+//   options.key = chars
+//   const { simulated } = options
 
-  //   if (simulated) {
-  //     return kb.specialCharsSimulated[chars].call(this, el, options)
+//   if (simulated) {
+//     return kb.specialCharsSimulated[chars].call(this, el, options)
+//   }
+
+//   return kb.specialChars[chars].call(this, el, options)
+// },
+
+// getKeyInfo (keyString) {
+//   const keyInfo = UsKeyboardLayout.keyboardMappings[keyString]
+
+//   if (keyInfo.key && keyInfo.key.length === 1) {
+//     keyInfo.text = keyInfo.key
+//   }
+
+//   const _activeModifiers = getActiveModifiers(state)
+
+//   _.extend(keyInfo, { modifiers: getModifiersValue(_activeModifiers) })
+
+//   return keyInfo
+// },
+
+// handleModifier (el, chars, options) {
+//   const modifier = modifierChars[chars]
+
+//   //# do nothing if already activated
+//   if (getActiveModifiers(state)[modifier]) {
+//     return
+//   }
+
+//   const _activeModifiers = getActiveModifiers(state)
+
+//   _activeModifiers[modifier] = true
+
+//   state('keyboardModifiers', _activeModifiers)
+
+//   return kb.simulateModifier(el, 'keydown', modifier, options)
+// },
+
+// simulateModifier (el, eventType, modifier, options) {
+//   return kb.fireSimulatedEvent(el, eventType, null, _.extend(options, {
+//     charCode: modifierCodeMap[modifier],
+//     id: _.uniqueId('char'),
+//     key: `<${modifier}>`,
+//   }))
+// },
+
+// keyup should be sent to the activeElement or body if null
+resetModifiers(doc: Document) {
+  // const activeEl = $elements.getActiveElByDocument(doc)
+  // const activeModifiers = getActiveModifiers(state)
+  // for (let modifier in activeModifiers) {
+  //   const isActivated = activeModifiers[modifier]
+  //   activeModifiers[modifier] = false
+  //   state('keyboardModifiers', _.clone(activeModifiers))
+  //   if (isActivated) {
+  //     kb.simulateModifier(activeEl, 'keyup', modifier, {
+  //       window,
+  //       onBeforeEvent () {},
+  //       onEvent () {},
+  //     })
   //   }
-
-  //   return kb.specialChars[chars].call(this, el, options)
-  // },
-
-  // getKeyInfo (keyString) {
-  //   const keyInfo = UsKeyboardLayout.keyboardMappings[keyString]
-
-  //   if (keyInfo.key && keyInfo.key.length === 1) {
-  //     keyInfo.text = keyInfo.key
-  //   }
-
-  //   const _activeModifiers = getActiveModifiers(state)
-
-  //   _.extend(keyInfo, { modifiers: getModifiersValue(_activeModifiers) })
-
-  //   return keyInfo
-  // },
-
-  // handleModifier (el, chars, options) {
-  //   const modifier = modifierChars[chars]
-
-  //   //# do nothing if already activated
-  //   if (getActiveModifiers(state)[modifier]) {
-  //     return
-  //   }
-
-  //   const _activeModifiers = getActiveModifiers(state)
-
-  //   _activeModifiers[modifier] = true
-
-  //   state('keyboardModifiers', _activeModifiers)
-
-  //   return kb.simulateModifier(el, 'keydown', modifier, options)
-  // },
-
-  // simulateModifier (el, eventType, modifier, options) {
-  //   return kb.fireSimulatedEvent(el, eventType, null, _.extend(options, {
-  //     charCode: modifierCodeMap[modifier],
-  //     id: _.uniqueId('char'),
-  //     key: `<${modifier}>`,
-  //   }))
-  // },
-
-  // keyup should be sent to the activeElement or body if null
-  resetModifiers(doc: Document) {
-    // const activeEl = $elements.getActiveElByDocument(doc)
-    // const activeModifiers = getActiveModifiers(state)
-    // for (let modifier in activeModifiers) {
-    //   const isActivated = activeModifiers[modifier]
-    //   activeModifiers[modifier] = false
-    //   state('keyboardModifiers', _.clone(activeModifiers))
-    //   if (isActivated) {
-    //     kb.simulateModifier(activeEl, 'keyup', modifier, {
-    //       window,
-    //       onBeforeEvent () {},
-    //       onEvent () {},
-    //     })
-    //   }
-    // }
-  }
+  // }
+}
 
   // const maybeFireSimulatedEvent = _.wrap(this.fireSimulatedEvent, (fn, ...args) => {
 

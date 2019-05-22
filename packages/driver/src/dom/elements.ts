@@ -1,21 +1,3 @@
-/* eslint-disable
-    default-case,
-    no-case-declarations,
-    no-cond-assign,
-    no-const-assign,
-    no-dupe-keys,
-    one-var,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-import { ThrowStatement } from 'babel-types'
 // NOT patched jquery
 import $ from 'jquery'
 import * as $jquery from './jquery'
@@ -347,6 +329,7 @@ const isNeedSingleValueChangeInputElement = (el: HTMLElement): el is HTMLSingleV
 }
 
 const canSetSelectionRangeElement = (el): el is HTMLElementCanSetSelectionRange => {
+  //TODO: If IE, all inputs can set selection range
   return isTextarea(el) || (isInput(el) && canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
 }
 
@@ -503,6 +486,14 @@ const getAllParents = (el: HTMLElement) => {
 
 const isSelector = ($el: JQuery<HTMLElement>, selector) => {
   return $el.is(selector)
+}
+
+const isDisabled = ($el:JQuery) => {
+  return $el.prop('disabled')
+}
+
+const isReadOnlyInput = ($el:JQuery) => {
+  return $el.prop('readonly')
 }
 
 const isDetached = ($el) => {
@@ -808,7 +799,16 @@ const getElements = ($el) => {
 const getContainsSelector = (text, filter = '') => {
   const escapedText = $utils.escapeQuotes(text)
 
-  return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+  // they may have written the filter as
+  // comma separated dom els, so we want to search all
+  // https://github.com/cypress-io/cypress/issues/2407
+  const filters = filter.trim().split(',')
+
+  const selectors = _.map(filters, (filter) => {
+    return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+  })
+
+  return selectors.join()
 }
 
 const priorityElement = "input[type='submit'], button, a, label"
@@ -924,6 +924,8 @@ export {
   isScrollOrAuto,
   isFocusable,
   isFocusableWhenNotDisabled,
+  isDisabled,
+  isReadOnlyInput,
   isAttached,
   isDetached,
   isAttachedEl,

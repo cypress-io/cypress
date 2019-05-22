@@ -5,6 +5,8 @@ const Promise = require('bluebird')
 // const debug = require('debug')('cypress:driver')
 const elements = require('../dom/elements')
 
+global.Promise = Promise
+
 // eslint-disable-next-line
 window.criRequest = function() {}
 
@@ -25,10 +27,20 @@ const init = () => {
       target: wsUrl,
       local: true,
     })
+    .timeout(2000)
     .then((cri_client) => {
       client = cri_client
     })
-    .catch(() => {})
+    // .catch/})
+    .catch((e) => {
+      if (e.name === 'TimeoutError') {
+        console.log('Timed out with', e)
+      }
+
+      throw e
+
+    })
+
   })
 }
 
@@ -78,36 +90,42 @@ const mouseEvent = (coords, type, modifiers) => {
   })
 }
 
-const keypress = (keyInfo) => {
-  return init().then(() => {
-    return Promise.all([keyDown(keyInfo), keyUp(keyInfo)])
-  })
+const keypress = async (keyInfo) => {
+  console.log('foo')
+  await init()
+  console.log({ client })
+  console.log('sdfsdfds')
+
+  return Promise.all([keyDown(keyInfo), keyUp(keyInfo)])
 }
 
-const keydown = (keyInfo) => {
-  return init().then(() => {
-    return keyDown(keyInfo)
-  })
+const keydown = async (keyInfo) => {
+  await init()
+
+  return keyDown(keyInfo)
+
 }
-const keyup = (keyInfo) => {
-  return init().then(() => {
-    return keyUp(keyInfo)
-  })
+const keyup = async (keyInfo) => {
+  await init()
+
+  return keyUp(keyInfo)
 }
 
-function keypressAll (keyInfoArray) {
-  return init().then(() => {
-    return Promise.all(
-      _.flatten(
-        keyInfoArray.map((keyInfo) => {
-          return [keyDown(keyInfo), keyUp(keyInfo)]
-        })
-      )
+async function keypressAll (keyInfoArray) {
+  await init()
+
+  return Promise.all(
+    _.flatten(
+      keyInfoArray.map((keyInfo) => {
+        return [keyDown(keyInfo), keyUp(keyInfo)]
+      })
     )
-  })
+  )
 }
 
 const keyDown = (keyInfo) => {
+  console.log(client)
+
   return Promise.resolve(
     client.send('Input.dispatchKeyEvent', {
       // type: text ? 'keyDown' : 'rawKeyDown',
@@ -141,7 +159,7 @@ const keyUp = (keyInfo) => {
   })
 }
 
-module.exports = {
+export {
   mouseDown,
   mouseUp,
   click,

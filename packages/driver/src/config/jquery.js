@@ -10,6 +10,7 @@ require('jquery.scrollto')
 const _ = require('lodash')
 
 const $dom = require('../dom')
+// const $elements = require('../dom/elements')
 
 //# force jquery to have the same visible
 //# and hidden logic as cypress

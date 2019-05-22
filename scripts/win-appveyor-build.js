@@ -19,9 +19,10 @@ shell.set('-e') // any error is fatal
 // https://www.appveyor.com/docs/environment-variables/
 
 const isRightBranch = () => {
-  const branch = process.env.APPVEYOR_REPO_BRANCH
+  const branch = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH || process.env.APPVEYOR_REPO_BRANCH
 
-  return branch === 'develop' || branch === 'issue-716-ffmpeg-packaging'
+  // TODO: remove 'webpack-runner'
+  return branch === 'develop' || branch === 'webpack-runner'
 }
 
 const isForkedPullRequest = () => {

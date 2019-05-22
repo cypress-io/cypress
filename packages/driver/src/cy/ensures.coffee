@@ -1,6 +1,7 @@
 _ = require("lodash")
 $dom = require("../dom")
 $utils = require("../cypress/utils")
+$elements = require('../dom/elements')
 
 VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
 
@@ -103,7 +104,7 @@ create = (state, expect) ->
   ensureReceivability = (subject, onFail) ->
     cmd = state("current").get("name")
 
-    if subject.prop("disabled")
+    if $elements.isDisabled(subject)
       node = $dom.stringify(subject)
 
       $utils.throwErrByPath("dom.disabled", {
@@ -114,7 +115,7 @@ create = (state, expect) ->
   ensureNotReadonly = (subject, onFail) ->
     cmd = state("current").get("name")
 
-    if subject.prop("readonly")
+    if $elements.isReadOnlyInput(subject)
       node = $dom.stringify(subject)
 
       $utils.throwErrByPath("dom.readonly", {

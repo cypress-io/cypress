@@ -20,6 +20,9 @@ REQUEST_DEFAULTS = {
   form: null
   gzip: true
   followRedirect: true
+  failOnStatusCode: true
+  retryOnNetworkFailure: true
+  retryOnStatusCodeFailure: false
 }
 
 REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
@@ -81,11 +84,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults(options, REQUEST_DEFAULTS, {
         log: true
-        timeout: config("responseTimeout")
-        failOnStatusCode: true
       })
 
       options.method = options.method.toUpperCase()
+
+      if options.retryOnStatusCodeFailure and not options.failOnStatusCode
+        $utils.throwErrByPath("request.status_code_flags_invalid")
 
       if _.has(options, "failOnStatus")
         $utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")

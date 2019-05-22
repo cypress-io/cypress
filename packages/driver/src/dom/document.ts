@@ -1,6 +1,6 @@
 const $jquery = require('./jquery')
 
-const docNode = Node.DOCUMENT_NODE
+const docNode = window.Node.DOCUMENT_NODE
 
 //TODO: make this not allow jquery
 const isDocument = (obj:HTMLElement | Document): obj is Document => {

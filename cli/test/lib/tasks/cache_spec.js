@@ -6,6 +6,7 @@ const fs = require(`${lib}/fs`)
 const state = require(`${lib}/tasks/state`)
 const cache = require(`${lib}/tasks/cache`)
 const stdout = require('../../support/stdout')
+const snapshot = require('../../support/snapshot')
 
 describe('lib/tasks/cache', () => {
   beforeEach(() => {
