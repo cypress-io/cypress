@@ -1,13 +1,15 @@
+const _ = require('lodash')
 const debug = require('debug')('cypress:server:stream_buffer')
 const stream = require('stream')
-const through2 = require('through2')
 
 function streamBuffer (initialSize = 2048) {
   let buffer = Buffer.allocUnsafe(initialSize)
   let bytesWritten = 0
   let finished = false
 
-  const onChunk = (chunk, enc, cb) => {
+  const readers = []
+
+  const onWrite = (chunk, enc, cb) => {
     if (chunk.length + bytesWritten > buffer.length) {
       let newBufferLength = buffer.length
 
@@ -30,46 +32,75 @@ function streamBuffer (initialSize = 2048) {
 
     bytesWritten += chunk.copy(buffer, bytesWritten)
 
-    return cb(null, chunk)
+    // emit in case there are readers waiting
+    writeable.emit('chunk', chunk)
+
+    cb()
   }
 
-  const onFlush = (cb) => {
+  const onFinal = (cb) => {
+    debug('stream buffer writeable final called')
     finished = true
     cb()
   }
 
-  const bufferer = through2(onChunk, onFlush)
-  const readers = []
+  const writeable = new stream.Writable({
+    write: onWrite,
+    final: onFinal,
+    autoDestroy: true,
+  })
 
-  bufferer.reader = () => {
+  writeable.createReadStream = () => {
     let bytesRead = 0
+    const readerId = _.uniqueId('reader')
+
+    const onRead = function (size) {
+      // if there are unread bytes in the buffer,
+      // send up to bytesWritten back
+      if (bytesRead < bytesWritten) {
+        const chunkLength = bytesWritten - bytesRead
+        const bytes = buffer.slice(bytesRead, bytesRead + chunkLength)
+        const bytesLength = bytes.length
+
+        debug('reading unread bytes from buffer %o', {
+          readerId, bytesRead, bytesWritten, chunkLength, readChunkLength: bytesLength,
+        })
+
+        bytesRead += bytesLength
+
+        // if we can still push more bytes into
+        // the buffer then do it
+        if (readable.push(bytes)) {
+          return onRead(size)
+        }
+      }
+
+      // if it's finished and there are no unread bytes, EOF
+      if (finished) {
+        // cleanup listeners that were added
+        writeable.removeListener('chunk', onRead)
+        writeable.removeListener('finish', onRead)
+
+        debug('buffered stream EOF %o', { readerId })
+
+        return readable.push(null)
+      }
+
+      // if we're not finished we may end up writing
+      // more data - or we may end
+      writeable.removeListener('chunk', onRead)
+      writeable.once('chunk', onRead)
+
+      // if the writeable stream buffer isn't finished
+      // yet - then read() will not be called again,
+      // so we restart reading when its finished
+      writeable.removeListener('finish', onRead)
+      writeable.once('finish', onRead)
+    }
 
     const readable = new stream.Readable({
-      read (size = initialSize) {
-        // if there are unread bytes in the buffer, send up to bytesWritten back
-        if (bytesRead < bytesWritten) {
-          const chunkLength = Math.min(size, bytesWritten)
-          const bytes = buffer.slice(bytesRead, chunkLength)
-
-          debug('reading unread bytes from buffer %o', { bytesRead, bytesWritten, readChunkLength: bytes.length, chunkLength, size })
-
-          bytesRead += bytes.length
-
-          return this.push(bytes)
-        }
-
-        // if there are no unread bytes, but the bufferer
-        // is still writing in, send an empty string
-        if (!finished) {
-          debug('no unread bytes, sending empty string %o', { bytesRead, bytesWritten })
-
-          return this.push('')
-        }
-
-        // if it's finished and there are no unread bytes, EOF
-        debug('buffered stream EOF')
-        this.push(null)
-      },
+      read: onRead,
+      autoDestroy: true,
     })
 
     readers.push(readable)
@@ -77,21 +108,20 @@ function streamBuffer (initialSize = 2048) {
     return readable
   }
 
-  bufferer.unpipeAll = () => {
-    readers.forEach((reader) => {
-      reader.unpipe() // unpipes from all destinations
-    })
+  writeable.unpipeAll = () => {
+    buffer = null // aggressive GC
+    _.invokeMap(readers, 'unpipe')
   }
 
-  bufferer._buffer = () => {
+  writeable._buffer = () => {
     return buffer
   }
 
-  bufferer._finished = () => {
+  writeable._finished = () => {
     return finished
   }
 
-  return bufferer
+  return writeable
 }
 
 module.exports = {
