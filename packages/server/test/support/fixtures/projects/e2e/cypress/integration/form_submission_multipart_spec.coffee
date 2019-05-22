@@ -1,23 +1,33 @@
-Cypress.Commands.add 'setFile', { prevSubject: "element" }, (element, filePath, title, description, copyright) ->
-  mimeTypes =
+{ Blob, _ } = Cypress
+
+Cypress.Commands.add 'setFile', { prevSubject: "element" }, (element, filePath) ->
+  mimeTypes = {
     jpeg: "image/jpeg"
     jpg: "image/jpeg"
     png: "image/png"
     pdf: "application/pdf"
+  }
+
   filePathSplitted = filePath.split('.').pop()
   mimeType = if mimeTypes[filePathSplitted] != undefined then mimeTypes[filePathSplitted] else null
 
-  cy.fixture(filePath, "base64").then (image) ->
-    Cypress.Blob.base64StringToBlob(image).then (blob) ->
+  fixtureOrReadFile = (filePath) ->
+    if _.startsWith(filePath, "/")
+      return cy.readFile(filePath, "base64")
+
+    return cy.fixture(filePath, "base64")
+
+  return fixtureOrReadFile(filePath).then (image) ->
+    return Blob.base64StringToBlob(image).then (blob) ->
       elementNode = element[0]
       file = new File([ blob ], filePath, type: mimeType)
       dataTransfer = new DataTransfer
-      dataTransfer.items.add file
+      dataTransfer.items.add(file)
       elementNode.files = dataTransfer.files
-      elementNode.dispatchEvent new Event("change", bubbles: true)
+      elementNode.dispatchEvent new Event("change", { bubbles: true })
 
-describe "<form> submissions", =>
-  it "can submit a form correctly", =>
+describe "<form> submissions", ->
+  it "can submit a form correctly", ->
     cy
     .visit("/")
     .get("input[type=text]")
@@ -27,7 +37,7 @@ describe "<form> submissions", =>
     .document()
     .contains('hello+world')
 
-  it "can submit a multipart/form-data form correctly", =>
+  it "can submit a multipart/form-data form correctly", ->
     cy
     .visit("/multipart-form-data")
     .get("input[type=text]")
@@ -37,8 +47,8 @@ describe "<form> submissions", =>
     .document()
     .contains('hello world')
 
-  context "can submit a multipart/form-data form with attachments", =>
-    testUpload = (fixturePath, containsOpts) ->
+  context "can submit a multipart/form-data form with attachments", ->
+    testUpload = (fixturePath, containsOpts= {}) ->
       cy.visit("/multipart-with-attachment?fixturePath=#{fixturePath}")
       .get("input[type=file]")
       .setFile(fixturePath)
@@ -47,24 +57,21 @@ describe "<form> submissions", =>
       .document()
       .contains('files match', containsOpts)
 
-    it "image/png", =>
+    it "image/png", ->
       testUpload("../../static/javascript-logo.png")
 
-    it "application/pdf", =>
+    it "application/pdf", ->
       testUpload("sample.pdf")
 
-    it "image/jpeg", =>
+    it "image/jpeg", ->
       testUpload("sample.jpg")
 
     ## https://github.com/cypress-io/cypress/issues/4253
-    it "large application/pdf", =>
+    it "large application/pdf", ->
       testUpload("bigger-sample.pdf")
 
     ## https://github.com/cypress-io/cypress/issues/4240
-    it "large image/jpeg", =>
-      ## 16MB image, too big to include with git repo
-      cy.exec("curl https://test-page-speed.cypress.io/files/huge-image.jpg -o cypress/fixtures/huge-image.jpg")
-
-      testUpload("huge-image.jpg", {
+    it "large image/jpeg", ->
+      testUpload(Cypress.env("PATH_TO_LARGE_IMAGE"), {
         timeout: 120000
       })
