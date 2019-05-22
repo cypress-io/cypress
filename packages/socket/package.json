@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
-  "browser": "./lib/client.js",
   "scripts": {
     "pretest": "npm run check-deps-pre",
     "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",

@@ -1,9 +1,9 @@
 const fs = require('fs')
 const path = require('path')
 const server = require('socket.io')
-const version = require('socket.io-client/package.json').version
+const version = require('socket.io/package').version
 const clientPath = require.resolve('socket.io-client')
-const client = require('./client')
+const client = require(clientPath)
 
 module.exports = {
   server,

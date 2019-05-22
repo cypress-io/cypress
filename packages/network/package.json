@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "build-js": "bin-up tsc --project .",
-    "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "clean-deps": "rm -rf node_modules"
   },
   "dependencies": {
     "bluebird": "3.5.3",
