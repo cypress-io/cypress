@@ -303,9 +303,10 @@ createRetryingRequestStream = (opts = {}) ->
   retryStream = duplexify(reqBodyBuffer, delayStream)
 
   cleanup = ->
-    ## null req body out to free memory
-    reqBodyBuffer.unpipeAll()
-    reqBodyBuffer = null
+    if reqBodyBuffer
+      ## null req body out to free memory
+      reqBodyBuffer.unpipeAll()
+      reqBodyBuffer = null
 
   emitError = (err) ->
     retryStream.emit("error", err)
