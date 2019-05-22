@@ -57,13 +57,25 @@ controllers = {
     res.send('<img src="/immediate-reset?load-img"/>')
 
   printBodyThirdTimeForm: (req, res) ->
-    res.send("<html><body><form method='POST' action='/print-body-third-time'><input type='text' name='foo'/><input type='submit'/></form></body></html>")
+    res.send(
+      """
+      <html>
+        <body>
+          <form method='POST' action='/print-body-third-time'>
+            <input type='text' name='foo'/>
+            <input type='submit'/>
+          </form>
+        </body>
+      </html>
+      """
+    )
 
   printBodyThirdTime: (req, res) ->
     console.log(req.body)
 
     res.type('html')
-    if counts[req.url] == 3
+
+    if counts[req.url] is 3
       return res.send(JSON.stringify(req.body))
 
     req.socket.destroy()

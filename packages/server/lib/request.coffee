@@ -302,8 +302,16 @@ createRetryingRequestStream = (opts = {}) ->
   reqBodyBuffer = streamBuffer()
   retryStream = duplexify(reqBodyBuffer, delayStream)
 
+  cleanup = ->
+    if reqBodyBuffer
+      ## null req body out to free memory
+      reqBodyBuffer.unpipeAll()
+      reqBodyBuffer = null
+
   emitError = (err) ->
     retryStream.emit("error", err)
+
+    cleanup()
 
   tryStartStream = ->
     ## if our request has been aborted
@@ -324,7 +332,7 @@ createRetryingRequestStream = (opts = {}) ->
     ## into the reqStream, then reapply this now
     if req
       reqStream.emit('pipe', req)
-      reqBodyBuffer.reader().pipe(reqStream)
+      reqBodyBuffer.createReadStream().pipe(reqStream)
 
     ## forward the abort call to the underlying request
     retryStream.abort = ->
@@ -390,9 +398,7 @@ createRetryingRequestStream = (opts = {}) ->
         onElse: ->
           debug("successful response received", { requestId })
 
-          ## null req body out to free memory
-          reqBodyBuffer.unpipeAll()
-          reqBodyBuffer = null
+          cleanup()
 
           ## forward the response event upwards which should happen
           ## prior to the pipe event, same as what request does
