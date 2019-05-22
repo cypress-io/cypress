@@ -65,39 +65,39 @@ jobs:
 
       # need to restore a separate cache for each package.json
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-cli-deps
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-root-deps
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-driver
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-example
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
+          key: v7-{{ arch }}-{{ .Branch }}-deps-electron
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-extension
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-reporter
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-runner
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-server
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-socket
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-static
       - restore_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-ts
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
@@ -119,73 +119,73 @@ jobs:
 
       # save each node_modules folder per package
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
           paths:
             - cli/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
           paths:
             - node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
           paths:
             - packages/coffee/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
           paths:
             - packages/desktop-gui/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
+          key: v6-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
           paths:
             - packages/driver/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
           paths:
             - packages/example/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
+          key: v7-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
           paths:
             - packages/electron/node_modules
             - ~/.cache/electron
             - ~/.electron
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
           paths:
             - packages/extension/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
           paths:
             - packages/https-proxy/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
           paths:
             - packages/launcher/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
+          key: v1-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
           paths:
             - packages/network/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
           paths:
             - packages/reporter/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
           paths:
             - packages/runner/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
+          key: v8-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
           paths:
             - packages/server/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
           paths:
             - packages/socket/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
           paths:
             - packages/static/node_modules
       - save_cache:
-          key: v12-{{ arch }}-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
+          key: v5-{{ arch }}-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
           paths:
             - packages/ts/node_modules
 
