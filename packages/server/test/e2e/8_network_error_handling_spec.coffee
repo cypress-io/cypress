@@ -268,6 +268,10 @@ describe "e2e network error handling", ->
       delete process.env.HTTP_PROXY
       delete process.env.NO_PROXY
 
+    afterEach ->
+      if @debugProxy
+        @debugProxy.stop()
+
     it "baseurl check tries 5 times in run mode", ->
       e2e.exec(@, {
         config: {
@@ -359,9 +363,11 @@ describe "e2e network error handling", ->
             ## server as expected
             return true
 
-      new DebugProxy({
+      @debugProxy = new DebugProxy({
         onConnect
       })
+
+      @debugProxy
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
@@ -377,3 +383,40 @@ describe "e2e network error handling", ->
 
           expect(connectCounts["localhost:#{HTTPS_PORT}"]).to.be.gte(3)
           expect(connectCounts["localhost:#{ERR_HTTPS_PORT}"]).to.be.gte(4)
+
+    it "does not connect to the upstream proxy for the SNI server request", ->
+      onConnect = sinon.spy ->
+        true
+
+      @debugProxy = new DebugProxy({
+        onConnect
+      })
+
+      @debugProxy
+      .start(PROXY_PORT)
+      .then =>
+        process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
+        process.env.NO_PROXY = "localhost:13373" ## proxy everything except for the irrelevant test
+
+        e2e.exec(@, {
+          spec: "https_passthru_spec.js"
+          snapshot: true
+          expectedExitCode: 0
+          config: {
+            baseUrl: "https://localhost:#{HTTPS_PORT}"
+          }
+        })
+        .then ->
+          expect(onConnect).to.be.calledTwice
+
+          ## 1st request: verifying base url
+          expect(onConnect.firstCall).to.be.calledWithMatch({
+            host: 'localhost'
+            port: HTTPS_PORT
+          })
+
+          ## 2nd request: <img> load from spec
+          expect(onConnect.secondCall).to.be.calledWithMatch({
+            host: 'localhost'
+            port: HTTPS_PORT
+          })

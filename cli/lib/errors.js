@@ -75,7 +75,7 @@ const notInstalledCI = (executable) => {
 }
 
 const nonZeroExitCodeXvfb = {
-  description: 'XVFB exited with a non zero exit code.',
+  description: 'Xvfb exited with a non zero exit code.',
   solution: stripIndent`
     There was a problem spawning Xvfb.
 
@@ -84,9 +84,9 @@ const nonZeroExitCodeXvfb = {
 }
 
 const missingXvfb = {
-  description: 'Your system is missing the dependency: XVFB',
+  description: 'Your system is missing the dependency: Xvfb',
   solution: stripIndent`
-    Install XVFB and run Cypress again.
+    Install Xvfb and run Cypress again.
 
     Read our documentation on dependencies for more information:
 
@@ -113,7 +113,7 @@ const invalidSmokeTestDisplayError = {
   description: 'Cypress verification failed.',
   solution  (msg) {
     return stripIndent`
-      Cypress failed to start after spawning a new XVFB server.
+      Cypress failed to start after spawning a new Xvfb server.
 
       The error logs we received were:
 
