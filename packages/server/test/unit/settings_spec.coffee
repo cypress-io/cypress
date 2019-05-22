@@ -133,7 +133,7 @@ describe "lib/settings", ->
       @options = {
         configFile: false
       }
-    
+
     it ".exists passes", ->
       settings.exists(@projectRoot, @options)
       .then (exists) ->
@@ -160,11 +160,11 @@ describe "lib/settings", ->
 
     afterEach ->
       fs.removeAsync("#{@projectRoot}#{@options.configFile}")
-    
+
     it ".exists fails when configFile doesn't exist", ->
       settings.exists(@projectRoot, @options)
       .catch (error) ->
-        expect(error.type).to.equal('PROJECT_DOES_NOT_EXIST')
+        expect(error.type).to.equal('CONFIG_FILE_NOT_FOUND')
 
     it ".write creates configFile" , ->
       settings.write(@projectRoot, { foo: "bar" }, @options)

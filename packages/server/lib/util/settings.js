@@ -104,7 +104,7 @@ module.exports = {
       return memo
 
     }
-      , _.cloneDeep(obj))
+    , _.cloneDeep(obj))
   },
 
   configFile (options = {}) {
@@ -144,7 +144,7 @@ module.exports = {
       //# cypress.json does not exist, we missing project
       log('cannot find file %s', file)
 
-      return this._err('PROJECT_DOES_NOT_EXIST', this.configFile(options), projectRoot)
+      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
         throw err

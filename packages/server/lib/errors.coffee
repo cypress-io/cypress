@@ -678,9 +678,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Learn more at https://on.cypress.io/reporters
       """
-    when "PROJECT_DOES_NOT_EXIST"
+    when "CONFIG_FILE_NOT_FOUND"
       """
-      Could not find any tests to run.
+      Could not find a Cypress configuration file, exiting.
 
       We looked but did not find a #{chalk.blue(arg1)} file in this folder: #{chalk.blue(arg2)}
       """

@@ -367,7 +367,7 @@ describe "lib/cypress", ->
         ])
       .each(ensureDoesNotExist)
       .then =>
-        @expectExitWithErr("PROJECT_DOES_NOT_EXIST", @pristinePath)
+        @expectExitWithErr("CONFIG_FILE_NOT_FOUND", @pristinePath)
 
     it "does not scaffold integration or example specs when runMode", ->
       settings.write(@pristinePath, {})
@@ -875,7 +875,7 @@ describe "lib/cypress", ->
           })
 
           @expectExitWith(0)
-          
+
     describe "--config-file", ->
       beforeEach ->
         @filename = "abcdefgh.test.json"
@@ -904,7 +904,7 @@ describe "lib/cypress", ->
               "--config-file",
               @filename
             ]).then =>
-              @expectExitWithErr("PROJECT_DOES_NOT_EXIST", @filename, @todosPath)
+              @expectExitWithErr("CONFIG_FILE_NOT_FOUND", @filename, @todosPath)
 
   ## most record mode logic is covered in e2e tests.
   ## we only need to cover the edge cases / warnings
