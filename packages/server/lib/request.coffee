@@ -331,7 +331,7 @@ createRetryingRequestStream = (opts = {}) ->
     ## into the reqStream, then reapply this now
     if req
       reqStream.emit('pipe', req)
-      reqBodyBuffer.reader().pipe(reqStream)
+      reqBodyBuffer.createReadStream().pipe(reqStream)
 
     ## forward the abort call to the underlying request
     retryStream.abort = ->
