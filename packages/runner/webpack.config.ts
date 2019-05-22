@@ -10,7 +10,7 @@ import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
 const mode = process.env.NODE_ENV as ('development' | 'production' | 'test' | 'reporter') || 'development'
 const webpackmode = mode === 'production' ? mode : 'development'
 
-const isDevServer = !!process.env.DEV_SERVER
+// const isDevServer = !!process.env.DEV_SERVER
 const config: webpack.Configuration = {
   entry: {
     cypress_runner: ['./src/index.js'],
@@ -94,7 +94,6 @@ const config: webpack.Configuration = {
               importer: function(...args) {
 								args[0] = args[0].replace(/\\/g, '/')
 								args[1] = args[1].replace(/\\/g, '/')
-								console.log(args)
 								return sassGlobImporter.apply(this, args)
               },
             },
@@ -119,7 +118,7 @@ const config: webpack.Configuration = {
     // new DebugWebpackPlugin(),
     // new debugPlugin(),
     new HtmlWebpackPlugin({
-      template: isDevServer ? './static/index.dev.html' : './static/index.html',
+      template: './static/index.html',
       inject: false,
     }),
     new CleanWebpackPlugin(),
@@ -140,7 +139,7 @@ const config: webpack.Configuration = {
       excludeModules: /main\.scss/,
     },
     noInfo: true,
-    writeToDisk: (filepath) => /index\.html/.test(filepath),
+    writeToDisk: true,
     headers: {
       "Access-Control-Allow-Origin": "*",
     }

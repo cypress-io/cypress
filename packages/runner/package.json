@@ -10,7 +10,7 @@
     "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "webpack --mode=production",
     "prewatch": "npm run check-deps-pre",
-    "watch": "webpack --watch",
+    "watch": "webpack-dev-server",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean": "zunder clean",
