@@ -21,8 +21,7 @@ shell.set('-e') // any error is fatal
 const isRightBranch = () => {
   const branch = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH || process.env.APPVEYOR_REPO_BRANCH
 
-  // TODO: remove 'webpack-runner'
-  return branch === 'develop' || branch === 'webpack-runner'
+  return branch === 'develop'
 }
 
 const isForkedPullRequest = () => {

@@ -371,7 +371,7 @@ describe('<Command />', () => {
     let runnablesStore
     let command
 
-    beforeEach(() => {
+    before(() => {
       clock = sinon.useFakeTimers()
     })
 
@@ -383,6 +383,10 @@ describe('<Command />', () => {
         events={events}
         runnablesStore={runnablesStore}
       />)
+    })
+
+    after(() => {
+      clock.restore()
     })
 
     describe('on mouse over', () => {

@@ -22,12 +22,16 @@ const getElement = (props) => {
 describe('scroller', () => {
   let clock
 
-  beforeEach(() => {
+  before(() => {
     clock = sinon.useFakeTimers()
   })
 
   beforeEach(() => {
     scroller.__reset()
+  })
+
+  after(() => {
+    clock.restore()
   })
 
   it('throws an error if attempting to scroll an element before setting a container', () => {

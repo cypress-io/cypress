@@ -58,18 +58,16 @@ copyAllToDist = (distDir) ->
     ## copies the package to dist
     ## including the default paths
     ## and any specified in package.json files
-    Promise.resolve(fs.readJsonAsync(pathToPackageJson(pkg)))
+    fs.readJsonAsync(pathToPackageJson(pkg))
     .then (json) ->
       ## grab all the files
       ## and default included paths
       ## and convert to relative paths
-      Promise.resolve(
-        DEFAULT_PATHS
-        .concat(json.files or [])
-        .concat(json.main or [])
-        .map (file) ->
-          path.join(pkg, file)
-      )
+      DEFAULT_PATHS
+      .concat(json.files or [])
+      .concat(json.main or [])
+      .map (file) ->
+        path.join(pkg, file)
       .map(copyRelativePathToDist, {concurrency: 1})
 
         ## fs-extra concurrency tests (copyPackage / copyRelativePathToDist)

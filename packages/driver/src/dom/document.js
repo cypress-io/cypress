@@ -1,6 +1,6 @@
 const $jquery = require('./jquery')
 
-const docNode = window.Node.DOCUMENT_NODE
+const docNode = Node.DOCUMENT_NODE
 
 const isDocument = (obj) => {
   try {

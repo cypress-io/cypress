@@ -1,7 +1,6 @@
 _ = require("lodash")
 fse = require("fs-extra")
 cp = require("child_process")
-execa = require('execa')
 path = require("path")
 Promise = require("bluebird")
 os = require("os")
@@ -16,24 +15,28 @@ shouldSkipProjectTest = () ->
   os.platform() == "win32"
 
 runSmokeTest = (buildAppExecutable) ->
-  rand = "" + Math.random()
-  console.log("executable path #{buildAppExecutable}")
+  new Promise (resolve, reject) ->
+    rand = "" + Math.random()
+    console.log("executable path #{buildAppExecutable}")
 
-  hasRightResponse = (stdout) ->
-    # there could be more debug lines in the output, so find 1 line with
-    # expected random value
-    lines = stdout.split('\n').map((s) -> s.trim())
-    return lines.includes(rand)
+    hasRightResponse = (stdout) ->
+      # there could be more debug lines in the output, so find 1 line with
+      # expected random value
+      lines = stdout.split('\n').map((s) -> s.trim())
+      return lines.includes(rand)
 
-  execa "#{buildAppExecutable}", ["--smoke-test", "--ping=#{rand}"], {timeout: 10000}
-  .catch (err) ->
-    console.error("smoke test failed with error %s", err.message)
-    throw err
-  .then ({stdout}) ->
-    stdout = stdout.replace(/\s/, "")
-    if !hasRightResponse(stdout)
-      throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
-    console.log("smokeTest passes")
+    cp.exec "#{buildAppExecutable} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
+      stdout = stdout.replace(/\s/, "")
+
+      if err
+        console.error("smoke test failed with error %s", err.message)
+        return reject(err)
+
+      if !hasRightResponse(stdout)
+        throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
+      else
+        console.log("smokeTest passes")
+        resolve()
 
 runProjectTest = (buildAppExecutable, e2e) ->
   if shouldSkipProjectTest()

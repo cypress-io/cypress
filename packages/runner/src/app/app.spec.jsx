@@ -1,8 +1,9 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
+import driver from '@packages/driver'
 
-import * as reporter from '@packages/reporter'
+import reporter from '../../../reporter'
 import Message from '../message/message'
 import State from '../lib/state'
 
@@ -39,6 +40,13 @@ const shallowRender = (component) => {
 }
 
 describe('<App />', () => {
+  beforeEach(() => {
+    driver.$ = () => ({
+      on: () => ({
+        trigger () {},
+      }),
+    })
+  })
 
   it('renders the reporter wrap with the reporter width', () => {
     const props = createProps()

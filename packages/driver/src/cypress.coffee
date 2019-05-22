@@ -160,8 +160,8 @@ class $Cypress
   ## or parsed. we have not received any custom commands
   ## at this point
   onSpecWindow: (specWindow) ->
-    logFn = (args...) =>
-      @log.apply(@, args)
+    logFn = =>
+      @log.apply(@, arguments)
 
     ## create cy and expose globally
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)

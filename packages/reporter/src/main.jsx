@@ -84,4 +84,4 @@ if (window.Cypress) {
   }
 }
 
-export { Reporter }
+export default { Reporter }

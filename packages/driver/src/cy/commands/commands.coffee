@@ -10,7 +10,7 @@ command = (ctx, name, args...) ->
       args: { name, cmds }
     })
 
-  ctx[name].apply(window, args)
+  ctx[name].apply(null, args)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addChainer({
@@ -22,5 +22,5 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     command: (args...) ->
       args.unshift(cy)
 
-      command.apply(window, args)
+      command.apply(null, args)
   })

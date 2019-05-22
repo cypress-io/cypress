@@ -1,3 +1,0 @@
---require 'test/test-setup'
---watch-extensions ts,jsx,tsx
---file 'test/helper'
