@@ -1,7 +1,7 @@
 /**
  * Test that plugin authors can write .d.ts files to extend Cypress types
  * Unfortunately we cannot test that vendor types located in node_modules are working
- * since those are copied as park of the deploy process
+ * since those are copied as part of the deploy process
  *
  */
 
