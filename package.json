@@ -73,7 +73,7 @@
     "@cypress/env-or-json-file": "2.0.0",
     "@cypress/npm-run-all": "4.0.5",
     "@cypress/questions-remain": "1.0.1",
-    "@cypress/set-commit-status": "1.3.4",
+    "@cypress/github-commit-status-check": "1.4.1",
     "@types/bluebird": "3.5.21",
     "@types/chai": "3.5.2",
     "@types/debug": "4.1.4",
