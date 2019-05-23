@@ -25,6 +25,15 @@ displayFlags = (obj, mapper) ->
   .join("\n")
   .value()
 
+displayRetriesRemaining = (tries) ->
+  times = pluralize('time', tries)
+
+  lastTryNewLine = if tries is 1 then "\n" else ""
+
+  chalk.gray(
+    "We will try connecting to it #{tries} more #{times}...#{lastTryNewLine}"
+  )
+
 warnIfExplicitCiBuildId = (ciBuildId) ->
   if not ciBuildId
     return ""
@@ -637,20 +646,36 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CANNOT_CONNECT_BASE_URL"
       """
-      Cypress could not verify that the server set as your `baseUrl` is running:
-
-        > #{chalk.blue(arg1)}
-
-      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
+      Cypress failed to verify that your server is running.
 
       Please start this server and then run Cypress again.
       """
     when "CANNOT_CONNECT_BASE_URL_WARNING"
       """
-      Cypress could not verify that the server set as your `baseUrl` is running: #{arg1}
+      Cypress could not verify that this server is running:
 
-      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
+        > #{chalk.blue(arg1)}
+
+      This server has been configured as your `baseUrl`, and tests will likely fail if it is not running.
       """
+    when "CANNOT_CONNECT_BASE_URL_RETRYING"
+      switch arg1.attempt
+        when 1
+          """
+          Cypress could not verify that this server is running:
+
+            > #{chalk.blue(arg1.baseUrl)}
+
+          We are verifying this server because it has been configured as your `baseUrl`.
+
+          Cypress automatically waits until your server is accessible before running tests.
+
+          #{displayRetriesRemaining(arg1.remaining)}
+          """
+        else
+          """
+          #{displayRetriesRemaining(arg1.remaining)}
+          """
     when "INVALID_REPORTER_NAME"
       """
       Could not load reporter by name: #{chalk.yellow(arg1.name)}
@@ -704,7 +729,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
 
       To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
@@ -712,7 +737,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
 
       Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
@@ -720,7 +745,31 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
 
       To upgrade your account, please visit your billing to upgrade to another billing plan.
 

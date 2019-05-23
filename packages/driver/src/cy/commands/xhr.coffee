@@ -10,6 +10,12 @@ server = null
 getServer = ->
   server ? unavailableErr()
 
+cancelPendingXhrs = ->
+  if server
+    server.cancelPendingXhrs()
+
+  return null
+
 reset = ->
   if server
     server.restore()
@@ -126,6 +132,9 @@ startXhrServer = (cy, state, config) ->
             when xhr.aborted
               indicator = "aborted"
               "(aborted)"
+            when xhr.canceled
+              indicator = "aborted"
+              "(canceled)"
             when xhr.status > 0
               xhr.status
             else
@@ -134,9 +143,9 @@ startXhrServer = (cy, state, config) ->
 
           indicator ?= if /^2/.test(status) then "successful" else "bad"
 
-          {
+          return {
+            indicator,
             message: "#{xhr.method} #{status} #{stripOrigin(xhr.url)}"
-            indicator: indicator
           }
       })
 
@@ -178,6 +187,15 @@ startXhrServer = (cy, state, config) ->
       if log = logs[xhr.id]
         log.snapshot("aborted").error(err)
 
+    onXhrCancel: (xhr) ->
+      setResponse(state, xhr)
+
+      if log = logs[xhr.id]
+        log.snapshot("canceled").set({
+          ended: true,
+          state: "failed"
+        })
+
     onAnyAbort: (route, xhr) =>
       if route and _.isFunction(route.onAbort)
         route.onAbort.call(cy, xhr)
@@ -214,6 +232,13 @@ defaults = {
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
+
+  ## if our page is going away due to
+  ## a form submit / anchor click then
+  ## we need to cancel all pending
+  ## XHR's so the command log displays
+  ## correctly
+  Cypress.on("page:end", cancelPendingXhrs)
 
   Cypress.on "test:start", ->
     ## reset the existing server

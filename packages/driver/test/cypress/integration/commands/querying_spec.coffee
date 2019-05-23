@@ -472,17 +472,19 @@ describe "src/cy/commands/querying", ->
       cy.on "internal:commandRetry", _.after 2, ->
         cy.$$("body").append(missingEl)
 
-      ## in this example our test has been running 200ms
-      ## but the timeout is below this amount, and it
-      ## still passes because the total running time is
-      ## not factored in (which is correct)
+      defaultCommandTimeout = Cypress.config('defaultCommandTimeout')
+
+      ## in this example our test has been running 300ms
+      ## but the default command timeout is below this amount,
+      ## and the test still passes because the timeout is only
+      ## into each command and not the total overall running time
       cy
-        .wait(400)
-        .get("#missing-el", {timeout: 225})
+        .wait(defaultCommandTimeout + 100)
+        .get("#missing-el", { timeout: defaultCommandTimeout + 50 })
         .then ->
           ## it should reset the timeout back
-          ## to 200 after successfully finished get method
-          expect(cy.timeout()).to.eq(200)
+          ## to 200 after successfully finishing 'get' method
+          expect(cy.timeout()).to.eq(defaultCommandTimeout)
 
     it "cancels existing promises", (done) ->
       cy.stub(Cypress.runner, "stop")
@@ -730,18 +732,17 @@ describe "src/cy/commands/querying", ->
           expect(@lastLog.get("$el").get(0)).not.to.be.ok
 
       it "logs route aliases", ->
-        cy
-          .visit("http://localhost:3500/fixtures/jquery.html")
-          .server()
-          .route(/users/, {}).as("getUsers")
-          .window().then { timeout: 2000 }, (win) ->
-            win.$.get("/users")
-          .get("@getUsers").then ->
-            expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
-              message: "@getUsers"
-              referencesAlias: {name: "getUsers"}
-              aliasType: "route"
-            }
+        cy.visit("http://localhost:3500/fixtures/jquery.html")
+        cy.server()
+        cy.route(/users/, {}).as("get.users")
+        cy.window().then { timeout: 2000 }, (win) ->
+          win.$.get("/users")
+        cy.get("@get.users").then ->
+          expect(@lastLog.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
+            message: "@get.users"
+            referencesAlias: {name: "get.users"}
+            aliasType: "route"
+          }
 
       it "logs primitive aliases", (done) ->
         cy.on "internal:log", (attrs, log) ->
@@ -883,6 +884,15 @@ describe "src/cy/commands/querying", ->
             .get("@getUsers").then (xhr) ->
               expect(xhr.url).to.include "/users"
 
+        it "handles dots in alias name", ->
+          cy.server()
+          cy.route(/users/, {}).as("get.users")
+          cy.visit("http://localhost:3500/fixtures/jquery.html")
+          cy.window().then { timeout: 2000 }, (win) ->
+            win.$.get("/users")
+          cy.get("@get.users").then (xhr) ->
+            expect(xhr.url).to.include "/users"
+
         it "returns null if no xhr is found", ->
           cy
             .server()
@@ -905,6 +915,20 @@ describe "src/cy/commands/querying", ->
               expect(xhrs).to.be.an("array")
               expect(xhrs[0].url).to.include "/users?num=1"
               expect(xhrs[1].url).to.include "/users?num=2"
+
+        it "returns an array of xhrs when dots in alias name", ->
+          cy.visit("http://localhost:3500/fixtures/jquery.html")
+          cy.server()
+          cy.route(/users/, {}).as("get.users")
+          cy.window().then { timeout: 2000 }, (win) ->
+            Promise.all([
+              win.$.get("/users", {num: 1})
+              win.$.get("/users", {num: 2})
+            ])
+          cy.get("@get.users.all").then (xhrs) ->
+            expect(xhrs).to.be.an("array")
+            expect(xhrs[0].url).to.include "/users?num=1"
+            expect(xhrs[1].url).to.include "/users?num=2"
 
         it "returns the 1st xhr", ->
           cy
@@ -931,6 +955,18 @@ describe "src/cy/commands/querying", ->
               ])
             .get("@getUsers.2").then (xhr2) ->
               expect(xhr2.url).to.include "/users?num=2"
+
+        it "returns the 2nd xhr when dots in alias", ->
+          cy.visit("http://localhost:3500/fixtures/jquery.html")
+          cy.server()
+          cy.route(/users/, {}).as("get.users")
+          cy.window().then { timeout: 2000 }, (win) ->
+            Promise.all([
+              win.$.get("/users", {num: 1})
+              win.$.get("/users", {num: 2})
+            ])
+          cy.get("@get.users.2").then (xhr2) ->
+            expect(xhr2.url).to.include "/users?num=2"
 
         it "returns the 3rd xhr as null", ->
           cy
@@ -1203,6 +1239,29 @@ describe "src/cy/commands/querying", ->
 
       cy.contains("form", "click me").then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
+
+    it "searches all els in comma separated filter", ->
+      cy.contains("a,button", "Naruto").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("a")
+
+      cy.contains("a,button", "Boruto").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("button")
+
+    it "searches all els in comma separated filter with spaces", ->
+      aText = "Naruto"
+      bText = "Boruto"
+
+      cy.contains("a, button", aText).then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("a")
+        expect($el.text()).to.eq(aText)
+
+      cy.contains("a, button", bText).then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("button")
+        expect($el.text()).to.eq(bText)
 
     it "favors input type=submit", ->
       input = cy.$$("#input-type-submit input")

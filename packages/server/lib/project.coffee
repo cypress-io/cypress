@@ -64,6 +64,7 @@ class Project extends EE
       report:       false
       onFocusTests: ->
       onError: ->
+      onWarning: ->
       onSettingsChanged: false
     }
 
@@ -72,6 +73,8 @@ class Project extends EE
         console.log("memory info", process.memoryUsage())
 
       @memoryCheck = setInterval(logMemory, 1000)
+
+    @onWarning = options.onWarning
 
     @getConfig(options)
     .tap (cfg) =>
@@ -90,7 +93,7 @@ class Project extends EE
 
         return config.updateWithBackgroundValues(cfg, modifiedCfg)
     .then (cfg) =>
-      @server.open(cfg, @)
+      @server.open(cfg, @, options.onWarning)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
