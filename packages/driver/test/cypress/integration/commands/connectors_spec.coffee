@@ -657,7 +657,7 @@ describe "src/cy/commands/connectors", ->
           cy.wrap(undefined).invoke("foo")
 
         it "throws when property value is undefined", (done) ->
-          cy.on "ftest:ail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include "Timed out retrying: cy.invoke() errored because the property: 'foo' is not a function, and instead returned a 'undefined' value."
@@ -740,7 +740,7 @@ describe "src/cy/commands/connectors", ->
           foo:  -> throw err
         }
 
-        cy.wrap(obj).its("foo").should("throw", err)
+        cy.wrap(obj).its("foo").should("throw", "nope cant access me")
 
       it "returns property", ->
         cy.noop({baz: "baz"}).its("baz").then (num) ->
