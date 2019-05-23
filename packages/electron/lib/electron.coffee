@@ -72,6 +72,10 @@ module.exports = {
 
       debug("spawning %s with args", execPath, argv)
 
+      if debug.enabled
+        ## enable the internal chromium logger
+        argv.push("--enable-logging")
+
       cp.spawn(execPath, argv, {stdio: "inherit"})
       .on "close", (code) ->
         debug("electron closing with code", code)

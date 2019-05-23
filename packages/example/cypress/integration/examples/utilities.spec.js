@@ -81,6 +81,22 @@ context('Utilities', () => {
 
     cy.get('.utility-moment').contains('3:38 PM')
       .should('have.class', 'badge')
+
+    // the time in the element should be between 3pm and 5pm
+    const start = Cypress.moment('3:00 PM', 'LT')
+    const end = Cypress.moment('5:00 PM', 'LT')
+
+    cy.get('.utility-moment .badge')
+      .should(($el) => {
+        // parse American time like "3:38 PM"
+        const m = Cypress.moment($el.text().trim(), 'LT')
+
+        // display hours + minutes + AM|PM
+        const f = 'h:mm A'
+
+        expect(m.isBetween(start, end),
+          `${m.format(f)} should be between ${start.format(f)} and ${end.format(f)}`).to.be.true
+      })
   })
 
 
