@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import chai from 'chai'
 import { EventEmitter } from 'events'
+import * as addDestroy from 'server-destroy-vvo'
 import http from 'http'
 import https from 'https'
 import net from 'net'
@@ -264,7 +265,7 @@ describe('lib/agent', function() {
         .catch((e) => {
           expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: The upstream proxy closed the socket after connecting but before sending a response.')
 
-          return proxy.closeAsync()
+          proxy.close()
         })
       })
     })
