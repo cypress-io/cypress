@@ -390,68 +390,82 @@ describe('polyfill programmatic blur events', () => {
   })
 })
 
-// https://github.com/cypress-io/cypress/issues/3001
-describe('skip actionability if already focused', () => {
-  it('inside input', () => {
-    cy
-    .visit('http://localhost:3500/fixtures/active-elements.html')
-    .then(() => {
+describe('intercept blur methods correctly', () => {
+  [
+    cy.$$('<a href="#">foo</a>'),
+    cy.$$('<input/>'),
+    cy.$$('<select>'),
+    cy.$$('<textarea/>'),
+    cy.$$('<button/>'),
+    cy.$$('<iframe src="" />'),
+    cy.$$('<div tabindex="1">tabindex</div>'),
+    cy.$$('<div contenteditable>contenteditable</div>'),
+  ]
+  // .slice(1, 2)
+  .forEach(($el) => {
+    it(`focus ${`${$el[0].outerHTML.slice(0, 30)}...`}`, () => {
+      cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
+        $el.appendTo(cy.$$('body'))
+        $el[0].focus()
+        cy.wrap($el[0]).focus()
+        .should('have.focus')
 
-      cy.$$('body').append(Cypress.$('\
-<div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
-<input type="text" id="foo">\
-'))
-
-      cy.$$('#foo').focus()
+      })
     })
-
-    cy.focused().type('new text').should('have.prop', 'value', 'new text')
   })
+  it('focus a contenteditable child', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
+      const outer = cy.$$('<div contenteditable>contenteditable</div>').appendTo(cy.$$('body'))
+      const inner = cy.$$('<div>first inner contenteditable</div>').appendTo(outer)
 
-  it('inside textarea', () => {
-    cy
-    .visit('http://localhost:3500/fixtures/active-elements.html')
-    .then(() => {
+      cy.$$('<div>second inner contenteditable</div>').appendTo(outer)
 
-      cy.$$('body').append(Cypress.$('\
-<div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
-<textarea id="foo"></textarea>\
-'))
+      cy.wrap(inner).parent().focus()
+      .should('have.focus')
 
-      cy.$$('#foo').focus()
+      inner.focus()
     })
 
-    cy.focused().type('new text').should('have.prop', 'value', 'new text')
   })
+  it('focus svg', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
+      const $svg = cy.$$(`<svg tabindex="1" width="900px" height="500px" viewBox="0 0 95 50" style="border: solid red 1px;"
+      xmlns="http://www.w3.org/2000/svg">
+     <g data-Name="group" stroke="green" fill="white" stroke-width="5" data-tabindex="0" >
+       <a xlink:href="#">
+         <circle cx="20" cy="25" r="5" data-Name="shape 1"  data-tabindex="0" />
+       </a>
+       <a xlink:href="#">
+         <circle cx="40" cy="25" r="5" data-Name="shape 2"  data-tabindex="0" />
+       </a>
+       <a xlink:href="#">
+         <circle cx="60" cy="25" r="5" data-Name="shape 3" data-tabindex="0" />
+       </a>
+       <a xlink:href="#">
+         <circle cx="80" cy="25" r="5" data-Name="shape 4" data-tabindex="0" />
+       </a>
+     </g>
+  </svg>`).appendTo(cy.$$('body'))
 
-  it('inside contenteditable', () => {
-    cy
-    .visit('http://localhost:3500/fixtures/active-elements.html')
-    .then(() => {
+      cy.wrap($svg).focus().should('have.focus')
 
-      cy.$$('body').append(Cypress.$('\
-<div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
-<div id="foo" contenteditable> \
-<div>foo</div><div>bar</div><div>baz</div> \
-</div>\
-'))
-      const win = cy.state('window')
-      const doc = window.document
-
-      cy.$$('#foo').focus()
-      const inner = cy.$$('div:contains(bar):last')
-
-      const range = doc.createRange()
-
-      range.selectNodeContents(inner[0])
-      const sel = win.getSelection()
-
-      sel.removeAllRanges()
-
-      sel.addRange(range)
     })
 
-    cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
+  })
+  it('focus area', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
+      cy.$$(`
+      <map name="map">
+      <area shape="circle" coords="0,0,100"
+      href="#"
+      target="_blank" alt="area" />
+      </map>
+      <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
+      `).appendTo(cy.$$('body'))
+
+      cy.get('area').focus().should('have.focus')
+
+    })
+
   })
 })
-

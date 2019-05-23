@@ -2373,6 +2373,62 @@ describe "src/cy/commands/actions/type", ->
         cy.get('#ce-inner1').then ($el) ->
           expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
 
+            
+      ## https://github.com/cypress-io/cypress/issues/3001
+      describe('skip actionability if already focused', () =>
+        it('inside input', () =>
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+            <input type="text" id="foo">
+            '))
+
+          cy.$$('#foo').focus()
+          
+
+          cy.focused().type('new text').should('have.prop', 'value', 'new text')
+        )
+
+        it('inside textarea', () =>
+         
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
+            <textarea id="foo"></textarea>
+            '))
+
+          cy.$$('#foo').focus()
+        
+
+          cy.focused().type('new text').should('have.prop', 'value', 'new text')
+        )
+
+        it('inside contenteditable', () =>
+      
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+            <div id="foo" contenteditable>
+            <div>foo</div><div>bar</div><div>baz</div>
+            </div>
+            '))
+          win = cy.state('window')
+          doc = window.document
+
+          cy.$$('#foo').focus()
+          inner = cy.$$('div:contains(bar):last')
+
+          range = doc.createRange()
+
+          range.selectNodeContents(inner[0])
+          sel = win.getSelection()
+
+          sel.removeAllRanges()
+
+          sel.addRange(range)
+        
+
+          cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
+        )
+      )
+
       it "can arrow from maxlength", ->
         cy.get('input:first').invoke('attr', 'maxlength', "5").type('foobar{leftarrow}')
         cy.window().then (win) ->
