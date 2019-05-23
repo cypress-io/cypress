@@ -89,29 +89,29 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 
     return Promise.join(
       util.getFileChecksum(filename),
-      util.getFileSize(filename)
-    ).spread((checksum, filesize) => {
-      if (checksum === expectedChecksum && filesize === expectedSize) {
-        debug('downloaded file has the expected checksum and size ✅')
+      util.getFileSize(filename),
+      ([checksum, filesize]) => {
+        if (checksum === expectedChecksum && filesize === expectedSize) {
+          debug('downloaded file has the expected checksum and size ✅')
 
-        return
-      }
+          return
+        }
 
-      debug('raising error: checksum or file size mismatch')
-      const text = stripIndent`
-        Corrupted download
+        debug('raising error: checksum or file size mismatch')
+        const text = stripIndent`
+          Corrupted download
 
-        Expected downloaded file to have checksum: ${expectedChecksum}
-        Computed checksum: ${checksum}
+          Expected downloaded file to have checksum: ${expectedChecksum}
+          Computed checksum: ${checksum}
 
-        Expected downloaded file to have size: ${expectedSize}
-        Computed size: ${filesize}
-      `
+          Expected downloaded file to have size: ${expectedSize}
+          Computed size: ${filesize}
+        `
 
-      debug(text)
+        debug(text)
 
-      throw new Error(text)
-    })
+        throw new Error(text)
+      })
   }
 
   if (expectedChecksum) {
