@@ -116,11 +116,14 @@ const _launchServer = (baseLoginUrl) => {
 
 const _stopServer = () => {
   debug('Closing auth server')
-  server.close()
+  if (server) {
+    server.close()
+    server = undefined
+  }
+
   app = undefined
   authState = undefined
   authCallback = undefined
-  server = undefined
 }
 
 const _launchNativeAuth = (loginUrl) => {
