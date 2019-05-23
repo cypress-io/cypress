@@ -165,21 +165,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
               ## retrieve the first focusable $el in our parent chain
               $elToFocus = $elements.getFirstFocusableEl($elToClick)
-
               if cy.needsFocus($elToFocus, $previouslyFocused)
-                ## if we are currently trying to focus
-                ## the window then blur the currently focused el
                 if $dom.isWindow($elToFocus)
+                  # if the first focusable element from the click
+                  # is the window, then we can skip the focus event
+                  # since the user has clicked a non-focusable element
                   $focused = cy.getFocused()
-
-                  ## if the current focused element hasn't changed
-                  ## then blur manually
-                  if $elements.isSame($focused, $previouslyFocused)
-                    cy.fireBlur($focused.get(0))
-                
+                  if $focused
+                    cy.fireBlur $focused.get(0)
                 else
-                  cy.fireFocus($elToFocus.get(0))
-
+                  # the user clicked inside a focusable element
+                  cy.fireFocus $elToFocus.get(0)
 
               afterMouseDown($elToClick, coords)
         })

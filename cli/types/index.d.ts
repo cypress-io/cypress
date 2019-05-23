@@ -1792,7 +1792,6 @@ declare namespace Cypress {
      *    cy.$$('p')
      */
     $$: JQueryStatic
-
   }
 
   interface Agent<A extends sinon.SinonSpy> {
