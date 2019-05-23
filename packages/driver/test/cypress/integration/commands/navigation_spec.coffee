@@ -1093,7 +1093,7 @@ describe "src/cy/commands/navigation", ->
         })
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.contain "cy.visit() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
           done()
 

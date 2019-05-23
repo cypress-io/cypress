@@ -1551,7 +1551,7 @@ describe "src/cy/commands/assertions", ->
         cy.get('div').should('not.have.focus')
 
       it "throws when obj is not DOM", (done) ->
-        cy.on "fail", (err) =>
+        cy.on "test:fail", (err) =>
           expect(@logs.length).to.eq(1)
           expect(@logs[0].get("error").message).to.contain(
             "expected {} to be 'focused'"

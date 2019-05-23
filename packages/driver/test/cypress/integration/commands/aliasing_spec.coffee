@@ -53,17 +53,17 @@ describe "src/cy/commands/aliasing", ->
 
     it "allows dot in alias names", ->
       cy.get("body").as("body.foo").then ->
-        expect(cy.get('@body.foo')).to.be.defined
-        expect(cy.state("aliases")['body.foo']).to.be.defined
+        expect(cy.get('@body.foo')).to.exist
+        expect(cy.state("aliases")['body.foo']).to.exist
 
     it "recognizes dot and non dot with same alias names", ->
       cy.get("body").as("body").then ->
-        expect(cy.get('@body')).to.be.defined
-        expect(cy.state("aliases")['body']).to.be.defined
+        expect(cy.get('@body')).to.exist
+        expect(cy.state("aliases")['body']).to.exist
       cy.contains("foo").as("body.foo").then ->
-        expect(cy.get('@body.foo')).to.be.defined
+        expect(cy.get('@body.foo')).to.exist
         expect(cy.get('@body.foo')).to.not.eq(cy.get('@body'))
-        expect(cy.state("aliases")['body.foo']).to.be.defined
+        expect(cy.state("aliases")['body.foo']).to.exist
 
     context "DOM subjects", ->
       it "assigns the remote jquery instance", ->
@@ -149,7 +149,7 @@ describe "src/cy/commands/aliasing", ->
         cy.get("div:first").as("@myAlias")
 
       it "throws on alias starting with @ char and dots", (done) ->
-        cy.on "fail", (err) ->
+        cy.on "test:fail", (err) ->
           expect(err.message).to.eq "'@my.alias' cannot be named starting with the '@' symbol. Try renaming the alias to 'my.alias', or something else that does not start with the '@' symbol."
           done()
 
@@ -368,7 +368,7 @@ describe "src/cy/commands/aliasing", ->
           .get("body").as("b")
           .get("input:first").as("firstInput")
           .get("@lastDiv")
-      
+
       it "throws when alias is missing '@' but matches an available alias", (done) ->
         cy.on "test:fail", (err) ->
           expect(err.message).to.eq "Invalid alias: 'getAny'.\nYou forgot the '@'. It should be written as: '@getAny'."

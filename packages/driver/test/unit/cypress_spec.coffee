@@ -271,17 +271,17 @@ describe "src/cypress", ->
 
   describe "._", ->
     it "is a reference to lodash", ->
-      expect(@Cypress._).to.be.defined
+      expect(@Cypress._).to.exist
       expect(@Cypress._.map).to.be.a("function")
 
   describe ".Blob", ->
     it "is a reference to blob util", ->
-      expect(@Cypress.Blob).to.be.defined
+      expect(@Cypress.Blob).to.exist
       expect(@Cypress.Blob.createBlob).to.be.a("function")
 
   describe ".Promise", ->
     it "is a reference to Promise", ->
-      expect(@Cypress.Promise).to.be.defined
+      expect(@Cypress.Promise).to.exist
       expect(@Cypress.Promise.resolve).to.be.a("function")
 
   describe ".minimatch", ->
