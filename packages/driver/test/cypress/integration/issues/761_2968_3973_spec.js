@@ -83,7 +83,7 @@ describe('issue #3973 - unloaded xhrs do not fire readystatechange event in chro
     .window()
     .then((win) => {
       return new Promise((resolve) => {
-        cy.on('window:unload', resolve)
+        cy.on('page:end', resolve)
 
         const xhr = new win.XMLHttpRequest()
 

@@ -1568,8 +1568,8 @@ describe "src/cy/commands/assertions", ->
         stub = cy.spy($.expr.pseudos, 'focus').as('focus')
         expect(cy.$$('button:first')).to.have.focus
         cy.get('button:first').should('have.focus')
-          .then ->
-            expect(stub).to.be.calledTwice
+        .then ->
+          expect(stub).to.be.calledThrice
 
     context "match", ->
       beforeEach ->
