@@ -21,7 +21,7 @@ const errMsg = (key, value, type) => {
 }
 
 const isFullyQualifiedUrl = (value) => {
-  return isString(value) && /^https?\:\/\//.test(value)
+  return isString(value) && /^(https?|file)\:\/\//.test(value)
 }
 
 const isArrayOfStrings = (value) => {
