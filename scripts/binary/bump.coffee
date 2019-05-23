@@ -11,7 +11,7 @@ os        = require("os")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
 makeEmptyGithubCommit = require("make-empty-github-commit")
 parse = require("parse-github-repo-url")
-{setCommitStatus} = require("@cypress/set-commit-status")
+{setCommitStatus} = require("@cypress/github-commit-status-check")
 
 fs = Promise.promisifyAll(fs)
 
@@ -183,6 +183,11 @@ module.exports = {
       ## make empty commit to trigger CIs
       ## project is owner/repo string like cypress-io/cypress-test-tiny
       console.log("making commit to project", project)
+
+      # print if we have a few github variables present
+      console.log("do we have GH_APP_ID?", Boolean(process.env.GH_APP_ID))
+      console.log("do we have GH_INSTALLATION_ID?", Boolean(process.env.GH_INSTALLATION_ID))
+      console.log("do we have GH_PRIVATE_KEY?", Boolean(process.env.GH_PRIVATE_KEY))
 
       parsedRepo = parse(project)
       owner = parsedRepo[0]

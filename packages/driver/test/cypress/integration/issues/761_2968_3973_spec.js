@@ -60,7 +60,7 @@ describe('issue #3973 - unloaded xhrs do not fire readystatechange event in chro
     const xhrs = []
     const stub = cy.stub()
 
-    cy.on('log:added', (attrs, log) => {
+    cy.on('internal:log', (attrs, log) => {
       if (attrs.name === 'xhr') {
         logs.push(log)
       }
@@ -83,7 +83,7 @@ describe('issue #3973 - unloaded xhrs do not fire readystatechange event in chro
     .window()
     .then((win) => {
       return new Promise((resolve) => {
-        cy.on('window:unload', resolve)
+        cy.on('page:end', resolve)
 
         const xhr = new win.XMLHttpRequest()
 

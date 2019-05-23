@@ -199,6 +199,7 @@ describe "lib/request", ->
       it "retries 4x on a connection reset", (done) ->
         opts = {
           url: "http://localhost:9988/econnreset"
+          retryIntervals: [0, 1, 2, 3]
         }
 
         stream = request.create(opts)
@@ -230,6 +231,7 @@ describe "lib/request", ->
       it "retries 4x on a connection reset", ->
         opts = {
           url: "http://localhost:9988/econnreset"
+          retryIntervals: [0, 1, 2, 3]
         }
 
         request.create(opts, true)

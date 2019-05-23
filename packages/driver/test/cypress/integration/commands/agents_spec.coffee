@@ -201,59 +201,115 @@ describe "src/cy/commands/agents", ->
               expect(@consoleProps["  1.2 matching arguments"]).to.eql(["foo", "baz"])
 
     describe ".as", ->
-      beforeEach ->
-        @logs = []
-        cy.on "internal:log", (attrs, log) =>
-          @logs.push(log)
+      context "without dots", ->
+        beforeEach ->
+          @logs = []
+          cy.on "internal:log", (attrs, log) =>
+            @logs.push(log)
 
-        @stub = cy.stub().as("myStub")
+          @stub = cy.stub().as("myStub")
 
-      it "returns stub", ->
-        expect(@stub).to.have.property("callCount")
+        it "returns stub", ->
+          expect(@stub).to.have.property("callCount")
 
-      it "updates instrument log with alias", ->
-        expect(@logs[0].get("alias")).to.eq("myStub")
-        expect(@logs[0].get("aliasType")).to.eq("agent")
+        it "updates instrument log with alias", ->
+          expect(@logs[0].get("alias")).to.eq("myStub")
+          expect(@logs[0].get("aliasType")).to.eq("agent")
 
-      it "includes alias in invocation log", ->
-        @stub()
-        expect(@logs[1].get("alias")).to.eql(["myStub"])
-        expect(@logs[1].get("aliasType")).to.eq("agent")
+        it "includes alias in invocation log", ->
+          @stub()
+          expect(@logs[1].get("alias")).to.eql(["myStub"])
+          expect(@logs[1].get("aliasType")).to.eq("agent")
 
-      it "includes alias in console props", ->
-        @stub()
-        consoleProps = @logs[1].get("consoleProps")()
-        expect(consoleProps["Alias"]).to.eql("myStub")
+        it "includes alias in console props", ->
+          @stub()
+          consoleProps = @logs[1].get("consoleProps")()
+          expect(consoleProps["Alias"]).to.eql("myStub")
 
-      it "updates the displayName of the agent", ->
-        expect(@myStub.displayName).to.eq("myStub")
+        it "updates the displayName of the agent", ->
+          expect(@myStub.displayName).to.eq("myStub")
 
-      it "stores the lookup as an alias", ->
-        expect(cy.state("aliases").myStub).to.exist
+        it "stores the lookup as an alias", ->
+          expect(cy.state("aliases").myStub).to.exist
 
-      it "stores the agent as the subject", ->
-        expect(cy.state("aliases").myStub.subject).to.eq(@stub)
+        it "stores the agent as the subject", ->
+          expect(cy.state("aliases").myStub.subject).to.eq(@stub)
 
-      it "assigns subject to runnable ctx", ->
-        expect(@myStub).to.eq(@stub)
+        it "assigns subject to runnable ctx", ->
+          expect(@myStub).to.eq(@stub)
 
-      it "retries until assertions pass", ->
-        cy.on "internal:commandRetry", _.after 2, =>
-          @myStub("foo")
+        it "retries until assertions pass", ->
+          cy.on "internal:commandRetry", _.after 2, =>
+            @myStub("foo")
 
-        cy.get("@myStub").should("be.calledWith", "foo")
+          cy.get("@myStub").should("be.calledWith", "foo")
 
-      describe "errors", ->
-        _.each [null, undefined, {}, [], 123], (value) =>
-          it "throws when passed: #{value}", ->
-            expect(=> cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
+        describe "errors", ->
+          _.each [null, undefined, {}, [], 123], (value) =>
+            it "throws when passed: #{value}", ->
+              expect(=> cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
 
-        it "throws on blank string", ->
-          expect(=> cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
+          it "throws on blank string", ->
+            expect(=> cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
 
-        _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
-          it "throws on a blacklisted word: #{blacklist}", ->
-            expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
+          _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
+            it "throws on a blacklisted word: #{blacklist}", ->
+              expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
+
+      context "with dots", ->
+        beforeEach ->
+          @logs = []
+          cy.on "internal:log", (attrs, log) =>
+            @logs.push(log)
+
+          @stub = cy.stub().as("my.stub")
+
+        it "returns stub", ->
+          expect(@stub).to.have.property("callCount")
+
+        it "updates instrument log with alias", ->
+          expect(@logs[0].get("alias")).to.eq("my.stub")
+          expect(@logs[0].get("aliasType")).to.eq("agent")
+
+        it "includes alias in invocation log", ->
+          @stub()
+          expect(@logs[1].get("alias")).to.eql(["my.stub"])
+          expect(@logs[1].get("aliasType")).to.eq("agent")
+
+        it "includes alias in console props", ->
+          @stub()
+          consoleProps = @logs[1].get("consoleProps")()
+          expect(consoleProps["Alias"]).to.eql("my.stub")
+
+        it "updates the displayName of the agent", ->
+          expect(@["my.stub"].displayName).to.eq("my.stub")
+
+        it "stores the lookup as an alias", ->
+          expect(cy.state("aliases")["my.stub"]).to.exist
+
+        it "stores the agent as the subject", ->
+          expect(cy.state("aliases")["my.stub"].subject).to.eq(@stub)
+
+        it "assigns subject to runnable ctx", ->
+          expect(@["my.stub"]).to.eq(@stub)
+
+        it "retries until assertions pass", ->
+          cy.on "internal:commandRetry", _.after 2, =>
+            @["my.stub"]("foo")
+
+          cy.get("@my.stub").should("be.calledWith", "foo")
+
+        describe "errors", ->
+          _.each [null, undefined, {}, [], 123], (value) =>
+            it "throws when passed: #{value}", ->
+              expect(=> cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
+
+          it "throws on blank string", ->
+            expect(=> cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
+
+          _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
+            it "throws on a blacklisted word: #{blacklist}", ->
+              expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
 
     describe "logging", ->
       beforeEach ->

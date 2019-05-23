@@ -43,6 +43,7 @@ packages/example/cypress/fixtures/users.json
 packages/server/.cy
 packages/server/.projects
 packages/server/support
+packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
 
 # CLI tool

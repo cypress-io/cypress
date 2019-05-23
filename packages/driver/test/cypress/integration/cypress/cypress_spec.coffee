@@ -45,8 +45,6 @@ describe "driver/src/cypress/index", ->
         expect(err.backend).to.be.true
         expect(err.stack).not.to.include("From previous event")
 
-        done()
-
   context ".isCy", ->
     it "returns true on cy, cy chainable", ->
       expect(Cypress.isCy(cy)).to.be.true
@@ -62,17 +60,17 @@ describe "driver/src/cypress/index", ->
       fn = ->
         Cypress.Log.command({})
 
-      expect(fn).to.throw(/has been renamed to Cypress.log/)
+      expect(fn).to.throw('has been renamed to Cypress.log')
 
     it "throws when passing non-object to Cypress.log()", ->
       fn = ->
         Cypress.log('My Log')
 
-      expect(fn).to.throw(/Cypress.log() can only be called with an options object. Your argument was/)
-      expect(fn).to.throw(/My Log/)
+      expect(fn).to.throw('Cypress.log() can only be called with an options object. Your argument was')
+      expect(fn).to.throw('My Log')
 
     it "does not throw when Cypress.log() called outside of command", ->
       fn = ->
         Cypress.log({ message: 'My Log' })
 
-      expect(fn).to.not.throw()
+      expect(fn).not.to.throw()

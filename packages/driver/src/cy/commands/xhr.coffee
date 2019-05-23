@@ -238,7 +238,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## we need to cancel all pending
   ## XHR's so the command log displays
   ## correctly
-  Cypress.on("window:unload", cancelPendingXhrs)
+  Cypress.on("page:end", cancelPendingXhrs)
 
   Cypress.on "test:start", ->
     ## reset the existing server

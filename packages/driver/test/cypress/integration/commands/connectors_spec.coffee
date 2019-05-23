@@ -369,7 +369,7 @@ describe "src/cy/commands/connectors", ->
         it "retries until function exists on the subject", ->
           obj = {}
 
-          cy.on "command:retry", _.after 3, ->
+          cy.on "internal:commandRetry", _.after 3, ->
             obj.foo = -> "bar"
 
           cy.wrap(obj).invoke("foo").then (val) ->
@@ -380,7 +380,7 @@ describe "src/cy/commands/connectors", ->
             foo: ""
           }
 
-          cy.on "command:retry", _.after 3, ->
+          cy.on "internal:commandRetry", _.after 3, ->
             obj.foo = -> "bar"
 
           cy.wrap(obj).invoke("foo").then (val) ->
@@ -391,7 +391,7 @@ describe "src/cy/commands/connectors", ->
             foo: undefined
           }
 
-          cy.on "command:retry", _.after 3, ->
+          cy.on "internal:commandRetry", _.after 3, ->
             obj.foo = -> "bar"
 
           cy.wrap(obj).invoke("foo").then (val) ->
@@ -402,7 +402,7 @@ describe "src/cy/commands/connectors", ->
             foo: -> "foo"
           }
 
-          cy.on "command:retry", _.after 3, ->
+          cy.on "internal:commandRetry", _.after 3, ->
             obj.foo = -> "bar"
 
           cy.wrap(obj).invoke("foo").should("eq", "bar")
@@ -657,7 +657,7 @@ describe "src/cy/commands/connectors", ->
           cy.wrap(undefined).invoke("foo")
 
         it "throws when property value is undefined", (done) ->
-          cy.on "ftest:ail", (err) =>
+          cy.on "test:fail", (err) =>
             lastLog = @lastLog
 
             expect(err.message).to.include "Timed out retrying: cy.invoke() errored because the property: 'foo' is not a function, and instead returned a 'undefined' value."
@@ -740,7 +740,7 @@ describe "src/cy/commands/connectors", ->
           foo:  -> throw err
         }
 
-        cy.wrap(obj).its("foo").should("throw", err)
+        cy.wrap(obj).its("foo").should("throw", "nope cant access me")
 
       it "returns property", ->
         cy.noop({baz: "baz"}).its("baz").then (num) ->
@@ -768,7 +768,7 @@ describe "src/cy/commands/connectors", ->
       it "retries by default until property exists without an assertion", ->
         obj = {}
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           obj.foo = "bar"
 
         cy.wrap(obj).its("foo").then (val) ->
@@ -779,7 +779,7 @@ describe "src/cy/commands/connectors", ->
           foo: undefined
         }
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           obj.foo = "bar"
 
         cy.wrap(obj).its("foo").then (val) ->
@@ -790,7 +790,7 @@ describe "src/cy/commands/connectors", ->
           foo: null
         }
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           obj.foo = "bar"
 
         cy.wrap(obj).its("foo").then (val) ->
@@ -812,7 +812,7 @@ describe "src/cy/commands/connectors", ->
           foo: ""
         }
 
-        cy.on "command:retry", _.after 3, ->
+        cy.on "internal:commandRetry", _.after 3, ->
           delete obj.foo
 
         cy.wrap(obj).its("foo").should("not.exist").then (val) ->
@@ -1147,7 +1147,7 @@ describe "src/cy/commands/connectors", ->
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
-          cy.on "command:retry", _.after 3, =>
+          cy.on "internal:commandRetry", _.after 3, =>
             obj.foo = {
               bar: "bar"
             }
