@@ -2,7 +2,7 @@ const { EventEmitter } = require('events')
 
 describe('controls', function () {
   beforeEach(function () {
-    cy.fixture('controls_runnables').as('runnables')
+    cy.fixture('runnables').as('runnables')
 
     this.runner = new EventEmitter()
 
