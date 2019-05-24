@@ -757,6 +757,7 @@ describe "lib/config", ->
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
+            ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" }
@@ -816,6 +817,7 @@ describe "lib/config", ->
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
+            ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" }
@@ -849,6 +851,7 @@ describe "lib/config", ->
       cfg = {
         foo: "bar"
         baz: "quux"
+        quux: "foo"
         lol: 1234
         env: {
           a: "a"
@@ -857,6 +860,7 @@ describe "lib/config", ->
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "quux", from: "cli" }
+          quux: { value: "foo", from: "default" }
           lol: { value: 1234,  from: "env" }
           env: {
             a: { value: "a", from: "config" }
@@ -867,6 +871,7 @@ describe "lib/config", ->
 
       overrides = {
         baz: "baz"
+        quux: ["bar", "quux"]
         env: {
           b: "bb"
           c: "c"
@@ -877,6 +882,7 @@ describe "lib/config", ->
         foo: "bar"
         baz: "baz"
         lol: 1234
+        quux: ["bar", "quux"]
         env: {
           a: "a"
           b: "bb"
@@ -885,6 +891,7 @@ describe "lib/config", ->
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "baz", from: "plugin" }
+          quux: { value: ["bar", "quux"], from: "plugin" }
           lol: { value: 1234,  from: "env" }
           env: {
             a: { value: "a", from: "config" }
