@@ -10,9 +10,9 @@ Cypress Version: 1.2.3
 `
 
 exports['errors .errors.formErrorText returns fully formed text message 1'] = `
-Your system is missing the dependency: XVFB
+Your system is missing the dependency: Xvfb
 
-Install XVFB and run Cypress again.
+Install Xvfb and run Cypress again.
 
 Read our documentation on dependencies for more information:
 
@@ -47,7 +47,7 @@ exports['errors individual has the following errors 1'] = [
 exports['invalid display error'] = `
 Cypress verification failed.
 
-Cypress failed to start after spawning a new XVFB server.
+Cypress failed to start after spawning a new Xvfb server.
 
 The error logs we received were:
 
