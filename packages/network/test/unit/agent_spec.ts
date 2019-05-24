@@ -207,8 +207,40 @@ describe('lib/agent', function() {
     })
 
     context('HttpsAgent', function() {
-      it("#createUpstreamProxyConnection calls to super for caching, TLS-ifying", function() {
-        const combinedAgent = new CombinedAgent()
+      beforeEach(function() {
+        this.agent = new CombinedAgent()
+
+        this.request = request.defaults({
+          agent: <any>this.agent,
+          proxy: null
+        })
+      })
+
+      it("#createConnection does not go to proxy if domain in NO_PROXY", function () {
+        const spy = sinon.spy(this.agent.httpsAgent, 'createProxiedConnection')
+
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
+        process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
+
+        return this.request({
+          url: 'https://example.com/',
+        })
+        .then(() => {
+          expect(spy).to.not.be.called
+
+          return this.request({
+            url: 'https://example.org/'
+          })
+          .then(() => {
+            throw new Error('should not be able to connect')
+          })
+          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0'}, () => {
+            expect(spy).to.be.calledOnce
+          })
+        })
+      })
+
+      it("#createProxiedConnection calls to super for caching, TLS-ifying", function() {
         const spy = sinon.spy(https.Agent.prototype, 'createConnection')
 
         const proxy = new DebuggingProxy()
@@ -219,26 +251,22 @@ describe('lib/agent', function() {
 
         return proxy.start(proxyPort)
         .then(() => {
-          return request({
+          return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
-            agent: <any>combinedAgent,
-            proxy: null
           })
         })
         .then(() => {
           const options = spy.getCall(0).args[0]
-          const session = combinedAgent.httpsAgent._sessionCache.map[options._agentKey]
+          const session = this.agent.httpsAgent._sessionCache.map[options._agentKey]
           expect(spy).to.be.calledOnce
-          expect(combinedAgent.httpsAgent._sessionCache.list).to.have.length(1)
+          expect(this.agent.httpsAgent._sessionCache.list).to.have.length(1)
           expect(session).to.not.be.undefined
 
           return proxy.stop()
         })
       })
 
-      it("#createUpstreamProxyConnection throws when connection is accepted then closed", function() {
-        const combinedAgent = new CombinedAgent()
-
+      it("#createProxiedConnection throws when connection is accepted then closed", function() {
         const proxy = Bluebird.promisifyAll(
           net.createServer((socket) => {
             socket.end()
@@ -252,10 +280,8 @@ describe('lib/agent', function() {
 
         return proxy.listenAsync(proxyPort)
         .then(() => {
-          return request({
+          return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
-            agent: <any>combinedAgent,
-            proxy: null
           })
         })
         .then(() => {
@@ -265,6 +291,41 @@ describe('lib/agent', function() {
           expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: The upstream proxy closed the socket after connecting but before sending a response.')
 
           return proxy.closeAsync()
+        })
+      })
+    })
+
+    context('HttpAgent', function() {
+      beforeEach(function() {
+        this.agent = new CombinedAgent()
+
+        this.request = request.defaults({
+          agent: <any>this.agent,
+          proxy: null
+        })
+      })
+
+      it("#createSocket does not go to proxy if domain in NO_PROXY", function () {
+        const spy = sinon.spy(this.agent.httpAgent, '_createProxiedSocket')
+
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
+        process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
+
+        return this.request({
+          url: 'http://example.com/',
+        })
+        .then(() => {
+          expect(spy).to.not.be.called
+
+          return this.request({
+            url: 'http://example.org/'
+          })
+          .then(() => {
+            throw new Error('should not be able to connect')
+          })
+          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0'}, () => {
+            expect(spy).to.be.calledOnce
+          })
         })
       })
     })
