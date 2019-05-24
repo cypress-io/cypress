@@ -10,7 +10,7 @@ zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
-cjsxify       = require("cjsxify")
+coffeeify       = require("coffeeify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
@@ -40,13 +40,25 @@ removeWhitespace = (c) ->
   c = str.lines(c).join(" ")
   c
 
+sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
+
+removeSourceMapContents = (fileContents) ->
+  fileContents.replace(sourceMapRegex, ";")
+
 browserifyFile = (filePath) ->
   streamToPromise(
-    browserify(filePath)
-    .transform(cjsxify)
-    .transform(babelify, {
-      plugins: ["add-module-exports", "@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-runtime"],
-      presets: ["@babel/preset-env", "@babel/preset-react"],
+    browserify({
+      entries: [filePath]
+      extensions: ['.js', '.jsx', '.coffee']
+      cache: {}
+      packageCache: {}
+      transform: [
+        [coffeeify, {}]
+        [babelify, {
+          plugins: ["add-module-exports", "@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-runtime"],
+          presets: ["@babel/preset-env", "@babel/preset-react"],
+        }]
+      ]
     })
     .bundle()
   )
@@ -454,7 +466,7 @@ describe "Routes", ->
 
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
 
       it "processes dom.jsx spec", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js")
@@ -463,7 +475,7 @@ describe "Routes", ->
 
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/baz.js"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
             expect(res.body).to.include("React.createElement(")
 
       it "serves error javascript file when the file is missing", ->
@@ -507,7 +519,7 @@ describe "Routes", ->
 
           browserifyFile(Fixtures.path("projects/no-server/my-tests/test1.js"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
 
       it "processes helpers/includes.js javascripts", ->
         @rp("http://localhost:2020/__cypress/tests?p=helpers/includes.js")
@@ -516,7 +528,7 @@ describe "Routes", ->
 
           browserifyFile(Fixtures.path("projects/no-server/helpers/includes.js"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
 
   context "ALL /__cypress/xhrs/*", ->
     beforeEach ->

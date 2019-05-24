@@ -1569,7 +1569,7 @@ describe "src/cy/commands/assertions", ->
         expect(cy.$$('button:first')).to.have.focus
         cy.get('button:first').should('have.focus')
           .then ->
-            expect(stub).to.be.calledTwice
+            expect(stub).to.be.calledThrice
 
     context "match", ->
       beforeEach ->
