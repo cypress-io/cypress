@@ -5,7 +5,7 @@
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
-    "node": ">=8.9.3"
+    "node": ">=10.2.1"
   },
   "scripts": {
     "prestart": "npm run check-deps-pre",
