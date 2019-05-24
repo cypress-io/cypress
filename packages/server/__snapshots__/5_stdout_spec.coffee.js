@@ -188,6 +188,23 @@ Fix the error in your code and re-run your tests.
   └─────────────────────────────────────────────────────┘
 
 
+Oops...we found an error preparing this test file:
+
+  /foo/bar/.projects/e2e/cypress/support/index.js
+
+The error was:
+
+<anonymous>:1:2: error: unexpected >
++>
+ ^
+
+This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
+
+- A missing file or dependency
+- A syntax error in the file or one of its dependencies
+
+Fix the error in your code and re-run your tests.
+
   (Video)
 
   - Started processing:   Compressing to 32 CRF
