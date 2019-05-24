@@ -319,6 +319,28 @@ const isSvg = function (el) {
   }
 }
 
+// active element is the default if its null
+// or its equal to document.body
+const activeElementIsDefault = (activeElement, body) => {
+  return (!activeElement) || (activeElement === body)
+}
+
+const isFocused = (el) => {
+  try {
+    const doc = $document.getDocumentFromElement(el)
+
+    const { activeElement, body } = doc
+
+    if (activeElementIsDefault(activeElement, body)) {
+      return false
+    }
+
+    return doc.activeElement === el
+  } catch (err) {
+    return false
+  }
+}
+
 const isElement = function (obj) {
   try {
     if ($jquery.isJquery(obj)) {
@@ -611,7 +633,16 @@ const getElements = ($el) => {
 const getContainsSelector = (text, filter = '') => {
   const escapedText = $utils.escapeQuotes(text)
 
-  return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+  // they may have written the filter as
+  // comma separated dom els, so we want to search all
+  // https://github.com/cypress-io/cypress/issues/2407
+  const filters = filter.trim().split(',')
+
+  const selectors = _.map(filters, (filter) => {
+    return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+  })
+
+  return selectors.join()
 }
 
 const priorityElement = 'input[type=\'submit\'], button, a, label'
@@ -747,6 +778,8 @@ module.exports = {
   isTextarea,
 
   isType,
+
+  isFocused,
 
   isNeedSingleValueChangeInputElement,
 

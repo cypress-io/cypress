@@ -12,13 +12,17 @@ const copyLowercaseEnvToUppercase = (name: string) => {
 }
 
 const normalizeEnvironmentProxy = () => {
-  if (!process.env.HTTPS_PROXY) {
+  if (process.env.HTTP_PROXY === 'false' || process.env.HTTP_PROXY === '0' || !process.env.HTTP_PROXY) {
+    delete process.env.HTTP_PROXY
+  }
+
+  if (!process.env.HTTPS_PROXY && process.env.HTTP_PROXY) {
     // request library will use HTTP_PROXY as a fallback for HTTPS urls, but
     // proxy-from-env will not, so let's just force it to fall back like this
     process.env.HTTPS_PROXY = process.env.HTTP_PROXY
   }
 
-  if (!process.env.NO_PROXY) {
+  if (!process.env.hasOwnProperty('NO_PROXY')) {
     // don't proxy localhost, to match Chrome's default behavior and user expectation
     process.env.NO_PROXY = 'localhost'
   }
@@ -27,7 +31,7 @@ const normalizeEnvironmentProxy = () => {
 export const loadSystemProxySettings = () => {
   ['NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY'].forEach(copyLowercaseEnvToUppercase)
 
-  if (process.env.HTTP_PROXY) {
+  if (typeof process.env.HTTP_PROXY !== 'undefined') {
     normalizeEnvironmentProxy()
 
     return

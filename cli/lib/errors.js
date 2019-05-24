@@ -2,13 +2,19 @@ const os = require('os')
 const chalk = require('chalk')
 const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 
 const util = require('./util')
 const state = require('./tasks/state')
 
-const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
+
+// TODO it would be nice if all error objects could be enforced via types
+// to only have description + solution properties
+
+const hr = '----------'
 
 // common errors Cypress application can encounter
 const failedDownload = {
@@ -21,7 +27,7 @@ const failedUnzip = {
   solution: stripIndent`
     Search for an existing issue or open a GitHub issue at
 
-      ${chalk.blue(issuesUrl)}
+      ${chalk.blue(util.issuesUrl)}
   `,
 }
 
@@ -36,7 +42,7 @@ const missingApp = (binaryDir) => {
 
 const binaryNotExecutable = (executable) => {
   return {
-    description: `Cypress cannot run because the binary does not have executable permissions: ${executable}`,
+    description: `Cypress cannot run because this binary file does not have executable permissions here:\n\n${executable}`,
     solution: stripIndent`\n
     Reasons this may happen:
 
@@ -69,7 +75,7 @@ const notInstalledCI = (executable) => {
 }
 
 const nonZeroExitCodeXvfb = {
-  description: 'XVFB exited with a non zero exit code.',
+  description: 'Xvfb exited with a non zero exit code.',
   solution: stripIndent`
     There was a problem spawning Xvfb.
 
@@ -78,9 +84,9 @@ const nonZeroExitCodeXvfb = {
 }
 
 const missingXvfb = {
-  description: 'Your system is missing the dependency: XVFB',
+  description: 'Your system is missing the dependency: Xvfb',
   solution: stripIndent`
-    Install XVFB and run Cypress again.
+    Install Xvfb and run Cypress again.
 
     Read our documentation on dependencies for more information:
 
@@ -88,6 +94,44 @@ const missingXvfb = {
 
     If you are using Docker, we provide containers with all required dependencies installed.
     `,
+}
+
+const smokeTestFailure = (smokeTestCommand, timedOut) => {
+  return {
+    description: `Cypress verification ${timedOut ? 'timed out' : 'failed'}.`,
+    solution: stripIndent`
+    This command failed with the following output:
+
+    ${smokeTestCommand}
+
+    `,
+  }
+}
+
+const invalidSmokeTestDisplayError = {
+  code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
+  description: 'Cypress verification failed.',
+  solution  (msg) {
+    return stripIndent`
+      Cypress failed to start after spawning a new Xvfb server.
+
+      The error logs we received were:
+
+      ${hr}
+
+      ${msg}
+
+      ${hr}
+
+      This is usually caused by a missing library or dependency.
+
+      The error above should indicate which dependency is missing.
+
+        ${chalk.blue(requiredDependenciesUrl)}
+
+      If you are using Docker, we provide containers with all required dependencies installed.
+    `
+  },
 }
 
 const missingDependency = {
@@ -106,7 +150,10 @@ const missingDependency = {
 
 const invalidCacheDirectory = {
   description: 'Cypress cannot write to the cache directory due to file permissions',
-  solution: '',
+  solution: stripIndent`
+    See discussion and possible solutions at
+    ${chalk.blue(util.getGitHubIssueUrl(1281))}
+  `,
 }
 
 const versionMismatch = {
@@ -123,7 +170,7 @@ const unexpected = {
 
     Check if there is a GitHub issue describing this crash:
 
-      ${chalk.blue(issuesUrl)}
+      ${chalk.blue(util.issuesUrl)}
 
     Consider opening a new issue.
   `,
@@ -153,7 +200,7 @@ const CYPRESS_RUN_BINARY = {
     const properFormat = `**/${state.getPlatformExecutable()}`
 
     return {
-      description: `Could not run binary set by environment variable CYPRESS_RUN_BINARY=${value}`,
+      description: `Could not run binary set by environment variable: CYPRESS_RUN_BINARY=${value}`,
       solution: `Ensure the environment variable is a path to the Cypress binary, matching ${properFormat}`,
     }
   },
@@ -179,34 +226,53 @@ function addPlatformInformation (info) {
 /**
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
-*/
-function formErrorText (info, msg) {
-  const hr = '----------'
-
+ */
+function formErrorText (info, msg, prevMessage) {
   return addPlatformInformation(info)
   .then((obj) => {
     const formatted = []
 
     function add (msg) {
       formatted.push(
-        stripIndents`${msg}`
+        stripIndents(msg)
       )
     }
 
-    add(`
-      ${obj.description}
+    la(is.unemptyString(obj.description),
+      'expected error description to be text', obj.description)
 
-      ${obj.solution}
+    // assuming that if there the solution is a function it will handle
+    // error message and (optional previous error message)
+    if (is.fn(obj.solution)) {
+      const text = obj.solution(msg, prevMessage)
 
-    `)
+      la(is.unemptyString(text), 'expected solution to be text', text)
 
-    if (msg) {
       add(`
-        ${hr}
+        ${obj.description}
 
-        ${msg}
+        ${text}
 
       `)
+    } else {
+      la(is.unemptyString(obj.solution),
+        'expected error solution to be text', obj.solution)
+
+      add(`
+        ${obj.description}
+
+        ${obj.solution}
+
+      `)
+
+      if (msg) {
+        add(`
+          ${hr}
+
+          ${msg}
+
+        `)
+      }
     }
 
     add(`
@@ -224,35 +290,42 @@ function formErrorText (info, msg) {
       `)
     }
 
-    return formatted.join('\n')
+    return formatted.join('\n\n')
   })
 }
 
-const raise = (text) => {
-  const err = new Error(text)
+const raise = (info) => {
+  return (text) => {
+    const err = new Error(text)
 
-  err.known = true
-  throw err
+    if (info.code) {
+      err.code = info.code
+    }
+
+    err.known = true
+    throw err
+  }
 }
 
 const throwFormErrorText = (info) => {
-  return (msg) => {
-    return formErrorText(info, msg)
-    .then(raise)
+  return (msg, prevMessage) => {
+    return formErrorText(info, msg, prevMessage)
+    .then(raise(info))
   }
 }
 
 module.exports = {
   raise,
-  // formError,
   formErrorText,
   throwFormErrorText,
+  hr,
   errors: {
     nonZeroExitCodeXvfb,
     missingXvfb,
     missingApp,
     notInstalledCI,
     missingDependency,
+    invalidSmokeTestDisplayError,
     versionMismatch,
     binaryNotExecutable,
     unexpected,
@@ -261,5 +334,6 @@ module.exports = {
     invalidCacheDirectory,
     removed,
     CYPRESS_RUN_BINARY,
+    smokeTestFailure,
   },
 }

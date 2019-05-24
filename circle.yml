@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:chrome64
+      - image: cypress/browsers:node8.9.3-chrome73
     environment:
       PLATFORM: linux
 
@@ -216,6 +216,8 @@ jobs:
           at: ~/
       # make sure mocha runs
       - run: npm run test-mocha
+      # test binary build code
+      - run: npm run test-scripts
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
@@ -276,7 +278,12 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
-      - run: DEBUG=test:proxy-performance npm run all test-performance -- --package server
+      - run:
+          command: |
+            set +e # don't exit on non-0 status code - performance tests can be spurious
+            npm run all test-performance -- --package server
+            echo "exited with code: $?"
+            exit 0
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -586,7 +593,7 @@ jobs:
             - npm-package-url.json
             - cypress.tgz
 
-  "test-next-version":
+  "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -620,7 +627,7 @@ jobs:
               --binary /tmp/urls/binary-url.json \
               --provider circle
 
-  "test-next-version-locally":
+  "test-npm-module-and-verify-binary":
     <<: *defaults
     steps:
       - attach_workspace:
@@ -787,6 +794,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -794,17 +802,19 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
-    - test-next-version:
+    - test-binary-and-npm-against-other-projects:
         filters:
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build-npm-package
           - build-binary
-    - test-next-version-locally:
+    - test-npm-module-and-verify-binary:
         filters:
           branches:
             only:
@@ -860,7 +870,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - fix-typescript-binary-building
+              - binary-metadata
         requires:
           - Mac build
 

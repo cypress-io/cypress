@@ -1,6 +1,8 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 const tty = require('tty')
 const path = require('path')
 const isCi = require('is-ci')
@@ -9,15 +11,20 @@ const getos = require('getos')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const cachedir = require('cachedir')
-const getWindowsProxy = require('@cypress/get-windows-proxy')
+const logSymbols = require('log-symbols')
 const executable = require('executable')
+const { stripIndent } = require('common-tags')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
 
+const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
+
 const getosAsync = Promise.promisify(getos)
+
+const isBrokenGtkDisplayRe = /Gtk: cannot open display/
 
 const stringify = (val) => {
   return _.isObject(val) ? JSON.stringify(val) : val
@@ -25,6 +32,46 @@ const stringify = (val) => {
 
 function normalizeModuleOptions (options = {}) {
   return _.mapValues(options, stringify)
+}
+
+/**
+ * Returns true if the platform is Linux. We do a lot of different
+ * stuff on Linux (like Xvfb) and it helps to has readable code
+ */
+const isLinux = () => {
+  return os.platform() === 'linux'
+}
+
+/**
+   * If the DISPLAY variable is set incorrectly, when trying to spawn
+   * Cypress executable we get an error like this:
+  ```
+  [1005:0509/184205.663837:WARNING:browser_main_loop.cc(258)] Gtk: cannot open display: 99
+  ```
+   */
+const isBrokenGtkDisplay = (str) => {
+  return isBrokenGtkDisplayRe.test(str)
+}
+
+const isPossibleLinuxWithIncorrectDisplay = () => {
+  return isLinux() && process.env.DISPLAY
+}
+
+const logBrokenGtkDisplayWarning = () => {
+  debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting Xvfb')
+
+  // if we get this error, we are on Linux and DISPLAY is set
+  logger.warn(stripIndent`
+
+    ${logSymbols.warning} Warning: Cypress failed to start.
+
+    This is likely due to a misconfigured DISPLAY environment variable.
+
+    DISPLAY was set to: "${process.env.DISPLAY}"
+
+    Cypress will attempt to fix the problem and rerun.
+  `)
+  logger.warn()
 }
 
 function stdoutLineMatches (expectedLine, stdout) {
@@ -86,30 +133,6 @@ const util = {
       FORCE_COLOR: sc,
       DEBUG_COLORS: sc,
       MOCHA_COLORS: sc ? true : undefined,
-    }
-  },
-
-  _getWindowsProxy () {
-    return getWindowsProxy()
-  },
-
-  loadSystemProxySettings () {
-    // load user's OS-specific proxy settings in to environment vars
-    if (!_.isUndefined(process.env.HTTP_PROXY) || !_.isUndefined(process.env.http_proxy)) {
-      // user has set proxy explicitly in environment vars, don't mess with it
-      return
-    }
-
-    if (os.platform() === 'win32') {
-      const proxy = this._getWindowsProxy()
-
-      if (proxy) {
-        // environment variables are the only way to make request lib use NO_PROXY
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = proxy.httpProxy
-        process.env.NO_PROXY = process.env.NO_PROXY || proxy.noProxy
-      }
-
-      return 'win32'
     }
   },
 
@@ -201,9 +224,11 @@ const util = {
     return Promise.resolve(executable(filePath))
   },
 
+  isLinux,
+
   getOsVersionAsync () {
     return Promise.try(() => {
-      if (os.platform() === 'linux') {
+      if (isLinux()) {
         return getosAsync()
         .then((osInfo) => {
           return [osInfo.dist, osInfo.release].join(' - ')
@@ -268,6 +293,22 @@ const util = {
   exec: execa,
 
   stdoutLineMatches,
+
+  issuesUrl,
+
+  isBrokenGtkDisplay,
+
+  logBrokenGtkDisplayWarning,
+
+  isPossibleLinuxWithIncorrectDisplay,
+
+  getGitHubIssueUrl (number) {
+    la(is.positive(number), 'github issue should be a positive number', number)
+    la(_.isInteger(number), 'github issue should be an integer', number)
+
+    return `${issuesUrl}/${number}`
+  },
+
 }
 
 module.exports = util

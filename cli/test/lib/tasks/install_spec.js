@@ -4,7 +4,7 @@ const path = require('path')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const mockfs = require('mock-fs')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 const stdout = require('../../support/stdout')
 

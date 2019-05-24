@@ -53,7 +53,7 @@ getStylesFor = (doc, $$, stylesheets, location) ->
 
       makePathsAbsoluteToDoc(doc, styleRules)
 
-getDocumentStylesheets = (document) ->
+getDocumentStylesheets = (document = {}) ->
   _.reduce document.styleSheets, (memo, stylesheet) ->
     memo[stylesheet.href] = stylesheet
     return memo
@@ -189,7 +189,7 @@ create = ($$, state) ->
     tmpHtmlEl = document.createElement("html")
 
     ## preserve attributes on the <html> tag
-    htmlAttrs = _.reduce $$("html")[0].attributes, (memo, attr) ->
+    htmlAttrs = _.reduce $$("html")[0]?.attributes, (memo, attr) ->
       if attr.specified
         try
           ## if we can successfully set the attribute
@@ -208,6 +208,8 @@ create = ($$, state) ->
 
     ## careful renaming or removing this method, the runner depends on it
     getStyles
+
+    getDocumentStylesheets
   }
 
 module.exports = {
