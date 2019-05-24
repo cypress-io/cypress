@@ -189,7 +189,7 @@ create = ($$, state) ->
     tmpHtmlEl = document.createElement("html")
 
     ## preserve attributes on the <html> tag
-    htmlAttrs = _.reduce $$("html")[0].attributes, (memo, attr) ->
+    htmlAttrs = _.reduce $$("html")[0]?.attributes, (memo, attr) ->
       if attr.specified
         try
           ## if we can successfully set the attribute
