@@ -1,6 +1,5 @@
 import Bluebird from 'bluebird'
 import chai from 'chai'
-import { EventEmitter } from 'events'
 import http from 'http'
 import https from 'https'
 import net from 'net'
@@ -26,12 +25,11 @@ const HTTPS_PORT = 31443
 
 describe('lib/agent', function() {
   beforeEach(function() {
-    this.oldEnv = Object.assign({}, process.env)
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   })
 
   afterEach(function() {
-    process.env = this.oldEnv
+    process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
     sinon.restore()
   })
 
@@ -216,8 +214,8 @@ describe('lib/agent', function() {
         })
       })
 
-      it("#createConnection does not go to proxy if domain in NO_PROXY", function () {
-        const spy = sinon.spy(this.agent.httpsAgent, 'createProxiedConnection')
+      it("#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY", function () {
+        const spy = sinon.spy(this.agent.httpsAgent, 'createUpstreamProxyConnection')
 
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
         process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
@@ -234,13 +232,13 @@ describe('lib/agent', function() {
           .then(() => {
             throw new Error('should not be able to connect')
           })
-          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0'}, () => {
+          .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0'}, () => {
             expect(spy).to.be.calledOnce
           })
         })
       })
 
-      it("#createProxiedConnection calls to super for caching, TLS-ifying", function() {
+      it("#createUpstreamProxyConnection calls to super for caching, TLS-ifying", function() {
         const spy = sinon.spy(https.Agent.prototype, 'createConnection')
 
         const proxy = new DebuggingProxy()
@@ -266,7 +264,7 @@ describe('lib/agent', function() {
         })
       })
 
-      it("#createProxiedConnection throws when connection is accepted then closed", function() {
+      it("#createUpstreamProxyConnection throws when connection is accepted then closed", function() {
         const proxy = Bluebird.promisifyAll(
           net.createServer((socket) => {
             socket.end()
