@@ -97,7 +97,7 @@
     "xvfb-maybe": "cypress-io/xvfb-maybe#c4a810c42d603949cd63b8cf245f6c239331d370"
   },
   "dependencies": {
-    "@cypress/browserify-preprocessor": "1.1.2",
+    "@cypress/browserify-preprocessor": "2.1.0",
     "@cypress/commit-info": "2.1.3",
     "@cypress/get-windows-proxy": "1.5.4",
     "@cypress/icons": "0.7.0",
