@@ -1785,7 +1785,7 @@ declare namespace Cypress {
     writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
   }
 
-  interface Agent<A extends sinon.SinonSpy> {
+  interface SinonSpyAgent<A extends sinon.SinonSpy> {
     log(shouldOutput?: boolean): Omit<A, 'withArgs'> & Agent<A>
 
     /**
@@ -1808,6 +1808,8 @@ declare namespace Cypress {
      */
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
   }
+         
+  type Agent<T> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
     whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
