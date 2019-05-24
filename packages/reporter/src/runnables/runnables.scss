@@ -196,6 +196,7 @@
 
   .runnable-title {
     font-size: 12.5px;
+    white-space: pre-line;
 
     &:focus {
       outline: 1px dotted #6c6c6c;
@@ -205,6 +206,7 @@
   .runnable-content-region {
     overflow: auto;
     position: relative;
+    display: inline-flex;
 
     &:focus {
       outline: 1px dotted #6c6c6c;
