@@ -17,7 +17,10 @@ let server
 const _buildFullLoginUrl = (baseLoginUrl, server) => {
   const { port } = server.address()
 
-  authState = random.id(32)
+  if (!authState) {
+    authState = random.id(32)
+  }
+
   const authUrl = `${baseLoginUrl}?port=${port}&state=${authState}`
 
   return authUrl

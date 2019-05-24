@@ -1,4 +1,5 @@
 require('../../spec_helper')
+const root = global.root
 
 const auth = require(`${root}../lib/gui/auth`)
 const electron = require('electron')
@@ -41,6 +42,13 @@ describe('lib/gui/auth', function () {
       expect(url).to.eq(LOGIN_URL)
       expect(random.id).to.be.calledWith(32)
       expect(this.server.address).to.be.calledOnce
+    })
+
+    it('does not regenerate the state code', function () {
+      auth._buildFullLoginUrl(BASE_URL, this.server)
+      auth._buildFullLoginUrl(BASE_URL, this.server)
+
+      expect(random.id).to.be.calledOnce
     })
   })
 
