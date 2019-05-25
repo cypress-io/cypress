@@ -1804,16 +1804,17 @@ declare namespace Cypress {
   }
 
   /**
-   * Options that control how a command behaves in the `within` scope
+   * Options that control how a command behaves in the `within` scope.
+   * These options will determine how nodes are selected.
    */
 
   interface Withinable {
     /**
-     * The subject of the within wrapper.
+     * Element to search for children in. If null, search begins from root-level DOM element.
      *
      * @default depends on context, null if outside of within wrapper
      */
-    withinSubject: JQuery | null
+    withinSubject: JQuery | HTMLElement | null
   }
 
   /**
