@@ -265,6 +265,16 @@ declare namespace Cypress {
     env(object: ObjectLike): void
 
     /**
+     * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
+     *
+     * @see https://on.cypress.io/iscy
+     * @example
+     *    Cypress.isCy(cy) // => true
+     */
+    isCy<TSubject = any>(obj: Chainable<TSubject>): obj is Chainable<TSubject>
+    isCy(obj: any): obj is Chainable
+
+    /**
      * Internal options for "cy.log" used in custom commands.
      *
      * @see https://on.cypress.io/cypress-log
@@ -1775,7 +1785,7 @@ declare namespace Cypress {
     writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
   }
 
-  interface Agent<A extends sinon.SinonSpy> {
+  interface SinonSpyAgent<A extends sinon.SinonSpy> {
     log(shouldOutput?: boolean): Omit<A, 'withArgs'> & Agent<A>
 
     /**
@@ -1799,8 +1809,33 @@ declare namespace Cypress {
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
   }
 
+  type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
+
   interface CookieDefaults {
     whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
+  }
+
+  interface Failable {
+    /**
+     * Whether to fail on response codes other than 2xx and 3xx
+     *
+     * @default {true}
+     */
+    failOnStatusCode: boolean
+
+    /**
+     * Whether Cypress should automatically retry status code errors under the hood
+     *
+     * @default {false}
+     */
+    retryOnStatusCodeFailure: boolean
+
+    /**
+     * Whether Cypress should automatically retry transient network errors under the hood
+     *
+     * @default {true}
+     */
+    retryOnNetworkFailure: boolean
   }
 
   /**
@@ -2067,10 +2102,9 @@ declare namespace Cypress {
   /**
    * Full set of possible options for cy.request call
    */
-  interface RequestOptions extends Loggable, Timeoutable {
+  interface RequestOptions extends Loggable, Timeoutable, Failable {
     auth: object
     body: RequestBody
-    failOnStatusCode: boolean
     followRedirect: boolean
     form: boolean
     gzip: boolean
@@ -2200,7 +2234,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/visit
    */
-  interface VisitOptions extends Loggable, Timeoutable {
+  interface VisitOptions extends Loggable, Timeoutable, Failable {
     /**
      * The URL to visit. Behaves the same as the `url` argument.
      */
@@ -2254,13 +2288,6 @@ declare namespace Cypress {
      * @param {Window} contentWindow the remote page's window object
      */
     onLoad(win: Window): void
-
-    /**
-     * Whether to fail on response codes other than 2xx and 3xx
-     *
-     * @default {true}
-     */
-    failOnStatusCode: boolean
 
     /**
      * Cypress will automatically apply the right authorization headers
@@ -3583,6 +3610,22 @@ declare namespace Cypress {
      */
     (chainer: 'contain', value: string): Chainable<Subject>
     /**
+     * Assert that at least one element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('have.focus')
+     *    cy.get('#result').should('be.focused')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.focus'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('be.focused')
+     *    cy.get('#result').should('have.focus')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.focused'): Chainable<Subject>
+    /**
      * Assert that the selection is not empty. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
      *    cy.get('#result').should('exist')
@@ -3738,6 +3781,22 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.be.visible'): Chainable<Subject>
+    /**
+     * Assert that no element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('not.have.focus')
+     *    cy.get('#result').should('not.be.focused')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.focus'): Chainable<Subject>
+    /**
+     * Assert that no element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('not.be.focused')
+     *    cy.get('#result').should('not.have.focus')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.focused'): Chainable<Subject>
     /**
      * Assert that the selection does not contain the given text, using `:contains()`. If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original implementation will be called.
      * @example
@@ -3935,7 +3994,7 @@ declare namespace Cypress {
     })
     ```
      */
-    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
+    (action: 'window:confirm', fn: ((text: string) => false | void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
@@ -3952,7 +4011,7 @@ declare namespace Cypress {
     ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
+    (action: 'window:alert', fn: ((text: string) => void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events

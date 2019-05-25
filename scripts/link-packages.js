@@ -30,7 +30,7 @@ function deleteOutputFolder () {
   .catch(_.noop)
 }
 
-function proxyModule (name, pathToMain, pathToBrowser) {
+function proxyModule (name, pathToMain, pathToBrowser, pathToTypes) {
   la(is.unemptyString(name), 'missing name')
   la(is.unemptyString(pathToMain), 'missing path to main', pathToMain)
   la(isRelative(pathToMain), 'path to main should be relative', pathToMain)
@@ -43,9 +43,21 @@ function proxyModule (name, pathToMain, pathToBrowser) {
   }
 
   if (pathToBrowser) {
-    la(isRelative(pathToBrowser),
-      'path to browser module should be relative', pathToBrowser)
+    la(
+      isRelative(pathToBrowser),
+      'path to browser module should be relative',
+      pathToBrowser
+    )
     pkg.browser = pathToBrowser
+  }
+
+  if (pathToTypes) {
+    la(
+      isRelative(pathToTypes),
+      'path to types file should be relative',
+      pathToTypes
+    )
+    pkg.types = pathToTypes
   }
 
   return pkg
@@ -62,12 +74,10 @@ function needsRegister (name) {
 function makeProxies () {
   return glob('./packages/*/package.json')
   .map((filename) => {
-    return fs.readJsonAsync(filename)
-    .then((json) => {
+    return fs.readJsonAsync(filename).then((json) => {
       return { filename, json }
     })
-  }
-  )
+  })
   .map(({ filename, json }) => {
     if (!json.main) {
       throw new Error(`Package ${json.name} is missing main`)
@@ -93,22 +103,45 @@ function makeProxies () {
 
     if (is.unemptyString(json.browser)) {
       debug('package has browser field %s', json.browser)
-      relativePathToBrowser = path.relative(destinationFolder,
+      relativePathToBrowser = path.relative(
+        destinationFolder,
         path.resolve(dirname, json.browser)
       )
       debug('relative path to browser', relativePathToBrowser)
     }
 
-    const proxy = proxyModule(json.name, relativePathToMain, relativePathToBrowser)
+    // if the package has types field, compute new path to it
+    let relativePathTypes
+
+    if (is.unemptyString(json.types)) {
+      debug('package has types field %s', json.types)
+      relativePathTypes = path.relative(
+        destinationFolder,
+        path.resolve(dirname, json.types)
+      )
+      debug('relative path to types', relativePathTypes)
+    }
+
+    const proxy = proxyModule(
+      json.name,
+      relativePathToMain,
+      relativePathToBrowser,
+      relativePathTypes
+    )
 
     console.log(path.dirname(destPackageFilename), '->', relativePathToMain)
 
-    return fs.outputJsonAsync(destPackageFilename, proxy)
+    return fs
+    .outputJsonAsync(destPackageFilename, proxy, { spaces: 2 })
     .then(() => {
       if (needsRegister(json.name)) {
         console.log('adding register file', registerPath)
 
-        return fs.outputFileAsync(registerPath, proxyRegister(bareName), 'utf8')
+        return fs.outputFileAsync(
+          registerPath,
+          proxyRegister(bareName),
+          'utf8'
+        )
       }
     })
   })

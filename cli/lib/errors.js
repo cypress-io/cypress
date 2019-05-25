@@ -75,7 +75,7 @@ const notInstalledCI = (executable) => {
 }
 
 const nonZeroExitCodeXvfb = {
-  description: 'XVFB exited with a non zero exit code.',
+  description: 'Xvfb exited with a non zero exit code.',
   solution: stripIndent`
     There was a problem spawning Xvfb.
 
@@ -84,9 +84,9 @@ const nonZeroExitCodeXvfb = {
 }
 
 const missingXvfb = {
-  description: 'Your system is missing the dependency: XVFB',
+  description: 'Your system is missing the dependency: Xvfb',
   solution: stripIndent`
-    Install XVFB and run Cypress again.
+    Install Xvfb and run Cypress again.
 
     Read our documentation on dependencies for more information:
 
@@ -108,21 +108,14 @@ const smokeTestFailure = (smokeTestCommand, timedOut) => {
   }
 }
 
-const invalidDisplayError = {
-  description: 'Cypress failed to start.',
-  solution  (msg, prevMessage) {
+const invalidSmokeTestDisplayError = {
+  code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
+  description: 'Cypress verification failed.',
+  solution  (msg) {
     return stripIndent`
-      First, we have tried to start Cypress using your DISPLAY settings
-      but encountered the following problem:
+      Cypress failed to start after spawning a new Xvfb server.
 
-      ${hr}
-
-      ${prevMessage}
-
-      ${hr}
-
-      Then we started our own XVFB and tried to start Cypress again, but
-      got the following error:
+      The error logs we received were:
 
       ${hr}
 
@@ -301,17 +294,23 @@ function formErrorText (info, msg, prevMessage) {
   })
 }
 
-const raise = (text) => {
-  const err = new Error(text)
+const raise = (info) => {
+  return (text) => {
+    const err = new Error(text)
 
-  err.known = true
-  throw err
+    if (info.code) {
+      err.code = info.code
+    }
+
+    err.known = true
+    throw err
+  }
 }
 
 const throwFormErrorText = (info) => {
   return (msg, prevMessage) => {
     return formErrorText(info, msg, prevMessage)
-    .then(raise)
+    .then(raise(info))
   }
 }
 
@@ -326,7 +325,7 @@ module.exports = {
     missingApp,
     notInstalledCI,
     missingDependency,
-    invalidDisplayError,
+    invalidSmokeTestDisplayError,
     versionMismatch,
     binaryNotExecutable,
     unexpected,

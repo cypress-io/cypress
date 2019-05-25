@@ -73,7 +73,7 @@ module.exports = {
       debug("spawning %s with args", execPath, argv)
 
       if debug.enabled
-        # let's see everything Electron spits back
+        ## enable the internal chromium logger
         argv.push("--enable-logging")
 
       cp.spawn(execPath, argv, {stdio: "inherit"})

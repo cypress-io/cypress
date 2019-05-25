@@ -18,6 +18,7 @@ export default class AutIframe {
     this.$iframe = $('<iframe>', {
       id: `Your App: '${this.config.projectName}'`,
       class: 'aut-iframe',
+      name: 'aut-iframe',
     })
 
     return this.$iframe
@@ -54,11 +55,16 @@ export default class AutIframe {
   detachDom = (Cypress) => {
     const contents = this._contents()
     const { headStyles, bodyStyles } = Cypress.getStyles()
-    const htmlAttrs = _.transform(contents.find('html')[0].attributes, (memo, attr) => {
-      if (attr.specified) {
-        memo[attr.name] = attr.value
-      }
-    }, {})
+    let htmlAttrs = {}
+
+    if (contents.find('html')[0]) {
+      htmlAttrs = _.transform(contents.find('html')[0].attributes, (memo, attr) => {
+        if (attr.specified) {
+          memo[attr.name] = attr.value
+        }
+      }, {})
+    }
+
     const $body = contents.find('body')
 
     $body.find('script,link[rel="stylesheet"],style').remove()
@@ -89,10 +95,14 @@ export default class AutIframe {
   }
 
   _replaceHtmlAttrs ($html, htmlAttrs) {
+    let oldAttrs = {}
+
     // remove all attributes
-    const oldAttrs = _.map($html[0].attributes, (attr) => {
-      return attr.name
-    })
+    if ($html[0]) {
+      oldAttrs = _.map($html[0].attributes, (attr) => {
+        return attr.name
+      })
+    }
 
     _.each(oldAttrs, (attr) => {
       $html.removeAttr(attr)
