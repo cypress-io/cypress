@@ -18,6 +18,18 @@ describe "driver/src/cy/snapshots", ->
         foo: "bar"
       })
 
+  context "snapshot no html/doc", ->
+    beforeEach ->
+      cy.visit("/fixtures/no_html.html")
+
+    it "does not err on snapshot", ->
+      { htmlAttrs } = cy.createSnapshot()
+
+      doc = cy.state("document")
+      doc.write('')
+
+      expect(htmlAttrs).to.eql({})
+
   context "snapshot el", ->
     before ->
       cy
@@ -31,6 +43,7 @@ describe "driver/src/cy/snapshots", ->
 
     beforeEach ->
       doc = cy.state("document")
+
 
       $(doc.head).empty().html(@head)
       $(doc.body).empty().html(@body)

@@ -5,6 +5,7 @@ sinonChai     = require("sinon-chai")
 sinonPromise  = require("sinon-as-promised")(Promise)
 
 global.request   = require("request-promise")
+global.sinon     = sinon
 global.supertest = require("supertest")
 
 chai.use(sinonChai)
