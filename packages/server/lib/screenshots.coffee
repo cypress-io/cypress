@@ -309,7 +309,10 @@ getPath = (data, ext, screenshotsFolder) ->
   if data.name
     names = data.name.split(pathSeparatorRe).map(sanitize)
   else
-    names = [data.titles.map(sanitize).join(RUNNABLE_SEPARATOR)]
+    ## they could have test titles that are not strings, 
+    ## remove those before trying to sanitize
+    stringTitles = _.filter(data.titles, _.isString)
+    names = [stringTitles.map(sanitize).join(RUNNABLE_SEPARATOR)]
 
   # truncate file names to be less than 220 characters
   # to accomodate filename size limits
