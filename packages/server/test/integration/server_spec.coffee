@@ -401,6 +401,44 @@ describe "Server", ->
             cookies: []
           })
 
+      it "yields isHtml true for HTML-shaped responses", ->
+        nock("http://example.com")
+        .get("/")
+        .reply(200, "<html>foo</html>")
+
+        @server._onResolveUrl("http://example.com", {}, @automationRequest)
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            isOkStatusCode: true
+            isHtml: true
+            contentType: undefined
+            url: "http://example.com/"
+            originalUrl: "http://example.com/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+
+      it "yields isHtml false for non-HTML-shaped responses", ->
+        nock("http://example.com")
+        .get("/")
+        .reply(200, '{ foo: "bar" }')
+
+        @server._onResolveUrl("http://example.com", {}, @automationRequest)
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            isOkStatusCode: true
+            isHtml: false
+            contentType: undefined
+            url: "http://example.com/"
+            originalUrl: "http://example.com/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+
       it "can follow multiple http redirects", ->
         nock("http://espn.com")
         .get("/")
