@@ -27,7 +27,7 @@ const config: webpack.Configuration = {
     alias: {
       'react': require.resolve('react')
     },
-    extensions: [ '.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
+    extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
   },
   output: {
     path: path.resolve('./dist'),
@@ -91,10 +91,10 @@ const config: webpack.Configuration = {
             loader: 'sass-loader',
             options: {
               sourceMap: true,
-              importer: function(...args) {
-								args[0] = args[0].replace(/\\/g, '/')
-								args[1] = args[1].replace(/\\/g, '/')
-								return sassGlobImporter.apply(this, args)
+              importer: function (...args) {
+                args[0] = args[0].replace(/\\/g, '/')
+                args[1] = args[1].replace(/\\/g, '/')
+                return sassGlobImporter.apply(this, args)
               },
             },
           }, // compiles Sass to CSS, using Node Sass by default
@@ -115,8 +115,6 @@ const config: webpack.Configuration = {
   },
 
   plugins: [
-    // new DebugWebpackPlugin(),
-    // new debugPlugin(),
     new HtmlWebpackPlugin({
       template: './static/index.html',
       inject: false,
@@ -148,4 +146,6 @@ const config: webpack.Configuration = {
 }
 
 export default config
+
+export { HtmlWebpackPlugin }
 
