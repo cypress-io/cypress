@@ -1,7 +1,7 @@
 const cloneDeep = require('lodash.clonedeep')
 const path = require('path')
 const webpack = require('webpack')
-const log = require('debug')('cypress:webpack')
+const debug = require('debug')('cypress:webpack')
 
 const createDeferred = require('./deferred')
 
@@ -42,7 +42,7 @@ const defaultOptions = {
 // on('file:preprocessor', webpack(options))
 //
 const preprocessor = (options = {}) => {
-  log('user options:', options)
+  debug('user options:', options)
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -57,13 +57,13 @@ const preprocessor = (options = {}) => {
   // the supported file and spec file to be requested again
   return (file) => {
     const filePath = file.filePath
-    log('get', filePath)
+    debug('get', filePath)
 
     // since this function can get called multiple times with the same
     // filePath, we return the cached bundle promise if we already have one
     // since we don't want or need to re-initiate webpack for it
     if (bundles[filePath]) {
-      log(`already have bundle for ${filePath}`)
+      debug(`already have bundle for ${filePath}`)
       return bundles[filePath]
     }
 
@@ -90,8 +90,8 @@ const preprocessor = (options = {}) => {
       },
     })
 
-    log(`input: ${filePath}`)
-    log(`output: ${outputPath}`)
+    debug(`input: ${filePath}`)
+    debug(`output: ${outputPath}`)
 
     const compiler = webpack(webpackOptions)
 
@@ -108,7 +108,7 @@ const preprocessor = (options = {}) => {
       err.filePath = filePath
       // backup the original stack before it's potentially modified by bluebird
       err.originalStack = err.stack
-      log(`errored bundling ${outputPath}`, err)
+      debug(`errored bundling ${outputPath}`, err)
       latestBundle.reject(err)
     }
 
@@ -129,11 +129,11 @@ const preprocessor = (options = {}) => {
 
       // these stats are really only useful for debugging
       if (jsonStats.warnings.length > 0) {
-        log(`warnings for ${outputPath}`)
-        log(jsonStats.warnings)
+        debug(`warnings for ${outputPath}`)
+        debug(jsonStats.warnings)
       }
 
-      log('finished bundling', outputPath)
+      debug('finished bundling', outputPath)
       // resolve with the outputPath so Cypress knows where to serve
       // the file from
       latestBundle.resolve(outputPath)
@@ -143,12 +143,12 @@ const preprocessor = (options = {}) => {
     const plugin = { name: 'CypressWebpackPreprocessor' }
 
     const onCompile = () => {
-      log('compile', filePath)
+      debug('compile', filePath)
       // we overwrite the latest bundle, so that a new call to this function
       // returns a promise that resolves when the bundling is finished
       latestBundle = createDeferred()
       bundles[filePath] = latestBundle.promise.tap(() => {
-        log('- compile finished for', filePath)
+        debug('- compile finished for', filePath)
         // when the bundling is finished, emit 'rerun' to let Cypress
         // know to rerun the spec
         file.emit('rerun')
@@ -158,7 +158,7 @@ const preprocessor = (options = {}) => {
     // when we should watch, we hook into the 'compile' hook so we know when
     // to rerun the tests
     if (file.shouldWatch) {
-      log('watching')
+      debug('watching')
 
       if (compiler.hooks) {
         compiler.hooks.compile.tap(plugin, onCompile)
@@ -172,7 +172,7 @@ const preprocessor = (options = {}) => {
     // when the spec or project is closed, we need to clean up the cached
     // bundle promise and stop the watcher via `bundler.close()`
     file.on('close', () => {
-      log('close', filePath)
+      debug('close', filePath)
       delete bundles[filePath]
 
       if (file.shouldWatch) {
