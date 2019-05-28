@@ -6,11 +6,11 @@ import sassGlobImporter = require('node-sass-globbing')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import CopyWebpackPlugin = require('copy-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
+import LiveReloadPlugin from 'webpack-livereload-plugin'
 
 const mode = process.env.NODE_ENV as ('development' | 'production' | 'test' | 'reporter') || 'development'
 const webpackmode = mode === 'production' ? mode : 'development'
 
-// const isDevServer = !!process.env.DEV_SERVER
 const config: webpack.Configuration = {
   entry: {
     cypress_runner: ['./src/index.js'],
@@ -119,29 +119,11 @@ const config: webpack.Configuration = {
       template: './static/index.html',
       inject: false,
     }),
-    new CleanWebpackPlugin(),
+    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
     new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
     new MiniCSSExtractWebpackPlugin(),
+    new LiveReloadPlugin({ appendScriptTag: 'true' })
   ],
-
-  devServer: {
-    port: 3938,
-    stats: {
-      errors: true,
-      warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
-      warnings: true,
-      all: false,
-      builtAt: true,
-      colors: true,
-      modules: true,
-      excludeModules: /main\.scss/,
-    },
-    noInfo: true,
-    writeToDisk: true,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    }
-  }
 
 }
 
