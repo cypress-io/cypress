@@ -59,7 +59,6 @@ replaceDurationInTables = (str, p1, p2) ->
   _.padStart("XX:XX", p1.length + p2.length)
 
 replaceUploadingResults = (orig, match..., offset, string) ->
-  
     results = match[1].split('\n').map((res) ->
       res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)')
     )
@@ -68,8 +67,6 @@ replaceUploadingResults = (orig, match..., offset, string) ->
     ret =  match[0] + results + match[3]
 
     return ret
-
-    
 
 normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
