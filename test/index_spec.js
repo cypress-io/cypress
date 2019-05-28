@@ -111,6 +111,20 @@ describe('webpack preprocessor', function () {
         })
       })
 
+      it('enables inline source maps', function () {
+        return this.run().then(() => {
+          expect(webpack.lastCall.args[0].devtool).to.equal('inline-source-map')
+        })
+      })
+
+      it('does not enable inline source maps when devtool is false', function () {
+        this.options.webpackOptions = { devtool: false }
+
+        return this.run().then(() => {
+          expect(webpack.lastCall.args[0].devtool).to.be.false
+        })
+      })
+
       it('runs when shouldWatch is false', function () {
         return this.run().then(() => {
           expect(this.compilerApi.run).to.be.called
