@@ -36,6 +36,12 @@ fileServer   = require("./file_server")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
+isResponseHtml = (contentType, responseBuffer) ->
+  if contentType
+    return contentType is "text/html"
+
+  isHtml(responseBuffer.toString())
+
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
   return if req.proxiedUrl
@@ -442,7 +448,11 @@ class Server
                 ## this allows us to detect & reject ETIMEDOUT errors
                 ## where the headers have been sent but the
                 ## connection hangs before receiving a body.
-                details.isHtml = contentType is "text/html" or isHtml(responseBuffer.toString())
+
+                ## if there is not a content-type, try to determine
+                ## if the response content is HTML-like
+                ## https://github.com/cypress-io/cypress/issues/1727
+                details.isHtml = isResponseHtml(contentType, responseBuffer)
 
                 debug("resolve:url response ended, setting buffer %o", { newUrl, details })
 
@@ -459,7 +469,7 @@ class Server
                     highWaterMark: Number.MAX_SAFE_INTEGER
                   })
 
-                  responseBufferStream.write(responseBuffer)
+                  responseBufferStream.end(responseBuffer)
 
                   buffers.set({
                     url: newUrl

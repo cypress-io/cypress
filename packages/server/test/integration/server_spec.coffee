@@ -235,8 +235,8 @@ describe "Server", ->
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOkStatusCode: false
-            isHtml: false
-            contentType: undefined
+            isHtml: true
+            contentType: "text/html"
             url: "http://localhost:2000/does-not-exist"
             originalUrl: "/does-not-exist"
             filePath: Fixtures.projectPath("no-server/dev/does-not-exist")
