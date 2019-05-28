@@ -29,7 +29,7 @@ const getDocumentStylesheets = (document) => {
   }, {})
 }
 
-const makePathsAbsoluteToDocCache = new LimitedMap()
+const makePathsAbsoluteToDocCache = new LimitedMap(50)
 const makePathsAbsoluteToDoc = $utils.memoize((styles, doc) => {
   if (!_.isString(styles)) return styles
 
@@ -44,7 +44,7 @@ const makePathsAbsoluteToDoc = $utils.memoize((styles, doc) => {
   })
 }, makePathsAbsoluteToDocCache)
 
-const makePathsAbsoluteToStylesheetCache = new LimitedMap()
+const makePathsAbsoluteToStylesheetCache = new LimitedMap(50)
 const makePathsAbsoluteToStylesheet = $utils.memoize((styles, href) => {
   if (!_.isString(styles)) {
     return styles
