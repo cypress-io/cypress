@@ -91,13 +91,12 @@ niv.install("react-dom@15.6.1")
     .status(500)
     .send("<html><body>server error</body></html>")
 
-  css2366 = ""
-  makeCss2366 = ->
-    css = _.range(1, 2501).map((n) -> ".c#{n} { font-size: #{Math.round(n / 10)}px; }").join("\n")
+  makeCss2366 = _.once ->
+    _.range(1, 2501).map((n) -> ".c#{n} { font-size: #{Math.round(n / 10)}px; }").join("\n")
 
   app.get "/dynamically-server-generated/issue-2366.css", (req, res) ->
-    res.setHeader('Content-Type', 'text/css')
-    res.status(200).send(css2366 or makeCss2366())
+    res.setHeader("Content-Type", "text/css")
+    res.status(200).send(makeCss2366())
 
   app.use(express.static(path.join(__dirname, "..", "cypress")))
 
