@@ -12,7 +12,7 @@ create = (Cypress, $$, state) ->
   getHtmlAttrs = (htmlEl) ->
     tmpHtmlEl = document.createElement("html")
 
-    _.transform htmlEl.attributes, (memo, attr) ->
+    _.transform htmlEl?.attributes, (memo, attr) ->
       return if not attr.specified
 
       try
