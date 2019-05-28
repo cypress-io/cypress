@@ -612,30 +612,17 @@ class Server
       {hostname} = url.parse("http://#{host}")
 
       onProxyErr = (err, req, res) ->
-        ## by default http-proxy will call socket.end
-        ## with no data, so we need to override the end
-        ## function and write our own response
+        ## http-proxy will handle ending the connection for us
         ## https://github.com/nodejitsu/node-http-proxy/blob/master/lib/http-proxy/passes/ws-incoming.js#L159
-        end = socket.end
-        socket.end = ->
-          socket.end = end
 
-          response = [
-            "HTTP/#{req.httpVersion} 502 #{statusCode.getText(502)}"
-            "X-Cypress-Proxy-Error-Message: #{err.message}"
-            "X-Cypress-Proxy-Error-Code: #{err.code}"
-          ].join("\r\n") + "\r\n\r\n"
+        proxiedUrl = "#{protocol}//#{hostname}:#{port}"
 
-          proxiedUrl = "#{protocol}//#{hostname}:#{port}"
-
-          debug(
-            "Got ERROR proxying websocket connection to url: '%s' received error: '%s' with code '%s'",
-            proxiedUrl,
-            err.toString()
-            err.code
-          )
-
-          socket.end(response)
+        debug(
+          "Got ERROR proxying websocket connection to url: '%s' received error: '%s' with code '%s'",
+          proxiedUrl,
+          err.toString()
+          err.code
+        )
 
       proxy.ws(req, socket, head, {
         secure: false
