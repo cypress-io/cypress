@@ -210,6 +210,35 @@ context('lib/tasks/verify', () => {
 
   })
 
+  it('sets ELECTRON_ENABLE_LOGGING without mutating process.env', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0777 }),
+      packageVersion,
+    })
+
+    expect(process.env.ELECTRON_ENABLE_LOGGING).to.be.undefined
+
+    util.exec.resolves()
+    sinon.stub(util, 'stdoutLineMatches').returns(true)
+
+    return verify
+    .start()
+    .then(() => {
+      expect(process.env.ELECTRON_ENABLE_LOGGING).to.be.undefined
+
+      const stdioOptions = util.exec.firstCall.args[2]
+
+      expect(stdioOptions).to.include({
+        timeout: 10000,
+      })
+
+      expect(stdioOptions.env).to.include({
+        ELECTRON_ENABLE_LOGGING: true,
+      })
+    })
+  })
+
   describe('with force: true', () => {
     beforeEach(() => {
       createfs({
@@ -285,7 +314,7 @@ context('lib/tasks/verify', () => {
     })
   })
 
-  describe('smoke test retries on bad display with our XVFB', () => {
+  describe('smoke test retries on bad display with our Xvfb', () => {
     let restore
 
     beforeEach(() => {
@@ -307,7 +336,7 @@ context('lib/tasks/verify', () => {
       restore()
     })
 
-    it('successfully retries with our XVFB on Linux', () => {
+    it('successfully retries with our Xvfb on Linux', () => {
       // initially we think the user has everything set
       xvfb.isNeeded.returns(false)
       sinon.stub(util, 'isPossibleLinuxWithIncorrectDisplay').returns(true)
@@ -340,7 +369,7 @@ context('lib/tasks/verify', () => {
       })
     })
 
-    it('fails on both retries with our XVFB on Linux', () => {
+    it('fails on both retries with our Xvfb on Linux', () => {
       // initially we think the user has everything set
       xvfb.isNeeded.returns(false)
 
@@ -378,7 +407,7 @@ context('lib/tasks/verify', () => {
       })
       .catch((e) => {
         expect(util.exec).to.have.been.calledTwice
-        // second time around we should have called XVFB
+        // second time around we should have called Xvfb
         expect(xvfb.start).to.have.been.calledOnce
         expect(xvfb.stop).to.have.been.calledOnce
 

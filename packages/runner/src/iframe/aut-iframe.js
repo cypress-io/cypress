@@ -18,6 +18,7 @@ export default class AutIframe {
     this.$iframe = $('<iframe>', {
       id: `Your App: '${this.config.projectName}'`,
       class: 'aut-iframe',
+      name: 'aut-iframe',
     })
 
     return this.$iframe
@@ -78,10 +79,14 @@ export default class AutIframe {
   }
 
   _replaceHtmlAttrs ($html, htmlAttrs) {
+    let oldAttrs = {}
+
     // remove all attributes
-    const oldAttrs = _.map($html[0].attributes, (attr) => {
-      return attr.name
-    })
+    if ($html[0]) {
+      oldAttrs = _.map($html[0].attributes, (attr) => {
+        return attr.name
+      })
+    }
 
     _.each(oldAttrs, (attr) => {
       $html.removeAttr(attr)

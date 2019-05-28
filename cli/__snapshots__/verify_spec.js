@@ -364,7 +364,7 @@ It looks like this is your first time using Cypress: 1.2.3
 
  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
-Error: XVFB exited with a non zero exit code.
+Error: Xvfb exited with a non zero exit code.
 
 There was a problem spawning Xvfb.
 
@@ -384,7 +384,7 @@ Cypress Version: 1.2.3
 exports['tried to verify twice, on the first try got the DISPLAY error'] = `
 Cypress verification failed.
 
-Cypress failed to start after spawning a new XVFB server.
+Cypress failed to start after spawning a new Xvfb server.
 
 The error logs we received were:
 
