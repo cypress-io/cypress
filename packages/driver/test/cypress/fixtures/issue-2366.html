@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="issue-2366-1.css" />
+    <link rel="stylesheet" href="issue-2366-2.css" />
+    <link rel="stylesheet" href="/dynamically-server-generated/issue-2366.css" />
+    <!--
+    <style>
+      #inline:after {
+        content: ' (before change)';
+      }
+      #inline {
+        margin-right: 3px;
+      }
+    </style>
+    -->
+  </head>
+  <body>
+    <h1 id="lots-of-css">random font size test</h1>
+    <h1 id="external-1">external 1</h1>
+    <h1 id="external-2">external 2</h1>
+    <h1 id="inline">inline</h1>
+
+    <script>
+      // The .c# classname is tightly coupled to generated CSS file made in packages/driver/test/support/server.coffee
+      // Avoid 0 px, so should('be.visible') check does not randomly fail
+      document.getElementById('lots-of-css').className = "c" + (1 + (Math.random() * 1000));
+      // Modify the CSS with JavaScript to ensure it is represented by the snapshot
+      window.changeRules = function (index) {
+        document.styleSheets[index].deleteRule(0);
+        document.styleSheets[index].deleteRule(0);
+        document.styleSheets[index].insertRule("#external-" + (index + 1) + ":after { content: ' (after change)'; }", 0);
+        document.styleSheets[index].insertRule("#external-" + (index + 1) + " { background-color: black; color: white; margin-right: " + (index * 10 + 10) + "px; }", 1);
+      };
+    </script>
+  </body>
+</html>
