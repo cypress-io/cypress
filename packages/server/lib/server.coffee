@@ -40,7 +40,10 @@ isResponseHtml = (contentType, responseBuffer) ->
   if contentType
     return contentType is "text/html"
 
-  isHtml(responseBuffer.toString())
+  if body = _.invoke(responseBuffer, 'toString')
+    return isHtml(body)
+
+  return false
 
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
@@ -448,6 +451,11 @@ class Server
                 ## this allows us to detect & reject ETIMEDOUT errors
                 ## where the headers have been sent but the
                 ## connection hangs before receiving a body.
+
+                if !_.get(responseBuffer, 'length')
+                  ## concatStream can yield an empty array, which is
+                  ## not a valid chunk
+                  responseBuffer = undefined
 
                 ## if there is not a content-type, try to determine
                 ## if the response content is HTML-like
