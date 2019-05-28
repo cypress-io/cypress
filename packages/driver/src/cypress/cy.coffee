@@ -90,7 +90,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   errors = $Errors.create(state, config, log)
   ensures = $Ensures.create(state, expect)
 
-  snapshots = $Snapshots.create(Cypress, $$, state)
+  snapshots = $Snapshots.create($$, state)
 
   isCy = (val) ->
     (val is cy) or $utils.isInstanceOf(val, $Chainer)
@@ -140,8 +140,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         Cypress.action("app:window:confirmed", str, ret)
 
         return ret
-      onCssModification: (href) ->
-        Cypress.action("app:css:modified", href)
     })
 
   wrapNativeMethods = (contentWindow) ->
@@ -161,6 +159,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.document.hasFocus = ->
         top.document.hasFocus()
+
+      cssModificationSpy = (original, args...) ->
+        snapshots.onCssModified(@href)
+        original.apply(@, args)
+
+      insertRule = contentWindow.CSSStyleSheet.prototype.insertRule
+      deleteRule = contentWindow.CSSStyleSheet.prototype.deleteRule
+
+      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -905,6 +913,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindowListeners(contentWindow)
 
       wrapNativeMethods(contentWindow)
+
+      snapshots.onBeforeWindowLoad()
 
       timers.wrap(contentWindow)
 

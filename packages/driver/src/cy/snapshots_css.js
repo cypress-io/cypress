@@ -90,7 +90,7 @@ const getInlineCssContents = (stylesheet, $$) => {
   })
 }
 
-const create = (Cypress, $$, state) => {
+const create = ($$, state) => {
   const cssIdToContentsMap = new WeakMap()
   const cssHashedContentsToIdMap = new LimitedMap()
   const cssHrefToIdMap = new LimitedMap()
@@ -98,16 +98,16 @@ const create = (Cypress, $$, state) => {
   let newWindow = false
 
   //// we invalidate the cache when css is modified by javascript
-  Cypress.on('css:modified', (href) => {
+  const onCssModified = (href) => {
     cssHrefToModifiedMap.set(href, { modified: true })
-  })
+  }
 
   //// the lifecycle of a stylesheet is the lifecycle of the window
   //// so track this to know when to re-evaluate the cache in case
   //// of css being modified by javascript
-  Cypress.on('window:before:load', () => {
+  const onBeforeWindowLoad = () => {
     newWindow = true
-  })
+  }
 
   const getCssId = (href, stylesheet) => {
     const hrefModified = cssHrefToModifiedMap.get(href) || {}
@@ -206,6 +206,8 @@ const create = (Cypress, $$, state) => {
   return {
     getStyleIds,
     getStylesByIds,
+    onCssModified,
+    onBeforeWindowLoad,
   }
 }
 

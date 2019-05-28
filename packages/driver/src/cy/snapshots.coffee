@@ -5,8 +5,8 @@ $SnapshotsCss = require("./snapshots_css")
 
 HIGHLIGHT_ATTR = "data-cypress-el"
 
-create = (Cypress, $$, state) ->
-  snapshotsCss = $SnapshotsCss.create(Cypress, $$, state)
+create = ($$, state) ->
+  snapshotsCss = $SnapshotsCss.create($$, state)
   snapshotsMap = new WeakMap()
 
   getHtmlAttrs = (htmlEl) ->
@@ -167,6 +167,10 @@ create = (Cypress, $$, state) ->
     detachDom
 
     getStyles
+
+    onCssModified: snapshotsCss.onCssModified
+
+    onBeforeWindowLoad: snapshotsCss.onBeforeWindowLoad
   }
 
 module.exports = {

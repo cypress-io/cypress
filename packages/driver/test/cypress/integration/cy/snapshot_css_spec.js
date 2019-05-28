@@ -23,8 +23,8 @@ describe('driver/src/cy/snapshots_css', () => {
 
   beforeEach(() => {
     setup = () => {
-      const snapshots = $Snapshots.create(Cypress, cy.$$, cy.state)
-      const snapshotCss = $SnapshotsCss.create(Cypress, cy.$$, cy.state)
+      const snapshots = $Snapshots.create(cy.$$, cy.state)
+      const snapshotCss = $SnapshotsCss.create(cy.$$, cy.state)
       const snapshot = snapshots.createSnapshot()
 
       return { snapshot, snapshotCss }

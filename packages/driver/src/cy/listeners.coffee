@@ -83,14 +83,4 @@ module.exports = {
 
     contentWindow.alert = callbacks.onAlert
     contentWindow.confirm = callbacks.onConfirm
-
-    cssModificationSpy = (original, args...) ->
-      callbacks.onCssModification(@href)
-      original.apply(@, args)
-
-    insertRule = contentWindow.CSSStyleSheet.prototype.insertRule
-    deleteRule = contentWindow.CSSStyleSheet.prototype.deleteRule
-
-    contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
-    contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 }
