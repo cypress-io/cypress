@@ -58,6 +58,19 @@ replaceDurationInTables = (str, p1, p2) ->
   ## full length of the duration so it doesn't shift content
   _.padStart("XX:XX", p1.length + p2.length)
 
+replaceUploadingResults = (orig, match..., offset, string) ->
+  
+    results = match[1].split('\n').map((res) ->
+      res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)')
+    )
+    .sort()
+    .join('\n')
+    ret =  match[0] + results + match[3]
+
+    return ret
+
+    
+
 normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
@@ -74,6 +87,7 @@ normalizeStdout = (str) ->
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
+  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
   .replace("/\(\d{2,4}x\d{2,4}\)/g", "(YYYYxZZZZ)") ## screenshot dimensions
   .split("\n")
     .map(replaceStackTraceLines)
