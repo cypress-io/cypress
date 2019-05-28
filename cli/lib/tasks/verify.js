@@ -78,8 +78,6 @@ const runSmokeTest = (binaryDir, options) => {
     const random = _.random(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
 
-    process.env.ELECTRON_ENABLE_LOGGING = true
-
     if (options.dev) {
       executable = 'node'
       args.unshift(
@@ -93,10 +91,19 @@ const runSmokeTest = (binaryDir, options) => {
     debug('using Cypress executable %s', executable)
     debug('smoke test command:', smokeTestCommand)
 
+    const env = _.extend({}, process.env, {
+      ELECTRON_ENABLE_LOGGING: true,
+    })
+
+    const stdioOptions = _.extend({}, {
+      env,
+      timeout: options.smokeTestTimeout,
+    })
+
     return Promise.resolve(util.exec(
       executable,
       args,
-      { timeout: options.smokeTestTimeout }
+      stdioOptions,
     ))
     .catch(onSmokeTestError(smokeTestCommand, linuxWithDisplayEnv))
     .then((result) => {
