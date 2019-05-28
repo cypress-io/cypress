@@ -370,7 +370,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         cy.now("get", selector, getOpts).then ($el) ->
           if $el and $el.length
-            $el = $dom.getFirstDeepestElement($el)
+            elArray = [].slice.call($el)
+            subjectContainingMatch = getOpts.withinSubject.filter($el.parents())
+            if (subjectContainingMatch.length)
+              elArray.unshift(subjectContainingMatch[0])
+            $elAndSubject = $dom.wrap(elArray)
+            $el = $dom.getFirstDeepestElement($elAndSubject)
 
           setEl($el)
 

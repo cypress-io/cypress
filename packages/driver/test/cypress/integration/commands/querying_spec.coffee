@@ -1218,7 +1218,7 @@ describe "src/cy/commands/querying", ->
         expect($span.get(0)).to.eq span.get(0)
 
     it "GET is scoped to the current subject", ->
-      span = cy.$$("#click-me a span")
+      span = cy.$$("#click-me a")
 
       cy.get("#click-me a").contains("click").then ($span) ->
         expect($span.length).to.eq(1)
@@ -1279,6 +1279,12 @@ describe "src/cy/commands/querying", ->
       cy.contains("Home Page").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("a")
+
+    it "can pick chained element as priority element", ->
+      $btn = cy.$$('button:contains(click button)')
+      console.log($btn)
+      cy.get('button').contains('click button').then ($el) ->
+        expect($el[0]).eq($btn[0])
 
     it "reduces right by priority element", ->
       label = cy.$$("#complex-contains label")
