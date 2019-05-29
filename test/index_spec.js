@@ -15,6 +15,7 @@ mockery.enable({
 mockery.registerMock('webpack', webpack)
 
 const preprocessor = require('../index')
+const stubbableRequire = require('../stubbable-require')
 
 describe('webpack preprocessor', function () {
   beforeEach(function () {
@@ -43,15 +44,14 @@ describe('webpack preprocessor', function () {
       on: sandbox.stub(),
       emit: sandbox.spy(),
     }
-    this.options = {}
     this.util = {
       getOutputPath: sandbox.stub().returns(this.outputPath),
       fileUpdated: sandbox.spy(),
       onClose: sandbox.stub(),
     }
 
-    this.run = () => {
-      return preprocessor(this.options)(this.file)
+    this.run = (options, file = this.file) => {
+      return preprocessor(options)(file)
     }
   })
 
@@ -128,8 +128,9 @@ describe('webpack preprocessor', function () {
       it('includes watchOptions if provided', function () {
         this.file.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
-        this.options.watchOptions = { poll: true }
-        return this.run().then(() => {
+        const options = { watchOptions: { poll: true } }
+
+        return this.run(options).then(() => {
           expect(this.compilerApi.watch.lastCall.args[0]).to.eql({
             poll: true,
           })
@@ -172,6 +173,47 @@ describe('webpack preprocessor', function () {
         return this.run().then(() => {
           this.file.on.withArgs('close').yield()
           expect(this.watchApi.close).not.to.be.called
+        })
+      })
+
+      it('uses default webpack options when no user options', function () {
+        return this.run().then(() => {
+          expect(webpack.lastCall.args[0].module.rules[0].use).to.have.length(1)
+          expect(webpack.lastCall.args[0].module.rules[0].use[0].loader).to.be.a('string')
+        })
+      })
+
+      it('uses default options when no user webpack options', function () {
+        return this.run({}).then(() => {
+          expect(webpack.lastCall.args[0].module.rules[0].use).to.have.length(1)
+          expect(webpack.lastCall.args[0].module.rules[0].use[0].loader).to.be.a('string')
+        })
+      })
+
+      it('does not use default options when user options are non-default', function () {
+        const options = { webpackOptions: { module: { rules: [] } } }
+
+        return this.run(options).then(() => {
+          expect(webpack.lastCall.args[0].module).to.equal(options.webpackOptions.module)
+        })
+      })
+
+      it('requires babel dependencies when default options are used', function () {
+        sandbox.spy(stubbableRequire, 'resolve')
+
+        return this.run().then(() => {
+          expect(stubbableRequire.resolve).to.be.calledWith('babel-loader')
+          expect(stubbableRequire.resolve).to.be.calledWith('@babel/preset-env')
+        })
+      })
+
+      it('does not requires babel dependencies when user options are non-default', function () {
+        sandbox.spy(stubbableRequire, 'resolve')
+        const options = { webpackOptions: { module: { rules: [] } } }
+
+        return this.run(options).then(() => {
+          expect(stubbableRequire.resolve).not.to.be.calledWith('babel-loader')
+          expect(stubbableRequire.resolve).not.to.be.calledWith('@babel/preset-env')
         })
       })
     })
