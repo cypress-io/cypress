@@ -29,7 +29,7 @@
     "secure": "nsp check",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "mocha",
-    "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'",
+    "test-watch": "chokidar '*.js' 'test/*.js' -c 'mocha'",
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
   },
   "devDependencies": {
@@ -68,8 +68,7 @@
   },
   "dependencies": {
     "bluebird": "3.5.0",
-    "debug": "3.1.0",
-    "lodash.clonedeep": "4.5.0"
+    "debug": "3.1.0"
   },
   "release": {
     "verifyConditions": "condition-circle",

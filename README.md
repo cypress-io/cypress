@@ -85,6 +85,8 @@ Object of webpack options. Just `require` in the options from your `webpack.conf
 }
 ```
 
+Source maps are always enabled unless explicitly disabled by specifying `devtool: false`.
+
 ### watchOptions
 
 Object of options for watching. See [webpack's docs](https://webpack.github.io/docs/node.js-api.html#compiler).
