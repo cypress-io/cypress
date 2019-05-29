@@ -103,7 +103,7 @@
     "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@ffmpeg-installer/ffmpeg": "1.0.17",
-    "ansi_up": "1.3.0",
+    "ansi_up": "4.0.3",
     "bluebird": "3.4.7",
     "browserify": "13.3.0",
     "chai": "1.10.0",
