@@ -81,6 +81,9 @@ const config: webpack.Configuration = {
 						},
 					}, // translates CSS into CommonJS
 					{
+						loader: require.resolve('resolve-url-loader')
+					},
+					{
 						loader: require.resolve('sass-loader'),
 						options: {
 							sourceMap: true,
@@ -100,6 +103,17 @@ const config: webpack.Configuration = {
 						loader: require.resolve('file-loader'),
 						options: {
 							name: './fonts/[name].[ext]',
+						},
+					},
+				],
+			},
+			{
+				test: /\.(png)$/,
+				use: [
+					{
+						loader: require.resolve('file-loader'),
+						options: {
+							name: './img/[name].[ext]',
 						},
 					},
 				],

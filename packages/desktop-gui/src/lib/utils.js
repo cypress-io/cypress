@@ -17,71 +17,70 @@ const browserIconLookup = {
   safari: 'safari',
 }
 
-module.exports = {
-  durationFormatted: duration.format,
+export const durationFormatted = duration.format
 
-  osIcon: (osName) => {
-    if (!osName) return ''
+export const osIcon = (osName) => {
+  if (!osName) return ''
 
-    return osIconLookup[osName] || 'desktop'
-  },
+  return osIconLookup[osName] || 'desktop'
+}
 
-  browserIcon: (browserName) => {
-    if (!browserName) return ''
+export const browserIcon = (browserName) => {
+  if (!browserName) return ''
 
-    return browserIconLookup[browserName] || 'globe'
-  },
+  return browserIconLookup[browserName] || 'globe'
+}
 
-  browserNameFormatted: (browserName) => {
-    if (!browserName) return ''
+export const browserNameFormatted = (browserName) => {
+  if (!browserName) return ''
 
-    return capitalize(browserName)
-  },
+  return capitalize(browserName)
+}
 
-  browserVersionFormatted: (browserVersion) => {
-    if (!browserVersion) return ''
+export const browserVersionFormatted = (browserVersion) => {
+  if (!browserVersion) return ''
 
-    // looks like: '53.0.2785.143'
-    return browserVersion.split('.')[0]
-  },
+  // looks like: '53.0.2785.143'
+  return browserVersion.split('.')[0]
+}
 
-  gravatarUrl: (email) => {
-    let opts = { size: '13', default: 'mm' }
+export const gravatarUrl = (email) => {
+  let opts = { size: '13', default: 'mm' }
 
-    if (!email) {
-      opts.forcedefault = 'y'
-    }
+  if (!email) {
+    opts.forcedefault = 'y'
+  }
 
-    return gravatar.url(email, opts, true)
-  },
+  return gravatar.url(email, opts, true)
+}
 
-  getStatusIcon: (status) => {
-    switch (status) {
-      case 'errored':
-        return 'exclamation-triangle'
-      case 'failed':
-        return 'exclamation-circle'
-      case 'noTests':
-        return 'ban'
-      case 'passed':
-        return 'check-circle'
-      case 'running':
-        return 'refresh fa-spin'
-      case 'overLimit':
-        return 'exclamation-triangle'
-      case 'timedOut':
-        return 'hourglass-end'
-      case null:
-        return 'terminal'
-      default:
-        return ''
-    }
-  },
+export const getStatusIcon = (status) => {
+  switch (status) {
+    case 'errored':
+      return 'exclamation-triangle'
+    case 'failed':
+      return 'exclamation-circle'
+    case 'noTests':
+      return 'ban'
+    case 'passed':
+      return 'check-circle'
+    case 'running':
+      return 'refresh fa-spin'
+    case 'overLimit':
+      return 'exclamation-triangle'
+    case 'timedOut':
+      return 'hourglass-end'
+    case null:
+      return 'terminal'
+    default:
+      return ''
+  }
+}
 
-  stripLeadingCyDirs (spec) {
-    if (!spec) return null
+export function stripLeadingCyDirs (spec) {
+  if (!spec) return null
 
-    // remove leading 'cypress/integration' from spec
-    return spec.replace(cyDirRegex, '')
-  },
+  // remove leading 'cypress/integration' from spec
+  return spec.replace(cyDirRegex, '')
+
 }

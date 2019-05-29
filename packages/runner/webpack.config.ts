@@ -19,13 +19,17 @@ config.plugins = [
     template: path.resolve(__dirname, './static/index.html'),
     inject: false,
   }),
-  new CopyWebpackPlugin([{ from: path.resolve(__dirname, 'static/fonts'), to: 'fonts' }]),
 ]
 
 config.resolve = {
   ...config.resolve,
   alias: {
-    'react': require.resolve('react')
+    'bluebird': require.resolve('bluebird'),
+    'lodash': require.resolve('lodash'),
+    'mobx': require.resolve('mobx'),
+    'mobx-react': require.resolve('mobx-react'),
+    'react': require.resolve('react'),
+    'react-dom': require.resolve('react-dom'),
   },
 }
 

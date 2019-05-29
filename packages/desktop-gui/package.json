@@ -6,14 +6,13 @@
   "scripts": {
     "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "node ./scripts/build-dev.js",
+    "build": "webpack",
     "prebuild-prod": "npm run check-deps-pre",
-    "build-prod": "node ./scripts/build-prod.js",
+    "build-prod": "npm run build -- --mode=production",
     "prewatch": "npm run check-deps-pre",
-    "watch": "node ./scripts/watch.js",
+    "watch": "npm run build -- --watch --progress",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
     "cypress:open": "node ../../scripts/cypress open --project .",
@@ -24,7 +23,6 @@
     "lib"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.31.3",
     "@cypress/react-tooltip": "0.4.0",
@@ -47,10 +45,11 @@
     "prop-types": "15.7.2",
     "rc-collapse": "1.11.2",
     "react": "16.8.6",
-    "rebuild-node-sass": "1.1.0",
     "react-bootstrap-modal": "4.2.0",
     "react-dom": "16.8.6",
     "react-loader": "2.4.5",
-    "zunder": "6.4.1"
+    "rebuild-node-sass": "1.1.0",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
   }
 }

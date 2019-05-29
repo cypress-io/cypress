@@ -15,7 +15,6 @@ const config: typeof commonConfig = {
 
 config.plugins = [
   ...config.plugins!,
-  // new CopyWebpackPlugin([{ from: path.resolve(__dirname, 'static/fonts'), to: 'fonts' }]),
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, 'static/index.html')
   }),
