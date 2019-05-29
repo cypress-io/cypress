@@ -118,9 +118,9 @@ describe('webpack preprocessor', function () {
       })
 
       it('does not enable inline source maps when devtool is false', function () {
-        this.options.webpackOptions = { devtool: false }
+        const options = { webpackOptions: { devtool: false } }
 
-        return this.run().then(() => {
+        return this.run(options).then(() => {
           expect(webpack.lastCall.args[0].devtool).to.be.false
         })
       })
