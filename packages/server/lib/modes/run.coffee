@@ -588,6 +588,7 @@ module.exports = {
     openProject.launch(browser, spec, browserOpts)
 
   listenForProjectEnd: (project, exit) ->
+    removeEventListeners = (->)
     new Promise (resolve) ->
       if exit is false
         resolve = (arg) ->
@@ -621,6 +622,13 @@ module.exports = {
       ## resolve the promise
       project.once("end", onEnd)
       project.once("exitEarlyWithErr", onEarlyExit)
+
+      removeEventListeners = () ->
+        project.removeListener("end", onEnd)
+        project.removeListener("exitEarlyWithErr", onEarlyExit)
+    .then (obj) =>
+      # Unsubscribe any extra event listeners to prevent a memory leak
+      removeEventListeners()
 
   waitForBrowserToConnect: (options = {}) ->
     { project, socketId, timeout } = options
