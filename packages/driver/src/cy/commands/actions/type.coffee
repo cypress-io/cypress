@@ -11,6 +11,7 @@ $actionability = require("../../actionability")
 
 inputEvents = "textInput input".split(" ")
 
+charsBetweenCurlyBracesRe = /({.+?})/
 dateRegex = /^\d{4}-\d{2}-\d{2}$/
 monthRegex = /^\d{4}-(0\d|1[0-2])$/
 weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
@@ -94,6 +95,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
 
+      stripCharsOfSpecialModifierKeys = (chars) -> 
+        return (chars.split(charsBetweenCurlyBracesRe).map (chars) ->
+            if charsBetweenCurlyBracesRe.test(chars)
+              ## don't return the special/modifier chars for validation
+              ""
+            else
+              chars
+          ).join('')
+
       if not isBody and not isTextLike and not hasTabIndex
         node = $dom.stringify(options.$el)
         $utils.throwErrByPath("type.not_on_typeable_element", {
@@ -116,43 +126,44 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if chars is ""
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
-      if !(chars == "{selectall}{del}")
-        if isDate and (
-          not _.isString(chars) or
-          not dateRegex.test(chars) or
-          not moment(chars).isValid()
-        )
-          $utils.throwErrByPath("type.invalid_date", {
-            onFail: options._log
-            args: { chars }
-          })
+      charsToValidate = stripCharsOfSpecialModifierKeys(chars)
 
-        if isMonth and (
-          not _.isString(chars) or
-          not monthRegex.test(chars)
-        )
-          $utils.throwErrByPath("type.invalid_month", {
-            onFail: options._log
-            args: { chars }
-          })
+      if isDate and (
+        not _.isString(charsToValidate) or
+        not dateRegex.test(charsToValidate) or
+        not moment(charsToValidate).isValid()
+      )
+        $utils.throwErrByPath("type.invalid_date", {
+          onFail: options._log
+          args: { chars }
+        })
 
-        if isWeek and (
-          not _.isString(chars) or
-          not weekRegex.test(chars)
-        )
-          $utils.throwErrByPath("type.invalid_week", {
-            onFail: options._log
-            args: { chars }
-          })
+      if isMonth and (
+        not _.isString(charsToValidate) or
+        not monthRegex.test(charsToValidate)
+      )
+        $utils.throwErrByPath("type.invalid_month", {
+          onFail: options._log
+          args: { chars }
+        })
 
-        if isTime and (
-          not _.isString(chars) or
-          not timeRegex.test(chars)
-        )
-          $utils.throwErrByPath("type.invalid_time", {
-            onFail: options._log
-            args: { chars }
-          })
+      if isWeek and (
+        not _.isString(charsToValidate) or
+        not weekRegex.test(charsToValidate)
+      )
+        $utils.throwErrByPath("type.invalid_week", {
+          onFail: options._log
+          args: { chars }
+        })
+
+      if isTime and (
+        not _.isString(charsToValidate) or
+        not timeRegex.test(charsToValidate)
+      )
+        $utils.throwErrByPath("type.invalid_time", {
+          onFail: options._log
+          args: { chars }
+        })
 
       options.chars = "" + chars
 
@@ -247,8 +258,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## set to an empty string
             if needSingleValueChange()
               typed += key
-              if typed is options.chars
-                $elements.setNativeProp(el, "value", options.chars)
+              if typed is stripCharsOfSpecialModifierKeys(options.chars)
+                ## set value with special and modifier keys stripped
+                $elements.setNativeProp(el, "value", stripCharsOfSpecialModifierKeys(options.chars))
             else
               $selection.replaceSelectionContents(el, key)
 

@@ -3225,6 +3225,10 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#time-without-value").type("01:60")
 
+        it "doesn't throw when valid time with special chars", ->
+          cy.get("#time-without-value").type("01:15{enter}")
+            .should('have.value', '01:15')
+
   context "#clear", ->
     it "does not change the subject", ->
       textarea = cy.$$("textarea")
