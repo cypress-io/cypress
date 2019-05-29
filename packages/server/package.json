@@ -142,7 +142,7 @@
     "http-status-codes": "1.3.2",
     "human-interval": "0.1.6",
     "image-size": "0.7.4",
-    "is-fork-pr": "2.2.0",
+    "is-fork-pr": "2.3.0",
     "jimp": "0.6.4",
     "jsonlint": "1.6.3",
     "konfig": "0.2.1",
