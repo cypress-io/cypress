@@ -83,15 +83,6 @@ module.exports = {
 
         return res.status(503).end()
 
-    # if req.headers.accept is "text/event-stream"
-    #   return nodeProxy.web(req, res, {
-    #     secure: false
-    #     ignorePath: true
-    #     target: req.proxiedUrl
-    #     timeout: 0
-    #     proxyTimeout: 0
-    #   })
-
     thr = through (d) -> @queue(d)
 
     @getHttpContent(thr, req, res, remoteState, config, request)
@@ -99,9 +90,6 @@ module.exports = {
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
-    ## prepends req.url with remoteState.origin
-    remoteUrl = req.proxiedUrl
 
     isInitial = req.cookies["__cypress.initial"] is "true"
 
@@ -130,9 +118,9 @@ module.exports = {
     resMatchesOriginPolicy = (respHeaders) ->
       switch remoteState.strategy
         when "http"
-          cors.urlMatchesOriginPolicyProps(remoteUrl, remoteState.props)
+          cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
         when "file"
-          remoteUrl.startsWith(remoteState.origin)
+          req.proxiedUrl.startsWith(remoteState.origin)
 
     setCookies = (value) ->
       ## dont modify any cookies if we're trying to clear
@@ -156,7 +144,7 @@ module.exports = {
       isGzipped = encoding and encoding.includes("gzip")
 
       debug("received response for %o", {
-        url: remoteUrl
+        url: req.proxiedUrl
         headers,
         statusCode,
         isGzipped
@@ -202,7 +190,7 @@ module.exports = {
             gzipError = isGzipError(err)
 
             debug("failed to proxy response %o", {
-              url: remoteUrl
+              url: req.proxiedUrl
               headers
               statusCode
               isGzipped
@@ -286,7 +274,7 @@ module.exports = {
 
         setBody(str, statusCode, headers)
 
-    if obj = buffers.take(remoteUrl)
+    if obj = buffers.take(req.proxiedUrl)
       wantsInjection = "full"
 
       onResponse(obj.stream, obj.response)
@@ -312,12 +300,12 @@ module.exports = {
       if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
         opts.url = req.proxiedUrl.replace(remoteState.origin, remoteState.fileServer)
       else
-        opts.url = remoteUrl
+        opts.url = req.proxiedUrl
 
       ## if we have auth headers and this request matches our origin protection space
       ## and the user has not supplied auth headers
       if not req.headers["authorization"] and (a = remoteState.auth) and
-          cors.urlMatchesOriginProtectionSpace(remoteUrl, remoteState.origin)
+          cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, remoteState.origin)
         base64 = Buffer.from(a.username + ":" + a.password).toString("base64")
         req.headers["authorization"] = "Basic #{base64}"
 
