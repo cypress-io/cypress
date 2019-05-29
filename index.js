@@ -86,6 +86,10 @@ const preprocessor = (options = {}) => {
       },
     })
 
+    if (webpackOptions.devtool !== false) {
+      webpackOptions.devtool = 'inline-source-map'
+    }
+
     debug(`input: ${filePath}`)
     debug(`output: ${outputPath}`)
 
