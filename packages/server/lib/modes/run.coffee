@@ -618,17 +618,18 @@ module.exports = {
       onEnd = (obj) ->
         resolve(obj)
 
+      removeEventListeners = () ->
+        project.removeListener("end", onEnd)
+        project.removeListener("exitEarlyWithErr", onEarlyExit)
+
       ## when our project fires its end event
       ## resolve the promise
       project.once("end", onEnd)
       project.once("exitEarlyWithErr", onEarlyExit)
-
-      removeEventListeners = () ->
-        project.removeListener("end", onEnd)
-        project.removeListener("exitEarlyWithErr", onEarlyExit)
-    .then (obj) =>
+    .then (project) =>
       # Unsubscribe any extra event listeners to prevent a memory leak
       removeEventListeners()
+      project
 
   waitForBrowserToConnect: (options = {}) ->
     { project, socketId, timeout } = options
