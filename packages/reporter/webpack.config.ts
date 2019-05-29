@@ -1,4 +1,4 @@
-import commonConfig, { HtmlWebpackPlugin, CopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import commonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
 
 const config: typeof commonConfig = {
@@ -9,7 +9,7 @@ const config: typeof commonConfig = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
-    devtoolModuleFilenameTemplate: '[namespace]/[resource-path]'
+    devtoolModuleFilenameTemplate: 'cypress://[namespace]/[resource-path]'
   },
 }
 

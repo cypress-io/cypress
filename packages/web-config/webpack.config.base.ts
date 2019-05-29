@@ -37,6 +37,7 @@ const config: webpack.Configuration = {
 		modules: true,
 		maxModules: 20,
 		excludeModules: /main.scss/,
+		timings: true,
 	},
 
 	module: {
@@ -125,7 +126,7 @@ const config: webpack.Configuration = {
 
 		new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
 		new MiniCSSExtractWebpackPlugin(),
-		new LiveReloadPlugin({ appendScriptTag: 'true' }),
+		new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, }),
 		// new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
 	],
 
