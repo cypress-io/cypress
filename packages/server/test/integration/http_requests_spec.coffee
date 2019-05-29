@@ -1729,31 +1729,32 @@ describe "Routes", ->
 
         ## https://github.com/cypress-io/cypress/issues/4267
         it "doesn't attach auth headers to a diff protection space on the same origin", ->
-          username = "u"
-          password = "p"
+          @setup("http://beta.something.com")
+          .then =>
+            username = "u"
+            password = "p"
 
-          base64 = Buffer.from(username + ":" + password).toString("base64")
+            base64 = Buffer.from(username + ":" + password).toString("base64")
 
-          @server._remoteAuth = {
-            username
-            password
-          }
+            @server._remoteAuth = {
+              username
+              password
+            }
 
-          nock("http://localhost:8080")
-          .get("/index")
-          .matchHeader("authorization", "Basic #{base64}")
-          .reply(200, "")
+            nock(/.*\.something.com/)
+            .get("/index")
+            .matchHeader("authorization", "Basic #{base64}")
+            .reply(200, "")
+            .get("/index")
+            .matchHeader("authorization", _.isUndefined)
+            .reply(200, "")
 
-          nock("http://differentprotectionspace.localhost:8080")
-          .get("/index")
-          .reply(200, "")
-
-          @rp("http://localhost:8080/index")
-          .then (res) =>
-            expect(res.statusCode).to.eq(200)
-            @rp("http://differentprotectionspace.localhost:8080/index")
-          .then (res) =>
-            expect(res.statusCode).to.eq(200)
+            @rp("http://beta.something.com/index")
+            .then (res) =>
+              expect(res.statusCode).to.eq(200)
+              @rp("http://cdn.something.com/index")
+            .then (res) =>
+              expect(res.statusCode).to.eq(200)
 
     context "images", ->
       beforeEach ->
