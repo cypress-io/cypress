@@ -626,10 +626,10 @@ module.exports = {
       ## resolve the promise
       project.once("end", onEnd)
       project.once("exitEarlyWithErr", onEarlyExit)
-    .then (project) =>
+    .then (obj) =>
       # Unsubscribe any extra event listeners to prevent a memory leak
       removeEventListeners()
-      project
+      obj
 
   waitForBrowserToConnect: (options = {}) ->
     { project, socketId, timeout } = options
