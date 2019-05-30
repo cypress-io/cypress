@@ -29,7 +29,7 @@ const config: webpack.Configuration = {
 	// this gives good stack traces and devTools DX
 	// also suitable for production since users will have better stack traces
 	// and files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
-	devtool: 'eval',
+	// devtool: 'eval',
 
 	stats: {
 		errors: true,
@@ -131,7 +131,6 @@ const config: webpack.Configuration = {
 		new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
 		new MiniCSSExtractWebpackPlugin(),
 		new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, }),
-		// new CopyWebpackPlugin([{ from: './static/fonts', to: 'fonts' }]),
 	],
 
 }
