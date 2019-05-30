@@ -22,6 +22,7 @@ Error: Async error from background file
     at stack trace line
     at stack trace line
     at stack trace line
+    at stack trace line
 
 
   (Results)

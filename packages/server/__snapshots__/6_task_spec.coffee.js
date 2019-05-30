@@ -90,13 +90,12 @@ The task 'returns:undefined' returned undefined. You must return a promise, a va
 
 The task handler was:
 
-returns:undefined() {}
+'returns:undefined' () {}
 
 Fix this in your background file here:
 /foo/bar/.projects/e2e/cypress/background/index.js
 
 https://on.cypress.io/api/task
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -128,11 +127,7 @@ https://on.cypress.io/api/task
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

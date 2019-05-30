@@ -169,9 +169,6 @@ Error: spec:start throws error
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
 
 `
