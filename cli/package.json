@@ -90,7 +90,7 @@
     "chai-as-promised": "7.1.1",
     "chai-string": "1.4.0",
     "dependency-check": "3.3.0",
-    "dtslint": "0.7.1",
+    "dtslint": "0.7.6",
     "execa-wrap": "1.4.0",
     "mock-fs": "4.9.0",
     "mocked-env": "1.2.4",
