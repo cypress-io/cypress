@@ -816,9 +816,7 @@ clone = (err, options = {}) ->
   obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
 
   if options.html
-    obj.message = ansi_up.ansi_to_html(err.message, {
-      use_classes: true
-    })
+    obj.message = ansi_up.ansi_to_html(err.message)
   else
     obj.message = err.message
 
