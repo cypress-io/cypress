@@ -13,7 +13,6 @@
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "preclean": "npm run check-deps-pre",
-    "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
     "test": "mocha 'src/**/*.spec.*'",

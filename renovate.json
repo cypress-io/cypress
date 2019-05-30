@@ -29,8 +29,7 @@
         "prefixed-list",
         "rebuild-node-sass",
         "snap-shot-it",
-        "terminal-banner",
-        "zunder"
+        "terminal-banner"
       ],
       "groupName": "team NPM packages",
       "schedule": "after 2am and before 4am"
