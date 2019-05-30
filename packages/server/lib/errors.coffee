@@ -1,9 +1,11 @@
-_       = require("lodash")
-strip   = require("strip-ansi")
-chalk   = require("chalk")
-ansi_up = require("ansi_up")
+_ = require("lodash")
+strip = require("strip-ansi")
+chalk = require("chalk")
+AU = require('ansi_up')
 Promise = require("bluebird")
 pluralize = require("pluralize")
+
+ansi_up = new AU.default
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
