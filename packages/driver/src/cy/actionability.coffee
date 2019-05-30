@@ -207,7 +207,7 @@ ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
 verify = (cy, $el, options, callbacks) ->
   win = $dom.getWindowByElement($el.get(0))
 
-  { _log, force, position } = options
+  { _log, force, position, scrollOptions } = options
 
   { onReady, onScroll } = callbacks
 
@@ -229,7 +229,7 @@ verify = (cy, $el, options, callbacks) ->
     runAllChecks = ->
       if force isnt true
         ## scroll the element into view
-        $el.get(0).scrollIntoView()
+        $el.get(0).scrollIntoView(scrollOptions)
 
         if onScroll
           onScroll($el, "element")
