@@ -48,28 +48,6 @@ internal:commandStart: get #non-existent
 internal:commandRetry: get expected '#non-existent' to exist in the DOM
   1) fails to get
 test:end: fails to get
-An error was thrown in your background file while executing the handler for the 'test:end' event.
-
-This error is being ignored because the event cannot affect the results of the run.
-
-The error we received was:
-
-Error: Error thrown in promise from "test:end". Should be ignored.
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-
 
   0 passing
   1 failing
@@ -91,6 +69,28 @@ Error: Error thrown in promise from "test:end". Should be ignored.
       at stack trace line
 
 
+
+An error was thrown in your background file while executing the handler for the 'test:end' event.
+
+This error is being ignored because the event cannot affect the results of the run.
+
+The error we received was:
+
+Error: Error thrown in promise from "test:end". Should be ignored.
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
 
 
   (Results)
