@@ -17,7 +17,7 @@
     "pretest": "npm run check-deps-pre",
     "test": "mocha src/**/*.spec.*",
     "test-watch": "npm run test -- --watch",
-    "lint": "bin-up eslint --fix scripts/*.js src/*.js* src/**/*.js*"
+    "lint": "bin-up eslint --fix src/*.js* src/**/*.js*"
   },
   "files": [
     "dist",
