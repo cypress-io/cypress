@@ -4,7 +4,7 @@ import path from 'path'
 const config: typeof commonConfig = {
   ...commonConfig,
   entry: {
-    cypress_runner: [path.resolve(__dirname, 'src')],
+    reporter: [path.resolve(__dirname, 'src')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
