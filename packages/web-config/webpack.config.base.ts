@@ -25,7 +25,11 @@ const config: webpack.Configuration = {
 	},
 
 	// Enable source maps
-	// devtool: 'inline-cheap-module-source-map',
+	// 'eval' maps lines to their files, but output is compiled.
+	// this gives good stack traces and devTools DX
+	// also suitable for production since users will have better stack traces
+	// and files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
+	devtool: 'eval',
 
 	stats: {
 		errors: true,
