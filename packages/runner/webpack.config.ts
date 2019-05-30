@@ -9,7 +9,7 @@ const config: typeof commonConfig = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
-    devtoolModuleFilenameTemplate: 'cypress://[namespace]/[resource-path]'
+    devtoolModuleFilenameTemplate: '[namespace]/[resource-path]'
   },
 }
 
