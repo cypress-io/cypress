@@ -24,12 +24,7 @@ config.plugins = [
 
 config.resolve = {
 	...config.resolve,
-	// alias: {
-	// 	'react': require.resolve('react')
-	// },
 }
 
 
 export default config
-
-

@@ -7,7 +7,8 @@
      * Allow javascript files to be compiled.
      * Override this in modules that need JS
      */
-		"allowJs": true,
+		// "allowJs": true,
+		// "noEmit": true,
 		"jsx": "react",
 		"noImplicitAny": false,
 		"noImplicitThis": false,
