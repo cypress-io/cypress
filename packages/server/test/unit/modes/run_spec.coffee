@@ -375,10 +375,6 @@ describe "lib/modes/run", ->
         @projectInstance.emit("exitEarlyWithErr", err.message)
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
 
-      runMode.listenForProjectEnd(@projectInstance)
-      .then ->
-        expect(@projectInstance.listeners("end")).to.have.length(0)
-
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,
         name: "foo.mp4"
@@ -393,7 +389,8 @@ describe "lib/modes/run", ->
           path: "cypress/integration/spec.js"
         }
       })
-      .then (obj) ->
+      .then (obj) =>
+        expect(@projectInstance.listeners("end")).to.have.length(0)
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(obj)
@@ -468,7 +465,7 @@ describe "lib/modes/run", ->
         expect(@projectInstance.listeners("end")).to.have.length(0)
 
       runMode.listenForProjectEnd(@projectInstance)
-      .then ->
+      .then =>
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
 
   context ".run browser vs video recording", ->
