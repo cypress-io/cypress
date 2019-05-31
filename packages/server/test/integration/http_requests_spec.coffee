@@ -94,11 +94,11 @@ describe "Routes", ->
         ## options including our proxy
         @rp = (options = {}) =>
           if _.isString(options)
-            url = options
+            targetUrl = options
             options = {}
 
           _.defaults options, {
-            url,
+            url: targetUrl,
             proxy: @proxy,
             jar,
             simple: false,

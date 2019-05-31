@@ -26,6 +26,16 @@ zlibOptions = {
 isGzipError = (err) ->
   Object.prototype.hasOwnProperty.call(zlib.constants, err.code)
 
+## https://github.com/cypress-io/cypress/issues/4298
+## https://tools.ietf.org/html/rfc7230#section-3.3.3
+## HEAD, 1xx, 204, and 304 responses should never contain anything after headers
+responseMustHaveEmptyBody = (method, statusCode) ->
+  _.some([
+    _.includes(NO_BODY_STATUS_CODES, statusCode),
+    _.inRange(statusCode, 100, 200),
+    _.invoke(method, 'toLowerCase') == 'head',
+  ])
+
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
   ## is not sent correctly
@@ -156,10 +166,7 @@ module.exports = {
         wantsSecurityRemoved,
       })
 
-      ## https://github.com/cypress-io/cypress/issues/4298
-      ## https://tools.ietf.org/html/rfc7230#section-3.3.3
-      ## 1xx, 204, and 304 responses should never contain anything after headers
-      if NO_BODY_STATUS_CODES.includes(statusCode) or 100 <= statusCode < 200
+      if responseMustHaveEmptyBody(req.method, statusCode)
         return res.end()
 
       ## if there is nothing to inject then just

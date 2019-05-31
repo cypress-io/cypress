@@ -1,9 +1,9 @@
-const stream = require('stream')
+const through = require('through')
 
 module.exports = {
   passthruStream () {
-    return new stream.PassThrough({
-      highWaterMark: Number.MAX_SAFE_INTEGER,
+    return through(function (chunk) {
+      this.queue(chunk)
     })
   },
 }
