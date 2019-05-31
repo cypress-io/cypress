@@ -4,7 +4,7 @@ fs      = require("./util/fs")
 
 module.exports = {
   readFile: (projectRoot, file, options = {}) ->
-    filePath = path.resolve(projectRoot, file)
+    filePath = path.join(projectRoot, file)
     readFn = if path.extname(filePath) is ".json"
       fs.readJsonAsync
     else
@@ -21,7 +21,7 @@ module.exports = {
       throw err
 
   writeFile: (projectRoot, file, contents, options = {}) ->
-    filePath = path.resolve(projectRoot, file)
+    filePath = path.join(projectRoot, file)
     writeOptions = {
       encoding: options.encoding or "utf8"
       flag: options.flag or "w"

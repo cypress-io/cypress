@@ -77,6 +77,9 @@ describe "src/cy/commands/files", ->
     it "really works", ->
       cy.readFile("cypress.json").its("baseUrl").should("eq", "http://localhost:3500")
 
+    it "works with leading slash", ->
+      cy.readFile("/cypress.json").its("baseUrl").should("eq", "http://localhost:3500")
+
     it "works when contents are supposed to be null", ->
       cy.readFile("does-not-exist").should("be.null")
 
