@@ -3172,6 +3172,40 @@ describe "Routes", ->
     #       proxy: @proxy
     #     })
 
+    context.only "with empty response", ->
+      @timeout(1000)
+
+      beforeEach (done) ->
+        @httpSrv = http.createServer (req, res) ->
+          switch req.url
+            when '/empty'
+              res.writeHead(304)
+              res.end()
+            when '/empty-chunked'
+              res.writeHead(304, {
+                'transfer-encoding': 'chunked'
+              })
+              res.end()
+
+        @httpSrv.listen =>
+          @port = @httpSrv.address().port
+
+          @setup("http://localhost:#{@port}")
+          .then(_.ary(done, 0))
+
+      afterEach ->
+        @httpSrv.close()
+
+      it "works immediately", ->
+        @rp({
+          url: "http://localhost:#{@port}/empty"
+        })
+
+      it "works immediately with Transfer-Encoding: chunked", ->
+        @rp({
+          url: "http://localhost:#{@port}/empty-chunked"
+        })
+
   context "POST *", ->
     beforeEach ->
       @setup("http://localhost:8000")
