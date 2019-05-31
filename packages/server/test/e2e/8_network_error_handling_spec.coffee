@@ -296,6 +296,8 @@ describe "e2e network error handling", ->
     afterEach ->
       if @debugProxy
         @debugProxy.stop()
+        .then =>
+          @debugProxy = null
 
     it "baseurl check tries 5 times in run mode", ->
       e2e.exec(@, {
