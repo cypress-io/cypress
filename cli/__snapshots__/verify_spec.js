@@ -1,76 +1,15 @@
-exports['verbose stdout output 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
+exports['Cypress non-executable permissions 1'] = `
+Error: Cypress cannot run because this binary file does not have executable permissions here:
 
- ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress
 
-Opening Cypress...
+Reasons this may happen:
 
-`
+- node was installed as 'root' or with 'sudo'
+- the cypress npm package as 'root' or with 'sudo'
 
-exports['no version of Cypress installed 1'] = `
-Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
+Please check that you have the appropriate user permissions.
 
-Please reinstall Cypress by running: cypress install
-----------
-
-Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress
-----------
-
-Platform: darwin (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
-exports['warning installed version does not match verified version 1'] = `
-Found binary version bloop installed in: /cache/Cypress/1.2.3/Cypress.app
-
-⚠ Warning: Binary version bloop does not match the expected package version 1.2.3
-
-  These versions may not work properly together.
-
-
-`
-
-exports['executable cannot be found 1'] = `
-Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
-
-Please reinstall Cypress by running: cypress install
-----------
-
-Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress
-----------
-
-Platform: darwin (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
-exports['verification with executable 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
-
- ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
-
-Opening Cypress...
-
-`
-
-exports['fails verifying Cypress 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
-
- ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
-STRIPPED
-Error: Cypress failed to start.
-
-This is usually caused by a missing library or dependency.
-
-The error below should indicate which dependency is missing.
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
-----------
-
-an error about dependencies
 ----------
 
 Platform: darwin (Foo-OsVersion)
@@ -87,144 +26,21 @@ Opening Cypress...
 
 `
 
-exports['no welcome message 1'] = `
-Found binary version 7.8.9 installed in: /cache/Cypress/1.2.3/Cypress.app
-
-⚠ Warning: Binary version 7.8.9 does not match the expected package version 1.2.3
-
-  These versions may not work properly together.
-
-
-`
-
-exports['xvfb fails 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
-
- ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
-STRIPPED
-Error: Your system is missing the dependency: XVFB
-
-Install XVFB and run Cypress again.
-
-Read our documentation on dependencies for more information:
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
-----------
-
-Caught error trying to run XVFB: "test without xvfb"
-----------
-
-Platform: darwin (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
-exports['verifying in ci 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
-
-[xx:xx:xx]  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app [started]
-[xx:xx:xx]  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app [completed]
-
-Opening Cypress...
-
-`
-
-exports['valid CYPRESS_RUN_BINARY 1'] = `
-Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/Contents/MacOS/Cypress:
-
-      This overrides the default Cypress binary path used.
-
-It looks like this is your first time using Cypress: 1.2.3
-
- ✔  Verified Cypress! /real/custom
-
-Opening Cypress...
-
-`
-
 exports['darwin: error when invalid CYPRESS_RUN_BINARY 1'] = `
-Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/:
+Note: You have set the environment variable:
 
-      This overrides the default Cypress binary path used.
+CYPRESS_RUN_BINARY=/custom/
 
-Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/custom/
+This overrides the default Cypress binary path used.
+
+Error: Could not run binary set by environment variable: CYPRESS_RUN_BINARY=/custom/
 
 Ensure the environment variable is a path to the Cypress binary, matching **/Contents/MacOS/Cypress
+
 ----------
 
 ENOENT: no such file or directory, stat '/custom/'
-----------
 
-Platform: darwin (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
-exports['linux: error when invalid CYPRESS_RUN_BINARY 1'] = `
-Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/:
-
-      This overrides the default Cypress binary path used.
-
-Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/custom/
-
-Ensure the environment variable is a path to the Cypress binary, matching **/Cypress
-----------
-
-ENOENT: no such file or directory, stat '/custom/'
-----------
-
-Platform: linux (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
-exports['win32: error when invalid CYPRESS_RUN_BINARY 1'] = `
-Note: You have set the environment variable: CYPRESS_RUN_BINARY=/custom/:
-
-      This overrides the default Cypress binary path used.
-
-Error: Could not run binary set by environment variable CYPRESS_RUN_BINARY=/custom/
-
-Ensure the environment variable is a path to the Cypress binary, matching **/Cypress.exe
-----------
-
-ENOENT: no such file or directory, stat '/custom/'
-----------
-
-Platform: win32 (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
-exports['silent verify 1'] = `
-[no output]
-`
-
-exports['no Cypress executable 1'] = `
-Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
-
-Please reinstall Cypress by running: cypress install
-----------
-
-Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress
-----------
-
-Platform: darwin (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
-exports['Cypress non-executable permissions 1'] = `
-Error: Cypress cannot run because the binary does not have executable permissions: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress
-
-Reasons this may happen:
-
-- node was installed as 'root' or with 'sudo'
-- the cypress npm package as 'root' or with 'sudo'
-
-Please check that you have the appropriate user permissions.
 ----------
 
 Platform: darwin (Foo-OsVersion)
@@ -247,26 +63,6 @@ Opening Cypress...
 
 `
 
-exports['fails with no stderr 1'] = `
-Error: Cypress failed to start.
-
-This is usually caused by a missing library or dependency.
-
-The error below should indicate which dependency is missing.
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
-----------
-
-Error: EPERM NOT PERMITTED
-----------
-
-Platform: darwin (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
 exports['error binary not found in ci 1'] = `
 Error: The cypress npm package is installed, but the Cypress binary is missing.
 
@@ -282,9 +78,335 @@ Properly caching the binary will fix this error and avoid downloading and unzipp
 Alternatively, you can run 'cypress install' to download the binary again.
 
 https://on.cypress.io/not-installed-ci-error
+
 ----------
 
 Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
+`
+
+exports['executable cannot be found 1'] = `
+Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
+
+Please reinstall Cypress by running: cypress install
+
+----------
+
+Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['fails verifying Cypress 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+STRIPPED
+Error: Cypress failed to start.
+
+This is usually caused by a missing library or dependency.
+
+The error below should indicate which dependency is missing.
+
+https://on.cypress.io/required-dependencies
+
+If you are using Docker, we provide containers with all required dependencies installed.
+
+----------
+
+an error about dependencies
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['fails with no stderr 1'] = `
+Error: Cypress failed to start.
+
+This is usually caused by a missing library or dependency.
+
+The error below should indicate which dependency is missing.
+
+https://on.cypress.io/required-dependencies
+
+If you are using Docker, we provide containers with all required dependencies installed.
+
+----------
+
+Error: EPERM NOT PERMITTED
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['lib/tasks/verify logs error when child process hangs 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+STRIPPED
+Error: Cypress verification timed out.
+
+This command failed with the following output:
+
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+
+----------
+
+some stderr
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['lib/tasks/verify logs error when child process returns incorrect stdout (stderr when exists) 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+STRIPPED
+Error: Cypress verification failed.
+
+This command failed with the following output:
+
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+
+----------
+
+some stderr
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['lib/tasks/verify logs error when child process returns incorrect stdout (stdout when no stderr) 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+STRIPPED
+Error: Cypress verification failed.
+
+This command failed with the following output:
+
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+
+----------
+
+some stdout
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['linux: error when invalid CYPRESS_RUN_BINARY 1'] = `
+Note: You have set the environment variable:
+
+CYPRESS_RUN_BINARY=/custom/
+
+This overrides the default Cypress binary path used.
+
+Error: Could not run binary set by environment variable: CYPRESS_RUN_BINARY=/custom/
+
+Ensure the environment variable is a path to the Cypress binary, matching **/Cypress
+
+----------
+
+ENOENT: no such file or directory, stat '/custom/'
+
+----------
+
+Platform: linux (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['no Cypress executable 1'] = `
+Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
+
+Please reinstall Cypress by running: cypress install
+
+----------
+
+Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['no version of Cypress installed 1'] = `
+Error: No version of Cypress is installed in: /cache/Cypress/1.2.3/Cypress.app
+
+Please reinstall Cypress by running: cypress install
+
+----------
+
+Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['no welcome message 1'] = `
+Found binary version 7.8.9 installed in: /cache/Cypress/1.2.3/Cypress.app
+
+⚠ Warning: Binary version 7.8.9 does not match the expected package version 1.2.3
+
+  These versions may not work properly together.
+
+
+`
+
+exports['silent verify 1'] = `
+[no output]
+`
+
+exports['valid CYPRESS_RUN_BINARY 1'] = `
+Note: You have set the environment variable:
+
+CYPRESS_RUN_BINARY=/custom/Contents/MacOS/Cypress
+
+This overrides the default Cypress binary path used.
+
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✔  Verified Cypress! /real/custom
+
+Opening Cypress...
+
+`
+
+exports['verbose stdout output 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
+
+Opening Cypress...
+
+`
+
+exports['verification with executable 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
+
+Opening Cypress...
+
+`
+
+exports['verifying in ci 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+[xx:xx:xx]  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app [started]
+[xx:xx:xx]  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app [completed]
+
+Opening Cypress...
+
+`
+
+exports['warning installed version does not match verified version 1'] = `
+Found binary version bloop installed in: /cache/Cypress/1.2.3/Cypress.app
+
+⚠ Warning: Binary version bloop does not match the expected package version 1.2.3
+
+  These versions may not work properly together.
+
+
+`
+
+exports['win32: error when invalid CYPRESS_RUN_BINARY 1'] = `
+Note: You have set the environment variable:
+
+CYPRESS_RUN_BINARY=/custom/
+
+This overrides the default Cypress binary path used.
+
+Error: Could not run binary set by environment variable: CYPRESS_RUN_BINARY=/custom/
+
+Ensure the environment variable is a path to the Cypress binary, matching **/Cypress.exe
+
+----------
+
+ENOENT: no such file or directory, stat '/custom/'
+
+----------
+
+Platform: win32 (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['xvfb fails 1'] = `
+It looks like this is your first time using Cypress: 1.2.3
+
+ ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+STRIPPED
+Error: Xvfb exited with a non zero exit code.
+
+There was a problem spawning Xvfb.
+
+This is likely a problem with your system, permissions, or installation of Xvfb.
+
+----------
+
+Error: test without xvfb
+
+----------
+
+Platform: darwin (Foo-OsVersion)
+Cypress Version: 1.2.3
+
+`
+
+exports['tried to verify twice, on the first try got the DISPLAY error'] = `
+Cypress verification failed.
+
+Cypress failed to start after spawning a new Xvfb server.
+
+The error logs we received were:
+
+----------
+
+[some noise here] Gtk: cannot open display: 987
+some other error
+again with
+some weird indent
+
+----------
+
+This is usually caused by a missing library or dependency.
+
+The error above should indicate which dependency is missing.
+
+[34mhttps://on.cypress.io/required-dependencies[39m
+
+If you are using Docker, we provide containers with all required dependencies installed.
+
+----------
+
+Platform: linux (Foo-OsVersion)
+Cypress Version: 1.2.3
 `

@@ -9,7 +9,7 @@ const open = require(`${lib}/exec/open`)
 const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const execa = require('execa-wrap')
 
 describe('cli', () => {
@@ -30,13 +30,13 @@ describe('cli', () => {
     // note it shows help for that specific command
     it('shows help', () => {
       return execa('bin/cypress', ['open', '--foo']).then((result) => {
-        snapshot('shows help for open --foo', result)
+        snapshot('shows help for open --foo 1', result)
       })
     })
 
     it('shows help for run command', () => {
       return execa('bin/cypress', ['run', '--foo']).then((result) => {
-        snapshot('shows help for run --foo', result)
+        snapshot('shows help for run --foo 1', result)
       })
     })
 
@@ -81,11 +81,14 @@ describe('cli', () => {
     })
     it('reports package version', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').withArgs(binaryDir).resolves('X.Y.Z')
+      sinon
+      .stub(state, 'getBinaryPkgVersionAsync')
+      .withArgs(binaryDir)
+      .resolves('X.Y.Z')
 
       this.exec('version')
       process.exit.callsFake(() => {
-        snapshot('cli version and binary version', logger.print())
+        snapshot('cli version and binary version 1', logger.print())
         done()
       })
     })
@@ -96,7 +99,7 @@ describe('cli', () => {
 
       this.exec('version')
       process.exit.callsFake(() => {
-        snapshot('cli version and binary version', logger.print())
+        snapshot('cli version and binary version 2', logger.print())
         done()
       })
     })
@@ -107,7 +110,7 @@ describe('cli', () => {
 
       this.exec('version')
       process.exit.callsFake(() => {
-        snapshot('cli version no binary version', logger.print())
+        snapshot('cli version no binary version 1', logger.print())
         done()
       })
     })
@@ -118,7 +121,7 @@ describe('cli', () => {
 
       this.exec('--version')
       process.exit.callsFake(() => {
-        snapshot('cli --version no binary version', logger.print())
+        snapshot('cli --version no binary version 1', logger.print())
         done()
       })
     })
@@ -129,7 +132,7 @@ describe('cli', () => {
 
       this.exec('-v')
       process.exit.callsFake(() => {
-        snapshot('cli -v no binary version', logger.print())
+        snapshot('cli -v no binary version 1', logger.print())
         done()
       })
     })
@@ -170,7 +173,9 @@ describe('cli', () => {
 
     it('calls run with spec', () => {
       this.exec('run --spec cypress/integration/foo_spec.js')
-      expect(run.start).to.be.calledWith({ spec: 'cypress/integration/foo_spec.js' })
+      expect(run.start).to.be.calledWith({
+        spec: 'cypress/integration/foo_spec.js',
+      })
     })
 
     it('calls run with port with -p arg', () => {
@@ -180,12 +185,16 @@ describe('cli', () => {
 
     it('calls run with env variables', () => {
       this.exec('run --env foo=bar,host=http://localhost:8888')
-      expect(run.start).to.be.calledWith({ env: 'foo=bar,host=http://localhost:8888' })
+      expect(run.start).to.be.calledWith({
+        env: 'foo=bar,host=http://localhost:8888',
+      })
     })
 
     it('calls run with config', () => {
       this.exec('run --config watchForFileChanges=false,baseUrl=localhost')
-      expect(run.start).to.be.calledWith({ config: 'watchForFileChanges=false,baseUrl=localhost' })
+      expect(run.start).to.be.calledWith({
+        config: 'watchForFileChanges=false,baseUrl=localhost',
+      })
     })
 
     it('calls run with key', () => {
@@ -317,11 +326,13 @@ describe('cli', () => {
     })
   })
   context('cypress verify', () => {
-
     it('verify calls verify.start with force: true', () => {
       sinon.stub(verify, 'start').resolves()
       this.exec('verify')
-      expect(verify.start).to.be.calledWith({ force: true, welcomeMessage: false })
+      expect(verify.start).to.be.calledWith({
+        force: true,
+        welcomeMessage: false,
+      })
     })
 
     it('verify calls verify.start + catches errors', (done) => {

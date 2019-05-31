@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 const util = require(`${lib}/util`)
 const run = require(`${lib}/exec/run`)
