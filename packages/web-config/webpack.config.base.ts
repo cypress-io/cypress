@@ -1,6 +1,4 @@
 import webpack, { Configuration, optimize, ResolvePlugin } from 'webpack'
-import _ from 'lodash'
-import path from 'path'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
 import sassGlobImporter = require('node-sass-globbing')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -8,11 +6,10 @@ import CopyWebpackPlugin = require('copy-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
-const mode = process.env.NODE_ENV as ('development' | 'production' | 'test' | 'reporter') || 'development'
-const webpackmode = mode === 'production' ? mode : 'development'
+process.env.NODE_ENV = process.env.NODE_ENV || 'development'
 
 const config: webpack.Configuration = {
-	mode: webpackmode,
+	mode: 'none',
 	node: {
 		fs: 'empty',
 		child_process: 'empty',
@@ -127,7 +124,6 @@ const config: webpack.Configuration = {
 	},
 
 	plugins: [
-
 		new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
 		new MiniCSSExtractWebpackPlugin(),
 		new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, }),

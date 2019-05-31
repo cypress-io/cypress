@@ -18,6 +18,7 @@ config.plugins = [
 	...config.plugins!,
 	new HtmlWebpackPlugin({
 		template: path.resolve(__dirname, './src/index.html'),
+		env: process.env.NODE_ENV,
 		inject: false,
 	}),
 ]
