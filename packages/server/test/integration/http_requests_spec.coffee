@@ -6,6 +6,7 @@ rp            = require("request-promise")
 dns           = require("dns")
 http          = require("http")
 path          = require("path")
+url           = require("url")
 zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
@@ -3156,36 +3157,23 @@ describe "Routes", ->
         es.onmessage = (m) =>
           expect(m.data).to.eq("hey")
           es.close()
-    #
-    #   it "handles errors when the event source connection cannot be made", (done) ->
-    #     ## it should call req.socket.destroy() when receiving error
-    #     @server.onRequest (req, res) =>
-    #       sinon.spy(@server._request, "create")
-    #       sinon.spy(req.socket, "destroy")
-    #
-    #       es.onerror = (e) =>
-    #         expect(@server._request.create).to.be.calledWithMatch({timeout: null})
-    #         expect(req.socket.destroy).to.be.calledOnce
-    #         done()
-    #
-    #     es = new EventSource("http://localhost:7777/sse", {
-    #       proxy: @proxy
-    #     })
 
-    context.only "with empty response", ->
+    context "when body should be empty", ->
       @timeout(1000)
 
       beforeEach (done) ->
         @httpSrv = http.createServer (req, res) ->
-          switch req.url
-            when '/empty'
-              res.writeHead(304)
-              res.end()
-            when '/empty-chunked'
-              res.writeHead(304, {
-                'transfer-encoding': 'chunked'
-              })
-              res.end()
+          { query } = url.parse(req.url, true)
+
+          if _.has(query, 'chunked')
+            res.setHeader('tranfer-encoding', 'chunked')
+          else
+            res.setHeader('content-length', '0')
+
+          res.writeHead(Number(query.status), {
+            'x-foo': 'bar'
+          })
+          res.end()
 
         @httpSrv.listen =>
           @port = @httpSrv.address().port
@@ -3196,15 +3184,24 @@ describe "Routes", ->
       afterEach ->
         @httpSrv.close()
 
-      it "works immediately", ->
-        @rp({
-          url: "http://localhost:#{@port}/empty"
-        })
+      [204, 304, 101, 102, 103].forEach (status) ->
+        it "passes through a #{status} response immediately", ->
+          @rp({
+            url: "http://localhost:#{@port}/?status=#{status}"
+            timeout: 100
+          })
+          .then (res) ->
+            expect(res.headers['x-foo']).to.eq('bar')
+            expect(res.statusCode).to.eq(status)
 
-      it "works immediately with Transfer-Encoding: chunked", ->
-        @rp({
-          url: "http://localhost:#{@port}/empty-chunked"
-        })
+        it "passes through a #{status} response with chunked encoding immediately", ->
+          @rp({
+            url: "http://localhost:#{@port}/?status=#{status}&chunked"
+            timeout: 100
+          })
+          .then (res) ->
+            expect(res.headers['x-foo']).to.eq('bar')
+            expect(res.statusCode).to.eq(status)
 
   context "POST *", ->
     beforeEach ->
