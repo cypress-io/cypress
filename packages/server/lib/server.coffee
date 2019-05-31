@@ -177,7 +177,7 @@ class Server
           upgrade.call(@_server, req, socket, head)
 
       @_server.on "connect", (req, socket, head) =>
-        debug("Got CONNECT request from %s", req.url)
+        debug("Got CONNECT request from %s", req.url,)
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
