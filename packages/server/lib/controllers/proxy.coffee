@@ -280,16 +280,9 @@ module.exports = {
         return res.redirect(statusCode, newUrl)
 
       if headers["x-cypress-file-server-error"]
-        filePath = headers["x-cypress-file-path"]
         wantsInjection or= "partial"
-        str = passthruStream()
-        setBody(str, statusCode, headers)
-        str.end(getErrorHtml({status: statusCode}, filePath))
-      else
-        if headers["x-cypress-file-server-error"]
-          wantsInjection or= "partial"
 
-        setBody(str, statusCode, headers)
+      setBody(str, statusCode, headers)
 
     if obj = buffers.take(remoteUrl)
       wantsInjection = "full"

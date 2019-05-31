@@ -72,7 +72,7 @@
     "eventsource": "1.0.7",
     "express-session": "1.16.1",
     "express-useragent": "1.0.12",
-    "http-mitm-proxy": "^0.7.0",
+    "http-mitm-proxy": "0.7.0",
     "https-proxy-agent": "1.0.0",
     "inquirer": "3.3.0",
     "istanbul": "0.4.5",
