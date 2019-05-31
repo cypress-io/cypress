@@ -370,9 +370,14 @@ describe "lib/modes/run", ->
       sinon.spy(runMode,  "displayScreenshots")
 
       process.nextTick =>
+        expect(@projectInstance.listeners("end")).to.have.length(1)
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
         @projectInstance.emit("exitEarlyWithErr", err.message)
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
+
+      runMode.listenForProjectEnd(@projectInstance)
+      .then ->
+        expect(@projectInstance.listeners("end")).to.have.length(0)
 
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,
@@ -455,13 +460,16 @@ describe "lib/modes/run", ->
           foo: "bar"
         })
 
-    it "stops listening to end event", ->
+    it "stops listening to 'end' and 'exitEarlyWithErr' events", ->
       process.nextTick =>
         expect(@projectInstance.listeners("end")).to.have.length(1)
+        expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
         @projectInstance.emit("end", {foo: "bar"})
         expect(@projectInstance.listeners("end")).to.have.length(0)
 
       runMode.listenForProjectEnd(@projectInstance)
+      .then ->
+        expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
 
   context ".run browser vs video recording", ->
     beforeEach ->
