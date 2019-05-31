@@ -178,7 +178,7 @@ create = ->
     closeOpenProjectAndBrowsers: ->
       Promise.all([
         @closeBrowser()
-        openProject.close() if openProject
+        openProject?.close()
       ])
       .then ->
         reset()

@@ -66,11 +66,9 @@ logger.defaultErrorHandler = (err) ->
         exit()
 
     else
-      ## instead of console'ing these we should
-      ## think about chalking them so they are
-      ## formatted and displayed
-      console.log(err)
-      console.log(err.stack)
+      console.log(chalk.red.underline("Uncaught Error:"))
+      console.log()
+      console.log(chalk.red(err?.stack or err?.message or err))
       exit()
 
   logger.createException(err).then(handleErr).catch(handleErr)

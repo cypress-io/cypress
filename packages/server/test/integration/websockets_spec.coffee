@@ -14,7 +14,7 @@ Automation  = require("#{root}lib/automation")
 Fixtures    = require("#{root}/test/support/helpers/fixtures")
 
 cyPort  = 12345
-otherPort = 5555
+otherPort = 5556
 wsPort  = 20000
 wssPort = 8443
 
@@ -59,7 +59,7 @@ describe "Web Sockets", ->
         expect(err.code).to.eq("ECONNRESET")
         done()
 
-    it "sends back 502 Bad Gateway when error upgrading", (done) ->
+    it "socket hangs up when error upgrading", (done) ->
       agent = new httpsAgent("http://localhost:#{cyPort}")
 
       @server._onDomainSet("http://localhost:#{otherPort}")
@@ -68,12 +68,8 @@ describe "Web Sockets", ->
         agent: agent
       })
 
-      client.on "unexpected-response", (req, res) ->
-        expect(res.statusCode).to.eq(502)
-        expect(res.statusMessage).to.eq("Bad Gateway")
-        expect(res.headers).to.have.property("x-cypress-proxy-error-message")
-        expect(res.headers).to.have.property("x-cypress-proxy-error-code")
-
+      client.on "error", (err) ->
+        expect(err.message).to.eq("socket hang up")
         done()
 
     it "proxies https messages", (done) ->

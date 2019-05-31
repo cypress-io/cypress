@@ -2,10 +2,10 @@ set e+x
 
 echo "This script should be run from cypress's root"
 
-name=cypress/browsers:node8.9.3-chrome73
+name=cypress/browsers:node10.2.1-chrome74
 echo "Pulling CI container $name"
 
-docker pull $name
+# docker pull $name
 
 echo "Starting Docker image with cypress volume attached"
 echo "You should be able to edit files locally"

@@ -1,3 +1,4 @@
+allowDestroy = require("server-destroy-vvo")
 http       = require("http")
 path       = require("path")
 httpsProxy = require("../../lib/proxy")
@@ -27,6 +28,8 @@ module.exports = {
 
   start: (port) ->
     prx = http.createServer()
+
+    allowDestroy(prx)
 
     dir = path.join(process.cwd(), "ca")
 
@@ -60,8 +63,7 @@ module.exports = {
           resolve(proxy)
 
   stop: ->
-    new Promise (resolve) ->
-      prx.close(resolve)
-    .then ->
-      prx.proxy.close()
+    ## close all open connections and force quit
+    prx.destroy()
+    prx.proxy.close()
 }

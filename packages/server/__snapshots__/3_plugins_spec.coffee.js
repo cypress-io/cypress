@@ -23,6 +23,7 @@ Error: Async error from plugins file
     at stack trace line
     at stack trace line
     at stack trace line
+    at stack trace line
 
 
   (Results)
