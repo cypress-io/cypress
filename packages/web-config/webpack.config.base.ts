@@ -6,7 +6,9 @@ import CopyWebpackPlugin = require('copy-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
-process.env.NODE_ENV = process.env.NODE_ENV || 'development'
+const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
+
+process.env.NODE_ENV = env
 
 const config: webpack.Configuration = {
 	mode: 'none',
@@ -26,7 +28,7 @@ const config: webpack.Configuration = {
 	// this gives good stack traces and devTools DX
 	// also suitable for production since users will have better stack traces
 	// and files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
-	devtool: 'eval',
+	// devtool: 'eval',
 
 	stats: {
 		errors: true,
@@ -123,11 +125,28 @@ const config: webpack.Configuration = {
 		],
 	},
 
+	optimization: {
+		usedExports: true,
+		providedExports: true,
+		concatenateModules: true,
+		sideEffects: true,
+		namedChunks: true,
+		namedModules:true,
+		removeAvailableModules: true,
+		mergeDuplicateChunks: true,
+		flagIncludedChunks: true,
+		removeEmptyChunks: true,
+	},
+
+	bail: process.env.NODE_ENV === 'production',
+
 	plugins: [
 		new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
 		new MiniCSSExtractWebpackPlugin(),
 		new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, }),
 	],
+
+	cache: env === 'development',
 
 }
 

@@ -95,6 +95,7 @@
     "bluebird-retry": "0.11.0",
     "bulk-decaffeinate": "3.3.1",
     "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
     "chalk": "2.4.2",
     "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",

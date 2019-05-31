@@ -27,6 +27,7 @@ packages = require("./util/packages")
 xvfb = require("../../cli/lib/exec/xvfb")
 linkPackages = require('../link-packages')
 { transformRequires } = require('./util/transform-requires')
+{ testStaticAssets } = require('./util/testStaticAssets')
 
 rootPackage = require("@packages/root")
 
@@ -73,6 +74,10 @@ buildCypressApp = (platform, version, options = {}) ->
       console.log('built app version', result.stdout)
       la(result.stdout == version, "different version reported",
         result.stdout, "from input version to build", version)
+
+  testBuiltStaticAssets = ->
+    log('#testBuiltStaticAssets')
+    testStaticAssets(distDir())
 
   canBuildInDocker = ->
     platform is "linux" and os.platform() is "darwin"
@@ -307,6 +312,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(cleanJs)
   .then(transformSymlinkRequires)
   .then(testVersion(distDir))
+  .then(testBuiltStaticAssets)
   .then(elBuilder) # should we delete everything in the buildDir()?
   .then(removeDevElectronApp)
   .then(testVersion(buildAppDir))

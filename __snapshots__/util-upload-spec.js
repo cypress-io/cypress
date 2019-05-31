@@ -39,3 +39,339 @@ exports['upload util isValidPlatformArch checks given strings second 1'] = {
     }
   ]
 }
+
+exports['upload util isValidPlatformArch checks given strings second 2'] = {
+  "name": "second",
+  "behavior": [
+    {
+      "given": "darwin-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "win32-ia32",
+      "expect": true
+    },
+    {
+      "given": "win32-x64",
+      "expect": true
+    },
+    {
+      "given": "darwin",
+      "expect": false
+    },
+    {
+      "given": "win32",
+      "expect": false
+    },
+    {
+      "given": "windows",
+      "expect": false
+    },
+    {
+      "given": "linux",
+      "expect": false
+    },
+    {
+      "given": "linux64",
+      "expect": false
+    }
+  ]
+}
+
+exports['upload util isValidPlatformArch checks given strings second 3'] = {
+  "name": "second",
+  "behavior": [
+    {
+      "given": "darwin-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "win32-ia32",
+      "expect": true
+    },
+    {
+      "given": "win32-x64",
+      "expect": true
+    },
+    {
+      "given": "darwin",
+      "expect": false
+    },
+    {
+      "given": "win32",
+      "expect": false
+    },
+    {
+      "given": "windows",
+      "expect": false
+    },
+    {
+      "given": "linux",
+      "expect": false
+    },
+    {
+      "given": "linux64",
+      "expect": false
+    }
+  ]
+}
+
+exports['upload util isValidPlatformArch checks given strings second 4'] = {
+  "name": "second",
+  "behavior": [
+    {
+      "given": "darwin-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "win32-ia32",
+      "expect": true
+    },
+    {
+      "given": "win32-x64",
+      "expect": true
+    },
+    {
+      "given": "darwin",
+      "expect": false
+    },
+    {
+      "given": "win32",
+      "expect": false
+    },
+    {
+      "given": "windows",
+      "expect": false
+    },
+    {
+      "given": "linux",
+      "expect": false
+    },
+    {
+      "given": "linux64",
+      "expect": false
+    }
+  ]
+}
+
+exports['upload util isValidPlatformArch checks given strings second 5'] = {
+  "name": "second",
+  "behavior": [
+    {
+      "given": "darwin-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "win32-ia32",
+      "expect": true
+    },
+    {
+      "given": "win32-x64",
+      "expect": true
+    },
+    {
+      "given": "darwin",
+      "expect": false
+    },
+    {
+      "given": "win32",
+      "expect": false
+    },
+    {
+      "given": "windows",
+      "expect": false
+    },
+    {
+      "given": "linux",
+      "expect": false
+    },
+    {
+      "given": "linux64",
+      "expect": false
+    }
+  ]
+}
+
+exports['upload util isValidPlatformArch checks given strings second 6'] = {
+  "name": "second",
+  "behavior": [
+    {
+      "given": "darwin-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "win32-ia32",
+      "expect": true
+    },
+    {
+      "given": "win32-x64",
+      "expect": true
+    },
+    {
+      "given": "darwin",
+      "expect": false
+    },
+    {
+      "given": "win32",
+      "expect": false
+    },
+    {
+      "given": "windows",
+      "expect": false
+    },
+    {
+      "given": "linux",
+      "expect": false
+    },
+    {
+      "given": "linux64",
+      "expect": false
+    }
+  ]
+}
+
+exports['upload util isValidPlatformArch checks given strings second 7'] = {
+  "name": "second",
+  "behavior": [
+    {
+      "given": "darwin-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "win32-ia32",
+      "expect": true
+    },
+    {
+      "given": "win32-x64",
+      "expect": true
+    },
+    {
+      "given": "darwin",
+      "expect": false
+    },
+    {
+      "given": "win32",
+      "expect": false
+    },
+    {
+      "given": "windows",
+      "expect": false
+    },
+    {
+      "given": "linux",
+      "expect": false
+    },
+    {
+      "given": "linux64",
+      "expect": false
+    }
+  ]
+}
+
+exports['upload util isValidPlatformArch checks given strings second 8'] = {
+  "name": "second",
+  "behavior": [
+    {
+      "given": "darwin-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "win32-ia32",
+      "expect": true
+    },
+    {
+      "given": "win32-x64",
+      "expect": true
+    },
+    {
+      "given": "darwin",
+      "expect": false
+    },
+    {
+      "given": "win32",
+      "expect": false
+    },
+    {
+      "given": "windows",
+      "expect": false
+    },
+    {
+      "given": "linux",
+      "expect": false
+    },
+    {
+      "given": "linux64",
+      "expect": false
+    }
+  ]
+}
+
+exports['upload util isValidPlatformArch checks given strings second 9'] = {
+  "name": "second",
+  "behavior": [
+    {
+      "given": "darwin-x64",
+      "expect": true
+    },
+    {
+      "given": "linux-x64",
+      "expect": true
+    },
+    {
+      "given": "win32-ia32",
+      "expect": true
+    },
+    {
+      "given": "win32-x64",
+      "expect": true
+    },
+    {
+      "given": "darwin",
+      "expect": false
+    },
+    {
+      "given": "win32",
+      "expect": false
+    },
+    {
+      "given": "windows",
+      "expect": false
+    },
+    {
+      "given": "linux",
+      "expect": false
+    },
+    {
+      "given": "linux64",
+      "expect": false
+    }
+  ]
+}

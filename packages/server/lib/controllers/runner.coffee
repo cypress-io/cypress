@@ -31,8 +31,6 @@ module.exports = {
   handle: (req, res) ->
     pathToFile = runner.getPathToDist(req.params[0])
 
-    res.set('Access-Control-Allow-Origin', '*')
-
     send(req, pathToFile)
     .pipe(res)
 }

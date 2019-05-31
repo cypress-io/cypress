@@ -6,10 +6,19 @@ const path = require('path')
 const proxyquire = require('proxyquire')
 const mockfs = require('mock-fs')
 const _snapshot = require('snap-shot-it')
+const chai = require('chai')
+
+chai.use(require('chai-as-promised'))
+
+const { expect } = chai
 
 const packages = require('../../../binary/util/packages')
 const { transformRequires } = require('../../../binary/util/transform-requires')
+const { testStaticAssets } = require('../../../binary/util/testStaticAssets')
 
+global.beforeEach(() => {
+  mockfs.restore()
+})
 const snapshot = (...args) => {
   mockfs.restore()
 
@@ -90,15 +99,117 @@ describe('transformRequires', () => {
 
     await transformRequires(buildRoot)
 
-    console.dir(getFs(), { depth: null })
+    logFs()
 
     snapshot(getFs())
+  })
+})
+
+describe('testStaticAssets', () => {
+  it('can detect valid runner js', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {
+              'runner.js': `${'some js\n'.repeat(5000)}`,
+            },
+          },
+          'desktop-gui': {
+            'dist': {
+              'index.html': 'window.env = \'production\'',
+            },
+          },
+        },
+      },
+    })
+
+    // logFs()
+
+    await testStaticAssets(buildDir)
+
+  })
+
+  it('can detect runner js with developer livereload enabled', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {
+              'runner.js': `
+              ${'some js\n'.repeat(5000)}
+              //webpack-livereload-plugin
+              some more js
+              `,
+            },
+          },
+          'desktop-gui': {
+            'dist': {
+              'index.html': 'window.env = \'production\'',
+            },
+          },
+        },
+      },
+    })
+
+    // logFs()
+
+    await expect(testStaticAssets(buildDir)).to.rejected.with.eventually
+    .property('message').contain('livereload')
+
+    mockfs.restore()
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {},
+          },
+        },
+      },
+    })
+
+    await expect(testStaticAssets(buildDir)).to.rejected.with.eventually
+    .property('message').contain('assets to be found')
+
+  })
+
+  it('can detect runner js minified code', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {
+              'runner.js': `
+              ${'minified code;minified code;minified code;\n'.repeat(600)}
+              `,
+            },
+          },
+          'desktop-gui': {
+            'dist': {
+              'index.html': 'window.env = \'production\'',
+            },
+          },
+        },
+      },
+    })
   })
 })
 
 afterEach(() => {
   mockfs.restore()
 })
+
+const logFs = () => {
+  // eslint-disable-next-line no-console
+  console.dir(getFs(), { depth: null })
+}
 
 const getFs = () => {
   const cwd = process.cwd().split('/').slice(1)
