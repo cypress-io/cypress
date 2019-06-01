@@ -119,7 +119,7 @@ describe('testStaticAssets', () => {
           },
           'desktop-gui': {
             'dist': {
-              'index.html': 'window.env = \'production\'',
+              'index.html': 'window.env = \'development\'',
             },
           },
         },
