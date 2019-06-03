@@ -488,27 +488,26 @@ describe "e2e network error handling", ->
         mitmProxy.onRequest (ctx, callback) ->
           callback()
 
-        Promise.fromCallback (cb) =>
-          mitmProxy.listen({
-            host: '127.0.0.1'
-            port: PROXY_PORT
-            keepAlive: true
-            httpAgent: http.globalAgent
-            httpsAgent: https.globalAgent
-            forceSNI: false
-            forceChunkedRequest: true
-          }, cb)
-        .then =>
-          process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
-          process.env.NO_PROXY = ""
+        mitmProxy.listen({
+          host: '127.0.0.1'
+          port: PROXY_PORT
+          keepAlive: true
+          httpAgent: http.globalAgent
+          httpsAgent: https.globalAgent
+          forceSNI: false
+          forceChunkedRequest: true
+        })
 
-          e2e.exec(@, {
-            spec: "network_error_304_handling_spec.js"
-            video: false
-            config: {
-              baseUrl: "http://localhost:#{PORT}"
-              pageLoadTimeout: 4000
-            }
-            expectedExitCode: 0
-            snapshot: true
-          })
+        process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
+        process.env.NO_PROXY = ""
+
+        e2e.exec(@, {
+          spec: "network_error_304_handling_spec.js"
+          video: false
+          config: {
+            baseUrl: "http://localhost:#{PORT}"
+            pageLoadTimeout: 4000
+          }
+          expectedExitCode: 0
+          snapshot: true
+        })
