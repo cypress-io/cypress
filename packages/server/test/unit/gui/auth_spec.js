@@ -12,6 +12,10 @@ const PORT = 9001
 const LOGIN_URL = `https://foo.invalid/login.html?port=9001&state=${RANDOM_STRING}`
 
 describe('lib/gui/auth', function () {
+  afterEach(function () {
+    auth._stopServer()
+  })
+
   context('._getOriginFromUrl', function () {
     it('given an https URL, returns the origin', function () {
       const origin = auth._getOriginFromUrl(LOGIN_URL)
