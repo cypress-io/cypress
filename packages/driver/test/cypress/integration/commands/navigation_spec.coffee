@@ -605,6 +605,12 @@ describe "src/cy/commands/navigation", ->
       })
       cy.contains('"user-agent":"something special"')
 
+    it "completes immediately on localhost", ->
+      cy.visit({
+        url: '/dump-method'
+        timeout: 50
+      })
+
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
         cy.visit("http://localhost:3500/post-only", {
