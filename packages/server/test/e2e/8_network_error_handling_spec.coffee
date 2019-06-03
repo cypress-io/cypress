@@ -483,13 +483,13 @@ describe "e2e network error handling", ->
           })
 
       it "behind a proxy with transfer-encoding: chunked", ->
-        @mitmProxy = mitmProxy()
+        mitmProxy = mitmProxy()
 
-        @mitmProxy.onRequest (ctx, callback) ->
+        mitmProxy.onRequest (ctx, callback) ->
           callback()
 
         Promise.fromCallback (cb) =>
-          @mitmProxy.listen({
+          mitmProxy.listen({
             host: '127.0.0.1'
             port: PROXY_PORT
             keepAlive: true
