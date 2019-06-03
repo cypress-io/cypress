@@ -2624,7 +2624,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#multiple-inputs-and-button-submit input:first").type("f{enter}").then -> done()
 
-      context "2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=submit]", ->
+      context "2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=reset]", ->
         it "triggers form submit", (done) ->
           @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit (e) ->
             e.preventDefault()
@@ -2645,6 +2645,28 @@ describe "src/cy/commands/actions/type", ->
           form.find("input").keypress (e) -> e.preventDefault()
 
           cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("f{enter}").then -> done()
+
+      context "2 inputs, 1 'reset' button, 1 'button' button, and 1 button with no type (default submit)", ->
+        it "triggers form submit", (done) ->
+          @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}")
+
+        it "causes click event on the button", (done) ->
+          @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type button:last").click (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}")
+
+        it "does not cause click event on the button if keydown is defaultPrevented on input", (done) ->
+          form = @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit ->
+            done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("f{enter}").then -> done()
 
       context "2 inputs, 1 'submit' element button", ->
         it "triggers form submit", (done) ->
