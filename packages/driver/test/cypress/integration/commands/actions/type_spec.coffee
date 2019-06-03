@@ -2624,6 +2624,28 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#multiple-inputs-and-button-submit input:first").type("f{enter}").then -> done()
 
+      context "2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=submit]", ->
+        it "triggers form submit", (done) ->
+          @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}")
+
+        it "causes click event on the button[type=submit]", (done) ->
+          @$forms.find("#multiple-inputs-and-reset-and-submit-buttons button[type=submit]").click (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}")
+
+        it "does not cause click event on the button[type=submit] if keydown is defaultPrevented on input", (done) ->
+          form = @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit ->
+            done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("f{enter}").then -> done()
+
       context "2 inputs, 1 'submit' element button", ->
         it "triggers form submit", (done) ->
           @$forms.find("#multiple-inputs-and-button-with-no-type").submit (e) ->

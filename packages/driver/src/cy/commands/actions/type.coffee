@@ -162,7 +162,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         form.find("input, button").filter (__, el) ->
           $el = $dom.wrap(el)
           ($dom.isSelector($el, "input") and $dom.isType($el, "submit")) or
-          ($dom.isSelector($el, "button") and not $dom.isType($el, "button"))
+          ($dom.isSelector($el, "button") and $dom.isType($el, "submit"))
 
       type = ->
         simulateSubmitHandler = ->
