@@ -99,7 +99,8 @@ module.exports = {
 
     ## reset stack by replacing the original first line
     ## with the new one
-    err.stack = stack.replace(str, err.toString())
+    if stack
+      err.stack = stack.replace(str, err.toString())
 
     return err
 
