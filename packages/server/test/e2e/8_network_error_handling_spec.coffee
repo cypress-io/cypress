@@ -449,7 +449,7 @@ describe "e2e network error handling", ->
           })
 
     ## https://github.com/cypress-io/cypress/issues/4298
-    context "does not retry on a 304 Not Modified", ->
+    context "does not delay a 304 Not Modified", ->
       it "in normal network conditions", ->
         e2e.exec(@, {
           spec: "network_error_304_handling_spec.js"
@@ -482,21 +482,11 @@ describe "e2e network error handling", ->
             snapshot: true
           })
 
-      ## TODO: I can't get this to run in 3.3.1, but this is the only e2e test
-      ## that demonstrates the actual bug in #4298
-      it.skip "behind a proxy with transfer-encoding: chunked", ->
-        nock.enableNetConnect()
-
+      it "behind a proxy with transfer-encoding: chunked", ->
         @mitmProxy = mitmProxy()
 
         @mitmProxy.onRequest (ctx, callback) ->
           callback()
-
-        @mitmProxy.onWebSocketConnection (ctx, callback) ->
-          callback()
-
-        @mitmProxy.onWebSocketFrame (ctx, type, fromServer, message, flags, callback) ->
-          callback(null, message, flags)
 
         Promise.fromCallback (cb) =>
           @mitmProxy.listen({
@@ -520,6 +510,5 @@ describe "e2e network error handling", ->
               pageLoadTimeout: 4000
             }
             expectedExitCode: 0
-            browser: 'chrome'
-            exit: false
+            snapshot: true
           })
