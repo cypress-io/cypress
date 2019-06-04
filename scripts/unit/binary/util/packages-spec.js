@@ -14,7 +14,7 @@ const { expect } = chai
 
 const packages = require('../../../binary/util/packages')
 const { transformRequires } = require('../../../binary/util/transform-requires')
-const { testStaticAssets } = require('../../../binary/util/testStaticAssets')
+const { testStaticAssets, testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
 
 global.beforeEach(() => {
   mockfs.restore()
@@ -105,7 +105,7 @@ describe('transformRequires', () => {
   })
 })
 
-describe('testStaticAssets', () => {
+describe.only('testStaticAssets', () => {
   it('can detect valid runner js', async () => {
     const buildDir = 'resources/app'
 
@@ -114,7 +114,8 @@ describe('testStaticAssets', () => {
         'packages': {
           'runner': {
             'dist': {
-              'runner.js': `${'some js\n'.repeat(5000)}`,
+              'runner.js': `${'some js\n'.repeat(5000)}
+              //# sourceMappingURL=data:application/json;charset=utf-8;base64`,
             },
           },
           'desktop-gui': {
@@ -132,7 +133,7 @@ describe('testStaticAssets', () => {
 
   })
 
-  it('can detect runner js with developer livereload enabled', async () => {
+  it('can detect bad strings in asset', async () => {
     const buildDir = 'resources/app'
 
     mockfs({
@@ -141,15 +142,10 @@ describe('testStaticAssets', () => {
           'runner': {
             'dist': {
               'runner.js': `
-              ${'some js\n'.repeat(5000)}
-              //webpack-livereload-plugin
+              some js
+              some really bad string
               some more js
               `,
-            },
-          },
-          'desktop-gui': {
-            'dist': {
-              'index.html': 'window.env = \'development\'',
             },
           },
         },
@@ -158,8 +154,10 @@ describe('testStaticAssets', () => {
 
     // logFs()
 
-    await expect(testStaticAssets(buildDir)).to.rejected.with.eventually
-    .property('message').contain('livereload')
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+      badStrings: ['some really bad string'],
+    })).to.rejected.with.eventually.property('message').contain('some really bad string')
 
     mockfs.restore()
 
@@ -173,7 +171,10 @@ describe('testStaticAssets', () => {
       },
     })
 
-    await expect(testStaticAssets(buildDir)).to.rejected.with.eventually
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+      badStrings: ['some really bad string'],
+    })).to.rejected.with.eventually
     .property('message').contain('assets to be found')
 
   })
@@ -187,18 +188,19 @@ describe('testStaticAssets', () => {
           'runner': {
             'dist': {
               'runner.js': `
-              ${'minified code;minified code;minified code;\n'.repeat(600)}
+              ${'minified code;minified code;minified code;\n'.repeat(50)}
               `,
-            },
-          },
-          'desktop-gui': {
-            'dist': {
-              'index.html': 'window.env = \'development\'',
             },
           },
         },
       },
     })
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+      minLineCount: 100,
+    })).to.rejected.with.eventually
+    .property('message').contain('minified')
   })
 })
 

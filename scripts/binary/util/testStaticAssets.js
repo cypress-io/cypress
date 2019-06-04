@@ -80,4 +80,5 @@ const testPackageStaticAssets = async (options = {}) => {
 
 module.exports = {
   testStaticAssets,
+  testPackageStaticAssets,
 }
