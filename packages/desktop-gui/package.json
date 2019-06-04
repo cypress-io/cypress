@@ -44,7 +44,7 @@
     "mobx-react-devtools": "6.1.1",
     "moment": "2.24.0",
     "prop-types": "15.7.2",
-    "rc-collapse": "1.11.2",
+    "rc-collapse": "1.11.3",
     "react": "16.8.6",
     "react-bootstrap-modal": "4.2.0",
     "react-dom": "16.8.6",
