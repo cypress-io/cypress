@@ -99,8 +99,6 @@ describe('transformRequires', () => {
 
     await transformRequires(buildRoot)
 
-    logFs()
-
     snapshot(getFs())
   })
 })
@@ -208,6 +206,7 @@ afterEach(() => {
   mockfs.restore()
 })
 
+// eslint-disable-next-line
 const logFs = () => {
   // eslint-disable-next-line no-console
   console.dir(getFs(), { depth: null })
