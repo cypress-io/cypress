@@ -46,7 +46,7 @@
     "lodash": "4.17.11",
     "lolex": "4.1.0",
     "methods": "1.1.2",
-    "method-override": "2.3.10",
+    "method-override": "3.0.0",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
     "mocha": "cypress-io/mocha#58f6eac05e664fc6b69aa9fba70f1f6b5531a900",
@@ -59,9 +59,9 @@
     "text-mask-addons": "3.8.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
-    "url-parse": "1.4.4",
+    "url-parse": "1.4.7",
     "vanilla-text-mask": "5.1.1",
-    "wait-on": "2.1.2",
+    "wait-on": "3.2.0",
     "zone.js": "0.9.0"
   }
 }
