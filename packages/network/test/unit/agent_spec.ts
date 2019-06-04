@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird'
 import chai from 'chai'
+import { EventEmitter } from 'events'
 import http from 'http'
 import https from 'https'
 import net from 'net'
@@ -206,7 +207,7 @@ describe('lib/agent', function() {
     })
 
     context('HttpsAgent', function() {
-      it("#createProxiedConnection calls to super for caching, TLS-ifying", function() {
+      it("#createUpstreamProxyConnection calls to super for caching, TLS-ifying", function() {
         const combinedAgent = new CombinedAgent()
         const spy = sinon.spy(https.Agent.prototype, 'createConnection')
 
@@ -235,7 +236,7 @@ describe('lib/agent', function() {
         })
       })
 
-      it("#createProxiedConnection throws when connection is accepted then closed", function() {
+      it("#createUpstreamProxyConnection throws when connection is accepted then closed", function() {
         const combinedAgent = new CombinedAgent()
 
         const proxy = Bluebird.promisifyAll(
@@ -261,7 +262,7 @@ describe('lib/agent', function() {
           throw new Error('should not succeed')
         })
         .catch((e) => {
-          expect(e.message).to.eq('Error: Connection closed while sending request to upstream proxy')
+          expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: The upstream proxy closed the socket after connecting but before sending a response.')
 
           return proxy.closeAsync()
         })
@@ -293,28 +294,30 @@ describe('lib/agent', function() {
   })
 
   context(".createProxySock", function() {
-    it("creates a `net` socket for an http url", function() {
-      sinon.stub(net, 'connect')
+    it("creates a `net` socket for an http url", function(done) {
+      sinon.spy(net, 'connect')
       const proxy = url.parse('http://foo.bar:1234')
-      createProxySock(proxy)
-      expect(net.connect).to.be.calledWith(1234, 'foo.bar')
+      createProxySock({ proxy }, (err) => {
+        expect(net.connect).to.be.calledWith({ host: 'foo.bar', port: 1234 })
+        done()
+      })
     })
 
-    it("creates a `tls` socket for an https url", function() {
-      sinon.stub(tls, 'connect')
+    it("creates a `tls` socket for an https url", function(done) {
+      sinon.spy(tls, 'connect')
       const proxy = url.parse('https://foo.bar:1234')
-      createProxySock(proxy)
-      expect(tls.connect).to.be.calledWith(1234, 'foo.bar')
+      createProxySock({ proxy }, (err) => {
+        expect(tls.connect).to.be.calledWith({ host: 'foo.bar', port: 1234 })
+        done()
+      })
     })
 
-    it("throws on unsupported proxy protocol", function() {
+    it("throws on unsupported proxy protocol", function(done) {
       const proxy = url.parse('socksv5://foo.bar:1234')
-      try {
-        createProxySock(proxy)
-        throw new Error("Shouldn't be reached")
-      } catch (e) {
-        expect(e.message).to.eq("Unsupported proxy protocol: socksv5:")
-      }
+      createProxySock({ proxy }, (err) => {
+        expect(err.message).to.eq("Unsupported proxy protocol: socksv5:")
+        done()
+      })
     })
   })
 

@@ -1,7 +1,6 @@
 const os = require('os')
 const Promise = require('bluebird')
 const Xvfb = require('@cypress/xvfb')
-const R = require('ramda')
 const { stripIndent } = require('common-tags')
 const debug = require('debug')('cypress:cli')
 const debugXvfb = require('debug')('cypress:xvfb')
@@ -23,9 +22,10 @@ module.exports = {
   _xvfb: xvfb, // expose for testing
 
   start () {
-    debug('Starting XVFB')
+    debug('Starting Xvfb')
 
     return xvfb.startAsync()
+    .return(null)
     .catch({ nonZeroExitCode: true }, throwFormErrorText(errors.nonZeroExitCodeXvfb))
     .catch((err) => {
       if (err.known) {
@@ -37,9 +37,13 @@ module.exports = {
   },
 
   stop () {
-    debug('Stopping XVFB')
+    debug('Stopping Xvfb')
 
     return xvfb.stopAsync()
+    .return(null)
+    .catch(() => {
+      // noop
+    })
   },
 
   isNeeded () {
@@ -53,7 +57,7 @@ module.exports = {
       const message = stripIndent`
         DISPLAY environment variable is set to ${process.env.DISPLAY} on Linux
         Assuming this DISPLAY points at working X11 server,
-        Cypress will not spawn own XVFB
+        Cypress will not spawn own Xvfb
 
         NOTE: if the X11 server is NOT working, Cypress will exit without explanation,
           see ${issueUrl}
@@ -67,7 +71,7 @@ module.exports = {
     }
 
     debug('undefined DISPLAY environment variable')
-    debug('Cypress will spawn its own XVFB')
+    debug('Cypress will spawn its own Xvfb')
 
     return true
   },
@@ -75,7 +79,7 @@ module.exports = {
   // async method, resolved with Boolean
   verify () {
     return xvfb.startAsync()
-    .then(R.T)
+    .return(true)
     .catch((err) => {
       debug('Could not verify xvfb: %s', err.message)
 

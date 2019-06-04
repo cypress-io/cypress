@@ -83,7 +83,7 @@ describe "lib/util/ci_provider", ->
     })
     expectsCommitParams({
       sha: "repoCommit"
-      branch: "repoBranch"
+      branch: "appveyorPullRequestHeadRepoBranch"
       message: "repoCommitMessage"
       authorName: "repoCommitAuthor"
       authorEmail: "repoCommitAuthorEmail"
