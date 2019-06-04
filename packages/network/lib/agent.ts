@@ -156,10 +156,12 @@ export class CombinedAgent {
       }
     }
 
-    debug(`addRequest called for ${options.href}`)
+    debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
     return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
       options.family = family
+
+      debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
         return this.httpsAgent.addRequest(req, options)
