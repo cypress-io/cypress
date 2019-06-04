@@ -9,7 +9,6 @@ const config: typeof commonConfig = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
-    devtoolModuleFilenameTemplate: '[namespace]/[resource-path]'
   },
 }
 

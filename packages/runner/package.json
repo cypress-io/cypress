@@ -5,11 +5,11 @@
   "private": true,
   "scripts": {
     "postinstall": "echo '@packages/runner needs: npm run build'",
-    "build": "webpack",
+    "build": "cross-env NODE_ENV=production webpack",
     "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "npm run build",
     "prewatch": "npm run check-deps-pre",
-    "watch": "npm run build -- --watch --progress",
+    "watch": "webpack --watch --progress",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",

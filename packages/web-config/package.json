@@ -1,6 +1,6 @@
 {
-	"name": "@packages/web-config",
-	"devDependencies": {
+  "name": "@packages/web-config",
+  "devDependencies": {
     "@babel/core": "7.4.4",
     "@babel/plugin-proposal-class-properties": "7.3.4",
     "@babel/plugin-proposal-decorators": "7.3.0",
@@ -14,10 +14,10 @@
     "babel-loader": "8.0.5",
     "browser-resolve": "1.11.3",
     "chai": "4.2.0",
+    "chalk": "2.4.2",
     "clean-webpack-plugin": "2.0.2",
     "coffee-loader": "0.9.0",
     "coffeescript": "2.4.1",
-    "copy-webpack-plugin": "5.0.1",
     "css-loader": "2.1.1",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "file-loader": "3.0.1",

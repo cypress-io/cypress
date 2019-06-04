@@ -12,13 +12,26 @@ const testStaticAssets = async (buildResourcePath) => {
   await Promise.all([
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/*.js`,
-      badStrings: ['webpack-livereload-plugin'],
+      badStrings: [
+        // should only exist during development
+        'webpack-livereload-plugin',
+        // indicates eval source maps were included, which cause crossorigin errors
+        '//# sourceURL=cypress://',
+      ],
+      goodStrings: [
+        // indicates inline source maps were included
+        '//# sourceMappingURL=data:application/json;charset=utf-8;base64',
+      ],
       minLineCount: 5000,
     }),
 
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/index.html`,
-      goodStrings: ['window.env = \'development\''],
+      goodStrings: [
+        // we're not setting NODE_ENV to production for some reason
+        // TODO: probably change this by using the build-prod script
+        'window.env = \'development\'',
+      ],
     }),
   ])
 }

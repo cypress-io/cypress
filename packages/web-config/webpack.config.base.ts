@@ -1,13 +1,17 @@
-import webpack, { Configuration, optimize, ResolvePlugin } from 'webpack'
+import webpack from 'webpack'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
 import sassGlobImporter = require('node-sass-globbing')
-import HtmlWebpackPlugin = require('html-webpack-plugin')
-import CopyWebpackPlugin = require('copy-webpack-plugin')
-import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
 import LiveReloadPlugin from 'webpack-livereload-plugin'
+import HtmlWebpackPlugin = require('html-webpack-plugin')
+import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
+import chalk from 'chalk'
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
-
+const args = process.argv.slice(2)
+const liveReloadEnabled = !args.includes('--no-livereload')
+const watchModeEnabled = args.includes('--watch') || args.includes('-w')
+// opt out of livereload with arg --no-livereload
+if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. use ${chalk.bold('--no-livereload')} to disable`))
 process.env.NODE_ENV = env
 
 const config: webpack.Configuration = {
@@ -22,13 +26,6 @@ const config: webpack.Configuration = {
 	resolve: {
 		extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
 	},
-
-	// Enable source maps
-	// 'eval' maps lines to their files, but output is compiled.
-	// this gives good stack traces and devTools DX
-	// also suitable for production since users will have better stack traces
-	// and files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
-	// devtool: 'eval',
 
 	stats: {
 		errors: true,
@@ -128,7 +125,6 @@ const config: webpack.Configuration = {
 	optimization: {
 		usedExports: true,
 		providedExports: true,
-		concatenateModules: true,
 		sideEffects: true,
 		namedChunks: true,
 		namedModules:true,
@@ -138,19 +134,37 @@ const config: webpack.Configuration = {
 		removeEmptyChunks: true,
 	},
 
-	bail: process.env.NODE_ENV === 'production',
+	bail: true,
 
 	plugins: [
 		new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
 		new MiniCSSExtractWebpackPlugin(),
-		new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, }),
+
+		// Enable source maps / eval maps
+		// 'EvalDevtoolModulePlugin' is used in development 
+		//    because it is fast and maps to filenames while showing compiled source
+		// 'SourceMapDevToolPlugin' is used in production for the same reasons as 'eval', but it
+		//    shows full source and does not cause crossorigin errors like 'eval' (in Chromium < 63)
+		// files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
+		env === 'production' ? 
+			new webpack.SourceMapDevToolPlugin({
+				moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+				fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
+			}) :
+			// @ts-ignore
+			new webpack.EvalDevToolModulePlugin({
+				moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+				fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'				
+			}),
+
+		...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, })]: []),
 	],
 
-	cache: env === 'development',
+	cache: true,
 
 }
 
 export default config
 
-export { HtmlWebpackPlugin, CopyWebpackPlugin }
+export { HtmlWebpackPlugin }
 
