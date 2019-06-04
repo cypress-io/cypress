@@ -1,7 +1,0 @@
-#external-1:after {
-  content: ' (before change)';
-}
-
-#external-1 {
-  margin-right: 1px;
-}

@@ -21,10 +21,10 @@ const isScreenStylesheet = (stylesheet) => {
   return !_.isString(media) || screenStylesheetRe.test(media)
 }
 
-const getDocumentStylesheets = (document) => {
-  if (!document) return {}
+const getDocumentStylesheets = (doc) => {
+  if (!doc) return {}
 
-  return _.transform(document.styleSheets, (memo, stylesheet) => {
+  return _.transform(doc.styleSheets, (memo, stylesheet) => {
     memo[stylesheet.href] = stylesheet
   }, {})
 }
@@ -121,7 +121,7 @@ const create = ($$, state) => {
 
     const cssContents = getExternalCssContents(href, stylesheet)
 
-    if (!cssContents) {
+    if (cssContents == null) {
       return
     }
 

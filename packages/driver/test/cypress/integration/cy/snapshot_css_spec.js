@@ -1,5 +1,4 @@
 const $ = Cypress.$.bind(Cypress)
-const $Snapshots = require('../../../../src/cy/snapshots')
 const $SnapshotsCss = require('../../../../src/cy/snapshots_css')
 
 const normalizeStyles = (styles) => {
@@ -19,80 +18,120 @@ const addStyles = (styles, to) => {
 }
 
 describe('driver/src/cy/snapshots_css', () => {
-  let setup
+  let snapshotCss
 
   beforeEach(() => {
-    setup = () => {
-      const snapshots = $Snapshots.create(cy.$$, cy.state)
-      const snapshotCss = $SnapshotsCss.create(cy.$$, cy.state)
-      const snapshot = snapshots.createSnapshot()
+    snapshotCss = $SnapshotsCss.create(cy.$$, cy.state)
 
-      return { snapshot, snapshotCss }
-    }
-
+    cy.viewport(400, 600)
     cy.visit('/fixtures/generic.html').then(() => {
       return Cypress.Promise.all([
         addStyles('<link rel="stylesheet" href="/fixtures/generic_styles.css" />', 'head'),
         addStyles('<style>p { color: blue; }</style>', 'head'),
         addStyles('<link media="screen" rel="stylesheet" href="http://localhost:3501/fixtures/generic_styles.css" />', 'head'),
-        addStyles('<link media="print" rel="stylesheet" href="/fixtures/generic_styles.css" />', 'head'),
-        addStyles('<link media="all" rel="stylesheet" href="/fixtures/generic_styles.css" />', 'body'),
-        addStyles('<link rel="stylesheet" href="/fixtures/generic_styles_2.css" />', 'body'),
+        addStyles('<link media="print" rel="stylesheet" href="/fixtures/generic_styles_print.css" />', 'head'),
+        addStyles('<link media="all" rel="stylesheet" href="/fixtures/generic_styles_2.css" />', 'body'),
+        addStyles('<link rel="stylesheet" href="/fixtures/generic_styles_3.css" />', 'body'),
       ])
     })
   })
 
   context('.getStyleIds', () => {
     it('returns IDs for cached CSS contents', () => {
-      const { snapshot, snapshotCss } = setup()
-      const { headStyleIds, bodyStyleIds } = snapshotCss.getStyleIds(snapshot)
+      const { headStyleIds, bodyStyleIds } = snapshotCss.getStyleIds()
+      const another = snapshotCss.getStyleIds()
 
+      expect(headStyleIds).to.have.length(3)
       expect(headStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
-      expect(bodyStyleIds).to.eql([{ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' }, { hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' }])
+
+      expect(bodyStyleIds).to.have.length(2)
+      expect(bodyStyleIds).to.eql([{ hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' }, { hrefId: 'http://localhost:3500/fixtures/generic_styles_3.css' }])
       // IDs for 2 of the same stylesheets should have referential equality
-      expect(headStyleIds[0]).to.equal(bodyStyleIds[0])
+      expect(headStyleIds[0]).to.equal(another.headStyleIds[0])
     })
 
     it('returns strings for inline stylesheets', () => {
-      const { snapshot, snapshotCss } = setup()
-      const { headStyleIds } = snapshotCss.getStyleIds(snapshot)
+      const { headStyleIds } = snapshotCss.getStyleIds()
 
       expect(headStyleIds[1]).to.equal('p { color: blue; }')
     })
 
     it('returns { href } object for cross-origin stylesheets', () => {
-      const { snapshot, snapshotCss } = setup()
-      const { headStyleIds } = snapshotCss.getStyleIds(snapshot)
+      const { headStyleIds } = snapshotCss.getStyleIds()
 
       expect(headStyleIds[2]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles.css' })
     })
 
     it('works for media-less stylesheets', () => {
-      const { snapshot, snapshotCss } = setup()
-      const { headStyleIds } = snapshotCss.getStyleIds(snapshot)
+      const { headStyleIds } = snapshotCss.getStyleIds()
 
       expect(headStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
     })
 
     it('works for media=screen stylesheets', () => {
-      const { snapshot, snapshotCss } = setup()
-      const { headStyleIds } = snapshotCss.getStyleIds(snapshot)
+      const { headStyleIds } = snapshotCss.getStyleIds()
 
       expect(headStyleIds[2]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles.css' })
     })
 
     it('works for media=all stylesheets', () => {
-      const { snapshot, snapshotCss } = setup()
-      const { bodyStyleIds } = snapshotCss.getStyleIds(snapshot)
+      const { bodyStyleIds } = snapshotCss.getStyleIds()
 
-      expect(bodyStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
+      expect(bodyStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' })
     })
 
     it('ignores other media stylesheets', () => {
-      const { snapshot, snapshotCss } = setup()
-      const { headStyleIds } = snapshotCss.getStyleIds(snapshot)
+      const { headStyleIds } = snapshotCss.getStyleIds()
 
       expect(headStyleIds).to.have.length(3)
+    })
+
+    it('returns new id if css has been modified', () => {
+      const idsBefore = snapshotCss.getStyleIds()
+
+      cy.state('document').styleSheets[0].insertRule('.qux { color: orange; }')
+      snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
+      const idsAfter = snapshotCss.getStyleIds()
+
+      expect(idsBefore.headStyleIds).to.have.length(3)
+      expect(idsAfter.headStyleIds).to.have.length(3)
+      expect(idsAfter.headStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
+      // same href, but id should be referentially NOT equal
+      expect(idsBefore.headStyleIds[0]).not.to.equal(idsAfter.headStyleIds[0])
+    })
+
+    it('returns same id after css has been modified until a new window', () => {
+
+      cy.state('document').styleSheets[0].insertRule('.qux { color: orange; }')
+      snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
+      const ids1 = snapshotCss.getStyleIds()
+      const ids2 = snapshotCss.getStyleIds()
+      const ids3 = snapshotCss.getStyleIds()
+
+      expect(ids1.headStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
+      expect(ids1.headStyleIds[0]).to.equal(ids2.headStyleIds[0])
+      expect(ids2.headStyleIds[0]).to.equal(ids3.headStyleIds[0])
+
+      cy.state('document').styleSheets[0].deleteRule(0) // need to change contents or they will map to same id
+      snapshotCss.onBeforeWindowLoad()
+      const ids4 = snapshotCss.getStyleIds()
+
+      expect(ids4.headStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
+      expect(ids3.headStyleIds[0]).not.to.equal(ids4.headStyleIds[0])
+    })
+
+    it('returns same id if css has been modified but yields same contents', () => {
+      const ids1 = snapshotCss.getStyleIds()
+
+      cy.state('document').styleSheets[0].insertRule('.qux { color: orange; }')
+      snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
+      cy.state('document').styleSheets[0].deleteRule(0)
+      snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
+
+      const ids2 = snapshotCss.getStyleIds()
+
+      expect(ids2.headStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
+      expect(ids1.headStyleIds[0]).to.equal(ids2.headStyleIds[0])
     })
   })
 
@@ -101,8 +140,7 @@ describe('driver/src/cy/snapshots_css', () => {
 
     beforeEach(() => {
       getStyles = () => {
-        const { snapshot, snapshotCss } = setup()
-        const { headStyleIds, bodyStyleIds } = snapshotCss.getStyleIds(snapshot)
+        const { headStyleIds, bodyStyleIds } = snapshotCss.getStyleIds()
         const headStyles = snapshotCss.getStylesByIds(headStyleIds)
         const bodyStyles = snapshotCss.getStylesByIds(bodyStyleIds)
 
@@ -115,8 +153,8 @@ describe('driver/src/cy/snapshots_css', () => {
 
       expect(headStyles[0]).to.equal('.foo { color: green; }')
       expect(headStyles[1]).to.equal('p { color: blue; }')
-      expect(bodyStyles[0]).to.eql('.foo { color: green; }')
-      expect(bodyStyles[1]).to.eql('.bar { color: red; }')
+      expect(bodyStyles[0]).to.eql('.bar { color: red; }')
+      expect(bodyStyles[1]).to.eql('.baz { color: purple; }')
     })
 
     it('returns { href } object for cross-origin stylesheets', () => {
@@ -125,7 +163,7 @@ describe('driver/src/cy/snapshots_css', () => {
       expect(headStyles[2]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles.css' })
     })
 
-    it('handles rules injected by JavaScript', () => {
+    it('includes rules injected by JavaScript', () => {
       const styleEl = document.createElement('style')
 
       $(styleEl).appendTo(cy.$$('head'))
@@ -151,12 +189,12 @@ describe('driver/src/cy/snapshots_css', () => {
 
       const { headStyles } = getStyles()
 
-      expect(headStyles[3].replace(/\s+/gm, '')).to.include(`
+      expect(normalizeStyles(headStyles[3])).to.include(normalizeStyles(`
         @font-face {
           font-family: "Some Font";
           src: url('http://localhost:3500/fonts/some-font.eot?#iefix') format("embedded-opentype"), url('http://localhost:3500/fonts/some-font.woff2') format("woff2"), url('http://localhost:3500/fonts/some-font.woff') format("woff"), url('http://localhost:3500/fonts/some-font.ttf') format("truetype"), url('http://localhost:3500/fonts/some-font.svg#glyphicons_halflingsregular') format("svg");
         }
-      `.replace(/\s+/gm, ''))
+      `))
     })
 
     it('replaces CSS paths of local stylesheets with absolute paths', () => {
