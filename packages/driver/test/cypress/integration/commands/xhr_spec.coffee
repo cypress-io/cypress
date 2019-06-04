@@ -188,7 +188,7 @@ describe "src/cy/commands/xhr", ->
 
         cy
           .server()
-          .route({url: /timeout/}).as("getTimeout")
+          .route({url: /timeout/}).as("get.timeout")
           .window().then (win) ->
             xhr = new win.XMLHttpRequest
             xhr.open("GET", "/timeout?ms=100")
@@ -198,7 +198,7 @@ describe "src/cy/commands/xhr", ->
             xhr.onload = ->
               onloaded = true
             null
-          .wait("@getTimeout").then (xhr) ->
+          .wait("@get.timeout").then (xhr) ->
             expect(onloaded).to.be.true
             expect(onreadystatechanged).to.be.true
             expect(xhr.status).to.eq(200)
