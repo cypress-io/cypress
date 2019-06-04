@@ -9,7 +9,7 @@ it "t1a", ->
 ## these 3 should be skipped
 describe "s1a", ->
   beforeEach ->
-    cy.get(".does-not-exist", {timeout: 100})
+    cy.get(".does-not-exist", {timeout: 500})
 
   it "t2a", ->
   it "t3a", ->
