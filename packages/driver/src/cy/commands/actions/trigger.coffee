@@ -53,10 +53,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { eventName }
         })
 
-      if options.$el.length > 1
+      numElements = $utils.getNumElements(options.$el)
+      if numElements > 1
         $utils.throwErrByPath("trigger.multiple_elements", {
           onFail: options._log
-          args: { num: options.$el.length }
+          args: { num: numElements }
         })
 
       dispatchEarly = false

@@ -5,6 +5,7 @@ moment = require("moment")
 Promise = require("bluebird")
 
 $jquery = require("../dom/jquery")
+$window = require('../dom/window.js')
 $Location = require("./location")
 $errorMessages = require("./error_messages")
 
@@ -363,4 +364,9 @@ module.exports = {
           values
 
     run(0)
+  
+  getNumElements: (subject) ->
+    if !subject then return 0
+    if $window.isWindow(subject) then return 1
+    return subject.length
 }
