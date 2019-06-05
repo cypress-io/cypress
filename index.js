@@ -72,6 +72,7 @@ const preprocessor = (options = {}) => {
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)
 
+    const entry = [filePath].concat(options.additionalEntries || [])
     // we're provided a default output path that lives alongside Cypress's
     // app data files so we don't have to worry about where to put the bundled
     // file on disk
@@ -79,7 +80,7 @@ const preprocessor = (options = {}) => {
 
     // we need to set entry and output
     webpackOptions = Object.assign(webpackOptions, {
-      entry: filePath,
+      entry,
       output: {
         path: path.dirname(outputPath),
         filename: path.basename(outputPath),

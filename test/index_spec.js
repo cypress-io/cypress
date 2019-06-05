@@ -98,7 +98,19 @@ describe('webpack preprocessor', function () {
 
       it('specifies the entry file', function () {
         return this.run().then(() => {
-          expect(webpack.lastCall.args[0].entry).to.equal(this.file.filePath)
+          expect(webpack.lastCall.args[0].entry).to.eql([this.file.filePath])
+        })
+      })
+
+      it('includes additional entry files', function () {
+        return this.run({
+          additionalEntries: ['entry-1.js', 'entry-2.js'],
+        }).then(() => {
+          expect(webpack.lastCall.args[0].entry).to.eql([
+            this.file.filePath,
+            'entry-1.js',
+            'entry-2.js',
+          ])
         })
       })
 
