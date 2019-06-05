@@ -18,7 +18,7 @@ script:
   - npm run lint
   - npm run transpile
   # you can simply run the tests
-  - npm test
+  - npm test -- --record false
   # you can record the tests on Cypress Dashboard
   # - npm test -- --record
   # and you can run the tests with Percy.io visual testing included
