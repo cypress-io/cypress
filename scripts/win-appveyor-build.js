@@ -20,8 +20,9 @@ shell.set('-e') // any error is fatal
 
 const isRightBranch = () => {
   const branch = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH || process.env.APPVEYOR_REPO_BRANCH
+  const shouldForceBinaryBuild = (process.env.APPVEYOR_REPO_COMMIT_MESSAGE || '').includes('[build binary]')
 
-  return branch === 'develop'
+  return branch === 'develop' || shouldForceBinaryBuild
 }
 
 const isForkedPullRequest = () => {
