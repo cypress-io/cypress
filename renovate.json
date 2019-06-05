@@ -6,10 +6,12 @@
   "major": {
     "automerge": false
   },
-  "prConcurrentLimit": 10,
-  "prHourlyLimit": 10,
+  "prConcurrentLimit": 1,
+  "prHourlyLimit": 1,
   "schedule": [
-    "after 10pm and before 5am on every weekday",
     "every weekend"
-  ]
+  ],
+  "updateNotScheduled": false,
+  "timezone": "America/New_York",
+  "masterIssue": true
 }
