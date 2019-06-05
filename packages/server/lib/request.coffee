@@ -441,11 +441,6 @@ module.exports = (options = {}) ->
   defaults = {
     timeout: options.timeout
     agent: agent
-    ## send keep-alive with requests since Chrome won't send it in proxy mode
-    ## https://github.com/cypress-io/cypress/pull/3531#issuecomment-476269041
-    headers: {
-      "Connection": "keep-alive"
-    }
     proxy: null ## upstream proxying is handled by CombinedAgent
   }
 
