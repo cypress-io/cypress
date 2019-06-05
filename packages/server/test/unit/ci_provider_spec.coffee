@@ -154,6 +154,13 @@ describe "lib/util/ci_provider", ->
       sha: "bitbucketCommit"
       branch: "gitFoundBranch"
     })
+    expectsCommitDefaults({
+      sha: undefined
+      branch: ""
+    }, {
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
 
   it "buildkite", ->
     resetEnv = mockedEnv({
@@ -202,7 +209,14 @@ describe "lib/util/ci_provider", ->
     # in this test only interested in branch and sha for example
     expectsCommitDefaults({
       sha: null,
-      branch: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "buildKiteCommit",
+      branch: "gitFoundBranch"
+    })
+    expectsCommitDefaults({
+      sha: undefined,
+      branch: ""
     }, {
       sha: "buildKiteCommit",
       branch: "buildKiteBranch"
