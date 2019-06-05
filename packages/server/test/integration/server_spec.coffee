@@ -11,7 +11,7 @@ config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 
-s3StaticHtmlUrl = "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/cypress-project-internal-test-assets/index.html"
+s3StaticHtmlUrl = "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html"
 
 describe "Server", ->
   beforeEach ->
@@ -1073,7 +1073,7 @@ describe "Server", ->
           #   console.log "ON REQUEST!!!!!!!!!!!!!!!!!!!!!!"
 
           #   nock("https://s3.amazonaws.com")
-          #   .get("/internal-test-runner-assets.cypress.io/cypress-project-internal-test-assets/index.html")
+          #   .get("/internal-test-runner-assets.cypress.io/index.html")
           #   .reply 200, "<html><head></head><body>jsonplaceholder</body></html>", {
           #     "Content-Type": "text/html"
           #   }
@@ -1147,7 +1147,7 @@ describe "Server", ->
           .then =>
             # @server.onNextRequest (req, res) ->
             #   nock("https://s3.amazonaws.com")
-            #   .get("/internal-test-runner-assets.cypress.io/cypress-project-internal-test-assets/index.html")
+            #   .get("/internal-test-runner-assets.cypress.io/index.html")
             #   .reply 200, "<html><head></head><body>jsonplaceholder</body></html>", {
             #     "Content-Type": "text/html"
             #   }
