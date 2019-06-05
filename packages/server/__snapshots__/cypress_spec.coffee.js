@@ -68,6 +68,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipPro
 - drone
 - gitlab
+- googleCloud
 - jenkins
 - semaphore
 - shippable
@@ -98,6 +99,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipPro
 - drone
 - gitlab
+- googleCloud
 - jenkins
 - semaphore
 - shippable
@@ -129,6 +131,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipPro
 - drone
 - gitlab
+- googleCloud
 - jenkins
 - semaphore
 - shippable
