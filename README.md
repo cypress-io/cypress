@@ -48,6 +48,7 @@ Pass in options as the second argument to `webpack`:
 
 ```javascript
 const webpack = require('@cypress/webpack-preprocessor')
+
 module.exports = (on) => {
   const options = {
     // send in the options from your webpack.config.js, so it works the same
@@ -92,6 +93,29 @@ Source maps are always enabled unless explicitly disabled by specifying `devtool
 Object of options for watching. See [webpack's docs](https://webpack.github.io/docs/node.js-api.html#compiler).
 
 **Default**: `{}`
+
+### additionalEntries
+
+An array of file path strings for additional entries to be included in the bundle.
+
+By necessity, this preprocessor sets the entry point for webpack as the spec file or support file. The `additionalEntries` option allows you to specify more entry points in order to utilize webpack's [multi-main entry](https://webpack.js.org/concepts/entry-points/#single-entry-shorthand-syntax). This allows runtime dependency resolution.
+
+**Default**: `[]`
+
+**Example**:
+
+```javascript
+const webpack = require('@cypress/webpack-preprocessor')
+
+module.exports = (on) => {
+  const options = {
+    webpackOptions: require('../../webpack.config'),
+    additionalEntries: ['./app/some-module.js'],
+  }
+
+  on('file:preprocessor', webpack(options))
+}
+```
 
 ## Modifying default options
 
