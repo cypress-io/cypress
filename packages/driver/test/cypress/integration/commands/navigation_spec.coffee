@@ -605,11 +605,23 @@ describe "src/cy/commands/navigation", ->
       })
       cy.contains('"user-agent":"something special"')
 
-    it "completes immediately on localhost", ->
-      cy.visit({
-        url: '/dump-method'
-        timeout: 50
-      })
+    ## https://github.com/cypress-io/cypress/issues/4313
+    it "normally finishes in less than 500ms on localhost with connection: close", ->
+      _.times 100, ->
+        t = undefined
+
+        cy.wrap({
+          startTimer: ->
+            t = setTimeout ->
+              throw new Error('took too long')
+            , 500
+        }, { log: false })
+        .invoke('startTimer')
+        .visit('/close-connection')
+        .then ->
+          clearTimeout(t)
+
+      cy.wrap ->
 
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
