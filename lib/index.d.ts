@@ -9,6 +9,16 @@ interface ReactModule {
   source: string
 }
 
+/**
+ * The `type` property from the transpiled JSX object.
+ * @example
+ * const { type } = React.createElement('div', null, 'Hello')
+ * const { type } = <div>Hello</div>
+ */
+interface JSX extends Function {
+  displayName: string
+}
+
 declare namespace Cypress {
   interface Cypress {
     stylesCache: any

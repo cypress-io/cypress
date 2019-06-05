@@ -1,5 +1,7 @@
 /// <reference path="./index.d.ts" />
 
+import getDisplayName from './getDisplayName';
+
 // having weak reference to styles prevents garbage collection
 // and "losing" styles when the next test starts
 const stylesCache = new Map()
@@ -106,7 +108,7 @@ Cypress.Commands.add('copyComponentStyles', component => {
  **/
 export const mount = (jsx, alias) => {
   // Get the display name property via the component constructor
-  const displayname = alias || jsx.type.prototype.constructor.name
+  const displayname = getDisplayName(jsx.type, alias)
 
   let cmd
 
@@ -165,7 +167,8 @@ Cypress.Commands.overwrite('get', (originalFn, selector, options) => {
       }
     case 'function':
       // If attempting to use the component name without JSX (testing in .js/.ts files)
-      const displayname = selector.prototype.constructor.name
+      // const displayname = selector.prototype.constructor.name
+      const displayname = getDisplayName(selector);
       return originalFn(`@${displayname}`, options)
     default:
       return originalFn(selector, options)
