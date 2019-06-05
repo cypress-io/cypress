@@ -37,7 +37,7 @@
     "@cypress/webpack-preprocessor": "1.1.3",
     "@percy/cypress": "1.0.9",
     "@types/node": "9.6.47",
-    "axios": "0.18.0",
+    "axios": "0.18.1",
     "babel-loader": "8.0.5",
     "css-loader": "2.1.1",
     "cypress": "3.3.1",
