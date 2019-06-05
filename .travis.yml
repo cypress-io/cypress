@@ -17,7 +17,13 @@ node_js:
 script:
   - npm run lint
   - npm run transpile
-  - npm test -- --record
+  # you can simply run the tests
+  - npm test
+  # you can record the tests on Cypress Dashboard
+  # - npm test -- --record
+  # and you can run the tests with Percy.io visual testing included
+  # - npm run percy:test -- --record
+
 after_success:
   - npm run semantic-release
 branches:
