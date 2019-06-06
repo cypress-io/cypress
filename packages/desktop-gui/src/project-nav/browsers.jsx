@@ -73,7 +73,24 @@ export default class Browsers extends Component {
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
+        {this._warnBadPolicy(browser)}
         {this._info(browser)}
+      </span>
+    )
+  }
+
+  _warnBadPolicy (browser) {
+    if (!browser.warnBadPolicy) return null
+
+    return (
+      <span className='browser-warning'>
+        <Tooltip
+          title='Cypress detected policy settings on your system that may interfere with using this browser.'
+          placement='bottom'
+          className='browser-info-tooltip cy-tooltip'
+        >
+          <i className='fa fa-exclamation-triangle' />
+        </Tooltip>
       </span>
     )
   }

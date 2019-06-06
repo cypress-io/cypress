@@ -201,12 +201,17 @@ handleEvent = (options, bus, event, id, type, arg) ->
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
-      chromePolicyCheck.run(onWarning)
-
       browsers.getAllBrowsersWith(options.browser)
       .then (browsers = []) ->
         options.config = _.assign(options.config, { browsers })
       .then ->
+        chromePolicyCheck.run (err) ->
+          options.config.browsers.forEach (browser) ->
+            if browser.family == 'chrome'
+              browser.warnBadPolicy = true
+
+          onWarning(err)
+
         openProject.create(arg, options, {
           onFocusTests: onFocusTests
           onSpecChanged: onSpecChanged

@@ -9,6 +9,7 @@ export default class Browser {
   @observable majorVersion
   @observable info
   @observable custom
+  @observable warnBadPolicy
   @observable isChosen = false
 
   constructor (browser) {
@@ -20,6 +21,7 @@ export default class Browser {
     this.majorVersion = browser.majorVersion
     this.info = browser.info
     this.custom = browser.custom
+    this.warnBadPolicy = browser.warnBadPolicy
   }
 
   @computed get icon () {

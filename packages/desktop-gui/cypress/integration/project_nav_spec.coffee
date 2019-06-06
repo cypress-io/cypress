@@ -232,6 +232,28 @@ describe "Project Nav", ->
         cy.get(".browsers-list")
           .find(".dropdown-toggle").should("not.be.visible")
 
+    describe "browser has a warning attached", ->
+      beforeEach ->
+        @browsers = [{
+          "name": "chromium",
+          "displayName": "Chromium",
+          "family": "chrome",
+          "version": "49.0.2609.0",
+          "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
+          "majorVersion": "49",
+          "warnBadPolicy": true
+        }]
+
+        @config.browsers = @browsers
+        @openProject.resolve(@config)
+
+      it "shows warning icon with tooltip", ->
+        cy.get(".browsers .fa-exclamation-triangle")
+          .then ($el) ->
+            $el[0].dispatchEvent(new Event("mouseover", {bubbles: true}))
+        cy.get(".cy-tooltip")
+          .should("contain", "Cypress detected policy settings on your system that may interfere with using this browser.")
+
     describe "custom browser available", ->
       beforeEach ->
         @config.browsers.push({
