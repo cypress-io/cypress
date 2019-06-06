@@ -30,17 +30,17 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
   { inspect, flag } = chaiUtils
 
   assertDom = (ctx, method, args...) ->
-    if not ($dom.isDom(ctx._obj) or $dom.isJquery(ctx._obj))
+    if not $dom.isDom(ctx._obj)
       try
         ## always fail the assertion
         ## if we aren't a DOM like object
-        ## depends on "negate" flag
-        ctx.assert(!!ctx.__flags.negate, args...)
+        ctx.assert(false, args...)
       catch err
         callbacks.onInvalid(method, ctx._obj)
 
   assert = (ctx, method, bool, args...) ->
     assertDom(ctx, method, args...)
+
     try
       # ## reset obj to wrapped
       orig = ctx._obj
@@ -57,7 +57,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
 
   assertParial = (ctx, method, actual, expected, message, notMessage, args...) ->
-    if ctx.__flags.includes or ctx.__flags.contains
+    if ctx.__flags.contains
       return assert(
         ctx
         method
@@ -95,13 +95,12 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
     )
 
   chai.Assertion.addMethod "id", (id) ->
-    assertParial(
+    assert(
       @,
       "id",
-      wrap(@).prop("id"),
-      id,
-      'id #{exp}',
-      'id #{exp}',
+      wrap(@).prop("id") is id,
+      'expected #{this} to have id #{exp}',
+      'expected #{this} not to have id #{exp}',
       id
     )
 

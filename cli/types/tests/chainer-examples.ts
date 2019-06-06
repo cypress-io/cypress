@@ -124,6 +124,13 @@ cy.wrap('foobar').should('have.string', 'bar')
 
 cy.wrap('foobar').should('include', 'foo')
 
+cy.wrap('foo').should('contain.value')
+cy.wrap('foo').should('contain.text')
+cy.wrap('foo').should('contain.html')
+cy.wrap('foo').should('not.contain.value')
+cy.wrap('foo').should('not.contain.text')
+cy.wrap('foo').should('not.contain.html')
+
 cy.wrap([1, 2, 3]).should('include.members', [1, 2])
 ;
 () => {

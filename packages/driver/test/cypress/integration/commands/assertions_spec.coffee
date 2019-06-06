@@ -975,17 +975,6 @@ describe "src/cy/commands/assertions", ->
 
         expect([]).to.have.id("foo")
 
-      it "partial match", ->
-        cy.get('#foo')
-          .should('contain.id', 'fo')
-          .should('not.contain.id', 'fizz')
-          .should('contain.id', 'o')
-        cy.get('#foo').should('include.id', 'oo')
-        cy.get('#foo').should('not.contain.id', 'oof')
-        cy.get('#foo').should('not.contain.id', 'oof').should ($el) ->
-          expect($el).to.contain.id('oo')
-
-
     context "html", ->
       beforeEach ->
         @$div = $("<div><button>button</button></div>")
@@ -1031,12 +1020,9 @@ describe "src/cy/commands/assertions", ->
         expect(null).to.have.html("foo")
 
       it "partial match", ->
-        expect(@$div).to.have.include.html('button')
-        expect(@$div).to.include.html('button')
+        expect(@$div).to.have.contain.html('button')
         expect(@$div).to.contain.html('button')
         expect(@$div).to.not.contain.html('span')
-        expect(@$div).to.not.include.html('span')
-        cy.get('button').should('include.html', 'button')
         cy.get('button').should('contain.html', 'button')
 
     context "text", ->
@@ -1073,9 +1059,8 @@ describe "src/cy/commands/assertions", ->
       it "partial match", ->
         expect(@$div).to.have.text('foo')
         expect(@$div).to.contain.text('o')
-        expect(@$div).to.include.text('o')
-        cy.get('div').should('include.text', 'iv').should('contain.text', 'd')
-        cy.get('div').should('not.contain.text', 'fizzbuzz').should('include.text', 'Nest')
+        cy.get('div').should('contain.text', 'iv').should('contain.text', 'd')
+        cy.get('div').should('not.contain.text', 'fizzbuzz').should('contain.text', 'Nest')
 
       it "throws when obj is not DOM", (done) ->
         cy.on "fail", (err) =>
@@ -1136,13 +1121,11 @@ describe "src/cy/commands/assertions", ->
 
       it "partial match", ->
         expect(@$input).to.contain.value('oo')
-        expect(@$input).to.include.value('oo')
-        expect(@$input).not.to.contain.value('oof')
-        expect(@$input).to.not.include.value('oof')
+        expect(@$input).to.not.contain.value('oof')
         cy.get('input')
           .invoke('val','foobar')
           .should('contain.value', 'bar')
-          .should('include.value', 'foo')
+          .should('contain.value', 'foo')
         cy.wrap(null).then ->
           cy.$$('<input value="foo1">').prependTo(cy.$$('body'))
           cy.$$('<input value="foo2">').prependTo(cy.$$('body'))
@@ -1241,18 +1224,6 @@ describe "src/cy/commands/assertions", ->
           done()
 
         expect({}).to.be.visible
-
-      it "is not.visible when detached from the DOM", ->
-        el = cy.$$('<div class="detached-on-click">detached on click</div>').on 'click', ->
-          el.remove()
-        .appendTo(cy.$$('body'))
-
-        cy.get('.detached-on-click').click().should('not.be.visible').then ->
-          expect(getLastLog()).to.eq('expected **<div.detached-on-click>** not to be **visible**')
-
-      it "is not.visible when dom query fails", ->
-        cy.get('.non-existent-el').should('not.be.visible').then ->
-          expect(getLastLog()).to.eq('expected **.non-existent-el** not to be **visible**')
 
     context "hidden", ->
       beforeEach ->
@@ -1946,6 +1917,3 @@ describe "src/cy/commands/assertions", ->
           done()
 
         expect({}).to.have.css("foo")
-
-
-getLastLog = -> cy.state('ctx').logs.slice(-1)[0].get('message')
