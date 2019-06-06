@@ -789,7 +789,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
        > #{arg1.join('\n > ')}
 
-      For more information, see https://on.cypress.io/error-messages#extension-policy-settings
+      For more information, see https://on.cypress.io/error-messages#bad-policy-settings
       """
 
 get = (type, arg1, arg2) ->
