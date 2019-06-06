@@ -1,4 +1,4 @@
-$ = Cypress.$.bind(Cypress)
+$ = Cypress.$
 _ = Cypress._
 
 helpers = require("../../support/helpers")
@@ -754,6 +754,11 @@ describe "src/cy/commands/assertions", ->
       it "calls super when not DOM element", ->
         cy.noop("foobar").should("contain", "oob")
 
+      ## https://github.com/cypress-io/cypress/issues/3549
+      it "is true when DOM el and not jQuery el contains text", ->
+        cy.get("div").then ($el) ->
+          cy.wrap($el[1]).should("contain", "Nested Find")
+
       it "escapes quotes", ->
         $span = "<span id=\"escape-quotes\">shouldn't and can\"t</span>"
 
@@ -805,58 +810,13 @@ describe "src/cy/commands/assertions", ->
           .get("body")
           .get("button").should("be.visible")
 
-      describe "doesn't pass not.visible for non-dom", ->
-        beforeEach ->
-          Cypress.config('defaultCommandTimeout', 50)
-
-        it "undefined", (done) ->
-          spy = cy.spy (err) ->
-            expect(err.message).to.contain('attempted to make')
-            done()
-          .as 'onFail'
-          cy.on 'fail', spy
-          cy.wrap().should('not.be.visible')
-
-        it 'null', (done) ->
-          spy = cy.spy (err) ->
-            expect(err.message).to.contain('attempted to make')
-            done()
-          .as 'onFail'
-          cy.on 'fail', spy
-          cy.wrap(null).should('not.be.visible')
-
-        it '[]', (done) ->
-          spy = cy.spy (err) ->
-            expect(err.message).to.contain('attempted to make')
-            done()
-          .as 'onFail'
-          cy.on 'fail', spy
-          cy.wrap([]).should('not.be.visible')
-
-        it '{}', (done) ->
-          spy = cy.spy (err) ->
-            expect(err.message).to.contain('attempted to make')
-            done()
-          .as 'onFail'
-          cy.on 'fail', spy
-          cy.wrap({}).should('not.be.visible')
-
-        it 'jquery wrapping els and selectors, not changing subject', ->
-          cy.wrap(cy.$$('<div></div>')).should('not.be.visible')
-          cy.wrap(cy.$$('<div></div>')).should('not.exist')
-          cy.wrap(cy.$$('<div></div>')).should('not.be.visible').should('not.exist')
-          cy.wrap(cy.$$('.non-existent')).should('not.be.visible')
-          cy.wrap(cy.$$('.non-existent')).should('not.exist')
-          cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
-
-        ## if this test breaks, it's ok. This behavior is no-man's-land
-        it 'jquery wrapping nonsense', ->
-          cy.wrap(cy.$$(42)).should('not.be.visible')
-          cy.wrap(cy.$$([])).should('not.exist')
-          cy.wrap(cy.$$([])).should('not.be.visible').should('not.exist')
-          cy.wrap(cy.$$({})).should('not.be.visible').should('not.exist')
-          cy.wrap(cy.$$(null)).should('not.be.visible').should('not.exist')
-          cy.wrap(cy.$$(undefined)).should('not.be.visible').should('not.exist')
+      it 'jquery wrapping els and selectors, not changing subject', ->
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible')
+        cy.wrap(cy.$$('<div></div>')).should('not.exist')
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible').should('exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.exist')
+        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
 
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
@@ -1647,30 +1607,25 @@ describe "src/cy/commands/assertions", ->
         cy.get('div').should('not.have.focus')
 
       it "throws when obj is not DOM", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(1)
-            expect(@logs[0].get("error").message).to.contain(
-              "expected {} not to be 'focused'"
-            )
-            expect(err.message).to.include("> focus")
-            expect(err.message).to.include("> {}")
+        cy.on "fail", (err) =>
+          expect(@logs.length).to.eq(1)
+          expect(@logs[0].get("error").message).to.contain(
+            "expected {} to be 'focused'"
+          )
+          expect(err.message).to.include("> focus")
+          expect(err.message).to.include("> {}")
 
-            done()
+          done()
 
-          expect({}).to.not.have.focus
+        expect({}).to.have.focus
 
-      it "throws when obj is not DOM 2", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(1)
-            expect(@logs[0].get("error").message).to.contain(
-              "expected {} to be 'focused'"
-            )
-            expect(err.message).to.include("> focus")
-            expect(err.message).to.include("> {}")
-
-            done()
-
-          expect({}).to.have.focus
+      it "calls into custom focus pseudos", ->
+        cy.$$('button:first').focus()
+        stub = cy.spy($.expr.pseudos, 'focus').as('focus')
+        expect(cy.$$('button:first')).to.have.focus
+        cy.get('button:first').should('have.focus')
+          .then ->
+            expect(stub).to.be.calledTwice
 
     context "match", ->
       beforeEach ->

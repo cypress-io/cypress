@@ -41,6 +41,7 @@ configKeys = toWords """
   port                            supportFolder
   reporter                        videosFolder
   reporterOptions
+  ignoreTestFiles
   testFiles                       defaultCommandTimeout
   trashAssetsBeforeRuns           execTimeout
   blacklistHosts                  pageLoadTimeout
@@ -230,8 +231,10 @@ module.exports = {
     .value()
 
     if url = config.baseUrl
-      ## always strip trailing slashes
-      config.baseUrl = _.trimEnd(url, "/")
+      ## replace multiple slashes at the end of string to single slash
+      ## so http://localhost/// will be http://localhost/
+      ## https://regexr.com/48rvt
+      config.baseUrl = url.replace(/\/\/+$/, "/")
 
     _.defaults(config, defaults)
 
@@ -285,7 +288,7 @@ module.exports = {
 
     setResolvedOn = (resolvedObj, obj) ->
       _.each obj, (val, key) ->
-        if _.isObject(val)
+        if _.isObject(val) && !_.isArray(val)
           ## recurse setting overrides
           ## inside of this nested objected
           setResolvedOn(resolvedObj[key], val)

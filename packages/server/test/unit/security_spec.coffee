@@ -38,6 +38,7 @@ original = """
       if (self !== top) run()
       if (self!==top) run()
       if (self === top) return
+      if (top.location!=self.location&&(top.location.href=self.location.href)) run()
       if (top.location != self.location) run()
       if (top.location != location) run()
       if (self.location != top.location) run()
@@ -96,6 +97,7 @@ expected = """
       if (self !== self) run()
       if (self!==self) run()
       if (self === self) return
+      if (self.location!=self.location&&(self.location.href=self.location.href)) run()
       if (self.location != self.location) run()
       if (self.location != location) run()
       if (self.location != self.location) run()
@@ -199,8 +201,8 @@ describe "lib/util/security", ->
         emberProd: "#{cdnUrl}/ember.js/2.18.2/ember.prod.js"
         reactDev: "#{cdnUrl}/react/16.2.0/umd/react.development.js"
         reactProd: "#{cdnUrl}/react/16.2.0/umd/react.production.min.js"
-        vendorBundle: "https://s3.amazonaws.com/assets.cypress.io/vendor.bundle.js"
-        hugeApp: "https://s3.amazonaws.com/assets.cypress.io/huge_app.js"
+        vendorBundle: "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js"
+        hugeApp: "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js"
       })
       .value()
 

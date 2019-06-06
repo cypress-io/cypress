@@ -99,7 +99,7 @@ class SelectorPlayground extends Component {
             </button>
           </Tooltip>
         </div>
-        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank" rel="noopener noreferrer">
+        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank">
           <i className='fa fa-question-circle'></i>{' '}
           Learn more
         </a>

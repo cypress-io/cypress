@@ -633,7 +633,16 @@ const getElements = ($el) => {
 const getContainsSelector = (text, filter = '') => {
   const escapedText = $utils.escapeQuotes(text)
 
-  return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+  // they may have written the filter as
+  // comma separated dom els, so we want to search all
+  // https://github.com/cypress-io/cypress/issues/2407
+  const filters = filter.trim().split(',')
+
+  const selectors = _.map(filters, (filter) => {
+    return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+  })
+
+  return selectors.join()
 }
 
 const priorityElement = 'input[type=\'submit\'], button, a, label'

@@ -37,6 +37,23 @@ describe('driver/src/cy/timers', () => {
     })
   })
 
+  it('setTimeout can pass multiple parameters to the target function', () => {
+    cy
+    .log('setTimeout should call target with two parameters')
+    .window()
+    .then((win) => {
+      win.foo = null
+      win.setFoo = (bar, baz) => {
+        win.foo = bar + baz
+      }
+
+      win.setTimeout(win.setFoo, 0, 'bar', 'baz')
+
+      cy
+      .window().its('foo').should('eq', 'barbaz')
+    })
+  })
+
   it('setInterval is called through', () => {
     cy
     .log('setInterval should be called')
@@ -70,6 +87,26 @@ describe('driver/src/cy/timers', () => {
       })
       .wait(100)
       .window().its('bar').should('be.null')
+    })
+  })
+
+  it('setInterval can pass multiple parameters to the target function', () => {
+    cy
+    .log('setInterval should call target with two parameters')
+    .window()
+    .then((win) => {
+      win.foo = null
+      win.setFoo = (bar, baz) => {
+        win.foo = bar + baz
+      }
+
+      const id1 = win.setInterval(win.setFoo, 1, 'bar', 'baz')
+
+      cy
+      .window().its('foo').should('eq', 'barbaz')
+      .then(() => {
+        win.clearInterval(id1)
+      })
     })
   })
 
@@ -387,12 +424,17 @@ describe('driver/src/cy/timers', () => {
     .then((win) => {
       const stub1 = cy.stub()
 
-      win.setTimeout(stub1, 200)
+      // we're setting setTimeout to 500ms because
+      // there were times where the driver's webserver
+      // was sending bytes after 200ms (TTFB) that caused
+      // this test to be flaky.
+      win.setTimeout(stub1, 500)
 
+      // force the window to sync reload
       win.location.reload()
 
       cy
-      .wait(400)
+      .wait(800)
       .then(() => {
         expect(stub1).not.to.be.called
       })
