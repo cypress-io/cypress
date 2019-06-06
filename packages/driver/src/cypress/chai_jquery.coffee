@@ -56,7 +56,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       ## send it up with the obj and whether it was negated
       callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
 
-  assertParial = (ctx, method, actual, expected, message, notMessage, args...) ->
+  assertPartial = (ctx, method, actual, expected, message, notMessage, args...) ->
     if ctx.__flags.contains
       return assert(
         ctx
@@ -115,7 +115,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
     actual = wrap(@).html()
 
-    assertParial(
+    assertPartial(
       @,
       "html",
       actual
@@ -137,7 +137,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
     actual = wrap(@).text()
 
-    assertParial(
+    assertPartial(
       @,
       "text",
       actual
@@ -159,7 +159,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
     actual = wrap(@).val()
 
-    assertParial(
+    assertPartial(
       @,
       "value",
       actual

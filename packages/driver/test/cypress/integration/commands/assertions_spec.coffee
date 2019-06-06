@@ -1020,7 +1020,6 @@ describe "src/cy/commands/assertions", ->
         expect(null).to.have.html("foo")
 
       it "partial match", ->
-        expect(@$div).to.have.contain.html('button')
         expect(@$div).to.contain.html('button')
         expect(@$div).to.not.contain.html('span')
         cy.get('button').should('contain.html', 'button')
