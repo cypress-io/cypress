@@ -14,6 +14,7 @@ Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
 ensureUrl   = require("../util/ensure-url")
+chromePolicyCheck = require("../util/chrome_policy_check")
 browsers    = require("../browsers")
 konfig      = require("../konfig")
 
@@ -199,6 +200,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
+
+      chromePolicyCheck.run(onWarning)
 
       browsers.getAllBrowsersWith(options.browser)
       .then (browsers = []) ->
