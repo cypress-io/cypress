@@ -751,6 +751,31 @@ describe "src/cy/commands/request", ->
           }
         })
 
+      it "displays body_circular when body is circular", (done) ->
+        c = {}
+        c.c = c
+
+        cy.request({
+          method: "POST"
+          url: "http://foo.invalid/"
+          body: {
+            c
+          }
+        })
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq """
+          The `body` parameter supplied to cy.request() contained a circular reference.
+
+          `body` can only be a string or an object with no circular references.
+          """
+
+          done()
+
       it "does not include redirects when there were no redirects", (done) ->
         backend = Cypress.backend
         .withArgs("http:request")
