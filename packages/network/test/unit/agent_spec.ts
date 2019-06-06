@@ -1,6 +1,5 @@
 import Bluebird from 'bluebird'
 import chai from 'chai'
-import { EventEmitter } from 'events'
 import http from 'http'
 import https from 'https'
 import net from 'net'
@@ -175,7 +174,8 @@ describe('lib/agent', function() {
           return new Bluebird((resolve) => {
             Io.client(`http://localhost:${HTTP_PORT}`, {
               agent: this.agent,
-              transports: ['websocket']
+              transports: ['websocket'],
+              rejectUnauthorized: false
             }).on('message', resolve)
           })
           .then(msg => {
@@ -191,7 +191,8 @@ describe('lib/agent', function() {
           return new Bluebird((resolve) => {
             Io.client(`https://localhost:${HTTPS_PORT}`, {
               agent: this.agent,
-              transports: ['websocket']
+              transports: ['websocket'],
+              rejectUnauthorized: false
             }).on('message', resolve)
           })
           .then(msg => {
@@ -357,7 +358,8 @@ describe('lib/agent', function() {
           Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
             agent: <any>testCase.agent,
             transports: ['websocket'],
-            timeout: 1
+            timeout: 1,
+            rejectUnauthorized: false
           })
           .on('message', reject)
           .on('connect_error', resolve)

@@ -176,6 +176,7 @@ describe "Web Sockets", ->
           path: @cfg.socketIoRoute
           transports: ["websocket"]
           parser: socketIo.circularParser
+          rejectUnauthorized: false
         })
         @wsClient.on "connect", -> done()
 
@@ -199,6 +200,7 @@ describe "Web Sockets", ->
           path: @cfg.socketIoRoute
           transports: ["websocket"]
           parser: socketIo.circularParser
+          rejectUnauthorized: false
         })
         @wsClient.on "connect", -> done()
 
@@ -223,6 +225,7 @@ describe "Web Sockets", ->
           agent: agent
           path: @cfg.socketIoRoute
           parser: socketIo.circularParser
+          rejectUnauthorized: false
         })
         @wsClient.on "connect", -> done()
 
