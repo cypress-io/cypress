@@ -12,6 +12,7 @@ import $Cypress, { $ } from '@packages/driver'
 const channel = io.connect({
   path: '/__socket.io',
   transports: ['websocket'],
+  parser: io.circularParser,
 })
 
 channel.on('connect', () => {
