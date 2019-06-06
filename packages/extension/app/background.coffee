@@ -2,6 +2,7 @@ map     = require("lodash/map")
 pick    = require("lodash/pick")
 once    = require("lodash/once")
 Promise = require("bluebird")
+{ circularParser } = require("@packages/socket")
 
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
@@ -41,7 +42,11 @@ connect = (host, path, io) ->
 
   ## cannot use required socket here due
   ## to bug in socket io client with browserify
-  client = io.connect(host, {path: path, transports: ["websocket"]})
+  client = io.connect(host, {
+    path: path,
+    transports: ["websocket"]
+    parser: circularParser
+  })
 
   client.on "automation:request", (id, msg, data) ->
     switch msg
