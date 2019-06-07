@@ -31,6 +31,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         animationDistanceThreshold: config("animationDistanceThreshold")
       })
 
+      if $dom.isWindow(options.$el)
+        ## get this into a jquery object
+        options.$el = $dom.wrap(options.$el)
+
+
       ## omit entries we know aren't part of an event, but pass anything
       ## else through so user can specify what the event object needs
       eventOptions = _.omit(options, "log", "$el", "position", "x", "y", "waitForAnimations", "animationDistanceThreshold")
@@ -53,11 +58,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { eventName }
         })
 
-      numElements = $utils.getNumElements(options.$el)
-      if numElements > 1
+      if options.$el.length > 1
         $utils.throwErrByPath("trigger.multiple_elements", {
           onFail: options._log
-          args: { num: numElements }
+          args: { num: options.$el.length }
         })
 
       dispatchEarly = false

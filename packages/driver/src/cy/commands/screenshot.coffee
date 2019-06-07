@@ -311,6 +311,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: config("responseTimeout")
       }
 
+      if isWin = $dom.isWindow(subject)
+        ## get this into a jquery object
+        subject = $dom.wrap(subject)
+
       screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip", "onBeforeScreenshot", "onAfterScreenshot")
       screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
@@ -333,11 +337,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
-      numElements = $utils.getNumElements(subject)
-      if numElements > 1
+      if subject and subject.length > 1
         $utils.throwErrByPath("screenshot.multiple_elements", {
           log: options._log
-          args: { numElements }
+          args: { numElements: subject.length }
         })
 
       if $dom.isElement(subject)

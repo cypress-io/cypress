@@ -40,14 +40,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { node }
         })
 
-      
-      numElements = $utils.getNumElements(options.$el)
-      if numElements > 1
+      if (num = options.$el.length) and num > 1
         return if options.error is false
 
         $utils.throwErrByPath("focus.multiple_elements", {
           onFail: options._log
-          args: { num: numElements }
+          args: { num }
         })
 
       el = options.$el.get(0)
