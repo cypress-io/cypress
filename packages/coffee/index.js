@@ -1,1 +1,1 @@
-module.exports = require("coffee-script")
+module.exports = require('coffeescript')

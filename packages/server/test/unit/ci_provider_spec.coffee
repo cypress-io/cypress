@@ -154,6 +154,13 @@ describe "lib/util/ci_provider", ->
       sha: "bitbucketCommit"
       branch: "gitFoundBranch"
     })
+    expectsCommitDefaults({
+      sha: undefined
+      branch: ""
+    }, {
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
 
   it "buildkite", ->
     resetEnv = mockedEnv({
@@ -202,7 +209,14 @@ describe "lib/util/ci_provider", ->
     # in this test only interested in branch and sha for example
     expectsCommitDefaults({
       sha: null,
-      branch: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "buildKiteCommit",
+      branch: "gitFoundBranch"
+    })
+    expectsCommitDefaults({
+      sha: undefined,
+      branch: ""
     }, {
       sha: "buildKiteCommit",
       branch: "buildKiteBranch"
@@ -404,6 +418,42 @@ describe "lib/util/ci_provider", ->
     }, {clear: true})
 
     expectsName("gitlab")
+
+  it "google cloud", ->
+    resetEnv = mockedEnv({
+      GCP_PROJECT: "123"
+
+      BUILD_ID: "buildId"
+
+      PROJECT_ID: "projectId"
+
+      COMMIT_SHA: "commitSha"
+      BRANCH_NAME: "branchName"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+    expectsCiParams({
+      buildId: "buildId"
+      projectId: "projectId"
+      commitSha: "commitSha"
+      branchName: "branchName"
+    })
+    expectsCommitParams({
+      sha: "commitSha"
+      branch: "branchName"
+    })
+
+    resetEnv = mockedEnv({
+      GCLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+
+    resetEnv = mockedEnv({
+      GOOGLE_CLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
 
   it "jenkins", ->
     resetEnv = mockedEnv({
