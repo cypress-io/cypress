@@ -37,7 +37,7 @@ describe "lib/util/chrome_policy_check", ->
            > HKEY_LOCAL_MACHINE\\Software\\Policies\\Google\\Chrome\\ProxyServer
            > HKEY_CURRENT_USER\\Software\\Policies\\Google\\Chromium\\ExtensionSettings
 
-          For more information, see https://on.cypress.io/error-messages#bad-policy-settings
+          For more information, see https://on.cypress.io/bad-browser-policy
           """
       )
 
