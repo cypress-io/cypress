@@ -1,12 +1,17 @@
-require('../../coffee/register')
+
+require('@packages/coffee/register')
 
 require('@babel/register')({
   'plugins': [
     // "istanbul",
-    ['@babel/plugin-proposal-decorators', { 'legacy': true }],
-    ['@babel/plugin-proposal-class-properties', { 'loose': true }],
+    [require.resolve('@babel/plugin-proposal-decorators'), { 'legacy': true }],
+    [require.resolve('@babel/plugin-proposal-class-properties'), { 'loose': true }],
   ],
-  'presets': ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
+  'presets': [
+    require.resolve('@babel/preset-env'),
+    require.resolve('@babel/preset-react'),
+    require.resolve('@babel/preset-typescript'),
+  ],
 
   // Setting this will remove the currently hooked extensions of `.es6`, `.es`, `.jsx`, `.mjs`
   // and .js so you'll have to add them back if you want them to be used again.
@@ -15,7 +20,7 @@ require('@babel/register')({
   ignore: [/node_modules/],
   // Setting this to false will disable the cache.
   cache: true,
-  sourceMaps: 'inline',
+  // sourceMaps: 'inline',
   // compact: true,
 })
 

@@ -6,10 +6,19 @@ const path = require('path')
 const proxyquire = require('proxyquire')
 const mockfs = require('mock-fs')
 const _snapshot = require('snap-shot-it')
+const chai = require('chai')
+
+chai.use(require('chai-as-promised'))
+
+const { expect } = chai
 
 const packages = require('../../../binary/util/packages')
 const { transformRequires } = require('../../../binary/util/transform-requires')
+const { testStaticAssets, testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
 
+global.beforeEach(() => {
+  mockfs.restore()
+})
 const snapshot = (...args) => {
   mockfs.restore()
 
@@ -90,15 +99,118 @@ describe('transformRequires', () => {
 
     await transformRequires(buildRoot)
 
-    console.dir(getFs(), { depth: null })
-
     snapshot(getFs())
+  })
+})
+
+describe.only('testStaticAssets', () => {
+  it('can detect valid runner js', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {
+              'runner.js': `${'some js\n'.repeat(5000)}
+              //# sourceMappingURL=data:application/json;charset=utf-8;base64`,
+            },
+          },
+          'desktop-gui': {
+            'dist': {
+              'index.html': 'window.env = \'development\'',
+            },
+          },
+        },
+      },
+    })
+
+    // logFs()
+
+    await testStaticAssets(buildDir)
+
+  })
+
+  it('can detect bad strings in asset', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {
+              'runner.js': `
+              some js
+              some really bad string
+              some more js
+              `,
+            },
+          },
+        },
+      },
+    })
+
+    // logFs()
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+      badStrings: ['some really bad string'],
+    })).to.rejected.with.eventually.property('message').contain('some really bad string')
+
+    mockfs.restore()
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {},
+          },
+        },
+      },
+    })
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+      badStrings: ['some really bad string'],
+    })).to.rejected.with.eventually
+    .property('message').contain('assets to be found')
+
+  })
+
+  it('can detect runner js minified code', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {
+              'runner.js': `
+              ${'minified code;minified code;minified code;\n'.repeat(50)}
+              `,
+            },
+          },
+        },
+      },
+    })
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+      minLineCount: 100,
+    })).to.rejected.with.eventually
+    .property('message').contain('minified')
   })
 })
 
 afterEach(() => {
   mockfs.restore()
 })
+
+// eslint-disable-next-line
+const logFs = () => {
+  // eslint-disable-next-line no-console
+  console.dir(getFs(), { depth: null })
+}
 
 const getFs = () => {
   const cwd = process.cwd().split('/').slice(1)

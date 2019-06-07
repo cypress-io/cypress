@@ -3,9 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Cypress</title>
-  {{#each stylesheets}}
-    <link rel="stylesheet" href="{{this}}" />
-  {{/each}}
+    <link rel="stylesheet" href="app.css" />
 </head>
 <body>
   <div id="app"></div>
@@ -14,8 +12,8 @@
     if (!!window.Cypress) {
       window.env = 'test'
     } else {
-      window.env = '{{env.NODE_ENV}}'
-    }
+      window.env = '<%= htmlWebpackPlugin.options.env %>'
+    } 
 
     if (window.env === 'development') {
       // this allows React DevTools to work in an iframe
@@ -23,9 +21,7 @@
       __REACT_DEVTOOLS_GLOBAL_HOOK__ = parent.__REACT_DEVTOOLS_GLOBAL_HOOK__
     }
   </script>
-  {{#each scripts}}
-    <script src="{{this}}"></script>
-  {{/each}}
+    <script src="app.js"></script>
   <script>
     // this allows us to control when the app starts from Cypress tests
     // but starts it immediately if run outside of Cypress

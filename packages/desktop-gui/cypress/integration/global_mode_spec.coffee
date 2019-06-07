@@ -45,7 +45,16 @@ describe "Global Mode", ->
     cy.visitIndex().then(@setup)
 
   it "shows cypress logo in nav", ->
-    cy.get(".nav .logo img").should("have.attr", "src", "img/cypress-inverse.png")
+    cy.get(".nav .logo img")
+    .should("have.attr", "src", "./img/cypress-inverse.png")
+    .then ($el) =>
+      new Cypress.Promise (resolve, reject) ->
+        img = new Image
+        img.onerror = -> reject new Error "img failed to load src: #{img.src}"
+        img.onload = resolve
+        img.src = $el[0].src
+
+      
 
   it "shows notice about using Cypress locally", ->
     cy.contains("versioning Cypress per project")

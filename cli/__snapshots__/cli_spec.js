@@ -354,18 +354,3 @@ exports['shows help for run --foo 1'] = `
   -------
   
 `
-
-exports['cli cypress run warns with space-separated --specs 1'] = `
-[33m⚠[39m Warning: It looks like you're passing --spec a space-separated list of files:
-
-"a b c d e f g"
-
-This will work, but it's not recommended.
-
-The most common cause of this warning is using an unescaped glob pattern. If you are
-trying to pass a glob pattern, escape it using quotes:
-  cypress run --spec "**/*.spec.js"
-
-If you are trying to pass multiple spec filenames, separate them by commas instead:
-  cypress run --spec spec1,spec2,spec3
-`

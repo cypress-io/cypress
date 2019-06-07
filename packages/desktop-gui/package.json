@@ -6,14 +6,13 @@
   "scripts": {
     "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "node ./scripts/build-dev.js",
+    "build": "webpack",
     "prebuild-prod": "npm run check-deps-pre",
-    "build-prod": "node ./scripts/build-prod.js",
+    "build-prod": "cross-env NODE_ENV=production npm run build",
     "prewatch": "npm run check-deps-pre",
-    "watch": "node ./scripts/watch.js",
+    "watch": "npm run build -- --watch --progress",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
     "cypress:open": "node ../../scripts/cypress open --project .",
@@ -24,7 +23,6 @@
     "lib"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.31.3",
     "@cypress/react-tooltip": "0.4.0",
@@ -32,6 +30,7 @@
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
+    "cross-env": "5.2.0",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "font-awesome": "4.7.0",
     "gravatar": "1.8.0",
@@ -45,12 +44,13 @@
     "mobx-react-devtools": "6.1.1",
     "moment": "2.24.0",
     "prop-types": "15.7.2",
-    "rc-collapse": "1.11.1",
+    "rc-collapse": "1.11.3",
     "react": "16.8.6",
-    "rebuild-node-sass": "1.1.0",
     "react-bootstrap-modal": "4.2.0",
     "react-dom": "16.8.6",
     "react-loader": "2.4.5",
-    "zunder": "6.4.1"
+    "rebuild-node-sass": "1.1.0",
+    "webpack": "4.32.2",
+    "webpack-cli": "3.3.2"
   }
 }

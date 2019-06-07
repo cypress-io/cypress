@@ -113,7 +113,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             'table': {
               //# mouse events tables will take up slots 1 and 2 if they're present
               //# this preserves the order of the tables
-              3 () {
+              3: () => {
                 return {
                   name: 'Keyboard Events',
                   data: getTableData(),
@@ -334,8 +334,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         //# of input/text/contenteditable
         //# changes
         onValueChange (originalText, el) {
+          debug('onValueChange', originalText, el)
           //# contenteditable should never be called here.
-          //# only input's and textareas can have change events
+          //# only inputs and textareas can have change events
           let changeEvent = state('changeEvent')
 
           if (changeEvent) {

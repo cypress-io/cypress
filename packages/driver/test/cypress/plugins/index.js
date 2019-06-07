@@ -3,8 +3,6 @@ const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
 
-const browserify = require('@cypress/browserify-preprocessor')
-
 module.exports = (on) => {
   on('task', {
     'return:arg' (arg) {
@@ -26,12 +24,4 @@ module.exports = (on) => {
       return null
     },
   })
-
-  const options = browserify.defaultOptions
-
-  // throw new Error(JSON.stringify(options))
-  options.browserifyOptions.extensions.push('.ts')
-  options.browserifyOptions.plugin.push('tsify')
-
-  // on('file:preprocessor', browserify(options))
 }

@@ -91,10 +91,7 @@ const mouseEvent = (coords, type, modifiers) => {
 }
 
 const keypress = async (keyInfo) => {
-  console.log('foo')
   await init()
-  console.log({ client })
-  console.log('sdfsdfds')
 
   return Promise.all([keyDown(keyInfo), keyUp(keyInfo)])
 }
@@ -124,8 +121,6 @@ async function keypressAll (keyInfoArray) {
 }
 
 const keyDown = (keyInfo) => {
-  console.log(client)
-
   return Promise.resolve(
     client.send('Input.dispatchKeyEvent', {
       // type: text ? 'keyDown' : 'rawKeyDown',

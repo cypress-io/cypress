@@ -10,7 +10,7 @@ const chaiSubset = require('chai-subset')
 
 chai.use(chaiSubset)
 
-const events = ['keydown', 'keyup', 'keypress', 'textInput', 'input', 'focus', 'focusin']
+const events = ['keydown', 'keyup', 'keypress', 'textInput', 'input', 'focus', 'focusin', 'change']
 
 //# trim new lines at the end of innerText
 //# due to changing browser versions implementing
@@ -239,7 +239,7 @@ describe('src/cy/commands/actions/type', function () {
         })
         .type('f', { force: true })
 
-        cy.getAll('input', 'textInput').each(shouldBeCalledWithMatch({ data: 'f' }))
+        cy.getAll('input', 'textInput', 'keypress').each(shouldBeCalledWithMatch({ data: 'f' }))
       })
 
       it('can forcibly type even when element is invisible', () => {
@@ -2385,8 +2385,8 @@ describe('src/cy/commands/actions/type', function () {
 
           $input.on('keyup', handleKeyup)
 
-          // cy.get('input:text:first').type('{shift}{ctrl}')
-          cy.wait(5000).then(() => {
+          cy.get('input:text:first').type('{shift}{ctrl}')
+          .then(() => {
             expect(events[0].shiftKey).to.be.true
             expect(events[0].which).to.equal(16)
             expect(handleKeyup.firstCall.args[0].shiftKey).eq(false)
@@ -2449,6 +2449,40 @@ describe('src/cy/commands/actions/type', function () {
 
             done()
           })
+
+        })
+        it('does not type characters when any modifier besides Shift is active', () => {
+          const $input = cy.$$('input:first')
+
+          attachKeyListeners({ $input })
+
+          cy.get('input:first').focus()
+          .type('{alt}m{enter}', { simulated: true })
+
+          cy.getAll('$input', ['input', 'textInput', 'change', 'keypress']).each(shouldNotBeCalled)
+
+        })
+        it('does not fire change when modifier + enter', () => {
+          const $input = cy.$$('input:first')
+
+          attachKeyListeners({ $input })
+
+          cy.get('input:first').focus()
+          .type('m{alt}{enter}', { simulated: true })
+
+          cy.getAll('$input', ['change']).each(shouldNotBeCalled)
+
+        })
+        it('does not fire textInput when modifier', () => {
+          const $input = cy.$$('input:first')
+
+          attachKeyListeners({ $input })
+
+          cy.get('input:first').focus()
+          .type('{alt}', { simulated: true })
+
+          cy.getAll('$input', ['textInput']).each(shouldNotBeCalled)
+
         })
 
         it('can use document.execCommand(\'copy\') on native keydown event', () => {
@@ -2461,7 +2495,9 @@ describe('src/cy/commands/actions/type', function () {
           cy.get('input:first').type('f')
         })
 
-        it('cannot use document.execCommand(\'copy\') on simulated(forced) keydown event', () => {
+        it.skip('cannot use document.execCommand(\'copy\') on simulated(forced) keydown event', () => {
+          cy.wait(4000)
+
           cy.$$('input:first')[0].addEventListener('keydown', () => {
             const worked = cy.state('document').execCommand('copy')
 
@@ -3090,6 +3126,7 @@ describe('src/cy/commands/actions/type', function () {
         })
       })
       it('accurately returns same el with no falsey contenteditable="false" attr', () => {
+        cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
           expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0])
@@ -3822,23 +3859,25 @@ describe('src/cy/commands/actions/type', function () {
         )
 
         it('has a table of keys', () => {
-          cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
+          // cy.get(':text:first').type('foooooo', {simulated: true})
+
+          cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}', { simulated: true })
           .then(function () {
             const table = this.lastLog.invoke('consoleProps').table[3]()
 
             expect(table.columns).to.deep.eq(['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'])
             expect(table.name).to.eq('Keyboard Events')
             const expectedTable = {
-              1: { typed: '<meta>', which: 91, keydown: true, modifiers: 'meta' },
-              2: { typed: '<alt>', which: 18, keydown: true, modifiers: 'alt, meta' },
-              3: { typed: 'f', which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: 'alt, meta' },
-              4: { typed: 'o', which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: 'alt, meta' },
-              5: { typed: 'o', which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: 'alt, meta' },
-              6: { typed: '{enter}', which: 13, keydown: true, keypress: true, keyup: true, change: true, modifiers: 'alt, meta' },
-              7: { typed: 'b', which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: 'alt, meta' },
-              8: { typed: '{leftarrow}', which: 37, keydown: true, keyup: true, modifiers: 'alt, meta' },
-              9: { typed: '{del}', which: 46, keydown: true, input: true, keyup: true, modifiers: 'alt, meta' },
-              10: { typed: '{enter}', which: 13, keydown: true, keypress: true, keyup: true, modifiers: 'alt, meta' },
+              1: { typed: 'Meta', which: 91, keydown: true, modifiers: 'meta' },
+              2: { typed: 'Alt', which: 18, keydown: true, modifiers: 'alt, meta' },
+              3: { typed: 'f', which: 70, keydown: true, keyup: true, modifiers: 'alt, meta' },
+              4: { typed: 'o', which: 79, keydown: true, keyup: true, modifiers: 'alt, meta' },
+              5: { typed: 'o', which: 79, keydown: true, keyup: true, modifiers: 'alt, meta' },
+              6: { typed: 'Enter', which: 13, keydown: true, keyup: true, modifiers: 'alt, meta' },
+              7: { typed: 'b', which: 66, keydown: true, keyup: true, modifiers: 'alt, meta' },
+              8: { typed: 'ArrowLeft', which: 37, keydown: true, keyup: true, modifiers: 'alt, meta' },
+              9: { typed: 'Delete', which: 46, keydown: true, keyup: true, modifiers: 'alt, meta' },
+              10: { typed: 'Enter', which: 13, keydown: true, keyup: true, modifiers: 'alt, meta' },
             }
 
             expect(table.data).to.deep.eq(expectedTable)

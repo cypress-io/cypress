@@ -25,6 +25,9 @@ describe('lib/tasks/cache', () => {
   })
 
   afterEach(() => {
+    mockfs.restore()
+    this.stdout = this.stdout.toString().split('\n').slice(0, -2).join('\n')
+    snapshot(this.stdout.toString() || '[no output]')
     stdout.restore()
   })
 
