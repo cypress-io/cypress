@@ -791,6 +791,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       For more information, see https://on.cypress.io/error-messages#bad-policy-settings
       """
+    when "BAD_POLICY_WARNING_TOOLTIP"
+      """
+      Cypress detected policy settings on your computer that may interfere with using this browser.
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

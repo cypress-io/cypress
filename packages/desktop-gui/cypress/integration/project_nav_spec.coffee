@@ -151,7 +151,7 @@ describe "Project Nav", ->
         it "sends the required parameters to launch a browser", ->
           browserArg = @ipc.launchBrowser.getCall(0).args[0].browser
           expect(browserArg).to.have.keys([
-            "family", "name", "path", "version", "majorVersion", "displayName", "info", "isChosen", "custom", "warnBadPolicy"
+            "family", "name", "path", "version", "majorVersion", "displayName", "info", "isChosen", "custom", "warning"
           ])
           expect(browserArg.path).to.include('/')
           expect(browserArg.family).to.equal('chrome')
@@ -241,7 +241,7 @@ describe "Project Nav", ->
           "version": "49.0.2609.0",
           "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
           "majorVersion": "49",
-          "warnBadPolicy": true
+          "warning": "Cypress detected policy settings on your computer that may interfere with using this browser."
         }]
 
         @config.browsers = @browsers
@@ -252,7 +252,7 @@ describe "Project Nav", ->
           .then ($el) ->
             $el[0].dispatchEvent(new Event("mouseover", {bubbles: true}))
         cy.get(".cy-tooltip")
-          .should("contain", "Cypress detected policy settings on your system that may interfere with using this browser.")
+          .should("contain", "Cypress detected policy settings on your computer that may interfere with using this browser.")
 
     describe "custom browser available", ->
       beforeEach ->

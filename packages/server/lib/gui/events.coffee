@@ -208,7 +208,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
         chromePolicyCheck.run (err) ->
           options.config.browsers.forEach (browser) ->
             if browser.family == 'chrome'
-              browser.warnBadPolicy = true
+              browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
 
           onWarning(err)
 
