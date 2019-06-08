@@ -38,7 +38,7 @@
     "@percy/cypress": "1.0.9",
     "@types/node": "9.6.49",
     "axios": "0.18.1",
-    "babel-loader": "8.0.5",
+    "babel-loader": "8.0.6",
     "css-loader": "2.1.1",
     "cypress": "3.3.1",
     "github-post-release": "1.13.1",
