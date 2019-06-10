@@ -605,19 +605,6 @@ describe "src/cy/commands/navigation", ->
       })
       cy.contains('"user-agent":"something special"')
 
-    ## https://github.com/cypress-io/cypress/issues/4313
-    it "normally finishes in less than 500ms on localhost with connection: close", ->
-      cy.on "log:added", (attrs, log) =>
-        if attrs.name is "visit"
-          @lastLog = log
-
-      _.times 100, ->
-        cy.visit('/dump-method')
-        .then () ->
-          expect(@lastLog.get("totalTime")).to.be.lte(2000)
-
-      cy.wrap ->
-
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
         cy.visit("http://localhost:3500/post-only", {

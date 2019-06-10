@@ -36,10 +36,6 @@ niv.install("react-dom@15.6.1")
   app.head "/", (req, res) ->
     res.sendStatus(200)
 
-  app.get "/close-connection", (req, res) ->
-    res.type('html')
-    .send('hello')
-
   app.get "/timeout", (req, res) ->
     Promise
     .delay(req.query.ms ? 0)
