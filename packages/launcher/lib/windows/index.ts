@@ -31,6 +31,24 @@ function formChromeCanaryAppPath() {
   return normalize(exe)
 }
 
+function formEdgeCanaryAppPath() {
+  const home = homedir()
+  const exe = join(
+    home,
+    'AppData',
+    'Local',
+    'Microsoft',
+    'Edge SxS',
+    'Application',
+    'msedge.exe'
+  )
+  return normalize(exe)
+}
+
+function formEdgeDevAppPath() {
+  const exe = 'C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe'
+  return normalize(exe)
+}
 type NameToPath = (name: string) => string
 
 interface WindowsBrowserPaths {
@@ -38,12 +56,16 @@ interface WindowsBrowserPaths {
   chrome: NameToPath
   canary: NameToPath
   chromium: NameToPath
+  edgeDev: NameToPath
+  edgeCanary: NameToPath
 }
 
 const formPaths: WindowsBrowserPaths = {
   chrome: formFullAppPath,
   canary: formChromeCanaryAppPath,
-  chromium: formChromiumAppPath
+  chromium: formChromiumAppPath,
+  edgeDev: formEdgeDevAppPath,
+  edgeCanary: formEdgeCanaryAppPath
 }
 
 function getWindowsBrowser(name: string): Promise<FoundBrowser> {
