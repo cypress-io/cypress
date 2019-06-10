@@ -151,14 +151,19 @@ describe "e2e visit", ->
         expectedExitCode: 2
       })
 
+  ## https://github.com/cypress-io/cypress/issues/4313
   context "resolves visits quickly", ->
     e2e.setup({
       servers: {
         port: 3434
         onServer: (app) ->
-          app.get '/foo', (req, res) ->
+          app.get '/keepalive', (req, res) ->
             res
-            # .set('connection', 'close')
+            .type('html').send('hi')
+
+          app.get '/close', (req, res) ->
+            res
+            .set('connection', 'close')
             .type('html').send('hi')
       }
       settings: {
@@ -166,12 +171,18 @@ describe "e2e visit", ->
       }
     })
 
-    it "in normal network conditions", ->
+    it "in chrome (headed)", ->
       e2e.exec(@, {
         spec: "fast_visit_spec.coffee"
-        snapshot: false
+        snapshot: true
         expectedExitCode: 0
-        # browser: 'chrome'
-        headed: true
-        exit: false
+        browser: 'chrome'
+      })
+
+    it "in electron (headless)", ->
+      e2e.exec(@, {
+        spec: "fast_visit_spec.coffee"
+        snapshot: true
+        expectedExitCode: 0
+        browser: 'electron'
       })
