@@ -607,19 +607,14 @@ describe "src/cy/commands/navigation", ->
 
     ## https://github.com/cypress-io/cypress/issues/4313
     it "normally finishes in less than 500ms on localhost with connection: close", ->
-      _.times 100, ->
-        t = undefined
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "visit"
+          @lastLog = log
 
-        cy.wrap({
-          startTimer: ->
-            t = setTimeout ->
-              throw new Error('took too long')
-            , 500
-        }, { log: false })
-        .invoke('startTimer')
-        .visit('/close-connection')
-        .then ->
-          clearTimeout(t)
+      _.times 100, ->
+        cy.visit('/dump-method')
+        .then () ->
+          expect(@lastLog.get("totalTime")).to.be.lte(2000)
 
       cy.wrap ->
 

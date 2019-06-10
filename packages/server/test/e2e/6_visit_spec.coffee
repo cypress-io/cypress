@@ -150,3 +150,28 @@ describe "e2e visit", ->
         snapshot: true
         expectedExitCode: 2
       })
+
+  context "resolves visits quickly", ->
+    e2e.setup({
+      servers: {
+        port: 3434
+        onServer: (app) ->
+          app.get '/foo', (req, res) ->
+            res
+            # .set('connection', 'close')
+            .type('html').send('hi')
+      }
+      settings: {
+        baseUrl: 'http://localhost:3434'
+      }
+    })
+
+    it "in normal network conditions", ->
+      e2e.exec(@, {
+        spec: "fast_visit_spec.coffee"
+        snapshot: false
+        expectedExitCode: 0
+        # browser: 'chrome'
+        headed: true
+        exit: false
+      })

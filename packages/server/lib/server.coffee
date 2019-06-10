@@ -311,11 +311,14 @@ class Server
     @_request.sendPromise(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
+    console.log('***************************************\n')
     debug("resolving visit %o", {
       url: urlStr
       headers
       options
     })
+
+    startTime = new Date()
 
     ## if we have an existing url resolver
     ## in flight then cancel it
@@ -390,7 +393,13 @@ class Server
         reject(err)
 
       onReqStreamReady = (str) =>
+        debug('onReqStreamReady')
         reqStream = str
+
+        require('debug')('cypress:server:server2')('lkasjflksadf %o', {
+          foo: process,
+          process
+        })
 
         str
         .on("error", onReqError)
@@ -451,6 +460,8 @@ class Server
                 ## where the headers have been sent but the
                 ## connection hangs before receiving a body.
                 debug("resolve:url response ended, setting buffer %o", { newUrl, details })
+
+                details.totalTime = new Date() - startTime
 
                 ## TODO: think about moving this logic back into the
                 ## frontend so that the driver can be in control of
