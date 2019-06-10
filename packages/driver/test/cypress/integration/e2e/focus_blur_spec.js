@@ -210,9 +210,11 @@ it('blur the activeElement when clicking the body', () => {
 
 describe('polyfill programmatic blur events', () => {
   // restore these props for the rest of the tests
-  const oldFocus = window.top.HTMLElement.prototype.focus
-  const oldBlur = window.top.HTMLElement.prototype.blur
-  const oldHasFocus = window.top.document.hasFocus
+  let stubElementFocus
+  let stubElementBlur
+  let stubSVGFocus
+  let stubSVGBlur
+  let stubHasFocus
   let oldActiveElement = null
 
   const setActiveElement = (el) => {
@@ -229,18 +231,21 @@ describe('polyfill programmatic blur events', () => {
 
     // simulate window being out of focus by overwriting
     // the focus/blur methods on HTMLElement
-    window.top.document.hasFocus = () => {
-      return false
-    }
-    window.top.HTMLElement.prototype.focus = function () { }
-    window.top.HTMLElement.prototype.blur = function () { }
+    stubHasFocus = cy.stub(window.top.document, 'hasFocus').returns(false)
+
+    stubElementFocus = cy.stub(window.top.HTMLElement.prototype, 'focus')
+    stubElementBlur = cy.stub(window.top.HTMLElement.prototype, 'blur')
+    stubSVGFocus = cy.stub(window.top.SVGElement.prototype, 'focus')
+    stubSVGBlur = cy.stub(window.top.SVGElement.prototype, 'blur')
   })
 
   afterEach(() => {
     Object.defineProperty(window.Document.prototype, 'activeElement', oldActiveElement)
-    window.top.HTMLElement.prototype.focus = oldFocus
-    window.top.HTMLElement.prototype.blur = oldBlur
-    window.top.document.hasFocus = oldHasFocus
+    stubHasFocus.restore()
+    stubElementFocus.restore()
+    stubElementBlur.restore()
+    stubSVGFocus.restore()
+    stubSVGBlur.restore()
   })
 
   // https://github.com/cypress-io/cypress/issues/1486
@@ -318,6 +323,136 @@ describe('polyfill programmatic blur events', () => {
       const $one = cy.$$('#one')
       const $two = cy.$$('#two')
 
+      const stub = cy.stub().as('focus/blur event');
+
+      ['focus', 'blur'].forEach((evt) => {
+        $one.on(evt, stub)
+
+        $two.on(evt, stub)
+      })
+
+      $one.get(0).focus()
+
+      // a hack here becuase we nuked the real .focus
+      setActiveElement($one.get(0))
+
+      $one.get(0).blur()
+
+      cy.then(() => {
+
+        expect(stub).calledTwice
+
+        expect(_.toPlainObject(stub.getCall(0).args[0].originalEvent)).to.containSubset({
+          type: 'focus',
+          target: $one.get(0),
+          isTrusted: false,
+        })
+
+        expect(_.toPlainObject(stub.getCall(1).args[0].originalEvent)).to.containSubset({
+          type: 'blur',
+          target: $one.get(0),
+          isTrusted: false,
+        })
+      })
+
+      .then(() => {
+
+        stub.reset()
+
+        setActiveElement(cy.$$('body').get(0))
+
+        $one.get(0).blur()
+
+        expect(stub, 'should not send blur if not focused el').not.called
+      })
+
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/1486
+  it('SVGElement simulated events when window is out of focus when .focus called', () => {
+    cy
+    .visit('http://localhost:3500/fixtures/active-elements.html')
+    .then(() => {
+
+      // programmatically focus the first, then second input element
+
+      const $one = cy.$$(`<svg id="svg-one" tabindex width="100" height="100">
+      <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+    </svg>`).appendTo(cy.$$('body'))
+      const $two = cy.$$(`<svg id="svg-two" tabindex width="100" height="100">
+      <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+    </svg>`).appendTo(cy.$$('body'))
+
+      const stub = cy.stub().as('focus/blur event').callsFake(() => {
+        Cypress.log({})
+      });
+
+      ['focus', 'blur'].forEach((evt) => {
+        $one.on(evt, stub)
+
+        return $two.on(evt, stub)
+      })
+
+      $one.get(0).focus()
+      // a hack here becuase we nuked the real .focus
+      setActiveElement($one.get(0))
+
+      $two.get(0).focus()
+      // cy.get('#two').click()
+
+      const getEvent = (n) => {
+        return stub.getCall(n).args[0].originalEvent
+      }
+
+      cy.wrap(null).then(() => {
+        expect(stub).to.be.calledThrice
+
+        expect(getEvent(0)).to.containSubset({
+          type: 'focus',
+          target: $one.get(0),
+          isTrusted: false,
+        })
+
+        expect(getEvent(1)).to.containSubset({
+          type: 'blur',
+          target: $one.get(0),
+          isTrusted: false,
+        })
+
+        expect(getEvent(2)).to.containSubset({
+          type: 'focus',
+          target: $two.get(0),
+          isTrusted: false,
+        })
+      })
+      .then(() => {
+
+        stub.reset()
+
+        setActiveElement($two.get(0))
+
+        $two.get(0).focus()
+
+        expect(stub, 'should not send focus if already focused el').not.called
+      })
+    })
+  }
+  )
+
+  // https://github.com/cypress-io/cypress/issues/1176
+  it('SVGElement simulated events when window is out of focus when .blur called', () => {
+    cy
+    .visit('http://localhost:3500/fixtures/active-elements.html')
+    .then(() => {
+      // programmatically focus the first, then second input element
+
+      const $one = cy.$$(`<svg id="svg-one" tabindex width="100" height="100">
+      <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+    </svg>`).appendTo(cy.$$('body'))
+      const $two = cy.$$(`<svg id="svg-two" tabindex width="100" height="100">
+      <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+    </svg>`).appendTo(cy.$$('body'))
       const stub = cy.stub().as('focus/blur event');
 
       ['focus', 'blur'].forEach((evt) => {
