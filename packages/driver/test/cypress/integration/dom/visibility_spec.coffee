@@ -238,6 +238,14 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
+      @$elOutOfParentWithFlexAndOverflowHiddenBounds = add """
+      <div style="display: flex; overflow: hidden;">
+        <div style="flex: 0 0 80%; background-color: red;">red</div>
+        <div style="flex: 0 0 80%; background-color: green;">green</div>
+        <div id="blue" style="background-color: blue;">blue</div>
+      </div>
+    """
+
       @$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent = add """
       <div style="border: 1px solid red; width: 200px; height: 200px; overflow: hidden;">
         <div style="position: absolute; left: 300px; border: 1px solid blue; width: 200px; height: 200px;">
@@ -461,6 +469,9 @@ describe "src/cypress/dom/visibility", ->
 
     it "is visible when parent overflow hidden but el in a closer parent with position absolute", ->
       expect(@$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent.find("span")).to.be.visible
+
+    it "is hidden when parent flex and overflow hidden and el out of bounds", ->
+      expect(@$elOutOfParentWithFlexAndOverflowHiddenBounds.find("#blue")).to.be.hidden
 
     it "is hidden when parent is wide and ancestor is overflow auto", ->
       expect(@$elOutOfAncestorOverflowAutoBounds.find("span")).to.be.hidden
