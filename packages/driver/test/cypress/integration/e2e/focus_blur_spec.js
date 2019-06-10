@@ -274,7 +274,9 @@ describe('polyfill programmatic blur events', () => {
         return stub.getCall(n).args[0].originalEvent
       }
 
-      cy.then(() => {
+      cy.wrap(null).then(() => {
+        expect(stub).to.be.calledThrice
+
         expect(getEvent(0)).to.containSubset({
           type: 'focus',
           target: $one.get(0),
