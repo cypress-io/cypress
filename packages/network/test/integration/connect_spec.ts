@@ -29,7 +29,9 @@ describe('lib/connect', function() {
       })
     })
 
-    it('resolves localhost on ::1 immediately', function() {
+    // Error: listen EADDRNOTAVAIL ::1
+    // TODO: add an ipv6 lo if to the docker container
+    it.skip('resolves localhost on ::1 immediately', function() {
       this.timeout(50)
 
       const server = net.createServer(_.partialRight(_.invoke, 'close'))
