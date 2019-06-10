@@ -311,7 +311,6 @@ class Server
     @_request.sendPromise(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
-    console.log('***************************************\n')
     debug("resolving visit %o", {
       url: urlStr
       headers
@@ -393,13 +392,7 @@ class Server
         reject(err)
 
       onReqStreamReady = (str) =>
-        debug('onReqStreamReady')
         reqStream = str
-
-        require('debug')('cypress:server:server2')('lkasjflksadf %o', {
-          foo: process,
-          process
-        })
 
         str
         .on("error", onReqError)
