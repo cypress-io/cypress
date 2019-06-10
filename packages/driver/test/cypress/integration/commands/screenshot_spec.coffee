@@ -550,7 +550,7 @@ describe "src/cy/commands/screenshot", ->
           .then ($el2) =>
             expect($el2.get(0)).to.equal($el.get(0))
 
-      it.only "passes through window", ->
+      it "passes through window", ->
         cy
         .window()
         .then (win) ->
