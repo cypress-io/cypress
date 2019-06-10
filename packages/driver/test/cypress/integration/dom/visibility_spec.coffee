@@ -238,6 +238,13 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
+      @$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent = add """
+      <div style="border: 1px solid red; width: 200px; height: 200px; overflow: hidden;">
+        <div style="position: absolute; left: 300px; border: 1px solid blue; width: 200px; height: 200px;">
+          <span style="border: 1px solid green;">Hello</span>
+        </div>
+      """
+
       @$elOutOfAncestorOverflowAutoBounds = add """
         <div style='width: 100px; height: 100px; overflow: auto;'>
           <div style='width: 1000px; position: relative;'>
@@ -451,6 +458,9 @@ describe "src/cypress/dom/visibility", ->
 
     it "is hidden when parent overflow-x hidden and out of bounds", ->
       expect(@$elOutOfParentWithOverflowXHiddenBounds.find("span")).to.be.hidden
+
+    it "is visible when parent overflow hidden but el in a closer parent with position absolute", ->
+      expect(@$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent.find("span")).to.be.visible
 
     it "is hidden when parent is wide and ancestor is overflow auto", ->
       expect(@$elOutOfAncestorOverflowAutoBounds.find("span")).to.be.hidden
