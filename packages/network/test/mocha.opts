@@ -1,0 +1,4 @@
+test/unit
+--compilers ts:@packages/ts/register
+--timeout 10000
+--recursive

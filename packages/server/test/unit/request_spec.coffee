@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_       = require("lodash")
 http    = require("http")
 Request = require("#{root}lib/request")
 
@@ -17,6 +18,91 @@ describe "lib/request", ->
       }
 
       expect(request.reduceCookieToArray(obj)).to.deep.eq(["foo=bar", "baz=quux"])
+
+  context "#getDelayForRetry", ->
+    it "divides by 10 when delay >= 1000 and err.code = ECONNREFUSED", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = [0, 999, 1000, 2000]
+
+      err = {
+        code: "ECONNREFUSED"
+      }
+
+      onNext = sinon.stub()
+
+      retryIntervals.forEach ->
+        request.getDelayForRetry({
+          err,
+          onNext,
+          retryIntervals,
+          delaysRemaining,
+        })
+
+      expect(delaysRemaining).to.be.empty
+      expect(onNext.args).to.deep.eq([
+        [0, 1]
+        [999, 2]
+        [100, 3]
+        [200, 4]
+      ])
+
+    it "does not divide by 10 when err.code != ECONNREFUSED", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = [2000, 2000, 2000, 2000]
+
+      err = {
+        code: "ECONNRESET"
+      }
+
+      onNext = sinon.stub()
+
+      request.getDelayForRetry({
+        err,
+        onNext,
+        retryIntervals,
+        delaysRemaining,
+      })
+
+      expect(delaysRemaining).to.have.length(3)
+      expect(onNext).to.be.calledWith(2000, 1)
+
+    it "calls onElse when delaysRemaining is exhausted", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = []
+
+      onNext = sinon.stub()
+      onElse = sinon.stub()
+
+      request.getDelayForRetry({
+        onElse
+        onNext,
+        retryIntervals,
+        delaysRemaining,
+      })
+
+      expect(onElse).to.be.calledWithExactly()
+      expect(onNext).not.to.be.called
+
+  context "#setDefaults", ->
+    it "delaysRemaining to retryIntervals clone", ->
+      retryIntervals = [1,2,3,4]
+
+      opts = request.setDefaults({ retryIntervals })
+
+      expect(opts.retryIntervals).to.eq(retryIntervals)
+      expect(opts.delaysRemaining).not.to.eq(retryIntervals)
+      expect(opts.delaysRemaining).to.deep.eq(retryIntervals)
+
+    it "retryIntervals to [0, 1000, 2000, 2000] by default", ->
+      opts = request.setDefaults({})
+
+      expect(opts.retryIntervals).to.deep.eq([0, 1000, 2000, 2000])
+
+    it "delaysRemaining can be overridden", ->
+      delaysRemaining = [1]
+      opts = request.setDefaults({ delaysRemaining })
+
+      expect(opts.delaysRemaining).to.eq(delaysRemaining)
 
   context "#createCookieString", ->
     it "joins array by '; '", ->
@@ -72,7 +158,90 @@ describe "lib/request", ->
 
       expect(@push).to.be.calledOnce
 
-  context "#send", ->
+  context "#create", ->
+    beforeEach (done) ->
+      @hits = 0
+
+      @srv = http.createServer (req, res) =>
+        @hits++
+
+        switch req.url
+          when "/never-ends"
+            res.writeHead(200)
+            res.write("foo\n")
+          when "/econnreset"
+            req.socket.destroy()
+
+      @srv.listen(9988, done)
+
+    afterEach ->
+      @srv.close()
+
+    context "retries for streams", ->
+      it "does not retry on a timeout", (done) ->
+        opts = request.setDefaults({
+          url: "http://localhost:9988/never-ends"
+          timeout: 100
+        })
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        stream.on "error", (err) ->
+          expect(err.code).to.eq('ESOCKETTIMEDOUT')
+          expect(retries).to.eq(0)
+          done()
+
+      it "retries 4x on a connection reset", (done) ->
+        opts = {
+          url: "http://localhost:9988/econnreset"
+          retryIntervals: [0, 1, 2, 3]
+        }
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        stream.on "error", (err) ->
+          expect(err.code).to.eq('ECONNRESET')
+          expect(retries).to.eq(4)
+          done()
+
+    context "retries for promises", ->
+      it "does not retry on a timeout", ->
+        opts = {
+          url: "http://localhost:9988/never-ends"
+          timeout: 100
+        }
+
+        request.create(opts, true)
+        .then ->
+          throw new Error('should not reach')
+        .catch (err) =>
+          expect(err.error.code).to.eq('ESOCKETTIMEDOUT')
+          expect(@hits).to.eq(1)
+
+      it "retries 4x on a connection reset", ->
+        opts = {
+          url: "http://localhost:9988/econnreset"
+          retryIntervals: [0, 1, 2, 3]
+        }
+
+        request.create(opts, true)
+        .then ->
+          throw new Error('should not reach')
+        .catch (err) =>
+          expect(err.error.code).to.eq('ECONNRESET')
+          expect(@hits).to.eq(5)
+
+  context "#sendPromise", ->
     beforeEach ->
       @fn = sinon.stub()
 
@@ -85,7 +254,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       }
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
       })
@@ -99,7 +268,7 @@ describe "lib/request", ->
 
       ## should not bomb on 500
       ## because simple = false
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
       })
@@ -111,7 +280,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
         body: "foobarbaz"
@@ -128,13 +297,14 @@ describe "lib/request", ->
         expect(resp.requestHeaders).to.deep.eq({
           "accept": "*/*"
           "accept-encoding": "gzip, deflate"
+          "connection": "keep-alive"
           "content-length": 9
           "host": "www.github.com"
         })
         expect(resp.allRequestResponses).to.deep.eq([
           {
             "Request Body":     "foobarbaz"
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "content-length": 9, "host": "www.github.com"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "content-length": 9, "host": "www.github.com"}
             "Request URL":      "http://www.github.com/foo"
             "Response Body":    "hello"
             "Response Headers": {"content-type": "text/html"}
@@ -157,7 +327,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/dashboard"
         cookies: false
       })
@@ -176,28 +346,29 @@ describe "lib/request", ->
         ])
         expect(resp.requestHeaders).to.deep.eq({
           "accept": "*/*"
-          "accept-encoding": "gzip, deflate",
+          "accept-encoding": "gzip, deflate"
+          "connection": "keep-alive"
           "referer": "http://www.github.com/auth"
           "host": "www.github.com"
         })
         expect(resp.allRequestResponses).to.deep.eq([
           {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com"}
             "Request URL":      "http://www.github.com/dashboard"
             "Response Body":    null
             "Response Headers": {"location": "/auth"}
             "Response Status":  301
           }, {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com", "referer": "http://www.github.com/dashboard"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com", "referer": "http://www.github.com/dashboard"}
             "Request URL":      "http://www.github.com/auth"
             "Response Body":    null
             "Response Headers": {"location": "/login"}
             "Response Status":  302
           }, {
             "Request Body":     null
-            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "host": "www.github.com", "referer": "http://www.github.com/auth"}
+            "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com", "referer": "http://www.github.com/auth"}
             "Request URL":      "http://www.github.com/login"
             "Response Body":    "log in"
             "Response Headers": {"content-type": "text/html"}
@@ -214,7 +385,7 @@ describe "lib/request", ->
       })
       .reply(200, {id: 1})
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: {foo: "bar", baz: "quux"}
@@ -231,7 +402,9 @@ describe "lib/request", ->
     it "catches errors", ->
       nock.enableNetConnect()
 
-      request.send({}, @fn, {
+      req = Request({ timeout: 2000 })
+
+      req.sendPromise({}, @fn, {
         url: "http://localhost:1111/foo"
         cookies: false
       })
@@ -247,7 +420,7 @@ describe "lib/request", ->
         "Content-Type": "application/json"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/status.json"
         cookies: false
       })
@@ -261,7 +434,7 @@ describe "lib/request", ->
         "Content-Type": "application/json"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/status.json"
         cookies: false
       })
@@ -276,7 +449,7 @@ describe "lib/request", ->
         "Content-Type": "text/plain"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
       })
@@ -293,9 +466,59 @@ describe "lib/request", ->
       headers = {}
       headers["user-agent"] = "foobarbaz"
 
-      request.send(headers, @fn, {
+      request.sendPromise(headers, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
+
+    it "sends connection: keep-alive by default", ->
+      nock("http://localhost:8080")
+      .matchHeader("connection", "keep-alive")
+      .get("/foo")
+      .reply(200, "it worked")
+
+      request.sendPromise({}, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("it worked")
+
+    it "lower cases headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("test", "true")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {}
+      headers["user-agent"] = "foobarbaz"
+
+      request.sendPromise(headers, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'TEST': true,
+        }
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
+
+    it "allows overriding user-agent in headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("user-agent", "custom-agent")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {'user-agent': 'test'}
+
+      request.sendPromise(headers, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'User-Agent': "custom-agent",
+        },
       })
       .then (resp) ->
         expect(resp.body).to.eq("derp")
@@ -307,7 +530,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
         })
@@ -320,7 +543,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
           headers: {
@@ -336,7 +559,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
           headers: {
@@ -352,7 +575,7 @@ describe "lib/request", ->
         .get("/foo?bar=baz&q=1")
         .reply(200)
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/foo"
           cookies: false
           qs: {
@@ -373,7 +596,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: true
@@ -392,7 +615,7 @@ describe "lib/request", ->
         .get("/dashboard")
         .reply(200, "dashboard")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           method: "POST"
           url: "http://localhost:8080/login"
           cookies: false
@@ -411,7 +634,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -430,7 +653,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -448,7 +671,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -466,7 +689,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
         })
@@ -482,7 +705,7 @@ describe "lib/request", ->
         .reply(200, "<html></html>")
 
       it "takes converts body to x-www-form-urlencoded and sets header", ->
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -504,7 +727,7 @@ describe "lib/request", ->
           baz: "quux"
         }
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -520,7 +743,7 @@ describe "lib/request", ->
       it "does not set json=true", ->
         init = sinon.spy(request.rp.Request.prototype, "init")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -548,7 +771,7 @@ describe "lib/request", ->
         @srv.close()
 
       it "recovers from bad headers", ->
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:9988/foo"
           cookies: false
           headers: {
@@ -561,7 +784,7 @@ describe "lib/request", ->
           expect(err.message).to.eq "TypeError: The header content contains invalid characters"
 
       it "handles weird content in the body just fine", ->
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:9988/foo"
           cookies: false
           json: true
@@ -569,3 +792,32 @@ describe "lib/request", ->
             "x-text": "אבגד"
           }
         })
+
+  context "#sendStream", ->
+    beforeEach ->
+      @fn = sinon.stub()
+
+    it "allows overriding user-agent in headers", ->
+      nock("http://localhost:8080")
+        .matchHeader("user-agent", "custom-agent")
+        .get("/foo")
+        .reply(200, "derp")
+
+      sinon.spy(request, "create")
+      @fn.resolves({})
+
+      headers = {'user-agent': 'test'}
+
+      options =  {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'user-agent': "custom-agent",
+        },
+      }
+
+      request.sendStream(headers, @fn, options)
+      .then (beginFn) ->
+        beginFn()
+        expect(request.create).to.be.calledOnce
+        expect(request.create).to.be.calledWith(options)

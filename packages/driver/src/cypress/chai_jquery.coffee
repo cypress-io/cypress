@@ -2,7 +2,17 @@ _ = require("lodash")
 $ = require("jquery")
 $dom = require("../dom")
 
-selectors = "visible hidden selected checked enabled disabled".split(" ")
+selectors = {
+  visible: "visible"
+  hidden: "hidden"
+  selected: "selected"
+  checked: "checked"
+  enabled: "enabled"
+  disabled: "disabled"
+  focus: "focused"
+  focused: "focused"
+}
+
 attrs = {
   attr: "attribute"
   css: "CSS property"
@@ -172,7 +182,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       else
         _super.apply(@, arguments)
 
-  _.each selectors, (selector) ->
+  _.each selectors, (selectorName, selector) ->
     chai.Assertion.addProperty selector, ->
       assert(
         @,
@@ -180,7 +190,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
         wrap(@).is(":" + selector),
         'expected #{this} to be #{exp}',
         'expected #{this} not to be #{exp}',
-        selector
+        selectorName
       )
 
   _.each attrs, (description, attr) ->

@@ -1,6 +1,5 @@
 _          = require("lodash")
 pkg        = require("@packages/root")
-uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
@@ -352,6 +351,8 @@ openProjectCreate = (projectRoot, socketId, options) ->
     morgan:       false
     report:       true
     isTextTerminal: options.isTextTerminal
+    onWarning: (err) ->
+      console.log(err.message)
     onError: (err) ->
       console.log("")
       if err.details
@@ -821,12 +822,10 @@ module.exports = {
 
     { isHeadless, isHeaded } = browser
 
-    browserName = browser.name
-
     debug("about to run spec %o", {
       spec
       isHeadless
-      browserName
+      browser
     })
 
     screenshots = []
@@ -838,11 +837,11 @@ module.exports = {
     ## to gracefully handle this in promise land
 
     ## if we've been told to record and we're not spawning a headed browser
-    browserCanBeRecorded = (name) ->
-      name is "electron" and isHeadless
+    browserCanBeRecorded = (browser) ->
+      browser.name is "electron" and isHeadless
 
     if video
-      if browserCanBeRecorded(browserName)
+      if browserCanBeRecorded(browser)
         if not videosFolder
           throw new Error("Missing videoFolder for recording")
 
@@ -853,10 +852,10 @@ module.exports = {
       else
         console.log("")
 
-        if browserName is "electron" and isHeaded
+        if browser.name is "electron" and isHeaded
           errors.warning("CANNOT_RECORD_VIDEO_HEADED")
         else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
+          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name)
 
     Promise.resolve(recording)
     .then (props = {}) =>
@@ -941,7 +940,7 @@ module.exports = {
 
       Promise.all([
         system.info(),
-        browsers.ensureAndGetByName(browserName),
+        browsers.ensureAndGetByNameOrPath(browserName),
         @findSpecs(config, specPattern),
         trashAssets(config),
         removeOldProfiles()
