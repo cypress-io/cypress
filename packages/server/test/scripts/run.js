@@ -65,7 +65,7 @@ if (options['inspect-brk']) {
 }
 
 commandAndArguments.args.push(
-  'node_modules/.bin/_mocha',
+  'node_modules/.bin/electron-mocha',
   run
 )
 
@@ -80,8 +80,8 @@ commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
-  '--compilers',
-  'ts:@packages/ts/register,coffee:@packages/coffee/register',
+  '--require-main',
+  '@packages/ts/register,@packages/coffee/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
