@@ -333,6 +333,18 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
+      @$parentWithClipPathAbsolutePositionElOutsideClipPath = add """
+        <div style="position: absolute; clip-path: polygon(0 0, 0 0, 0 0, 0 0);">
+          <span id="clip-path">clip-path</span>
+        </div>
+      """
+
+      @$parentWithClipPathAbsolutePositionElInsideClipPath = add """
+        <div style="position: absolute; clip-path: circle(100%);">
+          <span id="clip-path">clip-path</span>
+        </div>
+      """
+
       add """
         <div id="ancestorTransformMakesElOutOfBoundsOfAncestor" style='margin-left: 100px; overflow: hidden; width: 100px;'>
           <div style='transform: translateX(-100px); width: 200px;'>
@@ -499,6 +511,12 @@ describe "src/cypress/dom/visibility", ->
 
     it "is visible when parent is relatively positioned out of bounds but el is relatively positioned back in bounds", ->
       expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
+
+    it "is hidden when outside of parents clip-path", ->
+      expect(@$parentWithClipPathAbsolutePositionElOutsideClipPath).to.be.hidden
+
+    it "is visible when inside of parents clip-path", ->
+      expect(@$parentWithClipPathAbsolutePositionElInsideClipPath).to.be.visible
 
     it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
       cy.get("#ancestorTransformMakesElOutOfBoundsOfAncestor span").should("be.hidden")
