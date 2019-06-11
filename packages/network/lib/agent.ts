@@ -138,8 +138,18 @@ export class CombinedAgent {
   }
 
   // called by Node.js whenever a new request is made internally
-  // TODO: need to support legacy invocation? https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
-  addRequest(req: http.ClientRequest, options: http.RequestOptions) {
+  addRequest(req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
+    // Legacy API: addRequest(req, host, port, localAddress)
+    // https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
+    if (typeof options === 'string') {
+      // @ts-ignore
+      options = {
+        host: options,
+        port: port!,
+        localAddress
+      }
+    }
+
     const isHttps = isRequestHttps(options)
 
     if (!options.href) {
@@ -190,7 +200,7 @@ class HttpAgent extends http.Agent {
       if (proxy) {
         options.proxy = proxy
 
-        this._addProxiedRequest(req, <RequestOptionsWithProxy>options)
+        return this._addProxiedRequest(req, <RequestOptionsWithProxy>options)
       }
     }
 
