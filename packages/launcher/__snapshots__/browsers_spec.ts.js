@@ -29,14 +29,21 @@ exports['browsers returns the expected list of browsers 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "google-chrome-canary"
-
-},
-{
-  "name": "edge",
-  "family": "chrome",
-  "displayName": "Edge",
-  "versionRegex": {},
-  "profile": true,
-  "binary": "edge"
-}
+  },
+  {
+    "name":"edgeCanary",
+    "family":"chrome",
+    "displayName":"Edge Canary",
+    "versionRegex":{},
+    "profile":true,
+    "binary":"edge-canary"
+  },
+  {
+    "name":"edgeDev",
+    "family":"chrome",
+    "displayName":"Edge Dev",
+    "versionRegex":{},
+    "profile":true,
+    "binary":"edge-dev"
+  }
 ]
