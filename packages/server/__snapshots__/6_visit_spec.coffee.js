@@ -845,8 +845,8 @@ You have set the browser to: 'chrome'
 A video will not be recorded when using this browser.
 
 
-  ✓ normally finishes in less than  XX:XX on localhost with connection: keep-alive
   ✓ normally finishes in less than  XX:XX on localhost with connection: close
+  ✓ normally finishes in less than  XX:XX on localhost with connection: keep-alive
 
   2 passing
 
@@ -899,8 +899,8 @@ exports['e2e visit resolves visits quickly in electron (headless) 1'] = `
   Running: fast_visit_spec.coffee...                                                       (1 of 1) 
 
 
-  ✓ normally finishes in less than  XX:XX on localhost with connection: keep-alive
   ✓ normally finishes in less than  XX:XX on localhost with connection: close
+  ✓ normally finishes in less than  XX:XX on localhost with connection: keep-alive
 
   2 passing
 
