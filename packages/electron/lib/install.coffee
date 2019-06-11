@@ -35,7 +35,7 @@ module.exports = {
   move: (src, dest) ->
     ## src  is ./tmp/Cypress-darwin-x64
     ## dest is ./dist/Cypress
-    fs.moveAsync(src, dest, {clobber: true})
+    fs.moveAsync(src, dest, {overwrite: true})
     .then ->
       ## remove the tmp folder now
       fs.removeAsync(path.dirname(src))
