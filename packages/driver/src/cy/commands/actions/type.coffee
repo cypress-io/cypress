@@ -342,6 +342,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
 
         if elToCheckCurrentlyFocused && elToCheckCurrentlyFocused is $focused
+          ## TODO: not scrolling here, but revisit when scroll algorithm changes
           return type()
 
         $actionability.verify(cy, options.$el, options, {
