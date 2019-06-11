@@ -2,9 +2,6 @@ _ = Cypress._
 $ = Cypress.$
 Promise = Cypress.Promise
 
-require('cypress-plugin-retries')
-Cypress.env('RETRIES', 4)
-
 describe "src/cy/commands/xhr", ->
   before ->
     cy

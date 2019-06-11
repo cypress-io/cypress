@@ -379,7 +379,7 @@ create = (state, queue, retryFn) ->
       message = message.replace(stackTracesRe, "\n")
 
     obj = parseValueActualAndExpected(value, actual, expected)
-    
+
     if shouldShowDiff(error)
       diffObjs = prepareObjsForDiff(obj)
       diff = JsDiff.createPatch('string', diffObjs.actual, diffObjs.expected)
@@ -427,11 +427,11 @@ create = (state, queue, retryFn) ->
 
       consoleProps: =>
         obj = {Command: "assert"}
+
         parsedValues = parseValueActualAndExpected(value, actual, expected)
 
         _.extend obj, parsedValues
-        
-        
+
         _.extend obj, {
           Message: message.replace(bTagOpen, "").replace(bTagClosed, "")
         }
