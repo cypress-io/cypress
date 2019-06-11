@@ -48,7 +48,9 @@ module.exports = {
       user and user.authToken
 
   create: (err) ->
-    return Promise.resolve() if process.env["CYPRESS_ENV"] isnt "production"
+    if process.env["CYPRESS_ENV"] isnt "production" or
+       process.env["CYPRESS_EXCEPTION_REPORTING"] is "0"
+      return Promise.resolve()
 
     Promise.join(@getBody(err), @getAuthToken())
     .spread (body, authToken) ->

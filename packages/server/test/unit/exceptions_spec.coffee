@@ -124,9 +124,22 @@ describe "lib/exceptions", ->
   context ".create", ->
     beforeEach ->
       @env = process.env["CYPRESS_ENV"]
+      sinon.stub(api, "createRaygunException")
 
     afterEach ->
       process.env["CYPRESS_ENV"] = @env
+
+    describe "with CYPRESS_EXCEPTION_REPORTING=0", ->
+      beforeEach ->
+        process.env["CYPRESS_EXCEPTION_REPORTING"] = "0"
+
+      afterEach ->
+        delete process.env["CYPRESS_EXCEPTION_REPORTING"]
+
+      it "immediately resolves", ->
+        exception.create()
+        .then ->
+          expect(api.createRaygunException).to.not.be.called
 
     describe "development", ->
       beforeEach ->
@@ -134,6 +147,8 @@ describe "lib/exceptions", ->
 
       it "immediately resolves", ->
         exception.create()
+        .then ->
+          expect(api.createRaygunException).to.not.be.called
 
     describe "production", ->
       beforeEach ->
@@ -147,8 +162,6 @@ describe "lib/exceptions", ->
         })
 
         sinon.stub(exception, "getAuthToken").resolves("auth-token-123")
-
-        sinon.stub(api, "createRaygunException")
 
       it "sends body + authToken to api.createRaygunException", ->
         api.createRaygunException.resolves()
