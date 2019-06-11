@@ -1794,7 +1794,7 @@ declare namespace Cypress {
     $$: JQueryStatic
   }
 
-  interface Agent<A extends sinon.SinonSpy> {
+  interface SinonSpyAgent<A extends sinon.SinonSpy> {
     log(shouldOutput?: boolean): Omit<A, 'withArgs'> & Agent<A>
 
     /**
@@ -1817,6 +1817,8 @@ declare namespace Cypress {
      */
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
   }
+
+  type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
     whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
@@ -3987,7 +3989,7 @@ declare namespace Cypress {
     })
     ```
      */
-    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
+    (action: 'window:confirm', fn: ((text: string) => false | void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
@@ -4004,7 +4006,7 @@ declare namespace Cypress {
     ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
+    (action: 'window:alert', fn: ((text: string) => void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
