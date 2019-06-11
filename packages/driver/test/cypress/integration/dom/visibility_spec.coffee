@@ -335,13 +335,25 @@ describe "src/cypress/dom/visibility", ->
 
       @$parentWithClipPathAbsolutePositionElOutsideClipPath = add """
         <div style="position: absolute; clip-path: polygon(0 0, 0 0, 0 0, 0 0);">
-          <span id="clip-path">clip-path</span>
+          <span>clip-path</span>
         </div>
       """
 
       @$parentWithClipPathAbsolutePositionElInsideClipPath = add """
         <div style="position: absolute; clip-path: circle(100%);">
-          <span id="clip-path">clip-path</span>
+          <span>clip-path</span>
+        </div>
+      """
+
+      @$parentWithTransformScaleElOutsideScale = add """
+        <div style="transform: scale(0,0)">
+          <span>TRANSFORMERS</span>
+        </div>
+      """
+
+      @$parentWithTransformScaleElInsideScale = add """
+        <div style="transform: scale(1,1)">
+          <span>TRANSFORMERS</span>
         </div>
       """
 
@@ -513,10 +525,16 @@ describe "src/cypress/dom/visibility", ->
       expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
 
     it "is hidden when outside of parents clip-path", ->
-      expect(@$parentWithClipPathAbsolutePositionElOutsideClipPath).to.be.hidden
+      expect(@$parentWithClipPathAbsolutePositionElOutsideClipPath.find("span")).to.be.hidden
 
     it "is visible when inside of parents clip-path", ->
-      expect(@$parentWithClipPathAbsolutePositionElInsideClipPath).to.be.visible
+      expect(@$parentWithClipPathAbsolutePositionElInsideClipPath.find("span")).to.be.visible
+
+    it "is hidden when outside parents transform scale", ->
+      expect(@$parentWithTransformScaleElOutsideScale.find("span")).to.be.hidden
+
+    it "is visible when inside of parents transform scale", ->
+      expect(@$@$parentWithTransformScaleElInsideScale.find("span")).to.be.visible
 
     it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
       cy.get("#ancestorTransformMakesElOutOfBoundsOfAncestor span").should("be.hidden")
