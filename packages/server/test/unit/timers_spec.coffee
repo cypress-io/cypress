@@ -5,9 +5,6 @@ _ = require("lodash")
 parent = require("#{root}timers/parent")
 
 describe "timers/parent", ->
-  it "tests should be running in electron", ->
-    expect(process.versions.electron).to.not.be.undefined
-
   context ".fix", ->
     beforeEach ->
       parent.restore()
