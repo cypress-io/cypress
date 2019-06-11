@@ -38,7 +38,7 @@
     "pretest-e2e-chrome": "npm run check-deps-pre",
     "pretest-cov": "npm run check-deps-pre",
     "pretest-cov-process": "npm run check-deps-pre",
-    "precodecov": "npm run check-deps-pre",
+    "precodecov": "npm run check-deps-pre"
   },
   "files": [
     "config",
