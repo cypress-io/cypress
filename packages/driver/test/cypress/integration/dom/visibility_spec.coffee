@@ -357,6 +357,15 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
+      @$parentsWithBackfaceVisibilityHidden = add """
+        <div style="position: absolute; width: 200px; height: 260px; background: red; backface-visibility: hidden;">
+          <span id="front">front</span>
+        </div>
+        <div style="position: absolute; width: 200px; height: 260px; background: blue; backface-visibility: hidden; transform: rotateY(180deg);">
+          <span id="back" >back</span>
+        </div>
+      """
+
       add """
         <div id="ancestorTransformMakesElOutOfBoundsOfAncestor" style='margin-left: 100px; overflow: hidden; width: 100px;'>
           <div style='transform: translateX(-100px); width: 200px;'>
@@ -534,7 +543,13 @@ describe "src/cypress/dom/visibility", ->
       expect(@$parentWithTransformScaleElOutsideScale.find("span")).to.be.hidden
 
     it "is visible when inside of parents transform scale", ->
-      expect(@$@$parentWithTransformScaleElInsideScale.find("span")).to.be.visible
+      expect(@$parentWithTransformScaleElInsideScale.find("span")).to.be.visible
+
+    it "is visible when backface not transformed", ->
+      expect(@$parentsWithBackfaceVisibilityHidden.find("#front")).to.be.visible
+
+    it "is hidden when backface transformed", ->
+      expect(@$parentsWithBackfaceVisibilityHidden.find("#back")).to.be.hidden
 
     it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
       cy.get("#ancestorTransformMakesElOutOfBoundsOfAncestor span").should("be.hidden")
