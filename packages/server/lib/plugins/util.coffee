@@ -1,7 +1,9 @@
 _ = require("lodash")
 EE = require("events")
 debug = require("debug")("cypress:server:plugins")
+which = require("which")
 Promise = require("bluebird")
+resolveDir = require("resolve-dir")
 
 UNDEFINED_SERIALIZED = "__cypress_undefined__"
 
@@ -10,6 +12,24 @@ serializeError = (err) ->
 
 module.exports = {
   serializeError: serializeError
+
+  # instead of the built-in Node process, specify a path to 3rd party Node
+  # https://devdocs.io/node/child_process#child_process_child_process_fork_modulepath_args_options
+  # pass path to Node, acceptable
+  #   relative to home directory ~/.nvm/versions/node/v6.10.2/bin/node
+  #   absolute /usr/local/bin/node
+  #   "find" if the user wants us to find installed Node
+  findNode: (userOption) ->
+    if userOption is "find"
+      # TODO switch to ASYNC
+      debug("finding Node")
+      resolvedNode = which.sync("node", { nothrow: true })
+      debug("found Node %s", resolvedNode)
+    else
+      resolvedNode = resolveDir(userOption)
+      debug("using custom Node path '%s' resolved '%s'", userOption, resolvedNode)
+
+    resolvedNode
 
   wrapIpc: (aProcess) ->
     emitter = new EE()
@@ -58,7 +78,7 @@ module.exports = {
           value = undefined
 
         debug("promise resolved for id '#{invocationId}' with value", value)
-        
+
         resolve(value)
 
       ipc.on("promise:fulfilled:#{invocationId}", handler)

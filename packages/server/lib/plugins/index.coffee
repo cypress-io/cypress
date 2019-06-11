@@ -5,7 +5,6 @@ debug = require("debug")("cypress:server:plugins")
 Promise = require("bluebird")
 errors = require("../errors")
 util = require("./util")
-resolveDir = require("resolve-dir")
 
 pluginsProcess = null
 registeredEvents = {}
@@ -45,14 +44,13 @@ module.exports = {
       }
 
       if config.node
-        # instead of the built-in Node process, specify a path to 3rd party Node
-        # https://devdocs.io/node/child_process#child_process_child_process_fork_modulepath_args_options
-        # pass path to Node, acceptable
-        #   relative to home directory ~/.nvm/versions/node/v6.10.2/bin/node
-        #   absolute /usr/local/bin/node
-        resolvedNode = resolveDir(config.node)
-        debug("using custom Node path %s resolved %s", config.node, resolvedNode)
-        childOptions.execPath = resolvedNode
+        resolvedNode = util.findNode(config.node)
+
+        if resolvedNode
+          debug("using Node %s", resolvedNode)
+          childOptions.execPath = resolvedNode
+        else
+          console.error("Could not find Node from config %s, using bundled Node %s", config.node, process.version)
 
       pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
       ipc = util.wrapIpc(pluginsProcess)
