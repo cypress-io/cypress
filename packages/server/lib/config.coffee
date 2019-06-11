@@ -53,6 +53,7 @@ configKeys = toWords """
   videoUploadOnPasses
   watchForFileChanges
   waitForAnimations
+  node
 """
 
 breakingConfigKeys = toWords """
@@ -94,7 +95,7 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  trashAssetsBeforeRuns: true
+  trashAssetsBeforeRuns:         true
   autoOpen:                      false
   viewportWidth:                 1000
   viewportHeight:                660
@@ -105,7 +106,8 @@ defaults = {
   integrationFolder:             "cypress/integration"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
-  pluginsFile:                    "cypress/plugins"
+  pluginsFile:                   "cypress/plugins"
+  node:                          null
 
   ## deprecated
   javascripts:                   []
@@ -144,6 +146,7 @@ validationRules = {
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
+  node: v.isString
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->

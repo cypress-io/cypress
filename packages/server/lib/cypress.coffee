@@ -51,9 +51,11 @@ module.exports = {
       if @isCurrentlyRunningElectron()
         ## just run the gui code directly here
         ## and pass our options directly to main
+        debug("running Electron currently")
         require("./modes")(mode, options)
       else
         new Promise (resolve) ->
+          debug("starting Electron")
           cypressElectron = require("@packages/electron")
 
           fn = (code) ->
