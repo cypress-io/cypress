@@ -8,7 +8,9 @@
 
 const cp = require('child_process')
 const path = require('path')
-const log = require('debug')('cypress:server:timers')
+const debug = require('debug')('cypress:server:timers:parent')
+const net = require('net')
+const os = require('os')
 
 const st = global.setTimeout
 const si = global.setInterval
@@ -39,7 +41,7 @@ function fix () {
 
   function sendAndQueue (id, cb, ms, args) {
     // const started = Date.now()
-    log('queuing timer id %d after %d ms', id, ms)
+    debug('queuing timer id %d after %d ms', id, ms)
 
     queue[id] = {
       // started,
@@ -62,32 +64,58 @@ function fix () {
   }
 
   function clear (id) {
-    log('clearing timer id %d from queue %o', id, queue)
+    debug('clearing timer id %d from queue %o', id, queue)
 
     delete queue[id]
   }
 
   // fork the child process
-  let child = cp.fork(path.join(__dirname, 'child.js'), [], {
+  let ipc = net.createServer()
+  const ipcPath = path.join(os.tmpdir(), `cy-timers-${Math.random().toString()}`)
+
+  debug('listening on %o', { ipcPath })
+
+  let child = cp.spawn('node', [
+    path.join(__dirname, 'child.js'),
+    ipcPath,
+  ], {
     stdio: 'inherit',
   })
-  .on('message', (obj = {}) => {
-    const { id } = obj
 
-    const msg = queue[id]
+  ipc.listen({
+    path: ipcPath,
+  })
 
-    // if we didn't get a msg
-    // that means we must have
-    // cleared the timeout already
-    if (!msg) {
-      return
+  ipc.on('connection', (sock) => {
+    debug('connection received')
+    child.send = (obj) => {
+      obj = JSON.stringify(obj)
+      debug('sending %o', { obj })
+
+      return sock.write(obj)
     }
 
-    const { cb, args } = msg
+    sock.on('data', (obj = '{}') => {
+      debug('received %o', { obj: obj.toString() })
+      obj = JSON.parse(obj.toString())
 
-    clear(id)
+      const { id } = obj
 
-    cb(...args)
+      const msg = queue[id]
+
+      // if we didn't get a msg
+      // that means we must have
+      // cleared the timeout already
+      if (!msg) {
+        return
+      }
+
+      const { cb, args } = msg
+
+      clear(id)
+
+      cb(...args)
+    })
   })
 
   // In linux apparently the child process is never

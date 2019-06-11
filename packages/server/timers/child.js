@@ -1,20 +1,34 @@
-const log = require('debug')('cypress:server:timers')
+const debug = require('debug')('cypress:server:timers:child')
+const net = require('net')
 
-process.on('message', (obj = {}) => {
+const ipcPath = process.argv.pop()
+
+const sock = net.createConnection({
+  path: ipcPath,
+}, () => {
+  debug('connected to %o', { ipcPath })
+})
+
+sock.on('data', (obj = {}) => {
+  debug('received %o', obj)
+  obj = JSON.parse(obj.toString())
+
   const { id, ms } = obj
 
-  log('child received timer id %d', id)
+  debug('child received timer id %d', id)
 
   setTimeout(() => {
     try {
-      log('child sending timer id %d', id)
-
-      // process.send could throw if
-      // parent process has already exited
-      process.send({
+      const outObj = JSON.stringify({
         id,
         ms,
       })
+
+      debug('child sending timer id %d %o', id, outObj)
+
+      // process.send could throw if
+      // parent process has already exited
+      sock.write(outObj)
     } catch (err) {
       // eslint-disable no-empty
     }
