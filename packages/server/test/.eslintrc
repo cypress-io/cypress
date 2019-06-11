@@ -1,0 +1,8 @@
+{
+  "globals": {
+    "sinon": true
+  },
+  "extends": [
+    "plugin:cypress-dev/tests"
+  ]
+}
