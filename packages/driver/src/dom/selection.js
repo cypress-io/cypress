@@ -54,7 +54,7 @@ const _getSelectionBoundsFromContentEditable = function (el) {
       const range = sel.getRangeAt(0)
 
       //# if div[contenteditable] > text
-      const hostContenteditable = _getHostContenteditable(range.commonAncestorContainer)
+      const hostContenteditable = getHostContenteditable(range.commonAncestorContainer)
 
       if (hostContenteditable === el) {
         return {
@@ -123,10 +123,16 @@ const _insertSubstring = (curText, newText, [start, end]) => {
   return curText.substring(0, start) + newText + curText.substring(end)
 }
 
-const _getHostContenteditable = function (el) {
+const _hasContenteditableAttr = (el) => {
+  const attr = $elements.tryCallNativeMethod(el, 'getAttribute', 'contenteditable')
+
+  return attr !== undefined && attr !== null && attr !== 'false'
+}
+
+const getHostContenteditable = function (el) {
   let curEl = el
 
-  while (curEl.parentElement && !$elements.tryCallNativeMethod(curEl, 'getAttribute', 'contenteditable')) {
+  while (curEl.parentElement && !_hasContenteditableAttr(curEl)) {
     curEl = curEl.parentElement
   }
 
@@ -134,7 +140,7 @@ const _getHostContenteditable = function (el) {
   //# so act as if the original element is the host contenteditable
   //# TODO: remove this when we no longer click before type and move
   //# cursor to the end
-  if (!$elements.callNativeMethod(curEl, 'getAttribute', 'contenteditable')) {
+  if (!_hasContenteditableAttr(curEl)) {
     return el
   }
 
@@ -451,7 +457,7 @@ const moveSelectionToEnd = function (el) {
     //# to selectAll and then collapse so we use the Selection API
     const doc = $document.getDocumentFromElement(el)
     const range = $elements.callNativeMethod(doc, 'createRange')
-    const hostContenteditable = _getHostContenteditable(el)
+    const hostContenteditable = getHostContenteditable(el)
     let lastTextNode = _getInnerLastChild(hostContenteditable)
 
     if (lastTextNode.tagName === 'BR') {
@@ -593,6 +599,7 @@ module.exports = {
   deleteSelectionContents,
   moveSelectionToEnd,
   getCaretPosition,
+  getHostContenteditable,
   moveCursorLeft,
   moveCursorRight,
   moveCursorUp,

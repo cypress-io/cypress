@@ -1783,6 +1783,15 @@ declare namespace Cypress {
      * @see https://on.cypress.io/writefile
      */
     writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
+
+    /**
+     * jQuery library bound to the AUT
+     *
+     * @see https://on.cypress.io/$
+     * @example
+     *    cy.$$('p')
+     */
+    $$: JQueryStatic
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
