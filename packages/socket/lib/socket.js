@@ -4,14 +4,11 @@ const server = require('socket.io')
 const version = require('socket.io-client/package.json').version
 const clientPath = require.resolve('socket.io-client')
 const client = require('./client')
-const circularParser = require('socket.io-circular-parser')
 
 module.exports = {
   server,
 
   client,
-
-  circularParser,
 
   getPathToClientSource () {
     // clientPath returns the path to socket.io-client/lib/index.js

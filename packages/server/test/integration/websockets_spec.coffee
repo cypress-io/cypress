@@ -175,8 +175,6 @@ describe "Web Sockets", ->
         @wsClient = socketIo.client(@cfg.proxyUrl, {
           path: @cfg.socketIoRoute
           transports: ["websocket"]
-          parser: socketIo.circularParser
-          rejectUnauthorized: false
         })
         @wsClient.on "connect", -> done()
 
@@ -199,8 +197,6 @@ describe "Web Sockets", ->
           agent: agent
           path: @cfg.socketIoRoute
           transports: ["websocket"]
-          parser: socketIo.circularParser
-          rejectUnauthorized: false
         })
         @wsClient.on "connect", -> done()
 
@@ -224,8 +220,6 @@ describe "Web Sockets", ->
         @wsClient = socketIo.client("https://localhost:#{wssPort}", {
           agent: agent
           path: @cfg.socketIoRoute
-          parser: socketIo.circularParser
-          rejectUnauthorized: false
         })
         @wsClient.on "connect", -> done()
 
