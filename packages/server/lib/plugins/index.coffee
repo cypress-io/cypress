@@ -114,7 +114,7 @@ module.exports = {
     isRegistered
 
   execute: (event, args...) ->
-    debug("execute plugin event '#{event}' with args: %o %o %o", args...)
+    debug("execute plugin event '#{event}' Node '#{process.version}' with args: %o %o %o", args...)
     registeredEvents[event](args...)
 
   ## for testing purposes
