@@ -114,10 +114,10 @@ describe "app/background", ->
     it "can connect", (done) ->
       @server.on "connection", -> done()
 
-      background.connect("http://localhost:#{PORT}", "/__socket.io")
+      background.connect("http://localhost:#{PORT}", "/__socket.io", io)
 
     it "emits 'automation:client:connected'", (done) ->
-      client = background.connect("http://localhost:#{PORT}", "/__socket.io")
+      client = background.connect("http://localhost:#{PORT}", "/__socket.io", io)
 
       @sandbox.spy(client, "emit")
 
@@ -127,7 +127,7 @@ describe "app/background", ->
 
     it "listens to cookie changes", (done) ->
       addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener")
-      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+      client      = background.connect("http://localhost:#{PORT}", "/__socket.io", io)
 
       client.on "connect", _.once ->
         expect(addListener).to.be.calledOnce
@@ -136,7 +136,7 @@ describe "app/background", ->
   context "onChanged", ->
     it "does not emit when cause is overwrite", (done) ->
       addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener")
-      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+      client      = background.connect("http://localhost:#{PORT}", "/__socket.io", io)
 
       @sandbox.spy(client, "emit")
 
@@ -152,7 +152,7 @@ describe "app/background", ->
       info = { cause: "explicit", cookie: {name: "foo", value: "bar"} }
 
       addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener").yieldsAsync(info)
-      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+      client      = background.connect("http://localhost:#{PORT}", "/__socket.io", io)
 
       client.on "connect", ->
         client.emit = _.once (req, msg, data) ->
@@ -266,7 +266,7 @@ describe "app/background", ->
       done = _.once(done)
       @server.on "connection", (@socket) => done()
 
-      @client = background.connect("http://localhost:#{PORT}", "/__socket.io")
+      @client = background.connect("http://localhost:#{PORT}", "/__socket.io", io)
 
     describe "get:cookies", ->
       beforeEach ->

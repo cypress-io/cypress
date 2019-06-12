@@ -2,7 +2,7 @@ map     = require("lodash/map")
 pick    = require("lodash/pick")
 once    = require("lodash/once")
 Promise = require("bluebird")
-{ circularParser } = require("@packages/socket")
+io = require("@packages/socket")
 
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
@@ -14,10 +14,9 @@ firstOrNull = (cookies) ->
   cookies[0] ? null
 
 connect = (host, path, io) ->
-  io ?= global.io
-
-  ## bail if io isnt defined
-  return if not io
+  if not io.connect
+    ## running in node, return
+    return
 
   listenToCookieChanges = once ->
     chrome.cookies.onChanged.addListener (info) ->
@@ -45,7 +44,7 @@ connect = (host, path, io) ->
   client = io.connect(host, {
     path: path,
     transports: ["websocket"]
-    parser: circularParser
+    parser: io.circularParser
   })
 
   client.on "automation:request", (id, msg, data) ->
@@ -77,7 +76,7 @@ connect = (host, path, io) ->
   return client
 
 ## initially connect
-connect(HOST, PATH, global.io)
+connect(HOST, PATH, io)
 
 automation = {
   connect: connect
