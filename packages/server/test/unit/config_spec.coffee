@@ -951,10 +951,11 @@ describe "lib/config", ->
           version: "0.12.0"
         })
 
-    it "does not merge CYPRESS_ENV", ->
+    it "does not merge reserved environment variables", ->
       obj = {
         CYPRESS_ENV: "production"
         CYPRESS_FOO: "bar"
+        CYPRESS_CRASH_REPORTS: "0"
       }
 
       expect(config.getProcessEnvVars(obj)).to.deep.eq({

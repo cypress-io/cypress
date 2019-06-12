@@ -129,12 +129,12 @@ describe "lib/exceptions", ->
     afterEach ->
       process.env["CYPRESS_ENV"] = @env
 
-    describe "with CYPRESS_EXCEPTION_REPORTING=0", ->
+    describe "with CYPRESS_CRASH_REPORTS=0", ->
       beforeEach ->
-        process.env["CYPRESS_EXCEPTION_REPORTING"] = "0"
+        process.env["CYPRESS_CRASH_REPORTS"] = "0"
 
       afterEach ->
-        delete process.env["CYPRESS_EXCEPTION_REPORTING"]
+        delete process.env["CYPRESS_CRASH_REPORTS"]
 
       it "immediately resolves", ->
         exception.create()

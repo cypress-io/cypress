@@ -49,7 +49,7 @@ module.exports = {
 
   create: (err) ->
     if process.env["CYPRESS_ENV"] isnt "production" or
-       process.env["CYPRESS_EXCEPTION_REPORTING"] is "0"
+       process.env["CYPRESS_CRASH_REPORTS"] is "0"
       return Promise.resolve()
 
     Promise.join(@getBody(err), @getAuthToken())
