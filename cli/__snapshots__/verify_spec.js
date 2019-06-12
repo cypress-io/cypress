@@ -364,23 +364,49 @@ It looks like this is your first time using Cypress: 1.2.3
 
  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
-Error: Your system is missing the dependency: XVFB
+Error: Xvfb exited with a non zero exit code.
 
-Install XVFB and run Cypress again.
+There was a problem spawning Xvfb.
 
-Read our documentation on dependencies for more information:
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
+This is likely a problem with your system, permissions, or installation of Xvfb.
 
 ----------
 
-Caught error trying to run XVFB: "test without xvfb"
+Error: test without xvfb
 
 ----------
 
 Platform: darwin (Foo-OsVersion)
 Cypress Version: 1.2.3
 
+`
+
+exports['tried to verify twice, on the first try got the DISPLAY error'] = `
+Cypress verification failed.
+
+Cypress failed to start after spawning a new Xvfb server.
+
+The error logs we received were:
+
+----------
+
+[some noise here] Gtk: cannot open display: 987
+some other error
+again with
+some weird indent
+
+----------
+
+This is usually caused by a missing library or dependency.
+
+The error above should indicate which dependency is missing.
+
+[34mhttps://on.cypress.io/required-dependencies[39m
+
+If you are using Docker, we provide containers with all required dependencies installed.
+
+----------
+
+Platform: linux (Foo-OsVersion)
+Cypress Version: 1.2.3
 `

@@ -40,6 +40,17 @@ namespace CypressEnvTests {
   })
 }
 
+namespace CypressIsCyTests {
+  Cypress.isCy(cy) // $ExpectType boolean
+  Cypress.isCy(undefined) // $ExpectType boolean
+
+  const chainer = cy.wrap("foo").then(function() {
+    if (Cypress.isCy(chainer)) {
+      chainer // $ExpectType Chainable<string>
+    }
+  })
+}
+
 namespace CypressCommandsTests {
   Cypress.Commands.add('newCommand', () => {
     return
@@ -76,6 +87,12 @@ namespace CypressLogsTest {
   log.get() // $ExpectType LogConfig
   log.get('name') // $ExpectType string
   log.get('$el') // $ExpectType JQuery<HTMLElement>
+}
+
+namespace CypressLocalStorageTest {
+  Cypress.LocalStorage.clear = function(keys) {
+    keys // $ExpectType string[] | undefined
+  }
 }
 
 cy.wrap({ foo: [1, 2, 3] })

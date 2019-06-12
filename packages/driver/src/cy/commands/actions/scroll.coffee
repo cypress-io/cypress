@@ -194,7 +194,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $container.contentWindow = $container
 
       ## throw if we're trying to scroll multiple containers
-      if $container.length > 1
+      if (!isWin && $container.length > 1)
         $errUtils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
 
       _.defaults(options, {

@@ -113,7 +113,7 @@ defaults = (state, config, obj) ->
     if not parentOrChildRe.test(obj.type)
       ## does this command have a previously linked command
       ## by chainer id
-      obj.type = if current.hasPreviouslyLinkedCommand() then "child" else "parent"
+      obj.type = if current?.hasPreviouslyLinkedCommand() then "child" else "parent"
 
     _.defaults(obj, {
       event: false
@@ -132,7 +132,7 @@ defaults = (state, config, obj) ->
 
     # if obj.isCurrent
       ## stringify the obj.message (if it exists) or current.get("args")
-    obj.message = $utils.stringify(obj.message ? current.get("args"))
+    obj.message = $utils.stringify(obj.message ? current?.get("args"))
 
     ## allow type to by a dynamic function
     ## so it can conditionally return either
@@ -436,10 +436,13 @@ create = (Cypress, cy, state, config) ->
 
     logs[id] = true
 
-  logFn = (obj = {}) ->
+  logFn = (options = {}) ->
+    if !_.isObject(options)
+      $utils.throwErrByPath "log.invalid_argument", {args: { arg: options }}
+
     attributes = {}
 
-    log = Log(state, config, obj)
+    log = Log(state, config, options)
 
     ## add event emitter interface
     $Events.extend(log)
@@ -451,7 +454,7 @@ create = (Cypress, cy, state, config) ->
     ## as fast as every 4ms
     log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
 
-    log.set(obj)
+    log.set(options)
 
     ## if snapshot was passed
     ## in, go ahead and snapshot
@@ -479,6 +482,10 @@ create = (Cypress, cy, state, config) ->
     addToLogs(log)
 
     triggerLog(log)
+
+    ## if not current state then the log is being run
+    ## with no command reference, so just end the log
+    if not state("current") then log.end({silent: true})
 
     return log
 

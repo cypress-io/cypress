@@ -8,15 +8,15 @@ $LocalStorage = {
   localStorage: null
   remoteStorage: null
 
-  clear: (keys, local, remote) ->
+  clear: (keys) ->
     # TODO: update this to $errUtils.throwErrByPath() if uncommented
     # throw new Error("Cypress.LocalStorage is missing local and remote storage references!") if not @localStorage or not @remoteStorage
 
     ## make sure we always have an array here with all falsy values removed
     keys = _.compact([].concat(keys))
 
-    local ?= @localStorage
-    remote ?= @remoteStorage
+    local = @localStorage
+    remote = @remoteStorage
 
     storages = _.compact([local, remote])
 

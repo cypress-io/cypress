@@ -47,12 +47,35 @@ describe "driver/src/cypress/index", ->
 
         done()
 
-  context "Log", ->
+  context ".isCy", ->
+    it "returns true on cy, cy chainable", ->
+      expect(Cypress.isCy(cy)).to.be.true
+      chainer = cy.wrap().then ->
+        expect(Cypress.isCy(chainer)).to.be.true
+
+    it "returns false on non-cy objects", ->
+      expect(Cypress.isCy(undefined)).to.be.false
+      expect(Cypress.isCy(() => {})).to.be.false
+
+  context ".Log", ->
     it "throws when using Cypress.Log.command()", ->
       fn = ->
         Cypress.Log.command({})
 
       expect(fn).to.throw(/has been renamed to Cypress.log/)
+
+    it "throws when passing non-object to Cypress.log()", ->
+      fn = ->
+        Cypress.log('My Log')
+
+      expect(fn).to.throw(/Cypress.log() can only be called with an options object. Your argument was/)
+      expect(fn).to.throw(/My Log/)
+
+    it "does not throw when Cypress.log() called outside of command", ->
+      fn = ->
+        Cypress.log({ message: 'My Log' })
+
+      expect(fn).to.not.throw()
 
   context "DeprecatedCommanInterface", ->
     it "throws when using Cypress.add...Command", ->

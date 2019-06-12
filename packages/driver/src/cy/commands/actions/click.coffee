@@ -45,7 +45,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $el = $dom.wrap(el)
 
         domEvents = {}
-        $previouslyFocusedEl = null
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
@@ -150,9 +149,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## without firing the focus event
             $previouslyFocused = cy.getFocused()
 
-            if el = cy.needsForceFocus()
-              cy.fireFocus(el)
-
             el = $elToClick.get(0)
 
             domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
@@ -170,21 +166,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
               ## retrieve the first focusable $el in our parent chain
               $elToFocus = $elements.getFirstFocusableEl($elToClick)
-
               if cy.needsFocus($elToFocus, $previouslyFocused)
-                cy.fireFocus($elToFocus.get(0))
-
-                ## if we are currently trying to focus
-                ## the body then calling body.focus()
-                ## is a noop, and it will not blur the
-                ## current element, which is all so wrong
-                if $elToFocus.is("body")
+                if $dom.isWindow($elToFocus)
+                  # if the first focusable element from the click
+                  # is the window, then we can skip the focus event
+                  # since the user has clicked a non-focusable element
                   $focused = cy.getFocused()
-
-                  ## if the current focused element hasn't changed
-                  ## then blur manually
-                  if $elements.isSame($focused, $previouslyFocused)
-                    cy.fireBlur($focused.get(0))
+                  if $focused
+                    cy.fireBlur $focused.get(0)
+                else
+                  # the user clicked inside a focusable element
+                  cy.fireFocus $elToFocus.get(0)
 
               afterMouseDown($elToClick, coords)
         })

@@ -28,8 +28,8 @@ exports['e2e js error handling fails 1'] = `
       ✓ t6
     cross origin script errors
       5) explains where script errored
-    bad gzipped js
-      ✓ it does not crash
+    bad gzipped content
+      ✓ destroys the request socket
 
 
   3 passing

@@ -34,7 +34,7 @@
     "coffeeify": "2.1.0",
     "cross-env": "5.2.0",
     "eol": "0.9.1",
-    "fs-extra": "0.30.0",
+    "fs-extra": "4.0.3",
     "gulp": "3.9.1",
     "gulp-clean": "0.4.0",
     "gulp-rename": "1.4.0",

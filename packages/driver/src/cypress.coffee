@@ -166,6 +166,7 @@ class $Cypress
 
     ## create cy and expose globally
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
+    @isCy = @cy.isCy
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
     @runner = $Runner.create(specWindow, @mocha, @, @cy)

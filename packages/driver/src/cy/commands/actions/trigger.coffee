@@ -32,6 +32,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         animationDistanceThreshold: config("animationDistanceThreshold")
       })
 
+      if $dom.isWindow(options.$el)
+        ## get this into a jquery object
+        options.$el = $dom.wrap(options.$el)
+
+
       ## omit entries we know aren't part of an event, but pass anything
       ## else through so user can specify what the event object needs
       eventOptions = _.omit(options, "log", "$el", "position", "x", "y", "waitForAnimations", "animationDistanceThreshold")

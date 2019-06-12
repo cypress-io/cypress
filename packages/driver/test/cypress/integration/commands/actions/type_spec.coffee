@@ -2348,6 +2348,87 @@ describe "src/cy/commands/actions/type", ->
 
       it "respects being formatted by input event handlers"
 
+      it "accurately returns host contenteditable attr", ->
+        hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=true attr", ->
+        hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=\"\" attr", ->
+        hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=\"foo\" attr", ->
+        hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns same el with no falsey contenteditable=\"false\" attr", ->
+        hostEl = cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+
+            
+      ## https://github.com/cypress-io/cypress/issues/3001
+      describe('skip actionability if already focused', () =>
+        it('inside input', () =>
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+            <input type="text" id="foo">
+            '))
+
+          cy.$$('#foo').focus()
+          
+
+          cy.focused().type('new text').should('have.prop', 'value', 'new text')
+        )
+
+        it('inside textarea', () =>
+         
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
+            <textarea id="foo"></textarea>
+            '))
+
+          cy.$$('#foo').focus()
+        
+
+          cy.focused().type('new text').should('have.prop', 'value', 'new text')
+        )
+
+        it('inside contenteditable', () =>
+      
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+            <div id="foo" contenteditable>
+            <div>foo</div><div>bar</div><div>baz</div>
+            </div>
+            '))
+          win = cy.state('window')
+          doc = window.document
+
+          cy.$$('#foo').focus()
+          inner = cy.$$('div:contains(bar):last')
+
+          range = doc.createRange()
+
+          range.selectNodeContents(inner[0])
+          sel = win.getSelection()
+
+          sel.removeAllRanges()
+
+          sel.addRange(range)
+        
+
+          cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
+        )
+      )
+
       it "can arrow from maxlength", ->
         cy.get('input:first').invoke('attr', 'maxlength', "5").type('foobar{leftarrow}')
         cy.window().then (win) ->
@@ -2623,6 +2704,50 @@ describe "src/cy/commands/actions/type", ->
           form.find("input").keypress (e) -> e.preventDefault()
 
           cy.get("#multiple-inputs-and-button-submit input:first").type("f{enter}").then -> done()
+
+      context "2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=reset]", ->
+        it "triggers form submit", (done) ->
+          @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}")
+
+        it "causes click event on the button[type=submit]", (done) ->
+          @$forms.find("#multiple-inputs-and-reset-and-submit-buttons button[type=submit]").click (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}")
+
+        it "does not cause click event on the button[type=submit] if keydown is defaultPrevented on input", (done) ->
+          form = @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit ->
+            done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("f{enter}").then -> done()
+
+      context "2 inputs, 1 'reset' button, 1 'button' button, and 1 button with no type (default submit)", ->
+        it "triggers form submit", (done) ->
+          @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}")
+
+        it "causes click event on the button", (done) ->
+          @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type button:last").click (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}")
+
+        it "does not cause click event on the button if keydown is defaultPrevented on input", (done) ->
+          form = @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit ->
+            done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("f{enter}").then -> done()
 
       context "2 inputs, 1 'submit' element button", ->
         it "triggers form submit", (done) ->

@@ -380,6 +380,9 @@ module.exports = {
   location:
     invalid_key: "Location object does not have key: `{{key}}`"
 
+  log:
+    invalid_argument: "Cypress.log() can only be called with an options object. Your argument was: '{{arg}}'"
+
   miscellaneous:
     custom_command_interface_changed: (obj) -> {
       message: """
@@ -471,6 +474,21 @@ module.exports = {
       `Cypress.Log.command()` has been renamed to `Cypress.log()`
 
       Please update your code. You should be able to safely do a find/replace.
+    """
+    dangling_commands: """
+      Oops, Cypress detected something wrong with your test code.
+
+      The test has finished but Cypress still has commands in its queue.
+      The {{numCommands}} queued commands that have not yet run are:
+
+      {{commands}}
+
+      In every situation we've seen, this has been caused by programmer error.
+      Most often this indicates a race condition due to a forgotten 'return' or from commands in a previously run test bleeding into the current test.
+
+      For a much more thorough explanation including examples please review this error here:
+
+      https://on.cypress.io/command-queue-ended-early
     """
     invalid_command: "Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n"
     invalid_overwrite: "Cannot overwite command for: `{{name}}`. An existing command does not exist by that name."
@@ -574,6 +592,15 @@ module.exports = {
     invalid_arguments: "#{cmd('reload')} can only accept a boolean or `options` as its arguments."
 
   request:
+    status_code_flags_invalid: """
+    #{cmd('request')} was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }.
+
+    These options are incompatible with each other.
+
+     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
+    """
     auth_invalid: "#{cmd('request')} must be passed an object literal for the `auth` option."
     gzip_invalid: "#{cmd('request')} requires the `gzip` option to be a boolean."
     headers_invalid: "#{cmd('request')} requires the `headers` option to be an object literal."
@@ -889,7 +916,7 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/uncaught-exception-from-application"
     }
-    fromSpec: 
+    fromSpec:
       message: """
         This error originated from your test code, not from Cypress.
 
@@ -904,12 +931,19 @@ module.exports = {
     missing_preset: "#{cmd('viewport')} could not find a preset for: `{{preset}}`. Available presets are: {{presets}}"
 
   visit:
-    invalid_1st_arg: "#{cmd('visit')} must be called with a `url` or an `options` object containing a `url` as its 1st argument"
+    status_code_flags_invalid: """
+
+    These options are incompatible with each other.
+
+     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
+    """
+    invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
     invalid_method: "#{cmd('visit')} was called with an invalid method: `{{method}}`. Method can only be `GET` or `POST`."
     invalid_headers: "#{cmd('visit')} requires the `headers` option to be an object."
     no_duplicate_url: """
       #{cmd('visit')} must be called with only one `url`. You specified two urls:
-
       `url` from the `options` object: {{optionsUrl}}
       `url` from the `url` parameter: {{url}}
     """

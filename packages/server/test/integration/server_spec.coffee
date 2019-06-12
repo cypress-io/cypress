@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 _             = require("lodash")
+http          = require("http")
 rp            = require("request-promise")
 Promise       = require("bluebird")
 evilDns       = require("evil-dns")
@@ -10,7 +11,7 @@ config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 
-s3StaticHtmlUrl = "https://s3.amazonaws.com/static.cypress.io/cypress-project-internal-test-assets/index.html"
+s3StaticHtmlUrl = "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html"
 
 describe "Server", ->
   beforeEach ->
@@ -284,6 +285,64 @@ describe "Server", ->
             port: 2000
           }
         })
+
+      context "only having one request in flight at a time", ->
+        beforeEach (done) ->
+          @httpServer = http.createServer (req, res) ->
+            [path, ms] = req.url.split('/').slice(1)
+
+            switch path
+              when 'pause-before-body'
+                res.writeHead(200, { 'content-type': 'text/html' })
+                setTimeout ->
+                  res.write('ok')
+                  res.end()
+                , Number(ms)
+              when 'pause-before-headers'
+                setTimeout ->
+                  res.writeHead(200, { 'content-type': 'text/html' })
+                  res.write('ok')
+                  res.end()
+                , Number(ms)
+
+          @httpServer.listen =>
+            @httpPort = @httpServer.address().port
+            done()
+
+          @runOneReqTest = (path) =>
+            ## put the first request in flight
+            p1 = @server._onResolveUrl("http://localhost:#{@httpPort}/#{path}/1000", {}, @automationRequest)
+
+            Promise.delay(100)
+            .then =>
+              ## the p1 should not have a current promise phase or reqStream until it's cancelled
+              expect(p1).not.to.have.property('currentPromisePhase')
+              expect(p1).not.to.have.property('reqStream')
+
+              ## fire the 2nd request now that the first one has had some time to reach out
+              @server._onResolveUrl("http://localhost:#{@httpPort}/#{path}/100", {}, @automationRequest)
+            .then (obj) =>
+              expect(obj).to.deep.eq({
+                isOkStatusCode: true
+                isHtml: true
+                contentType: "text/html"
+                url: "http://localhost:#{@httpPort}/#{path}/100"
+                originalUrl: "http://localhost:#{@httpPort}/#{path}/100"
+                status: 200
+                statusText: "OK"
+                redirects: []
+                cookies: []
+              })
+
+              expect(p1.isCancelled()).to.be.true
+              expect(p1).to.have.property('currentPromisePhase')
+              expect(p1.reqStream.aborted).to.be.true
+
+        it "cancels and aborts the 1st request when it hasn't loaded headers and a 2nd request is made", ->
+          @runOneReqTest('pause-before-headers')
+
+        it "cancels and aborts the 1st request when it hasn't loaded body and a 2nd request is made", ->
+          @runOneReqTest('pause-before-body')
 
       it "can serve http requests", ->
         nock("http://getbootstrap.com")
@@ -1014,7 +1073,7 @@ describe "Server", ->
           #   console.log "ON REQUEST!!!!!!!!!!!!!!!!!!!!!!"
 
           #   nock("https://s3.amazonaws.com")
-          #   .get("/static.cypress.io/cypress-project-internal-test-assets/index.html")
+          #   .get("/internal-test-runner-assets.cypress.io/index.html")
           #   .reply 200, "<html><head></head><body>jsonplaceholder</body></html>", {
           #     "Content-Type": "text/html"
           #   }
@@ -1088,7 +1147,7 @@ describe "Server", ->
           .then =>
             # @server.onNextRequest (req, res) ->
             #   nock("https://s3.amazonaws.com")
-            #   .get("/static.cypress.io/cypress-project-internal-test-assets/index.html")
+            #   .get("/internal-test-runner-assets.cypress.io/index.html")
             #   .reply 200, "<html><head></head><body>jsonplaceholder</body></html>", {
             #     "Content-Type": "text/html"
             #   }
