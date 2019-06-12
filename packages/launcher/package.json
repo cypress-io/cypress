@@ -42,7 +42,7 @@
     "fs-extra": "4.0.3",
     "lodash": "4.17.11",
     "plist": "2.1.0",
-    "pluralize": "7.0.0",
+    "pluralize": "8.0.0",
     "ramda": "0.24.1"
   }
 }
