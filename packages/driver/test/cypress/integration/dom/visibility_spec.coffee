@@ -116,9 +116,40 @@ describe "src/cypress/dom/visibility", ->
       @$visHidden  = add "<ul style='visibility: hidden;'></ul>"
       @$parentVisHidden = add "<div class='invis' style='visibility: hidden;'><button>parent visibility: hidden</button></div>"
       @$displayNone = add "<button style='display: none'>display: none</button>"
+      @$inputHidden = add "<input type='hidden' value='abcdef'>"
       @$btnOpacity = add "<button style='opacity: 0'>opacity: 0</button>"
       @$divNoWidth = add "<div style='width: 0; height: 100px;'>width: 0</div>"
       @$divNoHeight = add "<div style='width: 50px; height: 0px;'>height: 0</div>"
+
+      @$optionInSelect = add """
+        <select>
+          <option>Naruto</option>
+        </select>
+      """
+
+      @$optgroupInSelect = add """
+        <select>
+          <optgroup label='Shinobi'>
+            <option>Naruto</option>
+          </optgroup>
+        </select>
+      """
+
+      @$tableVisCollapse = add """
+        <table>
+          <tr>
+            <td>Naruto</td>
+            <td class='collapse' style='visibility: collapse;'>Sasuke</td>
+            <td>Sakura</td>
+          </tr>
+          <tr class='collapse' style='visibility: collapse;'>
+            <td>Kaguya</td>
+            <td>Madara</td>
+            <td>Orochimaro</td>
+          </tr>
+        </table>
+      """
+      
       @$parentNoWidth = add """
         <div style='width: 0; height: 100px; overflow: hidden;'>
           <div style='height: 500px; width: 500px;'>
@@ -366,8 +397,8 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
-      add """
-        <div id="ancestorTransformMakesElOutOfBoundsOfAncestor" style='margin-left: 100px; overflow: hidden; width: 100px;'>
+      @$ancestorTransformMakesElOutOfBoundsOfAncestor = add """
+        <div style='margin-left: 100px; overflow: hidden; width: 100px;'>
           <div style='transform: translateX(-100px); width: 200px;'>
             <div style='width: 100px;'>
               <span>out of ancestor's bounds due to ancestor translate</span>
@@ -376,13 +407,13 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
-      add """
-        <div id="ancestorTransformMakesElInBoundsOfAncestor" style='margin-left: 100px; overflow: hidden; width: 100px;'>
+      @$ancestorTransformMakesElInBoundsOfAncestor = add """
+        <div style='margin-left: 100px; overflow: hidden; width: 100px;'>
           <div style='transform: translateX(-100px); width: 300px;'>
             <div style='display: inline-block; width: 100px;'>
               <span>out of ancestor's bounds due to ancestor translate</span>
             </div>
-            <div style='display: inline-block; width: 100px;'>
+            <div id='inbounds' style='display: inline-block; width: 100px;'>
               <span>in ancestor's bounds due to ancestor translate</span>
             </div>
           </div>
@@ -440,6 +471,36 @@ describe "src/cypress/dom/visibility", ->
 
       expect(@$tableVisCollapse.find("tr.collapse")).to.be.hidden
       expect(@$tableVisCollapse.find("tr.collapse")).to.not.be.visible  
+
+    it "is hidden if input type hidden", ->
+      expect(@$inputHidden.is(":hidden")).to.be.true
+      expect(@$inputHidden.is(":visible")).to.be.false
+
+      expect(@$inputHidden).to.be.hidden
+      expect(@$inputHidden).to.not.be.visible
+
+      cy.wrap(@$inputHidden).should("be.hidden")
+      cy.wrap(@$inputHidden).should("not.be.visible")
+
+    it "is visible if option in visible select", ->
+      expect(@$optionInSelect.find('option').is(":hidden")).to.be.false
+      expect(@$optionInSelect.find('option').is(":visible")).to.be.true
+
+      expect(@$optionInSelect.find('option')).not.to.be.hidden
+      expect(@$optionInSelect.find('option')).to.be.visible
+
+      cy.wrap(@$optionInSelect.find('option')).should("not.be.hidden")
+      cy.wrap(@$optionInSelect.find('option')).should("be.visible")
+
+    it "is visible if optgroup in visible select", ->
+      expect(@$optionInSelect.find('opgroup').is(":hidden")).to.be.false
+      expect(@$optionInSelect.find('opgroup').is(":visible")).to.be.true
+
+      expect(@$optionInSelect.find('opgroup')).not.to.be.hidden
+      expect(@$optionInSelect.find('opgroup')).to.be.visible
+
+      cy.wrap(@$optionInSelect.find('opgroup')).should("not.be.hidden")
+      cy.wrap(@$optionInSelect.find('opgroup')).should("be.visible")
 
     it "is visible if opacity is 0", ->
       expect(@$btnOpacity.is(":hidden")).to.be.false
@@ -579,10 +640,10 @@ describe "src/cypress/dom/visibility", ->
       expect(@$parentsWithBackfaceVisibilityHidden.find("#back")).to.be.hidden
 
     it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
-      cy.get("#ancestorTransformMakesElOutOfBoundsOfAncestor span").should("be.hidden")
+      expect(@$ancestorTransformMakesElOutOfBoundsOfAncestor.find("span")).to.be.hidden
 
     it "is visible when in ancestor's bounds due to ancestor's transform", ->
-      cy.get("#ancestorTransformMakesElInBoundsOfAncestor span").eq(1).should("be.visible")
+      expect(@$ancestorTransformMakesElInBoundsOfAncestor.find("#inbounds")).to.be.visible
 
     describe "#getReasonIsHidden", ->
       beforeEach ->
