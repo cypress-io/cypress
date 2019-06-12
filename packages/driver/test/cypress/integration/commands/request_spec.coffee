@@ -752,15 +752,18 @@ describe "src/cy/commands/request", ->
         })
 
       it "displays body_circular when body is circular", (done) ->
-        c = {}
-        c.c = c
+        foo = {
+          bar: {
+            baz: {}
+          }
+        }
+
+        foo.bar.baz.quux = foo
 
         cy.request({
           method: "POST"
           url: "http://foo.invalid/"
-          body: {
-            c
-          }
+          body: foo
         })
 
         cy.on "fail", (err) =>
@@ -769,7 +772,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq """
-          The `body` parameter supplied to cy.request() contained a circular reference.
+          The `body` parameter supplied to cy.request() contained a circular reference at the path "bar.baz.quux".
 
           `body` can only be a string or an object with no circular references.
           """
