@@ -434,6 +434,13 @@ describe "src/cypress/dom/visibility", ->
       cy.wrap(@$parentVisHidden).find("button").should("be.hidden")
       cy.wrap(@$parentVisHidden).find("button").should("not.be.visible")
 
+    it "is hidden if visibility collapse", ->
+      expect(@$tableVisCollapse.find("td.collapse")).to.be.hidden
+      expect(@$tableVisCollapse.find("td.collapse")).to.not.be.visible  
+
+      expect(@$tableVisCollapse.find("tr.collapse")).to.be.hidden
+      expect(@$tableVisCollapse.find("tr.collapse")).to.not.be.visible  
+
     it "is visible if opacity is 0", ->
       expect(@$btnOpacity.is(":hidden")).to.be.false
       expect(@$btnOpacity.is(":visible")).to.be.true
@@ -590,6 +597,9 @@ describe "src/cypress/dom/visibility", ->
 
       it "has 'visibility: hidden'", ->
         @reasonIs @$visHidden, "This element '<ul>' is not visible because it has CSS property: 'visibility: hidden'"
+
+      it "has 'visibility: collapse'", ->
+        @reasonIs @$tableVisCollapse.find("td.collapse"), "This element '<td.collapse>' is not visible because it has CSS property: 'visibility: collapse'"
 
       it "has parent with 'visibility: hidden'", ->
         @reasonIs @$parentVisHidden.find("button"), "This element '<button>' is not visible because its parent '<div.invis>' has CSS property: 'visibility: hidden'"

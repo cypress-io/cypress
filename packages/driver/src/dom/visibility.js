@@ -51,10 +51,10 @@ const isHidden = (el, name = 'isHidden()') => {
   // it is impossible for the user to interact with this element
   return elHasNoEffectiveWidthOrHeight($el) ||
 
-    elHasVisibilityHidden($el) ||
     // additionally if the effective visibility of the element
     // is hidden (which includes any parent nodes) then the user
     // cannot interact with this element and thus it is hidden
+    elHasVisibilityHiddenOrCollapse($el) ||
 
       // we do some calculations taking into account the parents
       // to see if its hidden by a parent
@@ -97,8 +97,16 @@ const elOffsetHeight = ($el) => {
   return $el[0].offsetHeight
 }
 
+const elHasVisibilityHiddenOrCollapse = ($el) => {
+  return elHasVisibilityHidden($el) || elHasVisibilityCollapse($el)
+}
+
 const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
+}
+
+const elHasVisibilityCollapse = ($el) => {
+  return $el.css('visibility') === 'collapse'
 }
 
 const elHasDisplayNone = ($el) => {
@@ -294,8 +302,20 @@ const parentHasVisibilityHidden = function ($el) {
     return $el
   }
 
-  return parentHasVisibilityNone($el.parent())
   // continue walking
+  return parentHasVisibilityHidden($el.parent())
+}
+
+const parentHasVisibilityCollapse = function ($el) {
+  // if we've walked all the way up to document then return false
+  if (!$el.length || $document.isDocument($el)) {
+    return false
+  }
+
+  // if we have display none then return the $el
+  if (elHasVisibilityCollapse($el)) {
+    return $el
+  }
 
   // continue walking
   return parentHasVisibilityCollapse($el.parent())
@@ -322,13 +342,21 @@ const getReasonIsHidden = function ($el) {
 
       return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'display: none'`
 
-    case !($parent = parentHasVisibilityNone($el.parent())):
+    case !($parent = parentHasVisibilityHidden($el.parent())):
       parentNode = $elements.stringify($parent, 'short')
 
       return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'visibility: hidden'`
 
+    case !($parent = parentHasVisibilityCollapse($el.parent())):
+      parentNode = $elements.stringify($parent, 'short')
+
+      return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'visibility: collapse'`
+
     case !elHasVisibilityHidden($el):
       return `This element '${node}' is not visible because it has CSS property: 'visibility: hidden'`
+
+    case !elHasVisibilityCollapse($el):
+      return `This element '${node}' is not visible because it has CSS property: 'visibility: collapse'`
 
     case !elHasNoOffsetWidthOrHeight($el):
       width = elOffsetWidth($el)
