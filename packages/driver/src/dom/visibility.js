@@ -60,8 +60,9 @@ const isHidden = (el, name = 'isHidden()') => {
       // to see if its hidden by a parent
       elIsHiddenByAncestors($el) ||
 
+        // if el is or any ancestor is a fixed element check if its covered
         (
-          elIsFixed($el) ?
+          elOrAncestorIsFixed($el) ?
             elIsNotElementFromPoint($el)
             :
             // else check if el is outside the bounds
@@ -71,7 +72,17 @@ const isHidden = (el, name = 'isHidden()') => {
 }
 
 const elHasNoEffectiveWidthOrHeight = ($el) => {
-  return (elOffsetWidth($el) <= 0) || (elOffsetHeight($el) <= 0) || ($el[0].getClientRects().length <= 0)
+  // Is the element's CSS width OR height, including any borders,
+  // padding, and vertical scrollbars (if rendered) less than 0?
+  //
+  // If the element is hidden (for example, by setting style.display
+  // on the element or one of its ancestors to "none"), then 0 is returned.
+  return (elOffsetWidth($el) <= 0) ||
+          (elOffsetHeight($el) <= 0) ||
+            // For HTML <area> elements, SVG elements that do not render anything themselves,
+            // display:none elements, and generally any elements that are not directly rendered,
+            // an empty list is returned.
+            ($el[0].getClientRects().length <= 0)
 }
 
 const elHasNoOffsetWidthOrHeight = ($el) => {
@@ -116,6 +127,7 @@ const canClipContent = function ($el, $ancestor) {
     return false
   }
 
+  // the closest parent with position relative, absolute, or fixed
   const $offsetParent = $jquery.wrap($el[0].offsetParent)
 
   // even if overflow is clippable, if the element's offset parent
@@ -128,7 +140,7 @@ const canClipContent = function ($el, $ancestor) {
   return true
 }
 
-const elIsFixed = function ($el) {
+const elOrAncestorIsFixed = function ($el) {
   const $stickyOrFixedEl = $elements.getFirstFixedOrStickyPositionParent($el)
 
   if ($stickyOrFixedEl) {
@@ -332,8 +344,8 @@ const getReasonIsHidden = function ($el) {
       return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'overflow: hidden' and an effective width and height of: '${width} x ${height}' pixels.`
 
     default:
-      if (elIsFixed($el)) {
       // nested else --___________--
+      if (elOrAncestorIsFixed($el)) {
         if (elIsNotElementFromPoint($el)) {
           // show the long element here
           const covered = $elements.stringify(elAtCenterPoint($el))
