@@ -20,26 +20,22 @@ serializeError = (err) ->
 #   installed globally, like 6 or 10 (NVM path comes later)
 #   So this function only fixes the path, if the Node cannot be found on first attempt
 #
-# TODO switch to ASYNC
 findNodeInFullPath = () ->
   debug("finding Node with $PATH %s", process.env.PATH)
 
-  found = which.sync("node", { nothrow: true })
-  if not found
+  Promise.fromCallback (cb) -> which('node', cb)
+  .catch () ->
     debug("could not find Node, trying to fix path")
     # Fix the $PATH on macOS when run from a GUI app
     fixPath()
     debug("searching again with fixed $PATH %s", process.env.PATH)
-    found = which.sync("node", { nothrow: true })
-
-  if not found
-    debug("could not find Node")
-  else
+    Promise.fromCallback (cb) -> which('node', cb)
+  .then (found) ->
     debug("found Node %s", found)
-
-  found
-
-
+    found
+  , () ->
+    debug("could not find Node")
+    return null
 
 module.exports = {
   serializeError: serializeError

@@ -43,56 +43,63 @@ module.exports = {
         stdio: "inherit"
       }
 
+      # if we need to find Node and use it to fork the child process
+      # find it asynchronously
+      decidedChildOptions = null
+
       if config.node
-        resolvedNode = util.findNode(config.node)
+        decidedChildOptions = util.findNode(config.node)
+          .then (resolvedNode) ->
+            if resolvedNode
+              debug("using Node %s", resolvedNode)
+              childOptions.execPath = resolvedNode
+            else
+              console.error("Could not find Node from config %s, using bundled Node %s", config.node, process.version)
+      else
+        decidedChildOptions = Promise.resolve()
 
-        if resolvedNode
-          debug("using Node %s", resolvedNode)
-          childOptions.execPath = resolvedNode
-        else
-          console.error("Could not find Node from config %s, using bundled Node %s", config.node, process.version)
+      decidedChildOptions.then () ->
+        pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
+        ipc = util.wrapIpc(pluginsProcess)
 
-      pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
-      ipc = util.wrapIpc(pluginsProcess)
+        handler(ipc) for handler in handlers
 
-      handler(ipc) for handler in handlers
+        ipc.send("load", config)
 
-      ipc.send("load", config)
+        ipc.on "loaded", (newCfg, registrations) ->
+          _.each registrations, (registration) ->
+            debug("register plugins process event", registration.event, "with id", registration.eventId)
 
-      ipc.on "loaded", (newCfg, registrations) ->
-        _.each registrations, (registration) ->
-          debug("register plugins process event", registration.event, "with id", registration.eventId)
+            register registration.event, (args...) ->
+              util.wrapParentPromise ipc, registration.eventId, (invocationId) ->
+                debug("call event", registration.event, "for invocation id", invocationId)
+                ids = {
+                  eventId: registration.eventId
+                  invocationId: invocationId
+                }
+                ipc.send("execute", registration.event, ids, args)
 
-          register registration.event, (args...) ->
-            util.wrapParentPromise ipc, registration.eventId, (invocationId) ->
-              debug("call event", registration.event, "for invocation id", invocationId)
-              ids = {
-                eventId: registration.eventId
-                invocationId: invocationId
-              }
-              ipc.send("execute", registration.event, ids, args)
+          resolve(newCfg)
 
-        resolve(newCfg)
+        ipc.on "load:error", (type, args...) ->
+          reject(errors.get(type, args...))
 
-      ipc.on "load:error", (type, args...) ->
-        reject(errors.get(type, args...))
+        killPluginsProcess = ->
+          pluginsProcess and pluginsProcess.kill()
+          pluginsProcess = null
 
-      killPluginsProcess = ->
-        pluginsProcess and pluginsProcess.kill()
-        pluginsProcess = null
+        handleError = (err) ->
+          debug("plugins process error:", err.stack)
+          killPluginsProcess()
+          err = errors.get("PLUGINS_ERROR", err.annotated or err.stack or err.message)
+          err.title = "Error running plugin"
+          options.onError(err)
 
-      handleError = (err) ->
-        debug("plugins process error:", err.stack)
-        killPluginsProcess()
-        err = errors.get("PLUGINS_ERROR", err.annotated or err.stack or err.message)
-        err.title = "Error running plugin"
-        options.onError(err)
+        pluginsProcess.on("error", handleError)
+        ipc.on("error", handleError)
 
-      pluginsProcess.on("error", handleError)
-      ipc.on("error", handleError)
-
-      ## see timers/parent.js line #93 for why this is necessary
-      process.on("exit", killPluginsProcess)
+        ## see timers/parent.js line #93 for why this is necessary
+        process.on("exit", killPluginsProcess)
 
   register: register
 
