@@ -28,10 +28,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           consoleProps: ->
             "Applied To": $dom.getElements(options.$el)
 
-      ## http://www.w3.org/TR/html5/editing.html#specially-focusable
+      el = options.$el.get(0)
+
+      ## the body is not really focusable, but it
+      ## can have focus on initial page load.
+      ## this is instead a noop.
+      ## TODO: throw on body instead (breaking change)
+      isBody = $dom.isJquery(options.$el) &&
+        $elements.isElement(options.$el.get(0)) &&
+        $elements.isBody(options.$el.get(0))
+
+      ## http://www.w3.org/$R/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
-      if not (isWin or $dom.isFocusable(options.$el))
+      if not (isWin or isBody or $dom.isFocusable(options.$el))
         return if options.error is false
 
         node = $dom.stringify(options.$el)
@@ -48,7 +58,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { num }
         })
 
-      el = options.$el.get(0)
 
       cy.fireFocus(el)
 

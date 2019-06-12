@@ -684,3 +684,7 @@ describe "src/cy/commands/actions/focus", ->
           done()
 
         cy.get(":text:first").focus().blur().should("have.class", "blured")
+
+      it "can handle window w/length > 1 as a subject", ->
+        cy.window().should('have.length', 2)
+        .focus()
