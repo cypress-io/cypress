@@ -3,6 +3,8 @@ packages/server/lib/scaffold/support/index.js
 packages/server/lib/scaffold/support/commands.js
 packages/extension/test/helpers/background.js
 packages/network/lib/agent.js
+cli/types
+!cli/types/index.d.ts
 packages/example
 !packages/example/lib
 **/__snapshots__

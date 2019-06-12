@@ -19,29 +19,29 @@ declare module 'cypress' {
     /**
      * Url used as prefix for `cy.visit()` or `cy.request()` command’s url
      */
-    baseUrl: string,
+    baseUrl: string
     /**
      * Any values to be set as environment variables
      */
-    env: object,
+    env: object
     /**
      * A String or Array of glob patterns used to ignore test files
      * that would otherwise be shown in your list of tests.
      */
-    ignoreTestFiles: string | string[],
+    ignoreTestFiles: string | string[]
     /**
      * The number of tests for which snapshots and command data are kept in memory.
      * Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      */
-    numTestsKeptInMemory: number,
+    numTestsKeptInMemory: number
     /**
      * Port used to host Cypress. Normally this is a randomly generated port
      */
-    port: number,
+    port: number
     /**
      * The reporter used during the `cypress run`. Default is "spec"
      */
-    reporter: string,
+    reporter: string
     /**
      * A String glob pattern of the test files to load.
      */
@@ -55,35 +55,35 @@ declare module 'cypress' {
      * Time, in milliseconds, to wait until most DOM based commands
      * are considered timed out.
      */
-    defaultCommandTimeout: number,
+    defaultCommandTimeout: number
     /**
      * Time, in milliseconds, to wait for a system command to
      * finish executing during a `cy.exec()` command.
      */
-    execTimeout: number,
+    execTimeout: number
     /**
      * Time, in milliseconds, to wait for a task to finish executing
      * during a `cy.task()` command.
      */
-    taskTimeout: number,
+    taskTimeout: number
     /**
      * Time, in milliseconds, to wait for page transition events or
      * `cy.visit()`, `cy.go()`, `cy.reload()` commands to fire
      * their page load events.
      */
-    pageLoadTimeout: number,
+    pageLoadTimeout: number
     /**
      * Time, in milliseconds, to wait for an XHR request to go out
      * in a `cy.wait()` command.
      */
-    requestTimeout: number,
+    requestTimeout: number
     /**
      * Time, in milliseconds, to wait until a response in a
      * `cy.request()`, `cy.wait()`, `cy.fixture()`, `cy.getCookie()`,
      * `cy.getCookies()`, `cy.setCookie()`, `cy.clearCookie()`,
      * `cy.clearCookies()`, and `cy.screenshot()` commands.
     */
-    responseTimeout: number,
+    responseTimeout: number
 
     //
     // folders and files
@@ -92,33 +92,33 @@ declare module 'cypress' {
     /**
      * Path to folder where application files will attempt to be served from.
      */
-    fileServerFolder: string,
+    fileServerFolder: string
     /**
      * Path to folder containing fixture files (Pass `false` to disable).
      */
-    fixturesFolder: string | false,
+    fixturesFolder: string | false
     /**
      * Path to folder containing integration test files.
      */
-    integrationFolder: string,
+    integrationFolder: string
     /**
      * Path to plugins file. (Pass `false` to disable)
      */
-    pluginsFile: string | false,
+    pluginsFile: string | false
     /**
      * Path to folder where screenshots will be saved from `cy.screenshot()`
      * command or after a test fails during cypress run.
      */
-    screenshotsFolder: string,
+    screenshotsFolder: string
     /**
      * Path to file to load before test files load.
      * This file is compiled and bundled. (Pass `false` to disable).
      */
-    supportFile: string | false,
+    supportFile: string | false
     /**
      * Path to folder where videos will be saved during `cypress run`
      */
-    videosFolder: string,
+    videosFolder: string
 
     //
     // screenshots
@@ -128,7 +128,7 @@ declare module 'cypress' {
      * Whether Cypress will trash assets within the `screenshotsFolder` and
      * `videosFolder` before tests run with cypress run. Default is `true`.
      */
-    trashAssetsBeforeRuns: boolean,
+    trashAssetsBeforeRuns: boolean
 
     //
     // videos
@@ -140,18 +140,18 @@ declare module 'cypress' {
      * where a lower value results in better quality
      * (at the expense of a higher file size).
      */
-    videoCompression: number | false,
+    videoCompression: number | false
     /**
      * Whether Cypress will capture a video of the tests run with `cypress run`.
      */
-    video: boolean,
+    video: boolean
     /**
      * Whether Cypress will upload the video to the Dashboard even if
      * all tests are passing. This applies only when recording your runs
      * to the Dashboard. Turn this off if you’d like the video uploaded
      * only when there are failing tests.
      */
-    videoUploadOnPasses: boolean,
+    videoUploadOnPasses: boolean
 
     //
     // browser
@@ -160,21 +160,21 @@ declare module 'cypress' {
      * Whether Chrome Web Security for `same-origin` policy and
      * `insecure mixed content` is enabled.
      */
-    chromeWebSecurity: boolean,
+    chromeWebSecurity: boolean
     /**
      * Enables you to override the default user agent the
      * browser sends in all request headers.
      */
-    userAgent: string,
+    userAgent: string
     /**
      * A String or Array of hosts that you wish to block traffic for.
      */
-    blacklistHosts: string | string[],
+    blacklistHosts: string | string[]
     /**
      * Whether Cypress will search for and replace obstructive JS code
      * in `.js` or `.html` files.
      */
-    modifyObstructiveCode: boolean,
+    modifyObstructiveCode: boolean
 
     //
     // viewport
@@ -183,7 +183,7 @@ declare module 'cypress' {
      * Default height in pixels for the application under tests’ viewport
      * (Override with `cy.viewport()` command)
      */
-    viewportHeight: number,
+    viewportHeight: number
     /**
      * Default width in pixels for the application under tests’ viewport.
      * (Override with `cy.viewport()` command)
@@ -406,7 +406,7 @@ declare module 'cypress' {
       wallClockStartedAt: dateTimeISO
       wallClockEndedAt: dateTimeISO
       wallClockDuration: ms
-    },
+    }
     /**
      * Reporter name like "spec"
      */
@@ -437,7 +437,7 @@ declare module 'cypress' {
        * resolved filename of the spec
        */
       absolute: string
-    },
+    }
     shouldUploadVideo: boolean
   }
 
@@ -489,7 +489,7 @@ declare module 'cypress' {
      })
      ```
      */
-    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult>,
+    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult>
     /**
      * Opens Cypress GUI. Resolves with void when the
      * GUI is closed.

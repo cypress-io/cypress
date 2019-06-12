@@ -1,4 +1,5 @@
 import moment = require('moment')
+
 export = Moment
 export as namespace Moment
 
