@@ -223,6 +223,7 @@ describe "Web Sockets", ->
           agent: agent
           path: @cfg.socketIoRoute
           parser: socketIo.circularParser
+          rejectUnauthorized: false
         })
         @wsClient.on "connect", -> done()
 
