@@ -394,6 +394,26 @@ describe "src/cypress/dom/visibility", ->
       # its factored in (window vs viewport) calculations
       scrollThisIntoView.get(1).scrollIntoView()
 
+    it "is visible if html", ->
+      expect(cy.$$("html").is(":hidden")).to.be.false
+      expect(cy.$$("html").is(":visible")).to.be.true
+
+      expect(cy.$$("html")).not.to.be.hidden
+      expect(cy.$$("html")).to.be.visible
+
+      cy.wrap(cy.$$("html")).should("not.be.hidden")
+      cy.wrap(cy.$$("html")).should("be.visible")
+
+    it "is visible if body", ->
+      expect(cy.$$("body").is(":hidden")).to.be.false
+      expect(cy.$$("body").is(":visible")).to.be.true
+
+      expect(cy.$$("body")).not.to.be.hidden
+      expect(cy.$$("body")).to.be.visible
+
+      cy.wrap(cy.$$("body")).should("not.be.hidden")
+      cy.wrap(cy.$$("body")).should("be.visible")
+
     it "is hidden if .css(visibility) is hidden", ->
       expect(@$visHidden.is(":hidden")).to.be.true
       expect(@$visHidden.is(":visible")).to.be.false

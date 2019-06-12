@@ -311,6 +311,10 @@ const isBody = (el) => {
   return getTagName(el) === 'body'
 }
 
+const isHTML = (el) => {
+  return getTagName(el) === 'html'
+}
+
 const isSvg = function (el) {
   try {
     return 'ownerSVGElement' in el
@@ -548,9 +552,9 @@ const getFirstFocusableEl = ($el) => {
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
-  // return null if we're at body/html
+  // return null if we're at body/html/document
   // cuz that means nothing has fixed position
-  if (!$el || $el.is('body,html')) {
+  if (!$el || $el.is('body,html') || $document.isDocument($el)) {
     return null
   }
 
@@ -772,6 +776,8 @@ module.exports = {
   isSame,
 
   isBody,
+
+  isHTML,
 
   isInput,
 

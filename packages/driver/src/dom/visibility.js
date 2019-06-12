@@ -29,6 +29,23 @@ const isHidden = (el, name = 'isHidden()') => {
 
   const $el = $jquery.wrap(el)
 
+  // the body and html are always visible
+  if ($elements.isBody(el) || $elements.isHTML(el)) {
+    return false
+  }
+
+  // hidden inputs are completely invisible
+  // if ($elements.isInput(el) || $elements.isType(el, 'hidden')) {
+  //   return true
+  // }
+
+  // if ($elements.isOption(el) || $elements.isOptgroup(el)) {
+  //   // if its parent select is visible, then it's not hidden
+  //   // const $select = $elements.getFirstParentWithTagName($el, 'select')
+
+  //   // return false
+  // }
+
   // in Cypress-land we consider the element hidden if
   // either its offsetHeight or offsetWidth is 0 because
   // it is impossible for the user to interact with this element
