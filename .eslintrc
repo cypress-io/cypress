@@ -7,28 +7,6 @@
     "@typescript-eslint"
   ],
   "rules": {
-    "semi": "off",
-    "no-useless-constructor": "off",
-    "@typescript-eslint/no-useless-constructor": [
-      "error"
-    ],
-    "@typescript-eslint/member-delimiter-style": [
-      "error",
-      {
-        "multiline": {
-          "delimiter": "none"
-        },
-        "singleline": {
-          "delimiter": "comma"
-        }
-      }
-    ],
-    "@typescript-eslint/no-unused-vars": "error",
-    "no-unused-vars": "off",
-    "@typescript-eslint/semi": [
-      "error",
-      "never"
-    ],
     "no-multiple-empty-lines": [
       "error",
       {
@@ -114,10 +92,39 @@
   "overrides": [
     {
       "files": [
-        "**/*.jsx"
+        "*.jsx"
       ],
       "rules": {
         "arrow-body-style": "off"
+      }
+    },
+    {
+      "files": [
+        "*.ts"
+      ],
+      "rules": {
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "error",
+        "no-useless-constructor": "off",
+        "@typescript-eslint/no-useless-constructor": [
+          "error"
+        ],
+        "semi": "off",
+        "@typescript-eslint/semi": [
+          "error",
+          "never"
+        ],
+        "@typescript-eslint/member-delimiter-style": [
+          "error",
+          {
+            "multiline": {
+              "delimiter": "none"
+            },
+            "singleline": {
+              "delimiter": "comma"
+            }
+          }
+        ]
       }
     }
   ]
