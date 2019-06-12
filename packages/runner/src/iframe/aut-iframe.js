@@ -18,7 +18,6 @@ export default class AutIframe {
     this.$iframe = $('<iframe>', {
       id: `Your App: '${this.config.projectName}'`,
       class: 'aut-iframe',
-      name: 'aut-iframe',
     })
 
     return this.$iframe
