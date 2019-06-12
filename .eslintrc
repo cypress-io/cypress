@@ -1,14 +1,64 @@
 {
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "plugin:cypress-dev/general"
   ],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "rules": {
-    "no-multiple-empty-lines": ["error", { "max": 1 } ],
-    "no-else-return": [ "error", { "allowElseIf": false } ],
-    "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
-    "no-unneeded-ternary": ["error"],
-    "array-bracket-newline": ["error", "consistent"],
-    "arrow-body-style": ["error", "always"],
+    "semi": "off",
+    "no-useless-constructor": "off",
+    "@typescript-eslint/no-useless-constructor": [
+      "error"
+    ],
+    "@typescript-eslint/member-delimiter-style": [
+      "error",
+      {
+        "multiline": {
+          "delimiter": "none"
+        },
+        "singleline": {
+          "delimiter": "comma"
+        }
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": "error",
+    "no-unused-vars": "off",
+    "@typescript-eslint/semi": [
+      "error",
+      "never"
+    ],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 1
+      }
+    ],
+    "no-else-return": [
+      "error",
+      {
+        "allowElseIf": false
+      }
+    ],
+    "brace-style": [
+      "error",
+      "1tbs",
+      {
+        "allowSingleLine": false
+      }
+    ],
+    "no-unneeded-ternary": [
+      "error"
+    ],
+    "array-bracket-newline": [
+      "error",
+      "consistent"
+    ],
+    "arrow-body-style": [
+      "error",
+      "always"
+    ],
     "padding-line-between-statements": [
       "error",
       {
@@ -55,6 +105,8 @@
     "node": true
   },
   "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module",
     "ecmaFeatures": {
       "legacyDecorators": true
     }
