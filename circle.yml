@@ -206,7 +206,6 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: npm run lint
-      - run: npm run all lint
 
   unit-tests:
     <<: *defaults
