@@ -64,6 +64,7 @@ describe "lib/socket", ->
           agent: agent
           path: socketIoRoute
           transports: ["websocket"]
+          parser: socketIo.circularParser
         })
       return
 
@@ -83,7 +84,7 @@ describe "lib/socket", ->
       sinon.stub(exec, 'run').resolves(foo)
 
       @client.emit "backend:request", "exec", "quuz", (res) ->
-        expect(res).to.deep.eq(foo)
+        expect(res.response).to.deep.eq(foo)
         done()
 
     context "on(automation:request)", ->
