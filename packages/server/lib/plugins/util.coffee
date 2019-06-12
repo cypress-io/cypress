@@ -4,11 +4,42 @@ debug = require("debug")("cypress:server:plugins")
 which = require("which")
 Promise = require("bluebird")
 resolveDir = require("resolve-dir")
+fixPath = require("fix-path")
 
 UNDEFINED_SERIALIZED = "__cypress_undefined__"
 
 serializeError = (err) ->
   _.pick(err, "name", "message", "stack", "code", "annotated")
+
+# Finds Node binary path
+#
+# Note about fix-path:
+#   while fix-path is good, it can cause unexpected behavior when running Cypress locally
+#   for example, using NVM we set local Node to 8
+#   then fix-path adds all user paths, and the found Node is whatever we have
+#   installed globally, like 6 or 10 (NVM path comes later)
+#   So this function only fixes the path, if the Node cannot be found on first attempt
+#
+# TODO switch to ASYNC
+findNodeInFullPath = () ->
+  debug("finding Node with $PATH %s", process.env.PATH)
+
+  found = which.sync("node", { nothrow: true })
+  if not found
+    debug("could not find Node, trying to fix path")
+    # Fix the $PATH on macOS when run from a GUI app
+    fixPath()
+    debug("searching again with fixed $PATH %s", process.env.PATH)
+    found = which.sync("node", { nothrow: true })
+
+  if not found
+    debug("could not find Node")
+  else
+    debug("found Node %s", found)
+
+  found
+
+
 
 module.exports = {
   serializeError: serializeError
@@ -18,15 +49,12 @@ module.exports = {
   # pass path to Node, acceptable
   #   relative to home directory ~/.nvm/versions/node/v6.10.2/bin/node
   #   absolute /usr/local/bin/node
-  #   "find" if the user wants us to find installed Node
+  #   "find" or "node" if the user wants us to find installed Node
   findNode: (userOption) ->
-    if userOption is "find"
-      # TODO switch to ASYNC
-      debug("finding Node")
-      resolvedNode = which.sync("node", { nothrow: true })
-      debug("found Node %s", resolvedNode)
+    if userOption is "find" or userOption is "node"
+      resolvedNode = _.memoize(findNodeInFullPath)()
     else
-      resolvedNode = resolveDir(userOption)
+      resolvedNode = _.memoize(resolveDir)(userOption)
       debug("using custom Node path '%s' resolved '%s'", userOption, resolvedNode)
 
     resolvedNode

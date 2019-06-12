@@ -374,3 +374,20 @@ We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our depe
 We will try to review and merge pull requests quickly. After merging we
 will try releasing a new version. If you want to know our build process or
 build your own Cypress binary, read [DEPLOY.md](DEPLOY.md)
+
+## Known problems
+
+### ENFILE
+
+If you get `ENFILE: file table overflow` or `ENFILE: too many open files` on Mac, check the file limit
+
+```shell
+ulimit -n
+256
+```
+
+This is way too low, increase it to maximum and try again.
+
+```shell
+ulimit -n 1024 1024
+```
