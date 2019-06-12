@@ -154,9 +154,11 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
   })
 }
 
-const start = ({ version, downloadDestination, progress }) => {
+const start = (opts) => {
+  let { version, downloadDestination, progress } = opts
+
   if (!downloadDestination) {
-    la(is.unemptyString(downloadDestination), 'missing download dir', arguments)
+    la(is.unemptyString(downloadDestination), 'missing download dir', opts)
   }
 
   if (!progress) {
