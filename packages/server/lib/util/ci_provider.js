@@ -63,6 +63,10 @@ const isWercker = () => {
   return process.env.WERCKER || process.env.WERCKER_MAIN_PIPELINE_STARTED
 }
 
+const isConcourse = () => {
+  return _.filter(Object.keys(process.env), key => /(CONCOURSE_)\w+/.test(key)).length > 0
+}
+
 /**
  * We detect CI providers by detecting an environment variable
  * unique to the provider, or by calling a function that returns true
@@ -80,6 +84,7 @@ const CI_PROVIDERS = {
   'circle': 'CIRCLECI',
   'codeshipBasic': isCodeshipBasic,
   'codeshipPro': isCodeshipPro,
+  'concourse': isConcourse,
   'drone': 'DRONE',
   'gitlab': isGitlab,
   'jenkins': isJenkins,
@@ -176,6 +181,14 @@ const _providerCiParams = () => {
       'CI_BUILD_ID',
       'CI_REPO_NAME',
       'CI_PROJECT_ID',
+    ]),
+    concourse: extract([
+      'BUILD_ID',
+      'BUILD_NAME',
+      'BUILD_JOB_NAME',
+      'BUILD_PIPELINE_NAME',
+      'BUILD_TEAM_NAME',
+      'ATC_EXTERNAL_URL',
     ]),
     drone: extract([
       'DRONE_JOB_NUMBER',
