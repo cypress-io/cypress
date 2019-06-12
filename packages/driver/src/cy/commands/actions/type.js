@@ -14,7 +14,6 @@
  */
 const _ = require('lodash')
 const Promise = require('bluebird')
-const moment = require('moment')
 
 const $dom = require('../../../dom')
 const $elements = require('../../../dom/elements')
@@ -24,13 +23,11 @@ const $actionability = require('../../actionability')
 const Debug = require('debug')
 const debug = Debug('driver:command:type')
 
-const inputEvents = 'textInput input'.split(' ')
-
-const dateRegex = /^\d{4}-\d{2}-\d{2}/
-const monthRegex = /^\d{4}-(0\d|1[0-2])/
-const weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
-const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
-const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
+// const dateRegex = /^\d{4}-\d{2}-\d{2}/
+// const monthRegex = /^\d{4}-(0\d|1[0-2])/
+// const weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
+// const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
+// const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.internal
@@ -50,7 +47,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
-      simulated: false,
+      simulated: !!Cypress.config('simulatedOnly'),
       delay: 10,
       release: true,
       waitForAnimations: config('waitForAnimations'),
@@ -128,11 +125,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       options._log.snapshot('before', { next: 'after' })
     }
 
-    let charsNeedingType
+    if (options.$el.length > 1) {
 
-    function _setCharsNeedingType (value) {
-      // not sure why using template literal
-      charsNeedingType = `${value}`
+      $utils.throwErrByPath('type.multiple_elements', {
+        onFail: options._log,
+        args: { num: options.$el.length },
+      })
     }
 
     chars = `${chars}`
@@ -279,7 +277,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         //   return charsToType
         // },
 
-        onAfterType (el) {
+        onAfterType () {
           if (options.release === true) {
             state('keyboardModifiers', null)
           }
@@ -324,9 +322,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         //   }
         // },
 
-        onEvent (id, key, column, which, value) {
+        onEvent (...args) {
           if (updateTable) {
-            return updateTable(...arguments)
+            return updateTable(...args)
           }
         },
 
@@ -385,13 +383,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         },
 
         onNoMatchingSpecialChars (chars, allChars) {
-          if (chars === '{tab}') {
+          if (chars === 'tab') {
             return $utils.throwErrByPath('type.tab', { onFail: options._log })
           }
 
           return $utils.throwErrByPath('type.invalid', {
             onFail: options._log,
-            args: { chars, allChars },
+            args: { chars: `{${chars}}`, allChars },
           })
         },
       })
@@ -523,7 +521,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
     //# blow up if any member of the subject
     //# isnt a textarea or text-like
-    const clear = function (el, index) {
+    const clear = function (el) {
       const $el = $dom.wrap(el)
 
       if (options.log) {
@@ -595,10 +593,3 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   )
 }
 
-function _getEndIndex (str, substr) {
-  return str.indexOf(substr) + substr.length
-}
-
-function _splitChars (chars, index) {
-  return [chars.slice(0, index), chars.slice(index)]
-}

@@ -64,7 +64,7 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
   const doc = $document.getDocumentFromElement(el)
 
   //# NOTE: insertText will also handle '\n', and render newlines
-  $elements.callNativeMethod(doc, 'execCommand', 'insertText', true, text)
+  return $elements.callNativeMethod(doc, 'execCommand', 'insertText', true, text)
 }
 
 //# Keeping around native implementation
@@ -278,7 +278,7 @@ const _collapseInputOrTextArea = (el, toIndex) => {
 }
 
 const moveCursorLeft = function (el) {
-  if ($elements.isTextarea(el) || $elements.isInput(el)) {
+  if ($elements.canSetSelectionRangeElement(el)) {
     const { start, end } = getSelectionBounds(el)
 
     if (start !== end) {
@@ -292,7 +292,7 @@ const moveCursorLeft = function (el) {
     return setSelectionRange(el, start - 1, start - 1)
   }
 
-  if ($elements.isContentEditable(el)) {
+  // if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
     return $elements.callNativeMethod(
@@ -302,7 +302,7 @@ const moveCursorLeft = function (el) {
       'backward',
       'character'
     )
-  }
+  // }
 }
 
 //# Keeping around native implementation
@@ -318,7 +318,7 @@ const moveCursorLeft = function (el) {
 // range.setEnd(range.startContainer, newOffset)
 
 const moveCursorRight = function (el) {
-  if ($elements.isTextarea(el) || $elements.isInput(el)) {
+  if ($elements.canSetSelectionRangeElement(el)) {
     const { start, end } = getSelectionBounds(el)
 
     if (start !== end) {
@@ -330,7 +330,6 @@ const moveCursorRight = function (el) {
     return setSelectionRange(el, start + 1, end + 1)
   }
 
-  if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
     return $elements.callNativeMethod(
@@ -340,7 +339,6 @@ const moveCursorRight = function (el) {
       'forward',
       'character'
     )
-  }
 }
 
 const moveCursorUp = (el) => {
@@ -487,6 +485,8 @@ const _moveSelectionTo = function (toStart, doc) {
     return
   }
 
+
+
   $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
   const selection = doc.getSelection()
 
@@ -529,11 +529,6 @@ const _moveSelectionTo = function (toStart, doc) {
 
 //# TODO: think about renaming this
 const replaceSelectionContents = function (el:HTMLElement, key:string) {
-  if ($elements.isContentEditable(el)) {
-    return _replaceSelectionContentsContentEditable(el, key)
-  }
-
-  
 
   if ($elements.canSetSelectionRangeElement(el)) {
     // if ($elements.isRead)
@@ -546,6 +541,9 @@ const replaceSelectionContents = function (el:HTMLElement, key:string) {
 
     return setSelectionRange(el, start + key.length, start + key.length)
   }
+
+  return _replaceSelectionContentsContentEditable(el, key)
+
 }
 
 const getCaretPosition = function (el) {
@@ -590,11 +588,11 @@ const focusCursor = function (el, doc) {
   elToFocus.focus()
 
   if ($elements.isInput(elToFocus) || $elements.isTextarea(elToFocus)) {
-    moveSelectionToEnd()
+    moveSelectionToEnd(doc)
   }
 
   if ($elements.isContentEditable(elToFocus) && prevFocused !== elToFocus) {
-    moveSelectionToEnd()
+    moveSelectionToEnd(doc)
   }
 }
 
