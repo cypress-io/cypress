@@ -135,7 +135,7 @@ export const mount = (jsx, alias) => {
         jsx,
         document.getElementById('cypress-jsdom')
       )
-      cy.wrap(component, { log: false }).as(displayname)
+      cy.wrap(component, { log: false }).as(alias || displayname)
     })
   cy.copyComponentStyles(jsx)
     .then(() => {
