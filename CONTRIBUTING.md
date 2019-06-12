@@ -377,17 +377,6 @@ build your own Cypress binary, read [DEPLOY.md](DEPLOY.md)
 
 ## Known problems
 
-### ENFILE
+### ENFILE or EMFILE
 
-If you get `ENFILE: file table overflow` or `ENFILE: too many open files` on Mac, check the file limit
-
-```shell
-ulimit -n
-256
-```
-
-This is way too low, increase it to maximum and try again.
-
-```shell
-ulimit -n 1024 1024
-```
+If you get `ENFILE: file table overflow`, `ENFILE: too many open files` or any other `ENFILE` or `EMFILE` errors on Mac, that means you are doing synchronous file system operations. Cypress should **NEVER** do them. Instead we should use async file system operations and let `graceful-fs` retry them. Find the place where the synchronous `fs` operation is done from the stacktrace and make it async.
