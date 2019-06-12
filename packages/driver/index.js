@@ -1,1 +1,1 @@
-module.exports = require("./lib/driver")
+module.exports = require('./lib/driver')

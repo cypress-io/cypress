@@ -14,10 +14,13 @@ module.exports = (on) => {
     'create:long:file' () {
       const filePath = path.join(__dirname, '..', '_test-output', 'longtext.txt')
       const longText = _.times(2000).map(() => {
-        return _.times(20).map(() => Math.random()).join(' ')
+        return _.times(20).map(() => {
+          return Math.random()
+        }).join(' ')
       }).join('\n\n')
 
       fs.outputFileSync(filePath, longText)
+
       return null
     },
   })
