@@ -47,6 +47,18 @@ describe "driver/src/cypress/index", ->
 
         done()
 
+    ## https://github.com/cypress-io/cypress/issues/4346
+    it "can complete if a circular reference is sent", ->
+      foo = {
+        bar: {}
+      }
+
+      foo.bar.baz = foo
+
+      Cypress.backend("foo", foo)
+      .catch (e) ->
+        expect(e.message).to.eq('You requested a backend event we cannot handle: foo')
+
   context ".isCy", ->
     it "returns true on cy, cy chainable", ->
       expect(Cypress.isCy(cy)).to.be.true
