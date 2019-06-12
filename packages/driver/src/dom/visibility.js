@@ -24,7 +24,7 @@ const isVisible = (el) => {
 // because of circular references
 const isHidden = (el, name = 'isHidden()') => {
   if (!$elements.isElement(el)) {
-    throw new Error(`Cypress.dom.${name} must be passed a basic DOM element.`)
+    throw new Error(`Cypress.dom.${name} failed because it requires a DOM element. The subject received was: '${el}'`)
   }
 
   const $el = $jquery.wrap(el)

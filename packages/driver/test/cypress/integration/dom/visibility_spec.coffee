@@ -13,7 +13,7 @@ describe "src/cypress/dom/visibility", ->
       fn = ->
         $dom.isHidden(null)
 
-      expect(fn).to.throw("Cypress.dom.isHidden() must be passed a basic DOM element.")
+      expect(fn).to.throw("Cypress.dom.isHidden() failed because it requires a DOM element. The subject received was: \'null\'")
 
   context "isVisible", ->
     it "exposes isVisible", ->
@@ -21,9 +21,9 @@ describe "src/cypress/dom/visibility", ->
 
     it "throws when not passed a DOM element", ->
       fn = ->
-        $dom.isVisible(null)
+        $dom.isVisible("form")
 
-      expect(fn).to.throw("Cypress.dom.isVisible() must be passed a basic DOM element.")
+      expect(fn).to.throw("Cypress.dom.isVisible() failed because it requires a DOM element. The subject received was: \'form\'")
 
   context "#isScrollable", ->
     beforeEach ->
