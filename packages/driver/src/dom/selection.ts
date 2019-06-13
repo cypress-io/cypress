@@ -40,8 +40,10 @@ const _getSelectionRange = (doc) => {
   return doc.createRange()
 }
 
-      //# if div[contenteditable] > text
-      const hostContenteditable = getHostContenteditable(range.commonAncestorContainer)
+const _getSelectionBoundsFromContentEditable = function (el) {
+  const doc = $document.getDocumentFromElement(el)
+  const range = _getSelectionRange(doc)
+  const hostContenteditable = getHostContenteditable(range.commonAncestorContainer)
 
   if (hostContenteditable === el) {
     return {
@@ -291,15 +293,15 @@ const moveCursorLeft = function (el) {
   }
 
   // if ($elements.isContentEditable(el)) {
-    const selection = _getSelectionByEl(el)
+  const selection = _getSelectionByEl(el)
 
-    return $elements.callNativeMethod(
-      selection,
-      'modify',
-      'move',
-      'backward',
-      'character'
-    )
+  return $elements.callNativeMethod(
+    selection,
+    'modify',
+    'move',
+    'backward',
+    'character'
+  )
   // }
 }
 
@@ -328,15 +330,15 @@ const moveCursorRight = function (el) {
     return setSelectionRange(el, start + 1, end + 1)
   }
 
-    const selection = _getSelectionByEl(el)
+  const selection = _getSelectionByEl(el)
 
-    return $elements.callNativeMethod(
-      selection,
-      'modify',
-      'move',
-      'forward',
-      'character'
-    )
+  return $elements.callNativeMethod(
+    selection,
+    'modify',
+    'move',
+    'forward',
+    'character'
+  )
 }
 
 const moveCursorUp = (el) => {
@@ -482,15 +484,6 @@ const _moveSelectionTo = function (toStart, doc) {
 
     return
   }
-
-  if ($elements.isContentEditable(el)) {
-    //# NOTE: can't use execCommand API here because we would have
-    //# to selectAll and then collapse so we use the Selection API
-    const doc = $document.getDocumentFromElement(el)
-    const range = $elements.callNativeMethod(doc, 'createRange')
-    const hostContenteditable = getHostContenteditable(el)
-    let lastTextNode = _getInnerLastChild(hostContenteditable)
-
 
   $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
   const selection = doc.getSelection()
