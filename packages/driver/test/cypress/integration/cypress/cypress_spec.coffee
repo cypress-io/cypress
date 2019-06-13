@@ -56,8 +56,10 @@ describe "driver/src/cypress/index", ->
       foo.bar.baz = foo
 
       Cypress.backend("foo", foo)
+      .then ->
+        throw new Error("should not reach")
       .catch (e) ->
-        expect(e.message).to.eq('You requested a backend event we cannot handle: foo')
+        expect(e.message).to.eq("You requested a backend event we cannot handle: foo")
 
   context ".isCy", ->
     it "returns true on cy, cy chainable", ->
