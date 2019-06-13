@@ -47,7 +47,9 @@ module.exports = {
       # find it asynchronously
       decidedChildOptions = null
 
-      if config.nodeVersion
+      if config.nodeVersion is "system"
+        # instead of the built-in Node process, specify a path to 3rd party Node
+        # https://devdocs.io/node/child_process#child_process_child_process_fork_modulepath_args_options
         decidedChildOptions = util.findNode(config.nodeVersion)
         .then (resolvedNode) ->
           if resolvedNode

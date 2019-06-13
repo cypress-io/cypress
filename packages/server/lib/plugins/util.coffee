@@ -3,7 +3,6 @@ EE = require("events")
 debug = require("debug")("cypress:server:plugins")
 which = require("which")
 Promise = require("bluebird")
-resolveDir = require("resolve-dir")
 fixPath = require("fix-path")
 
 UNDEFINED_SERIALIZED = "__cypress_undefined__"
@@ -42,17 +41,9 @@ module.exports = {
 
   # instead of the built-in Node process, specify a path to 3rd party Node
   # https://devdocs.io/node/child_process#child_process_child_process_fork_modulepath_args_options
-  # pass path to Node, acceptable
-  #   relative to home directory ~/.nvm/versions/node/v6.10.2/bin/node
-  #   absolute /usr/local/bin/node
-  #   "find" or "node" if the user wants us to find installed Node
-  findNode: (userOption) ->
-    if userOption is "find" or userOption is "node"
-      resolvedNode = _.memoize(findNodeInFullPath)()
-    else
-      resolvedNode = _.memoize(resolveDir)(userOption)
-      debug("using custom Node path '%s' resolved '%s'", userOption, resolvedNode)
-
+  findNode: () ->
+    # since the Node will not move around, finding it once should be enough
+    resolvedNode = _.memoize(findNodeInFullPath)()
     resolvedNode
 
   wrapIpc: (aProcess) ->
