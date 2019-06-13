@@ -51,7 +51,7 @@ module.exports = {
         # instead of the built-in Node process, specify a path to 3rd party Node
         # https://devdocs.io/node/child_process#child_process_child_process_fork_modulepath_args_options
         debug("looking for system Node")
-        decidedChildOptions = util.findNode(config.nodeVersion)
+        decidedChildOptions = util.findNode()
         .then (resolvedNode) ->
           if resolvedNode
             debug("using found Node %s", resolvedNode)
@@ -74,7 +74,6 @@ module.exports = {
         ipc.send("load", config)
 
         ipc.on "loaded", (newCfg, registrations) ->
-          debug("ipc loaded")
           _.each registrations, (registration) ->
             debug("register plugins process event", registration.event, "with id", registration.eventId)
 

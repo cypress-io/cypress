@@ -16,11 +16,25 @@ describe "lib/plugins/index", ->
     }
     sinon.stub(cp, "fork").returns(@pluginsProcess)
 
+    # callback registered for ipc.on("loaded", cb)
+    @ipcOnLoaded = null
+
     @ipc = {
       send: sinon.spy()
-      on: sinon.stub()
+      on: sinon.stub().callsFake (eventName, cb) =>
+        if eventName is "loaded"
+          @ipcOnLoaded = cb
     }
-    sinon.stub(util, "wrapIpc").returns(@ipc)
+
+    sinon.stub(util, "wrapIpc").callsFake (proc) =>
+      # need to call ipc.on("loaded") to resolve plugins.init() promise
+      setTimeout () =>
+        expect(@ipcOnLoaded, "ipc has on loaded callback").to.be.a("function")
+        newCfg = {}
+        registrations = []
+        @ipcOnLoaded(newCfg, registrations)
+      , 50
+      @ipc
 
   context "#init", ->
     it "is noop if no pluginsFile", ->
@@ -29,7 +43,6 @@ describe "lib/plugins/index", ->
     it.only "forks child process", ->
       plugins.init({ pluginsFile: "cypress-plugin" })
       .then ->
-        console.log('then')
         expect(cp.fork).to.be.called
         expect(cp.fork.lastCall.args[0]).to.contain("plugins/child/index.js")
         expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
