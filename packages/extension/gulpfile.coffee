@@ -9,7 +9,6 @@ Promise    = require("bluebird")
 coffeeify  = require("coffeeify")
 browserify = require("browserify")
 icons      = require("@cypress/icons")
-ext        = require("./")
 
 gulp.task "clean", ->
   gulp.src("dist")
