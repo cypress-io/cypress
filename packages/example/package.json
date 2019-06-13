@@ -14,8 +14,7 @@
     "prebuild": "npm run check-deps-pre",
     "build": "node ./bin/build.js && gulp build",
     "predeploy": "npm run build",
-    "deploy": "gulp deploy",
-    "lint": "bin-up eslint --fix *.js bin/*.js lib/*.js test/*.js"
+    "deploy": "gulp deploy"
   },
   "files": [
     "cypress",

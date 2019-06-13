@@ -24,7 +24,7 @@
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./test/support/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
     "codecov": "codecov",
-    "lint": "bin-up coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
+    "lint-coffee": "bin-up coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
     "prestart": "npm run check-deps-pre",
     "predev": "npm run check-deps-pre",
     "prerepl": "npm run check-deps-pre",

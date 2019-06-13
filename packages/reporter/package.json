@@ -19,7 +19,6 @@
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
     "test": "node ./scripts/test.js",
-    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project ."
   },

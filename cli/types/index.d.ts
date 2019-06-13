@@ -32,11 +32,11 @@ declare const assert: Chai.AssertStatic
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
-  type HistoryDirection = 'back' | 'forward'
+  type HistoryDirection = "back" | "forward"
   type HttpMethod = string
   type RequestBody = string | object
-  type ViewportOrientation = 'portrait' | 'landscape'
-  type PrevSubject = 'optional' | 'element' | 'document' | 'window'
+  type ViewportOrientation = "portrait" | "landscape"
+  type PrevSubject = "optional" | "element" | "document" | "window"
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -53,8 +53,8 @@ declare namespace Cypress {
    * Describes a browser Cypress can control
    */
   interface Browser {
-    name: 'electron' | 'chrome' | 'canary' | 'chromium' | 'firefox'
-    displayName: 'Electron' | 'Chrome' | 'Canary' | 'Chromium' | 'FireFox'
+    name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
+    displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
     version: string
     majorVersion: string
     path: string
@@ -1882,7 +1882,7 @@ declare namespace Cypress {
      * @default {@link Timeoutable#timeout}
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
-    requestTimeout: number
+    requestTimeout: number,
     /**
      * Time to wait for the response (ms)
      *
@@ -2155,7 +2155,7 @@ declare namespace Cypress {
      *
      * @default 'swing'
      */
-    easing: 'swing' | 'linear'
+    easing: 'swing' | 'linear',
   }
 
   interface ScrollIntoViewOptions extends ScrollToOptions {
@@ -4210,10 +4210,10 @@ declare namespace Cypress {
   }
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
-  type PositionType = 'topLeft' | 'top' | 'topRight' | 'left' | 'center' | 'right' | 'bottomLeft' | 'bottom' | 'bottomRight'
+  type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
   type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
   interface Offset {
-    top: number
+    top: number,
     left: number
   }
 

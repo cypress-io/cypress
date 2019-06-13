@@ -4,18 +4,16 @@
 // and should not repeat them
 
 // extra code that is not in the kitchensink that type checks edge cases
-cy.wrap('foo').then((subject) => {
+cy.wrap('foo').then(subject => {
   subject // $ExpectType string
-
   return cy.wrap(subject)
-}).then((subject) => {
+}).then(subject => {
   subject // $ExpectType string
 })
 
 const result = Cypress.minimatch('/users/1/comments', '/users/*/comments', {
   matchBase: true,
 })
-
 result // $ExpectType boolean
 
 Cypress.minimatch('/users/1/comments', '/users/*/comments') // $ExpectType boolean
@@ -31,15 +29,13 @@ cy.server().should((server) => {
 cy.visit('https://www.acme.com/', {
   auth: {
     username: 'wile',
-    password: 'coyote',
-  },
+    password: 'coyote'
+  }
 })
 
 const serverOptions: Partial<Cypress.ServerOptions> = {
   delay: 100,
-  whitelist: () => {
-    return true
-  },
+  whitelist: () => true
 }
 
 cy.server(serverOptions)
@@ -62,7 +58,6 @@ cy.on('window:alert', cy.stub())
 
 // sinon-chai example
 const stub = cy.stub()
-
 expect(stub).to.not.have.been.called
 stub()
 expect(stub).to.have.been.calledOnce
@@ -78,42 +73,39 @@ cy.on('window:confirm', cy.stub())
 
 // specifying HTTP method directly in the options object
 cy.request({
-  url: 'http://localhost:3000/myressource',
-  method: 'POST',
-  body: {},
+  url: "http://localhost:3000/myressource",
+  method: "POST",
+  body: {}
 })
 
 // specify query parameters
 // https://github.com/cypress-io/cypress/issues/2305
 cy.request({
-  url: 'http://localhost:3000/myressource',
+  url: "http://localhost:3000/myressource",
   qs: {
-    param: 'someValue',
-  },
+    param: 'someValue'
+  }
 })
 
 // if you want a separate variable, you need specify its type
 // otherwise TSC does not cast string "POST" as HttpMethod
 // https://github.com/cypress-io/cypress/issues/2093
 const opts: Partial<Cypress.RequestOptions> = {
-  url: 'http://localhost:3000/myressource',
-  method: 'POST',
-  body: {},
+  url: "http://localhost:3000/myressource",
+  method: "POST",
+  body: {}
 }
-
 cy.request(opts)
 
 // you can cast just the "method" property
 const opts2 = {
-  url: 'http://localhost:3000/myressource',
-  method: 'POST' as Cypress.HttpMethod,
-  body: {},
+  url: "http://localhost:3000/myressource",
+  method: "POST" as Cypress.HttpMethod,
+  body: {}
 }
-
 cy.request(opts2)
 
 const obj = {
-  foo: () => { },
+  foo: () => { }
 }
-
 cy.spy(obj, 'foo').as('my-spy')

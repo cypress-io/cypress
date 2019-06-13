@@ -16,8 +16,7 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
-    "test": "node ./scripts/test.js",
-    "lint": "bin-up eslint --fix scripts/*.js src/*.js* src/**/*.js*"
+    "test": "node ./scripts/test.js"
   },
   "files": [
     "dist",
