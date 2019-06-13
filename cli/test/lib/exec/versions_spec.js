@@ -23,6 +23,7 @@ describe('lib/exec/versions', function () {
       state.getBinaryPkgVersionAsync
       .withArgs('/my/cypress/path')
       .resolves('7.8.9')
+
       return versions.getVersions().then(({ package, binary }) => {
         expect(package).to.eql('4.5.6')
         expect(binary).to.eql('7.8.9')

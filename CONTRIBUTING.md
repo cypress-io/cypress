@@ -272,7 +272,7 @@ When you edit files, you can quickly fix all changed files before committing usi
 npm run lint-changed
 ```
 
-When committing files, we run Git pre-commit hook to fix the staged JS files. See the `precommit-lint` script in [package.json](package.json). This might change JS files and you would need to commit the changes again.
+When committing files, we run Git pre-commit hook to fix the staged and unstaged JS files. See the `precommit-lint` script in [package.json](package.json). This might change JS files and you would need to commit the changes again.
 
 ### Tests
 
