@@ -111,8 +111,8 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -212,8 +212,8 @@ We dynamically generated a new test to display this failure.
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================
 
@@ -737,8 +737,8 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Uploading Results)
 
-  - Failed Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
-  - Failed Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================
 
@@ -1034,8 +1034,8 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -1095,8 +1095,8 @@ We dynamically generated a new test to display this failure.
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================
 
@@ -1537,7 +1537,6 @@ StatusCodeError: 402
 
 `
 
-
 exports['e2e record api interaction errors create run 402 - free plan exceeds monthly tests errors and exits when on free plan and over recorded tests limit 1'] = `
 You've exceeded the limit of test recordings under your free plan this month. The limit is 500 test recordings.
 
@@ -1555,7 +1554,6 @@ To run your tests with groups, please visit your billing and upgrade to another 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 `
-
 
 exports['e2e record api interaction warnings create run warnings grace period - grouping feature warns when using parallel feature 1'] = `
 Grouping is not included under your free plan.

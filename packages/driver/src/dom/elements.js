@@ -25,8 +25,17 @@ const $utils = require('../cypress/utils')
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
-const focusable = 'body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]'
-
+const focusable = [
+  'a[href]',
+  'area[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'button:not([disabled])',
+  'iframe',
+  '[tabindex]',
+  '[contentEditable]',
+]
 const inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 
@@ -197,6 +206,7 @@ const nativeMethods = {
   setSelectionRange: _nativeSetSelectionRange,
   modify: window.Selection.prototype.modify,
   focus: _nativeFocus,
+  hasFocus: window.document.hasFocus,
   blur: _nativeBlur,
   select: _nativeSelect,
 }
@@ -319,6 +329,28 @@ const isSvg = function (el) {
   }
 }
 
+// active element is the default if its null
+// or its equal to document.body
+const activeElementIsDefault = (activeElement, body) => {
+  return (!activeElement) || (activeElement === body)
+}
+
+const isFocused = (el) => {
+  try {
+    const doc = $document.getDocumentFromElement(el)
+
+    const { activeElement, body } = doc
+
+    if (activeElementIsDefault(activeElement, body)) {
+      return false
+    }
+
+    return doc.activeElement === el
+  } catch (err) {
+    return false
+  }
+}
+
 const isElement = function (obj) {
   try {
     if ($jquery.isJquery(obj)) {
@@ -332,7 +364,9 @@ const isElement = function (obj) {
 }
 
 const isFocusable = ($el) => {
-  return $el.is(focusable)
+  return _.some(focusable, (sel) => {
+    return $el.is(sel)
+  })
 }
 
 const isType = function ($el, type) {
@@ -756,6 +790,8 @@ module.exports = {
   isTextarea,
 
   isType,
+
+  isFocused,
 
   isNeedSingleValueChangeInputElement,
 
