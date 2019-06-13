@@ -793,7 +793,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "BAD_POLICY_WARNING_TOOLTIP"
       """
-      Cypress detected policy settings on your computer that may interfere with using this browser.
+      Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
 
 get = (type, arg1, arg2) ->
