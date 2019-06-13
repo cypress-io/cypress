@@ -5,6 +5,7 @@ class AuthStore {
   @observable isLoading = true
   @observable isShowingLogin = false
   @observable user = null
+  @observable warning = null
 
   @computed get isAuthenticated () {
     return !!this.user && !!this.user.authToken
@@ -12,6 +13,10 @@ class AuthStore {
 
   @action setLoading (isLoading) {
     this.isLoading = isLoading
+  }
+
+  @action setWarning (warning) {
+    this.warning = warning
   }
 
   @action setShowingLogin (isShowing) {

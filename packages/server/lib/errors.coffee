@@ -781,6 +781,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Provide a path to an existing fixture file.
       """
+    when "AUTH_COULD_NOT_LAUNCH_BROWSER"
+      """
+      Cypress was unable to open your installed browser. To continue logging in to the dashboard, please open this URL in your web browser: #{arg1}
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

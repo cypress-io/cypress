@@ -5,9 +5,10 @@ const Promise = require('bluebird')
 const { shell } = require('electron')
 const url = require('url')
 
+const errors = require('../errors')
 const random = require('../util/random')
-const windows = require('./windows')
 const user = require('../user')
+const windows = require('./windows')
 
 let app
 let authCallback
@@ -43,7 +44,9 @@ const _getOriginFromUrl = (originalUrl) => {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = () => {
+const start = (onWarning) => {
+  authRedirectReached = false
+
   return user.getBaseLoginUrl()
   .then(_launchServer)
   .then(() => {
@@ -52,7 +55,7 @@ const start = () => {
   .then((loginRedirectUrl) => {
     debug('Trying to open native auth to URL ', loginRedirectUrl)
 
-    return _launchNativeAuth(loginRedirectUrl)
+    return _launchNativeAuth(loginRedirectUrl, onWarning)
     .catch((e) => {
       debug('Failed to launch native auth, falling back to Electron:', e)
 
@@ -152,12 +155,18 @@ const _stopServer = () => {
   authRedirectReached = false
 }
 
-const _launchNativeAuth = (loginUrl) => {
-  if (openExternalAttempted && !authRedirectReached) {
-    // we've tried launching openExternal before, but the auth server was never hit
-    // this indicates that openExternal fails on this system - fall back to Electron
-    return Promise.reject(new Error('Previous openExternal call failed, launching Electron'))
+const _launchNativeAuth = (loginUrl, onWarning) => {
+  const warnCouldNotLaunch = () => {
+    if (openExternalAttempted && !authRedirectReached) {
+      onWarning(errors.get('AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl))
+    }
   }
+
+  warnCouldNotLaunch()
+
+  setTimeout(() => {
+    warnCouldNotLaunch()
+  }, 10000)
 
   openExternalAttempted = true
 

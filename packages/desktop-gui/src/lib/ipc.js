@@ -30,6 +30,7 @@ const register = (eventName, isPromiseApi = true) => {
 
 register('add:project')
 register('begin:auth')
+register('on:auth:warning', false)
 register('clear:github:cookies')
 register('close:browser')
 register('close:project')

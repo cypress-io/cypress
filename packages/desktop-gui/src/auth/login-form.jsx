@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 
 import authApi from './auth-api'
 import ipc from '../lib/ipc'
+import MarkdownRenderer from '../lib/markdown-renderer'
 
 class LoginForm extends Component {
   static defaultProps = {
@@ -27,6 +28,7 @@ class LoginForm extends Component {
         >
           {this._buttonContent()}
         </button>
+        {this.props.warning && <p className='warning'><MarkdownRenderer markdown={this.props.warning}/></p>}
         <p className='terms'>By logging in, you agree to the <a onClick={this._openTerms}>Terms of Use</a> and <a onClick={this._openPrivacy}>Privacy Policy</a>.</p>
       </div>
     )
