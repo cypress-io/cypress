@@ -249,7 +249,11 @@
     visibility: visible;
   }
 
-   .test > .runnable-wrapper > .collapsible > .collapsible-header {
+  .collapsible-header {
+    display: flex;
+  }
+
+  .test > .runnable-wrapper > .collapsible > .collapsible-header {
     .collapsible-indicator,
     .collapsible-more {
       display: none;
