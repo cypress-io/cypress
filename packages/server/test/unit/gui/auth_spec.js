@@ -4,7 +4,6 @@ const root = global.root
 const auth = require(`${root}../lib/gui/auth`)
 const electron = require('electron')
 const random = require(`${root}../lib/util/random`)
-const windows = require(`${root}../lib/gui/windows`)
 
 const BASE_URL = 'https://foo.invalid/login.html'
 const RANDOM_STRING = 'a'.repeat(32)
@@ -56,21 +55,6 @@ describe('lib/gui/auth', function () {
     })
   })
 
-  context('._launchElectronAuth', function () {
-    it('calls windows.open with DASHBOARD_LOGIN and the correct url', function () {
-      sinon.stub(windows, 'open').resolves()
-
-      return auth._launchElectronAuth(LOGIN_URL)
-      .then(() => {
-        expect(windows.open).to.be.calledWithMatch(null, {
-          type: 'DASHBOARD_LOGIN',
-          url: LOGIN_URL,
-          focus: true,
-        })
-      })
-    })
-  })
-
   context('._launchNativeAuth', function () {
     it('is catchable if `shell` does not exist', function () {
       return auth._launchNativeAuth(LOGIN_URL)
@@ -91,9 +75,7 @@ describe('lib/gui/auth', function () {
       })
 
       it('returns a promise that is fulfilled when openExternal succeeds', function () {
-        sinon.stub(electron.shell, 'openExternal').callsFake((_, _2, cb) => {
-          cb()
-        })
+        sinon.stub(electron.shell, 'openExternal').callsArg(2)
 
         return auth._launchNativeAuth(LOGIN_URL)
         .then(() => {
@@ -101,10 +83,8 @@ describe('lib/gui/auth', function () {
         })
       })
 
-      it('returns a promise that is rejected when openExternal fails', function () {
-        sinon.stub(electron.shell, 'openExternal').callsFake((_, _2, cb) => {
-          cb(new Error('It broke!'))
-        })
+      it('is still fulfilled when openExternal fails, but onWarning is called', function () {
+        sinon.stub(electron.shell, 'openExternal').callsArgWith(2, new Error)
 
         return auth._launchNativeAuth(LOGIN_URL)
         .then(() => {

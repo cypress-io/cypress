@@ -56,13 +56,8 @@ const start = (onWarning) => {
     debug('Trying to open native auth to URL ', loginRedirectUrl)
 
     return _launchNativeAuth(loginRedirectUrl, onWarning)
-    .catch((e) => {
-      debug('Failed to launch native auth, falling back to Electron:', e)
-
-      return _launchElectronAuth(loginRedirectUrl)
-    })
     .then(() => {
-      debug('Successfully launched auth')
+      debug('openExternal completed')
     })
   })
   .then(() => {
@@ -73,7 +68,6 @@ const start = (onWarning) => {
   .finally(() => {
     _stopServer()
     windows.focusMainWindow()
-    windows.closeLoginWindow()
   })
 }
 
@@ -164,9 +158,7 @@ const _launchNativeAuth = (loginUrl, onWarning) => {
 
   warnCouldNotLaunch()
 
-  setTimeout(() => {
-    warnCouldNotLaunch()
-  }, 10000)
+  setTimeout(warnCouldNotLaunch, 10000)
 
   openExternalAttempted = true
 
@@ -174,20 +166,9 @@ const _launchNativeAuth = (loginUrl, onWarning) => {
   return Promise.fromCallback((cb) => {
     shell.openExternal(loginUrl, {}, cb)
   })
-}
-
-const _launchElectronAuth = (loginUrl) => {
-  debug('Opening Electron auth')
-
-  return windows.open(null, {
-    position: 'center',
-    focus: true,
-    width: 1000,
-    height: 635,
-    preload: false,
-    title: 'Login',
-    type: 'DASHBOARD_LOGIN',
-    url: loginUrl,
+  .catch((err) => {
+    debug('Error launching native auth: %o', { err })
+    warnCouldNotLaunch()
   })
 }
 
@@ -195,7 +176,6 @@ module.exports = {
   _buildFullLoginUrl,
   _getOriginFromUrl,
   _launchServer,
-  _launchElectronAuth,
   _launchNativeAuth,
   _stopServer,
   start,

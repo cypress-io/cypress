@@ -75,20 +75,6 @@ describe "lib/gui/windows", ->
 
         expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
 
-    it "updates the user agent for DASHBOARD_LOGIN", ->
-      options = {
-        type: "DASHBOARD_LOGIN"
-        url: "about:blank"
-      }
-
-      sinon.stub(user, "getBaseLoginUrl").resolves("about:blank")
-      @win.loadURL.throws()
-
-      Windows.open("/path/to/project", options).catch =>
-        newUserAgent = @win.webContents.setUserAgent.getCall(0).args[0]
-        expected = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/72.0.3626.121 Electron/4.0.5 Safari/537.36"
-        expect(newUserAgent).to.eq(expected)
-
   context ".create", ->
     it "opens dev tools if saved state is open", ->
       Windows.create("/foo/", {devTools: true})
