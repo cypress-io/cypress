@@ -1,5 +1,5 @@
 // ignore TS errors - we are importing from CoffeeScript files
-// @ts-ignore
+//@ts-ignore
 import uploadUtils from './util/upload'
 import { s3helpers } from './s3-api'
 
@@ -14,7 +14,7 @@ const key = 'beta/binary/3.3.0/darwin-x64/circle-develop-455046b928c861d4457b2ec
 */
 
 s3helpers.setUserMetadata(bucket, key, {
-  user: 'bar'
+  user: 'bar',
 }, s3)
 .then(() => {
   return s3helpers.getUserMetadata(bucket, key, s3)

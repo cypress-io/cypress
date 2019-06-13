@@ -8,8 +8,6 @@ import { HTMLSingleValueChangeInputElement, HTMLElementCanSetSelectionRange, HTM
 
 import _ from '../config/lodash'
 
-const fixedOrStickyRe = /(fixed|sticky)/
-
 const focusable = [
   'a[href]',
   'area[href]',
@@ -21,33 +19,7 @@ const focusable = [
   '[tabindex]',
   '[contentEditable]',
 ]
-const focusableWhenNotDisabled = [
-  'a[href]',
-  'area[href]',
-  'input',
-  'select',
-  'textarea',
-  'button',
-  'iframe',
-  '[tabindex]',
-  '[contentEditable]',
-]
-
-// const isTextInputable = (el: HTMLElement) => {
-//   if (isTextLike(el)) {
-//     return _.some([':not([readonly])'].map((sel) => {
-//       return $jquery.wrap(el).is(sel)
-//     }))
-//   }
-
-//   return false
-// }
-
-// const textinputable = ['input']
-
-//'body,a[href],button,select,[tabindex],input,textarea,[contenteditable]'
-
-const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month)$/
+const inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 
 // rules for native methods and props
@@ -427,40 +399,11 @@ const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
   }
 }
 
-/**
- * The element can be activeElement, recieve focus events, and also recieve keyboard events
- */
-const isFocusable = ($el: JQuery<Element>) => {
-  return (
-    _.some(focusable, (sel) => {
-      return $el.is(sel)
-    }) ||
-    (isElement($el[0]) &&
-      getTagName($el[0]) === 'html' &&
-      isContentEditable($el[0]))
-  )
+const isFocusable = ($el) => {
+  return _.some(focusable, (sel) => {
+    return $el.is(sel)
+  })
 }
-
-/**
- * The element can be activeElement, recieve focus events, and also recieve keyboard events
- * OR, it is a disabled element that would have been focusable
- */
-const isFocusableWhenNotDisabled = ($el: JQuery<Element>) => {
-  return (
-    _.some(focusableWhenNotDisabled, (sel) => {
-      return $el.is(sel)
-    }) ||
-    (isElement($el[0]) &&
-      getTagName($el[0]) === 'html' &&
-      isContentEditable($el[0]))
-  )
-}
-
-const isType = function (
-  el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>,
-  type
-) {
-  el = ([] as HTMLInputElement[]).concat($jquery.unwrap(el))[0]
 
   // NOTE: use DOMElement.type instead of getAttribute('type') since
   //       <input type="asdf"> will have type="text", and behaves like text type

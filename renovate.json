@@ -23,6 +23,7 @@
         "check-more-types",
         "console-table",
         "execa-wrap",
+        "is-fork-pr",
         "lazy-ass",
         "make-empty-github-commit",
         "mocha-banner",

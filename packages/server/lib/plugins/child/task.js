@@ -6,6 +6,7 @@ const getBody = (ipc, events, ids, [event]) => {
   const taskEvent = _.find(events, { event: 'task' }).handler
   const invoke = () => {
     const fn = taskEvent[event]
+
     return _.isFunction(fn) ? fn.toString() : ''
   }
 
@@ -14,16 +15,20 @@ const getBody = (ipc, events, ids, [event]) => {
 
 const getKeys = (ipc, events, ids) => {
   const taskEvent = _.find(events, { event: 'task' }).handler
-  const invoke = () => _.keys(taskEvent)
+  const invoke = () => {
+    return _.keys(taskEvent)
+  }
 
   util.wrapChildPromise(ipc, invoke, ids)
 }
 
 const merge = (prevEvents, events) => {
   const duplicates = _.intersection(_.keys(prevEvents), _.keys(events))
+
   if (duplicates.length) {
     errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
   }
+
   return _.extend(prevEvents, events)
 }
 
@@ -33,11 +38,13 @@ const wrap = (ipc, events, ids, args) => {
 
   const invoke = (eventId, args = []) => {
     const handler = _.get(events, `${eventId}.handler.${task}`)
+
     if (_.isFunction(handler)) {
       return handler(...args)
-    } else {
-      return '__cypress_unhandled__'
     }
+
+    return '__cypress_unhandled__'
+
   }
 
   util.wrapChildPromise(ipc, invoke, ids, [arg])

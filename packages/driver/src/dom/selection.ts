@@ -40,10 +40,8 @@ const _getSelectionRange = (doc) => {
   return doc.createRange()
 }
 
-const _getSelectionBoundsFromContentEditable = function (el) {
-  const doc = $document.getDocumentFromElement(el)
-  const range = _getSelectionRange(doc)
-  const hostContenteditable = getHostContenteditable(range.commonAncestorContainer)
+      //# if div[contenteditable] > text
+      const hostContenteditable = getHostContenteditable(range.commonAncestorContainer)
 
   if (hostContenteditable === el) {
     return {
@@ -485,6 +483,13 @@ const _moveSelectionTo = function (toStart, doc) {
     return
   }
 
+  if ($elements.isContentEditable(el)) {
+    //# NOTE: can't use execCommand API here because we would have
+    //# to selectAll and then collapse so we use the Selection API
+    const doc = $document.getDocumentFromElement(el)
+    const range = $elements.callNativeMethod(doc, 'createRange')
+    const hostContenteditable = getHostContenteditable(el)
+    let lastTextNode = _getInnerLastChild(hostContenteditable)
 
 
   $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)

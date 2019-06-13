@@ -16,18 +16,6 @@ create = (state) ->
 
     hasBlurred = false
 
-    hasFocus = $elements.callNativeMethod(top.document, 'hasFocus')
-
-    ## if our document does not have focus
-    ## then that means that we need to attempt to
-    ## bring our window into focus, and then figure
-    ## out if the browser fires the native focus
-    ## event - and if it doesn't, to flag this
-    ## element as needing focus on the next action
-    ## command
-    if not hasFocus
-      win.focus()
-
     ## we need to bind to the blur event here
     ## because some browsers will not ever fire
     ## the blur event if the window itself is not
@@ -78,6 +66,11 @@ create = (state) ->
     el.dispatchEvent(focusoutEvt)
 
   fireFocus = (el) ->
+    ## body will never emit focus events
+    ## so we avoid simulating this
+    if $elements.isBody(el)
+      return
+
     ## if we are focusing a different element
     ## dispatch any primed change events
     ## we have to do this because our blur
@@ -97,18 +90,6 @@ create = (state) ->
 
     hasFocused = false
 
-    hasFocus = $elements.callNativeMethod(top.document, 'hasFocus')
-
-    ## if our document does not have focus
-    ## then that means that we need to attempt to
-    ## bring our window into focus, and then figure
-    ## out if the browser fires the native focus
-    ## event - and if it doesn't, to flag this
-    ## element as needing focus on the next action
-    ## command
-    if not hasFocus
-      win.focus()
-
     ## we need to bind to the focus event here
     ## because some browsers will not ever fire
     ## the focus event if the window itself is not
@@ -124,11 +105,6 @@ create = (state) ->
     $elements.callNativeMethod(el, "focus")
 
     cleanup()
-
-    ## body will never emit focus events
-    ## so we avoid simulating this
-    if $elements.isBody(el)
-      return
 
     ## fallback if our focus event never fires
     ## to simulate the focus + focusin
@@ -171,11 +147,11 @@ create = (state) ->
     ## events if the window is not in focus
     ## so we fire fake events to act as if the window
     ## is always in focus
-
     $focused = getFocused()
 
     if $elements.isFocusable($dom.wrap(el)) && (!$focused || $focused[0] isnt el)
       fireFocus(el)
+      return
 
     $elements.callNativeMethod(el, 'focus')
     return
@@ -186,12 +162,13 @@ create = (state) ->
     ## so we fire fake events to act as if the window
     ## is always in focus.
     $focused = getFocused()
+
     if $focused && $focused[0] is el
       fireBlur(el)
+      return
 
     $elements.callNativeMethod(el, 'blur')
     return
-
 
   needsFocus = ($elToFocus, $previouslyFocusedEl) ->
     $focused = getFocused()

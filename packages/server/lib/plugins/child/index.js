@@ -3,6 +3,7 @@
 if (process.versions.electron) {
   require('../../timers/parent').fix()
 }
+
 require('graceful-fs').gracefulify(require('fs'))
 require('@packages/coffee/register')
 require && require.extensions && delete require.extensions['.litcoffee']
