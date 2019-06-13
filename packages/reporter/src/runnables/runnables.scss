@@ -78,7 +78,8 @@
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
-      width: 12px;
+      min-width: 12px;
+      height: 18px;
       text-align: center;
     }
 
@@ -248,7 +249,7 @@
     visibility: visible;
   }
 
-  .test > .runnable-wrapper > .collapsible > .collapsible-header {
+   .test > .runnable-wrapper > .collapsible > .collapsible-header {
     .collapsible-indicator,
     .collapsible-more {
       display: none;
