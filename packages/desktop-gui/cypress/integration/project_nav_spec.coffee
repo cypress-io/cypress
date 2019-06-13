@@ -241,18 +241,22 @@ describe "Project Nav", ->
           "version": "49.0.2609.0",
           "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
           "majorVersion": "49",
-          "warning": "Cypress detected policy settings on your computer that may interfere with using this browser."
+          "warning": "Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy"
         }]
 
         @config.browsers = @browsers
         @openProject.resolve(@config)
 
-      it "shows warning icon with tooltip", ->
+      it "shows warning icon with linkified tooltip", ->
         cy.get(".browsers .fa-exclamation-triangle")
           .then ($el) ->
             $el[0].dispatchEvent(new Event("mouseover", {bubbles: true}))
         cy.get(".cy-tooltip")
-          .should("contain", "Cypress detected policy settings on your computer that may interfere with using this browser.")
+          .should("contain", "Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see")
+          .get(".cy-tooltip a")
+          .click()
+          .then () ->
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/bad-browser-policy")
 
     describe "custom browser available", ->
       beforeEach ->

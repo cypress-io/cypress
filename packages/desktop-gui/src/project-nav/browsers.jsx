@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import Dropdown from '../dropdown/dropdown'
+import MarkdownRenderer from '../lib/markdown-renderer'
 
 import projectsApi from '../projects/projects-api'
 
@@ -85,7 +86,7 @@ export default class Browsers extends Component {
     return (
       <span className='browser-warning'>
         <Tooltip
-          title={browser.warning}
+          title={<MarkdownRenderer markdown={browser.warning}/>}
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
