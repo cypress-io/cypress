@@ -210,8 +210,6 @@ handleEvent = (options, bus, event, id, type, arg) ->
             if browser.family == 'chrome'
               browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
 
-          onWarning(err)
-
         openProject.create(arg, options, {
           onFocusTests: onFocusTests
           onSpecChanged: onSpecChanged
