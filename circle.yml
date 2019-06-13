@@ -720,7 +720,7 @@ linux-workflow: &linux-workflow
         name: Linux lint
         requires:
           - build
-    - lint-typescript:
+    - lint-types:
         requires:
           - build
     # unit, integration and e2e tests
