@@ -236,7 +236,7 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  lint-typescript:
+  lint-types:
     <<: *defaults
     parallelism: 1
     steps:
