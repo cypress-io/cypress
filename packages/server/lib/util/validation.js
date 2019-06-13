@@ -12,23 +12,27 @@
 const _ = require('lodash')
 const errors = require('../errors')
 
-//# validation functions take a key and a value and should:
-//#  - return true if it passes validation
-//#  - return a error message if it fails validation
+// # validation functions take a key and a value and should:
+// #  - return true if it passes validation
+// #  - return a error message if it fails validation
+
+const str = JSON.stringify
 
 const errMsg = (key, value, type) => {
-  return `Expected \`${key}\` to be ${type}. Instead the value was: \`${JSON.stringify(value)}\``
+  return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(
+    value
+  )}\``
 }
 
-const isFullyQualifiedUrl = (value) => {
+const isFullyQualifiedUrl = value => {
   return isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = (value) => {
+const isArrayOfStrings = value => {
   return isArray(value) && _.every(value, isString)
 }
 
-const isFalse = (value) => {
+const isFalse = value => {
   return value === false
 }
 
@@ -38,12 +42,11 @@ const { isString } = _
 
 module.exports = {
   isNumber (key, value) {
-    if ((value == null) || isNumber(value)) {
+    if (value == null || isNumber(value)) {
       return true
     }
 
     return errMsg(key, value, 'a number')
-
   },
 
   isNumberOrFalse (key, value) {
@@ -52,52 +55,50 @@ module.exports = {
     }
 
     return errMsg(key, value, 'a number or false')
-
   },
 
   isFullyQualifiedUrl (key, value) {
-    if ((value == null) || isFullyQualifiedUrl(value)) {
+    if (value == null || isFullyQualifiedUrl(value)) {
       return true
     }
 
-    return errMsg(key, value, 'a fully qualified URL (starting with `http://` or `https://`)')
-
+    return errMsg(
+      key,
+      value,
+      'a fully qualified URL (starting with `http://` or `https://`)'
+    )
   },
 
   isBoolean (key, value) {
-    if ((value == null) || _.isBoolean(value)) {
+    if (value == null || _.isBoolean(value)) {
       return true
     }
 
     return errMsg(key, value, 'a boolean')
-
   },
 
   isPlainObject (key, value) {
-    if ((value == null) || _.isPlainObject(value)) {
+    if (value == null || _.isPlainObject(value)) {
       return true
     }
 
     return errMsg(key, value, 'a plain object')
-
   },
 
   isString (key, value) {
-    if ((value == null) || isString(value)) {
+    if (value == null || isString(value)) {
       return true
     }
 
     return errMsg(key, value, 'a string')
-
   },
 
   isArray (key, value) {
-    if ((value == null) || isArray(value)) {
+    if (value == null || isArray(value)) {
       return true
     }
 
     return errMsg(key, value, 'an array')
-
   },
 
   isStringOrFalse (key, value) {
@@ -106,7 +107,6 @@ module.exports = {
     }
 
     return errMsg(key, value, 'a string or false')
-
   },
 
   isStringOrArrayOfStrings (key, value) {
@@ -115,6 +115,26 @@ module.exports = {
     }
 
     return errMsg(key, value, 'a string or an array of strings')
-
   },
+
+  /**
+   * Checks if given value for a key is equal to one of the provided values.
+   * @example
+    ```
+    validate = v.isOneOf("foo", "bar")
+    validate("example", "foo") // true
+    validate("example", "else") // error message string
+    ```
+   */
+  isOneOf (...values) {
+    return (key, value) => {
+      if (values.some(v => v === value)) {
+        return true
+      }
+
+      const strings = values.map(str).join(', ')
+
+      return errMsg(key, value, `one of these values: ${strings}`)
+    }
+  }
 }

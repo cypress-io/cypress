@@ -47,14 +47,15 @@ module.exports = {
       # find it asynchronously
       decidedChildOptions = null
 
-      if config.node
-        decidedChildOptions = util.findNode(config.node)
-          .then (resolvedNode) ->
-            if resolvedNode
-              debug("using Node %s", resolvedNode)
-              childOptions.execPath = resolvedNode
-            else
-              console.error("Could not find Node from config %s, using bundled Node %s", config.node, process.version)
+      if config.nodeVersion
+        decidedChildOptions = util.findNode(config.nodeVersion)
+        .then (resolvedNode) ->
+          if resolvedNode
+            debug("using Node %s", resolvedNode)
+            childOptions.execPath = resolvedNode
+          else
+            console.error("Could not find Node from config %s, using bundled Node %s",
+              config.nodeVersion, process.version)
       else
         decidedChildOptions = Promise.resolve()
 

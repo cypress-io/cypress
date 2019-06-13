@@ -53,7 +53,7 @@ configKeys = toWords """
   videoUploadOnPasses
   watchForFileChanges
   waitForAnimations
-  node
+  nodeVersion
 """
 
 breakingConfigKeys = toWords """
@@ -107,7 +107,7 @@ defaults = {
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
   pluginsFile:                   "cypress/plugins"
-  node:                          null
+  nodeVersion:                   "default"
 
   ## deprecated
   javascripts:                   []
@@ -146,7 +146,7 @@ validationRules = {
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
-  node: v.isString
+  nodeVersion: v.isOneOf("default", "bundled", "system")
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
