@@ -15,7 +15,9 @@
     "preclean": "npm run check-deps-pre",
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
-    "test": "node ./scripts/test.js",
+    "test": "mocha 'src/**/*.spec.*'",
+    "test-watch": "npm run test -- --watch",
+    "lint": "bin-up eslint --fix lib/*.js src/*.js* src/**/*.js*",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project ."
   },

@@ -1,3 +1,5 @@
+/* eslint-disable arrow-body-style */
+
 const la = require('lazy-ass')
 const fs = require('fs-extra')
 const _ = require('lodash')
@@ -23,6 +25,13 @@ const testStaticAssets = async (buildResourcePath) => {
         '//# sourceMappingURL=data:application/json;charset=utf-8;base64',
       ],
       minLineCount: 5000,
+    }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/runner/dist/reporter.css`,
+      goodStrings: [
+        // indicates css autoprefixer is correctly appending vendor prefixes (e.g -moz-touch)
+        ['-ms-', 20],
+      ],
     }),
 
     testPackageStaticAssets({
@@ -50,13 +59,20 @@ const testPackageStaticAssets = async (options = {}) => {
     const fileStr = (await fs.readFile(path)).toString()
 
     opts.goodStrings.forEach((str) => {
-      la(fileStr.includes(str), stripIndent`
-        Error in ${path}: expected to find string ${chalk.bold(str)}
-      `)
+      const [passed, count, atLeast] = includesString(fileStr, str)
+
+      la(passed, stripIndent`
+      Error in ${path}: expected to find at least ${atLeast} strings of ${chalk.bold(str)}
+      contained: ${count}
+    `)
+
     })
     opts.badStrings.forEach((str) => {
-      la(!fileStr.includes(str), stripIndent`
-        Error in ${path}: expected ${chalk.bold('not')} to find string ${chalk.bold(str)}
+      const [passed, count, atLeast] = includesString(fileStr, str)
+
+      la(!passed, stripIndent`
+        Error in ${path}: expected ${chalk.bold('not')} to find more than ${atLeast - 1} strings of ${chalk.bold(str)}
+        contained: ${count}
       `)
     })
 
@@ -81,4 +97,41 @@ const testPackageStaticAssets = async (options = {}) => {
 module.exports = {
   testStaticAssets,
   testPackageStaticAssets,
+}
+
+function includesCount (string, subString) {
+
+  string += ''
+  subString += ''
+  if (subString.length <= 0) return (string.length + 1)
+
+  let n = 0
+  let pos = 0
+  let step = subString.length
+
+  // eslint-disable-next-line
+  while (true) {
+    pos = string.indexOf(subString, pos)
+    if (pos >= 0) {
+      ++n
+      pos += step
+    } else {
+      break
+    }
+  }
+
+  return n
+}
+
+const includesString = (fileStr, options) => {
+  const opts = _.isArray(options) ? options : [options, 1]
+
+  const [substr, atLeast] = opts
+
+  const count = includesCount(fileStr, substr)
+
+  const passed = count >= atLeast
+
+  return [passed, count, atLeast]
+
 }

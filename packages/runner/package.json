@@ -14,7 +14,9 @@
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
-    "test": "node ./scripts/test.js"
+    "test": "mocha src/**/*.spec.*",
+    "test-watch": "npm run test -- --watch",
+    "lint": "bin-up eslint --fix src/*.js* src/**/*.js*"
   },
   "files": [
     "dist",
