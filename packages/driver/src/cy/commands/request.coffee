@@ -1,5 +1,5 @@
 _ = require("lodash")
-whatIsCircular = require("what-is-circular")
+whatIsCircular = require("@cypress/what-is-circular")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
