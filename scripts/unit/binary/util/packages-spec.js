@@ -125,7 +125,7 @@ describe('testStaticAssets', () => {
 
     // logFs()
 
-    await testStaticAssets(buildDir).not.be.rejected
+    await expect(testStaticAssets(buildDir)).not.be.rejected
 
   })
 
