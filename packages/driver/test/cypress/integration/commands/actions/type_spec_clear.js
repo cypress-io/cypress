@@ -1,9 +1,9 @@
 /* eslint arrow-body-style: "off" */
 
 const $ = Cypress.$.bind(Cypress)
-const { _ } = Cypress
+const { _, Promise } = Cypress
 
-export default function () {
+export default function clear_spec () {
   context('#clear', function () {
     it('does not change the subject', () => {
       const textarea = cy.$$('textarea')

@@ -1,7 +1,7 @@
-import { shouldNotBeCalled, shouldBeCalledOnce, shouldBeCalledNth, attachKeyListeners } from './utils'
 const { _, $ } = Cypress
+const { shouldNotBeCalled, shouldBeCalledOnce, shouldBeCalledNth, attachKeyListeners } = require('./type_spec_utils')
 
-export default function () {
+export default function errors () {
   describe('errors', function () {
     beforeEach(function () {
       Cypress.config('defaultCommandTimeout', 100)
@@ -825,7 +825,7 @@ export default function () {
       })
     })
 
-    it('ends', () => {
+    it.only('ends', () => {
       const logs = []
 
       cy.on('log:added', (attrs, log) => {
