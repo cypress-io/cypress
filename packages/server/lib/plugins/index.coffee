@@ -57,8 +57,7 @@ module.exports = {
             debug("using found Node %s", resolvedNode)
             childOptions.execPath = resolvedNode
           else
-            console.error("Could not find Node from config %s, using bundled Node %s",
-              config.nodeVersion, process.version)
+            util.logWarning("Could find system Node", "using bundled Node", process.version)
       else
         debug("using default bundled Node version %s", process.version)
         decidedChildOptions = Promise.resolve()

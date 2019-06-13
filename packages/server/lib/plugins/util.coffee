@@ -46,6 +46,10 @@ module.exports = {
     resolvedNode = _.memoize(findNodeInFullPath)()
     resolvedNode
 
+  # convenient for confirming from tests that a warning has been printed to the console
+  logWarning: () ->
+    console.warn.apply(console, arguments)
+
   wrapIpc: (aProcess) ->
     emitter = new EE()
 

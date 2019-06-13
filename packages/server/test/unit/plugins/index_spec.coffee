@@ -16,38 +16,79 @@ describe "lib/plugins/index", ->
     }
     sinon.stub(cp, "fork").returns(@pluginsProcess)
 
-    # callback registered for ipc.on("loaded", cb)
-    @ipcOnLoaded = null
-
     @ipc = {
       send: sinon.spy()
-      on: sinon.stub().callsFake (eventName, cb) =>
-        if eventName is "loaded"
-          @ipcOnLoaded = cb
+      on: sinon.stub()
     }
-
-    sinon.stub(util, "wrapIpc").callsFake (proc) =>
-      # need to call ipc.on("loaded") to resolve plugins.init() promise
-      setTimeout () =>
-        expect(@ipcOnLoaded, "ipc has on loaded callback").to.be.a("function")
-        newCfg = {}
-        registrations = []
-        @ipcOnLoaded(newCfg, registrations)
-      , 50
-      @ipc
+    sinon.stub(util, "wrapIpc").returns(@ipc)
 
   context "#init", ->
     it "is noop if no pluginsFile", ->
       plugins.init({}) ## doesn't reject or time out
 
     it "forks child process", ->
+      # have to fire "loaded" message, otherwise plugins.init promise never resolves
+      @ipc.on.withArgs("loaded").yields([])
       plugins.init({ pluginsFile: "cypress-plugin" })
       .then ->
         expect(cp.fork).to.be.called
         expect(cp.fork.lastCall.args[0]).to.contain("plugins/child/index.js")
         expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
 
+    it "uses default Node", ->
+      @ipc.on.withArgs("loaded").yields([])
+      config = {
+        pluginsFile: "cypress-plugin"
+      }
+      systemNode = "/my/path/to/system/node"
+      sinon.stub(util, "findNode").resolves(systemNode)
+      plugins.init(config)
+      .then ->
+        expect(util.findNode).to.not.be.called
+        # when forking, we use current process
+        options = {
+          stdio: "inherit"
+        }
+        expect(cp.fork.lastCall.args[2]).to.eql(options)
+
+    it "finds system Node", ->
+      @ipc.on.withArgs("loaded").yields([])
+      config = {
+        pluginsFile: "cypress-plugin",
+        nodeVersion: "system"
+      }
+      systemNode = "/my/path/to/system/node"
+      sinon.stub(util, "findNode").resolves(systemNode)
+      plugins.init(config)
+      .then ->
+        expect(util.findNode).to.be.called
+        options = {
+          stdio: "inherit",
+          execPath: systemNode
+        }
+        expect(cp.fork.lastCall.args[2]).to.eql(options)
+
+    it "finds default Node when cannot find system Node", ->
+      @ipc.on.withArgs("loaded").yields([])
+      config = {
+        pluginsFile: "cypress-plugin",
+        nodeVersion: "system"
+      }
+      # could not find system Node
+      sinon.stub(util, "findNode").resolves(null)
+      sinon.stub(util, "logWarning")
+      plugins.init(config)
+      .then ->
+        expect(util.findNode).to.be.called
+        expect(util.logWarning).to.be.calledWith("Could find system Node")
+        # uses process to fork
+        options = {
+          stdio: "inherit"
+        }
+        expect(cp.fork.lastCall.args[2]).to.eql(options)
+
     it "calls any handlers registered with the wrapped ipc", ->
+      @ipc.on.withArgs("loaded").yields([])
       handler = sinon.spy()
       plugins.registerHandler(handler)
       plugins.init({ pluginsFile: "cypress-plugin" })

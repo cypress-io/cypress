@@ -167,3 +167,9 @@ describe "lib/plugins/util", ->
         code: "the code"
         annotated: "the annotated version"
       })
+
+  context "#logWarning", ->
+    it "calls console.warn", ->
+      sinon.stub(console, "warn")
+      util.logWarning("foo", "bar")
+      expect(console.warn).to.be.calledWith("foo", "bar")
