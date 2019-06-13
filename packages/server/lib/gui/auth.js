@@ -12,7 +12,15 @@ const user = require('../user')
 let app
 let authCallback
 let authState
+let openExternalAttempted = false
+let authRedirectReached = false
 let server
+
+const _buildLoginRedirectUrl = (server) => {
+  const { port } = server.address()
+
+  return `http://127.0.0.1:${port}/redirect-to-auth`
+}
 
 const _buildFullLoginUrl = (baseLoginUrl, server) => {
   const { port } = server.address()
@@ -37,18 +45,21 @@ const _getOriginFromUrl = (originalUrl) => {
  */
 const start = () => {
   return user.getBaseLoginUrl()
-  .tap(_launchServer)
-  .then((baseLoginUrl) => {
-    return _buildFullLoginUrl(baseLoginUrl, server)
+  .then(_launchServer)
+  .then(() => {
+    return _buildLoginRedirectUrl(server)
   })
-  .then((loginUrl) => {
-    debug('Trying to open native auth to URL ', loginUrl)
+  .then((loginRedirectUrl) => {
+    debug('Trying to open native auth to URL ', loginRedirectUrl)
 
-    return _launchNativeAuth(loginUrl)
+    return _launchNativeAuth(loginRedirectUrl)
     .catch((e) => {
       debug('Failed to launch native auth, falling back to Electron:', e)
 
-      return _launchElectronAuth(loginUrl)
+      return _launchElectronAuth(loginRedirectUrl)
+    })
+    .then(() => {
+      debug('Successfully launched auth')
     })
   })
   .then(() => {
@@ -73,6 +84,16 @@ const _launchServer = (baseLoginUrl) => {
 
     debug('Launching auth server with origin', origin)
     app = express()
+
+    app.get('/redirect-to-auth', (req, res) => {
+      authRedirectReached = true
+
+      const fullLoginUrl = _buildFullLoginUrl(baseLoginUrl, server)
+
+      debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
+
+      res.redirect(303, fullLoginUrl)
+    })
 
     app.get('/auth', (req, res) => {
       debug('Received GET to /auth with query params %o', req.query)
@@ -127,9 +148,19 @@ const _stopServer = () => {
   app = undefined
   authState = undefined
   authCallback = undefined
+  openExternalAttempted = false
+  authRedirectReached = false
 }
 
 const _launchNativeAuth = (loginUrl) => {
+  if (openExternalAttempted && !authRedirectReached) {
+    // we've tried launching openExternal before, but the auth server was never hit
+    // this indicates that openExternal fails on this system - fall back to Electron
+    return Promise.reject(new Error('Previous openExternal call failed, launching Electron'))
+  }
+
+  openExternalAttempted = true
+
   // wrap openExternal here in case `electron.shell` is not available (during tests)
   return Promise.fromCallback((cb) => {
     shell.openExternal(loginUrl, {}, cb)
