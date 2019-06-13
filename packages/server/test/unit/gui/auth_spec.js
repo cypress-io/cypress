@@ -8,7 +8,8 @@ const random = require(`${root}../lib/util/random`)
 const BASE_URL = 'https://foo.invalid/login.html'
 const RANDOM_STRING = 'a'.repeat(32)
 const PORT = 9001
-const LOGIN_URL = `https://foo.invalid/login.html?port=9001&state=${RANDOM_STRING}`
+const REDIRECT_URL = `http://127.0.0.1:${PORT}/redirect-to-auth`
+const FULL_LOGIN_URL = `https://foo.invalid/login.html?port=${PORT}&state=${RANDOM_STRING}`
 
 describe('lib/gui/auth', function () {
   afterEach(function () {
@@ -17,7 +18,7 @@ describe('lib/gui/auth', function () {
 
   context('._getOriginFromUrl', function () {
     it('given an https URL, returns the origin', function () {
-      const origin = auth._getOriginFromUrl(LOGIN_URL)
+      const origin = auth._getOriginFromUrl(FULL_LOGIN_URL)
 
       expect(origin).to.eq('https://foo.invalid')
     })
@@ -42,7 +43,7 @@ describe('lib/gui/auth', function () {
     it('uses random and server.port to form a URL', function () {
       const url = auth._buildFullLoginUrl(BASE_URL, this.server)
 
-      expect(url).to.eq(LOGIN_URL)
+      expect(url).to.eq(FULL_LOGIN_URL)
       expect(random.id).to.be.calledWith(32)
       expect(this.server.address).to.be.calledOnce
     })
@@ -57,7 +58,7 @@ describe('lib/gui/auth', function () {
 
   context('._launchNativeAuth', function () {
     it('is catchable if `shell` does not exist', function () {
-      return auth._launchNativeAuth(LOGIN_URL)
+      return auth._launchNativeAuth(REDIRECT_URL)
       .then(() => {
         throw new Error('This should not succeed')
       })
@@ -77,21 +78,22 @@ describe('lib/gui/auth', function () {
       it('returns a promise that is fulfilled when openExternal succeeds', function () {
         sinon.stub(electron.shell, 'openExternal').callsArg(2)
 
-        return auth._launchNativeAuth(LOGIN_URL)
+        return auth._launchNativeAuth(REDIRECT_URL)
         .then(() => {
-          expect(electron.shell.openExternal).to.be.calledWithMatch(LOGIN_URL, {}, sinon.match.func)
+          expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL, {}, sinon.match.func)
         })
       })
 
       it('is still fulfilled when openExternal fails, but onWarning is called', function () {
         sinon.stub(electron.shell, 'openExternal').callsArgWith(2, new Error)
+        const onWarning = sinon.stub()
 
-        return auth._launchNativeAuth(LOGIN_URL)
+        return auth._launchNativeAuth(REDIRECT_URL, onWarning)
         .then(() => {
-          throw new Error('This should not succeed')
-        })
-        .catch({ message: 'It broke!' }, () => {
-          expect(electron.shell.openExternal).to.be.calledWithMatch(LOGIN_URL, {}, sinon.match.func)
+          expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL, {}, sinon.match.func)
+          expect(onWarning).to.be.calledWithMatch({
+            message: `Cypress was unable to open your installed browser. To continue logging in to the dashboard, please open this URL in your web browser: ${REDIRECT_URL}`,
+          })
         })
       })
     })

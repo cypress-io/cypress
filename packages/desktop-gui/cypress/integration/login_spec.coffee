@@ -6,7 +6,6 @@ describe "Login", ->
       { start, @ipc } = win.App
 
       cy.stub(@ipc, "onMenuClicked")
-      cy.stub(@ipc, "onFocusTests")
       cy.stub(@ipc, "getOptions").resolves({})
       cy.stub(@ipc, "getCurrentUser").resolves(null)
       cy.stub(@ipc, "updaterCheck").resolves(false)
@@ -17,6 +16,9 @@ describe "Login", ->
       cy.stub(@ipc, "externalOpen")
       cy.stub(@ipc, "clearGithubCookies")
       cy.stub(@ipc, "logOut").resolves()
+
+      cy.stub(@ipc, "onAuthWarning").callsFake (cb) =>
+        @onAuthWarningCb = cb
 
       @pingApiServer = @util.deferred()
       cy.stub(@ipc, "pingApiServer").returns(@pingApiServer.promise)
@@ -126,6 +128,20 @@ describe "Login", ->
           it "login button should be enabled", ->
             cy
               .get("@loginBtn").should("not.be.disabled")
+
+        describe "on ipc 'on:auth:warning'", ->
+          beforeEach ->
+            @onAuthWarningCb(null, "some warning here")
+
+          it "displays warning in ui", ->
+            cy
+              .get(".warning")
+                .should("be.visible")
+                .contains("some warning here")
+
+          it "login button should be disabled", ->
+            cy
+              .get("@loginBtn").should("be.disabled")
 
     describe "Dashboard link in message", ->
       it "opens link to Dashboard Service on click", ->
