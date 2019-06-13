@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
-  "browser": "./lib/client.js",
+  "browser": "./lib/browser.js",
   "scripts": {
     "postinstall": "patch-package",
     "pretest": "npm run check-deps-pre",
