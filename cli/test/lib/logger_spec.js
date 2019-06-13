@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const la = require('lazy-ass')
-const {stripIndent, stripIndents} = require('common-tags')
+const { stripIndent, stripIndents } = require('common-tags')
 const snapshot = require('../support/snapshot')
 
 describe('stripIndent', () => {
@@ -12,6 +12,7 @@ describe('stripIndent', () => {
           third line
       last line
     `
+
     // should preserve the structure of the text
     snapshot(removed)
   })
@@ -21,7 +22,8 @@ describe('stripIndent', () => {
     const removed = stripIndent(text)
     // removed 1 level of indentation and trimmed the string
     const expected = 'foo\n  bar'
-    la(removed === expected, 'removed indent is\n' + removed)
+
+    la(removed === expected, `removed indent is\n${removed}`)
   })
 
   it('can be used with nested message', () => {
@@ -33,6 +35,7 @@ describe('stripIndent', () => {
 
       last line
     `
+
     // should have NO indents
     // first line
     //
