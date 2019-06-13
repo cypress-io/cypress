@@ -760,7 +760,8 @@ describe "lib/config", ->
             ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            testFiles:                  { value: "**/*.*", from: "default" }
+            testFiles:                  { value: "**/*.*", from: "default" },
+            nodeVersion:                { value: "default", from: "default" },
           })
 
       it "sets config, envFile and env", ->
@@ -820,7 +821,8 @@ describe "lib/config", ->
             ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            testFiles:                  { value: "**/*.*", from: "default" }
+            testFiles:                  { value: "**/*.*", from: "default" },
+            nodeVersion:                { value: "default", from: "default" },
             env: {
               foo: {
                 value: "foo"

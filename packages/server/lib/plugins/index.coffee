@@ -50,18 +50,22 @@ module.exports = {
       if config.nodeVersion is "system"
         # instead of the built-in Node process, specify a path to 3rd party Node
         # https://devdocs.io/node/child_process#child_process_child_process_fork_modulepath_args_options
+        debug("looking for system Node")
         decidedChildOptions = util.findNode(config.nodeVersion)
         .then (resolvedNode) ->
           if resolvedNode
-            debug("using Node %s", resolvedNode)
+            debug("using found Node %s", resolvedNode)
             childOptions.execPath = resolvedNode
           else
             console.error("Could not find Node from config %s, using bundled Node %s",
               config.nodeVersion, process.version)
       else
+        debug("using default bundled Node version %s", process.version)
         decidedChildOptions = Promise.resolve()
 
-      decidedChildOptions.then () ->
+      return decidedChildOptions
+      .then () ->
+        debug("forking to run %s", childIndexFilename)
         pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
         ipc = util.wrapIpc(pluginsProcess)
 
@@ -70,6 +74,7 @@ module.exports = {
         ipc.send("load", config)
 
         ipc.on "loaded", (newCfg, registrations) ->
+          debug("ipc loaded")
           _.each registrations, (registration) ->
             debug("register plugins process event", registration.event, "with id", registration.eventId)
 
@@ -82,9 +87,11 @@ module.exports = {
                 }
                 ipc.send("execute", registration.event, ids, args)
 
+          debug("resolving with new config %o", newCfg)
           resolve(newCfg)
 
         ipc.on "load:error", (type, args...) ->
+          debug("load:error %s, rejecting", type)
           reject(errors.get(type, args...))
 
         killPluginsProcess = ->

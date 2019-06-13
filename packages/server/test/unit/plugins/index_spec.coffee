@@ -26,11 +26,13 @@ describe "lib/plugins/index", ->
     it "is noop if no pluginsFile", ->
       plugins.init({}) ## doesn't reject or time out
 
-    it "forks child process", ->
+    it.only "forks child process", ->
       plugins.init({ pluginsFile: "cypress-plugin" })
-      expect(cp.fork).to.be.called
-      expect(cp.fork.lastCall.args[0]).to.contain("plugins/child/index.js")
-      expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
+      .then ->
+        console.log('then')
+        expect(cp.fork).to.be.called
+        expect(cp.fork.lastCall.args[0]).to.contain("plugins/child/index.js")
+        expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
 
     it "calls any handlers registered with the wrapped ipc", ->
       handler = sinon.spy()
