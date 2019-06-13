@@ -24,15 +24,15 @@ const errMsg = (key, value, type) => {
   )}\``
 }
 
-const isFullyQualifiedUrl = value => {
+const isFullyQualifiedUrl = (value) => {
   return isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = value => {
+const isArrayOfStrings = (value) => {
   return isArray(value) && _.every(value, isString)
 }
 
-const isFalse = value => {
+const isFalse = (value) => {
   return value === false
 }
 
@@ -128,7 +128,9 @@ module.exports = {
    */
   isOneOf (...values) {
     return (key, value) => {
-      if (values.some(v => v === value)) {
+      if (values.some((v) => {
+        return v === value
+      })) {
         return true
       }
 
@@ -136,5 +138,5 @@ module.exports = {
 
       return errMsg(key, value, `one of these values: ${strings}`)
     }
-  }
+  },
 }
