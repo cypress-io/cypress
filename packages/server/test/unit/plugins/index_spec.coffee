@@ -40,7 +40,7 @@ describe "lib/plugins/index", ->
     it "is noop if no pluginsFile", ->
       plugins.init({}) ## doesn't reject or time out
 
-    it.only "forks child process", ->
+    it "forks child process", ->
       plugins.init({ pluginsFile: "cypress-plugin" })
       .then ->
         expect(cp.fork).to.be.called
@@ -51,9 +51,10 @@ describe "lib/plugins/index", ->
       handler = sinon.spy()
       plugins.registerHandler(handler)
       plugins.init({ pluginsFile: "cypress-plugin" })
-      expect(handler).to.be.called
-      expect(handler.lastCall.args[0].send).to.be.a("function")
-      expect(handler.lastCall.args[0].on).to.be.a("function")
+      .then ->
+        expect(handler).to.be.called
+        expect(handler.lastCall.args[0].send).to.be.a("function")
+        expect(handler.lastCall.args[0].on).to.be.a("function")
 
     it "sends config via ipc", ->
       @ipc.on.withArgs("loaded").yields([])
