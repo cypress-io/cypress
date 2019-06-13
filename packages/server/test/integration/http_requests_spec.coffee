@@ -2558,7 +2558,7 @@ describe "Routes", ->
           pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")
 
           getHugeFile = ->
-            rp("https://s3.amazonaws.com/assets.cypress.io/huge_app.js")
+            rp("https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js")
             .then (resp) ->
               fs
               .outputFileAsync(pathToHugeAppJs, resp)
