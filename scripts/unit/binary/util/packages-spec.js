@@ -1,5 +1,3 @@
-/* eslint-env mocha */
-
 const os = require('os')
 const _ = require('lodash')
 const path = require('path')
@@ -103,7 +101,7 @@ describe('transformRequires', () => {
   })
 })
 
-describe.only('testStaticAssets', () => {
+describe('testStaticAssets', () => {
   it('can detect valid runner js', async () => {
     const buildDir = 'resources/app'
 
@@ -127,7 +125,7 @@ describe.only('testStaticAssets', () => {
 
     // logFs()
 
-    await testStaticAssets(buildDir)
+    await testStaticAssets(buildDir).not.be.rejected
 
   })
 
@@ -177,7 +175,7 @@ describe.only('testStaticAssets', () => {
 
   })
 
-  it('can detect runner js minified code', async () => {
+  it('can detect asset with too many lines', async () => {
     const buildDir = 'resources/app'
 
     mockfs({
@@ -200,7 +198,41 @@ describe.only('testStaticAssets', () => {
     })).to.rejected.with.eventually
     .property('message').contain('minified')
   })
+
+  it('can detect asset that includes specified number of goodStrings', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'test': {
+            'file.css': `
+              ${'-moz-user-touch: "none"\n'.repeat(5)}
+              `,
+          },
+        },
+      },
+    })
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/test/file.css`,
+      goodStrings: [['-moz-', 10]],
+    })).to.rejected.with.eventually
+    .property('message').contain('at least 10')
+  })
 })
+
+/*
+// Example: Test real assets
+  it.only('can detect', async () => {
+    const buildDir = process.cwd()
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/reporter/dist/*.css`,
+      goodStrings: [['-ms-', 20]],
+    })).not.be.rejected
+  })
+*/
 
 afterEach(() => {
   mockfs.restore()

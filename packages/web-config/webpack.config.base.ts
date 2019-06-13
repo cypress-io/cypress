@@ -82,6 +82,14 @@ const config: webpack.Configuration = {
 						},
 					}, // translates CSS into CommonJS
 					{
+						loader: require.resolve('postcss-loader'),
+						options: {
+							plugins: [
+								require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
+							],
+						}
+					},
+					{
 						loader: require.resolve('resolve-url-loader')
 					},
 					{
