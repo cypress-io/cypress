@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "pretest": "npm run check-deps-pre && npm run lint",
+    "pretest": "npm run check-deps-pre",
     "test": "npm run unit",
     "unit": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "check-deps": "node ../../scripts/check-deps.js --verbose",

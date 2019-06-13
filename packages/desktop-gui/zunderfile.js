@@ -1,1 +1,1 @@
-require("./scripts/set-zunder-config")()
+require('./scripts/set-zunder-config')()
