@@ -1776,13 +1776,13 @@ declare namespace Cypress {
       })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
+    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings): Chainable<C>
     /**
      * Write to a file with the specified encoding and contents.
      *
      * @see https://on.cypress.io/writefile
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
+    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions>): Chainable<C>
 
     /**
      * jQuery library bound to the AUT
@@ -2316,6 +2316,12 @@ declare namespace Cypress {
      * @default true
      */
     cancelable: boolean
+  }
+
+  /** Options to change the default behavior of .writeFile */
+  interface WriteFileOptions extends Loggable { 
+    flag: string
+    encoding: Encodings
   }
 
   // Kind of onerous, but has a nice auto-complete. Also fallbacks at the end for custom stuff
