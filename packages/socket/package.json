@@ -15,7 +15,8 @@
     "check-deps-pre": "npm run check-deps -- --prescript"
   },
   "files": [
-    "lib"
+    "lib",
+    "patches"
   ],
   "dependencies": {
     "socket.io": "2.2.0",
