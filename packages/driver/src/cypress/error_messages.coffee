@@ -602,6 +602,11 @@ module.exports = {
     invalid_arguments: "#{cmd('reload')} can only accept a boolean or options as its arguments."
 
   request:
+    body_circular: ({ path }) -> """
+      The `body` parameter supplied to #{cmd('request')} contained a circular reference at the path "#{path.join(".")}".
+
+      `body` can only be a string or an object with no circular references.
+    """
     status_code_flags_invalid: """
     #{cmd('request')} was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }.
 
@@ -950,6 +955,11 @@ module.exports = {
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
 
   visit:
+    body_circular: ({ path }) -> """
+      The `body` parameter supplied to #{cmd('visit')} contained a circular reference at the path "#{path.join(".")}".
+
+      `body` can only be a string or an object with no circular references.
+    """
     status_code_flags_invalid: """
     #{cmd('visit')} was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }.
 

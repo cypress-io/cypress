@@ -1,4 +1,5 @@
 _ = require("lodash")
+whatIsCircular = require("@cypress/what-is-circular")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
@@ -132,6 +133,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## https://github.com/cypress-io/cypress/issues/2923
       if needsFormSpecified(options)
         options.form = true
+
+      if _.isObject(options.body) and path = whatIsCircular(options.body)
+        $utils.throwErrByPath("request.body_circular", { args: { path }})
 
       ## only set json to true if form isnt true
       ## and we have a valid object for body

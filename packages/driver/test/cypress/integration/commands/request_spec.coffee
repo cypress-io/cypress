@@ -749,6 +749,34 @@ describe "src/cy/commands/request", ->
           }
         })
 
+      it "displays body_circular when body is circular", (done) ->
+        foo = {
+          bar: {
+            baz: {}
+          }
+        }
+
+        foo.bar.baz.quux = foo
+
+        cy.request({
+          method: "POST"
+          url: "http://foo.invalid/"
+          body: foo
+        })
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq """
+          The `body` parameter supplied to cy.request() contained a circular reference at the path "bar.baz.quux".
+
+          `body` can only be a string or an object with no circular references.
+          """
+
+          done()
+
       it "does not include redirects when there were no redirects", (done) ->
         backend = Cypress.backend
         .withArgs("http:request")
