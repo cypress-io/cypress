@@ -1781,6 +1781,14 @@ declare namespace Cypress {
      * Write to a file with the specified encoding and contents.
      *
      * @see https://on.cypress.io/writefile
+    ```
+    cy.writeFile('path/to/ascii.txt', 'Hello World', { 
+      flag: 'a+',
+      encoding: 'ascii'
+    }).then((text) => {
+      expect(text).to.equal('Hello World') // true
+    })
+    ```
      */
     writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions>): Chainable<C>
 
