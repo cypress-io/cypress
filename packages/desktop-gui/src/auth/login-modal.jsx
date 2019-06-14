@@ -20,6 +20,7 @@ class LoginContent extends Component {
     hasApiServer: false,
     apiUrl: '',
     apiError: null,
+    succeeded: false,
   }
 
   componentDidMount () {
@@ -47,6 +48,10 @@ class LoginContent extends Component {
   }
 
   render () {
+    if (this.state.succeeded) {
+      return this._renderSuccess()
+    }
+
     if (this.state.isLoading) {
       return (
         <div className='modal-body login'>
@@ -65,7 +70,25 @@ class LoginContent extends Component {
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
         <h1><i className='fa fa-lock'></i> Log In</h1>
         <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
-        <LoginForm message={authStore.message} onSuccess={close} />
+        <LoginForm message={authStore.message} onSuccess={() => this.setState({ succeeded: true })} />
+      </div>
+    )
+  }
+
+  _renderSuccess () {
+    return (
+      <div className='modal-body login'>
+        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+        <h1><i className='fa fa-check'></i> Login Successful</h1>
+        <p>You are now logged in to the Cypress Dashboard as {authStore.user.name}.</p>
+        <div className='login-content'>
+          <button
+            className='btn btn-login btn-black btn-block'
+            onClick={close}
+          >
+            Continue
+          </button>
+        </div>
       </div>
     )
   }
