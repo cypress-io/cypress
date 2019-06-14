@@ -16,6 +16,8 @@ class LoginForm extends Component {
   }
 
   render () {
+    const { message } = this.props
+
     return (
       <div className='login-content'>
         {this._error()}
@@ -26,20 +28,20 @@ class LoginForm extends Component {
           onClick={this._login}
           disabled={this.state.isLoggingIn}
         >
-          {this._buttonContent()}
+          {this._buttonContent(message ? message.browserOpened : false)}
         </button>
-        {this.props.warning && <p className='warning'><MarkdownRenderer markdown={this.props.warning}/></p>}
+        {message && <p className={message.type}><MarkdownRenderer markdown={message.message}/></p>}
         <p className='terms'>By logging in, you agree to the <a onClick={this._openTerms}>Terms of Use</a> and <a onClick={this._openPrivacy}>Privacy Policy</a>.</p>
       </div>
     )
   }
 
-  _buttonContent () {
+  _buttonContent (browserOpened) {
     if (this.state.isLoggingIn) {
       return (
         <span>
           <i className='fa fa-spinner fa-spin'></i>{' '}
-          Logging in...
+          {browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
         </span>
       )
     }

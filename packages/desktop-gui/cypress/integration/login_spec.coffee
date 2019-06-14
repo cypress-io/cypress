@@ -17,8 +17,8 @@ describe "Login", ->
       cy.stub(@ipc, "clearGithubCookies")
       cy.stub(@ipc, "logOut").resolves()
 
-      cy.stub(@ipc, "onAuthWarning").callsFake (cb) =>
-        @onAuthWarningCb = cb
+      cy.stub(@ipc, "onAuthMessage").callsFake (cb) =>
+        @onAuthMessageCb = cb
 
       @pingApiServer = @util.deferred()
       cy.stub(@ipc, "pingApiServer").returns(@pingApiServer.promise)
@@ -129,9 +129,12 @@ describe "Login", ->
             cy
               .get("@loginBtn").should("not.be.disabled")
 
-        describe "on ipc 'on:auth:warning'", ->
+        describe "on ipc 'on:auth:message'", ->
           beforeEach ->
-            @onAuthWarningCb(null, "some warning here")
+            @onAuthMessageCb(null, {
+              message: "some warning here"
+              type: "warning"
+            })
 
           it "displays warning in ui", ->
             cy

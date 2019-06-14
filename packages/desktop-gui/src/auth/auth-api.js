@@ -22,14 +22,14 @@ class AuthApi {
   }
 
   login () {
-    ipc.onAuthWarning((__, warning) => {
-      authStore.setWarning(warning)
+    ipc.onAuthMessage((__, message) => {
+      authStore.setMessage(message)
     })
 
     return ipc.beginAuth()
     .then((user) => {
       authStore.setUser(user)
-      authStore.setWarning(null)
+      authStore.setMessage(null)
 
       return null
     })

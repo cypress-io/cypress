@@ -59,8 +59,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:project:error"
       onBus("project:error")
 
-    when "on:auth:warning"
-      onBus("auth:warning")
+    when "on:auth:message"
+      onBus("auth:message")
 
     when "on:project:warning"
       onBus("project:warning")
@@ -116,10 +116,10 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "begin:auth"
-      onWarning = (err) ->
-        bus.emit('auth:warning', _.get(err, 'message'))
+      onMessage = (msg) ->
+        bus.emit('auth:message', msg)
 
-      auth.start(onWarning)
+      auth.start(onMessage)
       .then(send)
       .catch(sendErr)
 

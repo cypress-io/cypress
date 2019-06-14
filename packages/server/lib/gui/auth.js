@@ -44,18 +44,28 @@ const _getOriginFromUrl = (originalUrl) => {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onWarning) => {
+const start = (onMessage) => {
+  function sendMessage (type, errorType, arg1) {
+    onMessage({
+      type,
+      message: errors.getMsgByType(errorType, arg1),
+      browserOpened: authRedirectReached,
+    })
+  }
+
   authRedirectReached = false
 
   return user.getBaseLoginUrl()
-  .then(_launchServer)
+  .then((baseLoginUrl) => {
+    return _launchServer(baseLoginUrl, sendMessage)
+  })
   .then(() => {
     return _buildLoginRedirectUrl(server)
   })
   .then((loginRedirectUrl) => {
     debug('Trying to open native auth to URL ', loginRedirectUrl)
 
-    return _launchNativeAuth(loginRedirectUrl, onWarning)
+    return _launchNativeAuth(loginRedirectUrl, sendMessage)
     .then(() => {
       debug('openExternal completed')
     })
@@ -74,7 +84,7 @@ const start = (onWarning) => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const _launchServer = (baseLoginUrl) => {
+const _launchServer = (baseLoginUrl, sendMessage) => {
   if (!server) {
     // launch an express server to listen for the auth callback from dashboard
     const origin = _getOriginFromUrl(baseLoginUrl)
@@ -90,6 +100,8 @@ const _launchServer = (baseLoginUrl) => {
       debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
 
       res.redirect(303, fullLoginUrl)
+
+      sendMessage('info', 'AUTH_BROWSER_LAUNCHED')
     })
 
     app.get('/auth', (req, res) => {
@@ -149,16 +161,16 @@ const _stopServer = () => {
   authRedirectReached = false
 }
 
-const _launchNativeAuth = (loginUrl, onWarning) => {
+const _launchNativeAuth = (loginUrl, sendMessage) => {
   const warnCouldNotLaunch = () => {
     if (openExternalAttempted && !authRedirectReached) {
-      onWarning(errors.get('AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl))
+      sendMessage('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
     }
   }
 
   warnCouldNotLaunch()
 
-  setTimeout(warnCouldNotLaunch, 10000)
+  setTimeout(warnCouldNotLaunch, 4000)
 
   openExternalAttempted = true
 

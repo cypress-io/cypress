@@ -65,7 +65,7 @@ class LoginContent extends Component {
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
         <h1><i className='fa fa-lock'></i> Log In</h1>
         <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
-        <LoginForm warning={authStore.warning} onSuccess={close} />
+        <LoginForm message={authStore.message} onSuccess={close} />
       </div>
     )
   }
