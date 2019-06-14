@@ -623,11 +623,11 @@ exports['e2e visit low responseTimeout, normal pageLoadTimeout fails when respon
   3 failing
 
   1) response timeouts result in an error handles no response errors on the initial visit:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/response_never_finishes
 
-We attempted to make an http request to this URL but the request failed without a response.
+We attempted to make an http request to this url but the request failed without a response.
 
 We received this error at the network level:
 
@@ -655,7 +655,6 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -672,11 +671,11 @@ Error: ESOCKETTIMEDOUT
       at stack trace line
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/response_never_finishes
 
-We attempted to make an http request to this URL but the request failed without a response.
+We attempted to make an http request to this url but the request failed without a response.
 
 We received this error at the network level:
 
@@ -704,7 +703,6 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -721,11 +719,11 @@ Error: ESOCKETTIMEDOUT
       at stack trace line
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/timeout?ms=1000
 
-We attempted to make an http request to this URL but the request failed without a response.
+We attempted to make an http request to this url but the request failed without a response.
 
 We received this error at the network level:
 
@@ -753,7 +751,6 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
