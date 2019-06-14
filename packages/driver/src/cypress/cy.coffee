@@ -64,7 +64,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     title = state("runnable").fullTitle()
 
     msg = $errUtils.errMsgByPath("miscellaneous.mixing_promises_and_commands", {
-      title: title 
+      title: title
     })
 
     $utils.warning(msg)
@@ -950,7 +950,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## do all the normal fail stuff and promise cancellation
       ## but dont re-throw the error
       if r = state("reject")
-        r(err)
+        r($errUtils.processErr(err, config))
 
       ## per the onerror docs we need to return true here
       ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror

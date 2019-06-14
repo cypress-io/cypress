@@ -141,9 +141,9 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1b'
       at stack trace line
@@ -309,9 +309,9 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1'
       at stack trace line

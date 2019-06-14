@@ -182,14 +182,6 @@ const errObjByPath = (errLookupObj, errPath, args) => {
   errObj.renderMessage = replaceErrMsgTokens(errObj.message, escapedArgs)
   errObj.message = replaceErrMsgTokens(errObj.message, args)
 
-  // THIS ends up being called on every retry,
-  // so it appends a LOT of docs links to the message
-  // if (errObj.docsUrl) {
-  //   const errProps = appendErrMsg(errObj, errObj.docsUrl)
-
-  //   mergeErrProps(errObj, errProps)
-  // }
-
   return errObj
 }
 
@@ -277,6 +269,21 @@ const getObjValueByPath = (obj, keyPath) => {
   return val
 }
 
+//// all errors flow through this function before they're finally thrown
+//// or used to reject promises
+const processErr = (errObj, config) => {
+  if (config('isInteractive') || !errObj.docsUrl) {
+    return errObj
+  }
+
+  // append the docs url when not interactive so it appears in the stdout
+  return appendErrMsg(errObj, errObj.docsUrl)
+
+  // const errProps = appendErrMsg(errObj, errObj.docsUrl)
+
+  // return mergeErrProps(errObj, errProps)
+}
+
 module.exports = {
   wrapErr,
   modifyErrMsg,
@@ -296,4 +303,5 @@ module.exports = {
   getCodeFrame,
   escapeErrMarkdown,
   getObjValueByPath,
+  processErr,
 }
