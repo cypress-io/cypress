@@ -2319,7 +2319,7 @@ declare namespace Cypress {
   }
 
   /** Options to change the default behavior of .writeFile */
-  interface WriteFileOptions extends Loggable { 
+  interface WriteFileOptions extends Loggable {
     flag: string
     encoding: Encodings
   }
