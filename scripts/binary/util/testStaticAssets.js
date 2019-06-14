@@ -27,7 +27,7 @@ const testStaticAssets = async (buildResourcePath) => {
       minLineCount: 5000,
     }),
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/reporter/dist/reporter.css`,
+      assetGlob: `${buildResourcePath}/packages/runner/dist/*.css`,
       goodStrings: [
         // indicates css autoprefixer is correctly appending vendor prefixes (e.g -moz-touch)
         ['-ms-', 20],
