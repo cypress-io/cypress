@@ -536,6 +536,36 @@ const isDescendent = ($el1, $el2) => {
   return !!(($el1.get(0) === $el2.get(0)) || $el1.has($el2).length)
 }
 
+const getEffectiveOpacity = ($el) => {
+  // 1 = 100% opaque
+  // 0 = 0% opaque or transparent
+
+  // the default opacity of all elements is 1
+  let elOpacity = 1
+
+  const elOpacityProp = $el.css('opacity')
+
+  // this will be returned as a string
+  if ($el.css('opacity')) {
+    elOpacity = Number(elOpacityProp)
+  }
+
+  // if we have a parent
+  const $parent = $el.parent()
+
+  if ($parent && !($document.isDocument($parent))) {
+    const elOpacityProp = $parent.css('opacity')
+
+    // having opacity on html or body is applied also
+    if (elOpacityProp) {
+      // The opaqueness is multiplied if they both have opacity
+      elOpacity = elOpacity * Number(elOpacityProp)
+    }
+  }
+
+  return elOpacity
+}
+
 // in order to simulate actual user behavior we need to do the following:
 // 1. take our element and figure out its center coordinate
 // 2. check to figure out the element listed at those coordinates
@@ -707,7 +737,6 @@ const getFirstDeepestElement = (elements, index = 0) => {
   }
 
   return $current
-
 }
 
 // short form css-inlines the element
@@ -830,6 +859,8 @@ module.exports = {
   tryCallNativeMethod,
 
   getElements,
+
+  getEffectiveOpacity,
 
   getFirstFocusableEl,
 

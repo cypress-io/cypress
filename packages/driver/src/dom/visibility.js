@@ -34,41 +34,78 @@ const isHidden = (el, name = 'isHidden()') => {
     return false
   }
 
-  // hidden inputs are completely invisible
-  // if ($elements.isInput(el) || $elements.isType(el, 'hidden')) {
-  //   return true
-  // }
+  // an option is considered visible if its parent select is visible
+  if ($elements.isOption(el) || $elements.isOptgroup(el)) {
+    // if its parent select is visible, then it's not hidden
+    const $select = $elements.getFirstParentWithTagName($el, 'select')
 
-  // if ($elements.isOption(el) || $elements.isOptgroup(el)) {
-  //   // if its parent select is visible, then it's not hidden
-  //   // const $select = $elements.getFirstParentWithTagName($el, 'select')
+    // check $select.length here first
+    // they may have not put the option into a select el,
+    // in which case it will fall through to regular visibility logic
+    if ($select && $select.length) {
+      // if the select is visible, the options in it are visible too
+      return isHidden($select[0], name)
+    }
+  }
 
-  //   // return false
-  // }
+  // anything with opacity 0 is not visible to eye
+  return elHasEffectiveOpacityZero($el) ||
 
-  // in Cypress-land we consider the element hidden if
-  // either its offsetHeight or offsetWidth is 0 because
-  // it is impossible for the user to interact with this element
-  return elHasNoEffectiveWidthOrHeight($el) ||
+    // in Cypress-land we consider the element hidden if
+    // either its offsetHeight or offsetWidth is 0 because
+    // it is impossible for the user to interact with this element
+    elHasNoEffectiveWidthOrHeight($el) ||
 
-    // additionally if the effective visibility of the element
-    // is hidden (which includes any parent nodes) then the user
-    // cannot interact with this element and thus it is hidden
-    elHasVisibilityHiddenOrCollapse($el) ||
+      // additionally if the effective visibility of the element
+      // is hidden (which includes any parent nodes) then the user
+      // cannot interact with this element and thus it is hidden
+      elHasVisibilityHiddenOrCollapse($el) ||
 
-      // we do some calculations taking into account the parents
-      // to see if its hidden by a parent
-      elIsHiddenByAncestors($el) ||
+        // we do some calculations taking into account the parents
+        // to see if its hidden by a parent
+        elIsHiddenByAncestors($el) ||
 
-        // if el is or any ancestor is a fixed element check if its covered
-        (
-          elOrAncestorIsFixed($el) ?
-            elIsNotElementFromPoint($el)
-            :
-            // else check if el is outside the bounds
-            // of its ancestors overflow
-            elIsOutOfBoundsOfAncestorsOverflow($el)
-        )
+          // if el is or any ancestor is a fixed element check if its covered
+          (
+            elOrAncestorIsFixed($el) ?
+              elIsNotElementFromPoint($el)
+              :
+              // else check if el is outside the bounds
+              // of its ancestors overflow
+              elIsOutOfBoundsOfAncestorsOverflow($el)
+          )
+}
+
+const elHasEffectiveOpacityZero = ($el) => {
+  // 1 = 100% opaque
+  // 0 = 0% opaque or transparent
+  return elHasOpacityZero($el) || ancestorHasOpacityZero($el.parent())
+}
+
+const elHasOpacityZero = function ($el) {
+  const elOpacity = $el.css('opacity')
+
+  if (elOpacity && Number(elOpacity) === 0) {
+    return true
+  }
+
+  // the default opacity of all elements is 1
+  return false
+}
+
+const ancestorHasOpacityZero = function ($el) {
+  // if we have no $el or we've walked all the way up to document
+  // then return false
+  if (!$el.length || $document.isDocument($el)) {
+    return false
+  }
+
+  if (elHasOpacityZero($el)) {
+    return true
+  }
+
+  // continue walking up ancestors
+  return ancestorHasOpacityZero($el.parent())
 }
 
 const elHasNoEffectiveWidthOrHeight = ($el) => {
@@ -271,7 +308,6 @@ const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
 
   // continue walking
   return parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
-
 }
 
 const parentHasDisplayNone = function ($el) {
@@ -288,7 +324,6 @@ const parentHasDisplayNone = function ($el) {
 
   // continue walking
   return parentHasDisplayNone($el.parent())
-
 }
 
 const parentHasVisibilityHidden = function ($el) {
