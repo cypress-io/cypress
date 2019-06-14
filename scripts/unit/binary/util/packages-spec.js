@@ -125,7 +125,7 @@ describe('testStaticAssets', () => {
 
     // logFs()
 
-    await testStaticAssets(buildDir).not.be.rejected
+    await expect(testStaticAssets(buildDir)).not.be.rejected
 
   })
 
@@ -228,7 +228,7 @@ describe('testStaticAssets', () => {
     const buildDir = process.cwd()
 
     await expect(testPackageStaticAssets({
-      assetGlob: `${buildDir}/packages/reporter/dist/*.css`,
+      assetGlob: `${buildDir}/packages/runner/dist/*.css`,
       goodStrings: [['-ms-', 20]],
     })).not.be.rejected
   })
