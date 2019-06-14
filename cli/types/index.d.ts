@@ -1782,7 +1782,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/writefile
     ```
-    cy.writeFile('path/to/ascii.txt', 'Hello World', { 
+    cy.writeFile('path/to/ascii.txt', 'Hello World', {
       flag: 'a+',
       encoding: 'ascii'
     }).then((text) => {
