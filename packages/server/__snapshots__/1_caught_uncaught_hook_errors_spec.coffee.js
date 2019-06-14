@@ -40,22 +40,10 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
   3 failing
 
   1) s1a "before each" hook for "t2a":
-     CypressError: Timed out retrying: Expected to find element: '.does-not-exist', but never found it.
+     AssertionError: Timed out retrying: Expected to find element: '.does-not-exist', but never found it.
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1a'
+  
 
   2) s3a "before all" hook for "t8a":
      Error: s3a before hook failed
