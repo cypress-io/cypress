@@ -24,7 +24,6 @@
   },
   "background": {
     "scripts": [
-      "socket.io.js",
       "background.js"
     ]
   },

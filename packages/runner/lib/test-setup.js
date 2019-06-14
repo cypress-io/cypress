@@ -2,7 +2,7 @@ const chai = require('chai')
 const JSDOM = require('jsdom').JSDOM
 const sinonChai = require('sinon-chai')
 const $Cypress = require('@packages/driver')
-const io = require('@packages/socket')
+const { client } = require('@packages/socket')
 
 // http://airbnb.io/enzyme/docs/guides/jsdom.html
 const jsdom = new JSDOM('<!doctype html><html><body></body></html>')
@@ -52,6 +52,6 @@ class Runner {
 
 global.Mocha = { Runnable, Runner }
 $Cypress.create = () => {}
-io.connect = () => {
+client.connect = () => {
   return { emit: () => {}, on: () => {} }
 }
