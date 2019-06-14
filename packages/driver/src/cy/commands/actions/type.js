@@ -31,7 +31,7 @@ const debug = Debug('driver:command:type')
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.internal
-  const $Keyboard = Cypress.dom.$Keyboard
+  const { Keyboard } = Cypress
 
   function type (subject, chars, options = {}) {
     // debugger
@@ -65,7 +65,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          const modifiers = $Keyboard.modifiersToString($Keyboard.getActiveModifiers(state))
+          const modifiers = Keyboard.modifiersToString(Keyboard.getActiveModifiers(state))
 
           if (modifiers) {
             obj.modifiers = modifiers

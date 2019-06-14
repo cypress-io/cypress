@@ -54,668 +54,668 @@ describe('src/cy/commands/actions/type', function () {
 
   context('#type', function () {
 
-    it('can moveToStart', () => {
-      const input = cy.$$('input:first')
-
-      input.val('foo')
+    // it('can moveToStart', () => {
+    //   const input = cy.$$('input:first')
+
+    //   input.val('foo')
 
-      cy.get('input:first').type('{moveToStart}bar')
-      .should('have.value', 'barfoo')
-    })
-
-    it('can moveToEnd', () => {
-      const input = cy.$$('input:first')
-
-      input.val('foo')
-      input[0].focus()
-      input[0].setSelectionRange(0, 0)
-
-      cy.get('input:first').type('{moveToEnd}bar')
-      .invoke('val').should('eq', 'foobar')
-    })
-
-    it('can moveToEnd from middle', () => {
-      const input = cy.$$('input:first')
-
-      input.val('foo')
-
-      input.get(0).setSelectionRange(1, 1)
-
-      cy.get('input:first').type('{moveToEnd}bar')
-      .invoke('val').should('eq', 'foobar')
-    })
-
-    it('does not change the subject', () => {
-      const input = cy.$$('input:first')
-
-      cy.get('input:first').type('foo').then(($input) => {
-        expect($input).to.match(input)
-      })
-    })
-
-    it('changes the value', () => {
-      const input = cy.$$('input:text:first')
-
-      input.val('')
-
-      //# make sure we are starting from a
-      //# clean state
-      expect(input).to.have.value('')
-
-      cy.get('input:text:first').type('foo').then(($input) => {
-        expect($input).to.have.value('foo')
-      })
-    })
-
-    it('appends subsequent type commands', () => {
-      return cy
-      .get('input:first').type('123').type('456')
-      .should('have.value', '123456')
-    }
-    )
-
-    it('appends subsequent commands when value is changed in between', () => {
-      return cy
-      .get('input:first')
-      .type('123')
-      .then(($input) => {
-        $input[0].value += '-'
-
-        return $input
-      }).type('456')
-      .should('have.value', '123-456')
-    }
-    )
-
-    it('can type numbers', () => {
-      cy.get(':text:first').type(123).then(($text) => {
-        expect($text).to.have.value('123')
-      })
-    }
-    )
-
-    it('triggers focus event on the input', (done) => {
-      cy.$$('input:text:first').focus(() => {
-        done()
-      })
+    //   cy.get('input:first').type('{moveToStart}bar')
+    //   .should('have.value', 'barfoo')
+    // })
+
+    // it('can moveToEnd', () => {
+    //   const input = cy.$$('input:first')
+
+    //   input.val('foo')
+    //   input[0].focus()
+    //   input[0].setSelectionRange(0, 0)
+
+    //   cy.get('input:first').type('{moveToEnd}bar')
+    //   .invoke('val').should('eq', 'foobar')
+    // })
+
+    // it('can moveToEnd from middle', () => {
+    //   const input = cy.$$('input:first')
+
+    //   input.val('foo')
+
+    //   input.get(0).setSelectionRange(1, 1)
+
+    //   cy.get('input:first').type('{moveToEnd}bar')
+    //   .invoke('val').should('eq', 'foobar')
+    // })
+
+    // it('does not change the subject', () => {
+    //   const input = cy.$$('input:first')
+
+    //   cy.get('input:first').type('foo').then(($input) => {
+    //     expect($input).to.match(input)
+    //   })
+    // })
+
+    // it('changes the value', () => {
+    //   const input = cy.$$('input:text:first')
+
+    //   input.val('')
+
+    //   //# make sure we are starting from a
+    //   //# clean state
+    //   expect(input).to.have.value('')
+
+    //   cy.get('input:text:first').type('foo').then(($input) => {
+    //     expect($input).to.have.value('foo')
+    //   })
+    // })
+
+    // it('appends subsequent type commands', () => {
+    //   return cy
+    //   .get('input:first').type('123').type('456')
+    //   .should('have.value', '123456')
+    // }
+    // )
+
+    // it('appends subsequent commands when value is changed in between', () => {
+    //   return cy
+    //   .get('input:first')
+    //   .type('123')
+    //   .then(($input) => {
+    //     $input[0].value += '-'
+
+    //     return $input
+    //   }).type('456')
+    //   .should('have.value', '123-456')
+    // }
+    // )
+
+    // it('can type numbers', () => {
+    //   cy.get(':text:first').type(123).then(($text) => {
+    //     expect($text).to.have.value('123')
+    //   })
+    // }
+    // )
+
+    // it('triggers focus event on the input', (done) => {
+    //   cy.$$('input:text:first').focus(() => {
+    //     done()
+    //   })
 
-      cy.get('input:text:first').type('bar')
-    })
-
-    it('lists the input as the focused element', () => {
-      const $input = cy.$$('input:text:first')
-
-      cy.get('input:text:first').type('bar').focused().then(($focused) => {
-        expect($focused.get(0)).to.eq($input.get(0))
-      })
-    })
-
-    it('causes previous input to receive blur', () => {
-      let blurred = false
+    //   cy.get('input:text:first').type('bar')
+    // })
+
+    // it('lists the input as the focused element', () => {
+    //   const $input = cy.$$('input:text:first')
+
+    //   cy.get('input:text:first').type('bar').focused().then(($focused) => {
+    //     expect($focused.get(0)).to.eq($input.get(0))
+    //   })
+    // })
+
+    // it('causes previous input to receive blur', () => {
+    //   let blurred = false
 
-      cy.$$('input:text:first').blur(() => {
-        return blurred = true
-      })
+    //   cy.$$('input:text:first').blur(() => {
+    //     return blurred = true
+    //   })
 
-      return cy
-      .get('input:text:first').type('foo')
-      .get('input:text:last').type('bar')
-      .then(() => {
-        expect(blurred).to.be.true
-      })
-    })
+    //   return cy
+    //   .get('input:text:first').type('foo')
+    //   .get('input:text:last').type('bar')
+    //   .then(() => {
+    //     expect(blurred).to.be.true
+    //   })
+    // })
 
-    it('can type into contenteditable', () => {
-      const oldText = cy.$$('#contenteditable').get(0).innerText
-
-      cy.get('#contenteditable')
-      .type(' foo')
-      .then(($div) => {
-        expect($div.get(0).innerText).to.eq((`${oldText} foo`))
-      })
-    })
-
-    it('delays 50ms before resolving', () => {
-      cy.$$(':text:first').on('change', () => {
-        return cy.spy(Promise, 'delay')
-      })
-
-      cy.get(':text:first').type('foo{enter}').then(() => {
-        expect(Promise.delay).to.be.calledWith(50, 'type')
-      })
-    })
-
-    it.skip('does not delay on simulated type with no delay option', () => {
-      cy.$$(':text:first').on('change', () => {
-        return cy.spy(Promise, 'delay')
-      })
+    // it('can type into contenteditable', () => {
+    //   const oldText = cy.$$('#contenteditable').get(0).innerText
+
+    //   cy.get('#contenteditable')
+    //   .type(' foo')
+    //   .then(($div) => {
+    //     expect($div.get(0).innerText).to.eq((`${oldText} foo`))
+    //   })
+    // })
+
+    // it('delays 50ms before resolving', () => {
+    //   cy.$$(':text:first').on('change', () => {
+    //     return cy.spy(Promise, 'delay')
+    //   })
+
+    //   cy.get(':text:first').type('foo{enter}').then(() => {
+    //     expect(Promise.delay).to.be.calledWith(50, 'type')
+    //   })
+    // })
+
+    // it.skip('does not delay on simulated type with no delay option', () => {
+    //   cy.$$(':text:first').on('change', () => {
+    //     return cy.spy(Promise, 'delay')
+    //   })
 
-      cy.get(':text:first').type('foo{enter}', { simulated: true }).then(() => {
-        expect(Promise.delay).not.to.be.called
-      })
-    })
-
-    it('increases the timeout delta', () => {
-      cy.spy(cy, 'timeout')
-
-      cy.get(':text:first').type('foo{enter}').then(() => {
-        expect(cy.timeout).to.be.calledWith(40, true, 'type')
-
-        expect(cy.timeout).to.be.calledWith(50, true, 'type')
-      })
-    })
-
-    it('accepts body as subject', () => {
-      cy.get('body').type('foo')
-    })
-
-    it('does not focus when body is subject', () => {
-      const bodyClicked = false
-
-      cy.$$('body').on('selection')
-
-      cy.get('body').type('foo').then(() => {
-        expect(bodyClicked).to.be.false
-      })
-    })
-
-    describe('actionability', () => {
-      it.skip('can forcibly click even when element is invisible', () => {
-        const $txt = cy.$$(':text:first').hide()
-
-        expect($txt).not.to.have.value('foo')
-
-        let clicked = false
-
-        $txt.on('click', () => {
-          return clicked = true
-        })
-
-        cy.get(':text:first').type('foo', { force: true }).then(($input) => {
-          expect(clicked).to.be.true
-
-          expect($input).to.have.value('foo')
-        })
-      })
-
-      it('can force type on element', () => {
-        cy.get('input:first').should((input) => {
-          attachKeyListeners({ input })
-        })
-        .type('f', { force: true })
-
-        cy.getAll('input', 'textInput', 'keypress').each(shouldBeCalledWithMatch({ data: 'f' }))
-      })
+    //   cy.get(':text:first').type('foo{enter}', { simulated: true }).then(() => {
+    //     expect(Promise.delay).not.to.be.called
+    //   })
+    // })
+
+    // it('increases the timeout delta', () => {
+    //   cy.spy(cy, 'timeout')
+
+    //   cy.get(':text:first').type('foo{enter}').then(() => {
+    //     expect(cy.timeout).to.be.calledWith(40, true, 'type')
+
+    //     expect(cy.timeout).to.be.calledWith(50, true, 'type')
+    //   })
+    // })
+
+    // it('accepts body as subject', () => {
+    //   cy.get('body').type('foo')
+    // })
+
+    // it('does not focus when body is subject', () => {
+    //   const bodyClicked = false
+
+    //   cy.$$('body').on('selection')
+
+    //   cy.get('body').type('foo').then(() => {
+    //     expect(bodyClicked).to.be.false
+    //   })
+    // })
+
+    // describe('actionability', () => {
+    //   it.skip('can forcibly click even when element is invisible', () => {
+    //     const $txt = cy.$$(':text:first').hide()
+
+    //     expect($txt).not.to.have.value('foo')
+
+    //     let clicked = false
+
+    //     $txt.on('click', () => {
+    //       return clicked = true
+    //     })
+
+    //     cy.get(':text:first').type('foo', { force: true }).then(($input) => {
+    //       expect(clicked).to.be.true
+
+    //       expect($input).to.have.value('foo')
+    //     })
+    //   })
+
+    //   it('can force type on element', () => {
+    //     cy.get('input:first').should((input) => {
+    //       attachKeyListeners({ input })
+    //     })
+    //     .type('f', { force: true })
+
+    //     cy.getAll('input', 'textInput', 'keypress').each(shouldBeCalledWithMatch({ data: 'f' }))
+    //   })
 
-      it('can forcibly type even when element is invisible', () => {
-        const $txt = cy.$$(':text:first').hide()
-
-        expect($txt).not.to.have.value('foo')
-
-        const click = cy.stub().as('click')
-        const keydown = cy.stub().as('keydown')
-        const textInput = cy.stub().as('textInput')
-
-        $txt.on('click', click)
-        $txt.on('textInput', textInput)
-        $txt.on('keydown', keydown)
-
-        cy.get(':text:first').type('foo', { force: true }).then(($input) => {
-          expect($input).to.have.value('foo')
-
-          expect(click).to.be.calledOnce
-          expect(keydown).callCount(3)
-        })
-      })
-
-      it.skip('can forcibly click even when being covered by another element', () => {
-        const $input = $('<input />')
-        .attr('id', 'input-covered-in-span')
-        .css({
-          width: 50,
-        })
-        .prependTo(cy.$$('body'))
-
-        let clicked = false
-
-        $input.on('click', () => {
-          return clicked = true
-        })
-
-        cy.get('#input-covered-in-span').type('foo', { force: true }).then(($input) => {
-          expect(clicked).to.be.true
-
-          expect($input).to.have.value('foo')
-        })
-      })
-
-      it('can forcibly type even when being covered by another element', () => {
-        $('<input />')
-        .attr('id', 'input-covered-in-span')
-        .css({
-          width: 50,
-        })
-        .prependTo(cy.$$('body'))
-
-        cy.get('#input-covered-in-span').type('foo', { force: true }).then(($input) => {
-          expect($input).to.have.value('foo')
-        })
-      })
-
-      it('waits until element becomes visible', () => {
-        const $txt = cy.$$(':text:first').hide()
-
-        let retried = false
+    //   it('can forcibly type even when element is invisible', () => {
+    //     const $txt = cy.$$(':text:first').hide()
+
+    //     expect($txt).not.to.have.value('foo')
+
+    //     const click = cy.stub().as('click')
+    //     const keydown = cy.stub().as('keydown')
+    //     const textInput = cy.stub().as('textInput')
+
+    //     $txt.on('click', click)
+    //     $txt.on('textInput', textInput)
+    //     $txt.on('keydown', keydown)
+
+    //     cy.get(':text:first').type('foo', { force: true }).then(($input) => {
+    //       expect($input).to.have.value('foo')
+
+    //       expect(click).to.be.calledOnce
+    //       expect(keydown).callCount(3)
+    //     })
+    //   })
+
+    //   it.skip('can forcibly click even when being covered by another element', () => {
+    //     const $input = $('<input />')
+    //     .attr('id', 'input-covered-in-span')
+    //     .css({
+    //       width: 50,
+    //     })
+    //     .prependTo(cy.$$('body'))
+
+    //     let clicked = false
+
+    //     $input.on('click', () => {
+    //       return clicked = true
+    //     })
+
+    //     cy.get('#input-covered-in-span').type('foo', { force: true }).then(($input) => {
+    //       expect(clicked).to.be.true
+
+    //       expect($input).to.have.value('foo')
+    //     })
+    //   })
+
+    //   it('can forcibly type even when being covered by another element', () => {
+    //     $('<input />')
+    //     .attr('id', 'input-covered-in-span')
+    //     .css({
+    //       width: 50,
+    //     })
+    //     .prependTo(cy.$$('body'))
+
+    //     cy.get('#input-covered-in-span').type('foo', { force: true }).then(($input) => {
+    //       expect($input).to.have.value('foo')
+    //     })
+    //   })
+
+    //   it('waits until element becomes visible', () => {
+    //     const $txt = cy.$$(':text:first').hide()
+
+    //     let retried = false
 
-        cy.on('command:retry', _.after(3, () => {
-          $txt.show()
-          retried = true
-        })
-        )
+    //     cy.on('command:retry', _.after(3, () => {
+    //       $txt.show()
+    //       retried = true
+    //     })
+    //     )
 
-        cy.get(':text:first').type('foo').then(() => {
-          expect(retried).to.be.true
-        })
-      })
+    //     cy.get(':text:first').type('foo').then(() => {
+    //       expect(retried).to.be.true
+    //     })
+    //   })
 
-      it.skip('waits until element is no longer disabled', () => {
-        const $txt = cy.$$(':text:first').prop('disabled', true)
+    //   it.skip('waits until element is no longer disabled', () => {
+    //     const $txt = cy.$$(':text:first').prop('disabled', true)
 
-        let retried = false
-        let clicks = 0
+    //     let retried = false
+    //     let clicks = 0
 
-        $txt.on('click', () => {
-          return clicks += 1
-        })
+    //     $txt.on('click', () => {
+    //       return clicks += 1
+    //     })
 
-        cy.on('command:retry', _.after(3, () => {
-          $txt.prop('disabled', false)
-          retried = true
-        })
-        )
+    //     cy.on('command:retry', _.after(3, () => {
+    //       $txt.prop('disabled', false)
+    //       retried = true
+    //     })
+    //     )
 
-        cy.get(':text:first').type('foo').then(() => {
-          expect(clicks).to.eq(1)
+    //     cy.get(':text:first').type('foo').then(() => {
+    //       expect(clicks).to.eq(1)
 
-          expect(retried).to.be.true
-        })
-      })
+    //       expect(retried).to.be.true
+    //     })
+    //   })
 
-      it('waits until element is no longer disabled', () => {
-        const $txt = cy.$$(':text:first').prop('disabled', true)
+    //   it('waits until element is no longer disabled', () => {
+    //     const $txt = cy.$$(':text:first').prop('disabled', true)
 
-        let retried = false
+    //     let retried = false
 
-        cy.on('command:retry', _.after(3, () => {
-          $txt.prop('disabled', false)
-          retried = true
-        })
-        )
+    //     cy.on('command:retry', _.after(3, () => {
+    //       $txt.prop('disabled', false)
+    //       retried = true
+    //     })
+    //     )
 
-        cy.get(':text:first').type('foo').then(() => {
-          expect(retried).to.be.true
-        })
-      })
+    //     cy.get(':text:first').type('foo').then(() => {
+    //       expect(retried).to.be.true
+    //     })
+    //   })
 
-      it('waits until element stops animating', () => {
-        let retries = 0
+    //   it('waits until element stops animating', () => {
+    //     let retries = 0
 
-        cy.on('command:retry', () => {
-          return retries += 1
-        })
+    //     cy.on('command:retry', () => {
+    //       return retries += 1
+    //     })
 
-        cy.stub(cy, 'ensureElementIsNotAnimating')
-        .throws(new Error('animating!'))
-        .onThirdCall().returns()
+    //     cy.stub(cy, 'ensureElementIsNotAnimating')
+    //     .throws(new Error('animating!'))
+    //     .onThirdCall().returns()
 
-        cy.get(':text:first').type('foo').then(() => {
-          //# - retry animation coords
-          //# - retry animation
-          //# - retry animation
-          expect(retries).to.eq(3)
+    //     cy.get(':text:first').type('foo').then(() => {
+    //       //# - retry animation coords
+    //       //# - retry animation
+    //       //# - retry animation
+    //       expect(retries).to.eq(3)
 
-          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
-        })
-      })
+    //       expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+    //     })
+    //   })
 
-      it('does not throw when waiting for animations is disabled', () => {
-        cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-        Cypress.config('waitForAnimations', false)
+    //   it('does not throw when waiting for animations is disabled', () => {
+    //     cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
+    //     Cypress.config('waitForAnimations', false)
 
-        cy.get(':text:first').type('foo').then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
-        })
-      })
+    //     cy.get(':text:first').type('foo').then(() => {
+    //       expect(cy.ensureElementIsNotAnimating).not.to.be.called
+    //     })
+    //   })
 
-      it('does not throw when turning off waitForAnimations in options', () => {
-        cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
+    //   it('does not throw when turning off waitForAnimations in options', () => {
+    //     cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
 
-        cy.get(':text:first').type('foo', { waitForAnimations: false }).then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
-        })
-      })
+    //     cy.get(':text:first').type('foo', { waitForAnimations: false }).then(() => {
+    //       expect(cy.ensureElementIsNotAnimating).not.to.be.called
+    //     })
+    //   })
 
-      it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        const $txt = cy.$$(':text:first')
+    //   it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
+    //     const $txt = cy.$$(':text:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+    //     const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
 
-        cy.spy(cy, 'ensureElementIsNotAnimating')
+    //     cy.spy(cy, 'ensureElementIsNotAnimating')
 
-        cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
+    //     cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
+    //       const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+    //       expect(args[1]).to.deep.eq([fromWindow, fromWindow])
 
-          expect(args[2]).to.eq(1000)
-        })
-      })
+    //       expect(args[2]).to.eq(1000)
+    //     })
+    //   })
 
-      it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
+    //   it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
+    //     const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
 
-        const $txt = cy.$$(':text:first')
+    //     const $txt = cy.$$(':text:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+    //     const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
 
-        cy.spy(cy, 'ensureElementIsNotAnimating')
+    //     cy.spy(cy, 'ensureElementIsNotAnimating')
 
-        cy.get(':text:first').type('foo').then(() => {
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
+    //     cy.get(':text:first').type('foo').then(() => {
+    //       const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+    //       expect(args[1]).to.deep.eq([fromWindow, fromWindow])
 
-          expect(args[2]).to.eq(animationDistanceThreshold)
-        })
-      })
-    })
+    //       expect(args[2]).to.eq(animationDistanceThreshold)
+    //     })
+    //   })
+    // })
 
-    describe('input types where no extra formatting required', () => {
-      return _.each([
-        'password',
-        'email',
-        'number',
-        'search',
-        'url',
-        'tel',
-      ], (type) => {
-        it(`accepts input [type=${type}]`, () => {
-          const input = cy.$$(`<input type='${type}' id='input-type-${type}' />`)
+    // describe('input types where no extra formatting required', () => {
+    //   return _.each([
+    //     'password',
+    //     'email',
+    //     'number',
+    //     'search',
+    //     'url',
+    //     'tel',
+    //   ], (type) => {
+    //     it(`accepts input [type=${type}]`, () => {
+    //       const input = cy.$$(`<input type='${type}' id='input-type-${type}' />`)
 
-          cy.$$('body').append(input)
+    //       cy.$$('body').append(input)
 
-          cy.get(`#input-type-${type}`).type('1234').then(($input) => {
-            expect($input).to.have.value('1234')
+    //       cy.get(`#input-type-${type}`).type('1234').then(($input) => {
+    //         expect($input).to.have.value('1234')
 
-            expect($input.get(0)).to.eq($input.get(0))
-          })
-        })
+    //         expect($input.get(0)).to.eq($input.get(0))
+    //       })
+    //     })
 
-        it(`accepts type [type=${type}], regardless of capitalization`, () => {
-          const input = cy.$$(`<input type='${type.toUpperCase()}' id='input-type-${type}' />`)
+    //     it(`accepts type [type=${type}], regardless of capitalization`, () => {
+    //       const input = cy.$$(`<input type='${type.toUpperCase()}' id='input-type-${type}' />`)
 
-          cy.$$('body').append(input)
+    //       cy.$$('body').append(input)
 
-          cy.get(`#input-type-${type}`).type('1234')
-        })
-      })
-    }
-    )
+    //       cy.get(`#input-type-${type}`).type('1234')
+    //     })
+    //   })
+    // }
+    // )
 
-    describe('tabindex', function () {
+    // describe('tabindex', function () {
 
-      it('receives keydown, keyup, keypress', function () {
-        const div = cy.$$('#tabindex')
+    //   it('receives keydown, keyup, keypress', function () {
+    //     const div = cy.$$('#tabindex')
 
-        attachKeyListeners({ div })
+    //     attachKeyListeners({ div })
 
-        cy.get('#tabindex').type('a')
-        cy.getAll('div', ['keydown', 'keypress', 'keyup']).each(shouldBeCalled)
-      })
+    //     cy.get('#tabindex').type('a')
+    //     cy.getAll('div', ['keydown', 'keypress', 'keyup']).each(shouldBeCalled)
+    //   })
 
-      it('does not receive textInput', function () {
-        const $div = cy.$$('#tabindex')
+    //   it('does not receive textInput', function () {
+    //     const $div = cy.$$('#tabindex')
 
-        let textInput = false
+    //     let textInput = false
 
-        $div.on('textInput', () => {
-          return textInput = true
-        })
+    //     $div.on('textInput', () => {
+    //       return textInput = true
+    //     })
 
-        cy.get('#tabindex').type('f').then(() => {
-          expect(textInput).to.be.false
-        })
-      })
+    //     cy.get('#tabindex').type('f').then(() => {
+    //       expect(textInput).to.be.false
+    //     })
+    //   })
 
-      it('does not receive input', function () {
-        const $div = cy.$$('#tabindex')
+    //   it('does not receive input', function () {
+    //     const $div = cy.$$('#tabindex')
 
-        let input = false
+    //     let input = false
 
-        $div.on('input', () => {
-          return input = true
-        })
+    //     $div.on('input', () => {
+    //       return input = true
+    //     })
 
-        cy.get('#tabindex').type('f').then(() => {
-          expect(input).to.be.false
-        })
-      })
+    //     cy.get('#tabindex').type('f').then(() => {
+    //       expect(input).to.be.false
+    //     })
+    //   })
 
-      it('does not receive change event', function () {
-        const $div = cy.$$('#tabindex')
+    //   it('does not receive change event', function () {
+    //     const $div = cy.$$('#tabindex')
 
-        const innerText = $div.text()
+    //     const innerText = $div.text()
 
-        let change = false
+    //     let change = false
 
-        $div.on('change', () => {
-          return change = true
-        })
+    //     $div.on('change', () => {
+    //       return change = true
+    //     })
 
-        cy.get('#tabindex').type('foo{enter}').then(($el) => {
-          expect(change).to.be.false
+    //     cy.get('#tabindex').type('foo{enter}').then(($el) => {
+    //       expect(change).to.be.false
 
-          expect($el.text()).to.eq(innerText)
-        })
-      })
+    //       expect($el.text()).to.eq(innerText)
+    //     })
+    //   })
 
-      it('does not change inner text', function () {
-        const $div = cy.$$('#tabindex')
+    //   it('does not change inner text', function () {
+    //     const $div = cy.$$('#tabindex')
 
-        const innerText = $div.text()
+    //     const innerText = $div.text()
 
-        cy.get('#tabindex').type('foo{leftarrow}{del}{rightarrow}{enter}').should('have.text', innerText)
-      })
+    //     cy.get('#tabindex').type('foo{leftarrow}{del}{rightarrow}{enter}').should('have.text', innerText)
+    //   })
 
-      it('receives focus', function () {
-        const $div = cy.$$('#tabindex')
+    //   it('receives focus', function () {
+    //     const $div = cy.$$('#tabindex')
 
-        let focus = false
+    //     let focus = false
 
-        $div.focus(() => {
-          return focus = true
-        })
+    //     $div.focus(() => {
+    //       return focus = true
+    //     })
 
-        cy.get('#tabindex').type('f').then(() => {
-          expect(focus).to.be.true
-        })
-      })
+    //     cy.get('#tabindex').type('f').then(() => {
+    //       expect(focus).to.be.true
+    //     })
+    //   })
 
-      it('receives blur', function () {
-        const $div = cy.$$('#tabindex')
+    //   it('receives blur', function () {
+    //     const $div = cy.$$('#tabindex')
 
-        let blur = false
+    //     let blur = false
 
-        $div.blur(() => {
-          return blur = true
-        })
+    //     $div.blur(() => {
+    //       return blur = true
+    //     })
 
-        cy
-        .get('#tabindex').type('f')
-        .get('input:first').focus().then(() => {
-          expect(blur).to.be.true
-        })
-      })
+    //     cy
+    //     .get('#tabindex').type('f')
+    //     .get('input:first').focus().then(() => {
+    //       expect(blur).to.be.true
+    //     })
+    //   })
 
-      it('receives keydown and keyup for other special characters and keypress for enter and regular characters', function () {
-        const $div = cy.$$('#tabindex')
+    //   it('receives keydown and keyup for other special characters and keypress for enter and regular characters', function () {
+    //     const $div = cy.$$('#tabindex')
 
-        const keydowns = []
-        const keyups = []
-        const keypresses = []
+    //     const keydowns = []
+    //     const keyups = []
+    //     const keypresses = []
 
-        $div.keydown((e) => {
-          return keydowns.push(e)
-        })
+    //     $div.keydown((e) => {
+    //       return keydowns.push(e)
+    //     })
 
-        $div.keypress((e) => {
-          return keypresses.push(e)
-        })
+    //     $div.keypress((e) => {
+    //       return keypresses.push(e)
+    //     })
 
-        $div.keyup((e) => {
-          return keyups.push(e)
-        })
+    //     $div.keyup((e) => {
+    //       return keyups.push(e)
+    //     })
 
-        cy
-        .get('#tabindex').type('f{leftarrow}{rightarrow}{enter}')
-        .then(() => {
-          expect(keydowns).to.have.length(4)
-          expect(keypresses).to.have.length(2)
+    //     cy
+    //     .get('#tabindex').type('f{leftarrow}{rightarrow}{enter}')
+    //     .then(() => {
+    //       expect(keydowns).to.have.length(4)
+    //       expect(keypresses).to.have.length(2)
 
-          expect(keyups).to.have.length(4)
-        })
-      })
-    })
+    //       expect(keyups).to.have.length(4)
+    //     })
+    //   })
+    // })
 
-    describe('delay', () => {
-      it('adds delay to delta for each key sequence', () => {
-        cy.spy(cy, 'timeout')
+    // describe('delay', () => {
+    //   it('adds delay to delta for each key sequence', () => {
+    //     cy.spy(cy, 'timeout')
 
-        cy
-        .get(':text:first')
-        .type('foo{enter}bar{leftarrow}', { delay: 5 })
-        .then(() => {
-          expect(cy.timeout).to.be.calledWith(5 * 8, true, 'type')
-        })
-      })
+    //     cy
+    //     .get(':text:first')
+    //     .type('foo{enter}bar{leftarrow}', { delay: 5 })
+    //     .then(() => {
+    //       expect(cy.timeout).to.be.calledWith(5 * 8, true, 'type')
+    //     })
+    //   })
 
-      it('can cancel additional keystrokes', (done) => {
-        cy.stub(Cypress.runner, 'stop')
+    //   it('can cancel additional keystrokes', (done) => {
+    //     cy.stub(Cypress.runner, 'stop')
 
-        const text = cy.$$(':text:first').keydown(_.after(3, () => {
-          return Cypress.stop()
-        })
-        )
+    //     const text = cy.$$(':text:first').keydown(_.after(3, () => {
+    //       return Cypress.stop()
+    //     })
+    //     )
 
-        cy.on('stop', () => {
-          return _.delay(() => {
-            expect(text).to.have.value('foo')
-
-            done()
-          }
-          , 50)
-        })
-
-        cy.get(':text:first').type('foo{enter}bar{leftarrow}')
-      })
-    })
-
-    describe('maxlength', () => {
-      it('limits text entered to the maxlength attribute of a text input', () => {
-        const $input = cy.$$(':text:first')
-
-        $input.attr('maxlength', 5)
-
-        cy.get(':text:first')
-        .type('1234567890')
-        .then((input) => {
-          expect(input).to.have.value('12345')
-        })
-      })
-
-      it('ignores an invalid maxlength attribute', () => {
-        const $input = cy.$$(':text:first')
-
-        $input.attr('maxlength', 'five')
-
-        cy.get(':text:first')
-        .type('1234567890')
-        .then((input) => {
-          expect(input).to.have.value('1234567890')
-        })
-      })
-
-      it('handles special characters', () => {
-        const $input = cy.$$(':text:first')
-
-        $input.attr('maxlength', 5)
-
-        cy.get(':text:first')
-        .type('12{selectall}')
-        .then((input) => {
-          expect(input).to.have.value('12')
-        })
-      })
-
-      it('maxlength=0 events', () => {
-        const events = []
-
-        const push = (evt) => {
-          return () => {
-            events.push(evt)
-          }
-        }
-
-        cy
-        .$$(':text:first')
-        .attr('maxlength', 0)
-        .on('keydown', push('keydown'))
-        .on('keypress', push('keypress'))
-        .on('textInput', push('textInput'))
-        .on('input', push('input'))
-        .on('keyup', push('keyup'))
-
-        cy.get(':text:first')
-        .type('1') //, { simulated: false })
-        .then(() => {
-          expect(events).to.deep.eq(['keydown', 'keypress', 'textInput', 'keyup'])
-        }
-        )
-      })
-
-      it('maxlength=1 events', () => {
-        const events = []
-
-        const push = (evt) => {
-          return () => {
-            events.push(evt)
-          }
-        }
-
-        cy
-        .$$(':text:first')
-        .attr('maxlength', 1)
-        .on('keydown', push('keydown'))
-        .on('keypress', push('keypress'))
-        .on('textInput', push('textInput'))
-        .on('input', push('input'))
-        .on('keyup', push('keyup'))
-
-        cy.get(':text:first')
-        .type('12')
-        .then(() => {
-          expect(events).to.deep.eq([
-            'keydown', 'keypress', 'textInput', 'input', 'keyup',
-            'keydown', 'keypress', 'textInput', 'keyup',
-          ])
-        }
-        )
-      })
-    })
+    //     cy.on('stop', () => {
+    //       return _.delay(() => {
+    //         expect(text).to.have.value('foo')
+
+    //         done()
+    //       }
+    //       , 50)
+    //     })
+
+    //     cy.get(':text:first').type('foo{enter}bar{leftarrow}')
+    //   })
+    // })
+
+    // describe('maxlength', () => {
+    //   it('limits text entered to the maxlength attribute of a text input', () => {
+    //     const $input = cy.$$(':text:first')
+
+    //     $input.attr('maxlength', 5)
+
+    //     cy.get(':text:first')
+    //     .type('1234567890')
+    //     .then((input) => {
+    //       expect(input).to.have.value('12345')
+    //     })
+    //   })
+
+    //   it('ignores an invalid maxlength attribute', () => {
+    //     const $input = cy.$$(':text:first')
+
+    //     $input.attr('maxlength', 'five')
+
+    //     cy.get(':text:first')
+    //     .type('1234567890')
+    //     .then((input) => {
+    //       expect(input).to.have.value('1234567890')
+    //     })
+    //   })
+
+    //   it('handles special characters', () => {
+    //     const $input = cy.$$(':text:first')
+
+    //     $input.attr('maxlength', 5)
+
+    //     cy.get(':text:first')
+    //     .type('12{selectall}')
+    //     .then((input) => {
+    //       expect(input).to.have.value('12')
+    //     })
+    //   })
+
+    //   it('maxlength=0 events', () => {
+    //     const events = []
+
+    //     const push = (evt) => {
+    //       return () => {
+    //         events.push(evt)
+    //       }
+    //     }
+
+    //     cy
+    //     .$$(':text:first')
+    //     .attr('maxlength', 0)
+    //     .on('keydown', push('keydown'))
+    //     .on('keypress', push('keypress'))
+    //     .on('textInput', push('textInput'))
+    //     .on('input', push('input'))
+    //     .on('keyup', push('keyup'))
+
+    //     cy.get(':text:first')
+    //     .type('1') //, { simulated: false })
+    //     .then(() => {
+    //       expect(events).to.deep.eq(['keydown', 'keypress', 'textInput', 'keyup'])
+    //     }
+    //     )
+    //   })
+
+    //   it('maxlength=1 events', () => {
+    //     const events = []
+
+    //     const push = (evt) => {
+    //       return () => {
+    //         events.push(evt)
+    //       }
+    //     }
+
+    //     cy
+    //     .$$(':text:first')
+    //     .attr('maxlength', 1)
+    //     .on('keydown', push('keydown'))
+    //     .on('keypress', push('keypress'))
+    //     .on('textInput', push('textInput'))
+    //     .on('input', push('input'))
+    //     .on('keyup', push('keyup'))
+
+    //     cy.get(':text:first')
+    //     .type('12')
+    //     .then(() => {
+    //       expect(events).to.deep.eq([
+    //         'keydown', 'keypress', 'textInput', 'input', 'keyup',
+    //         'keydown', 'keypress', 'textInput', 'keyup',
+    //       ])
+    //     }
+    //     )
+    //   })
+    // })
 
     valueChanging()
 
-    specialChars()
+    // specialChars()
 
     describe('modifiers', function () {
 

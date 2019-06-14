@@ -5,9 +5,9 @@ moment = require("moment")
 $dom = require("../../../dom")
 $elements = require("../../../dom/elements")
 $selection = require("../../../dom/selection")
-$Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
 $actionability = require("../../actionability")
+Keyboard = require("../../../cypress/keyboard")
 
 inputEvents = "textInput input".split(" ")
 
@@ -18,7 +18,7 @@ timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:before:run", ->
-    $Keyboard.resetModifiers(state("document"), state("window"))
+    Keyboard.resetModifiers(state("document"), state("window"))
 
   Commands.addAll({ prevSubject: "element" }, {
     type: (subject, chars, options = {}) ->
@@ -45,7 +45,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         getRow = (id, key, which) ->
           table[id] or do ->
             table[id] = (obj = {})
-            modifiers = $Keyboard.activeModifiers()
+            modifiers = Keyboard.activeModifiers()
             obj.modifiers = modifiers.join(", ") if modifiers.length
             if key
               obj.typed = key
@@ -233,7 +233,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         isContentEditable = $elements.isContentEditable(options.$el.get(0))
         isTextarea = $elements.isTextarea(options.$el.get(0))
 
-        $Keyboard.type({
+        Keyboard.type({
           $el:     options.$el
           chars:   options.chars
           delay:   options.delay

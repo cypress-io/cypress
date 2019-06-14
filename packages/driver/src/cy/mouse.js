@@ -1,17 +1,17 @@
+import Keyboard from './keyboard'
 const $dom = require('../dom')
 const $elements = require('../dom/elements')
 const $ = require('jquery')
 const _ = require('lodash')
-const $Keyboard = require('./keyboard')
 const $selection = require('../dom/selection')
 const Debug = require('debug')
 const debug = Debug('driver:mouse:1')
+
 /**
  * @typedef Coords
  * @property {number} x
  * @property {number} y
  */
-
 const getLastHoveredEl = (state) => {
   let lastHoveredEl = state('mouseLastHoveredEl')
   const lastHoveredElAttached = lastHoveredEl && $elements.isAttachedEl(lastHoveredEl)
@@ -34,8 +34,8 @@ const create = (state, focused) => {
   const mouse = {
 
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
-      const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
+      const _activeModifiers = Keyboard.getActiveModifiers(state)
+      const modifiersEventOptions = Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
       return _.extend({
@@ -534,8 +534,8 @@ const { stopPropagation } = window.MouseEvent.prototype
 
 const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, constructor) => {
   evtOptions = _.extend({}, evtOptions, { bubbles, cancelable })
-  const _eventModifiers = $Keyboard.fromModifierEventOptions(evtOptions)
-  const modifiers = $Keyboard.modifiersToString(_eventModifiers)
+  const _eventModifiers = Keyboard.fromModifierEventOptions(evtOptions)
+  const modifiers = Keyboard.modifiersToString(_eventModifiers)
 
   const evt = new constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
 
@@ -647,6 +647,6 @@ const toCoordsEventOptions = (x, y, win) => {
   }
 }
 
-module.exports = {
+export {
   create,
 }

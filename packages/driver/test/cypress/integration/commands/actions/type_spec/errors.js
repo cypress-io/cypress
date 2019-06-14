@@ -271,12 +271,12 @@ export default function () {
       cy.get('#input-covered-in-span').type('foo')
     })
 
-    it('throws when special characters dont exist', function (done) {
+    it.only('throws when special characters dont exist', function (done) {
 
       cy.on('fail', (err) => {
       // expect(this.logs.length).to.eq(2)
 
-        const keymap = cy.internal.keyboard.getKeymap()
+        const keymap = Cypress.Keyboard.getKeymap()
 
         const allChars = _.keys(keymap).join(', ')
 

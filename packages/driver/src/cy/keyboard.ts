@@ -269,6 +269,309 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
   return true
 }
 
+const getKeymap = () => {
+  return {
+    ...keyboardMappings,
+    ...modifierChars,
+    ...USKeyboard,
+  }
+}
+const validateTyping = (
+  el: HTMLElement,
+  chars: string,
+  onFail: Function,
+  skipCheckUntilIndex?: number
+) => {
+  if (skipCheckUntilIndex) {
+    return { skipCheckUntilIndex: skipCheckUntilIndex-- }
+  }
+
+  // debug('validateTyping', el, chars)
+  const $el = $dom.wrap(el)
+  const numElements = $el.length
+  const isBody = $el.is('body')
+  const isTextLike = $dom.isTextLike(el)
+  let isDate = false
+  let isTime = false
+  let isMonth = false
+  let isWeek = false
+  let isDateTime = false
+
+  if ($elements.isInput(el)) {
+    isDate = $dom.isType(el, 'date')
+    isTime = $dom.isType(el, 'time')
+    isMonth = $dom.isType(el, 'month')
+    isWeek = $dom.isType(el, 'week')
+    isDateTime =
+      $dom.isType(el, 'datetime') || $dom.isType(el, 'datetime-local')
+  }
+
+  const isFocusable = $elements.isFocusable($el)
+  const isEmptyChars = _.isEmpty(chars)
+  const clearChars = '{selectall}{del}'
+  const isClearChars = _.startsWith(_.lowerCase(chars), clearChars)
+
+  //# TODO: tabindex can't be -1
+  //# TODO: can't be readonly
+
+  if (isBody) {
+    return {}
+  }
+
+  if (!isFocusable && !isTextLike) {
+    const node = $dom.stringify($el)
+
+    $utils.throwErrByPath('type.not_on_typeable_element', {
+      onFail,
+      args: { node },
+    })
+  }
+
+  if (!isFocusable && isTextLike) {
+    const node = $dom.stringify($el)
+
+    $utils.throwErrByPath('type.not_actionable_textlike', {
+      onFail,
+      args: { node },
+    })
+  }
+
+  if (numElements > 1) {
+    $utils.throwErrByPath('type.multiple_elements', {
+      onFail,
+      args: { num: numElements },
+    })
+  }
+
+  if (!(_.isString(chars) || _.isFinite(chars))) {
+    $utils.throwErrByPath('type.wrong_type', {
+      onFail,
+      args: { chars },
+    })
+  }
+
+  if (isEmptyChars) {
+    $utils.throwErrByPath('type.empty_string', { onFail })
+  }
+
+  if (isClearChars) {
+    skipCheckUntilIndex = 2 // {selectAll}{del} is two keys
+
+    return { skipCheckUntilIndex }
+  }
+
+  if (isDate) {
+    let dateChars
+
+    if (
+      _.isString(chars) &&
+      (dateChars = dateRegex.exec(chars)) !== null &&
+      moment(dateChars[0]).isValid()
+    ) {
+      skipCheckUntilIndex = _getEndIndex(chars, dateChars[0])
+
+      return { skipCheckUntilIndex }
+    }
+
+    $utils.throwErrByPath('type.invalid_date', {
+      onFail,
+      // set matched date or entire char string
+      args: { chars: dateChars ? dateChars[0] : chars },
+    })
+  }
+
+  if (isMonth) {
+    let monthChars
+
+    if (_.isString(chars) && (monthChars = monthRegex.exec(chars)) !== null) {
+      skipCheckUntilIndex = _getEndIndex(chars, monthChars[0])
+
+      return { skipCheckUntilIndex }
+    }
+
+    $utils.throwErrByPath('type.invalid_month', {
+      onFail,
+      args: { chars },
+    })
+  }
+
+  if (isWeek) {
+    let weekChars
+
+    if (_.isString(chars) && (weekChars = weekRegex.exec(chars)) !== null) {
+      skipCheckUntilIndex = _getEndIndex(chars, weekChars[0])
+
+      return { skipCheckUntilIndex }
+    }
+
+    $utils.throwErrByPath('type.invalid_week', {
+      onFail,
+      args: { chars },
+    })
+  }
+
+  if (isTime) {
+    let timeChars
+
+    if (_.isString(chars) && (timeChars = timeRegex.exec(chars)) !== null) {
+      skipCheckUntilIndex = _getEndIndex(chars, timeChars[0])
+
+      return { skipCheckUntilIndex }
+    }
+
+    $utils.throwErrByPath('type.invalid_time', {
+      onFail,
+      args: { chars },
+    })
+  }
+
+  if (isDateTime) {
+    let dateTimeChars
+
+    if (
+      _.isString(chars) &&
+      (dateTimeChars = dateTimeRegex.exec(chars)) !== null
+    ) {
+      skipCheckUntilIndex = _getEndIndex(chars, dateTimeChars[0])
+
+      return { skipCheckUntilIndex }
+    }
+
+    $utils.throwErrByPath('type.invalid_dateTime', {
+      onFail,
+      args: { chars },
+    })
+  }
+
+  return {}
+}
+
+function _getEndIndex (str, substr) {
+  return str.indexOf(substr) + substr.length
+}
+
+// function _splitChars(chars, index) {
+//   return [chars.slice(0, index), chars.slice(index)]
+// }
+
+// Simulated default actions for select few keys.
+const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
+  Enter: (el, key, options) => {
+    if ($elements.isContentEditable(el) || $elements.isTextarea(el)) {
+      $selection.replaceSelectionContents(el, '\n')
+      key.events.input = true
+    } else {
+      key.events.textInput = false
+      key.events.input = false
+    }
+
+    options.onEnterPressed()
+  },
+  Delete: (el, key) => {
+    if ($selection.isCollapsed(el)) {
+      //# if there's no text selected, delete the prev char
+      //# if deleted char, send the input event
+      key.events.input = $selection.deleteRightOfCursor(el)
+
+      return
+    }
+
+    //# text is selected, so delete the selection
+    //# contents and send the input event
+    $selection.deleteSelectionContents(el)
+    key.events.input = true
+  },
+  Backspace: (el, key) => {
+    if ($selection.isCollapsed(el)) {
+      //# if there's no text selected, delete the prev char
+      //# if deleted char, send the input event
+      key.events.input = $selection.deleteLeftOfCursor(el)
+
+      return
+    }
+
+    //# text is selected, so delete the selection
+    //# contents and send the input event
+    $selection.deleteSelectionContents(el)
+    key.events.input = true
+  },
+  ArrowLeft: (el) => {
+    return $selection.moveCursorLeft(el)
+  },
+  ArrowRight: (el) => {
+    return $selection.moveCursorRight(el)
+  },
+
+  ArrowUp: (el) => {
+    return $selection.moveCursorUp(el)
+  },
+
+  ArrowDown: (el) => {
+    return $selection.moveCursorDown(el)
+  },
+}
+
+const modifierChars = {
+  alt: USKeyboard.Alt,
+  option: USKeyboard.Alt,
+
+  ctrl: USKeyboard.Control,
+  control: USKeyboard.Control,
+
+  meta: USKeyboard.Meta,
+  command: USKeyboard.Meta,
+  cmd: USKeyboard.Meta,
+
+  shift: USKeyboard.Shift,
+}
+
+const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
+  selectall: {
+    key: 'selectAll',
+    simulatedDefault: (el) => {
+      const doc = $document.getDocumentFromElement(el)
+
+      return $selection.selectAll(doc)
+    },
+    simulatedDefaultOnly: true,
+  },
+  movetostart: {
+    key: 'moveToStart',
+    simulatedDefault: (el) => {
+      const doc = $document.getDocumentFromElement(el)
+
+      return $selection.moveSelectionToStart(doc)
+    },
+    simulatedDefaultOnly: true,
+  },
+  movetoend: {
+    key: 'moveToEnd',
+    simulatedDefault: (el) => {
+      const doc = $document.getDocumentFromElement(el)
+
+      return $selection.moveSelectionToEnd(doc)
+    },
+    simulatedDefaultOnly: true,
+  },
+
+  del: USKeyboard.Delete,
+  backspace: USKeyboard.Backspace,
+  esc: USKeyboard.Escape,
+  enter: USKeyboard.Enter,
+  rightarrow: USKeyboard.ArrowRight,
+  leftarrow: USKeyboard.ArrowLeft,
+  uparrow: USKeyboard.ArrowUp,
+  downarrow: USKeyboard.ArrowDown,
+  '{': USKeyboard.BracketLeft,
+}
+
+const keyToModifierMap = {
+  Alt: 'alt',
+  Control: 'ctrl',
+  Meta: 'meta',
+  Shift: 'shift',
+}
+
 export interface typeOptions {
   $el: JQuery
   chars: string
@@ -345,7 +648,7 @@ export default class Keyboard {
     // # should make each keystroke async to mimic
     //# how keystrokes come into javascript naturally
 
-    let prevElement = $elements.getActiveElByDocument(doc)
+    // let prevElement = $elements.getActiveElByDocument(doc)
 
     const getActiveEl = (doc: Document) => {
       if (options.force) {
@@ -875,319 +1178,13 @@ export default class Keyboard {
 
     return simulatedDefault(el, key, options)
   }
-}
 
-const validateTyping = (
-  el: HTMLElement,
-  chars: string,
-  onFail: Function,
-  skipCheckUntilIndex?: number
-) => {
-  if (skipCheckUntilIndex) {
-    return { skipCheckUntilIndex: skipCheckUntilIndex-- }
-  }
-
-  // debug('validateTyping', el, chars)
-  const $el = $dom.wrap(el)
-  const numElements = $el.length
-  const isBody = $el.is('body')
-  const isTextLike = $dom.isTextLike(el)
-  let isDate = false
-  let isTime = false
-  let isMonth = false
-  let isWeek = false
-  let isDateTime = false
-
-  if ($elements.isInput(el)) {
-    isDate = $dom.isType(el, 'date')
-    isTime = $dom.isType(el, 'time')
-    isMonth = $dom.isType(el, 'month')
-    isWeek = $dom.isType(el, 'week')
-    isDateTime =
-      $dom.isType(el, 'datetime') || $dom.isType(el, 'datetime-local')
-  }
-
-  const isFocusable = $elements.isFocusable($el)
-  const isEmptyChars = _.isEmpty(chars)
-  const clearChars = '{selectall}{del}'
-  const isClearChars = _.startsWith(_.lowerCase(chars), clearChars)
-
-  //# TODO: tabindex can't be -1
-  //# TODO: can't be readonly
-
-  if (isBody) {
-    return {}
-  }
-
-  if (!isFocusable && !isTextLike) {
-    const node = $dom.stringify($el)
-
-    $utils.throwErrByPath('type.not_on_typeable_element', {
-      onFail,
-      args: { node },
-    })
-  }
-
-  if (!isFocusable && isTextLike) {
-    const node = $dom.stringify($el)
-
-    $utils.throwErrByPath('type.not_actionable_textlike', {
-      onFail,
-      args: { node },
-    })
-  }
-
-  if (numElements > 1) {
-    $utils.throwErrByPath('type.multiple_elements', {
-      onFail,
-      args: { num: numElements },
-    })
-  }
-
-  if (!(_.isString(chars) || _.isFinite(chars))) {
-    $utils.throwErrByPath('type.wrong_type', {
-      onFail,
-      args: { chars },
-    })
-  }
-
-  if (isEmptyChars) {
-    $utils.throwErrByPath('type.empty_string', { onFail })
-  }
-
-  if (isClearChars) {
-    skipCheckUntilIndex = 2 // {selectAll}{del} is two keys
-
-    return { skipCheckUntilIndex }
-  }
-
-  if (isDate) {
-    let dateChars
-
-    if (
-      _.isString(chars) &&
-      (dateChars = dateRegex.exec(chars)) !== null &&
-      moment(dateChars[0]).isValid()
-    ) {
-      skipCheckUntilIndex = _getEndIndex(chars, dateChars[0])
-
-      return { skipCheckUntilIndex }
-    }
-
-    $utils.throwErrByPath('type.invalid_date', {
-      onFail,
-      // set matched date or entire char string
-      args: { chars: dateChars ? dateChars[0] : chars },
-    })
-  }
-
-  if (isMonth) {
-    let monthChars
-
-    if (_.isString(chars) && (monthChars = monthRegex.exec(chars)) !== null) {
-      skipCheckUntilIndex = _getEndIndex(chars, monthChars[0])
-
-      return { skipCheckUntilIndex }
-    }
-
-    $utils.throwErrByPath('type.invalid_month', {
-      onFail,
-      args: { chars },
-    })
-  }
-
-  if (isWeek) {
-    let weekChars
-
-    if (_.isString(chars) && (weekChars = weekRegex.exec(chars)) !== null) {
-      skipCheckUntilIndex = _getEndIndex(chars, weekChars[0])
-
-      return { skipCheckUntilIndex }
-    }
-
-    $utils.throwErrByPath('type.invalid_week', {
-      onFail,
-      args: { chars },
-    })
-  }
-
-  if (isTime) {
-    let timeChars
-
-    if (_.isString(chars) && (timeChars = timeRegex.exec(chars)) !== null) {
-      skipCheckUntilIndex = _getEndIndex(chars, timeChars[0])
-
-      return { skipCheckUntilIndex }
-    }
-
-    $utils.throwErrByPath('type.invalid_time', {
-      onFail,
-      args: { chars },
-    })
-  }
-
-  if (isDateTime) {
-    let dateTimeChars
-
-    if (
-      _.isString(chars) &&
-      (dateTimeChars = dateTimeRegex.exec(chars)) !== null
-    ) {
-      skipCheckUntilIndex = _getEndIndex(chars, dateTimeChars[0])
-
-      return { skipCheckUntilIndex }
-    }
-
-    $utils.throwErrByPath('type.invalid_dateTime', {
-      onFail,
-      args: { chars },
-    })
-  }
-
-  return {}
-}
-
-function _getEndIndex (str, substr) {
-  return str.indexOf(substr) + substr.length
-}
-
-// function _splitChars(chars, index) {
-//   return [chars.slice(0, index), chars.slice(index)]
-// }
-
-// Simulated default actions for select few keys.
-const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
-  Enter: (el, key, options) => {
-    if ($elements.isContentEditable(el) || $elements.isTextarea(el)) {
-      $selection.replaceSelectionContents(el, '\n')
-      key.events.input = true
-    } else {
-      key.events.textInput = false
-      key.events.input = false
-    }
-
-    options.onEnterPressed()
-  },
-  Delete: (el, key) => {
-    if ($selection.isCollapsed(el)) {
-      //# if there's no text selected, delete the prev char
-      //# if deleted char, send the input event
-      key.events.input = $selection.deleteRightOfCursor(el)
-
-      return
-    }
-
-    //# text is selected, so delete the selection
-    //# contents and send the input event
-    $selection.deleteSelectionContents(el)
-    key.events.input = true
-  },
-  Backspace: (el, key) => {
-    if ($selection.isCollapsed(el)) {
-      //# if there's no text selected, delete the prev char
-      //# if deleted char, send the input event
-      key.events.input = $selection.deleteLeftOfCursor(el)
-
-      return
-    }
-
-    //# text is selected, so delete the selection
-    //# contents and send the input event
-    $selection.deleteSelectionContents(el)
-    key.events.input = true
-  },
-  ArrowLeft: (el) => {
-    return $selection.moveCursorLeft(el)
-  },
-  ArrowRight: (el) => {
-    return $selection.moveCursorRight(el)
-  },
-
-  ArrowUp: (el) => {
-    return $selection.moveCursorUp(el)
-  },
-
-  ArrowDown: (el) => {
-    return $selection.moveCursorDown(el)
-  },
-}
-
-const modifierChars = {
-  alt: USKeyboard.Alt,
-  option: USKeyboard.Alt,
-
-  ctrl: USKeyboard.Control,
-  control: USKeyboard.Control,
-
-  meta: USKeyboard.Meta,
-  command: USKeyboard.Meta,
-  cmd: USKeyboard.Meta,
-
-  shift: USKeyboard.Shift,
-}
-
-const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
-  selectall: {
-    key: 'selectAll',
-    simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.selectAll(doc)
-    },
-    simulatedDefaultOnly: true,
-  },
-  movetostart: {
-    key: 'moveToStart',
-    simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.moveSelectionToStart(doc)
-    },
-    simulatedDefaultOnly: true,
-  },
-  movetoend: {
-    key: 'moveToEnd',
-    simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.moveSelectionToEnd(doc)
-    },
-    simulatedDefaultOnly: true,
-  },
-
-  del: USKeyboard.Delete,
-  backspace: USKeyboard.Backspace,
-  esc: USKeyboard.Escape,
-  enter: USKeyboard.Enter,
-  rightarrow: USKeyboard.ArrowRight,
-  leftarrow: USKeyboard.ArrowLeft,
-  uparrow: USKeyboard.ArrowUp,
-  downarrow: USKeyboard.ArrowDown,
-  '{': USKeyboard.BracketLeft,
-}
-
-const getKeymap = () => {
-  return {
-    ...keyboardMappings,
-    ...modifierChars,
-    ...USKeyboard,
-  }
-}
-
-const keyToModifierMap = {
-  Alt: 'alt',
-  Control: 'ctrl',
-  Meta: 'meta',
-  Shift: 'shift',
-}
-
-export {
-  toModifiersEventOptions,
-  getActiveModifiers,
-  modifierChars,
-  modifiersToString,
-  fromModifierEventOptions,
-  validateTyping,
-  getKeymap,
-  keyboardMappings,
+  static toModifiersEventOptions = toModifiersEventOptions
+  static getActiveModifiers = getActiveModifiers
+  static modifierChars = modifierChars
+  static modifiersToString = modifiersToString
+  static fromModifierEventOptions = fromModifierEventOptions
+  static validateTyping = validateTyping
+  static getKeymap = getKeymap
+  static keyboardMappings = keyboardMappings
 }

@@ -6,224 +6,224 @@ const { _ } = Cypress
 
 export default function () {
   describe('value changing', function () {
-    it('changes the elements value', () => {
-      cy.get('#input-without-value').type('a').then(($text) => {
-        expect($text).to.have.value('a')
-      })
-    }
-    )
+    // it('changes the elements value', () => {
+    //   cy.get('#input-without-value').type('a').then(($text) => {
+    //     expect($text).to.have.value('a')
+    //   })
+    // }
+    // )
 
-    it('changes the elements value for multiple keys', () => {
-      cy.get('#input-without-value').type('foo').then(($text) => {
-        expect($text).to.have.value('foo')
-      })
-    }
-    )
+    // it('changes the elements value for multiple keys', () => {
+    //   cy.get('#input-without-value').type('foo').then(($text) => {
+    //     expect($text).to.have.value('foo')
+    //   })
+    // }
+    // )
 
-    it('inserts text after existing text', () => {
-      cy.get('#input-with-value').type(' bar').then(($text) => {
-        expect($text).to.have.value('foo bar')
-      })
-    }
-    )
+    // it('inserts text after existing text', () => {
+    //   cy.get('#input-with-value').type(' bar').then(($text) => {
+    //     expect($text).to.have.value('foo bar')
+    //   })
+    // }
+    // )
 
-    it('inserts text after existing text input by invoking val', () => {
-      cy.get('#input-without-value').invoke('val', 'foo').type(' bar').then(($text) => {
-        expect($text).to.have.value('foo bar')
-      })
-    }
-    )
+    // it('inserts text after existing text input by invoking val', () => {
+    //   cy.get('#input-without-value').invoke('val', 'foo').type(' bar').then(($text) => {
+    //     expect($text).to.have.value('foo bar')
+    //   })
+    // }
+    // )
 
-    it('overwrites text when currently has selection', () => {
-      cy.get('#input-without-value').invoke('val', '0').then((el) => {
-        return el.select()
-      })
+    // it('overwrites text when currently has selection', () => {
+    //   cy.get('#input-without-value').invoke('val', '0').then((el) => {
+    //     return el.select()
+    //   })
 
-      cy.get('#input-without-value').type('50').then(($input) => {
-        expect($input).to.have.value('50')
-      })
-    })
+    //   cy.get('#input-without-value').type('50').then(($input) => {
+    //     expect($input).to.have.value('50')
+    //   })
+    // })
 
-    it('overwrites text when selectAll in click handler', () => {
-      return cy.$$('#input-without-value').val('0').click(function () {
-        return $(this).select()
-      })
-    }
-    )
+    // it('overwrites text when selectAll in click handler', () => {
+    //   return cy.$$('#input-without-value').val('0').click(function () {
+    //     return $(this).select()
+    //   })
+    // }
+    // )
 
-    it('overwrites text when selectAll in mouseup handler', () => {
-      return cy.$$('#input-without-value').val('0').mouseup(function () {
-        return $(this).select()
-      })
-    }
-    )
+    // it('overwrites text when selectAll in mouseup handler', () => {
+    //   return cy.$$('#input-without-value').val('0').mouseup(function () {
+    //     return $(this).select()
+    //   })
+    // }
+    // )
 
-    it('overwrites text when selectAll in mouseup handler', () => {
-      return cy.$$('#input-without-value').val('0').mouseup(function () {
-        return $(this).select()
-      })
-    }
-    )
+    // it('overwrites text when selectAll in mouseup handler', () => {
+    //   return cy.$$('#input-without-value').val('0').mouseup(function () {
+    //     return $(this).select()
+    //   })
+    // }
+    // )
 
-    it('responsive to keydown handler', function () {
-      cy.$$('#input-without-value').val('1234').keydown(function () {
-        return $(this).get(0).setSelectionRange(0, 0)
-      })
+    // it('responsive to keydown handler', function () {
+    //   cy.$$('#input-without-value').val('1234').keydown(function () {
+    //     return $(this).get(0).setSelectionRange(0, 0)
+    //   })
 
-      cy.get('#input-without-value').type('56').then(($input) => {
-        expect($input).to.have.value('651234')
-      })
-    })
+    //   cy.get('#input-without-value').type('56').then(($input) => {
+    //     expect($input).to.have.value('651234')
+    //   })
+    // })
 
-    it('responsive to keyup handler', function () {
-      cy.$$('#input-without-value').val('1234').keyup(function () {
-        return $(this).get(0).setSelectionRange(0, 0)
-      })
+    // it('responsive to keyup handler', function () {
+    //   cy.$$('#input-without-value').val('1234').keyup(function () {
+    //     return $(this).get(0).setSelectionRange(0, 0)
+    //   })
 
-      cy.get('#input-without-value').type('56').then(($input) => {
-        expect($input).to.have.value('612345')
-      })
-    })
+    //   cy.get('#input-without-value').type('56').then(($input) => {
+    //     expect($input).to.have.value('612345')
+    //   })
+    // })
 
-    it('responsive to input handler', function () {
-      cy.$$('#input-without-value').val('1234').keyup(function () {
-        return $(this).get(0).setSelectionRange(0, 0)
-      })
+    // it('responsive to input handler', function () {
+    //   cy.$$('#input-without-value').val('1234').keyup(function () {
+    //     return $(this).get(0).setSelectionRange(0, 0)
+    //   })
 
-      cy.get('#input-without-value').type('56').then(($input) => {
-        expect($input).to.have.value('612345')
-      })
-    })
+    //   cy.get('#input-without-value').type('56').then(($input) => {
+    //     expect($input).to.have.value('612345')
+    //   })
+    // })
 
-    it('responsive to change handler', function () {
-      cy.$$('#input-without-value').val('1234').change(function () {
-        return $(this).get(0).setSelectionRange(0, 0)
-      })
+    // it('responsive to change handler', function () {
+    //   cy.$$('#input-without-value').val('1234').change(function () {
+    //     return $(this).get(0).setSelectionRange(0, 0)
+    //   })
 
-      //# no change event should be fired
-      cy.get('#input-without-value').type('56').then(($input) => {
-        expect($input).to.have.value('123456')
-      })
-    })
+    //   //# no change event should be fired
+    //   cy.get('#input-without-value').type('56').then(($input) => {
+    //     expect($input).to.have.value('123456')
+    //   })
+    // })
 
-    it('automatically moves the caret to the end if value is changed', () => {
-      cy.$$('#input-without-value').keypress((e) => {
-        e.preventDefault()
+    // it('automatically moves the caret to the end if value is changed', () => {
+    //   cy.$$('#input-without-value').keypress((e) => {
+    //     e.preventDefault()
 
-        const key = String.fromCharCode(e.which)
+    //     const key = String.fromCharCode(e.which)
 
-        const $input = $(e.target)
+    //     const $input = $(e.target)
 
-        const val = $input.val()
+    //     const val = $input.val()
 
-        //# setting value updates cursor to the end of input
-        return $input.val(`${val + key}-`)
-      })
+    //     //# setting value updates cursor to the end of input
+    //     return $input.val(`${val + key}-`)
+    //   })
 
-      cy.get('#input-without-value').type('foo').then(($input) => {
-        expect($input).to.have.value('f-o-o-')
-      })
-    })
+    //   cy.get('#input-without-value').type('foo').then(($input) => {
+    //     expect($input).to.have.value('f-o-o-')
+    //   })
+    // })
 
-    it('automatically moves the caret to the end if value is changed asynchronously', () => {
-      cy.$$('#input-without-value').keypress((e) => {
+    // it('automatically moves the caret to the end if value is changed asynchronously', () => {
+    //   cy.$$('#input-without-value').keypress((e) => {
 
-        const $input = $(e.target)
+    //     const $input = $(e.target)
 
-        return _.defer(() => {
-          const val = $input.val()
+    //     return _.defer(() => {
+    //       const val = $input.val()
 
-          return $input.val(`${val}-`)
-        })
-      })
+    //       return $input.val(`${val}-`)
+    //     })
+    //   })
 
-      cy.get('#input-without-value').type('foo').then(($input) => {
-        expect($input).to.have.value('f-o-o-')
-      })
-    })
+    //   cy.get('#input-without-value').type('foo').then(($input) => {
+    //     expect($input).to.have.value('f-o-o-')
+    //   })
+    // })
 
-    it('does not fire keypress when keydown is preventedDefault', (done) => {
-      cy.$$('#input-without-value').get(0).addEventListener('keypress', () => {
-        done('should not have received keypress event')
-      })
+    // it('does not fire keypress when keydown is preventedDefault', (done) => {
+    //   cy.$$('#input-without-value').get(0).addEventListener('keypress', () => {
+    //     done('should not have received keypress event')
+    //   })
 
-      cy.$$('#input-without-value').get(0).addEventListener('keydown', (e) => {
-        e.preventDefault()
-      })
+    //   cy.$$('#input-without-value').get(0).addEventListener('keydown', (e) => {
+    //     e.preventDefault()
+    //   })
 
-      cy.get('#input-without-value').type('foo').then(() => {
-        done()
-      })
-    })
+    //   cy.get('#input-without-value').type('foo').then(() => {
+    //     done()
+    //   })
+    // })
 
-    it('does not insert key when keydown is preventedDefault', () => {
-      cy.$$('#input-without-value').get(0).addEventListener('keydown', (e) => {
-        e.preventDefault()
-      })
+    // it('does not insert key when keydown is preventedDefault', () => {
+    //   cy.$$('#input-without-value').get(0).addEventListener('keydown', (e) => {
+    //     e.preventDefault()
+    //   })
 
-      cy.get('#input-without-value').type('foo').then(($text) => {
-        expect($text).to.have.value('')
-      })
-    })
+    //   cy.get('#input-without-value').type('foo').then(($text) => {
+    //     expect($text).to.have.value('')
+    //   })
+    // })
 
-    it('does not insert key when keypress is preventedDefault', () => {
-      cy.$$('#input-without-value').get(0).addEventListener('keypress', (e) => {
-        e.preventDefault()
-      })
+    // it('does not insert key when keypress is preventedDefault', () => {
+    //   cy.$$('#input-without-value').get(0).addEventListener('keypress', (e) => {
+    //     e.preventDefault()
+    //   })
 
-      cy.get('#input-without-value').type('foo').then(($text) => {
-        expect($text).to.have.value('')
-      })
-    })
+    //   cy.get('#input-without-value').type('foo').then(($text) => {
+    //     expect($text).to.have.value('')
+    //   })
+    // })
 
-    it('does not fire textInput when keypress is preventedDefault', (done) => {
-      cy.$$('#input-without-value').get(0).addEventListener('textInput', () => {
-        done('should not have received textInput event')
-      })
+    // it('does not fire textInput when keypress is preventedDefault', (done) => {
+    //   cy.$$('#input-without-value').get(0).addEventListener('textInput', () => {
+    //     done('should not have received textInput event')
+    //   })
 
-      cy.$$('#input-without-value').get(0).addEventListener('keypress', (e) => {
-        e.preventDefault()
-      })
+    //   cy.$$('#input-without-value').get(0).addEventListener('keypress', (e) => {
+    //     e.preventDefault()
+    //   })
 
-      cy.get('#input-without-value').type('foo').then(() => {
-        done()
-      })
-    })
+    //   cy.get('#input-without-value').type('foo').then(() => {
+    //     done()
+    //   })
+    // })
 
-    it('does not insert key when textInput is preventedDefault', () => {
-      cy.$$('#input-without-value').get(0).addEventListener('textInput', (e) => {
-        e.preventDefault()
-      })
+    // it('does not insert key when textInput is preventedDefault', () => {
+    //   cy.$$('#input-without-value').get(0).addEventListener('textInput', (e) => {
+    //     e.preventDefault()
+    //   })
 
-      cy.get('#input-without-value').type('foo')//, { simulated: false })
-      .then(($text) => {
-        expect($text).to.have.value('')
-      })
-    })
+    //   cy.get('#input-without-value').type('foo')//, { simulated: false })
+    //   .then(($text) => {
+    //     expect($text).to.have.value('')
+    //   })
+    // })
 
-    it('does not fire input when textInput is preventedDefault', (done) => {
-      cy.$$('#input-without-value').get(0).addEventListener('input', () => {
-        done('should not have received input event')
-      })
+    // it('does not fire input when textInput is preventedDefault', (done) => {
+    //   cy.$$('#input-without-value').get(0).addEventListener('input', () => {
+    //     done('should not have received input event')
+    //   })
 
-      cy.$$('#input-without-value').get(0).addEventListener('textInput', (e) => {
-        e.preventDefault()
-      })
+    //   cy.$$('#input-without-value').get(0).addEventListener('textInput', (e) => {
+    //     e.preventDefault()
+    //   })
 
-      cy.get('#input-without-value').type('foo').then(() => {
-        done()
-      })
-    })
+    //   cy.get('#input-without-value').type('foo').then(() => {
+    //     done()
+    //   })
+    // })
 
-    it('preventing default to input event should not affect anything', () => {
-      cy.$$('#input-without-value').get(0).addEventListener('input', (e) => {
-        e.preventDefault()
-      })
+    // it('preventing default to input event should not affect anything', () => {
+    //   cy.$$('#input-without-value').get(0).addEventListener('input', (e) => {
+    //     e.preventDefault()
+    //   })
 
-      cy.get('#input-without-value').type('foo').then(($input) => {
-        expect($input).to.have.value('foo')
-      })
-    })
+    //   cy.get('#input-without-value').type('foo').then(($input) => {
+    //     expect($input).to.have.value('foo')
+    //   })
+    // })
 
     describe('input[type=number]', () => {
       it('can change values', () => {
