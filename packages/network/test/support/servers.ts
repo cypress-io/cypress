@@ -14,7 +14,7 @@ export interface AsyncServer {
 function addDestroy (server: http.Server | https.Server) {
   let connections = []
 
-  function trackConn(conn) {
+  function trackConn (conn) {
     connections.push(conn)
 
     conn.on('close', () => {

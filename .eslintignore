@@ -1,11 +1,3 @@
-packages/server/lib/scaffold/plugins/index.js
-packages/server/lib/scaffold/support/index.js
-packages/server/lib/scaffold/support/commands.js
-packages/extension/test/helpers/background.js
-packages/network/lib/agent.js
-packages/example
-cli/types
-!packages/example/lib
 **/__snapshots__
 **/node_modules
 **/build
@@ -15,3 +7,15 @@ cli/types
 **/cypress/fixtures
 **/test/fixtures
 **/vendor
+packages/example
+cli/types
+!packages/example/lib
+packages/server/lib/scaffold/plugins/index.js
+packages/server/lib/scaffold/support/index.js
+packages/server/lib/scaffold/support/commands.js
+packages/extension/test/helpers/background.js
+packages/network/lib/*.js
+
+# these generated files are co-located with .ts source files
+packages/server/lib/util/ensure-url.js
+packages/server/lib/util/proxy.js
