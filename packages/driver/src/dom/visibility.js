@@ -30,6 +30,11 @@ const isHidden = (el, name = 'isHidden()') => {
 
   // an option is considered visible if its parent select is visible
   if ($elements.isOption(el) || $elements.isOptgroup(el)) {
+    // they could have just set to hide the option
+    if (elHasDisplayNone($el)) {
+      return true
+    }
+
     // if its parent select is visible, then it's not hidden
     const $select = $elements.getFirstParentWithTagName($el, 'select')
 
@@ -37,7 +42,7 @@ const isHidden = (el, name = 'isHidden()') => {
     // they may have not put the option into a select el,
     // in which case it will fall through to regular visibility logic
     if ($select && $select.length) {
-      // if the select is visible, the options in it are visible too
+      // if the select is hidden, the options in it are visible too
       return isHidden($select[0], name)
     }
   }

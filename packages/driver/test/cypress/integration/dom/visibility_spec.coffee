@@ -153,14 +153,24 @@ describe "src/cypress/dom/visibility", ->
 
       @$optionInHiddenSelect = add """
         <select style='display: none'>
-          <option>Naruto</option>
+          <option>Sasuke</option>
         </select>
       """
 
       @$optionOutsideSelect = add """
         <div style='display: none'>
-          <option>Naruto</option>
+          <option id='option-hidden'>Sasuke</option>
         </div>
+        <div>
+          <option id='option-visible'>Naruto</option>
+        </div>
+      """
+
+      @$optionHiddenInSelect = add """
+        <select>
+          <option>--Select--</option>
+          <option id="hidden-opt" style='display: none'>Sakura</option>
+        </select>
       """
 
       @$tableVisCollapse = add """
@@ -299,8 +309,8 @@ describe "src/cypress/dom/visibility", ->
 
       @$elOutOfParentWithFlexAndOverflowHiddenBounds = add """
       <div style="display: flex; overflow: hidden;">
-        <div style="flex: 0 0 80%; background-color: red;">red</div>
-        <div style="flex: 0 0 80%; background-color: green;">green</div>
+        <div id="red" style="flex: 0 0 80%; background-color: red;">red</div>
+        <div id="green" style="flex: 0 0 80%; background-color: green;">green</div>
         <div id="blue" style="background-color: blue;">blue</div>
       </div>
     """
@@ -543,16 +553,25 @@ describe "src/cypress/dom/visibility", ->
         cy.wrap(@$optionInHiddenSelect.find('option')).should("be.hidden")
         cy.wrap(@$optionInHiddenSelect.find('option')).should("not.be.visible")
 
+      it "is hidden if option is display none", ->
+        expect(@$optionHiddenInSelect.find('#hidden-opt').is(":hidden")).to.be.true
+        expect(@$optionHiddenInSelect.find('#hidden-opt').is(":visible")).to.be.false
+
+        expect(@$optionHiddenInSelect.find('#hidden-opt')).to.be.hidden
+        expect(@$optionHiddenInSelect.find('#hidden-opt')).not.to.be.visible
+
+        cy.wrap(@$optionHiddenInSelect.find('#hidden-opt')).should("be.hidden")
+        cy.wrap(@$optionHiddenInSelect.find('#hidden-opt')).should("not.be.visible")
+
       it "follows regular visibility logic if option outside of select", ->
-        expect(@$optionOutsideSelect.find('option').is(":hidden")).to.be.true
-        expect(@$optionOutsideSelect.find('option').is(":visible")).to.be.false
+        expect(@$optionOutsideSelect.find('#option-hidden').is(":hidden")).to.be.true
+        expect(@$optionOutsideSelect.find('#option-hidden')).to.be.hidden
+        cy.wrap(@$optionOutsideSelect.find('#option-hidden')).should("be.hidden")
 
-        expect(@$optionOutsideSelect.find('option')).to.be.hidden
-        expect(@$optionOutsideSelect.find('option')).not.to.be.visible
-
-        cy.wrap(@$optionOutsideSelect.find('option')).should("be.hidden")
-        cy.wrap(@$optionOutsideSelect.find('option')).should("not.be.visible")
-
+        expect(@$optionOutsideSelect.find('#option-visible').is(":visible")).to.be.true
+        expect(@$optionOutsideSelect.find('#option-visible')).to.be.visible
+        cy.wrap(@$optionOutsideSelect.find('#option-visible')).should("be.visible")
+    
     describe "opacity visible", ->
       it "is visible if opacity is 0", ->
         expect(@$btnOpacity.is(":hidden")).to.be.false
@@ -679,6 +698,8 @@ describe "src/cypress/dom/visibility", ->
         expect(@$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent.find("span")).to.be.visible
 
       it "is hidden when parent flex and overflow hidden and el out of bounds", ->
+        expect(@$elOutOfParentWithFlexAndOverflowHiddenBounds.find("#red")).to.be.visible
+        expect(@$elOutOfParentWithFlexAndOverflowHiddenBounds.find("#green")).to.be.visible
         expect(@$elOutOfParentWithFlexAndOverflowHiddenBounds.find("#blue")).to.be.hidden
 
       it "is hidden when parent is wide and ancestor is overflow auto", ->
