@@ -5,18 +5,22 @@ beforeEach ->
 
   return null
 
-it "normally finishes in less than 1000ms on localhost with connection: close", ->
+it "always finishes in less than 150ms on localhost with connection: close", ->
+  cy.visit('/close')
+
   Cypress._.times 100, ->
     cy.visit('/close')
     .then ->
-      expect(@lastLog.get("totalTime")).to.be.lte(1000)
+      expect(@lastLog.get("totalTime")).to.be.lte(150)
 
   return undefined
 
-it "normally finishes in less than 1000ms on localhost with connection: keep-alive", ->
+it "always finishes in less than 150ms on localhost with connection: keep-alive", ->
+  cy.visit('/close')
+
   Cypress._.times 100, ->
     cy.visit('/keepalive')
     .then ->
-      expect(@lastLog.get("totalTime")).to.be.lte(1000)
+      expect(@lastLog.get("totalTime")).to.be.lte(150)
 
   return undefined
