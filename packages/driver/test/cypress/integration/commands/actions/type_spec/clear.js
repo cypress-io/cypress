@@ -78,18 +78,18 @@ context('#clear', function () {
   context('works on input type', () => {
     const inputTypes = [
       'date',
-      // 'datetime',
-      // 'datetime-local',
-      // 'email',
-      // 'month',
-      // 'number',
-      // 'password',
-      // 'search',
-      // 'tel',
-      // 'text',
-      // 'time',
-      // 'url',
-      // 'week',
+      'datetime',
+      'datetime-local',
+      'email',
+      'month',
+      'number',
+      'password',
+      'search',
+      'tel',
+      'text',
+      'time',
+      'url',
+      'week',
     ]
 
     inputTypes.forEach((type) => {
@@ -242,6 +242,7 @@ context('#clear', function () {
     })
 
     it('throws when the subject isnt visible', (done) => {
+      cy.$$('input:text:first').show().hide()
 
       cy.on('fail', (err) => {
         expect(err.message).to.include('cy.clear() failed because this element is not visible')

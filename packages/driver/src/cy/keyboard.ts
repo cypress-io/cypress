@@ -144,8 +144,8 @@ const getActiveModifiers = (state: State) => {
 
 const modifiersToString = (modifiers: keyboardModifiers) => {
   return _.keys(_.pickBy(modifiers, (val) => {
-      return val
-    })).join(', ')
+    return val
+  })).join(', ')
 }
 
 const joinKeyArrayToString = (keyArr: KeyDetails[]) => {
@@ -357,7 +357,7 @@ const validateTyping = (
   if (isClearChars) {
     skipCheckUntilIndex = 2 // {selectAll}{del} is two keys
 
-    return { skipCheckUntilIndex }
+    return { skipCheckUntilIndex, isClearChars: true }
   }
 
   if (isDate) {
@@ -675,7 +675,7 @@ export default class Keyboard {
           const activeEl = getActiveEl(doc)
 
           if (!_skipCheckUntilIndex) {
-            const { skipCheckUntilIndex } = validateTyping(
+            const { skipCheckUntilIndex, isClearChars } = validateTyping(
               activeEl,
               joinKeyArrayToString(keyDetailsArr.slice(i)),
               options._log,
@@ -689,8 +689,8 @@ export default class Keyboard {
 
             _skipCheckUntilIndex = skipCheckUntilIndex
             if (
-              _skipCheckUntilIndex &&
-            $elements.isNeedSingleValueChangeInputElement(el)
+              _skipCheckUntilIndex
+              && $elements.isNeedSingleValueChangeInputElement(el)
             ) {
               const originalText = el.value
 
@@ -704,10 +704,14 @@ export default class Keyboard {
             _.last(keysType)!.simulatedDefault = () => {
               options.onValueChange(originalText, el)
 
+              const valToSet = isClearChars ? '' : joinKeyArrayToString(keysType)
+
+              debug('setting element value', valToSet, el)
+
               return $elements.setNativeProp(
                 el as HTMLTextLikeInputElement,
                 'value',
-                joinKeyArrayToString(keysType)
+                valToSet
               )
             }
             }
