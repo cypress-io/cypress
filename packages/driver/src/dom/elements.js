@@ -608,7 +608,7 @@ const getFirstFocusableEl = ($el) => {
 const getFirstParentWithTagName = ($el, tagName) => {
   // return null if we're at body/html/document
   // cuz that means nothing has fixed position
-  if (!$el || !tagName || $el.is('body,html') || $document.isDocument($el)) {
+  if (!$el[0] || !tagName || $el.is('body,html') || $document.isDocument($el)) {
     return null
   }
 
