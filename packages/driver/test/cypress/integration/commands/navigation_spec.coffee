@@ -243,6 +243,7 @@ describe "src/cy/commands/navigation", ->
 
     it "removes listeners", ->
       cy
+        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then ->
           winLoadListeners = cy.listeners("window:load")
@@ -266,6 +267,7 @@ describe "src/cy/commands/navigation", ->
       stub3 = cy.stub()
 
       cy
+        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then ->
           cy.on("stability:changed", stub1)
@@ -279,6 +281,7 @@ describe "src/cy/commands/navigation", ->
 
     it "removes listeners from window", ->
       cy
+        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then (win) ->
           rel = cy.stub(win, "removeEventListener")
@@ -369,6 +372,7 @@ describe "src/cy/commands/navigation", ->
 
       it "logs go", ->
         cy
+          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             lastLog = @lastLog
@@ -378,12 +382,14 @@ describe "src/cy/commands/navigation", ->
 
       it "can turn off logging", ->
         cy
+          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back", {log: false}).then ->
             expect(@lastLog).to.be.undefined
 
       it "does not log 'Page Load' events", ->
         cy
+          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
@@ -393,6 +399,7 @@ describe "src/cy/commands/navigation", ->
         beforeunload = false
 
         cy
+          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
             cy.on "window:before:unload", =>
@@ -588,6 +595,15 @@ describe "src/cy/commands/navigation", ->
         }
       })
       cy.contains('"x-foo-baz":"bar-quux"')
+
+    it "can send user-agent header", ->
+      cy.visit({
+        url: "http://localhost:3500/dump-headers",
+        headers: {
+          "user-agent": "something special"
+        }
+      })
+      cy.contains('"user-agent":"something special"')
 
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
@@ -1030,6 +1046,17 @@ describe "src/cy/commands/navigation", ->
           headers: "quux"
         })
 
+      it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          failOnStatusCode: false
+          retryOnStatusCodeFailure: true
+        })
+
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -1427,6 +1454,34 @@ describe "src/cy/commands/navigation", ->
           done()
 
         cy.visit("https://google.com/foo")
+
+      it "displays body_circular when body is circular", (done) ->
+        foo = {
+          bar: {
+            baz: {}
+          }
+        }
+
+        foo.bar.baz.quux = foo
+
+        cy.visit({
+          method: "POST"
+          url: "http://foo.invalid/"
+          body: foo
+        })
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq """
+          The `body` parameter supplied to cy.visit() contained a circular reference at the path "bar.baz.quux".
+
+          `body` can only be a string or an object with no circular references.
+          """
+
+          done()
 
   context "#page load", ->
     it "sets initial=true and then removes", ->

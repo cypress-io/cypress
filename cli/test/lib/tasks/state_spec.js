@@ -4,6 +4,7 @@ const os = require('os')
 const path = require('path')
 const Promise = require('bluebird')
 const proxyquire = require('proxyquire')
+const mockfs = require('mock-fs')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
@@ -190,6 +191,12 @@ describe('lib/tasks/state', function () {
     })
   })
   context('.writeBinaryVerified', function () {
+    beforeEach(() => {
+      mockfs({})
+    })
+    afterEach(() => {
+      mockfs.restore()
+    })
     it('writes to binary state verified:true', function () {
       sinon.stub(fs, 'outputJsonAsync').resolves()
 
