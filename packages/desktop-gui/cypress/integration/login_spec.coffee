@@ -85,13 +85,13 @@ describe "Login", ->
             cy.get(".modal").contains("Jane Lane")
 
           it "can close modal by clicking Continue", ->
-            cy.get(".modal .btn").contains("Continue").click()
+            cy.get(".modal .btn:contains(Continue)").click()
             .then ->
               cy.get(".modal").should("not.be.visible")
 
           context "after clicking Continue", ->
             beforeEach ->
-              cy.get(".modal .btn").contains("Continue").click()
+              cy.get(".modal .btn:contains(Continue)").click()
 
             context "log out", ->
               it "displays login button on logout", ->
