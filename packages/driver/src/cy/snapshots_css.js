@@ -109,7 +109,7 @@ const create = ($$, state) => {
     newWindow = true
   }
 
-  const getCssId = (href, stylesheet) => {
+  const getStyleId = (href, stylesheet) => {
     const hrefModified = cssHrefToModifiedMap.get(href) || {}
     const existing = cssHrefToIdMap.get(href)
 
@@ -168,7 +168,7 @@ const create = ($$, state) => {
       //// return the CSS rules as a string, or, if cross-domain,
       //// a reference to the stylesheet's href
       if (href) {
-        return getCssId(href, stylesheets[href]) || { href }
+        return getStyleId(href, stylesheets[href]) || { href }
       }
 
       //// otherwise, it's a style tag, and we can just grab its content
