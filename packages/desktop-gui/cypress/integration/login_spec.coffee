@@ -59,15 +59,15 @@ describe "Login", ->
       it "disables login button", ->
         cy.get("@loginBtn").should("be.disabled")
 
-      it "shows spinner with 'Logging In'", ->
-        cy.get("@loginBtn").invoke("text").should("contain", "Logging in...")
+      it "shows spinner with 'Opening browser'", ->
+        cy.get("@loginBtn").invoke("text").should("contain", "Opening browser...")
 
       context "on 'begin:auth'", ->
         beforeEach ->
           cy.get("@loginBtn")
 
-        it "displays spinner with 'Logging in...' and disables button", ->
-          cy.contains("Logging in...").should("be.disabled")
+        it "displays spinner with 'Opening browser...' and disables button", ->
+          cy.contains("Opening browser...").should("be.disabled")
 
         describe "on ipc begin:auth success", ->
           beforeEach ->
@@ -81,39 +81,48 @@ describe "Login", ->
               .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-          it "closes modal", ->
-            cy.get(".modal").should("not.be.visible")
+          it "displays username in success dialog", ->
+            cy.get(".modal").contains("Jane Lane")
 
-          context "log out", ->
-            it "displays login button on logout", ->
-              cy
-                .get("nav a").contains("Jane").click()
-              cy
-                .contains("Log Out").click()
-                .get(".nav").contains("Log In")
+          it "can close modal by clicking Continue", ->
+            cy.get(".modal .btn").contains("Continue").click()
+            .then ->
+              cy.get(".modal").should("not.be.visible")
 
-            it "calls clear:github:cookies", ->
-              cy
-                .get("nav a").contains("Jane").click()
-              cy
-                .contains("Log Out").click().then ->
-                  expect(@ipc.clearGithubCookies).to.be.called
+          context "after clicking Continue", ->
+            beforeEach ->
+              cy.get(".modal .btn").contains("Continue").click()
 
-            it "calls log:out", ->
-              cy
-                .get("nav a").contains("Jane").click()
-              cy
-                .contains("Log Out").click().then ->
-                  expect(@ipc.logOut).to.be.called
+            context "log out", ->
+              it "displays login button on logout", ->
+                cy
+                  .get("nav a").contains("Jane").click()
+                cy
+                  .contains("Log Out").click()
+                  .get(".nav").contains("Log In")
 
-            it "has login button enabled when returning to login after logout", ->
-              cy.get("nav a").contains("Jane").click()
-              cy.contains("Log Out").click()
-              cy.contains("Log In").click()
-              cy.get(".login button").eq(1)
-                .should("not.be.disabled")
-                .invoke("text")
-                .should("include", "Log In to Dashboard")
+              it "calls clear:github:cookies", ->
+                cy
+                  .get("nav a").contains("Jane").click()
+                cy
+                  .contains("Log Out").click().then ->
+                    expect(@ipc.clearGithubCookies).to.be.called
+
+              it "calls log:out", ->
+                cy
+                  .get("nav a").contains("Jane").click()
+                cy
+                  .contains("Log Out").click().then ->
+                    expect(@ipc.logOut).to.be.called
+
+              it "has login button enabled when returning to login after logout", ->
+                cy.get("nav a").contains("Jane").click()
+                cy.contains("Log Out").click()
+                cy.contains("Log In").click()
+                cy.get(".login button").eq(1)
+                  .should("not.be.disabled")
+                  .invoke("text")
+                  .should("include", "Log In to Dashboard")
 
         describe "on ipc 'begin:auth' error", ->
           beforeEach ->

@@ -84,16 +84,14 @@ describe('lib/gui/auth', function () {
         })
       })
 
-      it('is still fulfilled when openExternal fails, but onWarning is called', function () {
+      it('is still fulfilled when openExternal fails, but sendWarning is called', function () {
         sinon.stub(electron.shell, 'openExternal').callsArgWith(2, new Error)
-        const onWarning = sinon.stub()
+        const sendWarning = sinon.stub()
 
-        return auth._launchNativeAuth(REDIRECT_URL, onWarning)
+        return auth._launchNativeAuth(REDIRECT_URL, sendWarning)
         .then(() => {
           expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL, {}, sinon.match.func)
-          expect(onWarning).to.be.calledWithMatch({
-            message: `Cypress was unable to open your installed browser. To continue logging in to the dashboard, please open this URL in your web browser: ${REDIRECT_URL}`,
-          })
+          expect(sendWarning).to.be.calledWithMatch('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', REDIRECT_URL)
         })
       })
     })
