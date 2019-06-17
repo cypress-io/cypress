@@ -553,7 +553,19 @@ describe "src/cypress/dom/visibility", ->
         cy.wrap(@$optionOutsideSelect.find('option')).should("be.hidden")
         cy.wrap(@$optionOutsideSelect.find('option')).should("not.be.visible")
 
-    describe "opacity", ->
+    describe "opacity visible", ->
+      it "is visible if opacity is 0", ->
+        expect(@$btnOpacity.is(":hidden")).to.be.false
+        expect(@$btnOpacity.is(":visible")).to.be.true
+
+        expect(@$btnOpacity).not.to.be.hidden
+        expect(@$btnOpacity).to.be.visible
+
+        cy.wrap(@$btnOpacity).should("not.be.hidden")
+        cy.wrap(@$btnOpacity).should("be.visible")
+
+    # This should be run when we implement opacity 0 as hidden
+    describe.skip "opacity hidden", ->
       it "is hidden if opacity is 0", ->
         expect(@$btnOpacity.is(":hidden")).to.be.true
         expect(@$btnOpacity.is(":visible")).to.be.false

@@ -43,9 +43,10 @@ const isHidden = (el, name = 'isHidden()') => {
   }
 
   // anything with opacity 0 is not visible to eye
-  if (elHasEffectiveOpacityZero($el)) {
-    return true // is hidden
-  }
+  // TODO: comment back in on a breaking version change for visibility fixes
+  // if (elHasEffectiveOpacityZero($el)) {
+  //   return true // is hidden
+  // }
 
   // in Cypress-land we consider the element hidden if
   // either its offsetHeight or offsetWidth is 0 because
@@ -76,37 +77,37 @@ const isHidden = (el, name = 'isHidden()') => {
   return elIsOutOfBoundsOfAncestorsOverflow($el)
 }
 
-const elHasEffectiveOpacityZero = ($el) => {
-  // 1 = 100% opaque
-  // 0 = 0% opaque or transparent
-  return elHasOpacityZero($el) || ancestorHasOpacityZero($el.parent())
-}
+// const elHasEffectiveOpacityZero = ($el) => {
+//   // 1 = 100% opaque
+//   // 0 = 0% opaque or transparent
+//   return elHasOpacityZero($el) || ancestorHasOpacityZero($el.parent())
+// }
 
-const elHasOpacityZero = function ($el) {
-  const elOpacity = $el.css('opacity')
+// const elHasOpacityZero = function ($el) {
+//   const elOpacity = $el.css('opacity')
 
-  if (elOpacity && Number(elOpacity) === 0) {
-    return true
-  }
+//   if (elOpacity && Number(elOpacity) === 0) {
+//     return true
+//   }
 
-  // the default opacity of all elements is 1
-  return false
-}
+//   // the default opacity of all elements is 1
+//   return false
+// }
 
-const ancestorHasOpacityZero = function ($el) {
-  // if we have no $el or we've walked all the way up to document
-  // then return false
-  if (!$el.length || $document.isDocument($el)) {
-    return false
-  }
+// const ancestorHasOpacityZero = function ($el) {
+//   // if we have no $el or we've walked all the way up to document
+//   // then return false
+//   if (!$el.length || $document.isDocument($el)) {
+//     return false
+//   }
 
-  if (elHasOpacityZero($el)) {
-    return true
-  }
+//   if (elHasOpacityZero($el)) {
+//     return true
+//   }
 
-  // continue walking up ancestors
-  return ancestorHasOpacityZero($el.parent())
-}
+//   // continue walking up ancestors
+//   return ancestorHasOpacityZero($el.parent())
+// }
 
 const elHasNoEffectiveWidthOrHeight = ($el) => {
   // Is the element's CSS width OR height, including any borders,
