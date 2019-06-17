@@ -176,9 +176,9 @@ const canClipContent = function ($el, $ancestor) {
   const $offsetParent = $jquery.wrap($el[0].offsetParent)
 
   // even if overflow is clippable, if the element's offset parent
-  // is a parent of the ancestor, the ancestor will not clip the element
+  // is a parent or child of the ancestor, the ancestor will not clip the element
   // unless the element is position relative
-  if (!elHasPositionRelative($el) && $elements.isAncestor($ancestor, $offsetParent)) {
+  if (!elHasPositionRelative($el) && ($elements.isAncestor($ancestor, $offsetParent) || $elements.isChild($ancestor, $offsetParent))) {
     return false
   }
 
@@ -399,7 +399,6 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because it has CSS property: 'visibility: collapse'`
   }
 
-      return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   if (elHasNoOffsetWidthOrHeight($el)) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   }

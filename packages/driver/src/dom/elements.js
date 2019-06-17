@@ -390,6 +390,10 @@ const isAncestor = ($el, $maybeAncestor) => {
   return $el.parents().index($maybeAncestor) >= 0
 }
 
+const isChild = ($el, $maybeChild) => {
+  return $el.children().index($maybeChild) >= 0
+}
+
 const isSelector = ($el, selector) => {
   return $el.is(selector)
 }
@@ -817,6 +821,8 @@ module.exports = {
   isDetached,
 
   isAncestor,
+
+  isChild,
 
   isScrollable,
 
