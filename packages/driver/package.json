@@ -19,6 +19,7 @@
     "@cypress/sinon-chai": "1.1.0",
     "@cypress/underscore.inflection": "1.0.1",
     "@cypress/unique-selector": "0.4.2",
+    "@cypress/what-is-circular": "1.0.1",
     "angular": "1.7.7",
     "backbone": "1.4.0",
     "basic-auth": "2.0.1",
@@ -61,7 +62,6 @@
     "url-parse": "1.4.7",
     "vanilla-text-mask": "5.1.1",
     "wait-on": "3.2.0",
-    "@cypress/what-is-circular": "1.0.0",
     "zone.js": "0.9.0"
   }
 }

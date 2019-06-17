@@ -7,18 +7,6 @@
     "@typescript-eslint"
   ],
   "rules": {
-    "no-multiple-empty-lines": [
-      "error",
-      {
-        "max": 1
-      }
-    ],
-    "no-else-return": [
-      "error",
-      {
-        "allowElseIf": false
-      }
-    ],
     "brace-style": [
       "error",
       "1tbs",
@@ -26,55 +14,10 @@
         "allowSingleLine": false
       }
     ],
-    "no-unneeded-ternary": [
-      "error"
-    ],
-    "array-bracket-newline": [
-      "error",
-      "consistent"
-    ],
-    "arrow-body-style": [
-      "error",
-      "always"
-    ],
-    "padding-line-between-statements": [
+    "no-multiple-empty-lines": [
       "error",
       {
-        "blankLine": "always",
-        "prev": "*",
-        "next": "return"
-      },
-      {
-        "blankLine": "always",
-        "prev": [
-          "const",
-          "let",
-          "var",
-          "if",
-          "while",
-          "export",
-          "cjs-export",
-          "import",
-          "cjs-import"
-        ],
-        "next": "*"
-      },
-      {
-        "blankLine": "any",
-        "prev": [
-          "const",
-          "let",
-          "var",
-          "import",
-          "cjs-import"
-        ],
-        "next": [
-          "const",
-          "let",
-          "var",
-          "import",
-          "cjs-import"
-        ]
+        "max": 1
       }
     ]
   },
@@ -90,14 +33,6 @@
     }
   },
   "overrides": [
-    {
-      "files": [
-        "*.jsx"
-      ],
-      "rules": {
-        "arrow-body-style": "off"
-      }
-    },
     {
       "files": [
         "*.ts"
