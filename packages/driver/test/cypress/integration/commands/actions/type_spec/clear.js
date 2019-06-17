@@ -78,23 +78,24 @@ context('#clear', function () {
   context('works on input type', () => {
     const inputTypes = [
       'date',
-      'datetime',
-      'datetime-local',
-      'email',
-      'month',
-      'number',
-      'password',
-      'search',
-      'tel',
-      'text',
-      'time',
-      'url',
-      'week',
+      // 'datetime',
+      // 'datetime-local',
+      // 'email',
+      // 'month',
+      // 'number',
+      // 'password',
+      // 'search',
+      // 'tel',
+      // 'text',
+      // 'time',
+      // 'url',
+      // 'week',
     ]
 
     inputTypes.forEach((type) => {
       it(type, () => {
-        cy.get(`#${type}-with-value`).clear().then(($input) => {
+        cy.get(`#${type}-with-value`).clear()
+        .then(($input) => {
           expect($input.val()).to.equal('')
         })
       })
