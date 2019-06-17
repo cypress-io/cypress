@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 class LimitedMap extends Map {
   constructor (limit = 100) {
     super()
@@ -7,7 +9,7 @@ class LimitedMap extends Map {
 
   set (key, value) {
     if (this.size === this._limit) {
-      const firstKey = Array.from(this.keys())[0]
+      const firstKey = _.first(this.keys())
 
       this.delete(firstKey)
     }
