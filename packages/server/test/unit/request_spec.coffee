@@ -214,6 +214,26 @@ describe "lib/request", ->
           expect(retries).to.eq(4)
           done()
 
+      it "retries 4x on a NXDOMAIN (ENOTFOUND)", (done) ->
+        nock.enableNetConnect()
+
+        opts = {
+          url: "http://will-never-exist.invalid.example.com"
+          retryIntervals: [0, 1, 2, 3]
+        }
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        stream.on "error", (err) ->
+          expect(err.code).to.eq('ENOTFOUND')
+          expect(retries).to.eq(4)
+          done()
+
     context "retries for promises", ->
       it "does not retry on a timeout", ->
         opts = {
