@@ -34,6 +34,7 @@ const init = () => {
     // .catch/})
     .catch((e) => {
       if (e.name === 'TimeoutError') {
+        // eslint-disable-next-line
         console.log('Timed out with', e)
       }
 

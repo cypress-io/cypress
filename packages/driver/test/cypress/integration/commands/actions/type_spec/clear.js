@@ -37,8 +37,7 @@ context('#clear', function () {
     cy.on('command:retry', _.after(3, () => {
       textarea.prop('disabled', false)
       retried = true
-    })
-    )
+    }))
 
     cy.get('#comments').clear().then(() => {
       expect(clicks).to.eq(1)
@@ -79,29 +78,27 @@ context('#clear', function () {
   context('works on input type', () => {
     const inputTypes = [
       'date',
-      // 'datetime',
-      // 'datetime-local',
-      // 'email',
-      // 'month',
-      // 'number',
-      // 'password',
-      // 'search',
-      // 'tel',
-      // 'text',
-      // 'time',
-      // 'url',
-      // 'week',
+      'datetime',
+      'datetime-local',
+      'email',
+      'month',
+      'number',
+      'password',
+      'search',
+      'tel',
+      'text',
+      'time',
+      'url',
+      'week',
     ]
 
     inputTypes.forEach((type) => {
-      it.only(type, () => {
+      it(type, () => {
         cy.get(`#${type}-with-value`).clear().then(($input) => {
           expect($input.val()).to.equal('')
         })
-      }
-      )
-    }
-    )
+      })
+    })
   })
 
   describe('assertion verification', function () {
@@ -373,8 +370,7 @@ context('#clear', function () {
 
           expect(log.get('ended')).to.be.true
         })
-      }
-      )
+      })
     })
 
     it('snapshots after clicking', () => {
@@ -385,8 +381,7 @@ context('#clear', function () {
 
         expect(lastLog.get('snapshots')[0]).to.be.an('object')
       })
-    }
-    )
+    })
 
     it('logs deltaOptions', () => {
       cy.get('input:first').clear({ force: true, timeout: 1000 }).then(function () {
@@ -396,8 +391,7 @@ context('#clear', function () {
 
         expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
       })
-    }
-    )
+    })
   })
 })
 

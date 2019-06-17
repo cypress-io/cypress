@@ -1,12 +1,11 @@
 /* eslint arrow-body-style: "off" */
 import './hooks'
-import { trimInnerText, attachKeyListeners, shouldBeCalled, shouldNotBeCalled, shouldBeCalledWithMatch } from './utils'
+import { trimInnerText, attachKeyListeners, shouldNotBeCalled } from './utils'
 import errors from './errors'
 import clear from './clear'
-import specialChars from './special-chars'
 import valueChanging from './value-changing'
 const $ = Cypress.$.bind(Cypress)
-const { _, Promise } = Cypress
+const { _ } = Cypress
 
 require('debug').enable('driver:*')
 
@@ -1013,8 +1012,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {
           expect($input).to.have.value('ba')
         })
-      }
-      )
+      })
 
       it('modifiers are case-insensitive', (done) => {
         const $input = cy.$$('input:text:first')
@@ -1039,8 +1037,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.get('input:text:first').type('FoO').then(($input) => {
           expect($input).to.have.value('FoO')
         })
-      }
-      )
+      })
     })
 
     describe('caret position', function () {
@@ -1092,8 +1089,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.window().then(() => {
           expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 4, end: 4 })
-        }
-        )
+        })
       })
 
       it('won\'t arrowright past length', () => {
@@ -1102,8 +1098,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.window().then(() => {
           expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
-        }
-        )
+        })
       })
 
       it('won\'t arrowleft before word', () => {
@@ -1112,8 +1107,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.window().then(() => {
           expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 0, end: 0 })
-        }
-        )
+        })
       })
 
       it('leaves caret at the end of contenteditable', () => {
@@ -1122,8 +1116,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.window().then(() => {
           expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
-        }
-        )
+        })
       })
 
       it('leaves caret at the end of contenteditable when prefilled', () => {
@@ -1136,8 +1129,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.window().then(() => {
           expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
-        }
-        )
+        })
       })
 
       it('can move the caret left on contenteditable', () => {
@@ -1146,8 +1138,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.window().then(() => {
           expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 1, end: 1 })
-        }
-        )
+        })
       })
 
       //#make sure caret is correct
@@ -1162,8 +1153,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.window().then(() => {
           expect(Cypress.dom.getSelectionBounds(Cypress.$(':text:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
-        }
-        )
+        })
       })
 
       it('leaves caret at the end of textarea', () => {
@@ -1172,8 +1162,7 @@ describe('src/cy/commands/actions/type', function () {
         cy.window().then(() => {
           expect(Cypress.dom.getSelectionBounds(Cypress.$('#comments').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
-        }
-        )
+        })
       })
 
       it('can wrap cursor to next line in [contenteditable] with {rightarrow}', () => {
@@ -1320,8 +1309,7 @@ describe('src/cy/commands/actions/type', function () {
 
           expect(lastLog.get('$el')).to.eq($input)
         })
-      }
-      )
+      })
 
       it('logs message', () => {
         cy.get(':text:first').type('foobar').then(function () {
@@ -1329,8 +1317,7 @@ describe('src/cy/commands/actions/type', function () {
 
           expect(lastLog.get('message')).to.eq('foobar')
         })
-      }
-      )
+      })
 
       it('logs delay arguments', () => {
         cy.get(':text:first').type('foo', { delay: 20 }).then(function () {
@@ -1338,8 +1325,7 @@ describe('src/cy/commands/actions/type', function () {
 
           expect(lastLog.get('message')).to.eq('foo, {delay: 20}')
         })
-      }
-      )
+      })
 
       it('clones textarea value after the type happens', () => {
         const expectToHaveValueAndCoords = () => {
@@ -1440,8 +1426,7 @@ describe('src/cy/commands/actions/type', function () {
 
           expect(lastLog.get('snapshots')[1].body).to.be.an('object')
         })
-      }
-      )
+      })
 
       it('logs deltaOptions', () => {
         cy.get(':text:first').type('foo', { force: true, timeout: 1000 }).then(function () {
@@ -1451,8 +1436,7 @@ describe('src/cy/commands/actions/type', function () {
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })
-      }
-      )
+      })
 
       context('#consoleProps', function () {
         it('has all of the regular options', () => {
@@ -1467,8 +1451,7 @@ describe('src/cy/commands/actions/type', function () {
 
             expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
           })
-        }
-        )
+        })
 
         it('has a table of keys', () => {
           // cy.get(':text:first').type('foooooo', {simulated: true})
@@ -1494,8 +1477,7 @@ describe('src/cy/commands/actions/type', function () {
 
             expect(table.data).to.deep.eq(expectedTable)
           })
-        }
-        )
+        })
 
         // table.data.forEach (item, i) ->
         //   expect(item).to.deep.eq(expectedTable[i])
@@ -1510,8 +1492,7 @@ describe('src/cy/commands/actions/type', function () {
               1: { typed: 'f', which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true },
             })
           })
-        }
-        )
+        })
 
         it('has a table of keys with preventedDefault', function () {
           cy.$$(':text:first').keydown(() => {

@@ -700,5 +700,6 @@ Cypress.Commands.add('getAll', (aliases) => {
   return Cypress.Promise.all(
     aliases.split(' ').map((alias) => {
       return cy.now('get', alias)
-    }))
+    })
+  )
 })

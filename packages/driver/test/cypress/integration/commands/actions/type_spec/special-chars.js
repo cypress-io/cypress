@@ -123,8 +123,7 @@ describe('specialChars', function () {
       cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{backspace}u').then(($input) => {
         expect($input).to.have.value('bur')
       })
-    }
-    )
+    })
 
     it('can backspace a selection range of characters', () => {
       //# select the 'ar' characters
@@ -134,8 +133,7 @@ describe('specialChars', function () {
       }).get(':text:first').type('{backspace}').then(($input) => {
         expect($input).to.have.value('b')
       })
-    }
-    )
+    })
 
     it('sets which and keyCode to 8 and does not fire keypress events', (done) => {
       cy.$$(':text:first').on('keypress', () => {
@@ -148,8 +146,7 @@ describe('specialChars', function () {
         expect(e.key).to.eq('Backspace')
 
         done()
-      })
-      )
+      }))
 
       cy.get(':text:first').invoke('val', 'ab').type('{leftarrow}{backspace}')
     })
@@ -184,8 +181,7 @@ describe('specialChars', function () {
       cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{del}').then(($input) => {
         expect($input).to.have.value('ba')
       })
-    }
-    )
+    })
 
     it('can delete a selection range of characters', () => {
       //# select the 'ar' characters
@@ -195,8 +191,7 @@ describe('specialChars', function () {
       }).get(':text:first').type('{del}').then(($input) => {
         expect($input).to.have.value('b')
       })
-    }
-    )
+    })
 
     it('sets which and keyCode to 46 and does not fire keypress events', (done) => {
       cy.$$(':text:first').on('keypress', () => {
@@ -209,8 +204,7 @@ describe('specialChars', function () {
         expect(e.key).to.eq('Delete')
 
         done()
-      })
-      )
+      }))
 
       cy.get(':text:first').invoke('val', 'ab').type('{leftarrow}{del}')
     })
@@ -267,15 +261,13 @@ describe('specialChars', function () {
       cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}n').then(($input) => {
         expect($input).to.have.value('banr')
       })
-    }
-    )
+    })
 
     it('does not move the cursor if already at bounds 0', () => {
       cy.get(':text:first').invoke('val', 'bar').type('{selectall}{leftarrow}n').then(($input) => {
         expect($input).to.have.value('nbar')
       })
-    }
-    )
+    })
 
     it('sets the cursor to the left bounds', () => {
       //# select the 'a' character
@@ -285,8 +277,7 @@ describe('specialChars', function () {
       }).get(':text:first').type('{leftarrow}n').then(($input) => {
         expect($input).to.have.value('bnar')
       })
-    }
-    )
+    })
 
     it('sets the cursor to the very beginning', () => {
       //# select the 'a' character
@@ -296,8 +287,7 @@ describe('specialChars', function () {
       }).get(':text:first').type('{leftarrow}n').then(($input) => {
         expect($input).to.have.value('nbar')
       })
-    }
-    )
+    })
 
     it('sets which and keyCode to 37 and does not fire keypress events', (done) => {
       cy.$$(':text:first').on('keypress', () => {
@@ -360,15 +350,13 @@ describe('specialChars', function () {
       }).get(':text:first').type('{rightarrow}n').then(($input) => {
         expect($input).to.have.value('bnar')
       })
-    }
-    )
+    })
 
     it('does not move the cursor if already at end of bounds', () => {
       cy.get(':text:first').invoke('val', 'bar').type('{selectall}{rightarrow}n').then(($input) => {
         expect($input).to.have.value('barn')
       })
-    }
-    )
+    })
 
     it('sets the cursor to the rights bounds', () => {
       return cy
@@ -378,8 +366,7 @@ describe('specialChars', function () {
       }).get(':text:first').type('{rightarrow}n').then(($input) => {
         expect($input).to.have.value('banr')
       })
-    }
-    )
+    })
 
     it('sets the cursor to the very beginning', () => {
       return cy
@@ -388,8 +375,7 @@ describe('specialChars', function () {
       }).get(':text:first').type('{leftarrow}n').then(($input) => {
         expect($input).to.have.value('nbar')
       })
-    }
-    )
+    })
 
     it('sets which and keyCode to 39 and does not fire keypress events', (done) => {
       cy.$$(':text:first').on('keypress', () => {
@@ -533,8 +519,7 @@ describe('specialChars', function () {
       .invoke('val', '12.34')
       .type('{uparrow}{uparrow}')
       .should('have.value', '14')
-    }
-    )
+    })
   })
 
   context('{downarrow}', () => {
@@ -592,8 +577,7 @@ describe('specialChars', function () {
       .invoke('val', '12.34')
       .type('{downarrow}{downarrow}')
       .should('have.value', '11')
-    }
-    )
+    })
 
     it('downarrow ignores current selection', () => {
       const ce = cy.$$('[contenteditable]:first').get(0)
@@ -623,15 +607,13 @@ describe('specialChars', function () {
       cy.get(':text:first').invoke('val', '1234').type('{selectall}{del}').type('foo').then(($text) => {
         expect($text).to.have.value('foo')
       })
-    }
-    )
+    })
 
     it('can select all [contenteditable] and delete', () => {
       cy.get('#input-types [contenteditable]').invoke('text', '1234').type('{selectall}{del}').type('foo').then(($div) => {
         expect($div).to.have.text('foo')
       })
-    }
-    )
+    })
   })
 
   context('{selectall} then type something', () => {
@@ -639,10 +621,8 @@ describe('specialChars', function () {
       cy.get('#input-with-value').type('{selectall}new').then(($text) => {
         expect($text).to.have.value('new')
       })
-    }
-    )
-  }
-  )
+    })
+  })
 
   context('{enter}', function () {
     describe('{enter} on form', function () {
@@ -802,8 +782,7 @@ describe('specialChars', function () {
             done()
           })
         })
-      }
-      )
+      })
 
       context('2 inputs, no \'submit\' elements but 1 button[type=button]', () => {
         it('does not trigger submit event', function (done) {
@@ -812,8 +791,7 @@ describe('specialChars', function () {
             done()
           })
         })
-      }
-      )
+      })
 
       context('2 inputs, 1 \'submit\' element input[type=submit]', function () {
         it('triggers form submit', function (done) {
@@ -988,8 +966,7 @@ describe('specialChars', function () {
     it('sets which and keyCode to 13 and prevents EOL insertion', (done) => {
       cy.$$('#input-types textarea').on('keypress', _.after(2, () => {
         done('should not have received keypress event')
-      })
-      )
+      }))
 
       cy.$$('#input-types textarea').on('keydown', _.after(2, (e) => {
         expect(e.which).to.eq(13)
@@ -997,8 +974,7 @@ describe('specialChars', function () {
         expect(e.key).to.eq('Enter')
 
         e.preventDefault()
-      })
-      )
+      }))
 
       cy.get('#input-types textarea').invoke('val', 'foo').type('d{enter}').then(($textarea) => {
         expect($textarea).to.have.value('food')
@@ -1015,8 +991,7 @@ describe('specialChars', function () {
         expect(e.key).to.eq('Enter')
 
         e.preventDefault()
-      })
-      )
+      }))
 
       cy.get('#input-types textarea').invoke('val', 'foo').type('d{enter}').then(($textarea) => {
         expect($textarea).to.have.value('food')
@@ -1059,8 +1034,7 @@ describe('specialChars', function () {
       cy.get('#input-types textarea').invoke('val', 'foo').type('bar{enter}baz{enter}quux').then(($textarea) => {
         expect($textarea).to.have.value('foobar\nbaz\nquux')
       })
-    }
-    )
+    })
 
     it('inserts new line into [contenteditable] ', () => {
       cy.get('#input-types [contenteditable]:first').invoke('text', 'foo')
@@ -1072,8 +1046,7 @@ describe('specialChars', function () {
 
         expect($div.get(0).innerHTML).to.eql('foobar<div>baz</div><div><br></div><div><br></div><div>quux</div>')
       })
-    }
-    )
+    })
 
     it('inserts new line into [contenteditable] from midline', () => {
       cy.get('#input-types [contenteditable]:first').invoke('text', 'foo')
@@ -1083,7 +1056,6 @@ describe('specialChars', function () {
 
         expect($div.get(0).innerHTML).to.eql('fooba<div>ba</div><div>quuxzr</div>')
       })
-    }
-    )
+    })
   })
 })

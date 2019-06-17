@@ -33,7 +33,7 @@ const tryCatchFinally = function ({ tryFn, catchFn, finallyFn }) {
 
 const { matchesSelector } = $.find
 
-$.find.matchesSelector = function (elem, expr) {
+$.find.matchesSelector = function (elem, expr, ...otherArgs) {
   let supportMatchesSelector
   const isUsingFocus = _.includes(expr, ':focus')
 
@@ -42,7 +42,7 @@ $.find.matchesSelector = function (elem, expr) {
     $.find.support.matchesSelector = false
   }
 
-  const args = arguments
+  const args = [elem, expr, ...otherArgs]
   const _this = this
 
   return tryCatchFinally({

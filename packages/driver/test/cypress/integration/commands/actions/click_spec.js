@@ -38,8 +38,7 @@ describe('src/cy/commands/actions/click', function () {
     .then(function (win) {
       this.body = win.document.body.outerHTML
     })
-  }
-  )
+  })
 
   beforeEach(function () {
     const doc = cy.state('document')
@@ -176,8 +175,7 @@ describe('src/cy/commands/actions/click', function () {
         $btn.get(0).addEventListener(event, () => {
           events.push(event)
         })
-      }
-      )
+      })
 
       cy.get('#button').click().then(() => {
         expect(events).to.deep.eq(['mousedown', 'mouseup', 'click'])
@@ -193,8 +191,7 @@ describe('src/cy/commands/actions/click', function () {
         $btn.get(0).addEventListener(event, () => {
           events.push(event)
         })
-      }
-      )
+      })
 
       cy.get('#button').click().then(() => {
         expect(events).to.deep.eq(['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
@@ -859,8 +856,7 @@ describe('src/cy/commands/actions/click', function () {
         cy.on('command:retry', _.after(3, () => {
           $span.hide()
           retried = true
-        })
-        )
+        }))
 
         cy.get('#button-covered-in-span').click().then(() => {
           expect(retried).to.be.true
@@ -907,8 +903,7 @@ describe('src/cy/commands/actions/click', function () {
             clientX: m.closeTo(60, 2),
             clientY: 68,
           })
-        }
-        )
+        })
       })
 
       it('scrolls the window past two fixed positioned elements when being covered', () => {
@@ -946,8 +941,7 @@ describe('src/cy/commands/actions/click', function () {
           // - window (nav1)
           // - window (nav2)
           expect(scrolled).to.deep.eq(['element', 'element', 'window', 'window'])
-        }
-        )
+        })
       })
 
       it('scrolls a container past a fixed position element when being covered', () => {
@@ -1004,8 +998,7 @@ describe('src/cy/commands/actions/click', function () {
           // - window
           // - container
           expect(scrolled).to.deep.eq(['element', 'element', 'window', 'container'])
-        }
-        )
+        })
       })
 
       it('waits until element becomes visible', () => {
@@ -1016,8 +1009,7 @@ describe('src/cy/commands/actions/click', function () {
         cy.on('command:retry', _.after(3, () => {
           $btn.show()
           retried = true
-        })
-        )
+        }))
 
         cy.get('#button').click().then(() => {
           expect(retried).to.be.true
@@ -1037,8 +1029,7 @@ describe('src/cy/commands/actions/click', function () {
         cy.on('command:retry', _.after(3, () => {
           $btn.prop('disabled', false)
           retried = true
-        })
-        )
+        }))
 
         cy.get('#button').click().then(() => {
           expect(clicks).to.eq(1)
@@ -1413,8 +1404,7 @@ describe('src/cy/commands/actions/click', function () {
           input.get(0).addEventListener(event, () => {
             events.push(event)
           })
-        }
-        )
+        })
 
         cy.get('input:first').click().then(() => {
           expect(events).to.deep.eq(['mousedown', 'focus', 'focusin', 'mouseup', 'click'])
@@ -1474,7 +1464,7 @@ describe('src/cy/commands/actions/click', function () {
       it('will not fire focus events when nothing can receive focus', () => {
         const onFocus = cy.stub()
         .callsFake(() => {
-          debugger
+          // debugger
         })
 
         const win = cy.state('window')
@@ -1854,8 +1844,7 @@ describe('src/cy/commands/actions/click', function () {
 
           expect(lastLog.get('snapshots')[1].body).to.be.an('object')
         })
-      }
-      )
+      })
 
       it('returns only the $el for the element of the subject that was clicked', () => {
         const clicks = []
@@ -1904,8 +1893,7 @@ describe('src/cy/commands/actions/click', function () {
 
           expect(lastLog.get('coords')).to.deep.eq(fromWindow)
         })
-      }
-      )
+      })
 
       it('ends', () => {
         const logs = []
@@ -1922,8 +1910,7 @@ describe('src/cy/commands/actions/click', function () {
 
             expect(log.get('ended')).to.be.true
           })
-        }
-        )
+        })
       })
 
       it('logs { multiple: true} options', () => {
@@ -1934,8 +1921,7 @@ describe('src/cy/commands/actions/click', function () {
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ multiple: true, timeout: 1000 })
         })
-      }
-      )
+      })
 
       it('#consoleProps', () => {
         cy.get('button').first().click().then(function ($button) {
@@ -1954,8 +1940,7 @@ describe('src/cy/commands/actions/click', function () {
 
           expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
         })
-      }
-      ) // ensure we are within 1
+      }) // ensure we are within 1
 
       it('#consoleProps actual element clicked', function () {
         const $btn = $('<button>', {
@@ -2323,8 +2308,7 @@ describe('src/cy/commands/actions/click', function () {
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })
-      }
-      )
+      })
     })
   })
 
@@ -2658,8 +2642,7 @@ describe('src/cy/commands/actions/click', function () {
           expect(lastLog.get('snapshots')[0]).to.containSubset({ name: 'before' })
           expect(lastLog.get('snapshots')[1]).to.containSubset({ name: 'after' })
         })
-      }
-      )
+      })
 
       it('returns only the $el for the element of the subject that was dblclicked', () => {
         const dblclicks = []
@@ -3102,8 +3085,7 @@ describe('src/cy/commands/actions/click', function () {
           expect(lastLog.get('snapshots')[0]).to.containSubset({ name: 'before' })
           expect(lastLog.get('snapshots')[1]).to.containSubset({ name: 'after' })
         })
-      }
-      )
+      })
 
       it('returns only the $el for the element of the subject that was rightclicked', () => {
         const rightclicks = []
@@ -3255,8 +3237,7 @@ const attachListeners = (listenerArr) => (els) => {
     return listenerArr.forEach((evtName) => {
       el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
     })
-  }
-  )
+  })
 }
 
 const attachFocusListeners = attachListeners(focusEvents)
@@ -3273,7 +3254,8 @@ const getAllFn = (...aliases) => {
   return Cypress.Promise.all(
     aliases[0].split(' ').map((alias) => {
       return cy.now('get', alias)
-    }))
+    })
+  )
 }
 
 Cypress.Commands.add('getAll', getAllFn)

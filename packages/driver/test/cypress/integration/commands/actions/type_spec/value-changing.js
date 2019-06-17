@@ -1,8 +1,6 @@
 /* eslint arrow-body-style: "off" */
 
 import { trimInnerText, attachKeyListeners, shouldBeCalledOnce, shouldNotBeCalled } from './utils'
-const $ = Cypress.$.bind(Cypress)
-const { _ } = Cypress
 
 export default function () {
   describe('value changing', function () {
@@ -230,43 +228,37 @@ export default function () {
         cy.get('#number-without-value').type('42').then(($text) => {
           expect($text).to.have.value('42')
         })
-      }
-      )
+      })
 
       it('can input decimal', () => {
         cy.get('#number-without-value').type('2.0').then(($input) => {
           expect($input).to.have.value('2.0')
         })
-      }
-      )
+      })
 
       it('can utilize {selectall}', () => {
         cy.get('#number-with-value').type('{selectall}99').then(($input) => {
           expect($input).to.have.value('99')
         })
-      }
-      )
+      })
 
       it('can utilize arrows', () => {
         cy.get('#number-with-value').type('{leftarrow}{leftarrow}{rightarrow}9').then(($input) => {
           expect($input).to.have.value('192')
         })
-      }
-      )
+      })
 
       it('inserts text after existing text ', () => {
         cy.get('#number-with-value').type('34').then(($text) => {
           expect($text).to.have.value('1234')
         })
-      }
-      )
+      })
 
       it('inserts text after existing text input by invoking val', () => {
         cy.get('#number-without-value').invoke('val', '12').type('34').then(($text) => {
           expect($text).to.have.value('1234')
         })
-      }
-      )
+      })
 
       it('overwrites text on input[type=number] when input has existing text selected', () => {
         cy.get('#number-without-value').invoke('val', '0').then((el) => {
@@ -319,36 +311,31 @@ export default function () {
         cy.get('#email-without-value').type('brian@foo.com').then(($text) => {
           expect($text).to.have.value('brian@foo.com')
         })
-      }
-      )
+      })
 
       it('can utilize {selectall}', () => {
         cy.get('#email-with-value').type('{selectall}brian@foo.com').then(($text) => {
           expect($text).to.have.value('brian@foo.com')
         })
-      }
-      )
+      })
 
       it('can utilize arrows', () => {
         cy.get('#email-with-value').type('{leftarrow}{rightarrow}om').then(($text) => {
           expect($text).to.have.value('brian@foo.com')
         })
-      }
-      )
+      })
 
       it('inserts text after existing text', () => {
         cy.get('#email-with-value').type('om').then(($text) => {
           expect($text).to.have.value('brian@foo.com')
         })
-      }
-      )
+      })
 
       it('inserts text after existing text input by invoking val', () => {
         cy.get('#email-without-value').invoke('val', 'brian@foo.c').type('om').then(($text) => {
           expect($text).to.have.value('brian@foo.com')
         })
-      }
-      )
+      })
 
       it('overwrites text when input has existing text selected', () => {
         cy.get('#email-without-value').invoke('val', 'foo@bar.com').invoke('select')
@@ -378,22 +365,19 @@ export default function () {
         cy.get('#password-without-value').type('password').then(($text) => {
           expect($text).to.have.value('password')
         })
-      }
-      )
+      })
 
       it('inserts text after existing text', () => {
         cy.get('#password-with-value').type('word').then(($text) => {
           expect($text).to.have.value('password')
         })
-      }
-      )
+      })
 
       it('inserts text after existing text input by invoking val', () => {
         cy.get('#password-without-value').invoke('val', 'secr').type('et').then(($text) => {
           expect($text).to.have.value('secret')
         })
-      }
-      )
+      })
 
       it('overwrites text when input has existing text selected', () => {
         cy.get('#password-without-value').invoke('val', 'secret').invoke('select')
@@ -407,8 +391,7 @@ export default function () {
         // e.preventDefault()
         cy.$$('#input-with-value').mouseup((e) => {
           return e.target.setSelectionRange(1, 1)
-        }
-        )
+        })
 
         const select = (e) => {
           return e.target.select()
@@ -439,22 +422,19 @@ export default function () {
         cy.get('#date-without-value').type('1959-09-13').then(($text) => {
           expect($text).to.have.value('1959-09-13')
         })
-      }
-      )
+      })
 
       it('overwrites existing value', () => {
         cy.get('#date-with-value').type('1959-09-13').then(($text) => {
           expect($text).to.have.value('1959-09-13')
         })
-      }
-      )
+      })
 
       it('overwrites existing value input by invoking val', () => {
         cy.get('#date-without-value').invoke('val', '2016-01-01').type('1959-09-13').then(($text) => {
           expect($text).to.have.value('1959-09-13')
         })
-      }
-      )
+      })
     })
 
     describe('input[type=month]', () => {
@@ -462,22 +442,19 @@ export default function () {
         cy.get('#month-without-value').type('1959-09').then(($text) => {
           expect($text).to.have.value('1959-09')
         })
-      }
-      )
+      })
 
       it('overwrites existing value', () => {
         cy.get('#month-with-value').type('1959-09').then(($text) => {
           expect($text).to.have.value('1959-09')
         })
-      }
-      )
+      })
 
       it('overwrites existing value input by invoking val', () => {
         cy.get('#month-without-value').invoke('val', '2016-01').type('1959-09').then(($text) => {
           expect($text).to.have.value('1959-09')
         })
-      }
-      )
+      })
     })
 
     describe('input[type=week]', () => {
@@ -485,22 +462,19 @@ export default function () {
         cy.get('#week-without-value').type('1959-W09').then(($text) => {
           expect($text).to.have.value('1959-W09')
         })
-      }
-      )
+      })
 
       it('overwrites existing value', () => {
         cy.get('#week-with-value').type('1959-W09').then(($text) => {
           expect($text).to.have.value('1959-W09')
         })
-      }
-      )
+      })
 
       it('overwrites existing value input by invoking val', () => {
         cy.get('#week-without-value').invoke('val', '2016-W01').type('1959-W09').then(($text) => {
           expect($text).to.have.value('1959-W09')
         })
-      }
-      )
+      })
     })
 
     describe('input[type=time]', () => {
@@ -508,57 +482,49 @@ export default function () {
         cy.get('#time-without-value').type('01:23:45').then(($text) => {
           expect($text).to.have.value('01:23:45')
         })
-      }
-      )
+      })
 
       it('overwrites existing value', () => {
         cy.get('#time-with-value').type('12:34:56').then(($text) => {
           expect($text).to.have.value('12:34:56')
         })
-      }
-      )
+      })
 
       it('overwrites existing value input by invoking val', () => {
         cy.get('#time-without-value').invoke('val', '01:23:45').type('12:34:56').then(($text) => {
           expect($text).to.have.value('12:34:56')
         })
-      }
-      )
+      })
 
       it('can be formatted HH:mm', () => {
         cy.get('#time-without-value').type('01:23').then(($text) => {
           expect($text).to.have.value('01:23')
         })
-      }
-      )
+      })
 
       it('can be formatted HH:mm:ss', () => {
         cy.get('#time-without-value').type('01:23:45').then(($text) => {
           expect($text).to.have.value('01:23:45')
         })
-      }
-      )
+      })
 
       it('can be formatted HH:mm:ss.S', () => {
         cy.get('#time-without-value').type('01:23:45.9').then(($text) => {
           expect($text).to.have.value('01:23:45.9')
         })
-      }
-      )
+      })
 
       it('can be formatted HH:mm:ss.SS', () => {
         cy.get('#time-without-value').type('01:23:45.99').then(($text) => {
           expect($text).to.have.value('01:23:45.99')
         })
-      }
-      )
+      })
 
       it('can be formatted HH:mm:ss.SSS', () => {
         cy.get('#time-without-value').type('01:23:45.999').then(($text) => {
           expect($text).to.have.value('01:23:45.999')
         })
-      }
-      )
+      })
     })
 
     describe('[contenteditable]', () => {
@@ -566,15 +532,13 @@ export default function () {
         cy.get('#input-types [contenteditable]').type('foo').then(($div) => {
           expect($div).to.have.text('foo')
         })
-      }
-      )
+      })
 
       it('inserts text after existing text', () => {
         cy.get('#input-types [contenteditable]').invoke('text', 'foo').type(' bar').then(($text) => {
           expect($text).to.have.text('foo bar')
         })
-      }
-      )
+      })
 
       it('can type into [contenteditable] with existing <div>', () => {
         cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>foo</div>'
@@ -691,7 +655,6 @@ export default function () {
           cy.get('input').eq(1).should('have.value', 'bar')
         })
       })
-    }
-    )
+    })
   })
 }
