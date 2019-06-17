@@ -112,14 +112,16 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   // Is the element's CSS width OR height, including any borders,
   // padding, and vertical scrollbars (if rendered) less than 0?
   //
+  // elOffsetWidth:
   // If the element is hidden (for example, by setting style.display
   // on the element or one of its ancestors to "none"), then 0 is returned.
-  return (elOffsetWidth($el) <= 0) ||
-          (elOffsetHeight($el) <= 0) ||
-            // For HTML <area> elements, SVG elements that do not render anything themselves,
-            // display:none elements, and generally any elements that are not directly rendered,
-            // an empty list is returned.
-            ($el[0].getClientRects().length <= 0)
+
+  // $el[0].getClientRects().length:
+  // For HTML <area> elements, SVG elements that do not render anything themselves,
+  // display:none elements, and generally any elements that are not directly rendered,
+  // an empty list is returned.
+
+  return (elOffsetWidth($el) <= 0) || (elOffsetHeight($el) <= 0) || ($el[0].getClientRects().length <= 0)
 }
 
 const elHasNoOffsetWidthOrHeight = ($el) => {
@@ -160,6 +162,10 @@ const elHasPositionRelative = ($el) => {
   return $el.css('position') === 'relative'
 }
 
+const elHasPositionAbsolute = ($el) => {
+  return $el.css('position') === 'absolute'
+}
+
 const elHasClippableOverflow = function ($el) {
   return OVERFLOW_PROPS.includes($el.css('overflow')) ||
           OVERFLOW_PROPS.includes($el.css('overflow-y')) ||
@@ -167,18 +173,26 @@ const elHasClippableOverflow = function ($el) {
 }
 
 const canClipContent = function ($el, $ancestor) {
+
   // can't clip without overflow properties
   if (!elHasClippableOverflow($ancestor)) {
     return false
   }
 
   // the closest parent with position relative, absolute, or fixed
-  const $offsetParent = $jquery.wrap($el[0].offsetParent)
+  const $offsetParent = $jquery.wrap($el.offsetParent()[0])
 
-  // even if overflow is clippable, if the element's offset parent
-  // is a parent or child of the ancestor, the ancestor will not clip the element
+  // even if ancestors' overflow is clippable, if the element's offset parent
+  // is a parent of the ancestor, the ancestor will not clip the element
   // unless the element is position relative
-  if (!elHasPositionRelative($el) && ($elements.isAncestor($ancestor, $offsetParent) || $elements.isChild($ancestor, $offsetParent))) {
+  if (!elHasPositionRelative($el) && $elements.isAncestor($ancestor, $offsetParent)) {
+    return false
+  }
+
+  // even if ancestors' overflow is clippable, if the element's offset parent
+  // is a child of the ancestor, the ancestor will not clip the element
+  // unless the ancestor has position absolute
+  if (elHasPositionAbsolute($offsetParent) && $elements.isChild($ancestor, $offsetParent)) {
     return false
   }
 

@@ -697,14 +697,14 @@ describe "src/cypress/dom/visibility", ->
         expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
 
     describe "css clip-path", ->
-      it "is hidden when outside of parents clip-path", ->
+      it.skip "is hidden when outside of parents clip-path", ->
         expect(@$parentWithClipPathAbsolutePositionElOutsideClipPath.find("span")).to.be.hidden
 
       it "is visible when inside of parents clip-path", ->
         expect(@$parentWithClipPathAbsolutePositionElInsideClipPath.find("span")).to.be.visible
 
     describe "css transform", ->
-      it "is hidden when outside parents transform scale", ->
+      it.skip "is hidden when outside parents transform scale", ->
         expect(@$parentWithTransformScaleElOutsideScale.find("span")).to.be.hidden
 
       it "is visible when inside of parents transform scale", ->
@@ -720,7 +720,7 @@ describe "src/cypress/dom/visibility", ->
       it "is visible when backface not visible", ->
         expect(@$parentsWithBackfaceVisibilityHidden.find("#front")).to.be.visible
 
-      it "is hidden when backface visible", ->
+      it.skip "is hidden when backface visible", ->
         expect(@$parentsWithBackfaceVisibilityHidden.find("#back")).to.be.hidden
 
     describe "#getReasonIsHidden", ->
