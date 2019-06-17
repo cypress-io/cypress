@@ -154,11 +154,20 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
 
+      contentWindow.HTMLElement.prototype.blur = ->
+        focused.interceptBlur(this)
+
+      contentWindow.SVGElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(this, contentWindow, focusOption)
+
+      contentWindow.SVGElement.prototype.blur = ->
+        focused.interceptBlur(this)
+
       contentWindow.HTMLInputElement.prototype.select = ->
         $selection.interceptSelect.call(this)
 
       contentWindow.document.hasFocus = ->
-        top.document.hasFocus()
+        focused.documentHasFocus.call(@)
 
       cssModificationSpy = (original, args...) ->
         snapshots.onCssModified(@href)
@@ -635,7 +644,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## focused sync methods
     getFocused: focused.getFocused
-    needsForceFocus: focused.needsForceFocus
     needsFocus: focused.needsFocus
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur

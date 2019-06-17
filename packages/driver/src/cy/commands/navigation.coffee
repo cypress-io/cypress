@@ -1,4 +1,5 @@
 _ = require("lodash")
+whatIsCircular = require("@cypress/what-is-circular")
 moment = require("moment")
 UrlParse = require("url-parse")
 Promise = require("bluebird")
@@ -521,6 +522,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if not _.isObject(options.headers)
         $utils.throwErrByPath("visit.invalid_headers")
+
+      if _.isObject(options.body) and path = whatIsCircular(options.body)
+        $utils.throwErrByPath("visit.body_circular", { args: { path }})
 
       if options.log
         message = url

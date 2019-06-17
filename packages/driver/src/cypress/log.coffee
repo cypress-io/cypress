@@ -158,7 +158,7 @@ defaults = (state, config, obj) ->
     consoleProps: -> {}
   })
 
-Log = (state, config, obj) ->
+Log = (cy, state, config, obj) ->
   obj = defaults(state, config, obj)
 
   ## private attributes of each log
@@ -260,10 +260,9 @@ Log = (state, config, obj) ->
       }
 
     snapshot: (name, options = {}) ->
-      ## bail early and dont snapshot
-      ## if we're in headless mode
-      ## TODO: fix this
-      if not config("isInteractive")
+      ## bail early and don't snapshot if we're in headless mode
+      ## or we're not storing tests
+      if not config("isInteractive") or config("numTestsKeptInMemory") is 0
         return @
 
       _.defaults options,
@@ -451,7 +450,7 @@ create = (Cypress, cy, state, config) ->
 
     attributes = {}
 
-    log = Log(state, config, options)
+    log = Log(cy, state, config, options)
 
     ## add event emitter interface
     $Events.extend(log)
