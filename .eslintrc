@@ -19,6 +19,10 @@
       {
         "max": 1
       }
+    ],
+    "function-paren-newline": [
+      "error",
+      "consistent"
     ]
   },
   "env": {

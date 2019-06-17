@@ -73,8 +73,7 @@ const parseOpts = (opts) => {
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
     'browser', 'detached', 'headed', 'global', 'dev', 'force', 'exit',
-    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId'
-  )
+    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId')
 
   if (opts.exit) {
     opts = _.omit(opts, 'exit')
