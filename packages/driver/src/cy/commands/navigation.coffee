@@ -581,7 +581,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ({runOnLoadCallback}) ->
+      onLoad = ({runOnLoadCallback, totalTime}) ->
         ## reset window on load
         win = state("window")
 
@@ -589,7 +589,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if runOnLoadCallback isnt false
           options.onLoad?.call(runnable.ctx, win)
 
-        options._log.set({url: url}) if options._log
+        if options._log
+          options._log.set({
+            url
+            totalTime
+          })
 
         return Promise.resolve(win)
 
@@ -684,7 +688,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             url = $Location.fullyQualifyUrl(url)
 
             changeIframeSrc(url, "window:load")
-            .then(onLoad)
+            .then ->
+              onLoad(resp)
           else
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop
@@ -788,8 +793,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           go()
 
       visit()
-      .then ->
-        state("window")
       .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
         timedOutWaitingForPageLoad(options.timeout, options._log)

@@ -138,7 +138,18 @@ export class CombinedAgent {
   }
 
   // called by Node.js whenever a new request is made internally
-  addRequest(req: http.ClientRequest, options: http.RequestOptions) {
+  addRequest(req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
+    // Legacy API: addRequest(req, host, port, localAddress)
+    // https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
+    if (typeof options === 'string') {
+      // @ts-ignore
+      options = {
+        host: options,
+        port: port!,
+        localAddress
+      }
+    }
+
     const isHttps = isRequestHttps(options)
 
     if (!options.href) {
@@ -156,10 +167,12 @@ export class CombinedAgent {
       }
     }
 
-    debug(`addRequest called for ${options.href}`)
+    debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
     return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
       options.family = family
+
+      debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
         return this.httpsAgent.addRequest(req, options)
@@ -180,22 +193,22 @@ class HttpAgent extends http.Agent {
     this.httpsAgent = new https.Agent({ keepAlive: true })
   }
 
-  createSocket (req: http.ClientRequest, options: http.RequestOptions, cb: http.SocketCallback) {
+  addRequest (req: http.ClientRequest, options: http.RequestOptions) {
     if (process.env.HTTP_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
       if (proxy) {
         options.proxy = proxy
 
-        return this._createProxiedSocket(req, <RequestOptionsWithProxy>options, cb)
+        return this._addProxiedRequest(req, <RequestOptionsWithProxy>options)
       }
     }
 
-    super.createSocket(req, options, cb)
+    super.addRequest(req, options)
   }
 
-  _createProxiedSocket (req: http.ClientRequest, options: RequestOptionsWithProxy, cb: http.SocketCallback) {
-    debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
+  _addProxiedRequest (req: http.ClientRequest, options: RequestOptionsWithProxy) {
+    debug(`Creating proxied request for ${options.href} through ${options.proxy}`)
 
     const proxy = url.parse(options.proxy)
 
@@ -226,7 +239,7 @@ class HttpAgent extends http.Agent {
       return this.httpsAgent.addRequest(req, options)
     }
 
-    super.createSocket(req, options, cb)
+    super.addRequest(req, options)
   }
 }
 
