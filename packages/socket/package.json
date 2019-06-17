@@ -5,7 +5,7 @@
   "main": "index.js",
   "browser": "./lib/browser.js",
   "scripts": {
-    "postinstall": "patch-package",
+    "postinstall": "npx patch-package",
     "pretest": "npm run check-deps-pre",
     "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "pretest-watch": "npm run check-deps-pre",
@@ -15,11 +15,12 @@
     "check-deps-pre": "npm run check-deps -- --prescript"
   },
   "files": [
-    "lib"
+    "lib",
+    "patches"
   ],
   "dependencies": {
     "socket.io": "2.2.0",
-    "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#c5a895a0fef6d19d457a38a515dbb5c18feeb591",
+    "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#8c61ca1475c741285f336d9ad5bc05cc561b1066",
     "socket.io-client": "2.2.0"
   },
   "devDependencies": {

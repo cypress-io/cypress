@@ -751,6 +751,16 @@ describe "src/cy/commands/request", ->
           }
         })
 
+      ## https://github.com/cypress-io/cypress/issues/4346
+      it "throws on network failure when nested", (done) ->
+        cy.request("http://localhost:3500/dump-method")
+        .then ->
+          cy.request("http://0.0.0.0:12345")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.request() failed trying to load:"
+          done()
+
       it "displays body_circular when body is circular", (done) ->
         foo = {
           bar: {
