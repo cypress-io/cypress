@@ -176,7 +176,7 @@
     "semver": "6.0.0",
     "send": "0.17.0",
     "server-destroy": "1.0.1",
-    "shell-env": "1.0.0",
+    "shell-env": "3.0.0",
     "signal-exit": "3.0.2",
     "sinon": "5.1.1",
     "string-to-stream": "1.1.1",

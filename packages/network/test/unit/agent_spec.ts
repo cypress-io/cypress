@@ -24,12 +24,12 @@ const PROXY_PORT = 31000
 const HTTP_PORT = 31080
 const HTTPS_PORT = 31443
 
-describe('lib/agent', function() {
-  beforeEach(function() {
+describe('lib/agent', function () {
+  beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   })
 
-  afterEach(function() {
+  afterEach(function () {
     process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
     sinon.restore()
   })
@@ -177,7 +177,7 @@ describe('lib/agent', function() {
             Io.client(`http://localhost:${HTTP_PORT}`, {
               agent: this.agent,
               transports: ['websocket'],
-              rejectUnauthorized: false
+              rejectUnauthorized: false,
             }).on('message', resolve)
           })
           .then((msg) => {
@@ -194,7 +194,7 @@ describe('lib/agent', function() {
             Io.client(`https://localhost:${HTTPS_PORT}`, {
               agent: this.agent,
               transports: ['websocket'],
-              rejectUnauthorized: false
+              rejectUnauthorized: false,
             }).on('message', resolve)
           })
           .then((msg) => {
@@ -209,17 +209,17 @@ describe('lib/agent', function() {
       })
     })
 
-    context('HttpsAgent', function() {
-      beforeEach(function() {
+    context('HttpsAgent', function () {
+      beforeEach(function () {
         this.agent = new CombinedAgent()
 
         this.request = request.defaults({
-          agent: <any>this.agent,
-          proxy: null
+          agent: <any> this.agent,
+          proxy: null,
         })
       })
 
-      it("#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY", function () {
+      it('#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY', function () {
         const spy = sinon.spy(this.agent.httpsAgent, 'createUpstreamProxyConnection')
 
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
@@ -232,18 +232,18 @@ describe('lib/agent', function() {
           expect(spy).to.not.be.called
 
           return this.request({
-            url: 'https://example.org/'
+            url: 'https://example.org/',
           })
           .then(() => {
             throw new Error('should not be able to connect')
           })
-          .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0'}, () => {
+          .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0' }, () => {
             expect(spy).to.be.calledOnce
           })
         })
       })
 
-      it("#createUpstreamProxyConnection calls to super for caching, TLS-ifying", function() {
+      it('#createUpstreamProxyConnection calls to super for caching, TLS-ifying', function () {
         const spy = sinon.spy(https.Agent.prototype, 'createConnection')
 
         const proxy = new DebuggingProxy()
@@ -261,6 +261,7 @@ describe('lib/agent', function() {
         .then(() => {
           const options = spy.getCall(0).args[0]
           const session = this.agent.httpsAgent._sessionCache.map[options._agentKey]
+
           expect(spy).to.be.calledOnce
           expect(this.agent.httpsAgent._sessionCache.list).to.have.length(1)
           expect(session).to.not.be.undefined
@@ -269,7 +270,7 @@ describe('lib/agent', function() {
         })
       })
 
-      it("#createUpstreamProxyConnection throws when connection is accepted then closed", function() {
+      it('#createUpstreamProxyConnection throws when connection is accepted then closed', function () {
         const proxy = Bluebird.promisifyAll(
           net.createServer((socket) => {
             socket.end()
@@ -298,17 +299,17 @@ describe('lib/agent', function() {
       })
     })
 
-    context('HttpAgent', function() {
-      beforeEach(function() {
+    context('HttpAgent', function () {
+      beforeEach(function () {
         this.agent = new CombinedAgent()
 
         this.request = request.defaults({
-          agent: <any>this.agent,
-          proxy: null
+          agent: <any> this.agent,
+          proxy: null,
         })
       })
 
-      it("#createSocket does not go to proxy if domain in NO_PROXY", function () {
+      it('#createSocket does not go to proxy if domain in NO_PROXY', function () {
         const spy = sinon.spy(this.agent.httpAgent, '_createProxiedSocket')
 
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
@@ -321,12 +322,12 @@ describe('lib/agent', function() {
           expect(spy).to.not.be.called
 
           return this.request({
-            url: 'http://example.org/'
+            url: 'http://example.org/',
           })
           .then(() => {
             throw new Error('should not be able to connect')
           })
-          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0'}, () => {
+          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0' }, () => {
             expect(spy).to.be.calledOnce
           })
         })
@@ -428,7 +429,7 @@ describe('lib/agent', function() {
             agent: <any>testCase.agent,
             transports: ['websocket'],
             timeout: 1,
-            rejectUnauthorized: false
+            rejectUnauthorized: false,
           })
           .on('message', reject)
           .on('connect_error', resolve)
