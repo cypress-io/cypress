@@ -132,24 +132,39 @@ describe "src/cy/commands/actions/click", ->
         expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
 
     describe 'pointer-events:none', ->
+
       beforeEach ->
         cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:aliceblue;"></div>').appendTo cy.$$('#dom')
         ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none"></div>').appendTo(cy.$$('#dom'))
         cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:grey;"></div>').appendTo ptrNone
+        
       it 'element behind pointer-events:none should still get click', ->
         cy.get('#ptr').click() # should pass with flying colors
+      
+      it 'should be able to force on pointer-events:none with force:true', ->
+        cy.get('#ptrNone').click {timeout: 300, force:true}
+        
       it 'should error with message about pointer-events', ->
-        cy.once 'fail', (err) ->
-          expect(err.message).to.contain 'has style \'pointer-events:none\''
+        onError = cy.stub().callsFake (err) ->
+          expect(err.message).to.contain 'has style \'pointer-events: none\''
           expect(err.message).to.not.contain 'inherited from'
+      
+        cy.once 'fail', onError
           
         cy.get('#ptrNone').click {timeout: 300}
+        .then -> expect(onError).calledOnce
+        
+
       it 'should error with message about pointer-events and include inheritance', ->
-        cy.once 'fail', (err) ->
-          expect(err.message).to.contain 'has style \'pointer-events:none\', inherited from this element:'
+        onError = cy.stub().callsFake (err) ->
+          expect(err.message).to.contain 'has style \'pointer-events: none\', inherited from this element:'
           expect(err.message).to.contain '<div id="ptrNone"'
+        
+        cy.once 'fail', onError
 
         cy.get('#ptrNoneChild').click {timeout: 300}
+        .then -> expect(onError).calledOnce
+
 
     it "records correct clientX when el scrolled", (done) ->
       $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")

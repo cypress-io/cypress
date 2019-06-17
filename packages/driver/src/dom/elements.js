@@ -536,6 +536,25 @@ const isDescendent = ($el1, $el2) => {
   return !!(($el1.get(0) === $el2.get(0)) || $el1.has($el2).length)
 }
 
+const findParent = (el, fn) => {
+  let prevEl = el
+  let curEl = el.parentElement
+  let retEl = null
+
+  let counter = 0
+
+  while (curEl && counter++ < 100) {
+    if (retEl = fn(curEl, prevEl)) {
+      break
+    }
+
+    prevEl = curEl
+    curEl = curEl.parentElement
+  }
+
+  return retEl || el
+}
+
 // in order to simulate actual user behavior we need to do the following:
 // 1. take our element and figure out its center coordinate
 // 2. check to figure out the element listed at those coordinates
@@ -806,6 +825,8 @@ module.exports = {
   callNativeMethod,
 
   tryCallNativeMethod,
+
+  findParent,
 
   getElements,
 

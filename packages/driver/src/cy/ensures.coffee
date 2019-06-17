@@ -1,6 +1,7 @@
 _ = require("lodash")
 $dom = require("../dom")
 $utils = require("../cypress/utils")
+$elements = require("../dom/elements")
 
 VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
 
@@ -214,12 +215,10 @@ create = (state, expect) ->
     win = $dom.getWindowByElement(el)
     pointerEvents = win.getComputedStyle(el).pointerEvents
     if pointerEvents is 'none'
-      elInherited = $utils.findParent el, (el, prevEl) ->
+      elInherited = $elements.findParent el, (el, prevEl) ->
         if win.getComputedStyle(el).pointerEvents isnt 'none'
           return prevEl
-      
-
-
+    
       element = $dom.stringify(el)
       elementInherited = (el isnt elInherited) && $dom.stringify(elInherited)
 

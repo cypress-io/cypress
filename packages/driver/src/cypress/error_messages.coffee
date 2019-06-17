@@ -189,10 +189,13 @@ module.exports = {
 
         #{obj.element}
 
-        has style 'pointer-events:none'#{if obj.elementInherited then ", inherited from this element:" else ""}
+      has style 'pointer-events: none'#{if obj.elementInherited then ", inherited from this element:\n\n#{obj.elementInherited}\n" else ""}
 
-        #{if obj.elementInherited then obj.elementInherited else ""}
-      
+      'pointer-events: none' prevents user mouse interaction.
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
       """
     disabled: """
       #{cmd('{{cmd}}')} failed because this element is disabled:
