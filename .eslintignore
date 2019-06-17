@@ -1,21 +1,19 @@
 **/__snapshots__
-**/node_modules
 **/build
+**/cypress/fixtures
 **/dist
 **/dist-test
+**/node_modules
 **/support/fixtures
-**/cypress/fixtures
 **/test/fixtures
 **/vendor
-packages/example
+
+# cli/types is linted by tslint/dtslint
 cli/types
-!packages/example/lib
+# packages/example is not linted (think about changing this)
+packages/example
+
+packages/extension/test/helpers/background.js
 packages/server/lib/scaffold/plugins/index.js
 packages/server/lib/scaffold/support/index.js
 packages/server/lib/scaffold/support/commands.js
-packages/extension/test/helpers/background.js
-packages/network/lib/*.js
-
-# these generated files are co-located with .ts source files
-packages/server/lib/util/ensure-url.js
-packages/server/lib/util/proxy.js
