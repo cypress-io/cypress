@@ -66,9 +66,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       , options
 
     waitForXhr = (str, options) ->
-      ## we always want to strip everything after the first '.'
+      ## we always want to strip everything after the last '.'
       ## since we support alias property 'request'
-      [str, str2] = str.split(".")
+      if _.indexOf(str, ".") == -1 ||
+      str.slice(1) in _.keys(cy.state("aliases"))
+        [str, str2] = [str, null]
+      else
+        # potentially request, response or index
+        allParts = _.split(str, '.')
+        [str, str2] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
 
       if not aliasObj = cy.getAlias(str, "wait", log)
         cy.aliasNotFoundFor(str, "wait", log)
@@ -79,8 +85,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       {alias, command} = aliasObj
 
       str = _.compact([alias, str2]).join(".")
-
+ 
       type = cy.getXhrTypeByAlias(str)
+
+      [ index, num ] = getNumRequests(state, alias)
 
       ## if we have a command then continue to
       ## build up an array of referencesAlias
@@ -88,7 +96,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if log
         referencesAlias = log.get("referencesAlias") ? []
         aliases = [].concat(referencesAlias)
-        aliases.push(str)
+
+        if str
+          aliases.push({
+            name: str
+            cardinal: index + 1,
+            ordinal: num
+          })
+
         log.set "referencesAlias", aliases
 
       if command.get("name") isnt "route"
@@ -103,8 +118,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       timeout = options.timeout
       requestTimeout = options.requestTimeout ? timeout
       responseTimeout = options.responseTimeout ? timeout
-
-      [ index, num ] = getNumRequests(state, alias)
 
       waitForRequest = ->
         options = _.omit(options, "_runnableTimeout")
@@ -136,7 +149,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if log
         log.set "consoleProps", -> {
-          "Waited For": (log.get("referencesAlias") || []).join(", ")
+          "Waited For": (_.map(log.get("referencesAlias"), 'name') || []).join(", ")
           "Yielded": ret
         }
 

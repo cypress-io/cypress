@@ -62,6 +62,7 @@ class Project extends EE
       report:       false
       onFocusTests: ->
       onError: ->
+      onWarning: ->
       onSettingsChanged: false
     }
 
@@ -70,6 +71,8 @@ class Project extends EE
         console.log("memory info", process.memoryUsage())
 
       @memoryCheck = setInterval(logMemory, 1000)
+
+    @onWarning = options.onWarning
 
     @getConfig(options)
     .tap (cfg) =>
@@ -88,7 +91,7 @@ class Project extends EE
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
-      @server.open(cfg, @)
+      @server.open(cfg, @, options.onWarning)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
@@ -181,7 +184,7 @@ class Project extends EE
 
   watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
-    if not cfg.pluginsFile
+    if not cfg.pluginsFile or options.isTextTerminal
       return Promise.resolve()
 
     fs.pathExists(cfg.pluginsFile)
@@ -203,7 +206,7 @@ class Project extends EE
 
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
-    ## watch anything
+    ## watch anything (like in run mode)
     return if not onSettingsChanged
 
     debug("watch settings files")

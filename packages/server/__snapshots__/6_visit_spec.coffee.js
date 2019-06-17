@@ -31,21 +31,18 @@ exports['e2e visit low response timeout passes 1'] = `
       ✓ submits user agent on cy.request
     issue #255: url with like two domain
       ✓ passes
-    issue #272: responses which are never ended still send valid html
-      ✓ handles no response errors on the initial visit
-      ✓ handles no response errors when not initially visiting
     issue #309: request accept header not set
       ✓ sets accept header to text/html,*/*
 
 
-  13 passing
+  11 passing
 
 
   (Results)
 
   ┌─────────────────────────────────┐
-  │ Tests:        13                │
-  │ Passing:      13                │
+  │ Tests:        11                │
+  │ Passing:      11                │
   │ Failing:      0                 │
   │ Pending:      0                 │
   │ Skipped:      0                 │
@@ -69,9 +66,9 @@ exports['e2e visit low response timeout passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ visit_spec.coffee                         XX:XX       13       13        -        -        - │
+  │ ✔ visit_spec.coffee                         XX:XX       11       11        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       13       13        -        -        -  
+    All specs passed!                           XX:XX       11       11        -        -        -  
 
 
 `
@@ -109,7 +106,7 @@ http://localhost:16795/
 
 We attempted to make an http request to this URL but the request failed without a response.
 
-We received this error at stack trace line
+We received this error at the network level:
 
   > Error: connect ECONNREFUSED 127.0.0.1:16795
 
@@ -313,7 +310,7 @@ exports['e2e visit low response timeout fails when file server responds with 404
 
 /static/does-not-exist.html
 
-We failed looking for this file at stack trace line
+We failed looking for this file at the path:
 
 /foo/bar/.projects/e2e/static/does-not-exist.html
 
@@ -599,6 +596,346 @@ When this 'load' event occurs, Cypress will continue running commands.
   │ ✖ visit_http_timeout_failing_spec.coff…     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+
+
+`
+
+exports['e2e visit low responseTimeout, normal pageLoadTimeout fails when response never ends 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_response_never_ends_failing_spec.js)                                │
+  │ Searched:   cypress/integration/visit_response_never_ends_failing_spec.js                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_response_never_ends_failing_spec.js...                                    (1 of 1) 
+
+
+  response timeouts result in an error
+    1) handles no response errors on the initial visit
+    2) handles no response errors when not initially visiting
+    3) fails after reducing the responseTimeout option
+
+
+  0 passing
+  3 failing
+
+  1) response timeouts result in an error handles no response errors on the initial visit:
+     CypressError: cy.visit() failed trying to load:
+
+http://localhost:3434/response_never_finishes
+
+We attempted to make an http request to this URL but the request failed without a response.
+
+We received this error at the network level:
+
+  > Error: ESOCKETTIMEDOUT
+
+Common situations why this would fail:
+  - you don't have internet access
+  - you forgot to run / boot your web server
+  - your web server isn't accessible
+  - you have weird network configuration settings on your computer
+
+The stack trace for this error is:
+
+Error: ESOCKETTIMEDOUT
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+  2) response timeouts result in an error handles no response errors when not initially visiting:
+     CypressError: cy.visit() failed trying to load:
+
+http://localhost:3434/response_never_finishes
+
+We attempted to make an http request to this URL but the request failed without a response.
+
+We received this error at the network level:
+
+  > Error: ESOCKETTIMEDOUT
+
+Common situations why this would fail:
+  - you don't have internet access
+  - you forgot to run / boot your web server
+  - your web server isn't accessible
+  - you have weird network configuration settings on your computer
+
+The stack trace for this error is:
+
+Error: ESOCKETTIMEDOUT
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+  3) response timeouts result in an error fails after reducing the responseTimeout option:
+     CypressError: cy.visit() failed trying to load:
+
+http://localhost:3434/timeout?ms=1000
+
+We attempted to make an http request to this URL but the request failed without a response.
+
+We received this error at the network level:
+
+  > Error: ESOCKETTIMEDOUT
+
+Common situations why this would fail:
+  - you don't have internet access
+  - you forgot to run / boot your web server
+  - your web server isn't accessible
+  - you have weird network configuration settings on your computer
+
+The stack trace for this error is:
+
+Error: ESOCKETTIMEDOUT
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+    at stack trace line
+
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌─────────────────────────────────────────────────────────┐
+  │ Tests:        3                                         │
+  │ Passing:      0                                         │
+  │ Failing:      3                                         │
+  │ Pending:      0                                         │
+  │ Skipped:      0                                         │
+  │ Screenshots:  3                                         │
+  │ Video:        true                                      │
+  │ Duration:     X seconds                                 │
+  │ Spec Ran:     visit_response_never_ends_failing_spec.js │
+  └─────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors on the initial visit (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors when not initially visiting (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- fails after reducing the responseTimeout option (failed).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ visit_response_never_ends_failing_sp…     XX:XX        3        -        3        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
+
+
+`
+
+exports['e2e visit resolves visits quickly in chrome (headed) 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
+  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+
+Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
+
+
+  ✓ always finishes in less than XX:XX on localhost with connection: close
+  ✓ always finishes in less than XX:XX on localhost with connection: keep-alive
+
+  2 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────────┐
+  │ Tests:        2                      │
+  │ Passing:      2                      │
+  │ Failing:      0                      │
+  │ Pending:      0                      │
+  │ Skipped:      0                      │
+  │ Screenshots:  0                      │
+  │ Video:        false                  │
+  │ Duration:     X seconds              │
+  │ Spec Ran:     fast_visit_spec.coffee │
+  └──────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        2        -        -        -  
+
+
+`
+
+exports['e2e visit resolves visits quickly in electron (headless) 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
+  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+
+
+  ✓ always finishes in less than XX:XX on localhost with connection: close
+  ✓ always finishes in less than XX:XX on localhost with connection: keep-alive
+
+  2 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────────┐
+  │ Tests:        2                      │
+  │ Passing:      2                      │
+  │ Failing:      0                      │
+  │ Pending:      0                      │
+  │ Skipped:      0                      │
+  │ Screenshots:  0                      │
+  │ Video:        true                   │
+  │ Duration:     X seconds              │
+  │ Spec Ran:     fast_visit_spec.coffee │
+  └──────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 
 `

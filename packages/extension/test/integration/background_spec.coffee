@@ -94,10 +94,6 @@ tab3 = {
 }
 
 describe "app/background", ->
-  before ->
-    @io = global.io
-    global.io = socket.client
-
   beforeEach (done) ->
     @httpSrv = http.createServer()
     @server  = socket.server(@httpSrv, {path: "/__socket.io"})
@@ -106,9 +102,6 @@ describe "app/background", ->
   afterEach (done)  ->
     @server.close()
     @httpSrv.close -> done()
-
-  after ->
-    global.io = @io
 
   context ".connect", ->
     it "can connect", (done) ->

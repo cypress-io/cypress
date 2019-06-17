@@ -113,6 +113,25 @@ describe "e2e visit", ->
         spec: "issue_2196_spec.coffee"
       })
 
+  context "low responseTimeout, normal pageLoadTimeout", ->
+    e2e.setup({
+      settings: {
+        responseTimeout: 2000
+      }
+      servers: {
+        port: 3434,
+        static: true,
+        onServer: onServer
+      }
+    })
+
+    it "fails when response never ends", ->
+      e2e.exec(@, {
+        spec: "visit_response_never_ends_failing_spec.js",
+        snapshot: true,
+        expectedExitCode: 3
+      })
+
   context "normal response timeouts", ->
     e2e.setup({
       settings: {
@@ -130,4 +149,40 @@ describe "e2e visit", ->
         spec: "visit_http_timeout_failing_spec.coffee"
         snapshot: true
         expectedExitCode: 2
+      })
+
+  ## https://github.com/cypress-io/cypress/issues/4313
+  context "resolves visits quickly", ->
+    e2e.setup({
+      servers: {
+        port: 3434
+        onServer: (app) ->
+          app.get '/keepalive', (req, res) ->
+            res
+            .type('html').send('hi')
+
+          app.get '/close', (req, res) ->
+            res
+            .set('connection', 'close')
+            .type('html').send('hi')
+      }
+      settings: {
+        baseUrl: 'http://localhost:3434'
+      }
+    })
+
+    it "in chrome (headed)", ->
+      e2e.exec(@, {
+        spec: "fast_visit_spec.coffee"
+        snapshot: true
+        expectedExitCode: 0
+        browser: 'chrome'
+      })
+
+    it "in electron (headless)", ->
+      e2e.exec(@, {
+        spec: "fast_visit_spec.coffee"
+        snapshot: true
+        expectedExitCode: 0
+        browser: 'electron'
       })

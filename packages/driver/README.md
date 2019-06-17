@@ -2,7 +2,7 @@
 
 This is the core JavaScript library that is loaded inside the browser that is responsible for executing Cypress commands and managing the test runtime.
 
-## Install
+## Installing
 
 The driver's dependencies can be installed with:
 
@@ -20,7 +20,28 @@ cd packages/runner
 npm run watch
 ```
 
+## Developing
+
+If you're developing on the driver, you'll want to run in the normal Cypress GUI mode, like you would when you're writing tests for your own Cypress projects.
+
+```bash
+## run in cypress GUI mode
+cd packages/driver
+npm run cypress:open
+```
+
 Read the runner's [`README.md`](../runner/README.md) for more information.
+
+## Running
+
+You can also run all of the driver's tests locally. We don't really recommend this because it takes a long time, and we have this process optimized by load balancing the tests across multiple workers in CI.
+
+It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
+
+```bash
+## run all the tests
+npm run cypress:run
+```
 
 ## Testing
 
@@ -30,27 +51,8 @@ The driver uses a node server to test all of its edge cases, so first start that
 
 ```bash
 ## boot the driver's server
+cd packages/driver
 npm start
-```
-
-### Developing
-
-If you're developing on the driver, you'll want to run in the normal Cypress GUI mode, like you would when you're writing tests for your own Cypress projects.
-
-```bash
-## run in cypress GUI mode
-npm run cypress:open
-```
-
-### Running
-
-You can also run all of the driver's tests locally. We don't really recommend this because it takes a long time, and we have this process optimized by load balancing the tests across multiple workers in CI.
-
-It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
-
-```bash
-## run all the tests
-npm run cypress:run
 ```
 
 ## Debugging

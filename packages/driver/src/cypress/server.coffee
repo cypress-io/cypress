@@ -26,12 +26,21 @@ normalize = (val) ->
 
 nope = -> return null
 
+responseTypeIsTextOrEmptyString = (responseType) ->
+  responseType is "" or responseType is "text"
+
 ## when the browser naturally cancels/aborts
 ## an XHR because the window is unloading
+## on chrome < 71
 isAbortedThroughUnload = (xhr) ->
-  xhr.readyState is 4 and
-    xhr.status is 0 and
-      xhr.responseText is ""
+  xhr.canceled isnt true and
+    xhr.readyState is 4 and
+      xhr.status is 0 and
+        ## responseText may be undefined on some responseTypes
+        ## https://github.com/cypress-io/cypress/issues/3008
+        ## TODO: How do we want to handle other responseTypes?
+        (responseTypeIsTextOrEmptyString(xhr.responseType)) and
+          xhr.responseText is ""
 
 warnOnStubDeprecation = (obj, type) ->
   if _.has(obj, "stub")
@@ -69,6 +78,7 @@ serverDefaults = {
   onOpen: ->
   onSend: ->
   onXhrAbort: ->
+  onXhrCancel: ->
   onError: ->
   onLoad: ->
   onFixtureError: ->
@@ -273,16 +283,60 @@ create = (options = {}) ->
     getProxyFor: (xhr) ->
       proxies[xhr.id]
 
-    abort: ->
-      ## abort any outstanding xhr's
-      ## which aren't already aborted
-      _.chain(xhrs)
-      .filter (xhr) ->
-        xhr.aborted isnt true and xhr.readyState isnt 4
-      .invokeMap("abort")
-      .value()
+    abortXhr: (xhr) ->
+      proxy = server.getProxyFor(xhr)
 
-      return server
+      ## if the XHR leaks into the next test
+      ## after we've reset our internal server
+      ## then this may be undefined
+      return if not proxy
+
+      ## return if we're already aborted which
+      ## can happen if the browser already canceled
+      ## this xhr but we called abort later
+      return if xhr.aborted
+
+      xhr.aborted = true
+
+      abortStack = server.getStack()
+
+      proxy.aborted = true
+
+      options.onXhrAbort(proxy, abortStack)
+
+      if _.isFunction(options.onAnyAbort)
+        route = server.getRouteForXhr(xhr)
+
+        ## call the onAnyAbort function
+        ## after we've called options.onSend
+        options.onAnyAbort(route, proxy)
+
+    cancelXhr: (xhr) ->
+      proxy = server.getProxyFor(xhr)
+
+      ## if the XHR leaks into the next test
+      ## after we've reset our internal server
+      ## then this may be undefined
+      return if not proxy
+
+      xhr.canceled = true
+
+      proxy.canceled = true
+
+      options.onXhrCancel(proxy)
+
+      return xhr
+
+    cancelPendingXhrs: ->
+      ## cancel any outstanding xhr's
+      ## which aren't already complete
+      ## or already canceled
+      return _
+      .chain(xhrs)
+      .reject({ readyState: 4 })
+      .reject({ canceled: true })
+      .map(server.cancelXhr)
+      .value()
 
     set: (obj) ->
       warnOnStubDeprecation(obj, "server")
@@ -302,34 +356,6 @@ create = (options = {}) ->
       open   = XHR.prototype.open
       abort  = XHR.prototype.abort
       srh    = XHR.prototype.setRequestHeader
-
-      abortXhr = (xhr) ->
-        proxy = server.getProxyFor(xhr)
-
-        ## if the XHR leaks into the next test
-        ## after we've reset our internal server
-        ## then this may be undefined
-        return if not proxy
-
-        ## return if we're already aborted which
-        ## can happen if the browser already canceled
-        ## this xhr but we called abort later
-        return if xhr.aborted
-
-        xhr.aborted = true
-
-        abortStack = server.getStack()
-
-        proxy.aborted = true
-
-        options.onXhrAbort(proxy, abortStack)
-
-        if _.isFunction(options.onAnyAbort)
-          route = server.getRouteForXhr(xhr)
-
-          ## call the onAnyAbort function
-          ## after we've called options.onSend
-          options.onAnyAbort(route, proxy)
 
       restoreFn = ->
         ## restore the property back on the window
@@ -351,7 +377,7 @@ create = (options = {}) ->
         ## set the aborted property or call onXhrAbort
         ## to test this just use a regular XHR
         if @readyState isnt 4
-          abortXhr(@)
+          server.abortXhr(@)
 
         abort.apply(@, arguments)
 
@@ -432,7 +458,7 @@ create = (options = {}) ->
           ## by the onreadystatechange function
           try
             if isAbortedThroughUnload(xhr)
-              abortXhr(xhr)
+              server.abortXhr(xhr)
 
             if _.isFunction(orst = fns.onreadystatechange)
               orst.apply(xhr, arguments)
