@@ -311,8 +311,7 @@ describe('polyfill programmatic blur events', () => {
         expect(stub, 'should not send focus if already focused el').not.called
       })
     })
-  }
-  )
+  })
 
   // https://github.com/cypress-io/cypress/issues/1176
   it('simulated events when window is out of focus when .blur called', () => {
@@ -437,8 +436,7 @@ describe('polyfill programmatic blur events', () => {
         expect(stub, 'should not send focus if already focused el').not.called
       })
     })
-  }
-  )
+  })
 
   // https://github.com/cypress-io/cypress/issues/1176
   it('SVGElement simulated events when window is out of focus when .blur called', () => {

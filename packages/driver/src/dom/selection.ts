@@ -377,8 +377,7 @@ const _moveCursorUpOrDown = function (el, up) {
       'modify',
       'move',
       up ? 'backward' : 'forward',
-      'line'
-    )
+      'line')
   }
 }
 

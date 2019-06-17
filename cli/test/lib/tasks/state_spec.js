@@ -144,8 +144,7 @@ describe('lib/tasks/state', function () {
       os.platform.returns('unknown')
       expect(() => {
         return state.getBinaryDir().to.throw('Platform: "unknown" is not supported.')
-      }
-      )
+      })
     })
   })
 
@@ -224,8 +223,7 @@ describe('lib/tasks/state', function () {
           { verified: false },
           { spaces: 2 }
         )
-      }
-      )
+      })
     })
   })
   context('.getCacheDir', function () {

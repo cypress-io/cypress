@@ -25,8 +25,7 @@ describe('controls', function () {
       it('shows \'Tests\'', () => {
         cy.get('.focus-tests span').should('be.visible')
       })
-    }
-    )
+    })
 
     describe('< 400px wide', function () {
       beforeEach(() => {

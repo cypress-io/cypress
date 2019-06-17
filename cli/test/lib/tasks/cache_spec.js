@@ -45,8 +45,7 @@ describe('lib/tasks/cache', () => {
         .then((exists) => {
           return expect(exists).to.eql(false)
         })
-      }
-      )
+      })
     })
   })
   describe('.list', () => {
