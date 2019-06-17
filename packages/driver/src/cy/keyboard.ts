@@ -143,11 +143,9 @@ const getActiveModifiers = (state: State) => {
 }
 
 const modifiersToString = (modifiers: keyboardModifiers) => {
-  return _.keys(
-    _.pickBy(modifiers, (val) => {
+  return _.keys(_.pickBy(modifiers, (val) => {
       return val
-    })
-  ).join(', ')
+    })).join(', ')
 }
 
 const joinKeyArrayToString = (keyArr: KeyDetails[]) => {
@@ -286,6 +284,8 @@ const validateTyping = (
     return { skipCheckUntilIndex: skipCheckUntilIndex-- }
   }
 
+  debug('validateTyping:', chars, el)
+
   // debug('validateTyping', el, chars)
   const $el = $dom.wrap(el)
   const numElements = $el.length
@@ -308,8 +308,8 @@ const validateTyping = (
 
   const isFocusable = $elements.isFocusable($el)
   const isEmptyChars = _.isEmpty(chars)
-  const clearChars = '{selectall}{del}'
-  const isClearChars = _.startsWith(_.lowerCase(chars), clearChars)
+  const clearChars = '{selectall}{delete}'
+  const isClearChars = _.startsWith(chars.toLowerCase(), clearChars)
 
   //# TODO: tabindex can't be -1
   //# TODO: can't be readonly
@@ -664,10 +664,8 @@ export default class Keyboard {
       return activeEl
     }
 
-    //TODO: if simulated, synchronous
     let _skipCheckUntilIndex: number | undefined = 0
 
-    debug('type each key', keyDetailsArr)
     const typeKeyFns = _.map(
       keyDetailsArr,
       (key: KeyDetails, i: number) => {
@@ -683,6 +681,11 @@ export default class Keyboard {
               options._log,
               _skipCheckUntilIndex
             )
+
+            if (skipCheckUntilIndex) {
+
+              debug('skipCheckUntilIndex:', skipCheckUntilIndex)
+            }
 
             _skipCheckUntilIndex = skipCheckUntilIndex
             if (
@@ -739,8 +742,7 @@ export default class Keyboard {
       if (options.release !== false) {
         _.each(modifierKeys, (key) => {
           return this.simulatedKeyup(getActiveEl(doc), key, options)
-        }
-        )
+        })
       }
 
       options.onAfterType()
@@ -752,15 +754,13 @@ export default class Keyboard {
       return Promise.try(() => {
         return fn()
       }).delay(options.delay)
-    }
-    )
+    })
     .then(() => {
       if (options.release !== false) {
         if (options.simulated) {
           return Promise.map(modifierKeys, (key) => {
             return this.simulatedKeyup(getActiveEl(doc), key, options)
-          }
-          )
+          })
         }
 
         return Promise.map(modifierKeys, (key) => {
@@ -854,9 +854,7 @@ export default class Keyboard {
     } = {}
 
     if (addModifiers) {
-      const modifierEventOptions = toModifiersEventOptions(
-        getActiveModifiers(this.state)
-      )
+      const modifierEventOptions = toModifiersEventOptions(getActiveModifiers(this.state))
 
       eventOptions = {
         ...eventOptions,
@@ -1100,9 +1098,7 @@ export default class Keyboard {
     debug('getSimulatedDefaultForKey', key.key)
     if (key.simulatedDefault) return key.simulatedDefault
 
-    let nonShiftModifierPressed = hasModifierBesidesShift(
-      getActiveModifiers(this.state)
-    )
+    let nonShiftModifierPressed = hasModifierBesidesShift(getActiveModifiers(this.state))
 
     debug({ nonShiftModifierPressed, key })
     if (!nonShiftModifierPressed && simulatedDefaultKeyMap[key.key]) {

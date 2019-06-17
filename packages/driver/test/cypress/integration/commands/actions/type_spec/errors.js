@@ -314,16 +314,14 @@ export default function () {
       cy
       .get(':text:first').type(' ')
       .should('have.value', ' ')
-    }
-    )
+    })
 
     it('can type into input with invalid type attribute', () => {
       cy.get(':text:first')
       .invoke('attr', 'type', 'asdf')
       .type('foobar')
       .should('have.value', 'foobar')
-    }
-    )
+    })
 
     _.each([NaN, Infinity, [], {}, null, undefined], (val) => {
       it(`throws when trying to type: ${val}`, function (done) {
@@ -467,10 +465,8 @@ export default function () {
         cy.get('#by-name > input[type="tel"]')
         .type('1234567890')
         .should('have.prop', 'value', '1234567890')
-      }
-      )
-    }
-    )
+      })
+    })
 
     // it "throws when chars is invalid format", (done) ->
     //   cy.on "fail", (err) =>
@@ -584,10 +580,12 @@ export default function () {
 
     it('eventually passes the assertion', function () {
       cy.$$('input:first').keyup(function () {
-        return _.delay(() => {
-          return $(this).addClass('cleared')
-        }
-        , 100)
+        return _.delay(
+          () => {
+            return $(this).addClass('cleared')
+          }
+          , 100
+        )
       })
 
       cy.get('input:first').clear().should('have.class', 'cleared').then(function () {
@@ -602,10 +600,12 @@ export default function () {
 
     it('eventually passes the assertion on multiple inputs', function () {
       cy.$$('input').keyup(function () {
-        return _.delay(() => {
-          return $(this).addClass('cleared')
-        }
-        , 100)
+        return _.delay(
+          () => {
+            return $(this).addClass('cleared')
+          }
+          , 100
+        )
       })
 
       cy.get('input').invoke('slice', 0, 2).clear().should('have.class', 'cleared')
@@ -840,8 +840,7 @@ export default function () {
 
           expect(log.get('ended')).to.be.true
         })
-      }
-      )
+      })
     })
 
     it('snapshots after clicking', () => {
@@ -852,8 +851,7 @@ export default function () {
 
         expect(lastLog.get('snapshots')[0]).to.be.an('object')
       })
-    }
-    )
+    })
 
     it('logs deltaOptions', () => {
       cy.get('input:first').clear({ force: true, timeout: 1000 }).then(function () {
@@ -863,7 +861,6 @@ export default function () {
 
         expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
       })
-    }
-    )
+    })
   })
 }
