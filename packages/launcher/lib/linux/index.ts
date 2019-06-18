@@ -21,6 +21,7 @@ function getLinuxBrowser (
       stdout,
       versionRegex
     )
+
     throw notInstalledErr(binary)
   }
 
@@ -30,6 +31,7 @@ function getLinuxBrowser (
       binary,
       err.message
     )
+
     throw notInstalledErr(binary)
   }
 

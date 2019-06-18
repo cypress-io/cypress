@@ -24,6 +24,7 @@ describe('controls', function () {
     beforeEach(function () {
       this.suiteTitle = this.runnables.suites[0].title
     })
+
     describe('expand and collapse', function () {
       it('is expanded by default', function () {
         cy.contains(this.suiteTitle)
@@ -45,12 +46,15 @@ describe('controls', function () {
         it('expands/collapses on click', function () {
           cy.contains(this.suiteTitle)
           .click()
+
           cy.get('@suiteWrapper')
           .should('not.have.class', 'is-open')
           .find('.collapsible-content').eq(0)
           .should('not.be.visible')
+
           cy.contains(this.suiteTitle)
           .click()
+
           cy.get('@suiteWrapper')
           .should('have.class', 'is-open')
           .find('.collapsible-content').eq(0)
@@ -61,13 +65,16 @@ describe('controls', function () {
           cy.contains(this.suiteTitle)
           .parents('.collapsible-header')
           .focus().type('{enter}')
+
           cy.get('@suiteWrapper')
           .should('not.have.class', 'is-open')
           .find('.collapsible-content').eq(0)
           .should('not.be.visible')
+
           cy.contains(this.suiteTitle)
           .parents('.collapsible-header')
           .focus().type('{enter}')
+
           cy.get('@suiteWrapper')
           .should('have.class', 'is-open')
           .find('.collapsible-content').eq(0)
@@ -78,13 +85,16 @@ describe('controls', function () {
           cy.contains(this.suiteTitle)
           .parents('.collapsible-header')
           .focus().type(' ')
+
           cy.get('@suiteWrapper')
           .should('not.have.class', 'is-open')
           .find('.collapsible-content').eq(0)
           .should('not.be.visible')
+
           cy.contains(this.suiteTitle)
           .parents('.collapsible-header')
           .focus().type(' ')
+
           cy.get('@suiteWrapper')
           .should('have.class', 'is-open')
           .find('.collapsible-content').eq(0)

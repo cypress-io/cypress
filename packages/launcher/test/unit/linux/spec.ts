@@ -27,16 +27,22 @@ describe('linux browser detection', () => {
 
     stdout.withArgs('test-browser', ['--version'])
     .resolves('test-browser v100.1.2.3')
+
     stdout.withArgs('foo-browser', ['--version'])
     .resolves('foo-browser v100.1.2.3')
+
     stdout.withArgs('foo-bar-browser', ['--version'])
     .resolves('foo-browser v100.1.2.3')
+
     stdout.withArgs('/Applications/My Shiny New Browser.app', ['--version'])
     .resolves('foo-browser v100.1.2.3')
+
     stdout.withArgs('/foo/bar/browser', ['--version'])
     .resolves('foo-browser v9001.1.2.3')
+
     stdout.withArgs('/not/a/browser', ['--version'])
     .resolves('not a browser version string')
+
     stdout.withArgs('/not/a/real/path', ['--version'])
     .rejects()
   })

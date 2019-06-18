@@ -8,9 +8,9 @@ register({
 
 const sinon = require('sinon')
 const driver = returnMockRequire('@packages/driver')
-const io = returnMockRequire('@packages/socket/lib/client', {})
+const io = returnMockRequire('@packages/socket/lib/browser', { client: {} })
 
-io.connect = sinon.stub().returns({ emit: () => {}, on: () => {} })
+io.client.connect = sinon.stub().returns({ emit: () => {}, on: () => {} })
 
 beforeEach(() => {
   driver.$ = sinon.stub().throws('$ called without being stubbed')

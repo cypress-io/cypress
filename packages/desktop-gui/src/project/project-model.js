@@ -158,6 +158,7 @@ export default class Project {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)
       })
+
       // use a custom browser if one is supplied. or, if they already have
       // a browser chosen that's been saved in localStorage, then select that
       // otherwise just do the default.

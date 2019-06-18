@@ -53,6 +53,7 @@ const windowHasFocus = function () {
   window.addEventListener('focus', function () {
     hasFocus = true
   })
+
   window.focus()
 
   return hasFocus
@@ -534,6 +535,7 @@ describe('intercept blur methods correctly', () => {
       cy.state('document').onselectionchange = cy.stub().as('selectionchange')
     })
   })
+
   it('focus  <a>', () => {
     const $el = cy.$$('<a href="#">foo</a>')
 
@@ -548,6 +550,7 @@ describe('intercept blur methods correctly', () => {
     cy.wait(0).get('@selectionchange').should('not.be.called')
 
   })
+
   it('focus <select>', () => {
     const $el = cy.$$('<select>')
 
@@ -559,6 +562,7 @@ describe('intercept blur methods correctly', () => {
     cy.wait(0).get('@selectionchange').should('not.be.called')
 
   })
+
   it('focus <button>', () => {
     const $el = cy.$$('<button/>')
 
@@ -570,6 +574,7 @@ describe('intercept blur methods correctly', () => {
     cy.wait(0).get('@selectionchange').should('not.be.called')
 
   })
+
   it('focus <iframe>', () => {
     const $el = cy.$$('<iframe src="" />')
 
@@ -581,6 +586,7 @@ describe('intercept blur methods correctly', () => {
     cy.wait(0).get('@selectionchange').should('not.be.called')
 
   })
+
   it('focus [tabindex]', () => {
     const $el = cy.$$('<div tabindex="1">tabindex</div>')
 
@@ -592,6 +598,7 @@ describe('intercept blur methods correctly', () => {
     cy.wait(0).get('@selectionchange').should('not.be.called')
 
   })
+
   it('focus <textarea>', () => {
     const $el = cy.$$('<textarea/>')
 
@@ -603,6 +610,7 @@ describe('intercept blur methods correctly', () => {
     cy.get('@selectionchange').should('be.calledOnce')
 
   })
+
   it('focus [contenteditable]', () => {
     const $el = cy.$$('<div contenteditable>contenteditable</div>')
 
@@ -613,6 +621,7 @@ describe('intercept blur methods correctly', () => {
 
     cy.get('@selectionchange').should('be.calledOnce')
   })
+
   it('cannot focus a [contenteditable] child', () => {
     const outer = cy.$$('<div contenteditable>contenteditable</div>').appendTo(cy.$$('body'))
     const inner = cy.$$('<div>first inner contenteditable</div>').appendTo(outer)
@@ -630,6 +639,7 @@ describe('intercept blur methods correctly', () => {
 
     cy.get('@selectionchange').should('not.be.called')
   })
+
   it('focus svg', () => {
     const $svg = cy.$$(`<svg tabindex="1" width="900px" height="500px" viewBox="0 0 95 50" style="border: solid red 1px;"
       xmlns="http://www.w3.org/2000/svg">
@@ -652,6 +662,7 @@ describe('intercept blur methods correctly', () => {
     cy.wrap($svg).focus().should('have.focus')
 
   })
+
   it('focus area', () => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
       cy.$$(`

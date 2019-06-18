@@ -6,6 +6,7 @@ describe('src/cypress/log', function () {
       this.cy = {
         createSnapshot: cy.stub().returns({}),
       }
+
       this.state = cy.stub()
       this.config = cy.stub()
       this.config.withArgs('isInteractive').returns(true)
@@ -19,7 +20,7 @@ describe('src/cypress/log', function () {
       const log = this.log({ '$el': div })
       const result = log.snapshot()
 
-      expect(this.cy.createSnapshot).to.be.calledWith(div)
+      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div)
       expect(result).to.equal(log)
     })
 
