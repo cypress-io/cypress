@@ -39,6 +39,9 @@
     "lint-coffee": "coffeelint scripts/**/*.coffee && npm run all lint-coffee",
     "lint": "npm run lint-js && npm run lint-ts && npm run lint-coffee",
     "pretest": "npm run lint && npm run test-scripts",
+    "precommit": "npm run warn-only && lint-staged",
+    "precommit-lint": "eslint --fix",
+    "prepush": "npm run stop-only",
     "stop-only": "stop-only --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
     "warn-only": "stop-only --warn --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
     "bump": "node ./scripts/binary.js bump",
@@ -61,15 +64,9 @@
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d"
   },
   "lint-staged": {
-    "*.(js|ts)": [
-      "eslint --fix"
+    "*.js": [
+      "npm run precommit-lint"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run warn-only && lint-staged",
-      "pre-push": "npm run stop-only"
-    }
   },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.7",
