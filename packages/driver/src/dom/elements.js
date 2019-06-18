@@ -551,7 +551,7 @@ const findParent = (el, fn) => {
 
     const nextEl = curEl.parentElement
 
-    recurse(nextEl, curEl)
+    return recurse(nextEl, curEl)
   }
 
   return recurse(el.parentElement, el) || el
