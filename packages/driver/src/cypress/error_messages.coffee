@@ -185,9 +185,9 @@ module.exports = {
       """
     pointer_events_none: (obj) ->
       """
-        #{cmd(obj.cmd)} failed because this element:
+      #{cmd(obj.cmd)} failed because this element:
 
-        #{obj.element}
+      #{obj.element}
 
       has style 'pointer-events: none'#{if obj.elementInherited then ", inherited from this element:\n\n#{obj.elementInherited}\n" else ""}
 

@@ -541,9 +541,7 @@ const findParent = (el, fn) => {
   let curEl = el.parentElement
   let retEl = null
 
-  let counter = 0
-
-  while (curEl && counter++ < 100) {
+  while (curEl) {
     if (retEl = fn(curEl, prevEl)) {
       break
     }
