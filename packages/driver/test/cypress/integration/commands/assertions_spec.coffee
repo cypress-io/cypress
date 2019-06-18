@@ -628,7 +628,7 @@ describe "src/cy/commands/assertions", ->
           expect(true).to.be.false
         catch err
 
-    it "consoleProps for errors with diffs", (done) ->
+    it "consoleProps for assertion errors with diffs", (done) ->
       cy.on "log:added", (attrs, log) =>
         if attrs.name is "assert"
           { consoleProps } = attrs
@@ -646,6 +646,29 @@ describe "src/cy/commands/assertions", ->
           done()
       try
         expect('a').to.eq('b')
+      catch err
+
+    it "consoleProps for assertion errors with diffs in sinon-chai", (done) ->
+      cy.on "log:added", (attrs, log) =>
+        if attrs.name is "assert"
+          { consoleProps } = attrs
+
+          cy.removeAllListeners("log:added")
+
+          expect(_.keys(consoleProps)).to.deep.eq([
+            "Command"
+            "actual"
+            "expected"
+            "Message"
+            "Error"
+            "Diff"
+          ])
+          done()
+      try
+        spy = cy.stub()
+        spy('foo1')
+        spy('foo2')
+        expect(spy).to.calledWith('bar')
       catch err
 
     it "consoleProps error diffs are succinct", (done) ->
