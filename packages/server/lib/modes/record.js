@@ -466,11 +466,11 @@ const createRun = (options = {}) => {
         errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
         break
       case 422:
+        // eslint-disable-next-line no-case-declarations
+        const runUrl = _.get(err.error.payload, 'runUrl')
+
         switch (err.error.code) {
           case 'RUN_GROUP_NAME_NOT_UNIQUE':
-            // eslint-disable-next-line no-case-declarations
-            const runUrl = _.get(err.error.payload, 'runUrl')
-
             errors.throw('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
               group,
               runUrl,
