@@ -26,6 +26,7 @@ If you're developing on the driver, you'll want to run in the normal Cypress GUI
 
 ```bash
 ## run in cypress GUI mode
+cd packages/driver
 npm run cypress:open
 ```
 
@@ -50,6 +51,7 @@ The driver uses a node server to test all of its edge cases, so first start that
 
 ```bash
 ## boot the driver's server
+cd packages/driver
 npm start
 ```
 
