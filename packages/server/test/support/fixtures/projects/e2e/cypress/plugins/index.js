@@ -96,5 +96,11 @@ module.exports = (on) => {
         return null
       })
     },
+
+    'console:log' (obj) {
+      console.log(obj) // eslint-disable-line no-console
+
+      return null
+    },
   })
 }
