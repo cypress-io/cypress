@@ -31,10 +31,10 @@ const logException = (err) => {
   // create this exception report
   return logger.createException(err)
   .timeout(1000)
-  .catch(function () {})
+  .catch(() => {
+    // dont yell about any errors either
+  })
 }
-
-// dont yell about any errors either
 
 const runningInternalTests = () => {
   return env.get('CYPRESS_INTERNAL_E2E_TESTS') === '1'
@@ -44,14 +44,14 @@ const warnIfCiFlag = (ci) => {
   // if we are using the ci flag that means
   // we have an old version of the CLI tools installed
   // and that we need to warn the user what to update
-  if (ci) {
-    const type = (() => {
-      if (env.get('CYPRESS_CI_KEY')) {
-        return 'CYPRESS_CI_DEPRECATED_ENV_VAR'
-      }
+  let type
 
-      return 'CYPRESS_CI_DEPRECATED'
-    })()
+  if (ci) {
+    if (env.get('CYPRESS_CI_KEY')) {
+      type = 'CYPRESS_CI_DEPRECATED_ENV_VAR'
+    } else {
+      type = 'CYPRESS_CI_DEPRECATED'
+    }
 
     return errors.warning(type)
   }
@@ -277,7 +277,6 @@ const usedTestsMessage = (limit, phrase) => {
   }
 
   return ''
-
 }
 
 const billingLink = (orgId) => {
@@ -630,7 +629,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       projectId,
       specPattern,
     })
-    .then(function (resp) {
+    .then((resp) => {
       if (!resp) {
         // if a forked run, can't record and can't be parallel
         // because the necessary env variables aren't present
@@ -642,7 +641,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       let captured = null
       let instanceId = null
 
-      const beforeSpecRun = function (spec) {
+      const beforeSpecRun = (spec) => {
         debug('before spec run %o', { spec })
 
         capture.restore()
