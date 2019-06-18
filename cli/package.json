@@ -21,7 +21,6 @@
     "check-deps-pre": "npm run check-deps -- --prescript",
     "test-dependencies": "npm run check-deps && dependency-check . --no-dev",
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
-    "test-cov": "nyc npm run unit",
     "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
     "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "dtslint": "dtslint types",
@@ -30,12 +29,6 @@
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
-  },
-  "nyc": {
-    "exclude": [
-      "test",
-      "scripts"
-    ]
   },
   "types": "types",
   "dependencies": {
@@ -95,7 +88,6 @@
     "mock-fs": "4.9.0",
     "mocked-env": "1.2.4",
     "nock": "9.6.1",
-    "nyc": "13.3.0",
     "proxyquire": "2.1.0",
     "shelljs": "0.8.3",
     "sinon": "7.2.2",
