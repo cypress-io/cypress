@@ -96,7 +96,8 @@ module.exports = {
               'export',
               'cjs-export',
               'import',
-              'cjs-import'
+              'cjs-import',
+              'multiline-expression'
             ],
             'next': '*'
           },
