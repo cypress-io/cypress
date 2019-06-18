@@ -537,20 +537,24 @@ const isDescendent = ($el1, $el2) => {
 }
 
 const findParent = (el, fn) => {
-  let prevEl = el
-  let curEl = el.parentElement
-  let retEl = null
 
-  while (curEl) {
-    if (retEl = fn(curEl, prevEl)) {
-      break
+  const recurse = (curEl, prevEl) => {
+    if (!curEl) {
+      return null
     }
 
-    prevEl = curEl
-    curEl = curEl.parentElement
+    const retEl = fn(curEl, prevEl)
+
+    if (retEl) {
+      return retEl
+    }
+
+    const nextEl = curEl.parentElement
+
+    recurse(nextEl, curEl)
   }
 
-  return retEl || el
+  return recurse(el.parentElement, el) || el
 }
 
 // in order to simulate actual user behavior we need to do the following:
