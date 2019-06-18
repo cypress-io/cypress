@@ -47,12 +47,6 @@ const isHidden = (el, name = 'isHidden()') => {
     }
   }
 
-  // anything with opacity 0 is not visible to eye
-  // TODO: comment back in on a breaking version change for visibility fixes
-  // if (elHasEffectiveOpacityZero($el)) {
-  //   return true // is hidden
-  // }
-
   // in Cypress-land we consider the element hidden if
   // either its offsetHeight or offsetWidth is 0 because
   // it is impossible for the user to interact with this element
@@ -81,38 +75,6 @@ const isHidden = (el, name = 'isHidden()') => {
   // of its ancestors overflow
   return elIsOutOfBoundsOfAncestorsOverflow($el)
 }
-
-// const elHasEffectiveOpacityZero = ($el) => {
-//   // 1 = 100% opaque
-//   // 0 = 0% opaque or transparent
-//   return elHasOpacityZero($el) || ancestorHasOpacityZero($el.parent())
-// }
-
-// const elHasOpacityZero = function ($el) {
-//   const elOpacity = $el.css('opacity')
-
-//   if (elOpacity && Number(elOpacity) === 0) {
-//     return true
-//   }
-
-//   // the default opacity of all elements is 1
-//   return false
-// }
-
-// const ancestorHasOpacityZero = function ($el) {
-//   // if we have no $el or we've walked all the way up to document
-//   // then return false
-//   if (!$el.length || $document.isDocument($el)) {
-//     return false
-//   }
-
-//   if (elHasOpacityZero($el)) {
-//     return true
-//   }
-
-//   // continue walking up ancestors
-//   return ancestorHasOpacityZero($el.parent())
-// }
 
 const elHasNoEffectiveWidthOrHeight = ($el) => {
   // Is the element's CSS width OR height, including any borders,
