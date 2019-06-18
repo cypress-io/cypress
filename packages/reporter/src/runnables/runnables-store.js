@@ -152,6 +152,7 @@ class RunnablesStore {
         this._withTest(log.testId, (test) => {
           return test.addCommand(command, log.hookName)
         })
+
         break
       }
       case 'agent': {
@@ -161,6 +162,7 @@ class RunnablesStore {
         this._withTest(log.testId, (test) => {
           return test.addAgent(agent)
         })
+
         break
       }
       case 'route': {
@@ -170,6 +172,7 @@ class RunnablesStore {
         this._withTest(log.testId, (test) => {
           return test.addRoute(route)
         })
+
         break
       }
       default:
@@ -197,6 +200,7 @@ class RunnablesStore {
     _.each(defaults, (value, key) => {
       this[key] = value
     })
+
     this.runnables = []
     this._tests = {}
     this._logs = {}

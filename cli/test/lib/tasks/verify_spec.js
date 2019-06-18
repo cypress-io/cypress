@@ -350,6 +350,7 @@ context('lib/tasks/verify', () => {
           [some noise here] Gtk: cannot open display: 987
             and maybe a few other lines here with weird indent
         `
+
         firstSpawnError.stdout = ''
 
         // the second time the binary returns expected ping
@@ -387,6 +388,7 @@ context('lib/tasks/verify', () => {
           [some noise here] Gtk: cannot open display: 987
             and maybe a few other lines here with weird indent
         `
+
         firstSpawnError.stdout = ''
 
         // the second time it runs, it fails for some other reason
@@ -606,6 +608,7 @@ context('lib/tasks/verify', () => {
         executable: mockfs.file({ mode: 0777 }),
         packageVersion,
       })
+
       util.isCi.returns(true)
     })
 
@@ -642,6 +645,7 @@ context('lib/tasks/verify', () => {
         packageVersion,
         customDir: '/real/custom',
       })
+
       util.exec
       .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222'])
       .resolves(spawnedProcess)

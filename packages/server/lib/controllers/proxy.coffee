@@ -348,7 +348,7 @@ module.exports = {
     return if res.headersSent
 
     ## omit problematic headers
-    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
+    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy", "connection"
 
     ## do not cache when we inject content into responses
     ## later on we should switch to an etag system so we dont

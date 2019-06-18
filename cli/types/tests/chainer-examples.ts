@@ -424,3 +424,9 @@ cy
   })
 
 cy.get('#result').should('have.text', 'John Doe')
+
+cy.writeFile('../file.path', '', 'utf-8')
+cy.writeFile('../file.path', '', {
+  flag: 'a+',
+  encoding: 'utf-8'
+})

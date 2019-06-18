@@ -153,6 +153,7 @@ describe('lib/agent', function () {
               expect(this.debugProxy.requests[0]).to.include({
                 url: `http://localhost:${HTTP_PORT}/empty-response`,
               })
+
               expect(err.statusCode).to.eq(502)
             } else {
               expect(err.message).to.eq('Error: socket hang up')
@@ -309,8 +310,8 @@ describe('lib/agent', function () {
         })
       })
 
-      it('#createSocket does not go to proxy if domain in NO_PROXY', function () {
-        const spy = sinon.spy(this.agent.httpAgent, '_createProxiedSocket')
+      it('#addRequest does not go to proxy if domain in NO_PROXY', function () {
+        const spy = sinon.spy(this.agent.httpAgent, '_addProxiedRequest')
 
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
         process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
@@ -477,6 +478,7 @@ describe('lib/agent', function () {
           'Connection: close',
           '', '',
         ].join('\r\n'))
+
         // now change some stuff, regen, and expect it to work
         delete req._header
         // @ts-ignore

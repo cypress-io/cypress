@@ -82,12 +82,14 @@ export class Servers {
       this.httpServer = Promise.promisifyAll(
         addDestroy(http.createServer(app))
       ) as http.Server & AsyncServer
+
       this.wsServer = Io.server(this.httpServer)
 
       this.https = { cert, key }
       this.httpsServer = Promise.promisifyAll(
         addDestroy(https.createServer(this.https, <http.RequestListener>app))
       ) as https.Server & AsyncServer
+
       this.wssServer = Io.server(this.httpsServer)
 
       ;[this.wsServer, this.wssServer].map((ws) => {

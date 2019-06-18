@@ -19,6 +19,7 @@ describe('Hook model', () => {
       hook.addCommand({ isMatchingEvent: () => {
         return false
       } })
+
       expect(hook.commands.length).to.equal(1)
       hook.addCommand({})
       expect(hook.commands.length).to.equal(2)
@@ -113,12 +114,15 @@ describe('Hook model', () => {
       hook.addCommand({ isMatchingEvent: () => {
         return false
       }, alias: 'foo' })
+
       hook.addCommand({ isMatchingEvent: () => {
         return false
       }, alias: 'bar' })
+
       hook.addCommand({ isMatchingEvent: () => {
         return false
       }, alias: 'foo' })
+
       hook.addCommand({ isMatchingEvent: () => {
         return false
       }, alias: 'baz', hasDuplicates: true })

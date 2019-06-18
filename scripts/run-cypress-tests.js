@@ -75,8 +75,7 @@ const copyScreenshots = (name) => {
         return fs.copyAsync(screenshots, destination, {
           overwrite: true,
         })
-      }
-      )
+      })
     })
   }
 }
@@ -99,8 +98,7 @@ const copyVideos = (name) => {
         return fs.copyAsync(videos, destination, {
           overwrite: true,
         })
-      }
-      )
+      })
     })
   }
 }

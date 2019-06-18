@@ -194,6 +194,7 @@ export const moveBinaries = async (args = []) => {
 
   console.log('Copying %s for commit %s',
     pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
+
   console.log(lastBuilds.map(prop('s3zipPath')).join('\n'))
 
   try {
