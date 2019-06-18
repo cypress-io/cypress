@@ -405,11 +405,6 @@ const createRun = (options = {}) => {
         default:
           errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
             response: warning,
-            flags: {
-              group,
-              parallel,
-              ciBuildId,
-            },
           })
       }
     })
@@ -418,21 +413,19 @@ const createRun = (options = {}) => {
       stack: err.stack,
     })
 
-    let { code, payload } = err.error
-
-    const limit = _.get(payload, 'limit')
-    const orgId = _.get(payload, 'orgId')
-    const runUrl = _.get(payload, 'runUrl')
-
     switch (err.statusCode) {
-
       case 401:
         recordKey = `${recordKey.slice(0, 5)}...${recordKey.slice(-5)}`
 
         errors.throw('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
         break
       case 402:
-        switch (code) {
+        // eslint-disable-next-line no-case-declarations
+        const limit = _.get(err.error.payload, 'limit')
+        // eslint-disable-next-line no-case-declarations
+        const orgId = _.get(err.error.payload, 'orgId')
+
+        switch (err.error.code) {
           case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
             errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
               usedTestsMessage: usedTestsMessage(limit, 'private test'),
@@ -473,8 +466,11 @@ const createRun = (options = {}) => {
         errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
         break
       case 422:
-        switch (code) {
+        switch (err.error.code) {
           case 'RUN_GROUP_NAME_NOT_UNIQUE':
+            // eslint-disable-next-line no-case-declarations
+            const runUrl = _.get(err.error.payload, 'runUrl')
+
             errors.throw('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
               group,
               runUrl,
