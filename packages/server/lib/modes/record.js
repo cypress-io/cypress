@@ -593,10 +593,10 @@ const createInstance = (options = {}) => {
     // dont log exceptions if we have a 503 status code
     if (err.statusCode !== 503) {
       return logException(err)
-      .return(null)
+      .return({})
     }
 
-    return null
+    return {}
   })
 }
 
@@ -659,7 +659,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           ciBuildId,
           machineId,
         })
-        .then(function (resp = {}) {
+        .then((resp = {}) => {
           ({ instanceId } = resp)
 
           // pull off only what we need
