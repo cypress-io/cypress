@@ -112,7 +112,7 @@
     "electron-builder": "20.39.0",
     "eslint": "5.16.0",
     "eslint-plugin-cypress": "2.2.1",
-    "eslint-plugin-cypress-dev": "2.1.0",
+    "eslint-plugin-cypress-dev": "3.0.0",
     "eslint-plugin-mocha": "5.3.0",
     "eslint-plugin-react": "7.12.4",
     "execa": "1.0.0",
