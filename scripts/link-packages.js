@@ -48,6 +48,8 @@ function makeLinks () {
   })
 }
 
+'foo'
+
 function linkPackages () {
   return deleteOutputFolder()
   .then(makeLinks)
@@ -61,3 +63,5 @@ module.exports = linkPackages
 if (!module.parent) {
   linkPackages()
 }
+
+'bar'
