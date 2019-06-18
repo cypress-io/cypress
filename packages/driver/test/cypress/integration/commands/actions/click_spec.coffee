@@ -132,11 +132,10 @@ describe "src/cy/commands/actions/click", ->
         expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
 
     describe 'pointer-events:none', ->
-
       beforeEach ->
-        cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:aliceblue;"></div>').appendTo cy.$$('#dom')
-        ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none"></div>').appendTo(cy.$$('#dom'))
-        cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:grey;"></div>').appendTo ptrNone
+        cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo cy.$$('#dom')
+        ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>').appendTo(cy.$$('#dom'))
+        cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red;pointer-events:none">#ptrNone > div</div>').appendTo ptrNone
         
       it 'element behind pointer-events:none should still get click', ->
         cy.get('#ptr').click() # should pass with flying colors
