@@ -12,7 +12,7 @@ const { expect } = chai
 
 const packages = require('../../../binary/util/packages')
 const { transformRequires } = require('../../../binary/util/transform-requires')
-const { testStaticAssets, testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
+const { testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
 
 global.beforeEach(() => {
   mockfs.restore()
@@ -102,33 +102,6 @@ describe('transformRequires', () => {
 })
 
 describe('testStaticAssets', () => {
-  it('can detect valid runner js', async () => {
-    const buildDir = 'resources/app'
-
-    mockfs({
-      [buildDir]: {
-        'packages': {
-          'runner': {
-            'dist': {
-              'runner.js': `${'some js\n'.repeat(5000)}
-              //# sourceMappingURL=data:application/json;charset=utf-8;base64`,
-            },
-          },
-          'desktop-gui': {
-            'dist': {
-              'index.html': 'window.env = \'development\'',
-            },
-          },
-        },
-      },
-    })
-
-    // logFs()
-
-    await expect(testStaticAssets(buildDir)).not.be.rejected
-
-  })
-
   it('can detect bad strings in asset', async () => {
     const buildDir = 'resources/app'
 
