@@ -64,11 +64,28 @@ describe "lib/socket", ->
           agent: agent
           path: socketIoRoute
           transports: ["websocket"]
+          parser: socketIo.circularParser
         })
       return
 
     afterEach ->
       @client.disconnect()
+
+    ## https://github.com/cypress-io/cypress/issues/4346
+    it "can emit a circular object without crashing", (done) ->
+      foo = {
+        bar: {}
+      }
+
+      foo.bar.baz = foo
+
+      ## going to stub exec here just so we have something that we can
+      ## control the resolved value of
+      sinon.stub(exec, 'run').resolves(foo)
+
+      @client.emit "backend:request", "exec", "quuz", (res) ->
+        expect(res.response).to.deep.eq(foo)
+        done()
 
     context "on(automation:request)", ->
       describe "#onAutomation", ->
