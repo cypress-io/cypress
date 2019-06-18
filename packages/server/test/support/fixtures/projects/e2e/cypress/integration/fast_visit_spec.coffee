@@ -5,22 +5,40 @@ beforeEach ->
 
   return null
 
-it "always finishes in less than 150ms on localhost with connection: close", ->
-  cy.visit('/close')
+fastVisitSpec = (url) ->
+  cy.visit(url)
+
+  times = []
 
   Cypress._.times 100, ->
-    cy.visit('/close')
+    cy.visit(url)
     .then ->
-      expect(@lastLog.get("totalTime")).to.be.lte(150)
+      time = @lastLog.get("totalTime")
+      times.push(time)
 
-  return undefined
+  cy.then ->
+    times.sort (a, b) ->
+      a - b
 
-it "always finishes in less than 150ms on localhost with connection: keep-alive", ->
-  cy.visit('/close')
+    percentile = (p) ->
+      i = Math.floor(p / 100 * times.length) - 1
+      times[i]
 
-  Cypress._.times 100, ->
-    cy.visit('/keepalive')
-    .then ->
-      expect(@lastLog.get("totalTime")).to.be.lte(150)
+    message = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 97, 99, 100].map (p) ->
+      "#{p}%\t of visits to #{url} finished in less than #{percentile(p)}ms"
+    .join("\n")
 
-  return undefined
+    cy.task 'console:log', message
+
+    expect(percentile(90)).to.be.lte(100)
+
+    expect(percentile(100)).to.be.lte(250)
+
+    return undefined
+
+context "on localhost 100% of visits are faster than 250ms, 90% are faster than 100ms", ->
+  it "with connection: close", ->
+    fastVisitSpec '/close'
+
+  it "with connection: keep-alive", ->
+    fastVisitSpec '/keepalive'
