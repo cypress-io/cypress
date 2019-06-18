@@ -781,6 +781,53 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Provide a path to an existing fixture file.
       """
+    when "FREE_PLAN_NEARING_MONTHLY_TESTS"
+      """
+      You're nearing the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      If you exceed the limit, you will need to upgrade your account to continue recording tests this month. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_NEARING_MONTHLY_TESTS"
+      """
+      You're nearing the limit of private test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
+
+      If you exceed the limit, you will need to upgrade your account to continue recording tests this month. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_PARALLELIZATION_DISABLED"
+      """
+      Parallelization has been disabled, because you've exceeded the limit of test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_RUNS_HIDDEN"
+      """
+      You've exceeded the limit of test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
+
+      This run will be recorded, but its details will be hidden in the Cypress Dashboard.
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE_USED"
+      """
+      Parallelization is not included under your free plan.
+
+      Your plan is now in a grace period, which means your tests will still run with parallelization until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests with parallelization in the future.
+
+      #{arg1.link}
+      """
+    when "API_UNHANDLED_WARNING"
+      """
+      Warning: #{arg1.message}
+      """
+
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

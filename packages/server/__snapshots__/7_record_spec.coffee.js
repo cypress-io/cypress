@@ -1555,86 +1555,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 `
 
-exports['e2e record api interaction warnings create run warnings grace period - grouping feature warns when using parallel feature 1'] = `
-Grouping is not included under your free plan.
-
-Your plan is now in a grace period, which means your tests will still run with groups until 2999-12-31. Please upgrade your plan to continue running your tests with groups in the future.
-
-https://on.cypress.io/dashboard/organizations/org-id-1234/billing
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
-  │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
-  Estimated: 8 seconds
-
-
-  record pass
-    ✓ passes
-    - is pending
-
-
-  1 passing
-  1 pending
-
-
-  (Results)
-
-  ┌───────────────────────────────────────┐
-  │ Tests:        2                       │
-  │ Passing:      1                       │
-  │ Failing:      0                       │
-  │ Pending:      1                       │
-  │ Skipped:      0                       │
-  │ Screenshots:  1                       │
-  │ Video:        true                    │
-  │ Duration:     X seconds               │
-  │ Estimated:    8 seconds               │
-  │ Spec Ran:     record_pass_spec.coffee │
-  └───────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
-
-
-  (Uploading Results)
-
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
-
-
-───────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                       
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
-
-
-`
-
 exports['e2e record api interaction warnings create run warnings grace period - over private tests limit warns when over private test recordings 1'] = `
 You've exceeded the limit of private test recordings under your free plan this month. The limit is 500 private test recordings.
 
@@ -1961,6 +1881,564 @@ You've exceeded the limit of test recordings under your current billing plan thi
 To upgrade your account, please visit your billing to upgrade to another billing plan.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings grace period - grouping feature warns when using group feature 1'] = `
+Grouping is not included under your free plan.
+
+Your plan is now in a grace period, which means your tests will still run with groups until 2999-12-31. Please upgrade your plan to continue running your tests with groups in the future.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings free plan - nearing tests limit warns when nearing test recordings limit 1'] = `
+You're nearing the limit of private test recordings under your free plan this month. The limit is 500 private test recordings.
+
+If you exceed the limit, you will need to upgrade your account to continue recording tests this month. Please visit your billing to upgrade to another billing plan.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings paid plan - nearing tests limit warns when nearing test recordings limit 1'] = `
+You're nearing the limit of private test recordings under your current billing plan this month. The limit is 500 private test recordings.
+
+If you exceed the limit, you will need to upgrade your account to continue recording tests this month. Please visit your billing to upgrade to another billing plan.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings paid plan - parallelization disabled warns when over test recordings limit 1'] = `
+Parallelization has been disabled, because you've exceeded the limit of test recordings under your current billing plan this month. The limit is 500 private test recordings.
+
+To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings paid plan - runs hidden warns when over test recordings limit 1'] = `
+You've exceeded the limit of test recordings under your current billing plan this month. The limit is 500 private test recordings.
+
+This run will be recorded, but its details will be hidden in the Cypress Dashboard.
+
+To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings grace period - parallelization feature warns when using parallel feature 1'] = `
+Parallelization is not included under your free plan.
+
+Your plan is now in a grace period, which means your tests will still run with parallelization until 2999-12-31. Please upgrade your plan to continue running your tests with parallelization in the future.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings unhandled warning uses the message provided by the API 1'] = `
+Warning: This is a warning you did not anticipate!
 
 ====================================================================================================
 

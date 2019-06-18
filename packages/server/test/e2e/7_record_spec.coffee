@@ -1301,7 +1301,7 @@ describe "e2e record", ->
 
         setup(routes)
 
-        it "warns when using parallel feature", ->
+        it "warns when using group feature", ->
           e2e.exec(@, {
             key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
             spec: "record_pass*"
@@ -1364,6 +1364,189 @@ describe "e2e record", ->
         setup(routes)
 
         it "warns when over test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "free plan - nearing tests limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "FREE_PLAN_NEARING_MONTHLY_TESTS"
+              used: 700
+              limit: 500
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when nearing test recordings limit", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "paid plan - nearing tests limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "PAID_PLAN_NEARING_MONTHLY_TESTS"
+              used: 700
+              limit: 500
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when nearing test recordings limit", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "paid plan - parallelization disabled", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "PAID_PLAN_PARALLELIZATION_DISABLED"
+              used: 700
+              limit: 500
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over test recordings limit", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "paid plan - runs hidden", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "PAID_PLAN_RUNS_HIDDEN"
+              used: 700
+              limit: 500
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over test recordings limit", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "grace period - parallelization feature", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE_USED"
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when using parallel feature", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "unhandled warning", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              code: "A_WARNING_FROM_THE_FUTURE"
+              message: "This is a warning you did not anticipate!"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "uses the message provided by the API", ->
           e2e.exec(@, {
             key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
             spec: "record_pass*"

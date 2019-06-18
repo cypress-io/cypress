@@ -337,6 +337,35 @@ createRun = (options = {}) ->
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
+        when "FREE_PLAN_NEARING_MONTHLY_TESTS"
+          errors.warning("FREE_PLAN_NEARING_MONTHLY_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            link: billingLink(warning.orgId)
+          })
+        when "PAID_PLAN_NEARING_MONTHLY_TESTS"
+          errors.warning("PAID_PLAN_NEARING_MONTHLY_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            link: billingLink(warning.orgId)
+          })
+        when "PAID_PLAN_PARALLELIZATION_DISABLED"
+          errors.warning("PAID_PLAN_PARALLELIZATION_DISABLED", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            link: billingLink(warning.orgId)
+          })
+        when "PAID_PLAN_RUNS_HIDDEN"
+          errors.warning("PAID_PLAN_RUNS_HIDDEN", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            link: billingLink(warning.orgId)
+          })
+        when "PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE_USED"
+          errors.warning("PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE_USED", {
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
+        else
+          errors.warning("API_UNHANDLED_WARNING", {
+            message: warning.message
+          })
 
   .catch (err) ->
     debug("failed creating run %o", {
