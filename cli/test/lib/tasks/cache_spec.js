@@ -20,6 +20,7 @@ describe('lib/tasks/cache', () => {
         },
       },
     })
+
     sinon.stub(state, 'getCacheDir').returns('/.cache/Cypress')
     this.stdout = stdout.capture()
   })
@@ -37,6 +38,7 @@ describe('lib/tasks/cache', () => {
       expect(this.stdout.toString()).to.eql('/.cache/Cypress\n')
     })
   })
+
   describe('.clear', () => {
     it('deletes cache folder and everything inside it', () => {
       return cache.clear()
@@ -48,6 +50,7 @@ describe('lib/tasks/cache', () => {
       })
     })
   })
+
   describe('.list', () => {
     it('lists all versions of cached binary', () => {
       return cache.list()

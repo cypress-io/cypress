@@ -153,6 +153,7 @@ describe('lib/agent', function () {
               expect(this.debugProxy.requests[0]).to.include({
                 url: `http://localhost:${HTTP_PORT}/empty-response`,
               })
+
               expect(err.statusCode).to.eq(502)
             } else {
               expect(err.message).to.eq('Error: socket hang up')
@@ -477,6 +478,7 @@ describe('lib/agent', function () {
           'Connection: close',
           '', '',
         ].join('\r\n'))
+
         // now change some stuff, regen, and expect it to work
         delete req._header
         // @ts-ignore

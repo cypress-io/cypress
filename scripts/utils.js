@@ -11,6 +11,7 @@ function getNameAndBinary (args = process.argv) {
 
   la(is.unemptyString(options.npm),
     'missing --npm option', options)
+
   la(is.unemptyString(options.binary),
     'missing --binary option', options)
 

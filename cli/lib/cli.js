@@ -40,6 +40,7 @@ const spaceDelimitedSpecsMsg = (files) => {
     If you are trying to pass multiple spec filenames, separate them by commas instead:
       cypress run --spec spec1,spec2,spec3
   `)
+
   logger.log()
 }
 
