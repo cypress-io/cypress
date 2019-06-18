@@ -187,7 +187,7 @@ class Project extends EE
 
   watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
-    if not cfg.pluginsFile
+    if not cfg.pluginsFile or options.isTextTerminal
       return Promise.resolve()
 
     fs.pathExists(cfg.pluginsFile)
@@ -209,7 +209,7 @@ class Project extends EE
 
   watchSettings: (onSettingsChanged, options) ->
     ## bail if we havent been told to
-    ## watch anything
+    ## watch anything (like in run mode)
     return if not onSettingsChanged
 
     debug("watch settings files")

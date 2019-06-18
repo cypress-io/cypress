@@ -751,6 +751,44 @@ describe "src/cy/commands/request", ->
           }
         })
 
+      ## https://github.com/cypress-io/cypress/issues/4346
+      it "throws on network failure when nested", (done) ->
+        cy.request("http://localhost:3500/dump-method")
+        .then ->
+          cy.request("http://0.0.0.0:12345")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.request() failed trying to load:"
+          done()
+
+      it "displays body_circular when body is circular", (done) ->
+        foo = {
+          bar: {
+            baz: {}
+          }
+        }
+
+        foo.bar.baz.quux = foo
+
+        cy.request({
+          method: "POST"
+          url: "http://foo.invalid/"
+          body: foo
+        })
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq """
+          The `body` parameter supplied to cy.request() contained a circular reference at the path "bar.baz.quux".
+
+          `body` can only be a string or an object with no circular references.
+          """
+
+          done()
+
       it "does not include redirects when there were no redirects", (done) ->
         backend = Cypress.backend
         .withArgs("http:request")

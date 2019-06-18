@@ -329,6 +329,16 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
+    it "does not watch settings or plugins in run mode", ->
+      watch = sinon.spy(Watchers.prototype, "watch")
+      watchTree = sinon.spy(Watchers.prototype, "watchTree")
+
+      cypress.start(["--run-project=#{@pluginConfig}"])
+      .then =>
+        expect(watchTree).not.to.be.called
+        expect(watch).not.to.be.called
+        @expectExitWith(0)
+
     it "scaffolds out integration and example specs if they do not exist when not runMode", ->
       config.get(@pristinePath)
       .then (cfg) =>
