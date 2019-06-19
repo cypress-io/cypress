@@ -1,10 +1,16 @@
 _        = require("lodash")
+express  = require("express")
+http     = require("http")
+https    = require("https")
 path     = require("path")
 net      = require("net")
-debug    = require("debug")("network-error-handling-spec")
+request  = require("request")
+stream   = require("stream")
+debug    = require("debug")("cypress:server:network-error-handling-spec")
 Promise  = require("bluebird")
 bodyParser = require("body-parser")
 DebugProxy = require("@cypress/debugging-proxy")
+mitmProxy = require("http-mitm-proxy")
 launcher = require("@packages/launcher")
 chrome   = require("../../lib/browsers/chrome")
 e2e      = require("../support/helpers/e2e")
@@ -122,6 +128,9 @@ controllers = {
     ## https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4
     ## "The implication is that this is a temporary condition which will be alleviated after some delay."
     res.sendStatus(503)
+
+  load304: (req, res) ->
+    res.type('html').end('<img src="/static/javascript-logo.png"/>')
 }
 
 describe "e2e network error handling", ->
@@ -145,6 +154,8 @@ describe "e2e network error handling", ->
 
             next()
 
+          app.use("/static", express.static(path.join(e2ePath, 'static')))
+
           app.use(bodyParser.urlencoded({ extended: true }))
 
           app.get "/immediate-reset", controllers.immediateReset
@@ -154,6 +165,7 @@ describe "e2e network error handling", ->
           app.get "/works-third-time-else-500/:id", controllers.worksThirdTimeElse500
           app.post "/print-body-third-time", controllers.printBodyThirdTime
 
+          app.get "/load-304.html", controllers.load304
           app.get "/load-img-net-error.html", controllers.loadImgNetError
           app.get "/load-script-net-error.html", controllers.loadScriptNetError
           app.get "/print-body-third-time-form", controllers.printBodyThirdTimeForm
@@ -278,11 +290,14 @@ describe "e2e network error handling", ->
   context "Cypress", ->
     beforeEach ->
       delete process.env.HTTP_PROXY
+      delete process.env.HTTPS_PROXY
       delete process.env.NO_PROXY
 
     afterEach ->
       if @debugProxy
         @debugProxy.stop()
+        .then =>
+          @debugProxy = null
 
     it "baseurl check tries 5 times in run mode", ->
       e2e.exec(@, {
@@ -432,3 +447,67 @@ describe "e2e network error handling", ->
             host: 'localhost'
             port: HTTPS_PORT
           })
+
+    ## https://github.com/cypress-io/cypress/issues/4298
+    context "does not delay a 304 Not Modified", ->
+      it "in normal network conditions", ->
+        e2e.exec(@, {
+          spec: "network_error_304_handling_spec.js"
+          video: false
+          config: {
+            baseUrl: "http://localhost:#{PORT}"
+            pageLoadTimeout: 4000
+          }
+          expectedExitCode: 0
+          snapshot: true
+        })
+
+      it "behind a proxy", ->
+        @debugProxy = new DebugProxy()
+
+        @debugProxy
+        .start(PROXY_PORT)
+        .then =>
+          process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
+          process.env.NO_PROXY = ""
+        .then =>
+          e2e.exec(@, {
+            spec: "network_error_304_handling_spec.js"
+            video: false
+            config: {
+              baseUrl: "http://localhost:#{PORT}"
+              pageLoadTimeout: 4000
+            }
+            expectedExitCode: 0
+            snapshot: true
+          })
+
+      it "behind a proxy with transfer-encoding: chunked", ->
+        mitmProxy = mitmProxy()
+
+        mitmProxy.onRequest (ctx, callback) ->
+          callback()
+
+        mitmProxy.listen({
+          host: '127.0.0.1'
+          port: PROXY_PORT
+          keepAlive: true
+          httpAgent: http.globalAgent
+          httpsAgent: https.globalAgent
+          forceSNI: false
+          forceChunkedRequest: true
+        })
+
+        process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
+        process.env.NO_PROXY = ""
+
+        e2e.exec(@, {
+          spec: "network_error_304_handling_spec.js"
+          video: false
+          config: {
+            baseUrl: "http://localhost:#{PORT}"
+            pageLoadTimeout: 4000
+          }
+          expectedExitCode: 0
+          snapshot: true
+        })

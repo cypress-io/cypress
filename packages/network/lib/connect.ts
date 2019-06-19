@@ -22,6 +22,8 @@ export function byPortAndAddress (port: number, address: net.Address) {
 }
 
 export function getAddress (port: number, hostname: string) {
+  debug('beginning getAddress %o', { hostname, port })
+
   const fn = byPortAndAddress.bind({}, port)
 
   // promisify at the very last second which enables us to
@@ -35,8 +37,12 @@ export function getAddress (port: number, hostname: string) {
   // @ts-ignore
   return lookupAsync(hostname, { all: true })
   .then((addresses: net.Address[]) => {
+    debug('got addresses %o', { hostname, port, addresses })
     // convert to an array if string
     return Array.prototype.concat.call(addresses).map(fn)
+  })
+  .tapCatch((err) => {
+    debug('error getting address', { hostname, port, err })
   })
   .any()
 }
