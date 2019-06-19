@@ -19,7 +19,7 @@ CookieJar = tough.CookieJar
 ## shallow clone the original
 serializableProperties = Cookie.serializableProperties.slice(0)
 
-NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN".split(" ")
+NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND".split(" ")
 VERBOSE_REQUEST_OPTS = "followRedirect jar strictSSL".split(" ")
 HTTP_CLIENT_REQUEST_EVENTS = "abort connect continue information socket timeout upgrade".split(" ")
 
