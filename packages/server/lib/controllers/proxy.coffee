@@ -1,19 +1,20 @@
 _             = require("lodash")
 zlib          = require("zlib")
 concat        = require("concat-stream")
-through       = require("through")
 Promise       = require("bluebird")
 accept        = require("http-accept")
 debug         = require("debug")("cypress:server:proxy")
 cwd           = require("../cwd")
 cors          = require("../util/cors")
+passthruStream = require("../util/passthru_stream").passthruStream
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
 conditional   = require("../util/conditional_stream")
 networkFailures = require("../util/network_failures")
 
-redirectRe  = /^30(1|2|3|7|8)$/
+REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
+NO_BODY_STATUS_CODES = [204, 304]
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -24,6 +25,16 @@ zlibOptions = {
 
 isGzipError = (err) ->
   Object.prototype.hasOwnProperty.call(zlib.constants, err.code)
+
+## https://github.com/cypress-io/cypress/issues/4298
+## https://tools.ietf.org/html/rfc7230#section-3.3.3
+## HEAD, 1xx, 204, and 304 responses should never contain anything after headers
+responseMustHaveEmptyBody = (method, statusCode) ->
+  _.some([
+    _.includes(NO_BODY_STATUS_CODES, statusCode),
+    _.inRange(statusCode, 100, 200),
+    _.invoke(method, 'toLowerCase') == 'head',
+  ])
 
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
@@ -83,16 +94,7 @@ module.exports = {
 
         return res.status(503).end()
 
-    # if req.headers.accept is "text/event-stream"
-    #   return nodeProxy.web(req, res, {
-    #     secure: false
-    #     ignorePath: true
-    #     target: req.proxiedUrl
-    #     timeout: 0
-    #     proxyTimeout: 0
-    #   })
-
-    thr = through (d) -> @queue(d)
+    thr = passthruStream()
 
     @getHttpContent(thr, req, res, remoteState, config, request)
     .pipe(res)
@@ -163,6 +165,9 @@ module.exports = {
         wantsInjection,
         wantsSecurityRemoved,
       })
+
+      if responseMustHaveEmptyBody(req.method, statusCode)
+        return res.end()
 
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
@@ -269,7 +274,7 @@ module.exports = {
           catch err
             ## noop
 
-      if redirectRe.test(statusCode)
+      if REDIRECT_STATUS_CODES.includes(statusCode)
         newUrl = headers.location
 
         ## set cookies to initial=true
@@ -279,12 +284,12 @@ module.exports = {
 
         ## finally redirect our user agent back to our domain
         ## by making this an absolute-path-relative redirect
-        res.redirect(statusCode, newUrl)
-      else
-        if headers["x-cypress-file-server-error"]
-          wantsInjection or= "partial"
+        return res.redirect(statusCode, newUrl)
 
-        setBody(str, statusCode, headers)
+      if headers["x-cypress-file-server-error"]
+        wantsInjection or= "partial"
+
+      setBody(str, statusCode, headers)
 
     if obj = buffers.take(remoteUrl)
       wantsInjection = "full"
