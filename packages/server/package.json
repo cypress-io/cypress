@@ -124,7 +124,6 @@
     "dependency-tree": "7.0.2",
     "duplexify": "4.0.0",
     "electron-context-menu": "0.11.0",
-    "electron-positioner": "4.1.0",
     "errorhandler": "1.5.0",
     "evil-dns": "0.2.0",
     "execa": "1.0.0",
