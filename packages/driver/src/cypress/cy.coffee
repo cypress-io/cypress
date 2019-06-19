@@ -1092,6 +1092,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           return ret
 
         catch err
+          err = $errUtils.processErr(err, config)
+
           ## if our runnable.fn throw synchronously
           ## then it didnt fail from a cypress command
           ## but we should still teardown and handle
