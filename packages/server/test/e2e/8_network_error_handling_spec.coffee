@@ -315,7 +315,7 @@ describe "e2e network error handling", ->
         expectedExitCode: 2
       }).then ({ stdout }) ->
         expect(stdout).to.contain('1) network error handling cy.visit() retries fails after retrying 5x:')
-        expect(stdout).to.contain('CypressError: cy.visit() failed trying to load:')
+        expect(stdout).to.contain('CypressError: `cy.visit()` failed trying to load:')
         expect(stdout).to.contain('http://localhost:13370/immediate-reset?visit')
         expect(stdout).to.contain('We attempted to make an http request to this URL but the request failed without a response.')
         expect(stdout).to.contain('We received this error at the network level:')
