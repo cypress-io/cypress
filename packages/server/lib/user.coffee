@@ -1,10 +1,17 @@
 api     = require("./api")
 cache   = require("./cache")
 errors  = require("./errors")
+keys    = require("./util/keys")
 
 module.exports = {
   get: ->
     cache.getUser()
+
+  getSafely: ->
+    @get()
+    .tap (user) ->
+      ## obfuscate the userToken key
+      user.authToken = keys.hide(user.authToken)
 
   set: (user) ->
     cache.setUser(user)

@@ -5,6 +5,7 @@ deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 fs       = require("./util/fs")
+keys     = require("./util/keys")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
@@ -16,6 +17,10 @@ CYPRESS_ENV_PREFIX = "CYPRESS_"
 CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
 CYPRESS_RESERVED_ENV_VARS = [
   "CYPRESS_ENV"
+]
+CYPRESS_SPECIAL_ENV_VARS = [
+  "CI_KEY"
+  "RECORD_KEY"
 ]
 
 dashesOrUnderscoresRe = /^(_-)+/
@@ -192,6 +197,12 @@ validateFile = (file) ->
   return (settings) ->
     validate settings, (errMsg) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
+
+hideSpecialVals = (val, key) ->
+  if _.includes(CYPRESS_SPECIAL_ENV_VARS, key)
+    return keys.hide(val)
+
+  return val
 
 module.exports = {
   getConfigKeys: -> configKeys
@@ -553,7 +564,10 @@ module.exports = {
       memo
     , []
 
-    envProc = _.omit(envProc, configFromEnv)
+    envProc = _.chain(envProc)
+    .omit(configFromEnv)
+    .mapValues(hideSpecialVals)
+    .value()
 
     resolveFrom("config",  envCfg)
     resolveFrom("envFile", envFile)
