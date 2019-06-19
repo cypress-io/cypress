@@ -836,8 +836,40 @@ You have set the browser to: 'chrome'
 A video will not be recorded when using this browser.
 
 
-  ✓ always finishes in less than XX:XX on localhost with connection: close
-  ✓ always finishes in less than XX:XX on localhost with connection: keep-alive
+  on localhost 100% of visits are faster than XX:XX, 90% are faster than XX:XX
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: close
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: keep-alive
+
 
   2 passing
 
@@ -890,8 +922,40 @@ exports['e2e visit resolves visits quickly in electron (headless) 1'] = `
   Running: fast_visit_spec.coffee...                                                       (1 of 1) 
 
 
-  ✓ always finishes in less than XX:XX on localhost with connection: close
-  ✓ always finishes in less than XX:XX on localhost with connection: keep-alive
+  on localhost 100% of visits are faster than XX:XX, 90% are faster than XX:XX
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: close
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: keep-alive
+
 
   2 passing
 
