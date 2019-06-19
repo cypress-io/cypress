@@ -462,6 +462,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## highlight it in red or insert a new command
       errors.commandRunningFailed(err)
 
+      err = $errUtils.processErr(err, config)
+
       fail(err, state("runnable"))
     )
     .finally(cleanup)

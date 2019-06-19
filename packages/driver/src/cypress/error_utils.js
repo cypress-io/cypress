@@ -271,17 +271,13 @@ const getObjValueByPath = (obj, keyPath) => {
 
 //// all errors flow through this function before they're finally thrown
 //// or used to reject promises
-const processErr = (errObj, config) => {
+const processErr = (errObj = {}, config) => {
   if (config('isInteractive') || !errObj.docsUrl) {
     return errObj
   }
 
   // append the docs url when not interactive so it appears in the stdout
-  return appendErrMsg(errObj, errObj.docsUrl)
-
-  // const errProps = appendErrMsg(errObj, errObj.docsUrl)
-
-  // return mergeErrProps(errObj, errProps)
+  return appendErrMsg(errObj, `${errObj.docsUrl}\n`)
 }
 
 module.exports = {

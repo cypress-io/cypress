@@ -46,8 +46,6 @@ Cypress does not allow you to change superdomains within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
-
 https://on.cypress.io/cross-origin-violation
 
       at stack trace line
@@ -77,8 +75,6 @@ Cypress does not allow you to change superdomains within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
-
 https://on.cypress.io/cross-origin-violation
 
       at stack trace line
@@ -107,8 +103,6 @@ This typically happens in one of three ways:
 Cypress does not allow you to change superdomains within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
-
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
 
 https://on.cypress.io/cross-origin-violation
 
