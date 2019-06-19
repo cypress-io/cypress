@@ -911,7 +911,10 @@ describe "lib/config", ->
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
-      sinon.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
+      sinon.stub(config, "getProcessEnvVars").returns({
+        version: "0.12.1",
+        user: "bob",
+      })
 
       obj = {
         env: {
@@ -944,7 +947,6 @@ describe "lib/config", ->
 
   context ".getProcessEnvVars", ->
     ["cypress_", "CYPRESS_"].forEach (key) ->
-
       it "reduces key: #{key}", ->
         obj = {
           cypress_host: "http://localhost:8888"
@@ -970,6 +972,7 @@ describe "lib/config", ->
       expect(config.getProcessEnvVars(obj)).to.deep.eq({
         FOO: "bar"
         PROJECT_ID: "abc123"
+        CRASH_REPORTS: 0
       })
 
   context ".setUrls", ->

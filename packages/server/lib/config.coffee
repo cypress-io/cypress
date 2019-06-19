@@ -13,9 +13,9 @@ debug      = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
 CYPRESS_ENV_PREFIX = "CYPRESS_"
+CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
 CYPRESS_RESERVED_ENV_VARS = [
   "CYPRESS_ENV"
-  "CYPRESS_CRASH_REPORTS"
 ]
 
 dashesOrUnderscoresRe = /^(_-)+/
@@ -26,8 +26,14 @@ toWords = (str) ->
   str.trim().split(oneOrMoreSpacesRe)
 
 isCypressEnvLike = (key) ->
-  _.chain(key).invoke('toUpperCase').startsWith(CYPRESS_ENV_PREFIX).value() and
+  _.chain(key)
+  .invoke('toUpperCase')
+  .startsWith(CYPRESS_ENV_PREFIX)
+  .value() and
     not _.includes(CYPRESS_RESERVED_ENV_VARS, key)
+
+removeEnvPrefix = (key) ->
+  key.slice(CYPRESS_ENV_PREFIX_LENGTH)
 
 folders = toWords """
   fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
@@ -559,12 +565,9 @@ module.exports = {
     _.extend envCfg, envFile, envProc, envCLI
 
   getProcessEnvVars: (obj = {}) ->
-    normalize = (key) ->
-      key.slice(CYPRESS_ENV_PREFIX.length)
-
     _.reduce obj, (memo, value, key) ->
       if isCypressEnvLike(key)
-        memo[normalize(key)] = coerce(value)
+        memo[removeEnvPrefix(key)] = coerce(value)
       memo
     , {}
 
