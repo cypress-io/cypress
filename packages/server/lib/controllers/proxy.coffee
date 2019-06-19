@@ -40,6 +40,13 @@ setCookie = (res, key, val, domainName) ->
 
   res.cookie(key, val, options)
 
+reqNeedsBasicAuthHeaders = (req, remoteState) ->
+  { auth, origin } = remoteState
+
+  auth &&
+    not req.headers["authorization"] &&
+      cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
+
 module.exports = {
   handle: (req, res, config, getRemoteState, request, nodeProxy) ->
     remoteState = getRemoteState()
@@ -302,11 +309,15 @@ module.exports = {
       else
         opts.url = req.proxiedUrl
 
-      ## if we have auth headers and this request matches our origin protection space
-      ## and the user has not supplied auth headers
-      if not req.headers["authorization"] and (a = remoteState.auth) and
-          cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, remoteState.origin)
-        base64 = Buffer.from(a.username + ":" + a.password).toString("base64")
+      ## if we have auth headers and this request matches our origin
+      ## protection space and the user has not supplied auth headers
+      if reqNeedsBasicAuthHeaders(req, remoteState)
+        { auth } = remoteState
+
+        base64 = Buffer
+        .from(auth.username + ":" + auth.password)
+        .toString("base64")
+
         req.headers["authorization"] = "Basic #{base64}"
 
       rq = request.create(opts)
