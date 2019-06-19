@@ -60,8 +60,8 @@ module.exports = {
   },
 
   urlMatchesOriginProtectionSpace (urlStr, origin) {
-    const normalizedUrl = uri.addDefaultPort(urlStr)
-    const normalizedOrigin = uri.addDefaultPort(origin)
+    const normalizedUrl = uri.addDefaultPort(urlStr).format()
+    const normalizedOrigin = uri.addDefaultPort(origin).format()
 
     return _.startsWith(normalizedUrl, normalizedOrigin)
   },

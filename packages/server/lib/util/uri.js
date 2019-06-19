@@ -1,9 +1,28 @@
+// useful links for describing the parts that make up a URL:
+// - https://nodejs.org/api/url.html#url_url_strings_and_url_objects
+// - https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Examples
+//
+// node's url formatting algorithm (which acts pretty unexpectedly)
+// - https://nodejs.org/api/url.html#url_url_format_urlobject
+
 const _ = require('lodash')
 const url = require('url')
 
-const DEFAULT_PORTS = {
-  https: '443',
-  http: '80',
+// yup, protocol contains a: ':' colon
+// at the end of it (-______________-)
+const DEFAULT_PROTOCOL_PORTS = {
+  'https:': '443',
+  'http:': '80',
+}
+
+const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS)
+
+const portIsDefault = (port) => {
+  return port && DEFAULT_PORTS.includes(port)
+}
+
+const parseClone = (urlObject) => {
+  return url.parse(_.clone(urlObject))
 }
 
 const stripProtocolAndDefaultPorts = function (urlToCheck) {
@@ -12,7 +31,7 @@ const stripProtocolAndDefaultPorts = function (urlToCheck) {
 
   // if we have a default port for 80 or 443
   // then just return the hostname
-  if (_.values(DEFAULT_PORTS).includes(port)) {
+  if (portIsDefault(port)) {
     return hostname
   }
 
@@ -20,25 +39,40 @@ const stripProtocolAndDefaultPorts = function (urlToCheck) {
   return host
 }
 
-const removeDefaultPort = function (urlToCheck) {
-  const parsed = url.parse(urlToCheck)
+const removePort = (urlObject) => {
+  const parsed = parseClone(urlObject)
 
-  if (_.values(DEFAULT_PORTS).includes(parsed.port)) {
-    parsed.host = null
-    parsed.port = null
+  // set host to null else
+  // url.format(...) will ignore
+  // the port property
+  // https://nodejs.org/api/url.html#url_url_format_urlobject
+  parsed.host = null
+  parsed.port = null
+
+  return parsed
+}
+
+const removeDefaultPort = function (urlToCheck) {
+  let parsed = parseClone(urlToCheck)
+
+  if (portIsDefault(parsed.port)) {
+    parsed = removePort(parsed)
   }
 
-  return url.format(parsed)
+  return parsed
 }
 
 const addDefaultPort = function (urlToCheck) {
-  const parsed = url.parse(urlToCheck)
+  const parsed = parseClone(urlToCheck)
 
   if (!parsed.port) {
-    parsed.port = DEFAULT_PORTS[parsed.protocol]
+    // unset host...
+    // see above for reasoning
+    parsed.host = null
+    parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]
   }
 
-  return url.format(parsed)
+  return parsed
 }
 
 const getPath = (urlToCheck) => {
@@ -46,9 +80,11 @@ const getPath = (urlToCheck) => {
 }
 
 module.exports = {
-  addDefaultPort,
-
   getPath,
+
+  removePort,
+
+  addDefaultPort,
 
   removeDefaultPort,
 
