@@ -11,7 +11,6 @@ buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
 conditional   = require("../util/conditional_stream")
-networkFailures = require("../util/network_failures")
 
 REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 NO_BODY_STATUS_CODES = [204, 304]
