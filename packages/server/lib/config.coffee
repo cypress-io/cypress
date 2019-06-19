@@ -73,7 +73,7 @@ breakingConfigKeys = toWords """
   trashAssetsBeforeHeadlessRuns
 """
 
-defaults = {
+CONFIG_DEFAULTS = {
   port:                          null
   hosts:                         null
   morgan:                        true
@@ -107,7 +107,7 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  trashAssetsBeforeRuns: true
+  trashAssetsBeforeRuns:         true
   autoOpen:                      false
   viewportWidth:                 1000
   viewportHeight:                660
@@ -183,7 +183,7 @@ validate = (cfg, onErr) ->
     ## does this key have a validation rule?
     if validationFn = validationRules[key]
       ## and is the value different from the default?
-      if value isnt defaults[key]
+      if value isnt CONFIG_DEFAULTS[key]
         result = validationFn(key, value)
         if result isnt true
           onErr(result)
@@ -249,7 +249,7 @@ module.exports = {
       ## https://regexr.com/48rvt
       config.baseUrl = url.replace(/\/\/+$/, "/")
 
-    _.defaults(config, defaults)
+    _.defaults(config, CONFIG_DEFAULTS)
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
@@ -266,12 +266,12 @@ module.exports = {
       ## to zero
       config.numTestsKeptInMemory = 0
 
-    config = @setResolvedConfigValues(config, defaults, resolved)
+    config = @setResolvedConfigValues(config, CONFIG_DEFAULTS, resolved)
 
     if config.port
       config = @setUrls(config)
 
-    config = @setAbsolutePaths(config, defaults)
+    config = @setAbsolutePaths(config, CONFIG_DEFAULTS)
 
     config = @setParentTestsPaths(config)
 
@@ -389,7 +389,7 @@ module.exports = {
     .catch({code: "MODULE_NOT_FOUND"}, ->
       debug("support file %s does not exist", sf)
       ## supportFile doesn't exist on disk
-      if sf is path.resolve(obj.projectRoot, defaults.supportFile)
+      if sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
         debug("support file is default, check if #{path.dirname(sf)} exists")
         return fs.pathExists(sf)
         .then (found) ->
@@ -428,8 +428,9 @@ module.exports = {
   ##   * and the pluginsFile is NOT set to the default
   ##     - throw an error, because it should be there if the user
   ##       explicitly set it
-  setPluginsFile: (obj) ->
-    return Promise.resolve(obj) if not obj.pluginsFile
+  setPluginsFile: Promise.method (obj) ->
+    if not obj.pluginsFile
+      return obj
 
     obj = _.clone(obj)
 
@@ -445,7 +446,7 @@ module.exports = {
       debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
       debug("plugins file does not exist")
-      if pluginsFile is path.resolve(obj.projectRoot, defaults.pluginsFile)
+      if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
         debug("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
         fs.pathExists(pluginsFile)
         .then (found) ->
@@ -503,11 +504,12 @@ module.exports = {
     else
       proxyUrl
 
-    _.extend obj,
+    _.extend(obj, {
       proxyUrl:    proxyUrl
       browserUrl:  rootUrl + obj.clientRoute
       reporterUrl: rootUrl + obj.reporterRoute
       xhrUrl:      obj.namespace + obj.xhrRoute
+    })
 
     return obj
 
