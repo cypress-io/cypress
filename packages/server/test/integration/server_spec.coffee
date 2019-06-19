@@ -413,7 +413,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://example.com", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: undefined
@@ -432,7 +432,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://example.com", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: false
             contentType: undefined
