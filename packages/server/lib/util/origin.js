@@ -1,3 +1,4 @@
+// TODO: move this into lib/util/uri.js
 const url = require('url')
 
 module.exports = function (urlStr) {
