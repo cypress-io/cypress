@@ -1250,7 +1250,7 @@ describe "src/cy/commands/actions/click", ->
           expect(lastLog.get("snapshots")[1]).to.be.an("object")
           expect(lastLog.get("snapshots")[1].name).to.eq("after")
           expect(err.message).to.include "`cy.click()` failed because this element is not visible:"
-          expect(err.message).to.include ">button ...</button>"
+          expect(err.message).to.include ">button</button>"
           expect(err.message).to.include "`<button#button-covered-in-span>` is not visible because it has CSS property: `position: fixed` and its being covered"
           expect(err.message).to.include ">span on...</span>"
           expect(err.docsUrl).to.eq "https://on.cypress.io/element-cannot-be-interacted-with"

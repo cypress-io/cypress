@@ -171,7 +171,7 @@ describe "src/cypress/dom/visibility", ->
           </tr>
         </table>
       """
-      
+
       @$parentNoWidth = add """
         <div style='width: 0; height: 100px; overflow: hidden;'>
           <div style='height: 500px; width: 500px;'>
@@ -501,20 +501,20 @@ describe "src/cypress/dom/visibility", ->
 
       it "is hidden if visibility collapse", ->
         expect(@$tableVisCollapse.find("td.collapse")).to.be.hidden
-        expect(@$tableVisCollapse.find("td.collapse")).to.not.be.visible  
+        expect(@$tableVisCollapse.find("td.collapse")).to.not.be.visible
 
         expect(@$tableVisCollapse.find("tr.collapse")).to.be.hidden
-        expect(@$tableVisCollapse.find("tr.collapse")).to.not.be.visible  
+        expect(@$tableVisCollapse.find("tr.collapse")).to.not.be.visible
 
         expect(@$tableVisCollapse.find("tr.collapse td")).to.be.hidden
-        expect(@$tableVisCollapse.find("tr.collapse td")).to.not.be.visible  
+        expect(@$tableVisCollapse.find("tr.collapse td")).to.not.be.visible
 
       it "is hidden if parent has visibility collapse", ->
         expect(@$tableVisCollapse.find("tr.collapse td")).to.be.hidden
-        expect(@$tableVisCollapse.find("tr.collapse td")).to.not.be.visible  
+        expect(@$tableVisCollapse.find("tr.collapse td")).to.not.be.visible
 
         expect(@$tableVisCollapse.find("#collapse-span")).to.be.hidden
-        expect(@$tableVisCollapse.find("#collapse-span")).to.not.be.visible  
+        expect(@$tableVisCollapse.find("#collapse-span")).to.not.be.visible
 
       it "is hidden if input type hidden", ->
         expect(@$inputHidden.is(":hidden")).to.be.true
@@ -575,7 +575,7 @@ describe "src/cypress/dom/visibility", ->
         expect(@$optionOutsideSelect.find('#option-visible').is(":visible")).to.be.true
         expect(@$optionOutsideSelect.find('#option-visible')).to.be.visible
         cy.wrap(@$optionOutsideSelect.find('#option-visible')).should("be.visible")
-    
+
     describe "opacity visible", ->
       it "is visible if opacity is 0", ->
         expect(@$btnOpacity.is(":hidden")).to.be.false
@@ -714,7 +714,7 @@ describe "src/cypress/dom/visibility", ->
 
       it "is visible when inside of parents transform scale", ->
         expect(@$parentWithTransformScaleElInsideScale.find("span")).to.be.visible
-      
+
       it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
         expect(@$ancestorTransformMakesElOutOfBoundsOfAncestor.find("span")).to.be.hidden
 
@@ -746,10 +746,10 @@ describe "src/cypress/dom/visibility", ->
         @reasonIs @$parentVisHidden.find("button"), "This element `<button>` is not visible because its parent `<div.invis>` has CSS property: `visibility: hidden`"
 
       it "has 'visibility: collapse'", ->
-        @reasonIs @$tableVisCollapse.find("td.collapse"), "This element '<td.collapse>' is not visible because it has CSS property: 'visibility: collapse'"
+        @reasonIs @$tableVisCollapse.find("td.collapse"), "This element `<td.collapse>` is not visible because it has CSS property: `visibility: collapse`"
 
       it "has parent with 'visibility: collapse'", ->
-        @reasonIs @$tableVisCollapse.find("tr.collapse td:first"), "This element '<td>' is not visible because its parent '<tr.collapse>' has CSS property: 'visibility: collapse'"
+        @reasonIs @$tableVisCollapse.find("tr.collapse td:first"), "This element `<td>` is not visible because its parent '<tr.collapse>' has CSS property: `visibility: collapse`"
 
       it "has effective zero width", ->
         @reasonIs @$divNoWidth, "This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels."

@@ -95,7 +95,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       options.method = options.method.toUpperCase()
 
       if options.retryOnStatusCodeFailure and not options.failOnStatusCode
-        $utils.throwErrByPath("request.status_code_flags_invalid")
+        $errUtils.throwErrbyPath("request.status_code_flags_invalid")
 
       if _.has(options, "failOnStatus")
         $utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
@@ -140,7 +140,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options.form = true
 
       if _.isObject(options.body) and path = whatIsCircular(options.body)
-        $utils.throwErrByPath("request.body_circular", { args: { path }})
+        $errUtils.throwErrbyPath("request.body_circular", { args: { path }})
 
       ## only set json to true if form isnt true
       ## and we have a valid object for body

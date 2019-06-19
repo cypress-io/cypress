@@ -150,7 +150,7 @@ describe "src/cy/commands/aliasing", ->
 
       it "throws on alias starting with @ char and dots", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "'@my.alias' cannot be named starting with the '@' symbol. Try renaming the alias to 'my.alias', or something else that does not start with the '@' symbol."
+          expect(err.message).to.eq "`@my.alias` cannot be named starting with the `@` symbol. Try renaming the alias to `my.alias`, or something else that does not start with the `@` symbol."
           done()
 
         cy.get("div:first").as("@my.alias")
@@ -368,7 +368,7 @@ describe "src/cy/commands/aliasing", ->
           .get("body").as("b")
           .get("input:first").as("firstInput")
           .get("@lastDiv")
-      
+
       it "throws when alias is missing '@' but matches an available alias", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "Invalid alias: `getAny`.\nYou forgot the `@`. It should be written as: `@getAny`."
