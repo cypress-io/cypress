@@ -11,7 +11,6 @@ buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
 conditional   = require("../util/conditional_stream")
-networkFailures = require("../util/network_failures")
 
 redirectRe  = /^30(1|2|3|7|8)$/
 
