@@ -25,6 +25,8 @@ const parseClone = (urlObject) => {
   return url.parse(_.clone(urlObject))
 }
 
+const parse = url.parse
+
 const stripProtocolAndDefaultPorts = function (urlToCheck) {
   // grab host which is 'hostname:port' only
   const { host, hostname, port } = url.parse(urlToCheck)
@@ -80,6 +82,8 @@ const getPath = (urlToCheck) => {
 }
 
 module.exports = {
+  parse,
+
   getPath,
 
   removePort,
