@@ -516,7 +516,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       if options.retryOnStatusCodeFailure and not options.failOnStatusCode
-        $errUtils.throwErrbyPath("visit.status_code_flags_invalid")
+        $errUtils.throwErrByPath("visit.status_code_flags_invalid")
 
       if not isValidVisitMethod(options.method)
         $errUtils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
@@ -525,7 +525,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $errUtils.throwErrByPath("visit.invalid_headers")
 
       if _.isObject(options.body) and path = whatIsCircular(options.body)
-        $errUtils.throwErrbyPath("visit.body_circular", { args: { path }})
+        $errUtils.throwErrByPath("visit.body_circular", { args: { path }})
 
       if options.log
         message = url

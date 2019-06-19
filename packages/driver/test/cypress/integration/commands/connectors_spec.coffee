@@ -634,7 +634,7 @@ describe "src/cy/commands/connectors", ->
 
             expect(err.message).to.eq("Timed out retrying: expected 'foo' to equal 'bar'")
 
-            expect(lastLog.get("error").message).to.eq("expected 'foo' to equal 'bar'")
+            expect(lastLog.get("error").message).to.eq("Timed out retrying: expected 'foo' to equal 'bar'")
 
             done()
 
@@ -1114,7 +1114,7 @@ describe "src/cy/commands/connectors", ->
           fn.bar.baz = "baz"
 
           cy.wrap(fn).its("bar", "baz").should("eq", "baz")
-        
+
         it "resets traversalErr and throws the right assertion", (done) ->
           cy.timeout(200)
 
