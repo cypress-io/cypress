@@ -54,5 +54,5 @@ module.exports = {
 
     Promise.join(@getBody(err), @getAuthToken())
     .spread (body, authToken) ->
-      api.createRaygunException(body, authToken)
+      api.createCrashReport(body, authToken)
 }

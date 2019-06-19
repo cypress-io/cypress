@@ -124,7 +124,7 @@ describe "lib/exceptions", ->
   context ".create", ->
     beforeEach ->
       @env = process.env["CYPRESS_ENV"]
-      sinon.stub(api, "createRaygunException")
+      sinon.stub(api, "createCrashReport")
 
     afterEach ->
       process.env["CYPRESS_ENV"] = @env
@@ -139,7 +139,7 @@ describe "lib/exceptions", ->
       it "immediately resolves", ->
         exception.create()
         .then ->
-          expect(api.createRaygunException).to.not.be.called
+          expect(api.createCrashReport).to.not.be.called
 
     describe "development", ->
       beforeEach ->
@@ -148,7 +148,7 @@ describe "lib/exceptions", ->
       it "immediately resolves", ->
         exception.create()
         .then ->
-          expect(api.createRaygunException).to.not.be.called
+          expect(api.createCrashReport).to.not.be.called
 
     describe "production", ->
       beforeEach ->
@@ -163,8 +163,8 @@ describe "lib/exceptions", ->
 
         sinon.stub(exception, "getAuthToken").resolves("auth-token-123")
 
-      it "sends body + authToken to api.createRaygunException", ->
-        api.createRaygunException.resolves()
+      it "sends body + authToken to api.createCrashReport", ->
+        api.createCrashReport.resolves()
 
         exception.create().then =>
           body = {
@@ -172,4 +172,4 @@ describe "lib/exceptions", ->
             version: "0.1.2"
           }
 
-          expect(api.createRaygunException).to.be.calledWith(body, "auth-token-123")
+          expect(api.createCrashReport).to.be.calledWith(body, "auth-token-123")

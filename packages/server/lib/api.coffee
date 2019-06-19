@@ -226,7 +226,7 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
-  createRaygunException: (body, authToken, timeout = 3000) ->
+  createCrashReport: (body, authToken, timeout = 3000) ->
     rp.post({
       url: routes.exceptions()
       json: true
