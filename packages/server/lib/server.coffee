@@ -328,6 +328,8 @@ class Server
       options
     })
 
+    startTime = new Date()
+
     ## if we have an existing url resolver
     ## in flight then cancel it
     if @_urlResolver
@@ -463,6 +465,8 @@ class Server
                 details.isHtml = isResponseHtml(contentType, responseBuffer)
 
                 debug("resolve:url response ended, setting buffer %o", { newUrl, details })
+
+                details.totalTime = new Date() - startTime
 
                 ## TODO: think about moving this logic back into the
                 ## frontend so that the driver can be in control of
