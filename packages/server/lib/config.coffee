@@ -38,22 +38,23 @@ folders = toWords """
 configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
+  blacklistHosts
   chromeWebSecurity
   modifyObstructiveCode           integrationFolder
   env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
   port                            supportFolder
-  reporter                        videosFolder
+  projectId                       videosFolder
+  reporter
   reporterOptions
   ignoreTestFiles
   testFiles                       defaultCommandTimeout
   trashAssetsBeforeRuns           execTimeout
-  blacklistHosts                  pageLoadTimeout
-  userAgent                       requestTimeout
-  viewportWidth                   responseTimeout
-  viewportHeight                  taskTimeout
-  video
+  userAgent                       pageLoadTimeout
+  viewportWidth                   requestTimeout
+  viewportHeight                  responseTimeout
+  video                           taskTimeout
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
@@ -72,6 +73,7 @@ defaults = {
   morgan:                        true
   baseUrl:                       null
   socketId:                      null
+  projectId:                     null
   userAgent:                     null
   isTextTerminal:                false
   reporter:                      "spec"
@@ -519,13 +521,13 @@ module.exports = {
     envCLI  = envCLI ? {}
 
     matchesConfigKey = (key) ->
-      if _.has(cfg, key)
+      if _.has(CONFIG_DEFAULTS, key)
         return key
 
       key = key.toLowerCase().replace(dashesOrUnderscoresRe, "")
       key = _.camelCase(key)
 
-      if _.has(cfg, key)
+      if _.has(CONFIG_DEFAULTS, key)
         return key
 
     configFromEnv = _.reduce envProc, (memo, val, key) ->

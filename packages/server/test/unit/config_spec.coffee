@@ -497,6 +497,9 @@ describe "lib/config", ->
     it "port=null", ->
       @defaults "port", null
 
+    it "projectId=null", ->
+      @defaults("projectId", null)
+
     it "autoOpen=false", ->
       @defaults "autoOpen", false
 
@@ -727,6 +730,7 @@ describe "lib/config", ->
         .then (cfg) ->
           expect(cfg.resolved).to.deep.eq({
             env:                        { }
+            projectId:                  { value: null, from: "default" },
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
@@ -764,7 +768,10 @@ describe "lib/config", ->
           })
 
       it "sets config, envFile and env", ->
-        sinon.stub(config, "getProcessEnvVars").returns({quux: "quux"})
+        sinon.stub(config, "getProcessEnvVars").returns({
+          quux: "quux"
+          PROJECT_ID: "projectId123"
+        })
 
         obj = {
           projectRoot: "/foo/bar"
@@ -787,6 +794,7 @@ describe "lib/config", ->
         config.mergeDefaults(obj, options)
         .then (cfg) ->
           expect(cfg.resolved).to.deep.eq({
+            projectId:                  { value: "projectId123", from: "env" },
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
@@ -956,10 +964,12 @@ describe "lib/config", ->
         CYPRESS_ENV: "production"
         CYPRESS_FOO: "bar"
         CYPRESS_CRASH_REPORTS: "0"
+        CYPRESS_PROJECT_ID: "abc123"
       }
 
       expect(config.getProcessEnvVars(obj)).to.deep.eq({
         FOO: "bar"
+        PROJECT_ID: "abc123"
       })
 
   context ".setUrls", ->
