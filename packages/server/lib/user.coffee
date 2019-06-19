@@ -10,8 +10,9 @@ module.exports = {
   getSafely: ->
     @get()
     .tap (user) ->
-      ## obfuscate the userToken key
-      user.authToken = keys.hide(user.authToken)
+      if user.authToken
+        ## obfuscate the userToken key
+        user.authToken = keys.hide(user.authToken)
 
   set: (user) ->
     cache.setUser(user)
