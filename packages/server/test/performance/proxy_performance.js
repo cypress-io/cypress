@@ -388,7 +388,7 @@ describe('Proxy Performance', function () {
 
         t.addRows(testCases)
 
-        process.stdout.write('Note: All times are in milliseconds.')
+        process.stdout.write('Note: All times are in milliseconds.\n')
         t.printTable()
       })
     })
