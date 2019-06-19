@@ -1674,58 +1674,88 @@ describe "Routes", ->
               "Content-Type": "text/css"
             })
 
-      it "attaches auth headers when matches origin", ->
-        username = "u"
-        password = "p"
+      context "authorization", ->
+        it "attaches auth headers when matches origin", ->
+          username = "u"
+          password = "p"
 
-        base64 = Buffer.from(username + ":" + password).toString("base64")
+          base64 = Buffer.from(username + ":" + password).toString("base64")
 
-        @server._remoteAuth = {
-          username
-          password
-        }
-
-        nock("http://localhost:8080")
-        .get("/index")
-        .matchHeader("authorization", "Basic #{base64}")
-        .reply(200, "")
-
-        @rp("http://localhost:8080/index")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      it "does not attach auth headers when not matching origin", ->
-        nock("http://localhost:8080", {
-          badheaders: ['authorization']
-        })
-        .get("/index")
-        .reply(200, "")
-
-        @rp("http://localhost:8080/index")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      it "does not modify existing auth headers when matching origin", ->
-        existing = "Basic asdf"
-
-        @server._remoteAuth = {
-          username: "u"
-          password: "p"
-        }
-
-        nock("http://localhost:8080")
-        .get("/index")
-        .matchHeader("authorization", existing)
-        .reply(200, "")
-
-        @rp({
-          url: "http://localhost:8080/index"
-          headers: {
-            "Authorization": existing
+          @server._remoteAuth = {
+            username
+            password
           }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
+
+          nock("http://localhost:8080")
+          .get("/index")
+          .matchHeader("authorization", "Basic #{base64}")
+          .reply(200, "")
+
+          @rp("http://localhost:8080/index")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        it "does not attach auth headers when not matching origin", ->
+          nock("http://localhost:8080", {
+            badheaders: ['authorization']
+          })
+          .get("/index")
+          .reply(200, "")
+
+          @rp("http://localhost:8080/index")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        it "does not modify existing auth headers when matching origin", ->
+          existing = "Basic asdf"
+
+          @server._remoteAuth = {
+            username: "u"
+            password: "p"
+          }
+
+          nock("http://localhost:8080")
+          .get("/index")
+          .matchHeader("authorization", existing)
+          .reply(200, "")
+
+          @rp({
+            url: "http://localhost:8080/index"
+            headers: {
+              "Authorization": existing
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        ## https://github.com/cypress-io/cypress/issues/4267
+        it "doesn't attach auth headers to a diff protection space on the same origin", ->
+          @setup("http://beta.something.com")
+          .then =>
+            username = "u"
+            password = "p"
+
+            base64 = Buffer.from(username + ":" + password).toString("base64")
+
+            @server._remoteAuth = {
+              username
+              password
+            }
+
+            nock(/.*\.something.com/)
+            .get("/index")
+            .matchHeader("authorization", "Basic #{base64}")
+            .reply(200, "")
+            .get("/index")
+            .matchHeader("authorization", _.isUndefined)
+            .reply(200, "")
+
+            @rp("http://beta.something.com/index")
+            .then (res) =>
+              expect(res.statusCode).to.eq(200)
+              @rp("http://cdn.something.com/index")
+            .then (res) =>
+              expect(res.statusCode).to.eq(200)
 
     context "images", ->
       beforeEach ->

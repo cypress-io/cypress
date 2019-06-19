@@ -6,11 +6,11 @@ accept        = require("http-accept")
 debug         = require("debug")("cypress:server:proxy")
 cwd           = require("../cwd")
 cors          = require("../util/cors")
-passthruStream = require("../util/passthru_stream").passthruStream
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
 conditional   = require("../util/conditional_stream")
+{ passthruStream } = require("../util/passthru_stream")
 
 REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 NO_BODY_STATUS_CODES = [204, 304]
@@ -49,6 +49,13 @@ setCookie = (res, key, val, domainName) ->
     options.expires = new Date(0)
 
   res.cookie(key, val, options)
+
+reqNeedsBasicAuthHeaders = (req, remoteState) ->
+  { auth, origin } = remoteState
+
+  auth &&
+    not req.headers["authorization"] &&
+      cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 
 module.exports = {
   handle: (req, res, config, getRemoteState, request, nodeProxy) ->
@@ -101,9 +108,6 @@ module.exports = {
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-    ## prepends req.url with remoteState.origin
-    remoteUrl = req.proxiedUrl
-
     isInitial = req.cookies["__cypress.initial"] is "true"
 
     wantsInjection = null
@@ -131,9 +135,9 @@ module.exports = {
     resMatchesOriginPolicy = (respHeaders) ->
       switch remoteState.strategy
         when "http"
-          cors.urlMatchesOriginPolicyProps(remoteUrl, remoteState.props)
+          cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
         when "file"
-          remoteUrl.startsWith(remoteState.origin)
+          req.proxiedUrl.startsWith(remoteState.origin)
 
     setCookies = (value) ->
       ## dont modify any cookies if we're trying to clear
@@ -157,7 +161,7 @@ module.exports = {
       isGzipped = encoding and encoding.includes("gzip")
 
       debug("received response for %o", {
-        url: remoteUrl
+        url: req.proxiedUrl
         headers,
         statusCode,
         isGzipped
@@ -206,7 +210,7 @@ module.exports = {
             gzipError = isGzipError(err)
 
             debug("failed to proxy response %o", {
-              url: remoteUrl
+              url: req.proxiedUrl
               headers
               statusCode
               isGzipped
@@ -290,7 +294,7 @@ module.exports = {
 
       setBody(str, statusCode, headers)
 
-    if obj = buffers.take(remoteUrl)
+    if obj = buffers.take(req.proxiedUrl)
       wantsInjection = "full"
 
       onResponse(obj.stream, obj.response)
@@ -316,14 +320,18 @@ module.exports = {
       if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
         opts.url = req.proxiedUrl.replace(remoteState.origin, remoteState.fileServer)
       else
-        opts.url = remoteUrl
+        opts.url = req.proxiedUrl
 
-      ## if we have auth headers and this request matches our origin policy
-      if (a = remoteState.auth) and resMatchesOriginPolicy()
-        ## and no existing Authentication headers
-        if not req.headers["authorization"]
-          base64 = Buffer.from(a.username + ":" + a.password).toString("base64")
-          req.headers["authorization"] = "Basic #{base64}"
+      ## if we have auth headers and this request matches our origin
+      ## protection space and the user has not supplied auth headers
+      if reqNeedsBasicAuthHeaders(req, remoteState)
+        { auth } = remoteState
+
+        base64 = Buffer
+        .from(auth.username + ":" + auth.password)
+        .toString("base64")
+
+        req.headers["authorization"] = "Basic #{base64}"
 
       rq = request.create(opts)
 

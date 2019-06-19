@@ -54,7 +54,7 @@ setProxiedUrl = (req) ->
   ## and only leave the path which is
   ## how browsers would normally send
   ## use their url
-  req.proxiedUrl = uri.removeDefaultPort(req.url)
+  req.proxiedUrl = uri.removeDefaultPort(req.url).format()
 
   req.url = uri.getPath(req.url)
 
