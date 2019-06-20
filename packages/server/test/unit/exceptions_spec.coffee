@@ -2,7 +2,6 @@ require("../spec_helper")
 
 delete global.fs
 
-winston       = require("winston")
 api           = require("#{root}lib/api")
 user          = require("#{root}lib/user")
 logger        = require("#{root}lib/logger")
