@@ -95,6 +95,7 @@ module.exports = {
  * Only check on Windows. While it is possible for macOS/Linux to have preferences set that
  * override Cypress's settings, it's never been reported as an issue and would require more
  * native extensions to support checking.
+ * https://github.com/cypress-io/cypress/issues/4391
  */
 if (os.platform() === 'win32') {
   try {
