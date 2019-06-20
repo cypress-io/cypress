@@ -134,6 +134,14 @@ describe "Runs List", ->
           it "does not display spec if multiple instances", ->
             cy.get(".runs-container li").eq(2).contains("spec").should("not.exist")
 
+        context "parallelization disabled", ->
+          it "adds a warning indicator to the run list item", ->
+            cy.get(".env-duration .fa-exclamation-triangle")
+              .should("exist")
+              .trigger("mouseover")
+
+            cy.get(".cy-tooltip").contains("Parallelization was disabled for this run")
+
     describe "failure", ->
       beforeEach ->
         @pingApiServerAgain = @util.deferred()
