@@ -1053,7 +1053,7 @@ describe "src/cy/commands/navigation", ->
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.visit() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          expect(err.message).to.contain "These options are incompatible with each other."
           done()
 
         cy.visit({
@@ -1485,7 +1485,7 @@ describe "src/cy/commands/navigation", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq """
-          The `body` parameter supplied to cy.visit() contained a circular reference at the path "bar.baz.quux".
+          The `body` parameter supplied to `cy.visit()` contained a circular reference at the path "bar.baz.quux".
 
           `body` can only be a string or an object with no circular references.
           """

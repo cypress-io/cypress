@@ -949,7 +949,7 @@ module.exports = {
      - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
      - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
     """
-    invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
+    invalid_1st_arg: "#{cmd('visit')} must be called with a `url` or an `options` object containing a `url` as its 1st argument"
     invalid_method: "#{cmd('visit')} was called with an invalid method: `{{method}}`. Method can only be `GET` or `POST`."
     invalid_headers: "#{cmd('visit')} requires the `headers` option to be an object."
     no_duplicate_url: """
