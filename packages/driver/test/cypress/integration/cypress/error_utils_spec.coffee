@@ -400,6 +400,19 @@ describe "driver/src/cypress/error_utils", ->
         message: '`click` simple error message'
         renderMessage: '`click` simple error message'
       })
+
+    it "does not mutate the error message when it is an object", ->
+      $errUtils.errObjByPath(@errMsgs, 'command.obj', {
+        cmd: 'click'
+      })
+      obj = $errUtils.errObjByPath(@errMsgs, 'command.obj', {
+        cmd: 'dblclick'
+      })
+
+      expect(obj).to.deep.eq({
+        docsUrl: 'https://on.cypress.io'
+        message: '`dblclick` simple error message'
+        renderMessage: '`dblclick` simple error message'
       })
 
   context ".getErrMsgWithObjByPath", ->

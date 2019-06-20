@@ -179,10 +179,10 @@ const errObjByPath = (errLookupObj, errPath, args) => {
 
   const escapedArgs = _.mapValues(args, escapeErrMarkdown)
 
-  errObj.renderMessage = replaceErrMsgTokens(errObj.message, escapedArgs)
-  errObj.message = replaceErrMsgTokens(errObj.message, args)
-
-  return errObj
+  return _.extend({}, errObj, {
+    renderMessage: replaceErrMsgTokens(errObj.message, escapedArgs),
+    message: replaceErrMsgTokens(errObj.message, args),
+  })
 }
 
 const errMsgByPath = (errPath, args) => {
