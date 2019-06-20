@@ -117,7 +117,7 @@ describe "Runs List", ->
           cy.get("@runRow").contains("a few secs ago")
           cy.get("@runRow").contains("00:16")
 
-        it "displays seperate timers for incomplete runs", ->
+        it "displays separate timers for incomplete runs", ->
           cy.get("@firstRunRow").contains("24:47")
           cy.get(".runs-container li").eq(3).contains("45:47")
             .then -> cy.tick(1000)
