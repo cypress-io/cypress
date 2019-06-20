@@ -33,11 +33,11 @@ const CDP_PORT = 45679 /** port range starts here, not the actual port */
 const CY_PROXY_PORT = 45680
 
 const TEST_CASES = [
+  // these first 4 cases don't involve Cypress, don't need to run every time
   // {
   //   name: 'Chrome w/o HTTP/2',
   //   disableHttp2: true,
   // },
-  // these 5 test cases cover Chrome, useful only for comparison
   // {
   //   name: 'Chrome',
   // },
@@ -49,6 +49,7 @@ const TEST_CASES = [
   //   name: 'With HTTPS proxy',
   //   httpsUpstreamProxy: true,
   // },
+  // baseline test that all other tests are compared to
   {
     name: 'Chrome w/ proxy w/o HTTP/2 (baseline)',
     disableHttp2: true,
@@ -316,12 +317,10 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 let cyServer
 
 describe('Proxy Performance', function () {
-  this.timeout(240 * 1000)
+  this.timeout(60 * 1000)
+  this.retries(3)
 
   beforeEach(function () {
-    this.timeout(240 * 1000)
-    this.currentTest.timeout(240 * 1000)
-
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   })
 
@@ -388,6 +387,7 @@ describe('Proxy Performance', function () {
 
         t.addRows(testCases)
 
+        // console.log is bad for eslint, but nobody never said nothing about process.stdout.write
         process.stdout.write('Note: All times are in milliseconds.\n')
         t.printTable()
       })
