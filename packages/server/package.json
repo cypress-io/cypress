@@ -192,6 +192,6 @@
     "url-parse": "1.4.7",
     "uuid": "3.3.2",
     "widest-line": "3.1.0",
-    "winston": "3.2.1"
+    "winston": "2.4.4"
   }
 }
