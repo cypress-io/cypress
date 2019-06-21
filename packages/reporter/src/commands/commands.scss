@@ -23,7 +23,7 @@
       display: inline-block;
       font-size: 11px;
       cursor: pointer;
-      
+
       &:focus {
         outline: 1px dotted #6c6c6c;
       }
@@ -50,9 +50,9 @@
   }
 
   .commands-container {
-    font-family: $monospace;
-
     background-color: #eef1f4;
+    font-family: $monospace;
+    min-width: $reporter-contents-min-width;
     padding: 0;
 
     &:empty {
