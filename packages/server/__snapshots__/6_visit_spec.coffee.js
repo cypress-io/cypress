@@ -13,8 +13,8 @@ exports['e2e visit low response timeout passes 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_spec.coffee...                                                            (1 of 1) 
+
+  Running: visit_spec.coffee...                                                            (1 of 1)
 
 
   visits
@@ -64,11 +64,11 @@ exports['e2e visit low response timeout passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ visit_spec.coffee                         XX:XX       11       11        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       11       11        -        -        -  
+    All specs passed!                           XX:XX       11       11        -        -        -
 
 
 `
@@ -88,8 +88,8 @@ exports['e2e visit low response timeout fails when network connection immediatel
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_http_network_error_failing_spec.coffee...                                 (1 of 1) 
+
+  Running: visit_http_network_error_failing_spec.coffee...                                 (1 of 1)
 
 
   when network connection cannot be established
@@ -173,11 +173,11 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_http_network_error_failing_spe…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -
 
 
 `
@@ -197,8 +197,8 @@ exports['e2e visit low response timeout fails when server responds with 500 1'] 
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_http_500_response_failing_spec.coffee...                                  (1 of 1) 
+
+  Running: visit_http_500_response_failing_spec.coffee...                                  (1 of 1)
 
 
   when server response is 500
@@ -270,11 +270,11 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_http_500_response_failing_spec…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -
 
 
 `
@@ -294,8 +294,8 @@ exports['e2e visit low response timeout fails when file server responds with 404
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1) 
+
+  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1)
 
 
   when file server response is 404
@@ -367,11 +367,11 @@ The internal Cypress web server responded with:
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_file_404_response_failing_spec…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -
 
 
 `
@@ -391,8 +391,8 @@ exports['e2e visit low response timeout fails when content type isnt html 1'] = 
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1) 
+
+  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1)
 
 
   when content type is plain/text
@@ -466,11 +466,11 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_non_html_content_type_failing_…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -
 
 
 `
@@ -490,8 +490,8 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1) 
+
+  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1)
 
 
   when visit times out
@@ -591,11 +591,11 @@ When this 'load' event occurs, Cypress will continue running commands.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_http_timeout_failing_spec.coff…     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -
 
 
 `
@@ -615,8 +615,8 @@ exports['e2e visit low responseTimeout, normal pageLoadTimeout fails when respon
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_response_never_ends_failing_spec.js...                                    (1 of 1) 
+
+  Running: visit_response_never_ends_failing_spec.js...                                    (1 of 1)
 
 
   response timeouts result in an error
@@ -811,11 +811,11 @@ Error: ESOCKETTIMEDOUT
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖ visit_response_never_ends_failing_sp…     XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
+    1 of 1 failed (100%)                        XX:XX        3        -        3        -        -
 
 
 `
@@ -835,8 +835,8 @@ exports['e2e visit resolves visits quickly in chrome (headed) 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+
+  Running: fast_visit_spec.coffee...                                                       (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -845,7 +845,7 @@ You have set the browser to: 'chrome'
 A video will not be recorded when using this browser.
 
 
-  on localhost 100% of visits are faster than XX:XX, 90% are faster than XX:XX
+  on localhost 99% of visits are faster than XX:XX, 90% are faster than XX:XX
 histogram line
 histogram line
 histogram line
@@ -903,11 +903,11 @@ histogram line
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -
 
 
 `
@@ -927,11 +927,11 @@ exports['e2e visit resolves visits quickly in electron (headless) 1'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+
+  Running: fast_visit_spec.coffee...                                                       (1 of 1)
 
 
-  on localhost 100% of visits are faster than XX:XX, 90% are faster than XX:XX
+  on localhost 99% of visits are faster than XX:XX, 90% are faster than XX:XX
 histogram line
 histogram line
 histogram line
@@ -995,11 +995,11 @@ histogram line
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+      Spec                                                Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -
 
 
 `

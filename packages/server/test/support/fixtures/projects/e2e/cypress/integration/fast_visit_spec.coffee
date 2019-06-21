@@ -33,9 +33,9 @@ fastVisitSpec = (url) ->
     .then ->
       expect(percentile(90)).to.be.lte(100)
 
-      expect(percentile(100)).to.be.lte(250)
+      expect(percentile(99)).to.be.lte(250)
 
-context "on localhost 100% of visits are faster than 250ms, 90% are faster than 100ms", ->
+context "on localhost 99% of visits are faster than 250ms, 90% are faster than 100ms", ->
   it "with connection: close", ->
     fastVisitSpec '/close'
 
