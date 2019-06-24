@@ -2,6 +2,7 @@ const _ = require('lodash')
 const commander = require('commander')
 const { stripIndent } = require('common-tags')
 const logSymbols = require('log-symbols')
+const envinfo = require('envinfo')
 const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
@@ -112,7 +113,7 @@ const descriptions = {
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help', 'cache']
+const knownCommands = ['version', 'run', 'open', 'install', 'verify', 'info', '-v', '--version', 'help', '-h', '--help', 'cache']
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -257,6 +258,22 @@ module.exports = {
       }
 
       cache[opts]()
+    })
+
+    program
+    .command('info')
+    .description('Print useful information about the local environment')
+    .action(function () {
+      logger.log()
+      logger.log('Environment Info:')
+      envinfo
+      .run({
+        System: ['OS', 'CPU'],
+        Binaries: ['Node', 'Yarn', 'npm'],
+        Browsers: ['Chrome', 'Edge', 'Firefox', 'Safari'],
+        npmGlobalPackages: ['cypress'],
+      })
+      .then(logger.log)
     })
 
     debug('cli starts with arguments %j', args)
