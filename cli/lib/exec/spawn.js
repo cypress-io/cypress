@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const os = require('os')
 const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
@@ -23,7 +22,7 @@ const isGarbageLineWarning = (str) => {
 }
 
 function isPlatform (platform) {
-  return os.platform() === platform
+  return process.platform === platform
 }
 
 function needsStderrPiped (needsXvfb) {
