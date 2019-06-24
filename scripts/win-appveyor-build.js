@@ -96,6 +96,7 @@ if (isPullRequest()) {
 
   terminalBanner('installing cypress.zip locally')
   const zipFile = path.resolve('cypress.zip')
+
   console.log('zip file', zipFile)
   shell.mkdir('test-local-install')
   shell.cd('test-local-install')
@@ -106,6 +107,7 @@ if (isPullRequest()) {
     DEBUG: 'cypress:cli',
     CYPRESS_INSTALL_BINARY: zipFile,
   })
+
   shell.exec(`npm install ${packageFilename}`, {
     env: testEnv,
   })
