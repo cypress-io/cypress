@@ -10,7 +10,8 @@ const shell = require('shelljs')
 const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-// const assert = require('assert')
+const path = require('path')
+const terminalBanner = require('terminal-banner').terminalBanner
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -42,6 +43,7 @@ if (!shouldBuildBinary()) {
 
 console.log('building Windows binary')
 
+// package archive filename, something like "cypress-3.3.1.tgz"
 const filename = `cypress-${process.env.NEXT_DEV_VERSION}.tgz`
 const version = process.env.NEXT_DEV_VERSION
 
@@ -50,6 +52,9 @@ la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
 console.log('building version', version)
 
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
+
+const packageFilename = path.join(process.cwd(), 'cli', 'build', filename)
+console.log('full package filename:', packageFilename)
 
 const arch = os.arch()
 
@@ -73,22 +78,6 @@ if (result.stdout.includes('nodemon')) {
   process.exit(1)
 }
 
-// const pathToExe = 'C:/projects/cypress/build/win32/Cypress/Cypress.exe'
-
-// // verify that Cypress.exe is either 32bit or 64bit based on node's arch
-// const dumpbin = shell.exec(`dumpbin /headers ${pathToExe}`)
-
-// // eslint-disable-next-line default-case
-// switch (arch) {
-//   case 'ia32':
-//     assert.ok(dumpbin.stdout.includes('machine (x86)'))
-//     break
-
-//   case 'x64':
-//     assert.ok(dumpbin.stdout.includes('machine (x64)'))
-//     break
-// }
-
 /**
  * Returns true if we are building a pull request
  */
@@ -103,6 +92,14 @@ if (isPullRequest()) {
 
   shell.exec('npm run binary-zip')
   shell.ls('-l', '*.zip')
+
+  terminalBanner('installing cypress.zip locally')
+  shell.mkdir('test-local-install')
+  shell.cd('test-local-install')
+  shell.exec(`DEBUG=cypress:cli CYPRESS_INSTALL_BINARY=../cypress.zip npm install ${packageFilename}`)
+  shell.cd('..')
+
+  terminalBanner('upload zipped binary')
   shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)
   shell.cat('binary-url.json')
   shell.exec('node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor')
