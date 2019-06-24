@@ -169,6 +169,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
 
+      cssModificationSpy = (original, args...) ->
+        snapshots.onCssModified(@href)
+        original.apply(@, args)
+
+      insertRule = contentWindow.CSSStyleSheet.prototype.insertRule
+      deleteRule = contentWindow.CSSStyleSheet.prototype.deleteRule
+
+      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
+
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
     ## nested commands and need to splice them into the
@@ -912,6 +922,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       wrapNativeMethods(contentWindow)
 
+      snapshots.onBeforeWindowLoad()
+
       timers.wrap(contentWindow)
 
     onSpecWindowUncaughtException: ->
@@ -954,8 +966,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## When the function returns true, this prevents the firing of the default event handler.
       return true
 
-    getStyles: ->
-      snapshots.getStyles()
+    detachDom: (args...) ->
+      snapshots.detachDom(args...)
+
+    getStyles: (args...) ->
+      snapshots.getStyles(args...)
 
     setRunnable: (runnable, hookName) ->
       ## when we're setting a new runnable

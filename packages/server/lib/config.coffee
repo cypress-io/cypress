@@ -5,6 +5,7 @@ deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 fs       = require("./util/fs")
+keys     = require("./util/keys")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
@@ -12,8 +13,16 @@ v        = require("./util/validation")
 debug      = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
-## cypress followed by _
-cypressEnvRe = /^(cypress_)/i
+CYPRESS_ENV_PREFIX = "CYPRESS_"
+CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
+CYPRESS_RESERVED_ENV_VARS = [
+  "CYPRESS_ENV"
+]
+CYPRESS_SPECIAL_ENV_VARS = [
+  "CI_KEY"
+  "RECORD_KEY"
+]
+
 dashesOrUnderscoresRe = /^(_-)+/
 oneOrMoreSpacesRe = /\s+/
 everythingAfterFirstEqualRe = /=(.+)/
@@ -22,7 +31,14 @@ toWords = (str) ->
   str.trim().split(oneOrMoreSpacesRe)
 
 isCypressEnvLike = (key) ->
-  cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
+  _.chain(key)
+  .invoke('toUpperCase')
+  .startsWith(CYPRESS_ENV_PREFIX)
+  .value() and
+    not _.includes(CYPRESS_RESERVED_ENV_VARS, key)
+
+removeEnvPrefix = (key) ->
+  key.slice(CYPRESS_ENV_PREFIX_LENGTH)
 
 folders = toWords """
   fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
@@ -33,22 +49,23 @@ folders = toWords """
 configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
+  blacklistHosts
   chromeWebSecurity
   modifyObstructiveCode           integrationFolder
   env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
   port                            supportFolder
-  reporter                        videosFolder
+  projectId                       videosFolder
+  reporter
   reporterOptions
   ignoreTestFiles
   testFiles                       defaultCommandTimeout
   trashAssetsBeforeRuns           execTimeout
-  blacklistHosts                  pageLoadTimeout
-  userAgent                       requestTimeout
-  viewportWidth                   responseTimeout
-  viewportHeight                  taskTimeout
-  video
+  userAgent                       pageLoadTimeout
+  viewportWidth                   requestTimeout
+  viewportHeight                  responseTimeout
+  video                           taskTimeout
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
@@ -62,12 +79,13 @@ breakingConfigKeys = toWords """
   trashAssetsBeforeHeadlessRuns
 """
 
-defaults = {
+CONFIG_DEFAULTS = {
   port:                          null
   hosts:                         null
   morgan:                        true
   baseUrl:                       null
   socketId:                      null
+  projectId:                     null
   userAgent:                     null
   isTextTerminal:                false
   reporter:                      "spec"
@@ -173,7 +191,7 @@ validate = (cfg, onErr) ->
     ## does this key have a validation rule?
     if validationFn = validationRules[key]
       ## and is the value different from the default?
-      if value isnt defaults[key]
+      if value isnt CONFIG_DEFAULTS[key]
         result = validationFn(key, value)
         if result isnt true
           onErr(result)
@@ -182,6 +200,12 @@ validateFile = (file) ->
   return (settings) ->
     validate settings, (errMsg) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
+
+hideSpecialVals = (val, key) ->
+  if _.includes(CYPRESS_SPECIAL_ENV_VARS, key)
+    return keys.hide(val)
+
+  return val
 
 module.exports = {
   getConfigKeys: -> configKeys
@@ -239,7 +263,7 @@ module.exports = {
       ## https://regexr.com/48rvt
       config.baseUrl = url.replace(/\/\/+$/, "/")
 
-    _.defaults(config, defaults)
+    _.defaults(config, CONFIG_DEFAULTS)
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
@@ -256,12 +280,12 @@ module.exports = {
       ## to zero
       config.numTestsKeptInMemory = 0
 
-    config = @setResolvedConfigValues(config, defaults, resolved)
+    config = @setResolvedConfigValues(config, CONFIG_DEFAULTS, resolved)
 
     if config.port
       config = @setUrls(config)
 
-    config = @setAbsolutePaths(config, defaults)
+    config = @setAbsolutePaths(config, CONFIG_DEFAULTS)
 
     config = @setParentTestsPaths(config)
 
@@ -379,7 +403,7 @@ module.exports = {
     .catch({code: "MODULE_NOT_FOUND"}, ->
       debug("support file %s does not exist", sf)
       ## supportFile doesn't exist on disk
-      if sf is path.resolve(obj.projectRoot, defaults.supportFile)
+      if sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
         debug("support file is default, check if #{path.dirname(sf)} exists")
         return fs.pathExists(sf)
         .then (found) ->
@@ -418,8 +442,9 @@ module.exports = {
   ##   * and the pluginsFile is NOT set to the default
   ##     - throw an error, because it should be there if the user
   ##       explicitly set it
-  setPluginsFile: (obj) ->
-    return Promise.resolve(obj) if not obj.pluginsFile
+  setPluginsFile: Promise.method (obj) ->
+    if not obj.pluginsFile
+      return obj
 
     obj = _.clone(obj)
 
@@ -435,7 +460,7 @@ module.exports = {
       debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
       debug("plugins file does not exist")
-      if pluginsFile is path.resolve(obj.projectRoot, defaults.pluginsFile)
+      if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
         debug("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
         fs.pathExists(pluginsFile)
         .then (found) ->
@@ -493,11 +518,12 @@ module.exports = {
     else
       proxyUrl
 
-    _.extend obj,
+    _.extend(obj, {
       proxyUrl:    proxyUrl
       browserUrl:  rootUrl + obj.clientRoute
       reporterUrl: rootUrl + obj.reporterRoute
       xhrUrl:      obj.namespace + obj.xhrRoute
+    })
 
     return obj
 
@@ -517,13 +543,13 @@ module.exports = {
     envCLI  = envCLI ? {}
 
     matchesConfigKey = (key) ->
-      if _.has(cfg, key)
+      if _.has(CONFIG_DEFAULTS, key)
         return key
 
       key = key.toLowerCase().replace(dashesOrUnderscoresRe, "")
       key = _.camelCase(key)
 
-      if _.has(cfg, key)
+      if _.has(CONFIG_DEFAULTS, key)
         return key
 
     configFromEnv = _.reduce envProc, (memo, val, key) ->
@@ -541,7 +567,10 @@ module.exports = {
       memo
     , []
 
-    envProc = _.omit(envProc, configFromEnv)
+    envProc = _.chain(envProc)
+    .omit(configFromEnv)
+    .mapValues(hideSpecialVals)
+    .value()
 
     resolveFrom("config",  envCfg)
     resolveFrom("envFile", envFile)
@@ -555,12 +584,9 @@ module.exports = {
     _.extend envCfg, envFile, envProc, envCLI
 
   getProcessEnvVars: (obj = {}) ->
-    normalize = (key) ->
-      key.replace(cypressEnvRe, "")
-
     _.reduce obj, (memo, value, key) ->
       if isCypressEnvLike(key)
-        memo[normalize(key)] = coerce(value)
+        memo[removeEnvPrefix(key)] = coerce(value)
       memo
     , {}
 
