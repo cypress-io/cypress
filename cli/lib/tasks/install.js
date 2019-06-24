@@ -263,6 +263,7 @@ const start = (options = {}) => {
       if (exists) {
         debug('checking extension of %s - it is "%s"',
           needVersion, path.extname(needVersion))
+
         return path.extname(needVersion) === '.zip' ? needVersion : false
       }
 
