@@ -49,9 +49,12 @@ const version = process.env.NEXT_DEV_VERSION
 
 la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
 
-console.log('building version', version)
+terminalBanner(`building version ${version}`)
 
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
+
+console.log('CLI build folder')
+shell.ls('-l', 'C:\\projects\\cypress\\cli\\build')
 
 const packageFilename = path.join(process.cwd(), 'cli', 'build', filename)
 
@@ -101,6 +104,11 @@ if (isPullRequest()) {
   shell.mkdir('test-local-install')
   shell.cd('test-local-install')
 
+  // hmm, was the cypress-<version>.tgz renamed to just "cypress.tgz"
+  console.log('CLI build folder')
+  shell.ls('-l', 'C:\\projects\\cypress\\cli\\build')
+  const renamedPackageFile = path.join(process.cwd(), 'cli', 'build', 'cypress.tgz')
+
   // getting error on Windows "Failed to replace env in config: ${APPDATA}"
   // so let's try merging the env ourselves
   // NOTE: be careful about printing merged environment, because process.env
@@ -111,7 +119,7 @@ if (isPullRequest()) {
     CYPRESS_INSTALL_BINARY: zipFile,
   }
 
-  shell.exec(`npm install ${packageFilename}`, {
+  shell.exec(`npm install ${renamedPackageFile}`, {
     env: testEnv,
   })
   shell.cd('..')
