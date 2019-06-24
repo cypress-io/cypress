@@ -97,7 +97,12 @@ if (isPullRequest()) {
   terminalBanner('installing cypress.zip locally')
   shell.mkdir('test-local-install')
   shell.cd('test-local-install')
-  shell.exec(`DEBUG=cypress:cli CYPRESS_INSTALL_BINARY=../cypress.zip npm install ${packageFilename}`)
+  shell.exec(`npm install ${packageFilename}`, {
+    env: {
+      DEBUG: 'cypress:cli',
+      CYPRESS_INSTALL_BINARY: '../cypress.zip'
+    }
+  })
   shell.cd('..')
 
   terminalBanner('upload zipped binary')
