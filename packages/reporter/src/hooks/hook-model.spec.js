@@ -130,6 +130,7 @@ describe('Hook model', () => {
       expect(hook.aliasesWithDuplicates).to.not.include('bar')
     })
 
+    // https://github.com/cypress-io/cypress/issues/4411
     it('returns the same array instance if it has not changed', () => {
       let dupes = hook.aliasesWithDuplicates
 
