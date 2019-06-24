@@ -7,20 +7,34 @@ Common ESLint rules shared by Cypress packages.
 ## Installation
 
 ```
-npm install --save-dev eslint-plugin-cypress-dev
+npm install --save-dev @cypress/eslint-plugin-dev
 ```
 
 ## Usage
+
+Add this plugin to your .eslintrc:
+
+```js
+// .eslintrc.json
+{
+  "plugins": [
+    "@cypress/dev"
+  ]
+}
+```
 
 Extend one or more of the presets depending on the nature of the package:
 
 ```js
 // .eslintrc.json
 {
+  "plugins": [
+    "@cypress/dev"
+  ]
   "extends": [
-    "plugin:cypress-dev/general",
-    "plugin:cypress-dev/tests",
-    "plugin:cypress-dev/react"
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests",
+    "plugin:@cypress/dev/react"
   ]
 }
 ```
@@ -31,7 +45,7 @@ You can relax rules
 // .eslintrc.json
 {
   "extends": [
-    "plugin:cypress-dev/general"
+    "plugin:@cypress/dev/general"
   ],
   "rules": {
     "comma-dangle": "off",
@@ -49,13 +63,29 @@ You can relax rules
 
 The majority of the rules concerning JavaScript. Should usually be used at the root of the package.
 
+**requires you to install the following dependencies**:
+```sh
+@typescript-eslint/parser
+@typescript-eslint/eslint-plugin
+@cypress/eslint-plugin-json
+```
+
 ### tests
 
 Test-specific configuration and rules. Should be used within the `test` directory.
 
+**requires you to install the following dependencies**:
+```sh
+eslint-plugin-mocha
+```
 ### react
 
 React and JSX-specific configuration and rules.
+
+**requires you to install the following dependencies**:
+```sh
+babel-eslint
+eslint-plugin-react
 
 ## Dependencies
 
