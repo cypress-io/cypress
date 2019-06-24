@@ -95,13 +95,19 @@ if (isPullRequest()) {
   shell.ls('-l', '*.zip')
 
   terminalBanner('installing cypress.zip locally')
+  const zipFile = path.resolve('cypress.zip')
+  console.log('zip file', zipFile)
   shell.mkdir('test-local-install')
   shell.cd('test-local-install')
+
+  // getting error on Windows "Failed to replace env in config: ${APPDATA}"
+  // so let's try merging the env ourselves
+  const testEnv = Object.assign({}, process.env, {
+    DEBUG: 'cypress:cli',
+    CYPRESS_INSTALL_BINARY: zipFile,
+  })
   shell.exec(`npm install ${packageFilename}`, {
-    env: {
-      DEBUG: 'cypress:cli',
-      CYPRESS_INSTALL_BINARY: '../cypress.zip',
-    },
+    env: testEnv,
   })
   shell.cd('..')
 
