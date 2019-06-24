@@ -1,6 +1,20 @@
+const customRules = require('./custom-rules')
+
+const customRulesOptions = {
+  "@cypress/dev/arrow-body-multiline-braces": [
+    "error",
+    "always"
+  ],
+}
+
 module.exports = {
   configs: {
     general: {
+      parser: "@typescript-eslint/parser",
+      plugins: [
+        "@typescript-eslint",
+        "@cypress/json"
+      ],
       env: {
         es6: true,
         commonjs: true,
@@ -9,6 +23,7 @@ module.exports = {
         ecmaVersion: 2018,
       },
       rules: {
+        ...customRulesOptions,
         'array-bracket-newline': ['error', 'consistent'],
         'array-bracket-spacing': ['error', 'never'],
         'arrow-parens': ['error', 'always'],
@@ -182,4 +197,7 @@ module.exports = {
       },
     },
   },
+  rules: {
+    ...customRules
+  }
 }

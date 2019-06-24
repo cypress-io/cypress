@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    "@cypress/json"
+  ],
+  "env": {
+    "commonjs": true
+  },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2018
+  }
+}

@@ -1,40 +1,53 @@
 {
-  "name": "eslint-plugin-cypress-dev",
+  "name": "@cypress/eslint-plugin-dev",
   "version": "0.0.0-development",
   "description": "Common ESLint rules shared by Cypress packages",
-  "main": "index.js",
-  "author": "Chris Breiding (chris@cypress.io)",
-  "license": "MIT",
   "keywords": [
+    "cypress",
     "eslint",
-    "eslintplugin",
-    "cypress"
+    "eslintplugin"
   ],
+  "homepage": "https://github.com/cypress-io/eslint-plugin-cypress-dev#readme",
+  "bugs": {
+    "url": "https://github.com/cypress-io/eslint-plugin-cypress-dev/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cypress-io/eslint-plugin-cypress-dev.git"
   },
-  "bugs": {
-    "url": "https://github.com/cypress-io/eslint-plugin-cypress-dev/issues"
-  },
-  "homepage": "https://github.com/cypress-io/eslint-plugin-cypress-dev#readme",
-  "peerDependencies": {
-    "babel-eslint": "^7.2.3",
-    "eslint": ">= 3.2.1",
-    "eslint-plugin-mocha": "^4.11.0",
-    "eslint-plugin-react": "^7.2.1"
-  },
-  "devDependencies": {
-    "condition-circle": "1.5.0",
-    "github-post-release": "1.13.1",
-    "husky": "^0.14.3",
-    "semantic-release": "8.2.0",
-    "simple-commit-message": "3.3.1"
-  },
+  "license": "MIT",
+  "author": "Chris Breiding (chris@cypress.io)",
+  "main": "index.js",
   "scripts": {
     "lint": "eslint --fix *.js",
     "precommit": "npm run lint",
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
+  },
+  "dependencies": {
+    "eslint-rule-composer": "^0.3.0"
+  },
+  "devDependencies": {
+    "@cypress/eslint-plugin-json": "^2.0.3",
+    "@types/jest": "^24.0.15",
+    "@typescript-eslint/eslint-plugin": "^1.11.0",
+    "@typescript-eslint/parser": "^1.11.0",
+    "condition-circle": "1.5.0",
+    "eslint": "^5.16.0",
+    "github-post-release": "1.13.1",
+    "husky": "^0.14.3",
+    "jest": "^24.8.0",
+    "jest-cli": "^24.8.0",
+    "semantic-release": "8.2.0",
+    "simple-commit-message": "3.3.1"
+  },
+  "peerDependencies": {
+    "@cypress/eslint-plugin-json": ">= 2.0.3",
+    "@typescript-eslint/eslint-plugin": ">= 1.11.0",
+    "@typescript-eslint/parser": ">= 1.11.0",
+    "babel-eslint": "^7.2.3",
+    "eslint": ">= 3.2.1 < 6",
+    "eslint-plugin-mocha": "^4.11.0",
+    "eslint-plugin-react": "^7.2.1"
   },
   "release": {
     "verifyConditions": "condition-circle",
