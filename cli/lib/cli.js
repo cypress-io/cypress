@@ -262,7 +262,7 @@ module.exports = {
 
     program
     .command('info')
-    .description('Print useful information about the local environment')
+    .description('Prints useful information about the local environment')
     .action(function () {
       logger.log()
       logger.log('Environment Info:')
