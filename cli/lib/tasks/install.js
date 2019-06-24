@@ -259,6 +259,7 @@ const start = (options = {}) => {
 
     // see if version supplied is a path to a binary
     debug('checking if file exists "%s" cwd "%s"', needVersion, process.cwd())
+
     return fs.pathExistsAsync(needVersion)
     .then((exists) => {
       if (exists) {

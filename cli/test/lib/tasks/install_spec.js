@@ -119,6 +119,7 @@ describe('/lib/tasks/install', function () {
 
       it('can install local binary zip file from relative path', function () {
         const version = './cypress-resources/file.zip'
+
         debug('process.cwd %s', process.cwd())
 
         // command "npm install cypress"
@@ -127,6 +128,7 @@ describe('/lib/tasks/install', function () {
         // in this case, the expected absolute zip file path will be from the
         // project's root, not from the "node_modules/cypress" folder
         const zipFilePath = '/my/project/path/cypress-resources/file.zip'
+
         mockfs({
           [version]: 'asdf',
         })
