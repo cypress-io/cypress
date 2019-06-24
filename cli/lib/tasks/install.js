@@ -269,7 +269,8 @@ const start = (options = {}) => {
 
       const possibleFile = util.formAbsolutePath(needVersion)
 
-      debug('checking local file "%s" cwd "%s"', possibleFile, process.cwd())
+      debug('from "%s" formed possible local file "%s" cwd "%s"',
+        needVersion, possibleFile, process.cwd())
 
       return fs.pathExistsAsync(possibleFile)
       .then((exists) => {
@@ -285,9 +286,9 @@ const start = (options = {}) => {
     })
     .then((pathToLocalFile) => {
       if (pathToLocalFile) {
-        const absolutePath = path.resolve(needVersion)
+        const absolutePath = util.formAbsolutePath(needVersion)
 
-        debug('found local file at', absolutePath)
+        debug('using local zip file at "%s"', absolutePath)
         debug('skipping download')
 
         const rendererOptions = getRendererOptions()
