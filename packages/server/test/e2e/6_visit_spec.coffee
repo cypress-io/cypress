@@ -171,12 +171,17 @@ describe "e2e visit", ->
       }
     })
 
+    onStdout = (stdout) ->
+      stdout
+      .replace(/^\d+%\s+of visits to [^\s]+ finished in less than.*$/gm, 'histogram line')
+
     it "in chrome (headed)", ->
       e2e.exec(@, {
         spec: "fast_visit_spec.coffee"
         snapshot: true
         expectedExitCode: 0
         browser: 'chrome'
+        onStdout
       })
 
     it "in electron (headless)", ->
@@ -185,4 +190,5 @@ describe "e2e visit", ->
         snapshot: true
         expectedExitCode: 0
         browser: 'electron'
+        onStdout
       })
