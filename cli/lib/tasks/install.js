@@ -18,9 +18,9 @@ const { throwFormErrorText, errors } = require('../errors')
 
 const alreadyInstalledMsg = () => {
   if (!util.isPostInstall()) {
-    logger.log(stripIndent`    
+    logger.log(stripIndent`
       Skipping installation:
-  
+
         Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
     `)
   }
@@ -261,15 +261,18 @@ const start = (options = {}) => {
     return fs.pathExistsAsync(needVersion)
     .then((exists) => {
       if (exists) {
+        debug('checking extension of %s - it is "%s"',
+          needVersion, path.extname(needVersion))
         return path.extname(needVersion) === '.zip' ? needVersion : false
       }
 
       const possibleFile = util.formAbsolutePath(needVersion)
 
-      debug('checking local file', possibleFile, 'cwd', process.cwd())
+      debug('checking local file "%s" cwd "%s"', possibleFile, process.cwd())
 
       return fs.pathExistsAsync(possibleFile)
       .then((exists) => {
+        debug('local file "%s" exists?', possibleFile, exists)
         // if this exists return the path to it
         // else false
         if (exists && path.extname(possibleFile) === '.zip') {
