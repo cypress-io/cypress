@@ -100,8 +100,8 @@ if (isPullRequest()) {
   shell.exec(`npm install ${packageFilename}`, {
     env: {
       DEBUG: 'cypress:cli',
-      CYPRESS_INSTALL_BINARY: '../cypress.zip'
-    }
+      CYPRESS_INSTALL_BINARY: '../cypress.zip',
+    },
   })
   shell.cd('..')
 
