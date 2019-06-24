@@ -243,10 +243,16 @@ const util = {
     })
   },
 
-  // attention:
-  // when passing relative path to NPM post install hook, the current working
-  // directory is set to the `node_modules/cypress` folder
-  // the user is probably passing relative path with respect to root package folder
+  /**
+   * Returns absolute path to a given file IF the filename is specified
+   * while doing "npm install ..."
+   *
+   * **attention:**
+   * when passing relative path to NPM post install hook, the current working
+   * directory is set to the `node_modules/cypress` folder.
+   * the user is probably passing relative path with respect to root package folder,
+   * that's why we join it with 2 parent folders
+   */
   formAbsolutePath (filename) {
     if (path.isAbsolute(filename)) {
       return filename

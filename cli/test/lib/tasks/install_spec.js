@@ -4,6 +4,7 @@ const path = require('path')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const mockfs = require('mock-fs')
+const debug = require('debug')('test')
 const snapshot = require('../../support/snapshot')
 
 const stdout = require('../../support/stdout')
@@ -99,7 +100,7 @@ describe('/lib/tasks/install', function () {
         })
       })
 
-      it('can install local binary zip file without download', function () {
+      it('can install local binary zip file without download (absolute path)', function () {
         const version = '/tmp/local/file.zip'
 
         process.env.CYPRESS_INSTALL_BINARY = version
@@ -118,7 +119,14 @@ describe('/lib/tasks/install', function () {
 
       it('can install local binary zip file from relative path', function () {
         const version = './cypress-resources/file.zip'
+        debug('process.cwd %s', process.cwd())
 
+        // command "npm install cypress"
+        // sets the CWD to "node_modules/cypress" during post-install hook
+        sinon.stub(process, 'cwd').returns('/my/project/path/node_modules/cypress')
+        // in this case, the expected absolute zip file path will be from the
+        // project's root, not from the "node_modules/cypress" folder
+        const zipFilePath = '/my/project/path/cypress-resources/file.zip'
         mockfs({
           [version]: 'asdf',
         })
@@ -129,8 +137,9 @@ describe('/lib/tasks/install', function () {
         return install.start()
         .then(() => {
           expect(download.start).not.to.be.called
+          //
           expect(unzip.start).to.be.calledWithMatch({
-            zipFilePath: path.resolve(version),
+            zipFilePath,
             installDir,
           })
         })

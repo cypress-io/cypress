@@ -258,6 +258,7 @@ const start = (options = {}) => {
     }
 
     // see if version supplied is a path to a binary
+    debug('checking if file exists "%s" cwd "%s"', needVersion, process.cwd())
     return fs.pathExistsAsync(needVersion)
     .then((exists) => {
       if (exists) {
@@ -286,6 +287,8 @@ const start = (options = {}) => {
     })
     .then((pathToLocalFile) => {
       if (pathToLocalFile) {
+        debug('forming absolute zip file path from cwd %s and version %s',
+          process.cwd(), needVersion)
         const absolutePath = util.formAbsolutePath(needVersion)
 
         debug('using local zip file at "%s"', absolutePath)
