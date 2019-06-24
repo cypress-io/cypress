@@ -103,10 +103,13 @@ if (isPullRequest()) {
 
   // getting error on Windows "Failed to replace env in config: ${APPDATA}"
   // so let's try merging the env ourselves
-  const testEnv = Object.assign({}, process.env, {
+  // NOTE: be careful about printing merged environment, because process.env
+  // includes sensitive variables
+  const testEnv = {
+    APPDATA: process.env.APPDATA,
     DEBUG: 'cypress:cli',
     CYPRESS_INSTALL_BINARY: zipFile,
-  })
+  }
 
   shell.exec(`npm install ${packageFilename}`, {
     env: testEnv,
