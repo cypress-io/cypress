@@ -54,6 +54,7 @@ console.log('building version', version)
 shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
 
 const packageFilename = path.join(process.cwd(), 'cli', 'build', filename)
+
 console.log('full package filename:', packageFilename)
 
 const arch = os.arch()
