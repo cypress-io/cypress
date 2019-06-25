@@ -55,6 +55,12 @@ describe "aliases", ->
           }],
         })
 
+      it "has correct alias class", ->
+        cy.contains('.command-number', '1')
+          .parent()
+          .find('.command-alias')
+          .should('have.class', 'route')
+
       it "render without a count", ->
         cy.contains('.command-number', '1')
           .parent()
@@ -104,6 +110,9 @@ describe "aliases", ->
             ordinal: "2nd"
           }],
         })
+
+      it "renders all aliases ", ->
+        cy.get('.command-alias').should('have.length', 3)
 
       it "render with counts in non-event commands", ->
         cy.contains('.command-number', '1')
@@ -244,7 +253,7 @@ describe "aliases", ->
           state: "passed"
           name: "get"
           message: "body"
-          alias: "b"
+          alias: "barAlias"
           aliasType: "dom"
           event: true
           renderProps: {message: "", indicator: "passed"}
@@ -255,21 +264,27 @@ describe "aliases", ->
           name: "get"
           referencesAlias: [{
             cardinal: 1
-            name: "b"
+            name: "barAlias"
             ordinal: "1st"
           }],
         })
+
+      it "has correct alias class", ->
+        cy.contains('.command-number', '1')
+          .parent()
+          .find('.command-alias')
+          .should('have.class', 'dom')
 
       it "render without a count", ->
         cy.contains('.command-number', '1')
           .parent()
           .within ->
             cy.get('.command-alias-count').should('not.exist')
-            cy.contains('.command-alias', '@b')
+            cy.contains('.command-alias', '@barAlias')
               .trigger("mouseover")
 
         cy.get(".tooltip span").should ($tooltip) ->
-          expect($tooltip).to.contain("Found an alias for: 'b'")
+          expect($tooltip).to.contain("Found an alias for: 'barAlias'")
 
     describe "with consecutive duplicates", ->
       beforeEach ->
@@ -399,6 +414,9 @@ describe "aliases", ->
             ordinal: "2nd"
           }],
         })
+
+      it "renders all aliases ", ->
+        cy.get('.command-alias').should('have.length', 6)
 
       it "render without counts", ->
         cy.contains('.command-number', '1')
