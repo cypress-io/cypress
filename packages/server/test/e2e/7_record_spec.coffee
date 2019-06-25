@@ -1371,3 +1371,24 @@ describe "e2e record", ->
             snapshot: true
             expectedExitCode: 0
           })
+
+      describe "unknown warning", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          res: "postRunResponse@2.1.0"
+        }
+
+        setup(routes)
+
+        it "warns with unknown warning code", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
