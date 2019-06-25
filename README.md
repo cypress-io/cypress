@@ -3,7 +3,7 @@
     <h1>Cypress Developer ESLint Plugin</h1>
     <a href="https://www.npmjs.com/package/@cypress/eslint-plugin-dev"><img src="https://img.shields.io/npm/v/@cypress/eslint-plugin-dev.svg?style=flat"></a>
     <a href="https://www.npmjs.com/package/@cypress/eslint-plugin-dev"><img src="https://img.shields.io/npm/dm/@cypress/eslint-plugin-dev.svg"></a>
-    <a href="https://github.com/cypress-io/cypress-eslint-plugin-dev/blob/master/LICENSE.md"><img src="https://img.shields.io/github/license/cypress-io/@cypress/eslint-plugin-dev.svg"></a>
+    <a href="https://github.com/cypress-io/cypress-eslint-plugin-dev/blob/master/LICENSE.md"><img src="https://img.shields.io/github/license/cypress-io/cypress-eslint-plugin-dev.svg"></a>
 
 <p>Common ESLint rules shared by Cypress packages.</p>
 
