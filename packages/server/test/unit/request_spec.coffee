@@ -199,6 +199,7 @@ describe "lib/request", ->
       it "retries 4x on a connection reset", (done) ->
         opts = {
           url: "http://localhost:9988/econnreset"
+          retryIntervals: [0, 1, 2, 3]
         }
 
         stream = request.create(opts)
@@ -210,6 +211,26 @@ describe "lib/request", ->
 
         stream.on "error", (err) ->
           expect(err.code).to.eq('ECONNRESET')
+          expect(retries).to.eq(4)
+          done()
+
+      it "retries 4x on a NXDOMAIN (ENOTFOUND)", (done) ->
+        nock.enableNetConnect()
+
+        opts = {
+          url: "http://will-never-exist.invalid.example.com"
+          retryIntervals: [0, 1, 2, 3]
+        }
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        stream.on "error", (err) ->
+          expect(err.code).to.eq('ENOTFOUND')
           expect(retries).to.eq(4)
           done()
 
@@ -230,6 +251,7 @@ describe "lib/request", ->
       it "retries 4x on a connection reset", ->
         opts = {
           url: "http://localhost:9988/econnreset"
+          retryIntervals: [0, 1, 2, 3]
         }
 
         request.create(opts, true)

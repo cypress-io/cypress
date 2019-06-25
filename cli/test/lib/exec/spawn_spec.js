@@ -153,7 +153,7 @@ describe('lib/exec/spawn', function () {
           expect(xvfb.start).to.have.been.calledOnce
           expect(xvfb.stop).to.have.been.calledOnce
           expect(cp.spawn).to.have.been.calledTwice
-          // second code should be 0 after successfully running with XVFB
+          // second code should be 0 after successfully running with Xvfb
           expect(code).to.equal(0)
         })
       })

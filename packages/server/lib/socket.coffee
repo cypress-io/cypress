@@ -128,6 +128,7 @@ class Socket
       destroyUpgrade: false
       serveClient: false
       cookie: cookie
+      parser: socketIo.circularParser
     })
 
   startListening: (server, automation, config, options) ->

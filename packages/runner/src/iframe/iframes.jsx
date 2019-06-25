@@ -9,7 +9,6 @@ import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
-import eventManager from '../lib/event-manager'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
@@ -74,13 +73,7 @@ export default class Iframes extends Component {
       removeHeadStyles: this.autIframe.removeHeadStyles,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
-      detachDom: () => {
-        const Cypress = eventManager.getCypress()
-
-        if (Cypress) {
-          return this.autIframe.detachDom(Cypress)
-        }
-      },
+      detachDom: this.autIframe.detachDom,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={this.props.eventManager}

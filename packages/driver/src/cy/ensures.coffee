@@ -114,6 +114,10 @@ create = (state, expect) ->
   ensureVisibility = (subject, onFail) ->
     cmd = state("current").get("name")
 
+    # We overwrite the filter(":visible") in jquery
+    # packages/driver/src/config/jquery.coffee#L51
+    # So that this effectively calls our logic 
+    # for $dom.isVisible aka !$dom.isHidden
     if not (subject.length is subject.filter(":visible").length)
       reason = $dom.getReasonIsHidden(subject)
       node   = $dom.stringify(subject)

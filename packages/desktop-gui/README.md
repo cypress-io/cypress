@@ -82,5 +82,3 @@ This project is tested with Cypress itself. It acts exactly like any other Cypre
 ## from 'cypress/packages/desktop-gui' dir
 npm run cypress:open
 ```
-
-From here, you can drag in the `desktop-gui` dir from your local fork of `cypress`. Click into the project and run the tests~
