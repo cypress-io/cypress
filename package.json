@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cypress-io/eslint-plugin-cypress-dev.git"
+    "url": "https://github.com/cypress-io/eslint-plugin-cypress-dev.git"
   },
   "license": "MIT",
   "author": "Chris Breiding (chris@cypress.io)",
@@ -21,7 +21,7 @@
   "scripts": {
     "lint": "eslint --fix *.js",
     "precommit": "npm run lint",
-    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
+    "semantic-release": "semantic-release"
   },
   "dependencies": {
     "eslint-rule-composer": "^0.3.0"
@@ -35,7 +35,7 @@
     "husky": "^0.14.3",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
-    "semantic-release": "8.2.0"
+    "semantic-release": "^15.13.17"
   },
   "peerDependencies": {
     "@cypress/eslint-plugin-json": ">= 2.0.3",
