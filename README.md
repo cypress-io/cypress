@@ -63,7 +63,7 @@ You can relax rules
 
 The majority of the rules concerning JavaScript. Should usually be used at the root of the package.
 
-**requires you to install the following dependencies**:
+**you must install the following as devDependencies yourself**:
 ```sh
 @typescript-eslint/parser
 @typescript-eslint/eslint-plugin
@@ -74,7 +74,7 @@ The majority of the rules concerning JavaScript. Should usually be used at the r
 
 Test-specific configuration and rules. Should be used within the `test` directory.
 
-**requires you to install the following dependencies**:
+**you must install the following as devDependencies yourself**:
 ```sh
 eslint-plugin-mocha
 ```
@@ -82,10 +82,11 @@ eslint-plugin-mocha
 
 React and JSX-specific configuration and rules.
 
-**requires you to install the following dependencies**:
+**you must install the following as devDependencies yourself**:
 ```sh
 babel-eslint
 eslint-plugin-react
+```
 
 ## Dependencies
 

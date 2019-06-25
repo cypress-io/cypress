@@ -1,46 +1,26 @@
-version: 2
+version: 2.1
 jobs:
-  build:
-    working_directory: ~/cypress-io/cypress-eslint-plugin-dev
-    parallelism: 1
-    shell: /bin/bash --login
-    environment:
-      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
-      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+  test:
     docker:
-    - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
-      command: /sbin/init
+    - image: cypress/base:10
     steps:
     - checkout
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
-    - run:
-        working_directory: ~/cypress-io/cypress-eslint-plugin-dev
-        command: nvm install 10 && nvm alias default 10
     - restore_cache:
         keys:
-        - v1-dep-{{ .Branch }}-
-        - v1-dep-master-
-        - v1-dep-
-    - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
-    - run: export PATH="~/cypress-io/cypress-eslint-plugin-dev/node_modules/.bin:$PATH"
-    - run: npm ci
+        - cache-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
+    - run:
+        name: Yarn install
+        command: yarn install --frozen-lockfile
     - save_cache:
-        key: v1-dep-{{ .Branch }}-{{ epoch }}
+        key: cache-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
         paths:
-        - vendor/bundle
-        - ~/virtualenvs
-        - ~/.m2
-        - ~/.ivy2
-        - ~/.bundle
-        - ~/.go_workspace
-        - ~/.gradle
-        - ~/.cache/bower
-        - ./node_modules
-    - run: npm test
-    - run: npm run semantic-release || true
-    - store_test_results:
-        path: /tmp/circleci-test-results
-    - store_artifacts:
-        path: /tmp/circleci-artifacts
-    - store_artifacts:
-        path: /tmp/circleci-test-results
+        - ~/.cache
+    - run:
+        command: npm run test
+    - run:
+        command: npm run semantic-release
+workflows:
+  build:
+    jobs:
+    - test
+  version: 2

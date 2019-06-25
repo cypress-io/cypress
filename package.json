@@ -7,13 +7,13 @@
     "eslint",
     "eslintplugin"
   ],
-  "homepage": "https://github.com/cypress-io/eslint-plugin-cypress-dev#readme",
+  "homepage": "https://github.com/cypress-io/cypress-eslint-plugin-dev#readme",
   "bugs": {
-    "url": "https://github.com/cypress-io/eslint-plugin-cypress-dev/issues"
+    "url": "https://github.com/cypress-io/cypress-eslint-plugin-dev/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/eslint-plugin-cypress-dev.git"
+    "url": "git+https://github.com/cypress-io/cypress-eslint-plugin-dev.git"
   },
   "license": "MIT",
   "author": "Chris Breiding (chris@cypress.io)",
@@ -21,7 +21,8 @@
   "scripts": {
     "lint": "eslint --fix *.js",
     "precommit": "npm run lint",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post",
+    "test": "jest"
   },
   "dependencies": {
     "eslint-rule-composer": "^0.3.0"
