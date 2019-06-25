@@ -11,6 +11,8 @@ import {
   NetEventFrames,
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
+  DICT_STRING_MATCHER_FIELDS,
+  STRING_MATCHER_FIELDS,
   SERIALIZABLE_REQ_PROPS,
   SERIALIZABLE_RES_PROPS,
   StaticResponse,
@@ -32,11 +34,11 @@ const debug = debugModule('cypress:server:net_stubbing')
 
 function _getAllStringMatcherFields(options) {
   return _.concat(
-    _.filter(['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url'], _.partial(_.has, options)),
+    _.filter(STRING_MATCHER_FIELDS, _.partial(_.has, options)),
     // add the nested DictStringMatcher values to the list of fields
     _.flatten(
       _.filter(
-        ['headers', 'query'].map(field => {
+        DICT_STRING_MATCHER_FIELDS.map(field => {
           const value = options[field]
 
           if (value) {
@@ -122,6 +124,7 @@ export function _getMatchableForRequest(req) {
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
+// TOOD: optimize to short-circuit on route not match
 export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyIncomingMessage) {
   const matchable = _getMatchableForRequest(req)
 
@@ -134,11 +137,7 @@ export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyInc
 
   stringMatcherFields.forEach((field) => {
     const matcher = _.get(routeMatcher, field)
-    let value = _.get(matchable, field)
-
-    if (typeof value === 'undefined') {
-      value = ''
-    }
+    let value = _.get(matchable, field, '')
 
     if (typeof value !== 'string') {
       value = String(value)

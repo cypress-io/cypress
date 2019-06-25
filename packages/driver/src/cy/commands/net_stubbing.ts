@@ -14,6 +14,9 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
   "statusMessage"
 )
 
+export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
+export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
+
 type GlobPattern = string
 type StringMatcher = GlobPattern | RegExp
 type DictMatcher<T> = { [key: string]: T }
@@ -191,13 +194,12 @@ export namespace NetEventFrames {
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
  */
 function _annotateMatcherOptionsTypes(options: RouteMatcherOptions) {
-  const dictStringMatcherFields = ['headers', 'query']
-  const stringMatcherFields = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
+  const stringMatcherFields = STRING_MATCHER_FIELDS
   .concat(
     // add the nested DictStringMatcher values to the list of fields to annotate
     _.flatten(
       _.filter(
-        dictStringMatcherFields.map(field => {
+        DICT_STRING_MATCHER_FIELDS.map(field => {
           const value = options[field]
 
           if (value) {
