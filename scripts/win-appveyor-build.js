@@ -102,7 +102,7 @@ if (isPullRequest()) {
 
   // hmm, was the cypress-<version>.tgz renamed to just "cypress.tgz"
   console.log('CLI build folder')
-  shell.ls('-l', 'C:\\projects\\cypress\\cli\\build')
+  console.log(shell.ls('-l', 'C:\\projects\\cypress\\cli\\build'))
   const renamedPackageFile = path.join(process.cwd(), 'cli', 'build', 'cypress.tgz')
 
   console.log('zip file', zipFile)
