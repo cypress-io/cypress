@@ -100,14 +100,14 @@ if (isPullRequest()) {
   terminalBanner('installing cypress.zip locally')
   const zipFile = path.resolve('cypress.zip')
 
-  console.log('zip file', zipFile)
-  shell.mkdir('test-local-install')
-  shell.cd('test-local-install')
-
   // hmm, was the cypress-<version>.tgz renamed to just "cypress.tgz"
   console.log('CLI build folder')
   shell.ls('-l', 'C:\\projects\\cypress\\cli\\build')
   const renamedPackageFile = path.join(process.cwd(), 'cli', 'build', 'cypress.tgz')
+
+  console.log('zip file', zipFile)
+  shell.mkdir('test-local-install')
+  shell.cd('test-local-install')
 
   // getting error on Windows "Failed to replace env in config: ${APPDATA}"
   // so let's try merging the env ourselves
