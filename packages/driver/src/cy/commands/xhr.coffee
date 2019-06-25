@@ -407,6 +407,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         urlString = url.toString()
 
+        ## https://github.com/cypress-io/cypress/issues/2372
         if (decodedUrl = decodeURI(urlString)) and urlString != decodedUrl
           $utils.warnByPath("route.url_percentencoding_warning", { args: { decodedUrl }})
 

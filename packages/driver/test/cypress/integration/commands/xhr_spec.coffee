@@ -1327,6 +1327,7 @@ describe "src/cy/commands/xhr", ->
         .wait("@getFoo").then (xhr) ->
           expect(xhr.responseBody).to.eq "foo bar baz"
 
+    ## https://github.com/cypress-io/cypress/issues/2372
     it "warns if a percent-encoded URL is used", ->
       cy.spy(Cypress.utils, 'warning')
 
