@@ -2,4 +2,3 @@
 node_modules
 *.log
 yarn.lock
-package-lock.json

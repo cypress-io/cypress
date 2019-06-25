@@ -31,14 +31,11 @@
     "@types/jest": "^24.0.15",
     "@typescript-eslint/eslint-plugin": "^1.11.0",
     "@typescript-eslint/parser": "^1.11.0",
-    "condition-circle": "1.5.0",
     "eslint": "^5.16.0",
-    "github-post-release": "1.13.1",
     "husky": "^0.14.3",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
-    "semantic-release": "8.2.0",
-    "simple-commit-message": "3.3.1"
+    "semantic-release": "8.2.0"
   },
   "peerDependencies": {
     "@cypress/eslint-plugin-json": ">= 2.0.3",
@@ -48,10 +45,5 @@
     "eslint": ">= 3.2.1 < 6",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.2.1"
-  },
-  "release": {
-    "verifyConditions": "condition-circle",
-    "analyzeCommits": "simple-commit-message",
-    "generateNotes": "github-post-release"
   }
 }

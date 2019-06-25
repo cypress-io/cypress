@@ -23,7 +23,7 @@ jobs:
         - v1-dep-
     - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
     - run: export PATH="~/cypress-io/cypress-eslint-plugin-dev/node_modules/.bin:$PATH"
-    - run: npm install
+    - run: npm ci
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
         paths:
