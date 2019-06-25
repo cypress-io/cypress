@@ -403,6 +403,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## aliases subject
           options.response = aliasObj.subject
 
+        url = getUrl(options)
+
+        urlString = url.toString()
+
+        if (decodedUrl = decodeURI(urlString)) and urlString != decodedUrl
+          $utils.warnByPath("route.url_percentencoding_warning", { args: { decodedUrl }})
+
         options.log = Cypress.log({
           name: "route"
           instrument: "route"
@@ -415,7 +422,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           numResponses: 0
           consoleProps: ->
             Method:   options.method
-            URL:      getUrl(options)
+            URL:      url
             Status:   options.status
             Response: options.response
             Alias:    options.alias
