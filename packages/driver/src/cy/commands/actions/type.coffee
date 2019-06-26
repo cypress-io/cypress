@@ -170,16 +170,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           return if not form.length
 
-          multipleInputsAndNoSubmitElements = (form) ->
-            inputs  = form.find("input")
+          multipleInputsBlockImplicitSubmissionAndNoSubmitElements = (form) ->
             submits = getDefaultButtons(form)
 
-            inputs.length > 1 and submits.length is 0
+            ## https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+            implicitSubmissionBlockingInputs = form.find("input").filter (__, input) ->
+              $input = $dom.wrap(input)
+              
+              $elements.blocksImplicitSubmission($input)
+
+            implicitSubmissionBlockingInputs.length > 1 and submits.length is 0
 
           ## throw an error here if there are multiple form parents
 
           ## bail if we have multiple inputs and no submit elements
-          return if multipleInputsAndNoSubmitElements(form)
+          return if multipleInputsBlockImplicitSubmissionAndNoSubmitElements(form)
 
           clickedDefaultButton = (button) ->
             ## find the 'default button' as per HTML spec and click it natively

@@ -494,6 +494,28 @@ const isTextLike = function ($el) {
   ])
 }
 
+const blocksImplicitSubmission = function ($el) {
+  const type = (type) => {
+    return isType($el, type)
+  }
+
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+  return _.some([
+    type('text'),
+    type('search'),
+    type('url'),
+    type('tel'),
+    type('email'),
+    type('password'),
+    type('date'),
+    type('month'),
+    type('week'),
+    type('time'),
+    type('datetime-local'),
+    type('number'),
+  ])
+}
+
 const isScrollable = ($el) => {
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
@@ -831,6 +853,8 @@ module.exports = {
   isType,
 
   isFocused,
+
+  blocksImplicitSubmission,
 
   isNeedSingleValueChangeInputElement,
 

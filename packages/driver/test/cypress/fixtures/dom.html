@@ -231,9 +231,15 @@
           </div>
         </form>
 
-        <form id="no-buttons">
-          <input name="fname" />
-          <input name="lname" />
+        <form id="no-buttons-all-inputs-disabling-implicit-submission">
+          <input /> <!-- default is type='text' -->
+          <input /> <!-- default is type='text' -->
+        </form>
+
+        <!-- https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission -->
+        <form id="no-buttons-and-only-one-input-disabling-implicit-submission">
+          <input type="text" />
+          <input type="hidden" />
         </form>
 
         <form id="one-button-type-button">

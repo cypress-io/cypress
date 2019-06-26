@@ -2650,11 +2650,20 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#single-input input").type("f").type("f{enter}").then -> done()
 
-      context "2 inputs, no 'submit' elements", ->
+      # https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+      context "2 inputs, no 'submit' elements, all preventing implicit submission", ->
         it "does not trigger submit event", (done) ->
-          form = @$forms.find("#no-buttons").submit -> done("err: should not have submitted")
+          form = @$forms.find("#no-buttons-all-inputs-disabling-implicit-submission").submit -> done("err: should not have submitted")
 
-          cy.get("#no-buttons input:first").type("f").type("{enter}").then -> done()
+          cy.get("#no-buttons-all-inputs-disabling-implicit-submission input:first").type("f").type("{enter}").then -> done()
+
+      context "2 inputs, no 'submit' elements, only one preventing implicit submission", ->
+        it "does submit event", (done) ->
+          form = @$forms.find("#no-buttons-and-only-one-input-disabling-implicit-submission").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#no-buttons-and-only-one-input-disabling-implicit-submission input:first").type("f{enter}")
 
       context "2 inputs, no 'submit' elements but 1 button[type=button]", ->
         it "does not trigger submit event", (done) ->
