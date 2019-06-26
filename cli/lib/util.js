@@ -103,9 +103,10 @@ function printNodeOptions (log = debug) {
    */
 const dequote = (str) => {
   la(is.string(str), 'expected a string to remove double quotes', str)
-  if (str.length > 1 && str[0] === '"' && str[str.length-1] === '"') {
+  if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.substr(1, str.length - 2)
   }
+
   return str
 }
 
@@ -277,6 +278,7 @@ const util = {
     const packageConfigVar = process.env[`npm_package_config_${varName}`]
 
     let result
+
     if (envVar) {
       debug(`Using ${varName} from environment variable`)
 

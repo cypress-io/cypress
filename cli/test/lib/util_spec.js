@@ -362,7 +362,7 @@ describe('util', () => {
     })
 
     it('keeps single quotes', () => {
-      expect(util.dequote("'foo'")).to.equal("'foo'")
+      expect(util.dequote('\'foo\'')).to.equal('\'foo\'')
     })
 
     it('keeps unbalanced double quotes', () => {
