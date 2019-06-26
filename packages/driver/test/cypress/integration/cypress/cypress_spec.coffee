@@ -45,8 +45,6 @@ describe "driver/src/cypress/index", ->
         expect(err.backend).to.be.true
         expect(err.stack).not.to.include("From previous event")
 
-        done()
-
     ## https://github.com/cypress-io/cypress/issues/4346
     it "can complete if a circular reference is sent", ->
       foo = {
