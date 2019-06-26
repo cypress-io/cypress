@@ -116,8 +116,12 @@
     .command-alias {
       border-radius: 10px;
       color: #777888;
-      padding: 0px 5px;
+      padding: 0 5px;
       display: inline-block;
+
+      &.show-count {
+        padding-right: 2px;
+      }
 
       &.route {
         background-color: lighten(#FFB61C, 25%);
@@ -157,20 +161,20 @@
       margin-left: 0;
     }
 
-    .num-duplicates.has-alias,
+    .num-duplicates.has-alias {
+      border-radius: 0 10px 10px 0;
+      line-height: 2;
+      padding: 4px 6px 2px 4px;
+    }
+
     .command-alias-count {
       border-radius: 0 10px 10px 0;
-      padding: 0px 6px 1px 4px;
+      padding: 5px 6px 3px 4px;
     }
 
     .num-duplicates,
     .command-alias-count {
-      background-color: lighten(#ffdf9c, 8%);
-    }
-
-    .command-alias-count {
-      display: inline;
-      padding: 2px 6px 2px 4px;
+      background-color: darken(#ffdf9c, 8%) !important;
     }
   }
 
@@ -382,8 +386,10 @@
     .command-alias {
       font-family: $open-sans;
       font-size: 10px;
-      line-height: 1.5;
+      line-height: 1.75;
       margin-left: 5px;
+
+      
     }
 
     i:hover {
