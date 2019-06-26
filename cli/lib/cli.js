@@ -153,6 +153,8 @@ module.exports = {
     // in usage help docs
     program._name = 'cypress'
 
+    program.usage('<command> [options]')
+
     program
     .command('help')
     .description('Shows CLI help and exits')
