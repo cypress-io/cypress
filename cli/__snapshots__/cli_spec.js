@@ -134,8 +134,6 @@ exports['cli unknown command shows usage and exits 1'] = `
   stdout:
   -------
   Unknown command "foo"
-  Usage: cypress [options] [command]
-
   Usage: cypress <command> [options]
 
   Options:
