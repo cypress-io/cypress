@@ -368,6 +368,10 @@ describe('util', () => {
     it('keeps unbalanced double quotes', () => {
       expect(util.dequote('"foo')).to.equal('"foo')
     })
+
+    it('keeps inner double quotes', () => {
+      expect(util.dequote('a"b"c')).to.equal('a"b"c')
+    })
   })
 
   describe('.getEnv', () => {
