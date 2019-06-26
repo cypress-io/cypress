@@ -8,7 +8,7 @@ fs = require("../../lib/util/fs")
 Fixtures = require("../support/helpers/fixtures")
 
 postRunResponseWithWarnings = jsonSchemas.getExample("postRunResponse")("2.1.0")
-postRunResponse = _.merge({}, postRunResponseWithWarnings, { warnings: [] })
+postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
 
 e2ePath = Fixtures.projectPath("e2e")
@@ -86,8 +86,7 @@ sendUploadUrls = (req, res) ->
       uploadUrl: "http://localhost:1234/screenshots/#{num}.png"
     }
 
-  if screenshotUploadUrls.length
-    json.screenshotUploadUrls = screenshotUploadUrls
+  json.screenshotUploadUrls = screenshotUploadUrls
 
   res.json(json)
 
@@ -154,16 +153,19 @@ defaultRoutes = [
     method: "post"
     url: "/runs"
     req: "postRunRequest@2.1.0",
+    resSchema: "postRunResponse@2.1.0"
     res: postRunResponse
   }, {
     method: "post"
     url: "/runs/:id/instances"
     req: "postRunInstanceRequest@2.1.0",
+    resSchema: "postRunInstanceResponse@2.1.0"
     res: postRunInstanceResponse
   }, {
     method: "put"
     url: "/instances/:id"
     req: "putInstanceRequest@2.0.0",
+    resSchema: "putInstanceResponse@2.0.0"
     res: sendUploadUrls
   }, {
     method: "put"
@@ -398,6 +400,7 @@ describe "e2e record", ->
       method: "post"
       url: "/runs"
       req: "postRunRequest@2.1.0",
+      resSchema: "postRunResponse@2.1.0"
       res: (req, res) ->
         { group, ciBuildId } = req.body
 
@@ -421,6 +424,7 @@ describe "e2e record", ->
       method: "post"
       url: "/runs/:id/instances"
       req: "postRunInstanceRequest@2.1.0",
+      resSchema: "postRunInstanceResponse@2.1.0"
       res: (req, res) ->
         { machineId, spec } = req.body
 
@@ -595,7 +599,6 @@ describe "e2e record", ->
           method: "post"
           url: "/runs"
           req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
           res: (req, res) -> res.sendStatus(401)
         }
       ]
@@ -617,7 +620,6 @@ describe "e2e record", ->
           method: "post"
           url: "/runs"
           req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
           res: (req, res) -> res.sendStatus(404)
         }
       ]
@@ -1014,7 +1016,6 @@ describe "e2e record", ->
           method: "put"
           url: "/instances/:id"
           req: "putInstanceRequest@2.0.0",
-          resSchema: "putInstanceResponse@2.0.0"
           res: (req, res) -> res.sendStatus(500)
         }
       ]
@@ -1207,6 +1208,9 @@ describe "e2e record", ->
             res.json({
               instanceId,
               spec: null
+              estimatedWallClockDuration: null
+              totalInstances: 0
+              claimedInstances: 0
             })
       }
 
@@ -1257,6 +1261,8 @@ describe "e2e record", ->
             machineId
             runUrl
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
               limit: 500
               gracePeriodEnds: "2999-12-31"
@@ -1289,6 +1295,8 @@ describe "e2e record", ->
             machineId
             runUrl
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
               limit: 500
               gracePeriodEnds: "2999-12-31"
@@ -1321,6 +1329,8 @@ describe "e2e record", ->
             machineId
             runUrl
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
               gracePeriodEnds: "2999-12-31"
               orgId: "org-id-1234"
@@ -1352,6 +1362,8 @@ describe "e2e record", ->
             machineId
             runUrl
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
               gracePeriodEnds: "2999-12-31"
               orgId: "org-id-1234"
@@ -1383,6 +1395,8 @@ describe "e2e record", ->
             machineId
             runUrl
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
               used: 700
               limit: 500
@@ -1415,6 +1429,8 @@ describe "e2e record", ->
             machineId
             runUrl
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
               used: 700
               limit: 500
@@ -1441,7 +1457,7 @@ describe "e2e record", ->
           url: "/runs"
           req: "postRunRequest@2.1.0",
           resSchema: "postRunResponse@2.1.0"
-          res: postRunResponse
+          res: postRunResponseWithWarnings
         }
 
         setup(routes)
