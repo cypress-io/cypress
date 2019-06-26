@@ -1,12 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const debug = require('debug')('cypress:server')
 
@@ -51,6 +42,13 @@ const isGitlab = () => {
   return process.env.GITLAB_CI || (process.env.CI_SERVER_NAME && /^GitLab/.test(process.env.CI_SERVER_NAME))
 }
 
+const isGoogleCloud = () => {
+  // set automatically for the Node.js 6, Node.js 8 runtimes (not in Node 10)
+  // TODO: may also potentially have X_GOOGLE_* env var set
+  // https://cloud.google.com/functions/docs/env-var#environment_variables_set_automatically
+  return process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT
+}
+
 const isJenkins = () => {
   return process.env.JENKINS_URL ||
     process.env.JENKINS_HOME ||
@@ -82,6 +80,7 @@ const CI_PROVIDERS = {
   'codeshipPro': isCodeshipPro,
   'drone': 'DRONE',
   'gitlab': isGitlab,
+  'googleCloud': isGoogleCloud,
   'jenkins': isJenkins,
   'semaphore': 'SEMAPHORE',
   'shippable': 'SHIPPABLE',
@@ -200,6 +199,18 @@ const _providerCiParams = () => {
       'CI_ENVIRONMENT_URL',
     //# for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     ]),
+    googleCloud: extract([
+      // individual jobs
+      'BUILD_ID',
+      'PROJECT_ID',
+      // other information
+      'REPO_NAME',
+      'BRANCH_NAME',
+      'TAG_NAME',
+      'COMMIT_SHA',
+      'SHORT_SHA',
+      // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
+    ]),
     jenkins: extract([
       'BUILD_ID',
       'BUILD_URL',
@@ -313,6 +324,11 @@ const _providerCommitParams = function () {
     bitbucket: {
       sha: env.BITBUCKET_COMMIT,
       branch: env.BITBUCKET_BRANCH,
+      // message: ???
+      // authorName: ???
+      // authorEmail: ???
+      // remoteOrigin: ???
+      // defaultBranch: ???
     },
     buildkite: {
       sha: env.BUILDKITE_COMMIT,
@@ -367,6 +383,15 @@ const _providerCommitParams = function () {
       authorEmail: env.GITLAB_USER_EMAIL,
       // remoteOrigin: ???
       // defaultBranch: ???
+    },
+    googleCloud: {
+      sha: env.COMMIT_SHA,
+      branch: env.BRANCH_NAME,
+      // message: ??
+      // authorName: ??
+      // authorEmail: ??
+      // remoteOrigin: ???
+      // defaultBranch: ??
     },
     jenkins: {
       sha: env.GIT_COMMIT,
@@ -468,7 +493,7 @@ const commitDefaults = function (existingInfo) {
   // defaulting back to null if all fails
   // NOTE: only properties defined in "existingInfo" will be returned
   const combined = _.transform(existingInfo, (memo, value, key) => {
-    return memo[key] = _.defaultTo(value != null ? value : commitParamsObj[key], null)
+    return memo[key] = _.defaultTo(value || commitParamsObj[key], null)
   })
 
   debug('combined git and environment variables from provider')

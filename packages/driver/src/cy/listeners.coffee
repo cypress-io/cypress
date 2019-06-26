@@ -83,5 +83,4 @@ module.exports = {
 
     contentWindow.alert = callbacks.onAlert
     contentWindow.confirm = callbacks.onConfirm
-
 }
