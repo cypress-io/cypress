@@ -2035,7 +2035,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 `
 
-exports['e2e record api interaction warnings create run warnings unknown warning warns with unknown warnings 1'] = `
+exports['e2e record api interaction warnings create run warnings unknown warning warns with unknown warning code 1'] = `
 Warning from Cypress Dashboard: You are almost out of time
 
 Details:
