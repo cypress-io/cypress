@@ -372,6 +372,14 @@ describe('util', () => {
     it('keeps inner double quotes', () => {
       expect(util.dequote('a"b"c')).to.equal('a"b"c')
     })
+
+    it('passes empty strings', () => {
+      expect(util.dequote('')).to.equal('')
+    })
+
+    it('keeps single double quote character', () => {
+      expect(util.dequote('"')).to.equal('"')
+    })
   })
 
   describe('.getEnv', () => {
