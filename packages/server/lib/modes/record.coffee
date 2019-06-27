@@ -338,6 +338,11 @@ createRun = (options = {}) ->
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
+        else
+          errors.warning("DASHBOARD_UNKNOWN_CREATE_RUN_WARNING", {
+            message: warning.message,
+            props: _.omit(warning, 'message')
+          })
 
   .catch (err) ->
     debug("failed creating run %o", {
