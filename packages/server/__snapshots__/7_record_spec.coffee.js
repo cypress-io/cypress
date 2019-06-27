@@ -111,8 +111,8 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -212,8 +212,8 @@ We dynamically generated a new test to display this failure.
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================
 
@@ -737,8 +737,8 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Uploading Results)
 
-  - Failed Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
-  - Failed Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================
 
@@ -1034,8 +1034,8 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -1095,8 +1095,8 @@ We dynamically generated a new test to display this failure.
 
   (Uploading Results)
 
-  - Done Uploading (1/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (2/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
 ====================================================================================================
 
@@ -1537,7 +1537,6 @@ StatusCodeError: 402
 
 `
 
-
 exports['e2e record api interaction errors create run 402 - free plan exceeds monthly tests errors and exits when on free plan and over recorded tests limit 1'] = `
 You've exceeded the limit of test recordings under your free plan this month. The limit is 500 test recordings.
 
@@ -1555,7 +1554,6 @@ To run your tests with groups, please visit your billing and upgrade to another 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 `
-
 
 exports['e2e record api interaction warnings create run warnings grace period - grouping feature warns when using parallel feature 1'] = `
 Grouping is not included under your free plan.
@@ -1963,6 +1961,90 @@ You've exceeded the limit of test recordings under your current billing plan thi
 To upgrade your account, please visit your billing to upgrade to another billing plan.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings unknown warning warns with unknown warning code 1'] = `
+Warning from Cypress Dashboard: You are almost out of time
+
+Details:
+{
+  "code": "OUT_OF_TIME",
+  "name": "OutOfTime",
+  "hadTime": 1000,
+  "spentTime": 999
+}
 
 ====================================================================================================
 

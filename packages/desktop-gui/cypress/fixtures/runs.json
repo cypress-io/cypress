@@ -8,7 +8,7 @@
       "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "url": "https://circleci.com/gh/jekyl/jekyl_blog/140"
     },
-    "ciBuildId": "circle-6443",
+    "ciBuildId": null,
     "commit": {
       "authorEmail": "julie@devs.com",
       "authorName": "Julie Pearson",
@@ -80,6 +80,7 @@
         "wallClockStartedAt": "2018-02-01T20:14:19.323Z"
       }
     ],
+    "hiddenUntil": null,
     "id": "e9dcb3f6-2d68-587e-af1e-451e05f6539c",
     "instances": [
       {
@@ -109,6 +110,7 @@
           "osVersion": "16.04",
           "osVersionFormatted": "Ubuntu Linux - 16.04"
         },
+        "postProcessingCompletedAt": null,
         "screenshots": [],
         "skipped": 0,
         "spec": "search_results_spec.js",
@@ -127,6 +129,7 @@
     "orgName": "Jane Lane",
     "totalPassed": 0,
     "totalPending": 0,
+    "parallelizationDisabled": false,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
     "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
@@ -149,6 +152,7 @@
     "totalDuration": 16000,
     "totalFailed": 14,
     "failedTests": [],
+    "hiddenUntil": null,
     "id": "d692b78f-5bb1-558f-9592-f038dc4718a7",
     "instances": [
       {
@@ -178,11 +182,12 @@
           "osVersion": "15.5.0",
           "osVersionFormatted": "OS X El Capitan"
         },
+        "postProcessingCompletedAt": "2016-05-13T02:35:14.748Z",
         "screenshots": [],
         "skipped": 0,
         "spec": "search_results_spec.js",
         "status": "passed",
-        "stdout": "\u001b[90m  <select>(\u001b[4m\u001b[1mTests Starting\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[0m\u001b[0m\n\u001b[0m  Kitchen Sink\u001b[0m\n\u001b[2K\u001b[0G  \u001b[32m  ✓\u001b[0m\u001b[90m .should() - assert that <title> is correct\u001b[0m\u001b[31m (358ms)\u001b[0m\n\u001b[0m    Querying\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.get() - query DOM elements\u001b[0m\u001b[31m (84ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.contains() - query DOM elements with matching content\u001b[0m\u001b[31m (145ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .within() - query DOM elements within a specific element\u001b[0m\u001b[33m (63ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.root() - query the root DOM element\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[0m    Traversal\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .children() - get child DOM elements\u001b[0m\u001b[33m (46ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .closest() - get closest ancestor DOM element\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .eq() - get a DOM element at a specific index\u001b[0m\u001b[33m (61ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .filter() - get DOM elements that match the selector\u001b[0m\u001b[33m (51ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .find() - get descendant DOM elements of the selector\u001b[0m\u001b[31m (82ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .first() - get first DOM element\u001b[0m\u001b[31m (86ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .last() - get last DOM element\u001b[0m\u001b[33m (40ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .next() - get next sibling DOM element\u001b[0m\u001b[33m (42ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextAll() - get all next sibling DOM elements\u001b[0m\u001b[33m (58ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextUntil() - get next sibling DOM elements until next el\u001b[0m\u001b[33m (44ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .not() - remove DOM elements from set of DOM elements\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parent() - get parent DOM element from DOM elements\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parents() - get parent DOM elements from DOM elements\u001b[0m\u001b[33m (52ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parentsUntil() - get parent DOM elements from DOM elements until el\u001b[0m\u001b[33m (54ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prev() - get previous sibling DOM element\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevAll() - get all previous sibling DOM elements\u001b[0m\u001b[33m (48ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevUntil() - get all previous sibling DOM elements until el\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .siblings() - get all sibling DOM elements\u001b[0m\u001b[33m (38ms)\u001b[0m\n\u001b[0m    Actions\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .type() - type into a DOM element\u001b[0m\u001b[31m (4045ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .focus() - focus on a DOM element\u001b[0m\u001b[31m (118ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .blur() - blur off a DOM element\u001b[0m\u001b[31m (537ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .clear() - clears an input or textarea element\u001b[0m\u001b[31m (825ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .submit() - submit a form\u001b[0m\u001b[31m (423ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .click() - click on a DOM element\u001b[0m\u001b[31m (2555ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .dblclick() - double click on a DOM element\u001b[0m\u001b[31m (120ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.check() - check a checkbox or radio element\u001b[0m\u001b[31m (1968ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .uncheck() - uncheck a checkbox element\u001b[0m\u001b[31m (1637ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .select() - select an option in a <select> element\u001b[0m\u001b[31m (1092ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .scrollIntoView() - scroll an element into view\u001b[0m\u001b[31m (148ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.scrollTo() - scroll the window or element to a position\u001b[0m\u001b[31m (2043ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .trigger() - trigger an event on a DOM element\u001b[0m\u001b[31m (114ms)\u001b[0m\n\u001b[0m    Window\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.window() - get the global window object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.document() - get the document object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m  - get the title\u001b[0m\n\u001b[0m    Viewport\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.viewport() - set the viewport size and dimension\u001b[0m\u001b[31m (2771ms)\u001b[0m\n\u001b[0m    Location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.hash() - get the current URL hash\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.location() - get window.location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.url() - get the current URL\u001b[0m\n\u001b[0m    Navigation\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.go() - go back or forward in the browser's history\u001b[0m\u001b[31m (664ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.reload() - reload the page\u001b[0m\u001b[31m (613ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.visit() - visit a remote url\u001b[0m\u001b[31m (378ms)\u001b[0m\n\u001b[0m    Assertions\u001b[0m\n\u001b[0m      Implicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .should() - make an assertion about the current subject\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .and() - chain multiple assertions together\u001b[0m\n\u001b[0m      Explicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - assert shape of an object\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - make an assertion about a specified subject\u001b[0m\n\u001b[0m    Misc\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .end() - end the command chain\u001b[0m\u001b[31m (269ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.exec() - execute a system command\u001b[0m\u001b[31m (732ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.focused() - get the DOM element that has focus\u001b[0m\u001b[31m (426ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.screenshot() - take a screenshot\u001b[0m\u001b[31m (234ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wrap() - wrap an object\u001b[0m\n\u001b[0m    Connectors\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .each() - iterate over an array of elements\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .its() - get properties on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .invoke() - invoke a function on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .spread() - spread an array as individual args to callback function\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .then() - invoke a callback function with the current subject\u001b[0m\u001b[33m (67ms)\u001b[0m\n\u001b[0m    Aliasing\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .as() - alias a route or DOM element for later use\u001b[0m\u001b[31m (240ms)\u001b[0m\n\u001b[0m    Waiting\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wait() - wait for a specific amount of time\u001b[0m\u001b[31m (4726ms)\u001b[0m\n\u001b[0m    Network Requests\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.server() - control behavior of network requests and responses\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.request() - make an XHR request\u001b[0m\u001b[31m (457ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.route() - route responses to matching requests\u001b[0m\u001b[31m (1565ms)\u001b[0m\n\u001b[0m    Files\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.fixture() - load a fixture\u001b[0m\u001b[31m (444ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.readFile() - read a files contents\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.writeFile() - write to a file\u001b[0m\u001b[31m (146ms)\u001b[0m\n\u001b[0m    Local Storage\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearLocalStorage() - clear all data in local storage\u001b[0m\u001b[31m (402ms)\u001b[0m\n\u001b[0m    Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookie() - get a browser cookie\u001b[0m\u001b[31m (168ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookies() - get browser cookies\u001b[0m\u001b[31m (184ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.setCookie() - set a browser cookie\u001b[0m\u001b[33m (39ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookie() - clear a browser cookie\u001b[0m\u001b[31m (189ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookies() - clear browser cookies\u001b[0m\u001b[31m (197ms)\u001b[0m\n\u001b[0m    Spies, Stubs, and Clock\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.spy() - wrap a method in a spy\u001b[0m\u001b[31m (472ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.stub() - create a stub and/or replace a function with a stub\u001b[0m\u001b[31m (225ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clock() - control time in the browser\u001b[0m\u001b[31m (383ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.tick() - move time in the browser\u001b[0m\u001b[31m (616ms)\u001b[0m\n\u001b[0m    Utilities\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress._.method() - call a lodash method\u001b[0m\u001b[31m (154ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.$(selector) - call a jQuery method\u001b[0m\u001b[31m (188ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.moment() - format or parse dates using a moment method\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Blob.method() - blob utilities and base64 string conversion\u001b[0m\u001b[31m (321ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m new Cypress.Promise(function) - instantiate a bluebird promise\u001b[0m\u001b[31m (1009ms)\u001b[0m\n\u001b[0m    Cypress.config()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.config() - get and set configuration options\u001b[0m\u001b[33m (59ms)\u001b[0m\n\u001b[0m    Cypress.env()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.env() - get environment variables\u001b[0m\n\u001b[0m    Cypress.Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.debug() - enable or disable debugging\u001b[0m\u001b[31m (79ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.preserveOnce() - preserve cookies by key\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.defaults() - set defaults for all cookies\u001b[0m\n\u001b[0m    Cypress.dom\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.dom.isHidden() - determine if a DOM element is hidden\u001b[0m\n\u001b[0m    Cypress.Server\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Server.defaults() - change default config of server\u001b[0m\n\n\n\u001b[92m \u001b[0m\u001b[32m 90 passing\u001b[0m\u001b[90m (1m)\u001b[0m\n\n\n\u001b[32m  (\u001b[4m\u001b[1mTests Finished\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[37m  - Tests:           \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Passes:          \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Failures:        \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Pending:         \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Duration:        \u001b[39m\u001b[32m1 minute, 11 seconds\u001b[39m\n\u001b[37m  - Screenshots:     \u001b[39m\u001b[32m1\u001b[39m\n\u001b[37m  - Video Recorded:  \u001b[39m\u001b[32mfalse\u001b[39m\n\u001b[37m  - Cypress Version: \u001b[39m\u001b[32m1.4.1\u001b[39m\n\n\n\u001b[33m  (\u001b[4m\u001b[1mScreenshots\u001b[22m\u001b[24m)\u001b[39m\n\n  - /tmp/repo/cypress/screenshots/my-image.png \u001b[90m(1280x720)\u001b[39m\n\n\n\u001b[34m  (\u001b[4m\u001b[1mUploading Assets\u001b[22m\u001b[24m)\u001b[39m\n\n  - Done Uploading \u001b[90m(1/1)\u001b[39m \u001b[34m/tmp/repo/cypress/screenshots/my-image.png\u001b[39m\n\n\n\u001b[90m  (\u001b[4m\u001b[1mAll Done\u001b[22m\u001b[24m)\u001b[39m\n\n",
+        "stdout": "[39m\n\n",
         "videos": [],
         "wallClockDuration": 16000,
         "wallClockEndedAt": "2016-05-13T02:38:57.748Z",
@@ -215,11 +220,12 @@
           "osVersion": "15.5.0",
           "osVersionFormatted": "OS X El Capitan"
         },
+        "postProcessingCompletedAt": "2016-05-13T02:35:14.748Z",
         "screenshots": [],
         "skipped": 0,
-        "spec": "search_results_spec.js",
+        "spec": "cypress/integration/search_results_spec.js",
         "status": "passed",
-        "stdout": "\u001b[90m  <select>(\u001b[4m\u001b[1mTests Starting\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[0m\u001b[0m\n\u001b[0m  Kitchen Sink\u001b[0m\n\u001b[2K\u001b[0G  \u001b[32m  ✓\u001b[0m\u001b[90m .should() - assert that <title> is correct\u001b[0m\u001b[31m (358ms)\u001b[0m\n\u001b[0m    Querying\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.get() - query DOM elements\u001b[0m\u001b[31m (84ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.contains() - query DOM elements with matching content\u001b[0m\u001b[31m (145ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .within() - query DOM elements within a specific element\u001b[0m\u001b[33m (63ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.root() - query the root DOM element\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[0m    Traversal\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .children() - get child DOM elements\u001b[0m\u001b[33m (46ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .closest() - get closest ancestor DOM element\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .eq() - get a DOM element at a specific index\u001b[0m\u001b[33m (61ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .filter() - get DOM elements that match the selector\u001b[0m\u001b[33m (51ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .find() - get descendant DOM elements of the selector\u001b[0m\u001b[31m (82ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .first() - get first DOM element\u001b[0m\u001b[31m (86ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .last() - get last DOM element\u001b[0m\u001b[33m (40ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .next() - get next sibling DOM element\u001b[0m\u001b[33m (42ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextAll() - get all next sibling DOM elements\u001b[0m\u001b[33m (58ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .nextUntil() - get next sibling DOM elements until next el\u001b[0m\u001b[33m (44ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .not() - remove DOM elements from set of DOM elements\u001b[0m\u001b[33m (43ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parent() - get parent DOM element from DOM elements\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parents() - get parent DOM elements from DOM elements\u001b[0m\u001b[33m (52ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .parentsUntil() - get parent DOM elements from DOM elements until el\u001b[0m\u001b[33m (54ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prev() - get previous sibling DOM element\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevAll() - get all previous sibling DOM elements\u001b[0m\u001b[33m (48ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .prevUntil() - get all previous sibling DOM elements until el\u001b[0m\u001b[33m (49ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .siblings() - get all sibling DOM elements\u001b[0m\u001b[33m (38ms)\u001b[0m\n\u001b[0m    Actions\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .type() - type into a DOM element\u001b[0m\u001b[31m (4045ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .focus() - focus on a DOM element\u001b[0m\u001b[31m (118ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .blur() - blur off a DOM element\u001b[0m\u001b[31m (537ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .clear() - clears an input or textarea element\u001b[0m\u001b[31m (825ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .submit() - submit a form\u001b[0m\u001b[31m (423ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .click() - click on a DOM element\u001b[0m\u001b[31m (2555ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .dblclick() - double click on a DOM element\u001b[0m\u001b[31m (120ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.check() - check a checkbox or radio element\u001b[0m\u001b[31m (1968ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .uncheck() - uncheck a checkbox element\u001b[0m\u001b[31m (1637ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .select() - select an option in a <select> element\u001b[0m\u001b[31m (1092ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .scrollIntoView() - scroll an element into view\u001b[0m\u001b[31m (148ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.scrollTo() - scroll the window or element to a position\u001b[0m\u001b[31m (2043ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .trigger() - trigger an event on a DOM element\u001b[0m\u001b[31m (114ms)\u001b[0m\n\u001b[0m    Window\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.window() - get the global window object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.document() - get the document object\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m - get the title\u001b[0m\n\u001b[0m    Viewport\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.viewport() - set the viewport size and dimension\u001b[0m\u001b[31m (2771ms)\u001b[0m\n\u001b[0m    Location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.hash() - get the current URL hash\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.location() - get window.location\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.url() - get the current URL\u001b[0m\n\u001b[0m    Navigation\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.go() - go back or forward in the browser's history\u001b[0m\u001b[31m (664ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.reload() - reload the page\u001b[0m\u001b[31m (613ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.visit() - visit a remote url\u001b[0m\u001b[31m (378ms)\u001b[0m\n\u001b[0m    Assertions\u001b[0m\n\u001b[0m      Implicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .should() - make an assertion about the current subject\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m .and() - chain multiple assertions together\u001b[0m\n\u001b[0m      Explicit Assertions\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - assert shape of an object\u001b[0m\n\u001b[2K\u001b[0G      \u001b[32m  ✓\u001b[0m\u001b[90m expect - make an assertion about a specified subject\u001b[0m\n\u001b[0m    Misc\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .end() - end the command chain\u001b[0m\u001b[31m (269ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.exec() - execute a system command\u001b[0m\u001b[31m (732ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.focused() - get the DOM element that has focus\u001b[0m\u001b[31m (426ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.screenshot() - take a screenshot\u001b[0m\u001b[31m (234ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wrap() - wrap an object\u001b[0m\n\u001b[0m    Connectors\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .each() - iterate over an array of elements\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .its() - get properties on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .invoke() - invoke a function on the current subject\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .spread() - spread an array as individual args to callback function\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .then() - invoke a callback function with the current subject\u001b[0m\u001b[33m (67ms)\u001b[0m\n\u001b[0m    Aliasing\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m .as() - alias a route or DOM element for later use\u001b[0m\u001b[31m (240ms)\u001b[0m\n\u001b[0m    Waiting\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.wait() - wait for a specific amount of time\u001b[0m\u001b[31m (4726ms)\u001b[0m\n\u001b[0m    Network Requests\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.server() - control behavior of network requests and responses\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.request() - make an XHR request\u001b[0m\u001b[31m (457ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.route() - route responses to matching requests\u001b[0m\u001b[31m (1565ms)\u001b[0m\n\u001b[0m    Files\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.fixture() - load a fixture\u001b[0m\u001b[31m (444ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.readFile() - read a files contents\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.writeFile() - write to a file\u001b[0m\u001b[31m (146ms)\u001b[0m\n\u001b[0m    Local Storage\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearLocalStorage() - clear all data in local storage\u001b[0m\u001b[31m (402ms)\u001b[0m\n\u001b[0m    Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookie() - get a browser cookie\u001b[0m\u001b[31m (168ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.getCookies() - get browser cookies\u001b[0m\u001b[31m (184ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.setCookie() - set a browser cookie\u001b[0m\u001b[33m (39ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookie() - clear a browser cookie\u001b[0m\u001b[31m (189ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clearCookies() - clear browser cookies\u001b[0m\u001b[31m (197ms)\u001b[0m\n\u001b[0m    Spies, Stubs, and Clock\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.spy() - wrap a method in a spy\u001b[0m\u001b[31m (472ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.stub() - create a stub and/or replace a function with a stub\u001b[0m\u001b[31m (225ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.clock() - control time in the browser\u001b[0m\u001b[31m (383ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m cy.tick() - move time in the browser\u001b[0m\u001b[31m (616ms)\u001b[0m\n\u001b[0m    Utilities\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress._.method() - call a lodash method\u001b[0m\u001b[31m (154ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.$(selector) - call a jQuery method\u001b[0m\u001b[31m (188ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.moment() - format or parse dates using a moment method\u001b[0m\u001b[33m (41ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Blob.method() - blob utilities and base64 string conversion\u001b[0m\u001b[31m (321ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m new Cypress.Promise(function) - instantiate a bluebird promise\u001b[0m\u001b[31m (1009ms)\u001b[0m\n\u001b[0m    Cypress.config()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.config() - get and set configuration options\u001b[0m\u001b[33m (59ms)\u001b[0m\n\u001b[0m    Cypress.env()\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.env() - get environment variables\u001b[0m\n\u001b[0m    Cypress.Cookies\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.debug() - enable or disable debugging\u001b[0m\u001b[31m (79ms)\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.preserveOnce() - preserve cookies by key\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Cookies.defaults() - set defaults for all cookies\u001b[0m\n\u001b[0m    Cypress.dom\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.dom.isHidden() - determine if a DOM element is hidden\u001b[0m\n\u001b[0m    Cypress.Server\u001b[0m\n\u001b[2K\u001b[0G    \u001b[32m  ✓\u001b[0m\u001b[90m Cypress.Server.defaults() - change default config of server\u001b[0m\n\n\n\u001b[92m \u001b[0m\u001b[32m 90 passing\u001b[0m\u001b[90m (1m)\u001b[0m\n\n\n\u001b[32m  (\u001b[4m\u001b[1mTests Finished\u001b[22m\u001b[24m)\u001b[39m\n\n\u001b[37m  - Tests:           \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Passes:          \u001b[39m\u001b[32m90\u001b[39m\n\u001b[37m  - Failures:        \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Pending:         \u001b[39m\u001b[32m0\u001b[39m\n\u001b[37m  - Duration:        \u001b[39m\u001b[32m1 minute, 11 seconds\u001b[39m\n\u001b[37m  - Screenshots:     \u001b[39m\u001b[32m1\u001b[39m\n\u001b[37m  - Video Recorded:  \u001b[39m\u001b[32mfalse\u001b[39m\n\u001b[37m  - Cypress Version: \u001b[39m\u001b[32m1.4.1\u001b[39m\n\n\n\u001b[33m  (\u001b[4m\u001b[1mScreenshots\u001b[22m\u001b[24m)\u001b[39m\n\n  - /tmp/repo/cypress/screenshots/my-image.png \u001b[90m(1280x720)\u001b[39m\n\n\n\u001b[34m  (\u001b[4m\u001b[1mUploading Assets\u001b[22m\u001b[24m)\u001b[39m\n\n  - Done Uploading \u001b[90m(1/1)\u001b[39m \u001b[34m/tmp/repo/cypress/screenshots/my-image.png\u001b[39m\n\n\n\u001b[90m  (\u001b[4m\u001b[1mAll Done\u001b[22m\u001b[24m)\u001b[39m\n\n",
+        "stdout": "[39m\n\n",
         "videos": [],
         "wallClockDuration": 16000,
         "wallClockEndedAt": "2016-05-13T02:38:57.748Z",
@@ -233,6 +239,7 @@
     "orgName": "Acme Developers",
     "totalPassed": 5,
     "totalPending": 22,
+    "parallelizationDisabled": true,
     "projectId": "4d8971",
     "projectName": "webAppOnline",
     "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
@@ -252,23 +259,23 @@
       "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "url": "https://circleci.com/gh/jane-lane/webAppOnline/1780"
     },
-    "ciBuildId": "circle-job-123",
+    "ciBuildId": null,
     "commit": {
       "authorEmail": "julie@devs.com",
       "authorName": "Julie Pearson",
       "branch": "search-todos",
       "message": "regex remove whitespace",
-      
       "sha": "19550dacc61a1ea23d0f1ced676719550daae27",
       "url": "https://github.com/jane-lane/webAppOnline/commit/19550dacc61a1ea23d0f1ced676719550daae27"
     },
     "completedAt": "2016-05-13T02:30:26.000Z",
     "createdAt": "2016-03-21T02:35:12.748Z",
-    "customCiBuildId": true,
+    "customCiBuildId": false,
     "cypressVersion": "2.1.0",
     "totalDuration": 1424424,
     "totalFailed": 0,
     "failedTests": [],
+    "hiddenUntil": null,
     "id": "e5d4dcd1-463f-5af6-8775-c9fa9da53c96",
     "instances": [],
     "scheduledToCompleteAt": "2016-05-15T02:35:38.687Z",
@@ -278,6 +285,7 @@
     "orgName": "Acme Developers",
     "totalPassed": 28,
     "totalPending": 0,
+    "parallelizationDisabled": false,
     "projectId": "4d8971",
     "projectName": "webAppOnline",
     "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
@@ -297,7 +305,7 @@
       "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
     },
-    "ciBuildId": "circle-6441",
+    "ciBuildId": null,
     "commit": {
       "authorEmail": "julie@devs.com",
       "authorName": "Julie Pearson",
@@ -313,6 +321,7 @@
     "totalDuration": 0,
     "totalFailed": 0,
     "failedTests": [],
+    "hiddenUntil": null,
     "id": "746a0e50-16ee-5e5b-8505-800d0ba2f853",
     "instances": [
       {
@@ -342,9 +351,10 @@
           "osVersion": "Ubuntu Linux - 16.04",
           "osVersionFormatted": "Ubuntu Linux - 16.04"
         },
+        "postProcessingCompletedAt": null,
         "screenshots": [],
         "skipped": 0,
-        "spec": "organization_spec.js",
+        "spec": "cypress/integration/organization_spec.js",
         "status": "running",
         "stdout": null,
         "videos": [],
@@ -360,6 +370,7 @@
     "orgName": "Jane Lane",
     "totalPassed": 0,
     "totalPending": 0,
+    "parallelizationDisabled": false,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
     "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
@@ -379,7 +390,7 @@
       "pullRequestUrl": "https://github.com/jane-lane/jekyl_blog/pull/797",
       "url": "https://circleci.com/gh/cypress-io/cypress-core-example/140"
     },
-    "ciBuildId": "circle-6440",
+    "ciBuildId": null,
     "commit": {
       "authorEmail": "julie@devs.com",
       "authorName": "Julie Pearson",
@@ -395,6 +406,7 @@
     "totalDuration": 1424424,
     "totalFailed": 0,
     "failedTests": [],
+    "hiddenUntil": null,
     "id": "e7e67075-d479-5626-af00-3b541541ecbd",
     "instances": [
       {
@@ -424,9 +436,10 @@
           "osVersion": "7",
           "osVersionFormatted": "7"
         },
+        "postProcessingCompletedAt": "2016-05-13T02:35:14.748Z",
         "screenshots": [],
         "skipped": 0,
-        "spec": "search_results_spec.js",
+        "spec": "cypress/integration/search_results_spec.js",
         "status": "errored",
         "stdout": null,
         "videos": [],
@@ -461,6 +474,7 @@
           "osVersion": "18.0",
           "osVersionFormatted": "18.0"
         },
+        "postProcessingCompletedAt": "2016-05-13T02:35:14.748Z",
         "screenshots": [],
         "skipped": 0,
         "spec": "search_results_spec.js",
@@ -479,6 +493,7 @@
     "orgName": "Osato Devs",
     "totalPassed": 28,
     "totalPending": 2,
+    "parallelizationDisabled": false,
     "projectId": "2d8971",
     "projectName": "management-app",
     "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",

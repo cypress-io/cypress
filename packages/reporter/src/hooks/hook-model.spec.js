@@ -109,23 +109,43 @@ describe('Hook model', () => {
   })
 
   context('#aliasesWithDuplicates', () => {
+    const addCommand = (alias, hasDuplicates = false) => {
+      return hook.addCommand({
+        isMatchingEvent: () => {
+          return false
+        },
+        alias,
+        hasDuplicates,
+      })
+    }
+
     it('returns duplicates marked with hasDuplicates and those that appear mulitple times in the commands array', () => {
-      hook.addCommand({ isMatchingEvent: () => {
-        return false
-      }, alias: 'foo' })
-      hook.addCommand({ isMatchingEvent: () => {
-        return false
-      }, alias: 'bar' })
-      hook.addCommand({ isMatchingEvent: () => {
-        return false
-      }, alias: 'foo' })
-      hook.addCommand({ isMatchingEvent: () => {
-        return false
-      }, alias: 'baz', hasDuplicates: true })
+      addCommand('foo')
+      addCommand('bar')
+      addCommand('foo')
+      addCommand('baz', true)
 
       expect(hook.aliasesWithDuplicates).to.include('foo')
       expect(hook.aliasesWithDuplicates).to.include('baz')
       expect(hook.aliasesWithDuplicates).to.not.include('bar')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4411
+    it('returns the same array instance if it has not changed', () => {
+      let dupes = hook.aliasesWithDuplicates
+
+      addCommand('foo')
+      expect(dupes).to.deep.eq([])
+
+      addCommand('bar')
+      expect(hook.aliasesWithDuplicates === dupes).to.be.true
+
+      addCommand('foo')
+      dupes = hook.aliasesWithDuplicates
+      expect(dupes).to.deep.eq(['foo'])
+
+      addCommand('foo')
+      expect(hook.aliasesWithDuplicates === dupes).to.be.true
     })
   })
 })
