@@ -432,6 +432,11 @@ describe('util', () => {
         process.env.FOO = '  \'bar\'  '
         expect(util.getEnv('FOO', true)).to.equal('\'bar\'')
       })
+
+      it('keeps whitespace inside removed quotes', () => {
+        process.env.FOO = '"foo.txt "'
+        expect(util.getEnv('FOO', true)).to.equal('foo.txt ')
+      })
     })
   })
 })
