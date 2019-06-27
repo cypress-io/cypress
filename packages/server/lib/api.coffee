@@ -1,6 +1,5 @@
 _          = require("lodash")
 os         = require("os")
-nmi        = require("node-machine-id")
 debug      = require("debug")("cypress:server:api")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
@@ -89,11 +88,6 @@ formatResponseBody = (err) ->
 tagError = (err) ->
   err.isApiError = true
   throw err
-
-machineId = ->
-  nmi.machineId()
-  .catch ->
-    return null
 
 ## retry on timeouts, 5xx errors, or any error without a status code
 isRetriableError = (err) ->

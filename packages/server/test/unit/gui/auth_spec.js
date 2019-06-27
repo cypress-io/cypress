@@ -3,15 +3,24 @@ const root = global.root
 
 const auth = require(`${root}../lib/gui/auth`)
 const electron = require('electron')
+const machineId = require(`${root}../lib/util/machine_id`)
+const os = require('os')
+const pkg = require('@packages/root')
 const random = require(`${root}../lib/util/random`)
 
 const BASE_URL = 'https://foo.invalid/login.html'
 const RANDOM_STRING = 'a'.repeat(32)
 const PORT = 9001
 const REDIRECT_URL = `http://127.0.0.1:${PORT}/redirect-to-auth`
-const FULL_LOGIN_URL = `https://foo.invalid/login.html?port=${PORT}&state=${RANDOM_STRING}`
+const FULL_LOGIN_URL = `https://foo.invalid/login.html?port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&version=${pkg.version}&platform=linux&arch=x64`
 
 describe('lib/gui/auth', function () {
+  beforeEach(() => {
+    sinon.stub(os, 'platform').returns('linux')
+    sinon.stub(os, 'arch').returns('x64')
+    sinon.stub(machineId, 'machineId').resolves('abc123')
+  })
+
   afterEach(function () {
     auth._stopServer()
   })
@@ -40,19 +49,23 @@ describe('lib/gui/auth', function () {
       }
     })
 
-    it('uses random and server.port to form a URL', function () {
-      const url = auth._buildFullLoginUrl(BASE_URL, this.server)
-
-      expect(url).to.eq(FULL_LOGIN_URL)
-      expect(random.id).to.be.calledWith(32)
-      expect(this.server.address).to.be.calledOnce
+    it('uses random and server.port to form a URL along with environment info', function () {
+      return auth._buildFullLoginUrl(BASE_URL, this.server)
+      .then((url) => {
+        expect(url).to.eq(FULL_LOGIN_URL)
+        expect(random.id).to.be.calledWith(32)
+        expect(this.server.address).to.be.calledOnce
+      })
     })
 
     it('does not regenerate the state code', function () {
-      auth._buildFullLoginUrl(BASE_URL, this.server)
-      auth._buildFullLoginUrl(BASE_URL, this.server)
-
-      expect(random.id).to.be.calledOnce
+      return auth._buildFullLoginUrl(BASE_URL, this.server)
+      .then(() => {
+        return auth._buildFullLoginUrl(BASE_URL, this.server)
+      })
+      .then(() => {
+        expect(random.id).to.be.calledOnce
+      })
     })
   })
 

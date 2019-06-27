@@ -1,11 +1,14 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:auth')
 const express = require('express')
+const os = require('os')
+const pkg = require('@packages/root')
 const Promise = require('bluebird')
 const { shell } = require('electron')
 const url = require('url')
 
 const errors = require('../errors')
+const machineId = require('../util/machine_id')
 const random = require('../util/random')
 const user = require('../user')
 const windows = require('./windows')
@@ -30,9 +33,21 @@ const _buildFullLoginUrl = (baseLoginUrl, server) => {
     authState = random.id(32)
   }
 
-  const authUrl = `${baseLoginUrl}?port=${port}&state=${authState}`
+  const authUrl = url.parse(baseLoginUrl)
 
-  return authUrl
+  return machineId.machineId()
+  .then((id) => {
+    authUrl.query = {
+      port,
+      state: authState,
+      machineId: id,
+      version: pkg.version,
+      platform: os.platform(),
+      arch: os.arch(),
+    }
+
+    return authUrl.format()
+  })
 }
 
 const _getOriginFromUrl = (originalUrl) => {
@@ -95,13 +110,14 @@ const _launchServer = (baseLoginUrl, sendMessage) => {
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      const fullLoginUrl = _buildFullLoginUrl(baseLoginUrl, server)
+      _buildFullLoginUrl(baseLoginUrl, server)
+      .then((fullLoginUrl) => {
+        debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
 
-      debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
+        res.redirect(303, fullLoginUrl)
 
-      res.redirect(303, fullLoginUrl)
-
-      sendMessage('info', 'AUTH_BROWSER_LAUNCHED')
+        sendMessage('info', 'AUTH_BROWSER_LAUNCHED')
+      })
     })
 
     app.get('/auth', (req, res) => {
