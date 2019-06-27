@@ -98,9 +98,17 @@ function printNodeOptions (log = debug) {
 }
 
 /**
-   * Removes double quote characters "
-   * from the start and end of the given string IF they are both present
-   */
+ * Removes double quote characters
+ * from the start and end of the given string IF they are both present
+ *
+ * @example
+  ```
+  dequote('"foo"')
+  // returns string 'foo'
+  dequote('foo')
+  // returns string 'foo'
+  ```
+ */
 const dequote = (str) => {
   la(is.string(str), 'expected a string to remove double quotes', str)
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
