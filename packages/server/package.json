@@ -54,7 +54,7 @@
     "@babel/preset-react": "7.0.0",
     "@babel/runtime": "7.4.4",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/json-schemas": "5.31.3",
+    "@cypress/json-schemas": "5.32.1",
     "@cypress/sinon-chai": "1.1.0",
     "babel-plugin-add-module-exports": "1.0.2",
     "babelify": "10.0.0",
@@ -98,7 +98,7 @@
   },
   "dependencies": {
     "@cypress/browserify-preprocessor": "1.1.2",
-    "@cypress/commit-info": "2.1.3",
+    "@cypress/commit-info": "2.1.4",
     "@cypress/get-windows-proxy": "1.5.4",
     "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
