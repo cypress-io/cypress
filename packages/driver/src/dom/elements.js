@@ -494,7 +494,7 @@ const isTextLike = function ($el) {
   ])
 }
 
-const blocksImplicitSubmission = function ($el) {
+const isInputAllowingImplicitFormSubmission = function ($el) {
   const type = (type) => {
     return isType($el, type)
   }
@@ -854,7 +854,7 @@ module.exports = {
 
   isFocused,
 
-  blocksImplicitSubmission,
+  isInputAllowingImplicitFormSubmission,
 
   isNeedSingleValueChangeInputElement,
 

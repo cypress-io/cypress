@@ -170,21 +170,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           return if not form.length
 
-          multipleInputsBlockImplicitSubmissionAndNoSubmitElements = (form) ->
+          multipleInputsAllowImplicitSubmissionAndNoSubmitElements = (form) ->
             submits = getDefaultButtons(form)
 
             ## https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
-            implicitSubmissionBlockingInputs = form.find("input").filter (__, input) ->
+            ## some types of inputs can submit the form when hitting {enter}
+            ## but only if they are the sole input that allows implicit submission
+            ## and there are no buttons or input[submits] in the form
+            implicitSubmissionInputs = form.find("input").filter (__, input) ->
               $input = $dom.wrap(input)
               
-              $elements.blocksImplicitSubmission($input)
+              $elements.isInputAllowingImplicitFormSubmission($input)
 
-            implicitSubmissionBlockingInputs.length > 1 and submits.length is 0
+            implicitSubmissionInputs.length > 1 and submits.length is 0
 
           ## throw an error here if there are multiple form parents
 
-          ## bail if we have multiple inputs and no submit elements
-          return if multipleInputsBlockImplicitSubmissionAndNoSubmitElements(form)
+          ## bail if we have multiple inputs allowing implicit submission and no submit elements
+          return if multipleInputsAllowImplicitSubmissionAndNoSubmitElements(form)
 
           clickedDefaultButton = (button) ->
             ## find the 'default button' as per HTML spec and click it natively
