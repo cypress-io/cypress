@@ -1,4 +1,3 @@
-
 const ruleComposer = require('eslint-rule-composer')
 const arrowBodyStyle = require('eslint/lib/rules/arrow-body-style')
 
@@ -15,4 +14,3 @@ module.exports = ruleComposer.filterReports(
     return !(reportedToken && reportedToken.type === 'Line' && /^-{2,}$/u.test(reportedToken.value))
   }
 )
-

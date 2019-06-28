@@ -1,42 +1,43 @@
 {
   "name": "@cypress/eslint-plugin-dev",
   "version": "0.0.0-development",
-  "description": "Common ESLint rules shared by Cypress packages",
-  "keywords": [
-    "cypress",
-    "eslint",
-    "eslintplugin"
-  ],
-  "homepage": "https://github.com/cypress-io/cypress-eslint-plugin-dev#readme",
-  "bugs": {
-    "url": "https://github.com/cypress-io/cypress-eslint-plugin-dev/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress-eslint-plugin-dev.git"
-  },
-  "license": "MIT",
-  "author": "Chris Breiding (chris@cypress.io)",
-  "main": "index.js",
   "scripts": {
-    "lint": "eslint --fix *.js",
+    "lint": "eslint --ext .js,json,.eslintrc .",
+    "lint-changed": "node ./scripts/lint-changed",
+    "lint-changed-fix": "node ./scripts/lint-changed --fix",
+    "lint-fix": "yarn lint --fix",
+    "lint-pre-push": "node ./scripts/lint-pre-push",
+    "lint-staged": "node ./scripts/lint-staged",
     "precommit": "npm run lint",
     "semantic-release": "semantic-release",
     "test": "jest"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint-staged --silent",
+      "pre-push": "npm run lint-pre-push --silent"
+    }
+  },
   "dependencies": {
-    "eslint-rule-composer": "^0.3.0"
+    "bluebird": "^3.5.5",
+    "chalk": "^2.4.2",
+    "eslint-rule-composer": "^0.3.0",
+    "lodash": "^4.17.11",
+    "shelljs": "^0.8.3"
   },
   "devDependencies": {
-    "@cypress/eslint-plugin-json": "^2.0.3",
+    "@cypress/eslint-plugin-dev": "./",
+    "@cypress/eslint-plugin-json": "^3.0.3",
+    "@fellow/eslint-plugin-coffee": "^0.4.13",
     "@types/jest": "^24.0.15",
     "@typescript-eslint/eslint-plugin": "^1.11.0",
     "@typescript-eslint/parser": "^1.11.0",
     "eslint": "^5.16.0",
-    "husky": "^0.14.3",
+    "husky": "^2.7.0",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
-    "semantic-release": "^15.13.17"
+    "semantic-release": "^15.13.17",
+    "typescript": "^3.5.2"
   },
   "peerDependencies": {
     "@cypress/eslint-plugin-json": ">= 2.0.3",
@@ -46,5 +47,26 @@
     "eslint": ">= 3.2.1 < 6",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.2.1"
-  }
+  },
+  "bin": {
+    "lint-changed": "./scripts/lint-changed.js",
+    "lint-pre-push": "./scripts/lint-pre-push.js",
+    "lint-staged": "./scripts/lint-staged.js"
+  },
+  "description": "Common ESLint rules shared by Cypress packages",
+  "homepage": "https://github.com/cypress-io/cypress-eslint-plugin-dev#readme",
+  "license": "MIT",
+  "author": "Chris Breiding (chris@cypress.io)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress-eslint-plugin-dev.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-eslint-plugin-dev/issues"
+  },
+  "keywords": [
+    "cypress",
+    "eslint",
+    "eslintplugin"
+  ]
 }

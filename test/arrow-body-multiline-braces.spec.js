@@ -14,6 +14,7 @@ function execute (file, options = {}) {
         sourceType: 'module',
       },
     },
+
   })
 
   const cli = new CLIEngine({
@@ -46,7 +47,7 @@ it('lint multiline js', async () => {
 
 it('lint oneline js', async () => {
   const filename = './fixtures/oneline.js'
-  const result = execute(filename, {fix:false})
+  const result = execute(filename, { fix: false })
 
   expect(result.output).not.ok
   expect(result).toHaveProperty('errorCount', 0)
