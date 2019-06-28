@@ -126,7 +126,7 @@
     "electron-context-menu": "0.11.0",
     "errorhandler": "1.5.0",
     "evil-dns": "0.2.0",
-    "execa": "1.0.0",
+    "execa": "2.0.1",
     "express": "4.16.4",
     "express-handlebars": "3.0.2",
     "find-process": "1.4.1",
