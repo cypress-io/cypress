@@ -173,6 +173,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1.response}
       """
+    when "DASHBOARD_UNKNOWN_CREATE_RUN_WARNING"
+      """
+      Warning from Cypress Dashboard: #{arg1.message}
+
+      Details:
+      #{JSON.stringify(arg1.props, null, 2)}
+      """
     when "DASHBOARD_STALE_RUN"
       """
       You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
