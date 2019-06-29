@@ -1,5 +1,9 @@
 const customRules = require('./custom-rules')
 const baseRules = {
+  '@cypress/dev/arrow-body-multiline-braces': [
+    'error',
+    'always',
+  ],
   'array-bracket-newline': [
     'error',
     'consistent',
@@ -197,7 +201,6 @@ const baseRules = {
 module.exports = {
   configs: {
     general: {
-      // parser: '@typescript-eslint/parser',
       parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',
@@ -210,10 +213,6 @@ module.exports = {
         es6: true,
       },
       rules: {
-        '@cypress/dev/arrow-body-multiline-braces': [
-          'error',
-          'always',
-        ],
         ...baseRules,
       },
       overrides: [

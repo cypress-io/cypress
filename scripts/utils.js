@@ -1,11 +1,16 @@
 const _ = require('lodash')
 const EE = require('events')
 const sh = require('shelljs')
-const chalk = require('chalk')
+// const chalk = require('chalk')
 const Promise = require('bluebird')
 const debug = require('debug')('lint/util')
 
 const filesRegex = /\.(js|jsx|ts|tsx|coffee|json|eslintrc)$/
+
+Promise.config({
+  warnings: true,
+  longStackTraces: true,
+})
 
 module.exports = {
   lintFilesByText: (options) => {
@@ -15,10 +20,9 @@ module.exports = {
     const opts = _.defaults(options, {
       getFilenames: null,
       getFileText: null,
-      getLintCommand: (f) => `./node_modules/.bin/eslint --stdin --stdin-filename ${sh.ShellString(f)} --color=true`,
     })
 
-    const filenames = opts.getFilenames().grep(filesRegex).split('\n').filter(Boolean)
+    const filenames = opts.getFilenames().filter((v) => filesRegex.test(v))
 
     debug(`linting:
     ${filenames.join('\n\t')}
@@ -26,8 +30,15 @@ module.exports = {
 
     return Promise.map(filenames, (f) => {
 
+      debug('started linting', f)
+
       const fileText = opts.getFileText(f)
-      const lintCommand = opts.getLintCommand(f)
+
+      debugTerse('file text:', fileText)
+
+      if (!fileText.toString()) return
+
+      const lintCommand = `./node_modules/.bin/eslint --stdin --stdin-filename ${sh.ShellString(f)} --color=true`
 
       return Promise.promisify(fileText.exec)(
         lintCommand,
@@ -36,24 +47,18 @@ module.exports = {
       .tapCatch(debugTerse)
       .return(false)
       .catchReturn(true)
-
+      .finally(() => {
+        debug('finished linting ', f)
+      })
     }, { concurrency: 0 })
     .then((results) => {
       const failCount = _.filter(results).length
 
       debug({ failCount })
 
-      return failCount
+      return { failCount, filenames }
     })
-    .then((failCount) => {
-      if (failCount) {
-        debug('exiting with status code', failCount)
-        process.exit(failCount)
-      }
 
-      // eslint-disable-next-line no-console
-      console.log(chalk.bold(`${chalk.green(filenames.length)} files linted successfully`))
-    })
   },
   lintFilesByName: (options) => {
     sh.config.silent = true
@@ -63,7 +68,7 @@ module.exports = {
       fix: false,
     })
 
-    const filenames = opts.getFilenames().grep(filesRegex).split('\n').filter(Boolean)
+    const filenames = opts.getFilenames().filter((v) => filesRegex.test(v))
 
     debug(`linting:
     ${filenames.join('\n\t')}
@@ -82,15 +87,13 @@ module.exports = {
     .tapCatch(debugTerse)
     .return(false)
     .catchReturn(true)
-    .then((failCount) => {
-      if (failCount) {
-        debug('exiting with status code', failCount)
-        process.exit(failCount)
+    .then((failed) => {
+      return {
+        failed,
+        filenames,
       }
-
-      // eslint-disable-next-line no-console
-      console.log(chalk.bold(`${chalk.green(filenames.length)} files linted successfully`))
     })
+
   },
 
 }

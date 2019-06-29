@@ -4,17 +4,15 @@
   "scripts": {
     "lint": "eslint --ext .js,json,.eslintrc .",
     "lint-changed": "node ./scripts/lint-changed",
-    "lint-changed-fix": "node ./scripts/lint-changed --fix",
-    "lint-fix": "yarn lint --fix",
+    "lint-fix": "npm run lint -- --fix",
+    "lint-pre-commit": "node ./scripts/lint-pre-commit",
     "lint-pre-push": "node ./scripts/lint-pre-push",
-    "lint-staged": "node ./scripts/lint-staged",
-    "precommit": "npm run lint",
     "semantic-release": "semantic-release",
     "test": "jest"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-staged --silent",
+      "pre-commit": "npm run lint-pre-commit --silent",
       "pre-push": "npm run lint-pre-push --silent"
     }
   },
@@ -29,14 +27,24 @@
     "@cypress/eslint-plugin-dev": "./",
     "@cypress/eslint-plugin-json": "^3.0.3",
     "@fellow/eslint-plugin-coffee": "^0.4.13",
+    "@types/chai": "^4.1.7",
     "@types/jest": "^24.0.15",
+    "@types/mocha": "^5.2.7",
+    "@types/sinon": "^7.0.13",
+    "@types/sinon-chai": "^3.2.2",
     "@typescript-eslint/eslint-plugin": "^1.11.0",
     "@typescript-eslint/parser": "^1.11.0",
+    "chai": "^4.2.0",
     "eslint": "^5.16.0",
+    "eslint-plugin-mocha": "^5.3.0",
+    "eslint-plugin-promise": "^4.2.1",
     "husky": "^2.7.0",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
+    "mocha": "^6.1.4",
     "semantic-release": "^15.13.17",
+    "sinon": "^7.3.2",
+    "sinon-chai": "^3.3.0",
     "typescript": "^3.5.2"
   },
   "peerDependencies": {
@@ -50,8 +58,8 @@
   },
   "bin": {
     "lint-changed": "./scripts/lint-changed.js",
-    "lint-pre-push": "./scripts/lint-pre-push.js",
-    "lint-staged": "./scripts/lint-staged.js"
+    "lint-pre-commit": "./scripts/lint-pre-commit.js",
+    "lint-pre-push": "./scripts/lint-pre-push.js"
   },
   "description": "Common ESLint rules shared by Cypress packages",
   "homepage": "https://github.com/cypress-io/cypress-eslint-plugin-dev#readme",
