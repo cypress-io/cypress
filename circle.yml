@@ -16,6 +16,7 @@ jobs:
         - ~/.cache
     - run:
         command: npm run test
+    - run: npm whoami
     - run:
         command: npm run semantic-release
 workflows:
