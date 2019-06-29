@@ -32,8 +32,6 @@
     "@types/mocha": "^5.2.7",
     "@types/sinon": "^7.0.13",
     "@types/sinon-chai": "^3.2.2",
-    "@typescript-eslint/eslint-plugin": "^1.11.0",
-    "@typescript-eslint/parser": "^1.11.0",
     "chai": "^4.2.0",
     "eslint": "^5.16.0",
     "eslint-plugin-mocha": "^5.3.0",
@@ -44,8 +42,7 @@
     "mocha": "^6.1.4",
     "semantic-release": "^15.13.17",
     "sinon": "^7.3.2",
-    "sinon-chai": "^3.3.0",
-    "typescript": "^3.5.2"
+    "sinon-chai": "^3.3.0"
   },
   "peerDependencies": {
     "@cypress/eslint-plugin-json": ">= 2.0.3",
