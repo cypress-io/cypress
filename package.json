@@ -33,7 +33,7 @@
     "simple-commit-message": "3.3.1"
   },
   "scripts": {
-    "postinstall": "node ./deprecated --renamed @cypress/eslint-plugin-dev --message 'you may also need to rename cypress-dev -> @cypress/dev'",
+    "postinstall": "node ./deprecated --renamed @cypress/eslint-plugin-dev --message 'you may also need to rename cypress-dev -> @cypress/dev in your .eslintrc'",
     "lint": "eslint --fix *.js",
     "precommit": "npm run lint",
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
