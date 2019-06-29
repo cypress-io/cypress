@@ -1,5 +1,6 @@
 {
   "env": {
     "commonjs": true
-  }
+  },
+  "parserOptions": {"sourceType": "module"}
 }

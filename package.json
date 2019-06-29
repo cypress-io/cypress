@@ -25,6 +25,7 @@
     "eslint-plugin-react": "^7.2.1"
   },
   "devDependencies": {
+    "@types/yargs": "^13.0.0",
     "condition-circle": "1.5.0",
     "github-post-release": "1.13.1",
     "husky": "^0.14.3",
@@ -32,6 +33,7 @@
     "simple-commit-message": "3.3.1"
   },
   "scripts": {
+    "postinstall": "node ./deprecated --renamed @cypress/eslint-plugin-dev --message 'you may also need to rename cypress-dev -> @cypress/dev in your .eslintrc'",
     "lint": "eslint --fix *.js",
     "precommit": "npm run lint",
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
@@ -40,5 +42,9 @@
     "verifyConditions": "condition-circle",
     "analyzeCommits": "simple-commit-message",
     "generateNotes": "github-post-release"
+  },
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "yargs": "^13.2.4"
   }
 }
