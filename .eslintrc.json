@@ -2,5 +2,8 @@
   "env": {
     "commonjs": true
   },
-  "parserOptions": {"sourceType": "module"}
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  }
 }
