@@ -29,14 +29,14 @@
     "condition-circle": "1.5.0",
     "github-post-release": "1.13.1",
     "husky": "^0.14.3",
-    "semantic-release": "8.2.0",
+    "semantic-release": "^15.13.18",
     "simple-commit-message": "3.3.1"
   },
   "scripts": {
     "postinstall": "node ./deprecated --renamed @cypress/eslint-plugin-dev --message 'you may also need to rename cypress-dev -> @cypress/dev in your .eslintrc'",
     "lint": "eslint --fix *.js",
     "precommit": "npm run lint",
-    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
+    "semantic-release": "semantic-release"
   },
   "release": {
     "verifyConditions": "condition-circle",
