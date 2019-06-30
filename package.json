@@ -40,9 +40,5 @@
   "dependencies": {
     "chalk": "^2.4.2",
     "yargs": "^13.2.4"
-  },
-  "release": {
-    "analyzeCommits": "simple-commit-message",
-    "generateNotes": "github-post-release"
   }
 }
