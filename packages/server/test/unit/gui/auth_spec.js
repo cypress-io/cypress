@@ -12,12 +12,11 @@ const BASE_URL = 'https://foo.invalid/login.html'
 const RANDOM_STRING = 'a'.repeat(32)
 const PORT = 9001
 const REDIRECT_URL = `http://127.0.0.1:${PORT}/redirect-to-auth`
-const FULL_LOGIN_URL = `https://foo.invalid/login.html?port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&version=${pkg.version}&platform=linux&arch=x64`
+const FULL_LOGIN_URL = `https://foo.invalid/login.html?port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
 
 describe('lib/gui/auth', function () {
   beforeEach(() => {
     sinon.stub(os, 'platform').returns('linux')
-    sinon.stub(os, 'arch').returns('x64')
     sinon.stub(machineId, 'machineId').resolves('abc123')
   })
 

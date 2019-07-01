@@ -41,9 +41,8 @@ const _buildFullLoginUrl = (baseLoginUrl, server) => {
       port,
       state: authState,
       machineId: id,
-      version: pkg.version,
+      cypressVersion: pkg.version,
       platform: os.platform(),
-      arch: os.arch(),
     }
 
     return authUrl.format()
