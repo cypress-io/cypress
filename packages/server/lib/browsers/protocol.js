@@ -26,34 +26,34 @@ function connectAsync (opts) {
  * Waits for the port to respond with connection to Chrome Remote Interface
  * @param port Port number to connect to
  */
-const getWsTargetFor = port => {
+const getWsTargetFor = (port) => {
   la(is.port(port), 'expected port number', port)
 
   return promiseRetry(
-    retry => {
+    (retry) => {
       return connectAsync({ port }).catch(retry)
     },
     { retries: 10 }
   )
-    .catch(() => {
-      debug('retry connecting to debugging port %d', port)
-    })
-    .then(() => {
-      return CRI.List()
-    })
-    .then(targets => {
-      // activate the first available id
+  .catch(() => {
+    debug('retry connecting to debugging port %d', port)
+  })
+  .then(() => {
+    return CRI.List()
+  })
+  .then((targets) => {
+    // activate the first available id
 
-      // find the first target page that's a real tab
-      // and not the dev tools
-      const target = _.find(targets, t => {
-        return t.type === 'page' && t.url.startsWith('http')
-      })
-
-      return target.webSocketDebuggerUrl
+    // find the first target page that's a real tab
+    // and not the dev tools
+    const target = _.find(targets, (t) => {
+      return t.type === 'page' && t.url.startsWith('http')
     })
+
+    return target.webSocketDebuggerUrl
+  })
 }
 
 module.exports = {
-  getWsTargetFor
+  getWsTargetFor,
 }
