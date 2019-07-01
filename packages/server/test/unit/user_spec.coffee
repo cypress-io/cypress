@@ -14,25 +14,25 @@ describe "lib/user", ->
         expect(user).to.deep.eq({name: "brian"})
 
   context ".logOut", ->
-    it "calls api.createLogout + removes the session from cache", ->
-      sinon.stub(api, "createLogout").withArgs("abc-123").resolves()
+    it "calls api.getLogout + removes the session from cache", ->
+      sinon.stub(api, "getLogout").withArgs("abc-123").resolves()
       sinon.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
       sinon.spy(cache, "removeUser")
 
       user.logOut().then ->
         expect(cache.removeUser).to.be.calledOnce
 
-    it "does not send to api.createLogout without a authToken", ->
-      sinon.spy(api, "createLogout")
+    it "does not send to api.getLogout without a authToken", ->
+      sinon.spy(api, "getLogout")
       sinon.stub(cache, "getUser").resolves({name: "brian"})
       sinon.spy(cache, "removeUser")
 
       user.logOut().then ->
-        expect(api.createLogout).not.to.be.called
+        expect(api.getLogout).not.to.be.called
         expect(cache.removeUser).to.be.calledOnce
 
-    it "removes the session from cache even if api.createLogout rejects", ->
-      sinon.stub(api, "createLogout").withArgs("abc-123").rejects(new Error("ECONNREFUSED"))
+    it "removes the session from cache even if api.getLogout rejects", ->
+      sinon.stub(api, "getLogout").withArgs("abc-123").rejects(new Error("ECONNREFUSED"))
       sinon.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
       sinon.spy(cache, "removeUser")
 

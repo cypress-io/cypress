@@ -11,6 +11,11 @@ cache    = require("#{root}lib/cache")
 Promise  = require("bluebird")
 
 API_BASEURL = "http://localhost:1234"
+DASHBOARD_BASEURL = "http://localhost:3000"
+AUTH_URLS = {
+  "dashboardAuthUrl": "http://localhost:3000/test-runner.html"
+  "logoutUrl": "http://localhost:3000/logout"
+}
 
 makeError = (details = {}) ->
   _.extend(new Error(details.message or "Some error"), details)
@@ -20,9 +25,7 @@ describe "lib/api", ->
     nock(API_BASEURL)
     .matchHeader("x-route-version", "2")
     .get("/auth")
-    .reply(200, {
-      "dashboardAuthUrl": "http://localhost:3000/test-runner.html"
-    })
+    .reply(200, AUTH_URLS)
 
     api.clearCache()
     sinon.stub(os, "platform").returns("linux")
@@ -645,7 +648,7 @@ describe "lib/api", ->
   context ".getAuthUrls", ->
     it "GET /auth + returns the urls", ->
       api.getAuthUrls().then (urls) ->
-        expect(urls.dashboardAuthUrl).to.eq("http://localhost:3000/test-runner.html")
+        expect(urls).to.deep.eq(AUTH_URLS)
 
     it "tags errors", ->
       nock.cleanAll()
@@ -668,28 +671,28 @@ describe "lib/api", ->
         # nock will throw if this makes a second HTTP call
         api.getAuthUrls()
       .then (urls) ->
-        expect(urls.dashboardAuthUrl).to.eq("http://localhost:3000/test-runner.html")
+        expect(urls).to.deep.eq(AUTH_URLS)
 
-  context ".createLogout", ->
-    it "POSTs /signout", ->
-      nock(API_BASEURL)
+  context ".getLogout", ->
+    it "GETs /logout", ->
+      nock(DASHBOARD_BASEURL)
       .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
-      .post("/signout")
+      .get("/logout")
       .reply(200)
 
-      api.createLogout("auth-token-123")
+      api.getLogout("auth-token-123")
 
     it "tags errors", ->
-      nock(API_BASEURL)
+      nock(DASHBOARD_BASEURL)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
-      .post("/signout")
+      .post("/logout")
       .reply(500, {})
 
-      api.createLogout("auth-token-123")
+      api.getLogout("auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
