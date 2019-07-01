@@ -287,6 +287,30 @@ describe('util', () => {
     })
   })
 
+  describe('.calculateEta', () => {
+    it('Remaining eta is same as elapsed when 50%', () => {
+      expect(util.calculateEta('50', 1000)).to.equal(1000)
+    })
+
+    it('Remaining eta is 0 when 100%', () => {
+      expect(util.calculateEta('100', 500)).to.equal(0)
+    })
+  })
+
+  describe('.convertPercentToPercentage', () => {
+    it('converts to 100 when 1', () => {
+      expect(util.convertPercentToPercentage(1)).to.equal(100)
+    })
+
+    it('strips out extra decimals', () => {
+      expect(util.convertPercentToPercentage(0.37892)).to.equal(38)
+    })
+
+    it('returns 0 if null num', () => {
+      expect(util.convertPercentToPercentage(null)).to.equal(0)
+    })
+  })
+
   context('.printNodeOptions', () => {
     describe('NODE_OPTIONS is not set', () => {
 
