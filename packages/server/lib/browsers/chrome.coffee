@@ -10,10 +10,12 @@ plugins   = require("../plugins")
 fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
+protocol  = require("./protocol")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
 CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
+CHRONE_REMOTE_INTERFACE_PORT = 9222
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -171,7 +173,7 @@ module.exports = {
     ## https://github.com/cypress-io/cypress/issues/2223
     { majorVersion } = options.browser
     if majorVersion in CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING
-       args.push("--disable-blink-features=RootLayerScrolling")
+      args.push("--disable-blink-features=RootLayerScrolling")
 
     ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
     ## https://github.com/cypress-io/cypress/issues/1872
@@ -216,8 +218,16 @@ module.exports = {
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
+        ## TODO: make remote debugging port dynamic
+        args.push("--remote-debugging-port=#{CHRONE_REMOTE_INTERFACE_PORT}")
 
         debug("launch in chrome: %s, %s", url, args)
 
         utils.launch(browser, url, args)
+
+      .tap ->
+        protocol.getWsTargetFor(CHRONE_REMOTE_INTERFACE_PORT)
+        .then (wsUrl) ->
+          debug("received wsUrl %s for port %d", wsUrl, CHRONE_REMOTE_INTERFACE_PORT)
+          global.wsUrl = wsUrl
 }
