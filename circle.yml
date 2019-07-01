@@ -206,7 +206,6 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: npm run lint
-      - run: npm run all lint
 
   unit-tests:
     <<: *defaults
@@ -237,7 +236,7 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  lint-typescript:
+  lint-types:
     <<: *defaults
     parallelism: 1
     steps:
@@ -717,7 +716,7 @@ linux-workflow: &linux-workflow
         name: Linux lint
         requires:
           - build
-    - lint-typescript:
+    - lint-types:
         requires:
           - build
     # unit, integration and e2e tests

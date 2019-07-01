@@ -264,15 +264,16 @@ DEBUG=cypress:launcher
 ### Coding Style
 
 We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rules specified in
-[eslint-plugin-cypress-dev](https://github.com/cypress-io/eslint-plugin-cypress-dev) plugin.
+[@cypress/eslint-plugin-dev](https://github.com/cypress-io/cypress-eslint-plugin-dev) plugin.
 
-When you edit files, you can quickly fix all changed files before committing using
+When you edit files, you can quickly fix all changed files before you commit using
 
 ```bash
-npm run lint-changed
+npm run lint-changed-fix
 ```
 
-When committing files, we run Git pre-commit hook to fix the staged JS files. See the `precommit-lint` script in [package.json](package.json). This might change JS files and you would need to commit the changes again.
+When committing files, we run a Git pre-commit hook to lint the staged JS files. See the `lint-staged` script in [package.json](package.json).  
+If this command fails, you may need to run `npm run lint-changed-fix` and commit those changes.
 
 ### Tests
 
