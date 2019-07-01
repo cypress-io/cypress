@@ -11,7 +11,7 @@
     "clean-deps": "rm -rf node_modules"
   },
   "devDependencies": {
-    "ts-node": "4.1.0"
+    "ts-node": "5.0.1"
   },
   "dependencies": {
     "debug": "4.1.1"
