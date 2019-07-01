@@ -37,6 +37,7 @@ describe('lib/exec/spawn', function () {
         on: sinon.stub().returns(undefined),
       },
     }
+
     sinon.stub(process, 'stdin').value(new EE)
     sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
     sinon.stub(xvfb, 'start').resolves()

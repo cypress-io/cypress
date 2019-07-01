@@ -65,6 +65,6 @@ routes = _.reduce(routes, (memo, value, key) => {
 
   return memo
 }
-  , {})
+, {})
 
 module.exports = routes

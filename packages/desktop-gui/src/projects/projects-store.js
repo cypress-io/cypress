@@ -77,6 +77,7 @@ class ProjectsStore {
     _.each(this.projects, (project) => {
       project.isChosen = false
     })
+
     project.isChosen = true
   }
 

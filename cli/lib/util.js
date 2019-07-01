@@ -71,6 +71,7 @@ const logBrokenGtkDisplayWarning = () => {
 
     Cypress will attempt to fix the problem and rerun.
   `)
+
   logger.warn()
 }
 

@@ -311,7 +311,7 @@ describe "lib/project", ->
       expect(@watch).to.be.calledWith("/path/to/cypress.env.json")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: ->done()})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]

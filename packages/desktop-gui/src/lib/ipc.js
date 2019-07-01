@@ -21,6 +21,7 @@ const register = (eventName, isPromiseApi = true) => {
     // console.log('ipc', eventName, 'called with', args) // NOTE: uncomment to debug ipc
     return ipcBus(eventName, ...args)
   }
+
   if (!isPromiseApi) {
     ipc[_.camelCase(`off:${eventName}`)] = () => {
       return ipcBus.off(eventName)

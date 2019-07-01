@@ -19,7 +19,6 @@ const id = () =>
   })
 }
 
-
 module.exports = {
   id,
 }

@@ -19,6 +19,7 @@ describe('driver/src/util/limited_map', () => {
     _.each(_.times(100), (i) => {
       limitedMap.set(`foo-${i}`, i)
     })
+
     expect(limitedMap.size).to.equal(100)
     expect(Array.from(limitedMap.values())[0]).to.equal(0)
     expect(Array.from(limitedMap.values())[99]).to.equal(99)
@@ -45,6 +46,7 @@ describe('driver/src/util/limited_map', () => {
     _.each(_.times(5), (i) => {
       limitedMap.set(`foo-${i}`, i)
     })
+
     expect(limitedMap.size).to.equal(5)
     expect(Array.from(limitedMap.values())[0]).to.equal(0)
     expect(Array.from(limitedMap.values())[4]).to.equal(4)
