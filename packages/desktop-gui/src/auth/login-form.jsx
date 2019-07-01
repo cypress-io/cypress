@@ -76,7 +76,7 @@ class LoginForm extends Component {
 
     return (
       <span>
-          Log In to Dashboard
+        Log In to Dashboard
       </span>
     )
 

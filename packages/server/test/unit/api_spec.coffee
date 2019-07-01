@@ -689,7 +689,7 @@ describe "lib/api", ->
       nock(DASHBOARD_BASEURL)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
-      .post("/logout")
+      .get("/logout")
       .reply(500, {})
 
       api.getLogout("auth-token-123")
