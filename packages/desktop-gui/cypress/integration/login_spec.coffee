@@ -155,6 +155,36 @@ describe "Login", ->
             cy
               .get("@loginBtn").should("be.disabled")
 
+          it "on AUTH_COULD_NOT_LAUNCH_BROWSER login button changes", ->
+            @onAuthMessageCb(null, {
+              name: "AUTH_COULD_NOT_LAUNCH_BROWSER"
+              type: "warning"
+              message: "foo"
+            })
+
+            cy
+            .get(".login-content .btn-login")
+            .should("be.disabled")
+            .should("have.text", " Could not open browser.")
+
+          it "<pre> can be click-selected", ->
+            @onAuthMessageCb(null, {
+              message: """
+              foo
+              ```
+              bar
+              ```
+              """
+              type: "warning"
+            })
+
+            cy
+            .get(".login-content .message pre")
+            .click()
+            .document()
+            .then ($doc) ->
+              expect($doc.getSelection().toString()).to.eq('bar')
+
     describe "Dashboard link in message", ->
       it "opens link to Dashboard Service on click", ->
         cy.contains("a", "Cypress Dashboard Service").click().then ->
