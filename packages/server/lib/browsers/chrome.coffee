@@ -15,7 +15,7 @@ protocol  = require("./protocol")
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
 CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
-CHRONE_REMOTE_INTERFACE_PORT = 9222
+CHROME_REMOTE_INTERFACE_PORT = 9222
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -219,15 +219,20 @@ module.exports = {
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
         ## TODO: make remote debugging port dynamic
-        args.push("--remote-debugging-port=#{CHRONE_REMOTE_INTERFACE_PORT}")
+        args.push("--remote-debugging-port=#{CHROME_REMOTE_INTERFACE_PORT}")
 
         debug("launch in chrome: %s, %s", url, args)
 
-        utils.launch(browser, url, args)
+        # FIRST load the blank page
+        # first allows us to connect the remote interface,
+        # start video recording and then
+        # we will load the actual page
+        utils.launch(browser, null, args)
 
       .tap ->
-        protocol.getWsTargetFor(CHRONE_REMOTE_INTERFACE_PORT)
+        # at first the tab will be blank "new tab"
+        protocol.getWsTargetFor(CHROME_REMOTE_INTERFACE_PORT, 'New Tab')
         .then (wsUrl) ->
-          debug("received wsUrl %s for port %d", wsUrl, CHRONE_REMOTE_INTERFACE_PORT)
+          debug("received wsUrl %s for port %d", wsUrl, CHROME_REMOTE_INTERFACE_PORT)
           global.wsUrl = wsUrl
 }

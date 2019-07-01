@@ -24,10 +24,12 @@ function connectAsync (opts) {
 
 /**
  * Waits for the port to respond with connection to Chrome Remote Interface
- * @param port Port number to connect to
+ * @param {number} port Port number to connect to
+ * @param {string} title Expected page title
  */
-const getWsTargetFor = (port) => {
+const getWsTargetFor = (port, title) => {
   la(is.port(port), 'expected port number', port)
+  la(is.unemptyString(title), 'invalid page title', title)
 
   return promiseRetry(
     (retry) => {
@@ -48,10 +50,12 @@ const getWsTargetFor = (port) => {
     // find the first target page that's a real tab
     // and not the dev tools
     const target = _.find(targets, (t) => {
-      return t.type === 'page' && t.url.startsWith('http')
+      // return t.type === 'page' && t.url.startsWith('http')
+      return t.type === 'page' && t.title === title
     })
 
     debug('found CRI target %o', target)
+    la(target, 'could not find CRI target')
 
     return target.webSocketDebuggerUrl
   })
