@@ -52,6 +52,7 @@ const getWsTargetFor = (port) => {
     })
 
     debug('found CRI target %o', target)
+
     return target.webSocketDebuggerUrl
   })
 }
