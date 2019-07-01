@@ -1,6 +1,6 @@
 _             = require("lodash")
 zlib          = require("zlib")
-concat        = require("concat-stream")
+concatStream  = require("concat-stream")
 Promise       = require("bluebird")
 accept        = require("http-accept")
 debug         = require("debug")("cypress:server:proxy")
@@ -181,7 +181,7 @@ module.exports = {
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
         ## a buffer
-        injection = concat (body) ->
+        injection = concatStream (body) ->
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
           if isGzipped
@@ -271,7 +271,7 @@ module.exports = {
       ## always proxy the cookies coming from the incomingRes
       if cookies = headers["set-cookie"]
         ## normalize into array
-        for c in [].concat(cookies)
+        for c in [].concatStream(cookies)
           try
             res.append("Set-Cookie", c)
           catch err
