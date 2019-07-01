@@ -27,7 +27,6 @@
   "devDependencies": {
     "@types/yargs": "^13.0.0",
     "eslint": "^6.0.1",
-    "github-post-release": "1.13.1",
     "husky": "^0.14.3",
     "semantic-release": "^15.13.18"
   },
