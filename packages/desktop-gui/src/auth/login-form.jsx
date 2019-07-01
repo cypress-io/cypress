@@ -28,7 +28,7 @@ class LoginForm extends Component {
           onClick={this._login}
           disabled={this.state.isLoggingIn}
         >
-          {this._buttonContent(message ? message.browserOpened : false)}
+          {this._buttonContent()}
         </button>
         {message && <p className={message.type}><MarkdownRenderer markdown={message.message}/></p>}
         <p className='terms'>By logging in, you agree to the <a onClick={this._openTerms}>Terms of Use</a> and <a onClick={this._openPrivacy}>Privacy Policy</a>.</p>
@@ -36,12 +36,23 @@ class LoginForm extends Component {
     )
   }
 
-  _buttonContent (browserOpened) {
+  _buttonContent () {
+    const message = this.props.message || {}
+
     if (this.state.isLoggingIn) {
+      if (message.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
+        return (
+          <span>
+            <i className='fa fa-exclamation-triangle'></i>{' '}
+            Could not open browser.
+          </span>
+        )
+      }
+
       return (
         <span>
           <i className='fa fa-spinner fa-spin'></i>{' '}
-          {browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
+          {message.browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
         </span>
       )
     }

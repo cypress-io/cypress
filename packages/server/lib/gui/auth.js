@@ -59,10 +59,11 @@ const _getOriginFromUrl = (originalUrl) => {
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
 const start = (onMessage) => {
-  function sendMessage (type, errorType, arg1) {
+  function sendMessage (type, name, arg1) {
     onMessage({
       type,
-      message: errors.getMsgByType(errorType, arg1),
+      name,
+      message: errors.getMsgByType(name, arg1),
       browserOpened: authRedirectReached,
     })
   }
