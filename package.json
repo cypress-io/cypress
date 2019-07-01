@@ -35,12 +35,12 @@
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "link": "node ./scripts/link-packages.js",
     "lint": "npm run lint-coffee && echo 'running eslint...' && eslint --ext .js,.jsx,.ts,.tsx,.json,.eslintrc .",
-    "lint-changed": "node ./scripts/lint/lint-changed",
-    "lint-changed-fix": "node ./scripts/lint/lint-changed --fix",
+    "lint-changed": "lint-changed",
+    "lint-changed-fix": "npm run lint-changed -- --fix",
     "lint-coffee": "coffeelint scripts/**/*.coffee && eslint --ext .coffee . && npm run all lint-coffee",
     "lint-fix": "npm run lint -- --fix",
-    "lint-pre-push": "node ./scripts/lint/lint-pre-push",
-    "lint-staged": "node ./scripts/lint/lint-staged",
+    "lint-pre-commit": "lint-pre-commit",
+    "lint-pre-push": "lint-pre-push",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "npm run check-deps-pre",
@@ -55,7 +55,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-staged --silent",
+      "pre-commit": "npm run lint-pre-commit --silent",
       "pre-push": "npm run lint-pre-push --silent"
     }
   },
@@ -129,7 +129,6 @@
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
-    "lint-staged": "8.2.1",
     "lodash": "4.17.11",
     "make-empty-github-commit": "1.2.0",
     "mocha": "3.5.3",
