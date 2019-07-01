@@ -20,7 +20,7 @@ module.exports = {
 
       cache.removeUser().then ->
         if authToken
-          api.createSignout(authToken)
+          api.createLogout(authToken)
 
   syncProfile: (authToken) ->
     debug("synchronizing user profile")

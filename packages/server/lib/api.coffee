@@ -267,16 +267,18 @@ module.exports = {
     .timeout(timeout)
     .catch(tagError)
 
-  createSignout: (authToken) ->
-    rp.post({
-      url: routes.signout()
-      json: true
-      auth: {
-        bearer: authToken
-      }
-    })
-    .catch({statusCode: 401}, ->) ## do nothing on 401
-    .catch(tagError)
+  createLogout: (authToken) ->
+    @getAuthUrls()
+    .then (urls) ->
+      rp.post({
+        url: urls.logoutUrl
+        json: true
+        auth: {
+          bearer: authToken
+        }
+      })
+      .catch({statusCode: 401}, ->) ## do nothing on 401
+      .catch(tagError)
 
   createProject: (projectDetails, remoteOrigin, authToken) ->
     rp.post({

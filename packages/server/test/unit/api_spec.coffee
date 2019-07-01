@@ -670,7 +670,7 @@ describe "lib/api", ->
       .then (urls) ->
         expect(urls.dashboardAuthUrl).to.eq("http://localhost:3000/test-runner.html")
 
-  context ".createSignout", ->
+  context ".createLogout", ->
     it "POSTs /signout", ->
       nock(API_BASEURL)
       .matchHeader("x-os-name", "linux")
@@ -680,7 +680,7 @@ describe "lib/api", ->
       .post("/signout")
       .reply(200)
 
-      api.createSignout("auth-token-123")
+      api.createLogout("auth-token-123")
 
     it "tags errors", ->
       nock(API_BASEURL)
@@ -689,7 +689,7 @@ describe "lib/api", ->
       .post("/signout")
       .reply(500, {})
 
-      api.createSignout("auth-token-123")
+      api.createLogout("auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->

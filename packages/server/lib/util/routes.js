@@ -19,8 +19,6 @@ let routes = {
   auth: 'auth',
   me: 'me',
   ping: 'ping',
-  signin: 'signin',
-  signout: 'signout',
   runs: 'runs',
   instances: 'runs/:id/instances',
   instance: 'instances/:id',
@@ -66,6 +64,6 @@ routes = _.reduce(routes, (memo, value, key) => {
 
   return memo
 }
-  , {})
+, {})
 
 module.exports = routes
