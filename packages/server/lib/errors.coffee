@@ -783,7 +783,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "AUTH_COULD_NOT_LAUNCH_BROWSER"
       """
-      Cypress was unable to open your installed browser. To continue logging in to the dashboard, please open this URL in your web browser: #{arg1}
+      Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
+
+      ```
+      #{arg1}
+      ```
       """
     when "AUTH_BROWSER_LAUNCHED"
       """

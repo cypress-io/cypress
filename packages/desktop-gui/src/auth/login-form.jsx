@@ -30,10 +30,27 @@ class LoginForm extends Component {
         >
           {this._buttonContent()}
         </button>
-        {message && <p className={message.type}><MarkdownRenderer markdown={message.message}/></p>}
+        {
+          message && <p className={`message ${message.type}`} onClick={this._selectUrl}>
+            <MarkdownRenderer markdown={message.message}/>
+          </p>
+        }
         <p className='terms'>By logging in, you agree to the <a onClick={this._openTerms}>Terms of Use</a> and <a onClick={this._openPrivacy}>Privacy Policy</a>.</p>
       </div>
     )
+  }
+
+  _selectUrl () {
+    const selection = window.getSelection()
+
+    if (selection.rangeCount > 0) {
+      selection.removeAllRanges()
+    }
+
+    const range = document.createRange()
+
+    range.selectNodeContents(document.querySelector('.login-content .message pre'))
+    selection.addRange(range)
   }
 
   _buttonContent () {
