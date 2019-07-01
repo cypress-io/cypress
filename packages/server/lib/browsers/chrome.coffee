@@ -4,6 +4,8 @@ _         = require("lodash")
 os        = require("os")
 path      = require("path")
 Promise   = require("bluebird")
+CRI       = require('chrome-remote-interface')
+la        = require('lazy-ass')
 extension = require("@packages/extension")
 debug     = require("debug")("cypress:server:browsers")
 plugins   = require("../plugins")
@@ -235,4 +237,16 @@ module.exports = {
         .then (wsUrl) ->
           debug("received wsUrl %s for port %d", wsUrl, CHROME_REMOTE_INTERFACE_PORT)
           global.wsUrl = wsUrl
+
+          # SECOND use RPI to initialize connection to the browser
+          CRI({
+            target: wsUrl,
+            local: true
+          })
+        .then (client) ->
+          la(client, "could not get CRI client")
+          debug("received CRI client")
+
+          # THIRD send visit command to load the actual page
+          client.send('Page.navigate', { url })
 }

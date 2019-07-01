@@ -51,11 +51,12 @@ const getWsTargetFor = (port, title) => {
     // and not the dev tools
     const target = _.find(targets, (t) => {
       // return t.type === 'page' && t.url.startsWith('http')
-      return t.type === 'page' && t.title === title
+      // return t.type === 'page' && t.title === title
+      return t.type === 'page' && t.url === 'chrome://newtab/'
     })
 
-    debug('found CRI target %o', target)
     la(target, 'could not find CRI target')
+    debug('found CRI target %o', target)
 
     return target.webSocketDebuggerUrl
   })
