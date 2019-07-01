@@ -115,7 +115,7 @@
     "color-string": "1.5.3",
     "common-tags": "1.8.0",
     "compression": "1.7.4",
-    "concat-stream": "1.6.2",
+    "concat-stream": "2.0.0",
     "content-type": "1.0.4",
     "cookie": "0.4.0",
     "cookie-parser": "1.4.4",
