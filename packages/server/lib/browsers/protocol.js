@@ -42,6 +42,7 @@ const getWsTargetFor = (port) => {
     return CRI.List()
   })
   .then((targets) => {
+    debug('CRI list %o', targets)
     // activate the first available id
 
     // find the first target page that's a real tab
@@ -50,6 +51,7 @@ const getWsTargetFor = (port) => {
       return t.type === 'page' && t.url.startsWith('http')
     })
 
+    debug('found CRI target %o', target)
     return target.webSocketDebuggerUrl
   })
 }
