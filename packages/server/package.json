@@ -179,7 +179,6 @@
     "shell-env": "3.0.0",
     "signal-exit": "3.0.2",
     "sinon": "5.1.1",
-    "string-to-stream": "1.1.1",
     "strip-ansi": "3.0.1",
     "supports-color": "6.1.0",
     "syntax-error": "1.4.0",
