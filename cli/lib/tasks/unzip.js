@@ -27,13 +27,13 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
     return new Promise((resolve, reject) => {
       return yauzl.open(zipFilePath, (err, zipFile) => {
         if (err) return reject(err)
+
         // debug('zipfile.paths:', zipFile)
         // zipFile.on('entry', debug)
         // debug(zipFile.readEntry())
         const total = zipFile.entryCount
 
         debug('zipFile entries count', total)
-
 
         const started = new Date()
 
@@ -59,7 +59,9 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
         const unzipWithNode = () => {
           const endFn = (err) => {
-            if (err) { return reject(err) }
+            if (err) {
+              return reject(err)
+            }
 
             return resolve()
           }
@@ -81,10 +83,9 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
           const copyingFileRe = /^copying file/
 
           const sp = cp.spawn('ditto', ['-xkV', zipFilePath, installDir])
-          sp.on('error', () =>
+
           // f-it just unzip with node
-            unzipWithNode()
-          )
+          sp.on('error', unzipWithNode)
 
           sp.on('close', (code) => {
             if (code === 0) {
@@ -125,12 +126,17 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
 const start = ({ zipFilePath, installDir, progress }) => {
   la(is.unemptyString(installDir), 'missing installDir')
-  if (!progress) progress = { onProgress: () => ({}) }
+  if (!progress) {
+    progress = { onProgress: () => {
+      return {}
+    } }
+  }
 
   return fs.pathExists(installDir)
   .then((exists) => {
     if (exists) {
       debug('removing existing unzipped binary', installDir)
+
       return fs.removeAsync(installDir)
     }
   })

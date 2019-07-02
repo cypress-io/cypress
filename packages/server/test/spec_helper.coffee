@@ -1,7 +1,7 @@
 require("../lib/environment")
 
 global.root      = "../../"
-global.supertest = require("supertest-as-promised")
+global.supertest = require("supertest")
 global.nock      = require("nock")
 global.expect    = require("chai").expect
 global.mockery   = require("mockery")
@@ -12,7 +12,6 @@ Promise          = require("bluebird")
 path             = require("path")
 cache            = require("../lib/cache")
 appData          = require("../lib/util/app_data")
-agent            = require("superagent")
 
 require("chai")
 .use(require("@cypress/sinon-chai"))
@@ -39,6 +38,7 @@ hasOnly = false
 
     backup.apply(@, arguments)
 
+originalEnv = process.env
 env = _.clone(process.env)
 
 sinon.usingPromise(Promise)
@@ -79,6 +79,8 @@ before ->
   appData.ensure()
 
 beforeEach ->
+  @originalEnv = originalEnv
+
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
 

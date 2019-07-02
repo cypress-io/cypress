@@ -1,3 +1,6 @@
+// maximum supported file structure nesting level
+$max-nesting-level: 14;
+
 #tests-list-page {
   position: relative;
 
@@ -18,7 +21,6 @@
 
   .search {
     padding: 8px 5px 7px 15px;
-    padding-right: 5px;
     margin-right: 15px;
     display: inline-block;
     position: relative;
@@ -109,11 +111,26 @@
     margin-bottom: 0;
   }
 
-  .file > a, .folder {
-    color: #7c7f84;
+  .file, .folder {
+    .file-name,
+    .folder-name {
+      display: flex;
+      align-items: center;
 
-    i {
-      margin-right: 5px;
+      i {
+        font-size: 13px;
+        margin-right: 5px;
+        flex-shrink: 0;
+      }
+    }
+
+    @for $i from 0 through $max-nesting-level {
+      &.level-#{$i} {
+        .file-name,
+        .folder-name {
+          padding-left: 20px * $i;
+        }
+      }
     }
   }
 
@@ -124,37 +141,33 @@
     color: #636363;
     font-family: $font-sans;
 
-    i {
-      font-size: 13px;
-    }
+    &.level-0 {
+      >div>.folder-name {
+        padding: 5px 20px;
+        background-color: #F9F9F9;
+        font-weight: normal;
+        text-transform: uppercase;
+        border-bottom: 1px solid #eee;
+        border-top: 1px solid #eee;
+        color: #777;
+        line-height: 18px;
+        font-family: $font-sans;
 
-    i.folder-collapse-icon {
-      display: inline-block;
-      margin-right: 4px;
-    }
-
-    &>div>div {
-      padding-bottom: 0;
-    }
-
-    .folder-display-name {
-      display: inline-block;
-      margin-right: 5px;
+        i {
+          display: none;
+          margin-right: 5px;
+        }
+      }
     }
   }
 
   .file > a {
-    font-weight: 300;
+    font-weight: 400;
     border-bottom: 1px dotted #eeeeee;
     padding: 4px 0;
     font-family: $font-sans;
     color: #637eb9;
     font-size: 15px;
-
-    i {
-      font-size: 13px;
-      margin-right: 6px;
-    }
 
     &.active {
       pointer-events: none;
@@ -171,21 +184,11 @@
       }
     }
 
-    &:hover {
+    &:hover, &:focus {
       background-color: #f8f8f8;
       color: #38589c;
       cursor: pointer;
       text-decoration: none;
-    }
-
-    &:focus {
-      text-decoration: none;
-    }
-  }
-
-  .list-as-table>.folder {
-    &>div>div:last-child {
-      padding: 0;
     }
   }
 
@@ -195,10 +198,6 @@
   }
 
   .list-as-table>.file {
-    &:last-child>a {
-      // border-bottom: 0;
-    }
-
     &>div:first-child {
       @include responsive-width(75%);
     }
@@ -207,114 +206,6 @@
       @include responsive-width(25%);
       text-align: right;
       color: #bdc0c5;
-    }
-  }
-
-  // need to refactor to be calculated using javascript
-  .outer-files-container.list-as-table>.folder,
-  .outer-files-container.list-as-table>.file>a {
-
-    &>div>div:first-child {
-      padding: 5px 20px;
-      background-color: #F9F9F9;
-      font-weight: normal;
-      text-transform: uppercase;
-      border-bottom: 1px solid #eee;
-      border-top: 1px solid #eee;
-      color: #777;
-      line-height: 18px;
-      font-family: $font-sans;
-
-      i {
-        display: none;
-        margin-right: 5px;
-      }
-
-      i.folder-collapse-icon {
-        display: inline-block;
-      }
-
-      &:after {
-        content: "tests"
-      }
-    }
-
-    &>div>div:last-child {
-
-      &>.list-as-table>.folder,
-      &>.list-as-table>.file>a {
-
-        &>div>div:first-child {
-          padding-left: 20px;
-        }
-
-        &>div>div:last-child {
-
-          &>.list-as-table>.folder,
-          &>.list-as-table>.file>a {
-
-            &>div>div:first-child {
-              padding-left: 40px;
-            }
-
-            &>div>div:last-child {
-
-              &>.list-as-table>.folder,
-              &>.list-as-table>.file>a {
-
-                &>div>div:first-child {
-                  padding-left: 60px;
-                }
-
-                &>div>div:last-child {
-
-                  &>.list-as-table>.folder,
-                  &>.list-as-table>.file>a {
-
-                    &>div>div:first-child {
-                      padding-left: 80px;
-                    }
-
-                    &>div>div:last-child {
-
-                      &>.list-as-table>.folder,
-                      &>.list-as-table>.file>a {
-
-                        &>div>div:first-child {
-                          padding-left: 100px;
-                        }
-
-                        &>div>div:last-child {
-
-                          &>.list-as-table>.folder,
-                          &>.list-as-table>.file>a {
-
-                            &>div>div:first-child {
-                              padding-left: 120px;
-                            }
-
-                          }
-
-                        }
-
-                      }
-
-                    }
-
-                  }
-
-                }
-
-              }
-
-            }
-
-          }
-
-        }
-
-      }
-
     }
   }
 }

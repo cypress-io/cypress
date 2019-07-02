@@ -13,6 +13,7 @@ errors     = require("../errors")
 capture    = require("../capture")
 upload     = require("../upload")
 env        = require("../util/env")
+keys       = require("../util/keys")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 ciProvider = require("../util/ci_provider")
@@ -219,6 +220,33 @@ updateInstance = (options = {}) ->
     else
       null
 
+getCommitFromGitOrCi = (git) ->
+  la(check.object(git), 'expected git information object', git)
+  ciProvider.commitDefaults({
+    sha: git.sha
+    branch: git.branch
+    authorName: git.author
+    authorEmail: git.email
+    message: git.message
+    remoteOrigin: git.remote
+    defaultBranch: null
+  })
+
+usedTestsMessage = (limit, phrase) ->
+  if _.isFinite(limit)
+    "The limit is #{chalk.blue(limit)} #{phrase} recordings."
+  else
+    ""
+
+billingLink = (orgId) ->
+  if orgId
+    "https://on.cypress.io/dashboard/organizations/#{orgId}/billing"
+  else
+    "https://on.cypress.io/set-up-billing"
+
+gracePeriodMessage = (gracePeriodEnds) ->
+  gracePeriodEnds or "the grace period ends"
+
 createRun = (options = {}) ->
   _.defaults(options, {
     group: null,
@@ -231,7 +259,7 @@ createRun = (options = {}) ->
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
   if not recordKey
-    ## are we a forked PR and are we NOT running our own internal
+    ## are we a forked pull request (forked PR) and are we NOT running our own internal
     ## e2e tests? currently some e2e tests fail when a user submits
     ## a PR because this logic triggers unintended here
     if isForkPr.isForkPr() and not runningInternalTests()
@@ -251,6 +279,10 @@ createRun = (options = {}) ->
 
   specs = _.map(specs, getSpecRelativePath)
 
+  commit = getCommitFromGitOrCi(git)
+  debug("commit information from Git or from environment variables")
+  debug(commit)
+
   makeRequest = ->
     api.createRun({
       specs
@@ -265,18 +297,53 @@ createRun = (options = {}) ->
         params: ciProvider.ciParams()
         provider: ciProvider.provider()
       }
-      commit: ciProvider.commitDefaults({
-        sha: git.sha
-        branch: git.branch
-        authorName: git.author
-        authorEmail: git.email
-        message: git.message
-        remoteOrigin: git.remote
-        defaultBranch: null
-      })
+      commit
     })
 
   api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  .tap (response) ->
+    return if not response?.warnings?.length
+
+    _.each response.warnings, (warning) ->
+      switch warning.code
+        when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
+        when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "test")
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
+        when "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE", {
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
+        when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            link: billingLink(warning.orgId)
+          })
+        when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "test")
+            link: billingLink(warning.orgId)
+          })
+        when "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
+          errors.warning("PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED", {
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
+        else
+          errors.warning("DASHBOARD_UNKNOWN_CREATE_RUN_WARNING", {
+            message: warning.message,
+            props: _.omit(warning, 'message')
+          })
+
   .catch (err) ->
     debug("failed creating run %o", {
       stack: err.stack
@@ -284,8 +351,42 @@ createRun = (options = {}) ->
 
     switch err.statusCode
       when 401
-        recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+        recordKey = keys.hide(recordKey)
         errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
+      when 402
+        { code, payload } = err.error
+
+        limit = _.get(payload, "limit")
+        orgId = _.get(payload, "orgId")
+
+        switch code
+          when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
+              usedTestsMessage: usedTestsMessage(limit, "private test")
+              link: billingLink(orgId)
+            })
+          when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_TESTS", {
+              usedTestsMessage: usedTestsMessage(limit, "test")
+              link: billingLink(orgId)
+            })
+          when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+            errors.throw("PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN", {
+              link: billingLink(orgId)
+            })
+          when "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
+            errors.throw("RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN", {
+              link: billingLink(orgId)
+            })
+          else
+            errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", {
+              response: err,
+              flags: {
+                group,
+                parallel,
+                ciBuildId,
+              },
+            })
       when 404
         errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
       when 412
@@ -415,6 +516,9 @@ createRunAndRecordSpecs = (options = {}) ->
 
   commitInfo.commitInfo(projectRoot)
   .then (git) ->
+    debug("found the following git information")
+    debug(git)
+
     platform = {
       osCpus: sys.osCpus
       osName: sys.osName
@@ -437,7 +541,9 @@ createRunAndRecordSpecs = (options = {}) ->
     })
     .then (resp) ->
       if not resp
-        runAllSpecs()
+        ## if a forked run, can't record and can't be parallel
+        ## because the necessary env variables aren't present
+        runAllSpecs({}, false)
       else
         { runUrl, runId, machineId, groupId } = resp
 
@@ -518,7 +624,7 @@ createRunAndRecordSpecs = (options = {}) ->
                 instanceId
               })
 
-        runAllSpecs(beforeSpecRun, afterSpecRun, runUrl)
+        runAllSpecs({ beforeSpecRun, afterSpecRun, runUrl })
 
 module.exports = {
   createRun
@@ -545,4 +651,5 @@ module.exports = {
 
   createRunAndRecordSpecs
 
+  getCommitFromGitOrCi
 }

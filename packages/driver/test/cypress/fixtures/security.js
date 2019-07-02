@@ -11,6 +11,7 @@
   if (top!=self) run()
   if (top.location != self.location) run()
   if (top.location != location) run()
+  if (self.location != top.location) run()
   if (parent.frames.length > 0) run()
   if (window != top) run()
   if (window.top !== window.self) run()

@@ -19,6 +19,7 @@ const handleGlobalErrors = () => {
 
   window.onunhandledrejection = (event) => {
     const reason = event && event.reason
+
     sendErr(reason || event)
   }
 }

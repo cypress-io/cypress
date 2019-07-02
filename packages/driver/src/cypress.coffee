@@ -29,8 +29,16 @@ $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
-  cy: "getStyles".split(" ")
+  cy: "detachDom getStyles".split(" ")
 }
+
+jqueryProxyFn = ->
+  if not @cy
+    $utils.throwErrByPath("miscellaneous.no_cy")
+
+  @cy.$$.apply(@cy, arguments)
+
+_.extend(jqueryProxyFn, $)
 
 ## provide the old interface and
 ## throw a deprecation message
@@ -157,6 +165,7 @@ class $Cypress
 
     ## create cy and expose globally
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
+    @isCy = @cy.isCy
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
@@ -386,6 +395,9 @@ class $Cypress
       when "app:window:unload"
         @emit("window:unload", args[0])
 
+      when "app:css:modified"
+        @emit("css:modified", args[0])
+
       when "spec:script:error"
         @emit("script:error", args...)
 
@@ -442,11 +454,7 @@ class $Cypress
   addUtilityCommand: (key, fn) ->
     throwPrivateCommandInterface("addUtilityCommand")
 
-  $: ->
-    if not @cy
-      $utils.throwErrByPath("miscellaneous.no_cy")
-
-    @cy.$$.apply(@cy, arguments)
+  $: jqueryProxyFn
 
   ## attach to $Cypress to access
   ## all of the constructors
@@ -476,8 +484,6 @@ class $Cypress
   minimatch: minimatch
   sinon: sinon
   lolex: lolex
-
-  _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
   @create = (config) ->
     new $Cypress(config)

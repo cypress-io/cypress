@@ -6,8 +6,8 @@ request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 humanInterval = require("human-interval")
+agent      = require("@packages/network").agent
 pkg        = require("@packages/root")
-browsers   = require("./browsers")
 routes     = require("./util/routes")
 system     = require("./util/system")
 
@@ -35,6 +35,8 @@ if intervals = process.env.API_RETRY_INTERVALS
 
 rp = request.defaults (params = {}, callback) ->
   _.defaults(params, {
+    agent: agent
+    proxy: null
     gzip: true
   })
 
@@ -47,8 +49,9 @@ rp = request.defaults (params = {}, callback) ->
 
   method = params.method.toLowerCase()
 
+  # use %j argument to ensure deep nested properties are serialized
   debug(
-    "request to url: %s with params: %o",
+    "request to url: %s with params: %j",
     "#{params.method} #{params.url}",
     _.pick(params, "body", "headers")
   )
@@ -77,9 +80,11 @@ machineId = ->
   .catch ->
     return null
 
-## retry on timeouts or 5xx errors
+## retry on timeouts, 5xx errors, or any error without a status code
 isRetriableError = (err) ->
-  (err instanceof Promise.TimeoutError) or (500 <= err.statusCode < 600)
+  (err instanceof Promise.TimeoutError) or
+  (500 <= err.statusCode < 600) or
+  not err.statusCode?
 
 module.exports = {
   rp
@@ -221,7 +226,7 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
-  createRaygunException: (body, authToken, timeout = 3000) ->
+  createCrashReport: (body, authToken, timeout = 3000) ->
     rp.post({
       url: routes.exceptions()
       json: true

@@ -1,11 +1,18 @@
 _ = require("lodash")
+path = require("path")
 Promise = require("bluebird")
 bodyParser = require("body-parser")
 jsonSchemas = require("@cypress/json-schemas").api
 e2e = require("../support/helpers/e2e")
+fs = require("../../lib/util/fs")
+Fixtures = require("../support/helpers/fixtures")
 
-postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
+postRunResponseWithWarnings = jsonSchemas.getExample("postRunResponse")("2.1.0")
+postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
+
+e2ePath = Fixtures.projectPath("e2e")
+outputPath = path.join(e2ePath, "output.json")
 
 { runId, groupId, machineId, runUrl } = postRunResponse
 { instanceId } = postRunInstanceResponse
@@ -15,12 +22,12 @@ requests = null
 getRequestUrls = ->
   _.map(requests, "url")
 
-getSchemaErr = (err, schema) ->
+getSchemaErr = (tag, err, schema) ->
   {
     errors: err.errors
     object: err.object
     example: err.example
-    message: "Request should follow #{schema} schema"
+    message: "#{tag} should follow #{schema} schema"
   }
 
 getResponse = (responseSchema) ->
@@ -31,24 +38,26 @@ getResponse = (responseSchema) ->
 
   jsonSchemas.getExample(name)(version)
 
-sendResponse = (req, res, responseSchema) ->
-  if _.isFunction(responseSchema)
-    return responseSchema(req, res)
+sendResponse = (req, res, responseBody) ->
+  if _.isFunction(responseBody)
+    return responseBody(req, res)
 
-  res.json(getResponse(responseSchema))
+  res.json(getResponse(responseBody))
 
-ensureSchema = (requestSchema, responseSchema) ->
-  if requestSchema
-    [ name, version ] = requestSchema.split("@")
+ensureSchema = (expectedRequestSchema, responseBody, expectedResponseSchema) ->
+  if expectedRequestSchema
+    [ reqName, reqVersion ] = expectedRequestSchema.split("@")
 
   return (req, res) ->
     { body } = req
 
     try
-      if requestSchema
-        jsonSchemas.assertSchema(name, version)(body)
+      if expectedRequestSchema
+        jsonSchemas.assertSchema(reqName, reqVersion)(body)
 
-      sendResponse(req, res, responseSchema)
+      res.expectedResponseSchema = expectedResponseSchema
+
+      sendResponse(req, res, responseBody)
 
       key = [req.method, req.url].join(" ")
 
@@ -57,7 +66,7 @@ ensureSchema = (requestSchema, responseSchema) ->
         body
       })
     catch err
-      res.status(412).json(getSchemaErr(err, requestSchema))
+      res.status(412).json(getSchemaErr("request", err, expectedRequestSchema))
 
 sendUploadUrls = (req, res) ->
   { body } = req
@@ -77,19 +86,54 @@ sendUploadUrls = (req, res) ->
       uploadUrl: "http://localhost:1234/screenshots/#{num}.png"
     }
 
-  if screenshotUploadUrls.length
-    json.screenshotUploadUrls = screenshotUploadUrls
+  json.screenshotUploadUrls = screenshotUploadUrls
 
   res.json(json)
+
+assertResponseBodySchema = (req, res, next) ->
+  oldWrite = res.write
+  oldEnd = res.end
+
+  chunks = []
+
+  res.write = (chunk) ->
+    ## buffer the response, we'll really write it on end
+    chunks.push(chunk)
+
+  res.end = (chunk) ->
+    if (chunk)
+      chunks.push(chunk)
+
+    res.write = oldWrite
+    res.end = oldEnd
+
+    if res.expectedResponseSchema && _.inRange(res.statusCode, 200, 299)
+      body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
+
+      [ resName, resVersion ] = res.expectedResponseSchema.split("@")
+
+      try
+        jsonSchemas.assertSchema(resName, resVersion)(body)
+      catch err
+        return res.status(412).json(getSchemaErr("response", err, res.expectedResponseSchema))
+
+    chunks.map (chunk) ->
+      res.write(chunk)
+    res.end()
+
+  next()
 
 onServer = (routes) ->
   return (app) ->
     app.use(bodyParser.json())
 
+    app.use(assertResponseBodySchema)
+
     _.each routes, (route) ->
       app[route.method](route.url, ensureSchema(
         route.req,
-        route.res
+        route.res,
+        route.resSchema
       ))
 
 setup = (routes, settings = {}) ->
@@ -109,16 +153,19 @@ defaultRoutes = [
     method: "post"
     url: "/runs"
     req: "postRunRequest@2.1.0",
+    resSchema: "postRunResponse@2.1.0"
     res: postRunResponse
   }, {
     method: "post"
     url: "/runs/:id/instances"
     req: "postRunInstanceRequest@2.1.0",
+    resSchema: "postRunInstanceResponse@2.1.0"
     res: postRunInstanceResponse
   }, {
     method: "put"
     url: "/instances/:id"
     req: "putInstanceRequest@2.0.0",
+    resSchema: "putInstanceResponse@2.0.0"
     res: sendUploadUrls
   }, {
     method: "put"
@@ -152,6 +199,7 @@ describe "e2e record", ->
         spec: "record*"
         record: true
         snapshot: true
+        outputPath: outputPath
         expectedExitCode: 3
       })
       .get("stdout")
@@ -304,6 +352,10 @@ describe "e2e record", ->
         expect(forthInstanceStdout.body.stdout).not.to.include("record_fail_spec.coffee")
         expect(forthInstanceStdout.body.stdout).not.to.include("record_pass_spec.coffee")
 
+        fs.readJsonAsync(outputPath)
+        .then (results) ->
+          expect(results.runUrl).to.equal(runUrl)
+
   context "parallelization", ->
     allSpecs = [
       "cypress/integration/record_error_spec.coffee",
@@ -348,6 +400,7 @@ describe "e2e record", ->
       method: "post"
       url: "/runs"
       req: "postRunRequest@2.1.0",
+      resSchema: "postRunResponse@2.1.0"
       res: (req, res) ->
         { group, ciBuildId } = req.body
 
@@ -371,6 +424,7 @@ describe "e2e record", ->
       method: "post"
       url: "/runs/:id/instances"
       req: "postRunInstanceRequest@2.1.0",
+      resSchema: "postRunInstanceResponse@2.1.0"
       res: (req, res) ->
         { machineId, spec } = req.body
 
@@ -491,6 +545,7 @@ describe "e2e record", ->
         expect(getRequestUrls()).to.be.empty
 
     it "warns but does not exit when is forked pr", ->
+      process.env.CIRCLECI = "true"
       process.env.CIRCLE_PR_NUMBER = "123"
       process.env.CIRCLE_PR_USERNAME = "brian-mann"
       process.env.CIRCLE_PR_REPONAME = "cypress"
@@ -499,6 +554,24 @@ describe "e2e record", ->
       e2e.exec(@, {
         spec: "record_pass*"
         record: true
+        snapshot: true
+        expectedExitCode: 0
+      })
+      .then ->
+        expect(getRequestUrls()).to.be.empty
+
+    it "warns but does not exit when is forked pr and parallel", ->
+      process.env.CIRCLECI = "true"
+      process.env.CIRCLE_WORKFLOW_ID = "123"
+      process.env.CIRCLE_PR_NUMBER = "123"
+      process.env.CIRCLE_PR_USERNAME = "brian-mann"
+      process.env.CIRCLE_PR_REPONAME = "cypress"
+      process.env.CYPRESS_INTERNAL_E2E_TESTS = "0"
+
+      e2e.exec(@, {
+        spec: "record_pass*"
+        record: true
+        parallel: true
         snapshot: true
         expectedExitCode: 0
       })
@@ -635,6 +708,7 @@ describe "e2e record", ->
         method: "post"
         url: "/runs/:id/instances"
         req: "postRunInstanceRequest@2.1.0",
+        resSchema: "postRunInstanceResponse@2.1.0"
         res: (req, res) -> res.sendStatus(500)
       }
 
@@ -668,6 +742,7 @@ describe "e2e record", ->
         method: "post"
         url: "/runs/:id/instances"
         req: "postRunInstanceRequest@2.1.0",
+        resSchema: "postRunInstanceResponse@2.1.0"
         res: (req, res) ->
           res.json({
             instanceId
@@ -775,17 +850,130 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
+    describe "create run 402 - free plan exceeds monthly private tests", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+          payload: {
+            used: 600
+            limit: 500
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when on free plan and over recorded runs limit", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - free plan exceeds monthly tests", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+          payload: {
+            used: 600
+            limit: 500
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when on free plan and over recorded tests limit", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - parallel feature not available in plan", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
+          payload: {
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when attempting parallel run when not available in plan", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - grouping feature not available in plan", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          code: "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
+          payload: {
+            orgId: "org-id-1234"
+          }
+        })
+      }])
+
+      it "errors and exits when attempting parallel run when not available in plan", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
+    describe "create run 402 - unknown error", ->
+      setup([{
+        method: "post"
+        url: "/runs"
+        req: "postRunRequest@2.1.0",
+        res: (req, res) -> res.status(402).json({
+          error: "Something went wrong"
+        })
+      }])
+
+      it "errors and exits when there's an unknown 402 error", ->
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          record: true
+          snapshot: true
+          expectedExitCode: 1
+        })
+
     describe "create instance", ->
       routes = [
         {
           method: "post"
           url: "/runs"
           req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
           req: "postRunInstanceRequest@2.1.0",
+          resSchema: "postRunInstanceResponse@2.1.0"
           res: (req, res) -> res.sendStatus(500)
         }
       ]
@@ -816,11 +1004,13 @@ describe "e2e record", ->
           method: "post"
           url: "/runs"
           req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
           req: "postRunInstanceRequest@2.1.0",
+          resSchema: "postRunInstanceResponse@2.1.0"
           res: postRunInstanceResponse
         }, {
           method: "put"
@@ -857,21 +1047,25 @@ describe "e2e record", ->
           method: "post"
           url: "/runs"
           req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
           req: "postRunInstanceRequest@2.1.0",
+          resSchema: "postRunInstanceResponse@2.1.0"
           res: postRunInstanceResponse
         }, {
           method: "put"
           url: "/instances/:id"
           req: "putInstanceRequest@2.0.0",
+          resSchema: "putInstanceResponse@2.0.0"
           res: sendUploadUrls
         }, {
           method: "put"
           url: "/instances/:id/stdout"
           req: "putInstanceStdoutRequest@1.0.0",
+          resSchema: "putInstanceStdoutRequest@1.0.0"
           res: (req, res) -> res.sendStatus(500)
         }, {
           method: "put"
@@ -916,16 +1110,19 @@ describe "e2e record", ->
           method: "post"
           url: "/runs"
           req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
           req: "postRunInstanceRequest@2.1.0",
+          resSchema: "postRunInstanceResponse@2.1.0"
           res: postRunInstanceResponse
         }, {
           method: "put"
           url: "/instances/:id"
           req: "putInstanceRequest@2.0.0",
+          resSchema: "putInstanceResponse@2.0.0"
           res: sendUploadUrls
         }, {
           method: "put"
@@ -992,6 +1189,7 @@ describe "e2e record", ->
         method: "post"
         url: "/runs/:id/instances"
         req: "postRunInstanceRequest@2.1.0",
+        resSchema: "postRunInstanceResponse@2.1.0"
         res: (req, res) ->
           count += 1
 
@@ -1010,6 +1208,9 @@ describe "e2e record", ->
             res.json({
               instanceId,
               spec: null
+              estimatedWallClockDuration: null
+              totalInstances: 0
+              claimedInstances: 0
             })
       }
 
@@ -1043,3 +1244,230 @@ describe "e2e record", ->
             "PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout"
             "POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances"
           ])
+
+  describe "api interaction warnings", ->
+
+    describe "create run warnings", ->
+      describe "grace period - over private tests limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              name: "foo"
+              message: "foo"
+              code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+              limit: 500
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over private test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "grace period - over tests limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              name: "foo"
+              message: "foo"
+              code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+              limit: 500
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "grace period - parallel feature", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              name: "foo"
+              message: "foo"
+              code: "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when using parallel feature", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "grace period - grouping feature", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              name: "foo"
+              message: "foo"
+              code: "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
+              gracePeriodEnds: "2999-12-31"
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when using parallel feature", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "paid plan - over private tests limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              name: "foo"
+              message: "foo"
+              code: "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
+              used: 700
+              limit: 500
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over private test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "paid plan - over tests limit", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
+          res: (req, res) -> res.status(200).json({
+            runId
+            groupId
+            machineId
+            runUrl
+            warnings: [{
+              name: "foo"
+              message: "foo"
+              code: "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+              used: 700
+              limit: 500
+              orgId: "org-id-1234"
+            }]
+          })
+        }
+
+        setup(routes)
+
+        it "warns when over test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "unknown warning", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.1.0",
+          resSchema: "postRunResponse@2.1.0"
+          res: postRunResponseWithWarnings
+        }
+
+        setup(routes)
+
+        it "warns with unknown warning code", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+

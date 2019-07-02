@@ -1,10 +1,9 @@
 _ = require("lodash")
+whatIsCircular = require("@cypress/what-is-circular")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
 $Location = require("../../cypress/location")
-
-validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
 isOptional = (memo, val, key) ->
   if _.isNull(val)
@@ -21,21 +20,34 @@ REQUEST_DEFAULTS = {
   json: null
   form: null
   gzip: true
+  timeout: null
   followRedirect: true
+  failOnStatusCode: true
+  retryOnNetworkFailure: true
+  retryOnStatusCodeFailure: false
 }
 
 REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 
 OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 
-argIsHttpMethod = (str) ->
-  _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
+hasFormUrlEncodedContentTypeHeader = (headers) ->
+  header = _.findKey(headers, _.matches("application/x-www-form-urlencoded"))
+
+  header and _.toLower(header) is "content-type"
 
 isValidJsonObj = (body) ->
   _.isObject(body) and not _.isFunction(body)
 
 whichAreOptional = (val, key) ->
   val is null and key in OPTIONAL_OPTS
+
+needsFormSpecified = (options = {}) ->
+  { body, json, headers } = options
+
+  ## json isn't true, and we have an object body and the user
+  ## specified that the content-type header is x-www-form-urlencoded
+  json isnt true and _.isObject(body) and hasFormUrlEncodedContentTypeHeader(headers)
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   # Cypress.extend
@@ -59,7 +71,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         when args.length is 2
           ## if our first arg is a valid
           ## HTTP method then set method + url
-          if argIsHttpMethod(args[0])
+          if $utils.isValidHttpMethod(args[0])
             o.method = args[0]
             o.url    = args[1]
           else
@@ -74,11 +86,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       _.defaults(options, REQUEST_DEFAULTS, {
         log: true
-        timeout: config("responseTimeout")
-        failOnStatusCode: true
       })
 
+      ## if timeout is not supplied, use the configured default
+      options.timeout ||= config("responseTimeout")
+
       options.method = options.method.toUpperCase()
+
+      if options.retryOnStatusCodeFailure and not options.failOnStatusCode
+        $utils.throwErrByPath("request.status_code_flags_invalid")
 
       if _.has(options, "failOnStatus")
         $utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
@@ -89,7 +105,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.has(options, "followRedirects")
         options.followRedirect = options.followRedirects
 
-      if not validHttpMethodsRe.test(options.method)
+      if not $utils.isValidHttpMethod(options.method)
         $utils.throwErrByPath("request.invalid_method", {
           args: { method: o.method }
         })
@@ -114,6 +130,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
         $utils.throwErrByPath("request.url_invalid")
+
+      ## if a user has `x-www-form-urlencoded` content-type set
+      ## with an object body, they meant to add 'form: true'
+      ## so we are nice and do it for them :)
+      ## https://github.com/cypress-io/cypress/issues/2923
+      if needsFormSpecified(options)
+        options.form = true
+
+      if _.isObject(options.body) and path = whatIsCircular(options.body)
+        $utils.throwErrByPath("request.body_circular", { args: { path }})
 
       ## only set json to true if form isnt true
       ## and we have a valid object for body

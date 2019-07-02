@@ -15,7 +15,7 @@ pipe = (req, res) ->
 onConnect = (req, socket, head, proxy) ->
   proxy.connect(req, socket, head, {
     onDirectConnection: (req, socket, head) ->
-      req.url is "localhost:8444"
+      ["localhost:8444", "localhost:12344"].includes(req.url)
   })
 
 onRequest = (req, res) ->
@@ -39,7 +39,7 @@ module.exports = {
         if req.url.includes("replace")
           write = res.write
           res.write = (chunk) ->
-            chunk = new Buffer(chunk.toString().replace("https server", "replaced content"))
+            chunk = Buffer.from(chunk.toString().replace("https server", "replaced content"))
 
             write.call(@, chunk)
 

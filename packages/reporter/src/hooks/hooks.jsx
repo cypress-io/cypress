@@ -19,7 +19,7 @@ const Hook = observer(({ model }) => (
       isOpen={true}
     >
       <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} />)}
+        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
       </ul>
     </Collapsible>
   </li>
@@ -32,4 +32,5 @@ const Hooks = observer(({ model }) => (
 ))
 
 export { Hook, HookHeader }
+
 export default Hooks

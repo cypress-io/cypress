@@ -6,8 +6,8 @@ branches:
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
-  # Test against the same version of Node.js version as included in Electron
-  nodejs_version: "8.2.1"
+  # use matching version of Node.js
+  nodejs_version: "8.9.3"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables
@@ -15,13 +15,26 @@ environment:
   # https://ci.appveyor.com/tools/encrypt
   ci_json:
     secure: tf3fK5S5Gh5HGUcDo3eGw7nqdcFU/4A+2s3JJovmn/eA0p9dEspjPFp7G1I9BxdUc4OoCeJ3dSSrCQ1BPIzb/bzK6aQqAZQWNcJ1sanoIiF0QUPbiW40Js3xpWylIh8qutVoaWtZz5a1ygg9sJmAYR7qB5+aQqQNA55TBKkUCydXpnDBfWuagb6d/7cblULsXasvvji3RIoxWTKd8HmaD/xxqONjPAJ3IJsiDTaWc5S9bAgV8/IYa7YZaQm5vpTTsWU5IGwkA1l9yMu7j+7BSNK9esvAYyKsx7kUV9jiVFo=
+  # for uploading built binary to S3 bucket
   aws_credentials_json:
     secure: ttGzd2/rW+i8H+pozcFxzZKU07B5INL8+LjD4vCOKes+tI6EaKhrLvAQ9xT7r+e1oTWbC8olZQ96ZZ8P5Ve8pIpG8oe1ITMs5f50iXaKULfwIcJOm+G8a3pkMRZOWa0wGs7/sKtRSyIpMFRfCOIl8TePBKEgeRtVzixBqSuyYLn/u2dz0z8uHeJDq/H1kJlI
+  # CDN control
   CF_DOMAIN: "cypress.io"
   CF_EMAIL:
     secure: +kZOcImCZVZJv/e/hQc3gvJ6xXSH88qg46cMwKn8mRo=
   CF_TOKEN:
     secure: d8SQfJ2r6qrKDjYWoFg3AzgY7aL6hTuE5OIlRr0TXkcXkZzdmYCujfzIYcCQfpZg
+  # authenticate as Cypress bot when posting commit status checks
+  GH_APP_ID:
+    secure: oR0RVDbv6GKej4wwjkz7Zw==
+  GH_INSTALLATION_ID:
+    secure: tAoqu4zIgZUxOfW0u9YQgw==
+  GH_PRIVATE_KEY:
+    secure: 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
+
+platform:
+  - x64
+  - x86
 
 # https://www.appveyor.com/docs/build-cache/
 # hmm, seems there is NPM on windows problem
@@ -33,15 +46,21 @@ environment:
 
 # Install scripts. (runs after repo cloning)
 install:
-  - ps: Install-Product node $env:nodejs_version
-  - npm run check-node-version
-  # NPM v3 has flaky permission issues on Windows
-  - npm install -g npm@5
-  - npm install -g @bahmutov/print-env
+  - ps: Install-Product node $env:nodejs_version $env:platform
+  # upgrade npm
+  - npm install -g npm@6
+  - npm install -g @bahmutov/print-env@1
   # Output useful info for debugging.
   - node --version
+  - node --print process.arch
   - npm --version
+  # prints all public variables relevant to the build
+  - print-env Platform
+  - npm run check-node-version
   - print-env APPVEYOR
+  # prints if we have sensitive variables that start with a prefix GH
+  # which are used to trigger other projects
+  - has-env GH
   # clean cache to prevent install permission issues
   - npm cache clean --force
   # install root modules only
@@ -64,7 +83,6 @@ test_script:
   - echo Commit message
   - echo %APPVEYOR_REPO_COMMIT_MESSAGE%
   - echo body of commit message, if any
-  - echo %APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED%
   - 7z
   - cd packages/launcher && node index.js && cd ../..
   # make sure mocha runs
@@ -75,6 +93,7 @@ test_script:
   - echo Building Windows NPM package %NEXT_DEV_VERSION%
   - npm --no-git-tag-version version %NEXT_DEV_VERSION%
   - cd cli
+  - npm install
   - npm run build
   - cd build
   - npm pack

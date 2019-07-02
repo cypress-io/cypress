@@ -1,10 +1,10 @@
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
-// if we are running in electron
-// we must hack around busted timers
-if (process.versions.electron) {
-  require('./timers/parent').fix()
+if (process.env.CY_NET_PROFILE && process.env.CYPRESS_ENV) {
+  const netProfiler = require('./lib/util/net_profiler')()
+
+  process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
 }
 
 process.env.UV_THREADPOOL_SIZE = 128

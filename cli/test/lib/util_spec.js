@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const tty = require('tty')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
 
@@ -15,6 +15,37 @@ describe('util', () => {
     sinon.stub(logger, 'error')
   })
 
+  context('.isBrokenGtkDisplay', () => {
+    it('detects only GTK message', () => {
+      os.platform.returns('linux')
+      const text = '[some noise here] Gtk: cannot open display: 99'
+
+      expect(util.isBrokenGtkDisplay(text)).to.be.true
+      // and not for the other messages
+      expect(util.isBrokenGtkDisplay('display was set incorrectly')).to.be.false
+    })
+  })
+
+  context('.getGitHubIssueUrl', () => {
+    it('returls url for issue number', () => {
+      const url = util.getGitHubIssueUrl(4034)
+
+      expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')
+    })
+
+    it('throws for anything but a positive integer', () => {
+      expect(() => {
+        return util.getGitHubIssueUrl('4034')
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(-5)
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(5.19)
+      }).to.throw
+    })
+  })
+
   context('.stdoutLineMatches', () => {
     const { stdoutLineMatches } = util
 
@@ -24,24 +55,28 @@ describe('util', () => {
 
     it('matches entire output', () => {
       const line = '444'
+
       expect(stdoutLineMatches(line, line)).to.be.true
     })
 
     it('matches a line in output', () => {
       const line = '444'
       const stdout = ['start', line, 'something else'].join('\n')
+
       expect(stdoutLineMatches(line, stdout)).to.be.true
     })
 
     it('matches a trimmed line in output', () => {
       const line = '444'
       const stdout = ['start', `  ${line} `, 'something else'].join('\n')
+
       expect(stdoutLineMatches(line, stdout)).to.be.true
     })
 
     it('does not find match', () => {
       const line = '445'
       const stdout = ['start', '444', 'something else'].join('\n')
+
       expect(stdoutLineMatches(line, stdout)).to.be.false
     })
   })
@@ -53,14 +88,16 @@ describe('util', () => {
       const options = {
         foo: 'bar',
       }
-      snapshot('others_unchanged', normalizeModuleOptions(options))
+
+      snapshot('others_unchanged 1', normalizeModuleOptions(options))
     })
 
     it('passes string env unchanged', () => {
       const options = {
         env: 'foo=bar',
       }
-      snapshot('env_as_string', normalizeModuleOptions(options))
+
+      snapshot('env_as_string 1', normalizeModuleOptions(options))
     })
 
     it('converts environment object', () => {
@@ -71,7 +108,8 @@ describe('util', () => {
           host: 'kevin.dev.local',
         },
       }
-      snapshot('env_as_object', normalizeModuleOptions(options))
+
+      snapshot('env_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts config object', () => {
@@ -81,7 +119,8 @@ describe('util', () => {
           watchForFileChanges: false,
         },
       }
-      snapshot('config_as_object', normalizeModuleOptions(options))
+
+      snapshot('config_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts reporterOptions object', () => {
@@ -91,7 +130,8 @@ describe('util', () => {
           toConsole: true,
         },
       }
-      snapshot('reporter_options_as_object', normalizeModuleOptions(options))
+
+      snapshot('reporter_options_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts specs array', () => {
@@ -100,14 +140,16 @@ describe('util', () => {
           'a', 'b', 'c',
         ],
       }
-      snapshot('spec_as_array', normalizeModuleOptions(options))
+
+      snapshot('spec_as_array 1', normalizeModuleOptions(options))
     })
 
     it('does not convert spec when string', () => {
       const options = {
         spec: 'x,y,z',
       }
-      snapshot('spec_as_string', normalizeModuleOptions(options))
+
+      snapshot('spec_as_string 1', normalizeModuleOptions(options))
     })
   })
 
@@ -245,11 +287,36 @@ describe('util', () => {
     })
   })
 
+  describe('.calculateEta', () => {
+    it('Remaining eta is same as elapsed when 50%', () => {
+      expect(util.calculateEta('50', 1000)).to.equal(1000)
+    })
+
+    it('Remaining eta is 0 when 100%', () => {
+      expect(util.calculateEta('100', 500)).to.equal(0)
+    })
+  })
+
+  describe('.convertPercentToPercentage', () => {
+    it('converts to 100 when 1', () => {
+      expect(util.convertPercentToPercentage(1)).to.equal(100)
+    })
+
+    it('strips out extra decimals', () => {
+      expect(util.convertPercentToPercentage(0.37892)).to.equal(38)
+    })
+
+    it('returns 0 if null num', () => {
+      expect(util.convertPercentToPercentage(null)).to.equal(0)
+    })
+  })
+
   context('.printNodeOptions', () => {
     describe('NODE_OPTIONS is not set', () => {
 
       it('does nothing if debug is not enabled', () => {
         const log = sinon.spy()
+
         log.enabled = false
         util.printNodeOptions(log)
         expect(log).not.have.been.called
@@ -257,6 +324,7 @@ describe('util', () => {
 
       it('prints message when debug is enabled', () => {
         const log = sinon.spy()
+
         log.enabled = true
         util.printNodeOptions(log)
         expect(log).to.be.calledWith('NODE_OPTIONS is not set')
@@ -270,6 +338,7 @@ describe('util', () => {
 
       it('does nothing if debug is not enabled', () => {
         const log = sinon.spy()
+
         log.enabled = false
         util.printNodeOptions(log)
         expect(log).not.have.been.called
@@ -277,6 +346,7 @@ describe('util', () => {
 
       it('prints value when debug is enabled', () => {
         const log = sinon.spy()
+
         log.enabled = true
         util.printNodeOptions(log)
         expect(log).to.be.calledWith('NODE_OPTIONS=%s', 'foo')
@@ -287,6 +357,7 @@ describe('util', () => {
   describe('.getOsVersionAsync', () => {
     let util
     let getos = sinon.stub().resolves(['distro-release'])
+
     beforeEach(() => {
       util = proxyquire(`${lib}/util`, { getos })
     })

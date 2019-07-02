@@ -1,0 +1,63 @@
+{
+  "autorun": false,
+  "terminals": [
+    {
+      "name": "cypress open",
+      "focus": true,
+      "onlySingle": true,
+      "execute": true,
+      "command": "npm run cypress:open"
+    },
+    {
+      "name": "cypress run",
+      "focus": true,
+      "onlySingle": true,
+      "execute": false,
+      "command": "npm run cypress:run -- --project ../project"
+    },
+    {
+      "name": "packages/server test-watch",
+      "focus": true,
+      "onlySingle": true,
+      "execute": false,
+      "cwd": "[cwd]/packages/server",
+      "command": "npm run test-watch -- [file]"
+    },
+    {
+      "name": "packages/server test-e2e",
+      "focus": true,
+      "onlySingle": true,
+      "execute": false,
+      "cwd": "[cwd]/packages/server",
+      "command": "npm run test-e2e -- --spec name"
+    },
+    {
+      "name": "packages/runner watch",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/runner",
+      "command": "npm run watch"
+    },
+    {
+      "name": "packages/driver cypress open",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/driver",
+      "command": "npm run cypress:open"
+    },
+    {
+      "name": "packages/desktop-gui cypress open",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/desktop-gui",
+      "command": "npm run cypress:open"
+    },
+    {
+      "name": "packages/desktop-gui watch",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/desktop-gui",
+      "command": "npm run watch"
+    }
+  ]
+}

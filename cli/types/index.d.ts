@@ -4,20 +4,27 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 2.5
+// TypeScript Version: 2.8
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference path="./blob-util.d.ts" />
-/// <reference path="./bluebird.d.ts" />
-/// <reference path="./minimatch.d.ts" />
+/// <reference path="./cy-blob-util.d.ts" />
+/// <reference path="./cy-bluebird.d.ts" />
+/// <reference path="./cy-moment.d.ts" />
+/// <reference path="./cy-minimatch.d.ts" />
+/// <reference path="./cy-chai.d.ts" />
+/// <reference path="./lodash/index.d.ts" />
+/// <reference path="./sinon/index.d.ts" />
+/// <reference path="./sinon-chai/index.d.ts" />
+/// <reference path="./mocha/index.d.ts" />
+/// <reference path="./jquery/index.d.ts" />
+/// <reference path="./chai-jquery/index.d.ts" />
 
-/// <reference types="chai" />
-/// <reference types="chai-jquery" />
-/// <reference types="jquery" />
-/// <reference types="lodash" />
-/// <reference types="mocha" />
-/// <reference types="sinon" />
-/// <reference types="sinon-chai" />
+// "moment" types are with "node_modules/moment"
+/// <reference types="moment" />
+
+// load ambient declaration for "cypress" NPM module
+// hmm, how to load it better?
+/// <reference path="./cypress-npm-api.d.ts" />
 
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
@@ -26,7 +33,7 @@ declare const assert: Chai.AssertStatic
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = "back" | "forward"
-  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "HEAD" | "TRACE" | "CONNECT" | "PATCH"
+  type HttpMethod = string
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
@@ -53,6 +60,20 @@ declare namespace Cypress {
     path: string
     isHeaded: boolean
     isHeadless: boolean
+  }
+
+  interface LocalStorage {
+    /**
+     * Called internally to clear `localStorage` in two situations.
+     *
+     * 1. Before every test, this is called with no argument to clear all keys.
+     * 2. On `cy.clearLocalStorage(keys)` this is called with `keys` as an argument.
+     *
+     * You should not call this method directly to clear `localStorage`; instead, use `cy.clearLocalStorage(key)`.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     */
+    clear: (keys?: string[]) => void
   }
 
   /**
@@ -91,7 +112,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/minimatch
      */
-    minimatch: Mimimatch.MimimatchStatic
+    minimatch: typeof Minimatch.minimatch
     /**
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
@@ -100,7 +121,7 @@ declare namespace Cypress {
      * @example
      *    const todaysDate = Cypress.moment().format("MMM DD, YYYY")
      */
-    moment: (...args: any[]) => any // perhaps we want to add moment as a dependency for types?
+    moment: Moment.MomentStatic
     /**
      * Cypress automatically includes Bluebird and exposes it as Cypress.Promise.
      *
@@ -114,10 +135,12 @@ declare namespace Cypress {
      * Cypress version string. i.e. "1.1.2"
      * @see https://on.cypress.io/version
      * @example
-     *    expect(Cypress.version).to.be.a('string')
-     *    if (Cypress.version === '1.2.0') {
-     *       // test something specific
-     *    }
+      ```
+      expect(Cypress.version).to.be.a('string')
+      if (Cypress.version === '1.2.0') {
+        // test something specific
+      }
+      ```
      */
     version: string
 
@@ -141,6 +164,15 @@ declare namespace Cypress {
 
     /**
      * Currently executing spec file.
+     * @example
+    ```
+    Cypress.spec
+    // {
+    //  name: "config_passing_spec.coffee",
+    //  relative: "cypress/integration/config_passing_spec.coffee",
+    //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
+    // }
+    ```
      */
     spec: {
       name: string // "config_passing_spec.coffee"
@@ -154,11 +186,50 @@ declare namespace Cypress {
     browser: Browser
 
     /**
+     * Internal class for LocalStorage management.
+     */
+    LocalStorage: LocalStorage
+
+    /**
+     * Returns all configuration objects.
      * @see https://on.cypress.io/config
+     * @example
+    ```
+    Cypress.config()
+    // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
+    ```
      */
     config(): ConfigOptions
+    /**
+     * Returns one configuration value.
+     * @see https://on.cypress.io/config
+     * @example
+    ```
+    Cypress.config('pageLoadTimeout')
+    // 60000
+    ```
+     */
     config<K extends keyof ConfigOptions>(key: K): ConfigOptions[K]
+    /**
+     * Sets one configuration value.
+     * @see https://on.cypress.io/config
+     * @example
+    ```
+    Cypress.config('viewportWidth', 800)
+    ```
+     */
     config<K extends keyof ConfigOptions>(key: K, value: ConfigOptions[K]): void
+    /**
+     * Sets multiple configuration values at once.
+     * @see https://on.cypress.io/config
+     * @example
+    ```
+    Cypress.config({
+      defaultCommandTimeout: 10000,
+      viewportHeight: 900
+    })
+    ```
+     */
     config(Object: Partial<ConfigOptions>): void
 
     // no real way to type without generics
@@ -192,6 +263,16 @@ declare namespace Cypress {
      *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
      */
     env(object: ObjectLike): void
+
+    /**
+     * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
+     *
+     * @see https://on.cypress.io/iscy
+     * @example
+     *    Cypress.isCy(cy) // => true
+     */
+    isCy<TSubject = any>(obj: Chainable<TSubject>): obj is Chainable<TSubject>
+    isCy(obj: any): obj is Chainable
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -275,16 +356,20 @@ declare namespace Cypress {
      * @see https://on.cypress.io/variables-and-aliases
      * @see https://on.cypress.io/get
      * @example
-     *    // Get the aliased ‘todos’ elements
-     *    cy.get('ul#todos').as('todos')
-     *    //...hack hack hack...
-     *    // later retrieve the todos
-     *    cy.get('@todos')
+    ```
+    // Get the aliased ‘todos’ elements
+    cy.get('ul#todos').as('todos')
+    //...hack hack hack...
+    // later retrieve the todos
+    cy.get('@todos')
+    ```
      */
     as(alias: string): Chainable<Subject>
 
     /**
-     * Blur a focused element. This element must currently be in focus. If you want to ensure an element is focused before blurring, try using .focus() before .blur().
+     * Blur a focused element. This element must currently be in focus.
+     * If you want to ensure an element is focused before blurring,
+     * try using .focus() before .blur().
      *
      * @see https://on.cypress.io/blur
      */
@@ -353,19 +438,29 @@ declare namespace Cypress {
      * to clear localStorage inside a single test. Yields `localStorage` object.
      *
      * @see https://on.cypress.io/clearlocalstorage
+     * @param {string} [key] - name of a particular item to remove (optional).
      * @example
-     *    cy.clearLocalStorage().should(ls => {
-     *      expect(ls.getItem('prop1')).to.be.null
-     *    })
+      ```
+      // removes all local storage keys
+      cy.clearLocalStorage()
+        .should(ls => {
+          expect(ls.getItem('prop1')).to.be.null
+        })
+      // removes item "todos"
+      cy.clearLocalStorage("todos")
+      ```
      */
     clearLocalStorage(key?: string): Chainable<Storage>
     /**
      * Clear keys in local storage that match given regular expression.
      *
      * @see https://on.cypress.io/clearlocalstorage
+     * @param {RegExp} re - regular expression to match.
      * @example
-     *    // Clear all local storage matching /app-/
-     *    cy.clearLocalStorage(/app-/)
+    ```
+    // Clear all local storage matching /app-/
+    cy.clearLocalStorage(/app-/)
+    ```
      */
     clearLocalStorage(re: RegExp): Chainable<Storage>
 
@@ -382,7 +477,8 @@ declare namespace Cypress {
     /**
      * Click a DOM element at specific corner / side.
      *
-     * @param {String} position The position where the click should be issued. The `center` position is the default position.
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').click('topRight')
@@ -395,9 +491,11 @@ declare namespace Cypress {
      * @param {number} y The distance in pixels from the element’s top to issue the click.
      * @see https://on.cypress.io/click
      * @example
-     *    // The click below will be issued inside of the element
-     *    // (15px from the left and 40px from the top).
-     *    cy.get('button').click(15, 40)
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').click(15, 40)
+    ```
      */
     click(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
@@ -441,7 +539,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable<Clock>
+    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -621,9 +719,11 @@ declare namespace Cypress {
     fixture<Contents = any>(path: string, encoding: Encodings, options?: Partial<Timeoutable>): Chainable<Contents> // no log?
 
     /**
-     * Get the DOM element that is currently focused.
+     * Focus on a DOM element.
      *
      * @see https://on.cypress.io/focus
+     * @example
+     * cy.get('input').first().focus() // Focus on the first input
      */
     focus(options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
 
@@ -699,7 +799,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/hash
      */
-    hash(options?: Partial<Loggable>): Chainable<string>
+    hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
      * Invoke a function on the previously yielded subject.
@@ -1104,7 +1204,7 @@ declare namespace Cypress {
      *    cy.screenshot()
      *    cy.get(".post").screenshot()
      */
-    screenshot(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
     /**
      * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
      *
@@ -1325,19 +1425,37 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S, options?: Partial<Timeoutable>): Chainable<S>
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command.
      *
@@ -1346,7 +1464,16 @@ declare namespace Cypress {
      *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
      *    cy.location().then((loc) => {})   // Yields location object as first arg
      */
-    then(fn: (this: ObjectLike, currentSubject: Subject) => void, options?: Partial<Timeoutable>): Chainable<Subject>
+    then(fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     * @example
+     *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
+     *    cy.location().then((loc) => {})   // Yields location object as first arg
+     */
+    then(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
 
     /**
      * Move time after overriding a native time function with [cy.clock()](https://on.cypress.io/clock).
@@ -1368,19 +1495,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, position?: PositionType, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      *
      * @see https://on.cypress.io/trigger
      */
-    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & DocumentEventMap[K]>): Chainable<Subject>
+    trigger<K extends keyof DocumentEventMap>(eventName: K, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike & DocumentEventMap[K]>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      * Custom events... If the following were `.triggerCustom`,
@@ -1390,7 +1517,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, position?: PositionType, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
     /**
      * Trigger an event on a DOM element.
      * Custom events... If the following were `.triggerCustom`,
@@ -1410,7 +1537,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('a').trigger('mousedown')
      */
-    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions>): Chainable<Subject>
+    trigger(eventName: string, x: number, y: number, options?: Partial<TriggerOptions & ObjectLike>): Chainable<Subject>
 
     /**
      * Type into a DOM element.
@@ -1495,14 +1622,22 @@ declare namespace Cypress {
      * @example
      *    cy.visit('http://localhost:3000')
      *    cy.visit('/somewhere') // opens ${baseUrl}/somewhere
+     *    cy.visit({
+     *      url: 'http://google.com',
+     *      method: 'POST'
+     *    })
      *
      */
     visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
+    visit(options: Partial<VisitOptions> & { url: string }): Chainable<Window>
 
     /**
-     * Wait for a number of milliseconds or wait for an aliased resource to resolve before moving on to the next command.
+     * Wait for a number of milliseconds.
+     * You almost never need to wait for an arbitrary period of time.
+     * There are always better ways to express this in Cypress, see the documentation.
      *
      * @see https://on.cypress.io/wait
+     * @param {number} ms - Milliseconds to wait.
      * @example
      *    cy.wait(1000) // wait for 1 second
      */
@@ -1511,25 +1646,59 @@ declare namespace Cypress {
      * Wait for a specific XHR to respond.
      *
      * @see https://on.cypress.io/wait
+     * @param {string} alias - Name of the alias to wait for.
+     *
+    ```
+    // Wait for the route aliased as 'getAccount' to respond
+    // without changing or stubbing its response
+    cy.server()
+    cy.route('/accounts/*').as('getAccount')
+    cy.visit('/accounts/123')
+    cy.wait('@getAccount').then((xhr) => {
+      // we can now access the low level xhr
+      // that contains the request body,
+      // response body, status, etc
+    })
+    ```
      */
-    wait(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR>
+    wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
     /**
      * Wait for list of XHR requests to complete.
      *
      * @see https://on.cypress.io/wait
+     * @param {string[]} aliases - An array of aliased routes as defined using the `.as()` command.
+     *
+    ```
+    // wait for 3 XHR requests to complete
+    cy.server()
+    cy.route('users/*').as('getUsers')
+    cy.route('activities/*').as('getActivities')
+    cy.route('comments/*').as('getComments')
+    cy.visit('/dashboard')
+
+    cy.wait(['@getUsers', '@getActivities', '@getComments'])
+      .then((xhrs) => {
+        // xhrs will now be an array of matching XHR's
+        // xhrs[0] <-- getUsers
+        // xhrs[1] <-- getActivities
+        // xhrs[2] <-- getComments
+      })
+    ```
      */
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable>): Chainable<WaitXHR[]>
+    wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
      *
      * @see https://on.cypress.io/window
      * @example
-     *    cy.visit('http://localhost:8080/app')
-     *    cy.window().then(function(win){
-     *      // win is the remote window
-     *      // of the page at: http://localhost:8080/app
-     *    })
+    ```
+    cy.visit('http://localhost:8080/app')
+    cy.window().then(function(win){
+      // win is the remote window
+      // of the page at: http://localhost:8080/app
+    })
+    ```
      */
     window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
 
@@ -1538,14 +1707,15 @@ declare namespace Cypress {
      * Useful when working within a particular group of elements such as a `<form>`.
      * @see https://on.cypress.io/within
      * @example
-     *    cy.get('form').within(($form) => {
-     *      // cy.get() will only search for elements within form,
-     *      // not within the entire document
-     *      cy.get('input[name="username"]').type('john')
-     *      cy.get('input[name="password"]').type('password')
-     *      cy.root().submit()
-     *    })
-     *
+    ```
+    cy.get('form').within(($form) => {
+      // cy.get() will only search for elements within form,
+      // not within the entire document
+      cy.get('input[name="username"]').type('john')
+      cy.get('input[name="password"]').type('password')
+      cy.root().submit()
+    })
+    ```
      */
     within(fn: (currentSubject: Subject) => void): Chainable<Subject>
     /**
@@ -1560,21 +1730,38 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/wrap
      * @example
-     *    cy.get('form').within(($form) => {
-     *       // more commands
-     *       cy.wrap($form).should('have.class', 'form-container')
-     *    })
+    ```
+    // wraps DOM element
+    cy.get('form').within(($form) => {
+      // more commands
+      cy.wrap($form).should('have.class', 'form-container')
+    })
+    ```
      */
     wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    /**
+     * Yield the element passed into `.wrap()` to the next command in the Cypress chain.
+     *
+     * @see https://on.cypress.io/wrap
+     * @example
+    ```
+    cy.wrap(new Promise((resolve, reject) => {
+      setTimeout(resolve, 1000);
+    }).then(result => {})
+    ```
+     */
+    wrap<F extends Promise<S>, S>(promise: F, options?: Partial<Loggable & Timeoutable>): Chainable<S>
     /**
      * Yields whatever is passed into `.wrap()` to the next command in the Cypress chain.
      *
      * @see https://on.cypress.io/wrap
      * @example
-     *    // Make assertions about object
-     *    cy.wrap({ amount: 10 })
-     *      .should('have.property', 'amount')
-     *      .and('eq', 10)
+    ```
+    // Make assertions about object
+    cy.wrap({ amount: 10 })
+      .should('have.property', 'amount')
+      .and('eq', 10)
+    ```
      */
     wrap<S>(object: S, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
@@ -1582,17 +1769,40 @@ declare namespace Cypress {
      * Write to a file with the specified contents.
      *
      * @see https://on.cypress.io/writefile
+    ```
+    cy.writeFile('path/to/message.txt', 'Hello World')
+      .then((text) => {
+        expect(text).to.equal('Hello World') // true
+      })
+    ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
+    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings): Chainable<C>
     /**
      * Write to a file with the specified encoding and contents.
      *
      * @see https://on.cypress.io/writefile
+    ```
+    cy.writeFile('path/to/ascii.txt', 'Hello World', {
+      flag: 'a+',
+      encoding: 'ascii'
+    }).then((text) => {
+      expect(text).to.equal('Hello World') // true
+    })
+    ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
+    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions>): Chainable<C>
+
+    /**
+     * jQuery library bound to the AUT
+     *
+     * @see https://on.cypress.io/$
+     * @example
+     *    cy.$$('p')
+     */
+    $$: JQueryStatic
   }
 
-  interface Agent<A extends sinon.SinonSpy> {
+  interface SinonSpyAgent<A extends sinon.SinonSpy> {
     log(shouldOutput?: boolean): Omit<A, 'withArgs'> & Agent<A>
 
     /**
@@ -1616,8 +1826,33 @@ declare namespace Cypress {
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
   }
 
+  type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
+
   interface CookieDefaults {
     whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
+  }
+
+  interface Failable {
+    /**
+     * Whether to fail on response codes other than 2xx and 3xx
+     *
+     * @default {true}
+     */
+    failOnStatusCode: boolean
+
+    /**
+     * Whether Cypress should automatically retry status code errors under the hood
+     *
+     * @default {false}
+     */
+    retryOnStatusCodeFailure: boolean
+
+    /**
+     * Whether Cypress should automatically retry transient network errors under the hood
+     *
+     * @default {true}
+     */
+    retryOnNetworkFailure: boolean
   }
 
   /**
@@ -1643,6 +1878,26 @@ declare namespace Cypress {
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
     timeout: number
+  }
+
+  /**
+   * Options that control how long the Test Runner waits for an XHR request and response to succeed
+   */
+  interface TimeoutableXHR {
+    /**
+     * Time to wait for the request (ms)
+     *
+     * @default {@link Timeoutable#timeout}
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
+    requestTimeout: number,
+    /**
+     * Time to wait for the response (ms)
+     *
+     * @default {@link Timeoutable#timeout}
+     * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+     */
+    responseTimeout: number
   }
 
   /**
@@ -1847,16 +2102,18 @@ declare namespace Cypress {
     env: object
   }
 
-  interface RequestOptions extends Loggable, Timeoutable {
+  /**
+   * Full set of possible options for cy.request call
+   */
+  interface RequestOptions extends Loggable, Timeoutable, Failable {
     auth: object
     body: RequestBody
-    failOnStatusCode: boolean
     followRedirect: boolean
     form: boolean
     gzip: boolean
     headers: object
     method: HttpMethod
-    qs: string
+    qs: object
     url: string
   }
 
@@ -1922,6 +2179,10 @@ declare namespace Cypress {
     interval: number
   }
 
+  /**
+   * Setting default options for cy.server()
+   * @see https://on.cypress.io/server
+   */
   interface ServerOptions {
     delay: number
     method: HttpMethod
@@ -1934,7 +2195,10 @@ declare namespace Cypress {
     enable: boolean
     force404: boolean
     urlMatchingOptions: object
-    whitelist(...args: any[]): void
+    whitelist(xhr: Request): void
+    onAnyRequest(route: RouteOptions, proxy: any): void
+    onAnyResponse(route: RouteOptions, proxy: any): void
+    onAnyAbort(route: RouteOptions, proxy: any): void
   }
 
   interface SetCookieOptions extends Loggable, Timeoutable {
@@ -1976,7 +2240,47 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/visit
    */
-  interface VisitOptions extends Loggable, Timeoutable {
+  interface VisitOptions extends Loggable, Timeoutable, Failable {
+    /**
+     * The URL to visit. Behaves the same as the `url` argument.
+     */
+    url: string
+
+    /**
+     * The HTTP method to use in the visit. Can be `GET` or `POST`.
+     *
+     * @default "GET"
+     */
+    method: 'GET' | 'POST'
+
+    /**
+     * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-urlencoded` header.
+     *
+     * @example
+     *    cy.visit({
+     *      url: 'http://www.example.com/form.html',
+     *      method: 'POST',
+     *      body: {
+     *        "field1": "foo",
+     *        "field2": "bar"
+     *      }
+     *    })
+     */
+    body: RequestBody
+
+    /**
+     * An object that maps HTTP header names to values to be sent along with the request.
+     *
+     * @example
+     *    cy.visit({
+     *      url: 'http://www.example.com',
+     *      headers: {
+     *        'Accept-Language': 'en-US'
+     *      }
+     *    })
+     */
+    headers: { [header: string]: string }
+
     /**
      * Called before your page has loaded all of its resources.
      *
@@ -1990,13 +2294,6 @@ declare namespace Cypress {
      * @param {Window} contentWindow the remote page's window object
      */
     onLoad(win: Window): void
-
-    /**
-     * Whether to fail on response codes other than 2xx and 3xx
-     *
-     * @default {true}
-     */
-    failOnStatusCode: boolean
 
     /**
      * Cypress will automatically apply the right authorization headers
@@ -2029,7 +2326,13 @@ declare namespace Cypress {
      *
      * @default true
      */
-    cancable: boolean
+    cancelable: boolean
+  }
+
+  /** Options to change the default behavior of .writeFile */
+  interface WriteFileOptions extends Loggable {
+    flag: string
+    encoding: Encodings
   }
 
   // Kind of onerous, but has a nice auto-complete. Also fallbacks at the end for custom stuff
@@ -2495,7 +2798,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_match
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'match', value: string | RegExp): Chainable<Subject>
+    (chainer: 'match', value: RegExp): Chainable<Subject>
     /**
      * When the target is a non-function object, `.respondTo` asserts that the target has a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
      * @example
@@ -2995,7 +3298,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_match
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.match', value: string | RegExp): Chainable<Subject>
+    (chainer: 'not.match', value: RegExp): Chainable<Subject>
     /**
      * When the target is a non-function object, `.respondTo` asserts that the target does not have a `method` with the given name method. The method can be own or inherited, and it can be enumerable or non-enumerable.
      * @example
@@ -3319,6 +3622,22 @@ declare namespace Cypress {
      */
     (chainer: 'contain', value: string): Chainable<Subject>
     /**
+     * Assert that at least one element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('have.focus')
+     *    cy.get('#result').should('be.focused')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.focus'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('be.focused')
+     *    cy.get('#result').should('have.focus')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.focused'): Chainable<Subject>
+    /**
      * Assert that the selection is not empty. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
      *    cy.get('#result').should('exist')
@@ -3474,6 +3793,22 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.be.visible'): Chainable<Subject>
+    /**
+     * Assert that no element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('not.have.focus')
+     *    cy.get('#result').should('not.be.focused')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.focus'): Chainable<Subject>
+    /**
+     * Assert that no element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('not.be.focused')
+     *    cy.get('#result').should('not.have.focus')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.focused'): Chainable<Subject>
     /**
      * Assert that the selection does not contain the given text, using `:contains()`. If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original implementation will be called.
      * @example
@@ -3635,26 +3970,28 @@ declare namespace Cypress {
      * Fires when an uncaught exception occurs in your application.
      * Cypress will fail the test when this fires.
      * Return `false` from this event and Cypress will not fail the test. Also useful for debugging purposes because the actual `error` instance is provided to you.
-     * @example
-     * // likely want to do this in a support file
-     * // so it's applied to all spec files
-     * // cypress/support/index.js
-     *
-     * Cypress.on('uncaught:exception', (err, runnable) => {
-     *   // returning false here prevents Cypress from
-     *   // failing the test
-     *   return false
-     * })
-     * // stub "window.alert" in a single test
-     * it('shows alert', () => {
-     *    const stub = cy.stub()
-     *    cy.on('window:alert', stub)
-     *    // trigger application code that calls alert(...)
-     *    .then(() => {
-     *      expect(stub).to.have.been.calledOnce
-     *    })
-     * })
      * @see https://on.cypress.io/catalog-of-events#App-Events
+     * @example
+    ```
+      // likely want to do this in a support file
+      // so it's applied to all spec files
+      // cypress/support/index.js
+
+      Cypress.on('uncaught:exception', (err, runnable) => {
+        // returning false here prevents Cypress from
+        // failing the test
+        return false
+      })
+      // stub "window.alert" in a single test
+      it('shows alert', () => {
+        const stub = cy.stub()
+        cy.on('window:alert', stub)
+        // trigger application code that calls alert(...)
+        .then(() => {
+          expect(stub).to.have.been.calledOnce
+        })
+      })
+    ```
      */
     (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
     /**
@@ -3662,26 +3999,31 @@ declare namespace Cypress {
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      * @example
-     *    cy.on('window:confirm', (str) => {
-     *      console.log(str)
-     *      return false // simulate "Cancel"
-     *    })
+    ```
+    cy.on('window:confirm', (str) => {
+      console.log(str)
+      return false // simulate "Cancel"
+    })
+    ```
      */
-    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy>): void
+    (action: 'window:confirm', fn: ((text: string) => false | void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
      * @example
-     *    const stub = cy.stub()
-     *    cy.on('window:alert', stub)
-     *    // assume the button calls window.alert()
-     *    cy.get('.my-button').click()
-     *    .then(() => {
-     *      expect(stub).to.have.been.calledOnce
-     *    })
+    ```
+    const stub = cy.stub()
+    cy.on('window:alert', stub)
+    // assume the button calls window.alert()
+    cy.get('.my-button')
+      .click()
+      .then(() => {
+        expect(stub).to.have.been.calledOnce
+      })
+    ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy>): void
+    (action: 'window:alert', fn: ((text: string) => void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -3892,26 +4234,29 @@ declare namespace Cypress {
     left: number
   }
 
-  // Diff / Omit taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
-  type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T]
-  // @ts-ignore TODO - remove this if possible. Seems a recent change to TypeScript broke this. Possibly https://github.com/Microsoft/TypeScript/pull/17912
-  type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>
+  // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
+  type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
+  type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 }
 
 /**
  * Global variables `cy` added by Cypress with all API commands.
  * @see https://on.cypress.io/api
  * @example
- *    cy.get('button').click()
- *    cy.get('.result').contains('Expected text')
+```
+cy.get('button').click()
+cy.get('.result').contains('Expected text')
+```
  */
 declare const cy: Cypress.Chainable<undefined>
 /**
  * Global variable `Cypress` holds common utilities and constants.
  * @see https://on.cypress.io/api
  * @example
- *    Cypress.config("pageLoadTimeout") // => 60000
- *    Cypress.version // => "1.4.0"
- *    Cypress._ // => Lodash _
+```
+Cypress.config("pageLoadTimeout") // => 60000
+Cypress.version // => "1.4.0"
+Cypress._ // => Lodash _
+```
  */
 declare const Cypress: Cypress.Cypress

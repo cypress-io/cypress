@@ -1,6 +1,5 @@
 _             = require("lodash")
 path          = require("path")
-uuid          = require("node-uuid")
 debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
@@ -73,7 +72,7 @@ class Socket
     ## need to take into account integrationFolder may be different so
     ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
     debug("watch test file %o", originalFilePath)
-    filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
+    filePath = path.join(config.integrationFolder, originalFilePath.replace("integration#{path.sep}", ""))
     filePath = path.relative(config.projectRoot, filePath)
 
     ## bail if this is special path like "__all"
@@ -125,6 +124,7 @@ class Socket
       destroyUpgrade: false
       serveClient: false
       cookie: cookie
+      parser: socketIo.circularParser
     })
 
   startListening: (server, automation, config, options) ->
@@ -210,7 +210,7 @@ class Socket
         socket.on "automation:response", automation.response
 
       socket.on "automation:request", (message, data, cb) =>
-        debug("automation:request %o", message, data)
+        debug("automation:request %s %o", message, data)
 
         automationRequest(message, data)
         .then (resp) ->
@@ -331,6 +331,9 @@ class Socket
 
         ## we only use the 'ack' here in tests
         cb() if cb
+
+      socket.on "external:open", (url) ->
+        require("electron").shell.openExternal(url)
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>

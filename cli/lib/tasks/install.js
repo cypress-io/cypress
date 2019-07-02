@@ -81,6 +81,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
         return download.start({ version, downloadDestination, progress })
         .then((redirectVersion) => {
           if (redirectVersion) version = redirectVersion
+
           debug(`finished downloading file: ${downloadDestination}`)
         })
         .then(() => {
@@ -105,6 +106,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 
         const cleanup = () => {
           debug('removing zip file %s', downloadDestination)
+
           return fs.removeAsync(downloadDestination)
         }
 
@@ -145,12 +147,14 @@ const start = (options = {}) => {
 
   const pkgVersion = util.pkgVersion()
   let needVersion = pkgVersion
+
   debug('version in package.json is', needVersion)
 
   // let this environment variable reset the binary version we need
   if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
 
     const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY')
+
     debug('using environment variable CYPRESS_INSTALL_BINARY %s', envVarVersion)
 
     if (envVarVersion === '0') {
@@ -159,6 +163,7 @@ const start = (options = {}) => {
         stripIndent`
         ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`)
       logger.log()
+
       return Promise.resolve()
     }
 
@@ -173,6 +178,7 @@ const start = (options = {}) => {
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
     const envCache = util.getEnv('CYPRESS_CACHE_FOLDER')
+
     logger.log(
       stripIndent`
         ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
@@ -194,11 +200,14 @@ const start = (options = {}) => {
     ${err.message}
     `)
   })
-  .then(() => state.getBinaryPkgVersionAsync(binaryDir))
+  .then(() => {
+    return state.getBinaryPkgVersionAsync(binaryDir)
+  })
   .then((binaryVersion) => {
 
     if (!binaryVersion) {
       debug('no binary installed under cli version')
+
       return true
     }
 
@@ -206,21 +215,22 @@ const start = (options = {}) => {
 
     logger.log()
     logger.log(stripIndent`
-      Cypress ${chalk.green(binaryVersion)} is already installed in ${chalk.cyan(installDir)}
+      Cypress ${chalk.green(binaryVersion)} is installed in ${chalk.cyan(installDir)}
       `)
     logger.log()
 
     if (options.force) {
       debug('performing force install over existing binary')
+
       return true
     }
 
     if ((binaryVersion === needVersion) || !util.isSemver(needVersion)) {
       // our version matches, tell the user this is a noop
       alreadyInstalledMsg()
+
       return false
     }
-
 
     return true
   })
@@ -228,6 +238,7 @@ const start = (options = {}) => {
     // noop if we've been told not to download
     if (!shouldInstall) {
       debug('Not downloading or installing binary')
+
       return
     }
 
@@ -254,6 +265,7 @@ const start = (options = {}) => {
       }
 
       const possibleFile = util.formAbsolutePath(needVersion)
+
       debug('checking local file', possibleFile, 'cwd', process.cwd())
 
       return fs.pathExistsAsync(possibleFile)
@@ -263,16 +275,19 @@ const start = (options = {}) => {
         if (exists && path.extname(possibleFile) === '.zip') {
           return possibleFile
         }
+
         return false
       })
     })
     .then((pathToLocalFile) => {
       if (pathToLocalFile) {
         const absolutePath = path.resolve(needVersion)
+
         debug('found local file at', absolutePath)
         debug('skipping download')
 
         const rendererOptions = getRendererOptions()
+
         return new Listr([unzipTask({
           progress: {
             throttle: 100,
@@ -292,10 +307,13 @@ const start = (options = {}) => {
       debug('preparing to download and unzip version ', needVersion, 'to path', installDir)
 
       const downloadDir = os.tmpdir()
+
       return downloadAndUnzip({ version: needVersion, installDir, downloadDir })
     })
     // delay 1 sec for UX, unless we are testing
-    .then(() => Promise.delay(1000))
+    .then(() => {
+      return Promise.delay(1000)
+    })
     .then(displayCompletionMsg)
   })
 }
@@ -304,22 +322,24 @@ module.exports = {
   start,
 }
 
-const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => ({
-  title: util.titleize('Unzipping Cypress'),
-  task: (ctx, task) => {
+const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
+  return {
+    title: util.titleize('Unzipping Cypress'),
+    task: (ctx, task) => {
     // as our unzip progresses indicate the status
-    progress.onProgress = progessify(task, 'Unzipping Cypress')
+      progress.onProgress = progessify(task, 'Unzipping Cypress')
 
-    return unzip.start({ zipFilePath, installDir, progress })
-    .then(() => {
-      util.setTaskTitle(
-        task,
-        util.titleize(chalk.green('Unzipped Cypress')),
-        rendererOptions.renderer
-      )
-    })
-  },
-})
+      return unzip.start({ zipFilePath, installDir, progress })
+      .then(() => {
+        util.setTaskTitle(
+          task,
+          util.titleize(chalk.green('Unzipped Cypress')),
+          rendererOptions.renderer
+        )
+      })
+    },
+  }
+}
 
 const progessify = (task, title) => {
   // return higher order function
@@ -342,9 +362,11 @@ const progessify = (task, title) => {
 // the default
 const getRendererOptions = () => {
   let renderer = util.isCi() ? verbose : 'default'
+
   if (logger.logLevel() === 'silent') {
     renderer = 'silent'
   }
+
   return {
     renderer,
   }

@@ -4,6 +4,12 @@ $utils = require("../cypress/utils")
 
 VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
 
+## TODO: in 4.0 we should accept a new validation type called 'elements'
+## which accepts an array of elements (and they all have to be elements!!)
+## this would fix the TODO below, and also ensure that commands understand
+## they may need to work with both element arrays, or specific items
+## such as a single element, a single document, or single window
+
 returnFalse = -> return false
 
 create = (state, expect) ->
@@ -108,6 +114,10 @@ create = (state, expect) ->
   ensureVisibility = (subject, onFail) ->
     cmd = state("current").get("name")
 
+    # We overwrite the filter(":visible") in jquery
+    # packages/driver/src/config/jquery.coffee#L51
+    # So that this effectively calls our logic 
+    # for $dom.isVisible aka !$dom.isHidden
     if not (subject.length is subject.filter(":visible").length)
       reason = $dom.getReasonIsHidden(subject)
       node   = $dom.stringify(subject)

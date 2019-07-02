@@ -45,51 +45,64 @@ const prepareArtifactsFolder = () => {
   if (!isCircle) {
     return Promise.resolve()
   }
+
   console.log('Making folder %s', artifactsFolder)
+
   return fs.ensureDirAsync(artifactsFolder)
 }
 
-const fileExists = (name) => Promise.resolve(existsSync(name))
-
-const copyScreenshots = (name) => () => {
-  la(is.unemptyString(name), 'missing name', name)
-
-  const screenshots = path.join(options.project, 'cypress', 'screenshots')
-  return fileExists(screenshots)
-  .then((exists) => {
-    if (!exists) {
-      return
-    }
-
-    console.log('Copying screenshots for %s from %s', name, screenshots)
-    const destination = path.join(artifactsFolder, name)
-
-    return fs.ensureDirAsync(destination)
-    .then(() =>
-      fs.copyAsync(screenshots, destination, {
-        overwrite: true,
-      })
-    )
-  })
+const fileExists = (name) => {
+  return Promise.resolve(existsSync(name))
 }
 
-const copyVideos = (name) => () => {
-  const videos = path.join(options.project, 'cypress', 'videos')
-  return fileExists(videos)
-  .then((exists) => {
-    if (!exists) {
-      return
-    }
+const copyScreenshots = (name) => {
+  return () => {
+    la(is.unemptyString(name), 'missing name', name)
 
-    console.log('Copying videos for %s from %s', name, videos)
-    const destination = path.join(artifactsFolder, name)
-    return fs.ensureDirAsync(destination)
-    .then(() =>
-      fs.copyAsync(videos, destination, {
-        overwrite: true,
-      })
-    )
-  })
+    const screenshots = path.join(options.project, 'cypress', 'screenshots')
+
+    return fileExists(screenshots)
+    .then((exists) => {
+      if (!exists) {
+        return
+      }
+
+      console.log('Copying screenshots for %s from %s', name, screenshots)
+      const destination = path.join(artifactsFolder, name)
+
+      return fs.ensureDirAsync(destination)
+      .then(() => {
+        return fs.copyAsync(screenshots, destination, {
+          overwrite: true,
+        })
+      }
+      )
+    })
+  }
+}
+
+const copyVideos = (name) => {
+  return () => {
+    const videos = path.join(options.project, 'cypress', 'videos')
+
+    return fileExists(videos)
+    .then((exists) => {
+      if (!exists) {
+        return
+      }
+
+      console.log('Copying videos for %s from %s', name, videos)
+      const destination = path.join(artifactsFolder, name)
+
+      return fs.ensureDirAsync(destination)
+      .then(() => {
+        return fs.copyAsync(videos, destination, {
+          overwrite: true,
+        })
+      }
+      )
+    })
+  }
 }
 
 /**
@@ -97,11 +110,14 @@ const copyVideos = (name) => () => {
  *
  * @param {string} name Spec base name
  */
-const copyArtifacts = (name) => () => {
-  if (!isCircle) {
-    return Promise.resolve()
+const copyArtifacts = (name) => {
+  return () => {
+    if (!isCircle) {
+      return Promise.resolve()
+    }
+
+    return copyScreenshots(name)().then(copyVideos(name))
   }
-  return copyScreenshots(name)().then(copyVideos(name))
 }
 
 function isLoadBalanced (options) {
@@ -212,6 +228,7 @@ if (needsXvfb) {
   return xvfb.start()
   .then(run)
   .finally(xvfb.stop)
-} else {
-  return run()
 }
+
+return run()
+

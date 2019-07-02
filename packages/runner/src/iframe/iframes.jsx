@@ -9,7 +9,6 @@ import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
-import eventManager from '../lib/event-manager'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
@@ -74,12 +73,7 @@ export default class Iframes extends Component {
       removeHeadStyles: this.autIframe.removeHeadStyles,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
-      detachDom: () => {
-        const Cypress = eventManager.getCypress()
-        if (Cypress) {
-          return this.autIframe.detachDom(Cypress)
-        }
-      },
+      detachDom: this.autIframe.detachDom,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={this.props.eventManager}
@@ -122,6 +116,7 @@ export default class Iframes extends Component {
 
       const $container = $(this.refs.container).empty()
       const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
+
       this.autIframe.showBlankContents()
 
       const $specIframe = $('<iframe />', {
@@ -140,6 +135,7 @@ export default class Iframes extends Component {
 
     if (this.props.state.snapshot.showingHighlights) {
       const snapshot = snapshotProps.snapshots[this.props.state.snapshot.stateIndex]
+
       this.autIframe.highlightEl(snapshot, snapshotProps)
     } else {
       this.autIframe.removeHighlights()
@@ -148,6 +144,7 @@ export default class Iframes extends Component {
 
   _changeSnapshotState = (snapshotProps, index) => {
     const snapshot = snapshotProps.snapshots[index]
+
     this.props.state.snapshot.stateIndex = index
     this.autIframe.restoreDom(snapshot)
 

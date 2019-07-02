@@ -12,6 +12,12 @@ bTagOpen = /\*\*/g
 bTagClosed = /\*\*/g
 stackTracesRe = / at .*\n/gm
 
+IS_DOM_TYPES = [$dom.isElement, $dom.isDocument, $dom.isWindow]
+
+invokeWith = (value) ->
+  return (fn) ->
+    fn(value)
+
 functionHadArguments = (current) ->
   fn = current and current.get("args") and current.get("args")[0]
   fn and _.isFunction(fn) and fn.length > 0
@@ -27,9 +33,12 @@ isDomSubjectAndMatchesValue = (value, subject) ->
     ## no difference
     _.difference(els1, els2).length is 0
 
-  $dom.isDom(value) and
-    $dom.isDom(subject) and
-      allElsAreTheSame()
+  ## iterate through each dom type until we
+  ## find the function for this particular value
+  if isDomTypeFn = _.find(IS_DOM_TYPES, invokeWith(value))
+    ## then check that subject also matches this
+    ## and that all the els are the same
+    return isDomTypeFn(subject) and allElsAreTheSame()
 
 ## Rules:
 ## 1. always remove value
@@ -102,6 +111,10 @@ create = (state, queue, retryFn) ->
 
     state("upcomingAssertions", cmds)
 
+    ## we're applying the default assertion in the
+    ## case where there are no upcoming assertion commands
+    isDefaultAssertionErr = cmds.length is 0
+
     options.assertions ?= []
 
     _.defaults callbacks, {
@@ -147,7 +160,8 @@ create = (state, queue, retryFn) ->
 
       options.error = err
 
-      throw err if err.retry is false
+      if err.retry is false
+        throw err
 
       onFail  = callbacks.onFail
       onRetry = callbacks.onRetry
@@ -159,14 +173,18 @@ create = (state, queue, retryFn) ->
       ## and finish the assertions and then throw
       ## it again
       try
-        onFail.call(@, err) if _.isFunction(onFail)
+        if _.isFunction(onFail)
+          ## pass in the err and the upcoming assertion commands
+          onFail.call(@, err, isDefaultAssertionErr, cmds)
       catch e3
         finishAssertions(options.assertions)
         throw e3
 
-      retryFn(onRetry, options) if _.isFunction(onRetry)
+      if _.isFunction(onRetry)
+        retryFn(onRetry, options)
 
-    ## bail if we have no assertions
+    ## bail if we have no assertions and apply
+    ## the default assertions if applicable
     if not cmds.length
       return Promise
         .try(ensureExistence)
@@ -267,6 +285,12 @@ create = (state, queue, retryFn) ->
         cmd.skip()
 
     assertions = (memo, fn, i) =>
+      ## HACK: bluebird .reduce will not call the callback
+      ## if given an undefined initial value, so in order to
+      ## support undefined subjects, we wrap the initial value
+      ## in an Array and unwrap it if index = 0
+      if i is 0
+        memo = memo[0]
       fn(memo).then (subject) ->
         subjects[i] = subject
 
@@ -282,7 +306,7 @@ create = (state, queue, retryFn) ->
     state("overrideAssert", overrideAssert)
 
     Promise
-    .reduce(fns, assertions, subject)
+    .reduce(fns, assertions, [subject])
     .then ->
       restore()
 

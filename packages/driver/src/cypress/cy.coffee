@@ -17,6 +17,7 @@ $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
+$Timers = require("../cy/timers")
 $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
@@ -52,18 +53,6 @@ setRemoteIframeProps = ($autIframe, state) ->
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
-  timersPaused = false
-
-  ## TODO: move this to its own module
-  timerQueues = {}
-  timerQueues.reset = ->
-    _.extend(timerQueues, {
-      setTimeout: []
-      setInterval: []
-      requestAnimationFrame: []
-    })
-
-  timerQueues.reset()
 
   isStopped = -> stopped
 
@@ -79,7 +68,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   $$ = (selector, context) ->
     context ?= state("document")
-    new $.fn.init(selector, context)
+    $dom.query(selector, context)
 
   queue = $CommandQueue.create()
 
@@ -91,6 +80,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
 
@@ -127,6 +117,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
+        timers.reset()
+
         Cypress.action("app:window:before:unload", e)
 
         ## return undefined so our beforeunload handler
@@ -152,38 +144,40 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   wrapNativeMethods = (contentWindow) ->
     try
+      ## return null to trick contentWindow into thinking
+      ## its not been iframed if modifyObstructiveCode is true
+      if config("modifyObstructiveCode")
+        Object.defineProperty(contentWindow, "frameElement", {
+          get: -> null
+        })
+
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
         focused.interceptFocus(this, contentWindow, focusOption)
+
+      contentWindow.HTMLElement.prototype.blur = ->
+        focused.interceptBlur(this)
+
+      contentWindow.SVGElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(this, contentWindow, focusOption)
+
+      contentWindow.SVGElement.prototype.blur = ->
+        focused.interceptBlur(this)
 
       contentWindow.HTMLInputElement.prototype.select = ->
         $selection.interceptSelect.call(this)
 
       contentWindow.document.hasFocus = ->
-        top.document.hasFocus()
+        focused.documentHasFocus.call(@)
 
-  runTimerQueue = (queue) ->
-    _.each timerQueues[queue], ([contentWindow, args]) ->
-      contentWindow[queue].apply(contentWindow, args)
+      cssModificationSpy = (original, args...) ->
+        snapshots.onCssModified(@href)
+        original.apply(@, args)
 
-    timerQueues[queue] = []
+      insertRule = contentWindow.CSSStyleSheet.prototype.insertRule
+      deleteRule = contentWindow.CSSStyleSheet.prototype.deleteRule
 
-  wrapTimers = (contentWindow) ->
-    originals = {
-      setTimeout: contentWindow.setTimeout
-      setInterval: contentWindow.setInterval
-      requestAnimationFrame: contentWindow.requestAnimationFrame
-    }
-
-    wrapFn = (fnName) ->
-      return (args...) ->
-        if timersPaused
-          timerQueues[fnName].push([contentWindow, args])
-        else
-          originals[fnName].apply(contentWindow, args)
-
-    contentWindow.setTimeout = wrapFn("setTimeout")
-    contentWindow.setInterval = wrapFn("setInterval")
-    contentWindow.requestAnimationFrame = wrapFn("requestAnimationFrame")
+      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -316,15 +310,23 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     .then (subject) ->
       state("commandIntermediateValue", undefined)
 
+      ## we may be given a regular array here so
+      ## we need to re-wrap the array in jquery
+      ## if that's the case if the first item
+      ## in this subject is a jquery element.
+      ## we want to do this because in 3.1.2 there
+      ## was a regression when wrapping an array of elements
+      firstSubject = $utils.unwrapFirst(subject)
+
       ## if ret is a DOM element and its not an instance of our own jQuery
-      if subject and $dom.isElement(subject) and not $utils.isInstanceOf(subject, $)
+      if subject and $dom.isElement(firstSubject) and not $utils.isInstanceOf(subject, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
         ## TODO: enable turning this off
         ## wrapSubjectsInJquery: false
         ## which will just pass subjects downstream
         ## without modifying them
-        subject = $(subject)
+        subject = $dom.wrap(subject)
 
       command.set({ subject: subject })
 
@@ -483,10 +485,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## if we have a prevSubject then error
       ## since we're invoking this improperly
       if prevSubject and ("optional" not in [].concat(prevSubject))
+        stringifiedArg = $utils.stringifyActual(args[0])
         $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
           args: {
             cmd:  name
-            args: $utils.stringifyActual(args[0])
+            args: if _.isString(args[0]) then "\"#{stringifiedArg}\"" else stringifiedArg
           }
         })
 
@@ -641,10 +644,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## focused sync methods
     getFocused: focused.getFocused
-    needsForceFocus: focused.needsForceFocus
     needsFocus: focused.needsFocus
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
+
+    ## timer sync methods
+    pauseTimers: timers.pauseTimers
 
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
@@ -749,7 +754,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state(backup)
 
       queue.reset()
-      timerQueues.reset()
+      timers.reset()
 
       cy.removeAllListeners()
 
@@ -917,15 +922,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       wrapNativeMethods(contentWindow)
 
-      wrapTimers(contentWindow)
+      snapshots.onBeforeWindowLoad()
 
-    pauseTimers: (pause) ->
-      timersPaused = pause
-
-      if not pause
-        runTimerQueue("setTimeout")
-        runTimerQueue("setInterval")
-        runTimerQueue("requestAnimationFrame")
+      timers.wrap(contentWindow)
 
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err
@@ -967,8 +966,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## When the function returns true, this prevents the firing of the default event handler.
       return true
 
-    getStyles: ->
-      snapshots.getStyles()
+    detachDom: (args...) ->
+      snapshots.detachDom(args...)
+
+    getStyles: (args...) ->
+      snapshots.getStyles(args...)
 
     setRunnable: (runnable, hookName) ->
       ## when we're setting a new runnable

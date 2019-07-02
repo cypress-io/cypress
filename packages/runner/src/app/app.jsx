@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
-import { Reporter } from '@packages/reporter'
+import { Reporter } from '../../../reporter'
 import { $ } from '@packages/driver'
 
 import errorMessages from '../errors/error-messages'
@@ -134,6 +134,7 @@ class App extends Component {
       }
 
       const messageNode = findDOMNode(this.refs.message)
+
       if (messageNode) {
         messageNode.style.display = 'none'
       }
@@ -151,6 +152,7 @@ class App extends Component {
       if (!config.scale) {
         const $window = $(window)
         const $iframesSizeNode = $(iframesSizeNode)
+
         iframesSizeNode.style.width = `${Math.min($window.width(), $iframesSizeNode.width())}px`
         iframesSizeNode.style.height = `${Math.min($window.height(), $iframesSizeNode.height())}px`
         iframesSizeNode.style.transform = null
@@ -177,6 +179,7 @@ class App extends Component {
       headerNode.style.display = null
 
       const messageNode = findDOMNode(this.refs.message)
+
       if (messageNode) {
         messageNode.style.display = null
       }

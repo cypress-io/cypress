@@ -3,7 +3,6 @@ require("../spec_helper")
 _            = require("lodash")
 os           = require("os")
 path         = require("path")
-uuid         = require("node-uuid")
 Promise      = require("bluebird")
 socketIo     = require("@packages/socket")
 extension    = require("@packages/extension")
@@ -65,11 +64,28 @@ describe "lib/socket", ->
           agent: agent
           path: socketIoRoute
           transports: ["websocket"]
+          parser: socketIo.circularParser
         })
       return
 
     afterEach ->
       @client.disconnect()
+
+    ## https://github.com/cypress-io/cypress/issues/4346
+    it "can emit a circular object without crashing", (done) ->
+      foo = {
+        bar: {}
+      }
+
+      foo.bar.baz = foo
+
+      ## going to stub exec here just so we have something that we can
+      ## control the resolved value of
+      sinon.stub(exec, 'run').resolves(foo)
+
+      @client.emit "backend:request", "exec", "quuz", (res) ->
+        expect(res.response).to.deep.eq(foo)
+        done()
 
     context "on(automation:request)", ->
       describe "#onAutomation", ->
@@ -333,7 +349,8 @@ describe "lib/socket", ->
 
       it "errors when fixtures fails", (done) ->
         cb = (resp) ->
-          expect(resp.error.message).to.include "No fixture exists at:"
+          expect(resp.error.message).to.include "A fixture file could not be found"
+          expect(resp.error.message).to.include "does-not-exist.txt"
           done()
 
         @client.emit("backend:request", "get:fixture", "does-not-exist.txt", {}, cb)
@@ -450,16 +467,16 @@ describe "lib/socket", ->
           expect(preprocessor.removeFile).to.be.calledWithMatch("test1.js", @cfg)
 
       it "sets #testFilePath", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js").then =>
-          expect(@socket.testFilePath).to.eq "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "integration#{path.sep}test1.js").then =>
+          expect(@socket.testFilePath).to.eq "tests#{path.sep}test1.js"
 
       it "can normalizes leading slash", ->
-        @socket.watchTestFileByPath(@cfg, "/integration/test1.js").then =>
-          expect(@socket.testFilePath).to.eq "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "#{path.sep}integration#{path.sep}test1.js").then =>
+          expect(@socket.testFilePath).to.eq "tests#{path.sep}test1.js"
 
       it "watches file by path", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        expect(preprocessor.getFile).to.be.calledWith("tests/test2.coffee", @cfg)
+        @socket.watchTestFileByPath(@cfg, "integration#{path.sep}test2.coffee")
+        expect(preprocessor.getFile).to.be.calledWith("tests#{path.sep}test2.coffee", @cfg)
 
       it "triggers watched:file:changed event when preprocessor 'file:updated' is received", (done) ->
         sinon.stub(fs, "statAsync").resolves()

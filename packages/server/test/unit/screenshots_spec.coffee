@@ -32,7 +32,7 @@ describe "lib/screenshots", ->
       viewport: { width: 40, height: 40 }
     }
 
-    @buffer = new Buffer("image 1 data buffer")
+    @buffer = Buffer.from("image 1 data buffer")
 
     @jimpImage = {
       id: 1
@@ -168,21 +168,21 @@ describe "lib/screenshots", ->
         @jimpImage2 = clone(@jimpImage, {
           id: 2
           bitmap: {
-            data: new Buffer("image 2 data buffer")
+            data: Buffer.from("image 2 data buffer")
           }
         })
 
         @jimpImage3 = clone(@jimpImage, {
           id: 3
           bitmap: {
-            data: new Buffer("image 3 data buffer")
+            data: Buffer.from("image 3 data buffer")
           }
         })
 
         @jimpImage4 = clone(@jimpImage, {
           id: 4
           bitmap: {
-            data: new Buffer("image 4 data buffer")
+            data: Buffer.from("image 4 data buffer")
           }
         })
 
@@ -393,7 +393,7 @@ describe "lib/screenshots", ->
         dimensions = sizeOf(buf)
 
         screenshots.save(
-          { name: "foo bar\\baz%/my-$screenshot", specName: "foo.spec.js", testFailure: false },
+          { name: "foo bar\\baz/my-screenshot", specName: "foo.spec.js", testFailure: false },
           details,
           @config.screenshotsFolder
         )
@@ -408,8 +408,8 @@ describe "lib/screenshots", ->
             multipart: false
             pixelRatio: 2
             path: path.normalize(result.path)
-            size: 284
-            name: "foo bar\\baz%/my-$screenshot"
+            size: 272
+            name: "foo bar\\baz/my-screenshot"
             specName: "foo.spec.js"
             testFailure: false
             takenAt: "1234-date"
@@ -469,48 +469,61 @@ describe "lib/screenshots", ->
 
   context ".getPath", ->
     it "concats spec name, screenshotsFolder, and name", ->
-      p = screenshots.getPath({
-        specName: "examples$/user/list.js"
+      screenshots.getPath({
+        specName: "examples/user/list.js"
         titles: ["bar", "baz"]
-        name: "quux/lorem*"
+        name: "quux/lorem"
       }, "png", "path/to/screenshots")
-
-      expect(p).to.eq(
-        "path/to/screenshots/examples$/user/list.js/quux/lorem.png"
-      )
-
-      p2 = screenshots.getPath({
-        specName: "examples$/user/list.js"
-        titles: ["bar", "baz"]
-        name: "quux*"
-        takenPaths: ["path/to/screenshots/examples$/user/list.js/quux.png"]
-      }, "png", "path/to/screenshots")
-
-      expect(p2).to.eq(
-        "path/to/screenshots/examples$/user/list.js/quux (1).png"
-      )
+      .then (p) ->
+        expect(p).to.eq(
+          "path/to/screenshots/examples/user/list.js/quux/lorem.png"
+        )
 
     it "concats spec name, screenshotsFolder, and titles", ->
-      p = screenshots.getPath({
-        specName: "examples$/user/list.js"
-        titles: ["bar", "baz^"]
+      screenshots.getPath({
+        specName: "examples/user/list.js"
+        titles: ["bar", "baz"]
         takenPaths: ["a"]
         testFailure: true
       }, "png", "path/to/screenshots")
+      .then (p) ->
+        expect(p).to.eq(
+          "path/to/screenshots/examples/user/list.js/bar -- baz (failed).png"
+        )
 
-      expect(p).to.eq(
-        "path/to/screenshots/examples$/user/list.js/bar -- baz (failed).png"
-      )
-
-      p2 = screenshots.getPath({
+    it "sanitizes file paths", ->
+      screenshots.getPath({
         specName: "examples$/user/list.js"
-        titles: ["bar", "baz^"]
-        takenPaths: ["path/to/screenshots/examples$/user/list.js/bar -- baz.png"]
+        titles: ["bar*", "baz..", "語言"]
+        takenPaths: ["a"]
+        testFailure: true
       }, "png", "path/to/screenshots")
+      .then (p) ->
+        expect(p).to.eq(
+          "path/to/screenshots/examples$/user/list.js/bar -- baz -- 語言 (failed).png"
+        )
 
-      expect(p2).to.eq(
-        "path/to/screenshots/examples$/user/list.js/bar -- baz (1).png"
-      )
+    _.each [Infinity, 0 / 0, [], {}, 1, false], (value) ->
+      it "doesn't err and stringifies non-string test title: #{value}", ->
+        screenshots.getPath({
+          specName: "examples$/user/list.js"
+          titles: ["bar*", "語言", value]
+          takenPaths: ["a"]
+          testFailure: true
+        }, "png", "path/to/screenshots")
+        .then (p) ->
+          expect(p).to.eq("path/to/screenshots/examples$/user/list.js/bar -- 語言 -- #{value} (failed).png")
+
+    _.each [null, undefined], (value) ->
+      it "doesn't err and removes null/undefined test title: #{value}", ->
+        screenshots.getPath({
+          specName: "examples$/user/list.js"
+          titles: ["bar*", "語言", value]
+          takenPaths: ["a"]
+          testFailure: true
+        }, "png", "path/to/screenshots")
+        .then (p) ->
+          expect(p).to.eq("path/to/screenshots/examples$/user/list.js/bar -- 語言 --  (failed).png")
 
   context ".afterScreenshot", ->
     beforeEach ->

@@ -6,13 +6,17 @@ const Promise = require('bluebird')
 module.exports = (on) => {
   // save some time by only reading the originals once
   let cache = {}
+
   function getCachedImage (name) {
     const cachedImage = cache[name]
+
     if (cachedImage) return Promise.resolve(cachedImage)
 
     const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
+
     return Jimp.read(imagePath).then((image) => {
       cache[name] = image
+
       return image
     })
   }
@@ -52,14 +56,22 @@ module.exports = (on) => {
       }
 
       const comparePath = path.join(__dirname, '..', 'screenshots', `${b}.png`)
+
       return Promise.all([
         getCachedImage(a),
         Jimp.read(comparePath),
       ])
       .spread((originalImage, compareImage) => {
-        const coord = 11 * devicePixelRatio
+        const blackout1XCoord = 11 * devicePixelRatio
+        const blackout2XCoord = 31 * devicePixelRatio
+        const blackoutYCoord = 11 * devicePixelRatio
 
-        if (blackout && !isBlack(Jimp.intToRGBA(compareImage.getPixelColor(coord, coord)))) {
+        if (
+          blackout && (
+            !isBlack(Jimp.intToRGBA(compareImage.getPixelColor(blackout1XCoord, blackoutYCoord))) ||
+            !isBlack(Jimp.intToRGBA(compareImage.getPixelColor(blackout2XCoord, blackoutYCoord)))
+          )
+        ) {
           throw new Error('Blackout not present!')
         }
 
@@ -83,6 +95,12 @@ module.exports = (on) => {
 
         return null
       })
+    },
+
+    'console:log' (obj) {
+      console.log(obj) // eslint-disable-line no-console
+
+      return null
     },
   })
 }

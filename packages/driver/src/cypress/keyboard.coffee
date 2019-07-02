@@ -13,6 +13,7 @@ charsBetweenCurlyBracesRe = /({.+?})/
 keyStandardMap = {
   # Cypress keyboard key : Standard value
   "{backspace}": "Backspace",
+  "{insert}": "Insert",
   "{del}": "Delete",
   "{downarrow}": "ArrowDown",
   "{enter}": "Enter",
@@ -20,10 +21,14 @@ keyStandardMap = {
   "{leftarrow}": "ArrowLeft",
   "{rightarrow}": "ArrowRight",
   "{uparrow}": "ArrowUp",
+  "{home}": "Home",
+  "{end}": "End",
   "{alt}": "Alt",
   "{ctrl}": "Control",
   "{meta}": "Meta",
-  "{shift}": "Shift"
+  "{shift}": "Shift",
+  "{pageup}": "PageUp",
+  "{pagedown}": "PageDown"
 }
 
 $Keyboard = {
@@ -101,6 +106,19 @@ $Keyboard = {
 
         return
 
+    ## charCode = 45
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{insert}": (el, options) ->
+      options.charCode  = 45
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{insert}"
+      @ensureKey el, null, options
+
+
     ## charCode = 8
     ## no keyPress
     ## no textInput
@@ -126,7 +144,7 @@ $Keyboard = {
 
         return
 
-  
+
     ## charCode = 27
     ## no keyPress
     ## no textInput
@@ -211,6 +229,58 @@ $Keyboard = {
       options.setKey    = "{downarrow}"
       @ensureKey el, null, options, ->
         $selection.moveCursorDown(el)
+
+    ## charCode = 36
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{home}": (el, options) ->
+      options.charCode  = 36
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{home}"
+      @ensureKey el, null, options, ->
+        $selection.moveCursorToLineStart(el)
+
+    ## charCode = 35
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{end}": (el, options) ->
+      options.charCode  = 35
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{end}"
+      @ensureKey el, null, options, ->
+        $selection.moveCursorToLineEnd(el)
+
+
+    ## charCode = 33
+    ## no keyPress
+    ## no textInput
+    ## no input
+   "{pageup}": (el, options) ->
+      options.charCode  = 33
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{pageup}"
+      @ensureKey el, null, options
+
+
+    ## charCode = 34
+    ## no keyPress
+    ## no textInput
+    ## no input
+    "{pagedown}": (el, options) ->
+      options.charCode  = 34
+      options.keypress  = false
+      options.textInput = false
+      options.input     = false
+      options.setKey    = "{pagedown}"
+      @ensureKey el, null, options
   }
 
   modifierChars: {
@@ -304,9 +374,13 @@ $Keyboard = {
           .resolve @typeKey(el, char, options)
           .delay(options.delay)
 
-  getCharCode: (key) ->
+  getKeyCode: (key) ->
     code = key.charCodeAt(0)
     @charCodeMap[code] ? code
+
+  getAsciiCode: (key) ->
+    code = key.charCodeAt(0)
+    return code
 
   expectedValueDoesNotMatchCurrentValue: (expected, rng) ->
     expected isnt rng.all()
@@ -333,18 +407,18 @@ $Keyboard = {
 
     switch eventType
       when "keydown", "keyup"
-        charCodeAt = options.charCode ? @getCharCode(key.toUpperCase())
+        keyCode = options.charCode ? @getKeyCode(key.toUpperCase())
 
         charCode = 0
-        keyCode  = charCodeAt
-        which    = charCodeAt
+        keyCode  = keyCode
+        which    = keyCode
 
       when "keypress"
-        charCodeAt = options.charCode ? @getCharCode(key)
+        asciiCode = options.charCode ? @getAsciiCode(key)
 
-        charCode = charCodeAt
-        keyCode  = charCodeAt
-        which    = charCodeAt
+        charCode = asciiCode
+        keyCode  = asciiCode
+        which    = asciiCode
 
       when "textInput"
         charCode  = 0
@@ -385,7 +459,7 @@ $Keyboard = {
         which: which
       }
 
-    args = [options.id, key, eventType, charCodeAt]
+    args = [options.id, key, eventType, which]
 
     ## give the driver a chance to bail on this event
     ## if we return false here
@@ -451,7 +525,7 @@ $Keyboard = {
 
           if $elements.isInput(el) or $elements.isTextarea(el)
             ml = el.maxLength
-  
+
           ## maxlength is -1 by default when omitted
           ## but could also be null or undefined :-/
           ## only cafe if we are trying to type a key
@@ -468,7 +542,7 @@ $Keyboard = {
     @simulateKey(el, "keyup", key, options)
 
   isSpecialChar: (chars) ->
-    !!@specialChars[chars]
+    chars in _.keys(@specialChars)
 
   handleSpecialChars: (el, chars, options) ->
     options.key = chars
@@ -482,7 +556,7 @@ $Keyboard = {
   }
 
   isModifier: (chars) ->
-    !!@modifierChars[chars]
+    chars in _.keys(@modifierChars)
 
   handleModifier: (el, chars, options) ->
     modifier = @modifierChars[chars]

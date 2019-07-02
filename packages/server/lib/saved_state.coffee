@@ -11,11 +11,12 @@ whitelist = """
   appHeight
   appX
   appY
-  isAppDevToolsOpen
+  autoScrollingEnabled
   browserWidth
   browserHeight
   browserX
   browserY
+  isAppDevToolsOpen
   isBrowserDevToolsOpen
   reporterWidth
   showedOnBoardingModal

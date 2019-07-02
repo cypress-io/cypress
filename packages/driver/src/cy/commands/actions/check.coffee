@@ -1,5 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../../../dom")
@@ -53,7 +52,7 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## blow up if any member of the subject
   ## isnt a checkbox or radio
   checkOrUncheckEl = (el, index) =>
-    $el = $(el)
+    $el = $dom.wrap(el)
 
     if not isAcceptableElement($el)
       node   = $dom.stringify($el)
@@ -94,8 +93,9 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       ## then notify the user of this note
       ## and bail
       if isNoop($el)
-        ## still ensure visibility even if the command is noop
-        cy.ensureVisibility($el, options._log)
+        if !options.force
+          ## still ensure visibility even if the command is noop
+          cy.ensureVisibility($el, options._log)
         if options._log
           inputType = if $el.is(":radio") then "radio" else "checkbox"
           consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."

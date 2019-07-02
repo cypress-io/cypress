@@ -161,19 +161,27 @@ class RunsList extends Component {
         return this._projectNotSetup()
 
       // the project is invalid
-      } else if (errors.isNotFound(this.runsStore.error)) {
+      }
+
+      if (errors.isNotFound(this.runsStore.error)) {
         return this._projectNotSetup(false)
 
       // they have been logged out
-      } else if (errors.isUnauthenticated(this.runsStore.error)) {
+      }
+
+      if (errors.isUnauthenticated(this.runsStore.error)) {
         return this._loginMessage()
 
       // they are not authorized to see runs
-      } else if (errors.isUnauthorized(this.runsStore.error)) {
+      }
+
+      if (errors.isUnauthorized(this.runsStore.error)) {
         return this._permissionMessage()
 
       // other error, but only show if we don't already have runs
-      } else if (!this.runsStore.isLoaded) {
+      }
+
+      if (!this.runsStore.isLoaded) {
         return <ErrorMessage error={this.runsStore.error} />
       }
     }
@@ -189,9 +197,10 @@ class RunsList extends Component {
         return this._projectNotSetup()
 
       // OR they have setup CI
-      } else {
-        return this._empty()
       }
+
+      return this._empty()
+
     }
     //--------End Run States----------//
 
@@ -202,11 +211,12 @@ class RunsList extends Component {
           <h5>Runs
             {this._lastUpdated()}
             <button
+              aria-label='Refresh'
               className='btn btn-link btn-sm'
               disabled={this.runsStore.isLoading}
               onClick={this._getRuns}
             >
-              <i className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
+              <i aria-hidden="true" className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
           </h5>
           <div>

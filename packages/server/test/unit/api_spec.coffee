@@ -3,17 +3,51 @@ require("../spec_helper")
 _        = require("lodash")
 os       = require("os")
 nmi      = require("node-machine-id")
+agent    = require("@packages/network").agent
 pkg      = require("@packages/root")
 api      = require("#{root}lib/api")
 browsers = require("#{root}lib/browsers")
 Promise  = require("bluebird")
 
-makeError = (details) ->
+makeError = (details = {}) ->
   _.extend(new Error(details.message or "Some error"), details)
 
 describe "lib/api", ->
   beforeEach ->
     sinon.stub(os, "platform").returns("linux")
+
+  context ".rp", ->
+    beforeEach ->
+      sinon.spy(agent, 'addRequest')
+      nock.enableNetConnect() ## nock will prevent requests from reaching the agent
+
+    it "makes calls using the correct agent", ->
+      api.ping()
+      .thenThrow()
+      .catch =>
+        expect(agent.addRequest).to.be.calledOnce
+        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+          href: 'http://localhost:1234/ping'
+        })
+
+    context "with a proxy defined", ->
+      beforeEach ->
+        @oldEnv = Object.assign({}, process.env)
+
+      it "makes calls using the correct agent", ->
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://foo.invalid:1234'
+        process.env.NO_PROXY = ''
+
+        api.ping()
+        .thenThrow()
+        .catch =>
+          expect(agent.addRequest).to.be.calledOnce
+          expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+            href: 'http://localhost:1234/ping'
+          })
+
+      afterEach ->
+        process.env = @oldEnv
 
   context ".getOrgs", ->
     it "GET /orgs + returns orgs", ->
@@ -938,7 +972,7 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.isApiError).to.be.true
 
-  context ".createRaygunException", ->
+  context ".createCrashReport", ->
     beforeEach ->
       @setup = (body, authToken, delay = 0) ->
         nock("http://localhost:1234")
@@ -951,7 +985,7 @@ describe "lib/api", ->
 
     it "POSTs /exceptions", ->
       @setup({foo: "bar"}, "auth-token-123")
-      api.createRaygunException({foo: "bar"}, "auth-token-123")
+      api.createCrashReport({foo: "bar"}, "auth-token-123")
 
     it "by default times outs after 3 seconds", ->
       ## return our own specific promise
@@ -961,7 +995,7 @@ describe "lib/api", ->
       sinon.stub(api.rp, "post").returns(p)
 
       @setup({foo: "bar"}, "auth-token-123")
-      api.createRaygunException({foo: "bar"}, "auth-token-123").then ->
+      api.createCrashReport({foo: "bar"}, "auth-token-123").then ->
         expect(p.timeout).to.be.calledWith(3000)
 
     it "times out after exceeding timeout", ->
@@ -969,7 +1003,7 @@ describe "lib/api", ->
       @setup({foo: "bar"}, "auth-token-123", 5000)
 
       ## and set the timeout to only be 50ms
-      api.createRaygunException({foo: "bar"}, "auth-token-123", 50)
+      api.createCrashReport({foo: "bar"}, "auth-token-123", 50)
       .then ->
         throw new Error("errored: it did not catch the timeout error!")
       .catch Promise.TimeoutError, ->
@@ -983,7 +1017,7 @@ describe "lib/api", ->
       .post("/exceptions", {foo: "bar"})
       .reply(500, {})
 
-      api.createRaygunException({foo: "bar"}, "auth-token-123")
+      api.createCrashReport({foo: "bar"}, "auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -1017,6 +1051,14 @@ describe "lib/api", ->
         api.retryWithBackoff(fn2)
       .then ->
         expect(fn2).to.be.calledTwice
+
+    it "retries on error without status code", ->
+      fn = sinon.stub().rejects(makeError())
+      fn.onCall(1).resolves()
+
+      api.retryWithBackoff(fn)
+      .then ->
+        expect(fn).to.be.calledTwice
 
     it "does not retry on non-5xx errors", ->
       fn1 = sinon.stub().rejects(makeError({ message: "499 error", statusCode: 499 }))

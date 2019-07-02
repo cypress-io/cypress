@@ -2,7 +2,8 @@ e2e = require("../support/helpers/e2e")
 
 onServer = (app) ->
   app.get "/viewport", e2e.sendHtml("""
-    <div class="black-me-out" style="position: fixed; left: 10px; top: 10px;">Redacted</div>
+    <div class="black-me-out" style="position: fixed; left: 10px; top: 10px; width: 10px; height: 10px;"></div>
+    <div class="black-me-out" style="position: absolute; left: 30px; top: 10px; width: 10px; height: 10px;"></div>
   """)
 
 describe "e2e screenshot viewport capture", ->

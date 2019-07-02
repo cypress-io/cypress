@@ -38,6 +38,7 @@ const createProps = () => ({
 describe('<Container />', () => {
   it('initializes the event manager when mounted', () => {
     const props = createProps()
+
     mount(<Container {...props} />)
     expect(props.eventManager.addGlobalListeners).to.have.been.called
     expect(props.eventManager.addGlobalListeners.firstCall.args[0]).to.equal(props.state)
@@ -50,6 +51,7 @@ describe('<Container />', () => {
 
     beforeEach(() => {
       const props = createProps()
+
       props.state.automation = automation.CONNECTING
       component = shallow(<Container {...props} />)
     })

@@ -3,9 +3,10 @@ require('../spec_helper')
 const os = require('os')
 const path = require('path')
 const R = require('ramda')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const Promise = require('bluebird')
 const tmp = Promise.promisifyAll(require('tmp'))
+const mockfs = require('mock-fs')
 
 const fs = require(`${lib}/fs`)
 const open = require(`${lib}/exec/open`)
@@ -13,6 +14,14 @@ const run = require(`${lib}/exec/run`)
 const cypress = require(`${lib}/cypress`)
 
 describe('cypress', function () {
+  beforeEach(function () {
+    mockfs({})
+  })
+
+  afterEach(() => {
+    mockfs.restore()
+  })
+
   context('.open', function () {
     beforeEach(function () {
       sinon.stub(open, 'start').resolves()
@@ -21,6 +30,7 @@ describe('cypress', function () {
     const getCallArgs = R.path(['lastCall', 'args', 0])
     const getStartArgs = () => {
       expect(open.start).to.be.called
+
       return getCallArgs(open.start)
     }
 
@@ -48,10 +58,12 @@ describe('cypress', function () {
 
   context('.run', function () {
     let outputPath
+
     beforeEach(function () {
       outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
       sinon.stub(tmp, 'fileAsync').resolves(outputPath)
       sinon.stub(run, 'start').resolves()
+
       return fs.outputJsonAsync(outputPath, {
         code: 0,
         failingTests: [],
@@ -62,10 +74,12 @@ describe('cypress', function () {
     const normalizeCallArgs = (args) => {
       expect(args.outputPath).to.equal(outputPath)
       delete args.outputPath
+
       return args
     }
     const getStartArgs = () => {
       expect(run.start).to.be.called
+
       return normalizeCallArgs(getCallArgs(run.start))
     }
 

@@ -279,7 +279,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "runnable:after:run:async", (test, runnable) ->
     screenshotConfig = $Screenshot.getConfig()
 
-    return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive")
+    return if not test.err or not screenshotConfig.screenshotOnRunFailure or config("isInteractive") or test.err.isPending
 
     ## if a screenshot has not been taken (by cy.screenshot()) in the test
     ## that failed, we can bypass UI-changing and pixel-checking (simple: true)
@@ -311,6 +311,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         timeout: config("responseTimeout")
       }
 
+      isWin = $dom.isWindow(subject)
+
       screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip", "onBeforeScreenshot", "onAfterScreenshot")
       screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
@@ -333,7 +335,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             consoleProps
         })
 
-      if subject and subject.length > 1
+      if not isWin and subject and subject.length > 1
         $utils.throwErrByPath("screenshot.multiple_elements", {
           log: options._log
           args: { numElements: subject.length }

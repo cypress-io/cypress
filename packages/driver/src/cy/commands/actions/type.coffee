@@ -1,5 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 moment = require("moment")
 
@@ -117,42 +116,43 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if chars is ""
         $utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
-      if isDate and (
-        not _.isString(chars) or
-        not dateRegex.test(chars) or
-        not moment(chars).isValid()
-      )
-        $utils.throwErrByPath("type.invalid_date", {
-          onFail: options._log
-          args: { chars }
-        })
+      if !(chars == "{selectall}{del}")
+        if isDate and (
+          not _.isString(chars) or
+          not dateRegex.test(chars) or
+          not moment(chars).isValid()
+        )
+          $utils.throwErrByPath("type.invalid_date", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isMonth and (
-        not _.isString(chars) or
-        not monthRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_month", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isMonth and (
+          not _.isString(chars) or
+          not monthRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_month", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isWeek and (
-        not _.isString(chars) or
-        not weekRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_week", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isWeek and (
+          not _.isString(chars) or
+          not weekRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_week", {
+            onFail: options._log
+            args: { chars }
+          })
 
-      if isTime and (
-        not _.isString(chars) or
-        not timeRegex.test(chars)
-      )
-        $utils.throwErrByPath("type.invalid_time", {
-          onFail: options._log
-          args: { chars }
-        })
+        if isTime and (
+          not _.isString(chars) or
+          not timeRegex.test(chars)
+        )
+          $utils.throwErrByPath("type.invalid_time", {
+            onFail: options._log
+            args: { chars }
+          })
 
       options.chars = "" + chars
 
@@ -160,9 +160,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getDefaultButtons = (form) ->
         form.find("input, button").filter (__, el) ->
-          $el = $(el)
+          $el = $dom.wrap(el)
           ($dom.isSelector($el, "input") and $dom.isType($el, "submit")) or
-          ($dom.isSelector($el, "button") and not $dom.isType($el, "button"))
+          ($dom.isSelector($el, "button") and not $dom.isType($el, "button") and not $dom.isType($el, "reset") )
 
       type = ->
         simulateSubmitHandler = ->
@@ -328,15 +328,29 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
+        ## if the subject is already the focused element, start typing
+        ## we handle contenteditable children by getting the host contenteditable,
+        ## and seeing if that is focused
+        ## Checking first if element is focusable accounts for focusable els inside
+        ## of contenteditables
+        $focused = cy.getFocused()
+        $focused = $focused && $focused[0]
+
+        if $elements.isFocusable(options.$el)
+          elToCheckCurrentlyFocused = options.$el[0]
+        else if $elements.isContentEditable(options.$el[0])
+          elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
+
+        if elToCheckCurrentlyFocused && elToCheckCurrentlyFocused is $focused
+          ## TODO: not scrolling here, but revisit when scroll algorithm changes
+          return type()
+
         $actionability.verify(cy, options.$el, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)
 
           onReady: ($elToClick) ->
             $focused = cy.getFocused()
-
-            if el = cy.needsForceFocus()
-              cy.fireFocus(el)
 
             ## if we dont have a focused element
             ## or if we do and its not ourselves
@@ -378,8 +392,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             })
 
     clear: (subject, options = {}) ->
-      ## what about other types of inputs besides just text?
-      ## what about the new HTML5 ones?
       _.defaults(options, {
         log: true
         force: false
@@ -388,7 +400,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## blow up if any member of the subject
       ## isnt a textarea or text-like
       clear = (el, index) ->
-        $el = $(el)
+        $el = $dom.wrap(el)
 
         if options.log
           ## figure out the options which actually change the behavior of clicks

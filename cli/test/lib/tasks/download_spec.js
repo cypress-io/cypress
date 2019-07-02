@@ -5,7 +5,7 @@ const la = require('lazy-ass')
 const is = require('check-more-types')
 const path = require('path')
 const nock = require('nock')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
@@ -45,36 +45,73 @@ describe('lib/tasks/download', function () {
   context('download url', () => {
     it('returns url', () => {
       const url = download.getUrl()
+
       la(is.url(url), url)
     })
 
     it('returns latest desktop url', () => {
       const url = download.getUrl()
-      snapshot('latest desktop url', normalize(url))
+
+      snapshot('latest desktop url 1', normalize(url))
     })
 
     it('returns specific desktop version url', () => {
       const url = download.getUrl('0.20.2')
-      snapshot('specific version desktop url', normalize(url))
+
+      snapshot('specific version desktop url 1', normalize(url))
     })
 
     it('returns input if it is already an https link', () => {
       const url = 'https://somewhere.com'
       const result = download.getUrl(url)
+
       expect(result).to.equal(url)
     })
 
     it('returns input if it is already an http link', () => {
       const url = 'http://local.com'
       const result = download.getUrl(url)
+
       expect(result).to.equal(url)
+    })
+  })
+
+  context('download base url from CYPRESS_DOWNLOAD_MIRROR env var', () => {
+    it('env var', () => {
+      process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com'
+      const url = download.getUrl('0.20.2')
+
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR 1', normalize(url))
+    })
+
+    it('env var with trailing slash', () => {
+      process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/'
+      const url = download.getUrl('0.20.2')
+
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with trailing slash 1', normalize(url))
+    })
+
+    it('env var with subdirectory', () => {
+      process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/example'
+      const url = download.getUrl('0.20.2')
+
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory 1', normalize(url))
+    })
+
+    it('env var with subdirectory and trailing slash', () => {
+      process.env.CYPRESS_DOWNLOAD_MIRROR = 'https://cypress.example.com/example/'
+      const url = download.getUrl('0.20.2')
+
+      snapshot('base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory and trailing slash 1', normalize(url))
     })
   })
 
   it('saves example.zip to options.downloadDestination', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
-    .reply(200, () => fs.createReadStream('test/fixture/example.zip'))
+    .reply(200, () => {
+      return fs.createReadStream('test/fixture/example.zip')
+    })
 
     nock('https://download.cypress.io')
     .get('/desktop/1.2.3')
@@ -83,7 +120,6 @@ describe('lib/tasks/download', function () {
       Location: 'https://aws.amazon.com/some.zip',
       'x-version': '0.11.1',
     })
-
 
     const onProgress = sinon.stub().returns(undefined)
 
@@ -94,6 +130,7 @@ describe('lib/tasks/download', function () {
     })
     .then((responseVersion) => {
       expect(responseVersion).to.eq('0.11.1')
+
       return fs.statAsync(downloadDestination)
     })
   })
@@ -101,7 +138,9 @@ describe('lib/tasks/download', function () {
   it('resolves with response x-version if present', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
-    .reply(200, () => fs.createReadStream('test/fixture/example.zip'))
+    .reply(200, () => {
+      return fs.createReadStream('test/fixture/example.zip')
+    })
 
     nock('https://download.cypress.io')
     .get('/desktop/1.2.3')
@@ -121,7 +160,9 @@ describe('lib/tasks/download', function () {
 
     nock('https://aws.amazon.com')
     .get('/some.zip')
-    .reply(200, () => fs.createReadStream('test/fixture/example.zip'))
+    .reply(200, () => {
+      return fs.createReadStream('test/fixture/example.zip')
+    })
 
     nock('https://download.cypress.io')
     .get('/desktop/0.13.0')
@@ -133,6 +174,7 @@ describe('lib/tasks/download', function () {
 
     return download.start(this.options).then((responseVersion) => {
       expect(responseVersion).to.eq('0.13.0')
+
       return fs.statAsync(downloadDestination)
     })
   })
@@ -141,6 +183,7 @@ describe('lib/tasks/download', function () {
     const ctx = this
 
     const err = new Error()
+
     err.statusCode = 404
     err.statusMessage = 'Not Found'
     this.options.version = null
@@ -157,7 +200,7 @@ describe('lib/tasks/download', function () {
     .catch((err) => {
       logger.error(err)
 
-      return snapshot('download status errors', normalize(ctx.stdout.toString()))
+      return snapshot('download status errors 1', normalize(ctx.stdout.toString()))
     })
   })
 })

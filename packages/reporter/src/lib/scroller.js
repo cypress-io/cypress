@@ -30,6 +30,7 @@ class Scroller {
       if (!this._userScroll) {
         // programmatic scroll
         this._userScroll = true
+
         return
       }
 
@@ -41,8 +42,10 @@ class Scroller {
         clearTimeout(this._countUserScrollsTimeout)
         this._countUserScrollsTimeout = null
         this._userScrollCount = 0
+
         return
       }
+
       if (this._countUserScrollsTimeout) return
 
       this._countUserScrollsTimeout = setTimeout(() => {
@@ -64,6 +67,7 @@ class Scroller {
     // aim to scroll just into view, so that the bottom of the element
     // is just above the bottom of the container
     let scrollTopGoal = this._aboveBottom(element)
+
     // can't have a negative scroll, so put it to the top
     if (scrollTopGoal < 0) {
       scrollTopGoal = 0

@@ -5,6 +5,7 @@ const os = require('os')
 const tty = require('tty')
 const path = require('path')
 const EE = require('events')
+const mockedEnv = require('mocked-env')
 
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -56,7 +57,8 @@ describe('lib/exec/spawn', function () {
           '--cwd',
           cwd,
         ], {
-          foo: 'bar',
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
         })
       })
     })
@@ -74,7 +76,8 @@ describe('lib/exec/spawn', function () {
           '--cwd',
           cwd,
         ], {
-          foo: 'bar',
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
         })
       })
     })
@@ -120,10 +123,46 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    describe('Linux display', () => {
+      let restore
+
+      beforeEach(() => {
+        restore = mockedEnv({
+          DISPLAY: 'test-display',
+        })
+      })
+
+      afterEach(() => {
+        restore()
+      })
+
+      it('retries with xvfb if fails with display exit code', function () {
+        this.spawnedProcess.on.withArgs('close').onFirstCall().yieldsAsync(1)
+        this.spawnedProcess.on.withArgs('close').onSecondCall().yieldsAsync(0)
+
+        const buf1 = '[some noise here] Gtk: cannot open display: 987'
+
+        this.spawnedProcess.stderr.on
+        .withArgs('data')
+        .yields(buf1)
+
+        os.platform.returns('linux')
+
+        return spawn.start('--foo')
+        .then((code) => {
+          expect(xvfb.start).to.have.been.calledOnce
+          expect(xvfb.stop).to.have.been.calledOnce
+          expect(cp.spawn).to.have.been.calledTwice
+          // second code should be 0 after successfully running with Xvfb
+          expect(code).to.equal(0)
+        })
+      })
+    })
+
     it('rejects with error from spawn', function () {
       const msg = 'the error message'
-      this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
 
+      this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
 
       return spawn.start('--foo')
       .then(() => {
@@ -178,6 +217,26 @@ describe('lib/exec/spawn', function () {
           FORCE_STDIN_TTY: '1',
           FORCE_STDOUT_TTY: '1',
         })
+      })
+    })
+
+    it('sets windowsHide:false property in windows', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      os.platform.returns('win32')
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].windowsHide).to.be.false
+      })
+    })
+
+    it('does not set windowsHide property when in darwin', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      return spawn.start([], { env: {} })
+      .then(() => {
+        expect(cp.spawn.firstCall.args[2].windowsHide).to.be.undefined
       })
     })
 
@@ -250,7 +309,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('writes everything on win32', function () {
-      const buf1 = new Buffer('asdf')
+      const buf1 = Buffer.from('asdf')
 
       this.spawnedProcess.stdin.pipe.withArgs(process.stdin)
       this.spawnedProcess.stdout.pipe.withArgs(process.stdout)
@@ -268,9 +327,9 @@ describe('lib/exec/spawn', function () {
     })
 
     it('does not write to process.stderr when from xlib or libudev', function () {
-      const buf1 = new Buffer('Xlib: something foo')
-      const buf2 = new Buffer('libudev something bar')
-      const buf3 = new Buffer('asdf')
+      const buf1 = Buffer.from('Xlib: something foo')
+      const buf2 = Buffer.from('libudev something bar')
+      const buf3 = Buffer.from('asdf')
 
       this.spawnedProcess.stderr.on
       .withArgs('data')
@@ -295,8 +354,8 @@ describe('lib/exec/spawn', function () {
     })
 
     it('does not write to process.stderr when from high sierra warnings', function () {
-      const buf1 = new Buffer('2018-05-19 15:30:30.287 Cypress[7850:32145] *** WARNING: Textured Window')
-      const buf2 = new Buffer('asdf')
+      const buf1 = Buffer.from('2018-05-19 15:30:30.287 Cypress[7850:32145] *** WARNING: Textured Window')
+      const buf2 = Buffer.from('asdf')
 
       this.spawnedProcess.stderr.on
       .withArgs('data')
@@ -326,7 +385,9 @@ describe('lib/exec/spawn', function () {
         const fn = () => {
           called = true
           const err = new Error()
+
           err.code = 'EPIPE'
+
           return process.stdin.emit('error', err)
         }
 
@@ -342,7 +403,9 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         const fn = () => {
           const err = new Error('wattttt')
+
           err.code = 'FAILWHALE'
+
           return process.stdin.emit('error', err)
         }
 

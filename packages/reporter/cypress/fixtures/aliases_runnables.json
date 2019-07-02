@@ -1,0 +1,13 @@
+{
+  "id": "r1",
+  "title": "",
+  "root": true,
+  "suites": [],
+  "tests": [
+    {
+      "id": "r3",
+      "title": "test 1",
+      "state": "passed"
+    }
+  ]
+}

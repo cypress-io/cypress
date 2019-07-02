@@ -219,6 +219,9 @@ describe "taking screenshots", ->
           devicePixelRatio
         })
 
+  it "doesn't take a screenshot for a pending test", ->
+    @skip()
+
   context "before hooks", ->
     before ->
       ## failure 2
@@ -236,3 +239,10 @@ describe "taking screenshots", ->
       throw new Error("after each hook failed")
 
     it "empty test 2", ->
+
+  context "really long test title #{Cypress._.repeat('a', 255)}", ->
+    it "takes a screenshot", ->
+      cy.screenshot()
+
+    it "takes another screenshot", ->
+      cy.screenshot()

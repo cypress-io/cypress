@@ -77,3 +77,11 @@ describe "lib/util/specs", ->
         expect(files.length).to.equal(2)
         expect(files[0].name).to.equal("js_spec.js")
         expect(files[1].name).to.equal("ts_spec.ts")
+
+    it "properly handles directories with names including '.'", ->
+      config.get(FixturesHelper.projectPath("odd-directory-name"))
+      .then (cfg) ->
+        specsUtil.find(cfg)
+      .then (files) ->
+        expect(files.length).to.equal(1)
+        expect(files[0].name).to.equal("1.0/sample_spec.js")

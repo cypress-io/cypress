@@ -1,12 +1,12 @@
 _          = require("lodash")
 pkg        = require("@packages/root")
-uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
 debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
+
 recordMode = require("./record")
 errors     = require("../errors")
 Project    = require("../project")
@@ -21,7 +21,6 @@ trash      = require("../util/trash")
 random     = require("../util/random")
 system     = require("../util/system")
 duration   = require("../util/duration")
-progress   = require("../util/progress_bar")
 terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
@@ -313,12 +312,12 @@ iterateThroughSpecs = (options = {}) ->
       ## else iterate in serial
       serial()
 
-getProjectId = (project, id) ->
+getProjectId = Promise.method (project, id) ->
   id ?= env.get("CYPRESS_PROJECT_ID")
 
   ## if we have an ID just use it
   if id
-    return Promise.resolve(id)
+    return id
 
   project
   .getProjectId()
@@ -352,9 +351,16 @@ openProjectCreate = (projectRoot, socketId, options) ->
     morgan:       false
     report:       true
     isTextTerminal: options.isTextTerminal
+    onWarning: (err) ->
+      console.log(err.message)
     onError: (err) ->
       console.log("")
-      console.log(err.stack)
+      if err.details
+        console.log(err.message)
+        console.log("")
+        console.log(chalk.yellow(err.details))
+      else
+        console.log(err.stack)
       openProject.emit("exitEarlyWithErr", err.message)
   })
   .catch {portInUse: true}, (err) ->
@@ -520,7 +526,6 @@ module.exports = {
 
       console.log("")
 
-      # bar = progress.create("Post Processing Video")
       console.log(
         gray("  - Started processing:  "),
         chalk.cyan("Compressing to #{videoCompression} CRF")
@@ -766,6 +771,7 @@ module.exports = {
       osName: sys.osName,
       osVersion: sys.osVersion,
       cypressVersion: pkg.version,
+      runUrl: runUrl,
       config,
     }
 
@@ -816,12 +822,10 @@ module.exports = {
 
     { isHeadless, isHeaded } = browser
 
-    browserName = browser.name
-
     debug("about to run spec %o", {
       spec
       isHeadless
-      browserName
+      browser
     })
 
     screenshots = []
@@ -833,11 +837,11 @@ module.exports = {
     ## to gracefully handle this in promise land
 
     ## if we've been told to record and we're not spawning a headed browser
-    browserCanBeRecorded = (name) ->
-      name is "electron" and isHeadless
+    browserCanBeRecorded = (browser) ->
+      browser.name is "electron" and isHeadless
 
     if video
-      if browserCanBeRecorded(browserName)
+      if browserCanBeRecorded(browser)
         if not videosFolder
           throw new Error("Missing videoFolder for recording")
 
@@ -848,10 +852,10 @@ module.exports = {
       else
         console.log("")
 
-        if browserName is "electron" and isHeaded
+        if browser.name is "electron" and isHeaded
           errors.warning("CANNOT_RECORD_VIDEO_HEADED")
         else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browserName)
+          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name)
 
     Promise.resolve(recording)
     .then (props = {}) =>
@@ -936,7 +940,7 @@ module.exports = {
 
       Promise.all([
         system.info(),
-        browsers.ensureAndGetByName(browserName),
+        browsers.ensureAndGetByNameOrPath(browserName),
         @findSpecs(config, specPattern),
         trashAssets(config),
         removeOldProfiles()
@@ -949,14 +953,14 @@ module.exports = {
         if not specs.length
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun, runUrl) =>
+        runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) =>
           @runSpecs({
             beforeSpecRun
             afterSpecRun
             projectRoot
             specPattern
             socketId
-            parallel
+            parallel: parallelOverride
             browser
             project
             runUrl
@@ -992,7 +996,8 @@ module.exports = {
             runAllSpecs
           })
         else
-          runAllSpecs()
+          ## not recording, can't be parallel
+          runAllSpecs({}, false)
 
   run: (options) ->
     electronApp
