@@ -7,7 +7,7 @@ e2e = require("../support/helpers/e2e")
 fs = require("../../lib/util/fs")
 Fixtures = require("../support/helpers/fixtures")
 
-postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
+postRunResponse = jsonSchemas.getExample("postRunResponse")("2.1.0")
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
 
 e2ePath = Fixtures.projectPath("e2e")
@@ -124,7 +124,7 @@ defaultRoutes = [
   }, {
     method: "put"
     url: "/instances/:id"
-    req: "putInstanceRequest@2.0.0",
+    req: "putInstanceRequest@2.2.0",
     res: sendUploadUrls
   }, {
     method: "put"
@@ -152,7 +152,7 @@ describe "e2e record", ->
   context "passing", ->
     setup(defaultRoutes)
 
-    it "passes", ->
+    it.only "passes", ->
       e2e.exec(@, {
         key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
         spec: "record*"
