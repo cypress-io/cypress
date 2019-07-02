@@ -1,8 +1,13 @@
 {
-  "eslint.autoFixOnSave": true,
   "eslint.validate": [
-    "javascript",
-    "javascriptreact",
+    { 
+      "language": "javascript",
+      "autoFix": true
+    },
+    {
+      "language": "javascriptreact",
+      "autoFix": true
+    },
     {
       "language": "typescript",
       "autoFix": true
@@ -18,11 +23,6 @@
     {
       "language": "coffeescript",
       "autoFix": false
-    }
+    },
   ],
-  "eslint.options": {
-    "rules": {
-      "no-debugger": "off"
-    }
-  }
 }
