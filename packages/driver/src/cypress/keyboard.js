@@ -1,20 +1,3 @@
-/* eslint-disable
-    autofix/no-unused-vars,
-    default-case,
-    no-case-declarations,
-    no-self-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS204: Change includes calls to have a more natural evaluation order
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 const $elements = require('../dom/elements')
@@ -109,7 +92,7 @@ const $Keyboard = {
       options.setKey = '{del}'
 
       return this.ensureKey(el, null, options, () => {
-        const bounds = $selection.getSelectionBounds(el)
+        $selection.getSelectionBounds(el)
 
         if ($selection.isCollapsed(el)) {
           //# if there's no text selected, delete the prev char
@@ -412,17 +395,17 @@ const $Keyboard = {
     options = _.clone(options)
 
     switch (false) {
-      case !this.isSpecialChar(chars):
+      case !this.isSpecialChar(chars): {
         return Promise
         .resolve(this.handleSpecialChars(el, chars, options))
         .delay(options.delay)
-
-      case !this.isModifier(chars):
+      }
+      case !this.isModifier(chars): {
         return Promise
         .resolve(this.handleModifier(el, chars, options))
         .delay(options.delay)
-
-      case !charsBetweenCurlyBracesRe.test(chars):
+      }
+      case !charsBetweenCurlyBracesRe.test(chars): {
         //# between curly braces, but not a valid special
         //# char or modifier
         const allChars = _.keys(this.specialChars).concat(_.keys(this.modifierChars)).join(', ')
@@ -430,14 +413,15 @@ const $Keyboard = {
         return Promise
         .resolve(options.onNoMatchingSpecialChars(chars, allChars))
         .delay(options.delay)
-
-      default:
+      }
+      default: {
         return Promise
         .each(chars.split(''), (char) => {
           return Promise
           .resolve(this.typeKey(el, char, options))
           .delay(options.delay)
         })
+      }
     }
   },
 
@@ -467,7 +451,9 @@ const $Keyboard = {
     //# bail if we've said not to fire this specific event
     //# in our options
 
-    let charCode; let keyCode; let which
+    let charCode
+    let keyCode
+    let which
 
     if (options[eventType] === false) {
       return true
@@ -484,37 +470,39 @@ const $Keyboard = {
     })
 
     switch (eventType) {
-      case 'keydown': case 'keyup':
+      case 'keydown': case 'keyup': {
         keyCode = options.charCode != null ? options.charCode : this.getKeyCode(key.toUpperCase())
 
         charCode = 0
-        keyCode = keyCode
         which = keyCode
         break
-
-      case 'keypress':
+      }
+      case 'keypress': {
         const asciiCode = options.charCode != null ? options.charCode : this.getAsciiCode(key)
 
         charCode = asciiCode
         keyCode = asciiCode
         which = asciiCode
         break
-
-      case 'textInput':
+      }
+      case 'textInput': {
         charCode = 0
         keyCode = 0
         which = 0
         otherKeys = false
-
         _.extend(event, {
           data: key,
         })
         break
+      }
 
-      case 'input':
+      case 'input': {
         keys = false
         otherKeys = false
         break
+      }
+
+      default: null
     }
 
     if (otherKeys) {
