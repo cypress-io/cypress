@@ -55,16 +55,16 @@
     "lint-changed": "./scripts/lint-changed.js",
     "lint-pre-commit": "./scripts/lint-pre-commit.js"
   },
-  "description": "Common ESLint rules shared by Cypress packages",
-  "homepage": "https://github.com/cypress-io/cypress-eslint-plugin-dev#readme",
+  "description": "Common ESLint rules shared by Internal Cypress packages",
+  "homepage": "https://github.com/cypress-io/eslint-plugin-dev#readme",
   "license": "MIT",
   "author": "Chris Breiding (chris@cypress.io)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress-eslint-plugin-dev.git"
+    "url": "https://github.com/cypress-io/eslint-plugin-dev.git"
   },
   "bugs": {
-    "url": "https://github.com/cypress-io/cypress-eslint-plugin-dev/issues"
+    "url": "https://github.com/cypress-io/eslint-plugin-dev/issues"
   },
   "keywords": [
     "cypress",
