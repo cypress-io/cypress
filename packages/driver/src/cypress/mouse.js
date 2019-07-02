@@ -1,114 +1,126 @@
-Promise = require("bluebird")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const Promise = require("bluebird");
 
-$Cypress = require("../cypress")
-$Keyboard = require("./keyboard")
-$dom = require("../dom")
+const $Cypress = require("../cypress");
+const $Keyboard = require("./keyboard");
+const $dom = require("../dom");
 
-stopPropagation = window.MouseEvent.prototype.stopPropagation
+const { stopPropagation } = window.MouseEvent.prototype;
 
 module.exports = {
-  mouseDown: ($elToClick, fromViewport) ->
-    el = $elToClick.get(0)
+  mouseDown($elToClick, fromViewport) {
+    const el = $elToClick.get(0);
 
-    win = $dom.getWindowByElement(el)
+    const win = $dom.getWindowByElement(el);
 
-    mdownEvtProps = $Keyboard.mixinModifiers({
-      bubbles: true
-      cancelable: true
-      view: win
-      clientX: fromViewport.x
-      clientY: fromViewport.y
-      buttons: 1
+    const mdownEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true,
+      cancelable: true,
+      view: win,
+      clientX: fromViewport.x,
+      clientY: fromViewport.y,
+      buttons: 1,
       detail: 1
-    })
+    });
 
-    mdownEvt = new window.MouseEvent "mousedown", mdownEvtProps
+    const mdownEvt = new window.MouseEvent("mousedown", mdownEvtProps);
 
-    ## ensure this property exists on older chromium versions
-    mdownEvt.buttons ?= 1
+    //# ensure this property exists on older chromium versions
+    if (mdownEvt.buttons == null) { mdownEvt.buttons = 1; }
 
-    mdownEvt.stopPropagation = ->
-      @_hasStoppedPropagation = true
-      stopPropagation.apply(@, arguments)
+    mdownEvt.stopPropagation = function() {
+      this._hasStoppedPropagation = true;
+      return stopPropagation.apply(this, arguments);
+    };
 
-    cancelled = !el.dispatchEvent(mdownEvt)
+    const cancelled = !el.dispatchEvent(mdownEvt);
 
-    props = {
-      preventedDefault: cancelled
+    const props = {
+      preventedDefault: cancelled,
       stoppedPropagation: !!mdownEvt._hasStoppedPropagation
-    }
+    };
 
-    modifiers = $Keyboard.activeModifiers()
-    props.modifiers = modifiers.join(", ") if modifiers.length
-    props
+    const modifiers = $Keyboard.activeModifiers();
+    if (modifiers.length) { props.modifiers = modifiers.join(", "); }
+    return props;
+  },
 
-  mouseUp: ($elToClick, fromViewport) ->
-    el = $elToClick.get(0)
+  mouseUp($elToClick, fromViewport) {
+    const el = $elToClick.get(0);
 
-    win = $dom.getWindowByElement(el)
+    const win = $dom.getWindowByElement(el);
 
-    mupEvtProps = $Keyboard.mixinModifiers({
-      bubbles: true
-      cancelable: true
-      view: win
-      clientX: fromViewport.x
-      clientY: fromViewport.y
-      buttons: 0
+    const mupEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true,
+      cancelable: true,
+      view: win,
+      clientX: fromViewport.x,
+      clientY: fromViewport.y,
+      buttons: 0,
       detail: 1
-    })
+    });
 
-    mupEvt = new MouseEvent "mouseup", mupEvtProps
+    const mupEvt = new MouseEvent("mouseup", mupEvtProps);
 
-    ## ensure this property exists on older chromium versions
-    mupEvt.buttons ?= 0
+    //# ensure this property exists on older chromium versions
+    if (mupEvt.buttons == null) { mupEvt.buttons = 0; }
 
-    mupEvt.stopPropagation = ->
-      @_hasStoppedPropagation = true
-      stopPropagation.apply(@, arguments)
+    mupEvt.stopPropagation = function() {
+      this._hasStoppedPropagation = true;
+      return stopPropagation.apply(this, arguments);
+    };
 
-    cancelled = !el.dispatchEvent(mupEvt)
+    const cancelled = !el.dispatchEvent(mupEvt);
 
-    props = {
-      preventedDefault: cancelled
+    const props = {
+      preventedDefault: cancelled,
       stoppedPropagation: !!mupEvt._hasStoppedPropagation
-    }
+    };
 
-    modifiers = $Keyboard.activeModifiers()
-    props.modifiers = modifiers.join(", ") if modifiers.length
-    props
+    const modifiers = $Keyboard.activeModifiers();
+    if (modifiers.length) { props.modifiers = modifiers.join(", "); }
+    return props;
+  },
 
-  click: ($elToClick, fromViewport) ->
-    el = $elToClick.get(0)
+  click($elToClick, fromViewport) {
+    const el = $elToClick.get(0);
 
-    win = $dom.getWindowByElement(el)
+    const win = $dom.getWindowByElement(el);
 
-    clickEvtProps = $Keyboard.mixinModifiers({
-      bubbles: true
-      cancelable: true
-      view: win
-      clientX: fromViewport.x
-      clientY: fromViewport.y
-      buttons: 0
+    const clickEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true,
+      cancelable: true,
+      view: win,
+      clientX: fromViewport.x,
+      clientY: fromViewport.y,
+      buttons: 0,
       detail: 1
-    })
+    });
 
-    clickEvt = new MouseEvent "click", clickEvtProps
+    const clickEvt = new MouseEvent("click", clickEvtProps);
 
-    ## ensure this property exists on older chromium versions
-    clickEvt.buttons ?= 0
+    //# ensure this property exists on older chromium versions
+    if (clickEvt.buttons == null) { clickEvt.buttons = 0; }
 
-    clickEvt.stopPropagation = ->
-      @_hasStoppedPropagation = true
-      stopPropagation.apply(@, arguments)
+    clickEvt.stopPropagation = function() {
+      this._hasStoppedPropagation = true;
+      return stopPropagation.apply(this, arguments);
+    };
 
-    cancelled = !el.dispatchEvent(clickEvt)
+    const cancelled = !el.dispatchEvent(clickEvt);
 
-    props = {
-      preventedDefault: cancelled
+    const props = {
+      preventedDefault: cancelled,
       stoppedPropagation: !!clickEvt._hasStoppedPropagation
-    }
+    };
 
-    modifiers = $Keyboard.activeModifiers()
-    props.modifiers = modifiers.join(", ") if modifiers.length
-    props
-}
+    const modifiers = $Keyboard.activeModifiers();
+    if (modifiers.length) { props.modifiers = modifiers.join(", "); }
+    return props;
+  }
+};
