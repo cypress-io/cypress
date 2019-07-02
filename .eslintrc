@@ -1,4 +1,7 @@
 {
+  "plugins": [
+    "autofix"
+  ],
   "extends": [
     "plugin:cypress-dev/general"
   ],
@@ -9,6 +12,10 @@
     "no-unneeded-ternary": ["error"],
     "array-bracket-newline": ["error", "consistent"],
     "arrow-body-style": ["error", "always"],
+    "function-paren-newline": [
+      "error",
+      "consistent"
+    ],
     "padding-line-between-statements": [
       "error",
       {
@@ -48,7 +55,11 @@
           "cjs-import"
         ]
       }
-    ]
+    ],
+
+    "no-unused-vars": "off",
+    "autofix/no-unused-vars": "error",
+    "autofix/prefer-arrow-callback": "error"
   },
   "env": {
     "es6": true,
