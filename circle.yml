@@ -279,11 +279,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: |
-            set +e # don't exit on non-0 status code - performance tests can be spurious
-            npm run all test-performance -- --package server
-            echo "exited with code: $?"
-            exit 0
+          command: npm run all test-performance -- --package server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -859,6 +855,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - test-example-repos-on-mac-4526
         requires:
           - Mac build
 
@@ -871,6 +868,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - binary-metadata
+              - test-example-repos-on-mac-4526
         requires:
           - Mac build
 
@@ -895,6 +893,19 @@ mac-workflow: &mac-workflow
         requires:
           - Mac NPM package
           - Mac binary
+
+    - test-binary-and-npm-against-other-projects:
+        name: Test Mac binary against other projects
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+              - test-example-repos-on-mac-4526
+        requires:
+          - Mac NPM package
+          - Mac binary
+
 workflows:
   linux:
     <<: *linux-workflow

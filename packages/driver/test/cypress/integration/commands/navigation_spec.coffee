@@ -541,6 +541,11 @@ describe "src/cy/commands/navigation", ->
         .then ->
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
 
+    ## https://github.com/cypress-io/cypress/issues/1727
+    it "can visit a page with undefined content type and html-shaped body", ->
+      cy
+        .visit("http://localhost:3500/undefined-content-type")
+
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0

@@ -1,4 +1,4 @@
-import { capitalize } from 'lodash'
+import _ from 'lodash'
 import gravatar from 'gravatar'
 import duration from '../../../server/lib/util/duration'
 
@@ -34,7 +34,7 @@ export const browserIcon = (browserName) => {
 export const browserNameFormatted = (browserName) => {
   if (!browserName) return ''
 
-  return capitalize(browserName)
+  return _.capitalize(browserName)
 }
 
 export const browserVersionFormatted = (browserVersion) => {
@@ -82,5 +82,33 @@ export function stripLeadingCyDirs (spec) {
 
   // remove leading 'cypress/integration' from spec
   return spec.replace(cyDirRegex, '')
+}
+
+export function stripSharedDirsFromDir2 (dir1, dir2, osName) {
+  const sep = osName === 'win32' ? '\\' : '/'
+
+  const arr1 = dir1.split(sep)
+  const arr2 = dir2.split(sep)
+
+  let found = false
+
+  return _
+  .chain(arr2)
+  .transform((memo, segment, index) => {
+    const segmentsFromEnd1 = arr1.slice(-(index + 1))
+    const segmentsFromBeg2 = arr2.slice(0, index + 1)
+
+    if (_.isEqual(segmentsFromBeg2, segmentsFromEnd1)) {
+      return found = arr2.slice(index + 1)
+    }
+
+    if (found) {
+      memo.push(...found)
+
+      return false
+    }
+  })
+  .join(sep)
+  .value()
 
 }
