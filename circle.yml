@@ -15,9 +15,9 @@ jobs:
         paths:
         - ~/.cache
     - run:
-        command: npm run test
+        command: yarn run test
     - run:
-        command: npm run semantic-release
+        command: yarn run semantic-release
 workflows:
   build:
     jobs:

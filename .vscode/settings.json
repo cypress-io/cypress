@@ -1,6 +1,29 @@
 {
-  "git.ignoreLimitWarning": true,
-  "eslint.enable": true,
   "eslint.alwaysShowStatus": true,
-  "eslint.autoFixOnSave": true
+  "eslint.validate": [
+    { 
+      "language": "javascript",
+      "autoFix": true
+    },
+    {
+      "language": "javascriptreact",
+      "autoFix": true
+    },
+    {
+      "language": "typescript",
+      "autoFix": true
+    },
+    {
+      "language": "typescriptreact",
+      "autoFix": true
+    },
+    {
+      "language": "json",
+      "autoFix": true
+    },
+    {
+      "language": "coffeescript",
+      "autoFix": false
+    },
+  ],
 }

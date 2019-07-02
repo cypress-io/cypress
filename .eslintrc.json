@@ -1,9 +1,11 @@
 {
-  "env": {
-    "commonjs": true
-  },
-  "parserOptions": {
-    "ecmaVersion": 2018,
-    "sourceType": "module"
-  }
+  "plugins": [
+    "@cypress/dev",
+    "promise"
+  ],
+  "extends": [
+    "plugin:promise/recommended",
+    "plugin:@cypress/dev/general"
+  ],
+  "rules": {}
 }
