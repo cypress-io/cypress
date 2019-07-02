@@ -19,10 +19,10 @@ const testStaticAssets = async (buildResourcePath) => {
         'webpack-livereload-plugin',
         // indicates eval source maps were included, which cause crossorigin errors
         '//# sourceURL=cypress://',
+        '//# sourceMappingURL=data:application/json;charset=utf-8;base64',
       ],
       goodStrings: [
         // indicates inline source maps were included
-        '//# sourceMappingURL=data:application/json;charset=utf-8;base64',
       ],
       minLineCount: 5000,
     }),

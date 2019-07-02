@@ -155,10 +155,11 @@ const config: webpack.Configuration = {
     //    shows full source and does not cause crossorigin errors like 'eval' (in Chromium < 63)
     // files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
     env === 'production' ?
-      new webpack.SourceMapDevToolPlugin({
-        moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-        fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
-      }) :
+      null:
+      // new webpack.SourceMapDevToolPlugin({
+      //   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+      //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
+      // }) :
       // @ts-ignore
       new webpack.EvalDevToolModulePlugin({
         moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
