@@ -86,7 +86,7 @@ context('lib/tasks/verify', () => {
     // make it think the executable exists and is verified
     createfs({
       alreadyVerified: true,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
@@ -102,7 +102,7 @@ context('lib/tasks/verify', () => {
   it('logs warning when installed version does not match verified version', () => {
     createfs({
       alreadyVerified: true,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion: 'bloop',
     })
 
@@ -135,7 +135,7 @@ context('lib/tasks/verify', () => {
   it('logs error when child process hangs', () => {
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
@@ -160,7 +160,7 @@ context('lib/tasks/verify', () => {
   it('logs error when child process returns incorrect stdout (stderr when exists)', () => {
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
@@ -187,7 +187,7 @@ context('lib/tasks/verify', () => {
   it('logs error when child process returns incorrect stdout (stdout when no stderr)', () => {
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
@@ -213,7 +213,7 @@ context('lib/tasks/verify', () => {
   it('sets ELECTRON_ENABLE_LOGGING without mutating process.env', () => {
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
@@ -243,7 +243,7 @@ context('lib/tasks/verify', () => {
     beforeEach(() => {
       createfs({
         alreadyVerified: true,
-        executable: mockfs.file({ mode: 777 }),
+        executable: mockfs.file({ mode: 0o777 }),
         packageVersion,
       })
     })
@@ -302,7 +302,7 @@ context('lib/tasks/verify', () => {
 
       createfs({
         alreadyVerified: false,
-        executable: mockfs.file({ mode: 777 }),
+        executable: mockfs.file({ mode: 0o777 }),
         packageVersion,
       })
     })
@@ -324,7 +324,7 @@ context('lib/tasks/verify', () => {
 
       createfs({
         alreadyVerified: false,
-        executable: mockfs.file({ mode: 777 }),
+        executable: mockfs.file({ mode: 0o777 }),
         packageVersion,
       })
 
@@ -445,7 +445,7 @@ context('lib/tasks/verify', () => {
     mockfs.restore()
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 666 }),
+      executable: mockfs.file({ mode: 0o666 }),
       packageVersion,
     })
 
@@ -468,7 +468,7 @@ context('lib/tasks/verify', () => {
   it('logs and runs when current version has not been verified', () => {
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
@@ -483,7 +483,7 @@ context('lib/tasks/verify', () => {
   it('logs and runs when installed version is different than package version', () => {
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion: '7.8.9',
     })
 
@@ -498,7 +498,7 @@ context('lib/tasks/verify', () => {
   it('is silent when logLevel is silent', () => {
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
@@ -515,7 +515,7 @@ context('lib/tasks/verify', () => {
   it('turns off Opening Cypress...', () => {
     createfs({
       alreadyVerified: true,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion: '7.8.9',
     })
 
@@ -531,7 +531,7 @@ context('lib/tasks/verify', () => {
   it('logs error when fails smoke test unexpectedly without stderr', () => {
     createfs({
       alreadyVerified: false,
-      executable: mockfs.file({ mode: 777 }),
+      executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
@@ -561,7 +561,7 @@ context('lib/tasks/verify', () => {
 
       createfs({
         alreadyVerified: false,
-        executable: mockfs.file({ mode: 777 }),
+        executable: mockfs.file({ mode: 0o777 }),
         packageVersion,
       })
     })
@@ -605,7 +605,7 @@ context('lib/tasks/verify', () => {
     beforeEach(() => {
       createfs({
         alreadyVerified: false,
-        executable: mockfs.file({ mode: 777 }),
+        executable: mockfs.file({ mode: 0o777 }),
         packageVersion,
       })
 
@@ -641,7 +641,7 @@ context('lib/tasks/verify', () => {
       process.env.CYPRESS_RUN_BINARY = envBinaryPath
       createfs({
         alreadyVerified: false,
-        executable: mockfs.file({ mode: 777 }),
+        executable: mockfs.file({ mode: 0o777 }),
         packageVersion,
         customDir: '/real/custom',
       })
@@ -700,7 +700,7 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
   if (customDir) {
     mockFiles['/custom/Contents/MacOS/Cypress'] = mockfs.symlink({
       path: '/real/custom/Contents/MacOS/Cypress',
-      mode: 777,
+      mode: 0o777,
     })
   }
 
