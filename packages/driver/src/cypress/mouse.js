@@ -1,18 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const Promise = require('bluebird')
-
-const $Cypress = require('../cypress')
 const $Keyboard = require('./keyboard')
 const $dom = require('../dom')
 
@@ -41,10 +26,10 @@ module.exports = {
       mdownEvt.buttons = 1
     }
 
-    mdownEvt.stopPropagation = function () {
+    mdownEvt.stopPropagation = function (...args) {
       this._hasStoppedPropagation = true
 
-      return stopPropagation.apply(this, arguments)
+      return stopPropagation.apply(this, args)
     }
 
     const cancelled = !el.dispatchEvent(mdownEvt)
@@ -85,10 +70,10 @@ module.exports = {
       mupEvt.buttons = 0
     }
 
-    mupEvt.stopPropagation = function () {
+    mupEvt.stopPropagation = function (...args) {
       this._hasStoppedPropagation = true
 
-      return stopPropagation.apply(this, arguments)
+      return stopPropagation.apply(this, args)
     }
 
     const cancelled = !el.dispatchEvent(mupEvt)
@@ -129,10 +114,10 @@ module.exports = {
       clickEvt.buttons = 0
     }
 
-    clickEvt.stopPropagation = function () {
+    clickEvt.stopPropagation = function (...args) {
       this._hasStoppedPropagation = true
 
-      return stopPropagation.apply(this, arguments)
+      return stopPropagation.apply(this, args)
     }
 
     const cancelled = !el.dispatchEvent(clickEvt)

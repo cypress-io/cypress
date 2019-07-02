@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
@@ -17,15 +6,14 @@ const fail = function (str) {
   throw new Error(str)
 }
 
-describe('src/cy/commands/actions/click', function () {
+describe('src/cy/commands/actions/click', () => {
   before(() => {
     return cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
       this.body = win.document.body.outerHTML
     })
-  }
-  )
+  })
 
   beforeEach(function () {
     const doc = cy.state('document')
@@ -33,7 +21,7 @@ describe('src/cy/commands/actions/click', function () {
     return $(doc.body).empty().html(this.body)
   })
 
-  context('#click', function () {
+  context('#click', () => {
     it('receives native click event', (done) => {
       const $btn = cy.$$('#button')
 
@@ -68,7 +56,7 @@ describe('src/cy/commands/actions/click', function () {
     })
 
     it('bubbles up native click event', (done) => {
-      const click = (e) => {
+      const click = () => {
         cy.state('window').removeEventListener('click', click)
 
         return done()
@@ -159,8 +147,7 @@ describe('src/cy/commands/actions/click', function () {
         return $btn.get(0).addEventListener(event, () => {
           return events.push(event)
         })
-      }
-      )
+      })
 
       return cy.get('#button').click().then(() => {
         return expect(events).to.deep.eq(['mousedown', 'mouseup', 'click'])
@@ -216,8 +203,7 @@ describe('src/cy/commands/actions/click', function () {
         return $btn.get(0).addEventListener(event, () => {
           return events.push(event)
         })
-      }
-      )
+      })
 
       return cy.get('#button').click().then(() => {
         return expect(events).to.deep.eq(['mouseup', 'click'])
@@ -250,7 +236,7 @@ describe('src/cy/commands/actions/click', function () {
       return cy.get(':text:first').click()
     })
 
-    it('does not fire a focus, mouseup, or click event when element has been removed on mousedown', function () {
+    it('does not fire a focus, mouseup, or click event when element has been removed on mousedown', () => {
       const $btn = cy.$$('button:first')
 
       $btn.on('mousedown', function () {
@@ -274,7 +260,7 @@ describe('src/cy/commands/actions/click', function () {
       return cy.contains('button').click()
     })
 
-    it('does not fire a click when element has been removed on mouseup', function () {
+    it('does not fire a click when element has been removed on mouseup', () => {
       const $btn = cy.$$('button:first')
 
       $btn.on('mouseup', function () {
@@ -290,7 +276,7 @@ describe('src/cy/commands/actions/click', function () {
     })
 
     it('silences errors on unfocusable elements', () => {
-      const div = cy.$$('div:first')
+      cy.$$('div:first')
 
       return cy.get('div:first').click({ force: true })
     })
@@ -319,7 +305,7 @@ describe('src/cy/commands/actions/click', function () {
     })
 
     it('delays 50ms before resolving', () => {
-      cy.$$('button:first').on('click', (e) => {
+      cy.$$('button:first').on('click', () => {
         return cy.spy(Promise, 'delay')
       })
 
@@ -602,7 +588,7 @@ describe('src/cy/commands/actions/click', function () {
         })
         .prependTo($body)
 
-        const $nav = $(`\
+        $(`\
 <div><input type="text" data-cy="input" />
 <br><br>
 <a href="#" data-cy="button"> Button </a></div>\
@@ -627,7 +613,7 @@ describe('src/cy/commands/actions/click', function () {
         })
         .appendTo($wrap)
 
-        const $longBlock1 = $('<div>Long block 1</div>')
+        $('<div>Long block 1</div>')
         .attr('id', 'long-block-1')
         .css({
           height: '500px',
@@ -636,7 +622,7 @@ describe('src/cy/commands/actions/click', function () {
           width: '100%',
         }).appendTo($content)
 
-        const $longBlock2 = $('<div>Long block 2</div>')
+        $('<div>Long block 2</div>')
         .attr('id', 'long-block-2')
         .css({
           height: '500px',
@@ -645,7 +631,7 @@ describe('src/cy/commands/actions/click', function () {
           width: '100%',
         }).appendTo($content)
 
-        const $longBlock3 = $('<div>Long block 3</div>')
+        $('<div>Long block 3</div>')
         .attr('id', 'long-block-3')
         .css({
           height: '500px',
@@ -654,7 +640,7 @@ describe('src/cy/commands/actions/click', function () {
           width: '100%',
         }).appendTo($content)
 
-        const $longBlock4 = $('<div>Long block 4</div>')
+        $('<div>Long block 4</div>')
         .attr('id', 'long-block-4')
         .css({
           height: '500px',
@@ -663,7 +649,7 @@ describe('src/cy/commands/actions/click', function () {
           width: '100%',
         }).appendTo($content)
 
-        const $longBlock5 = $('<div>Long block 5</div>')
+        $('<div>Long block 5</div>')
         .attr('id', 'long-block-5')
         .css({
           height: '500px',
@@ -689,7 +675,8 @@ describe('src/cy/commands/actions/click', function () {
 
       it('can forcibly click even when being covered by another element', () => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
-        const span = $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+
+        $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
         const scrolled = []
         let retried = false
@@ -699,7 +686,7 @@ describe('src/cy/commands/actions/click', function () {
           return scrolled.push(type)
         })
 
-        cy.on('command:retry', ($el, type) => {
+        cy.on('command:retry', () => {
           return retried = true
         })
 
@@ -739,8 +726,7 @@ describe('src/cy/commands/actions/click', function () {
         cy.on('command:retry', _.after(3, () => {
           $span.hide()
           retried = true
-        })
-        )
+        }))
 
         return cy.get('#button-covered-in-span').click().then(() => {
           expect(retried).to.be.true
@@ -755,11 +741,11 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('scrolls the window past a fixed position element when being covered', () => {
-        const $btn = $('<button>button covered</button>')
+        $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
         .appendTo(cy.$$('#fixed-nav-test'))
 
-        const $nav = $('<nav>nav on button</nav>').css({
+        $('<nav>nav on button</nav>').css({
           position: 'fixed',
           left: 0,
           top: 0,
@@ -774,22 +760,20 @@ describe('src/cy/commands/actions/click', function () {
           return scrolled.push(type)
         })
 
-        return cy.get('#button-covered-in-nav').click().then(() =>
         //# - element scrollIntoView
         //# - element scrollIntoView (retry animation coords)
         //# - window
-        {
+        return cy.get('#button-covered-in-nav').click().then(() => {
           return expect(scrolled).to.deep.eq(['element', 'element', 'window'])
-        }
-        )
+        })
       })
 
       it('scrolls the window past two fixed positioned elements when being covered', () => {
-        const $btn = $('<button>button covered</button>')
+        $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
         .appendTo(cy.$$('#fixed-nav-test'))
 
-        const $nav = $('<nav>nav on button</nav>').css({
+        $('<nav>nav on button</nav>').css({
           position: 'fixed',
           left: 0,
           top: 0,
@@ -798,7 +782,7 @@ describe('src/cy/commands/actions/click', function () {
           zIndex: 1,
         }).prependTo(cy.$$('body'))
 
-        const $nav2 = $('<nav>nav2 on button</nav>').css({
+        $('<nav>nav2 on button</nav>').css({
           position: 'fixed',
           left: 0,
           top: 40,
@@ -813,15 +797,13 @@ describe('src/cy/commands/actions/click', function () {
           return scrolled.push(type)
         })
 
-        return cy.get('#button-covered-in-nav').click().then(() =>
         //# - element scrollIntoView
         //# - element scrollIntoView (retry animation coords)
         //# - window (nav1)
         //# - window (nav2)
-        {
+        return cy.get('#button-covered-in-nav').click().then(() => {
           return expect(scrolled).to.deep.eq(['element', 'element', 'window', 'window'])
-        }
-        )
+        })
       })
 
       it('scrolls a container past a fixed position element when being covered', () => {
@@ -846,7 +828,7 @@ describe('src/cy/commands/actions/click', function () {
         })
         .prependTo($body)
 
-        const $btn = $('<button>button covered</button>')
+        $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
         .css({
           marginTop: 500,
@@ -855,7 +837,7 @@ describe('src/cy/commands/actions/click', function () {
         })
         .appendTo($container)
 
-        const $nav = $('<nav>nav on button</nav>')
+        $('<nav>nav on button</nav>')
         .css({
           position: 'fixed',
           left: 0,
@@ -872,15 +854,13 @@ describe('src/cy/commands/actions/click', function () {
           return scrolled.push(type)
         })
 
-        return cy.get('#button-covered-in-nav').click().then(() =>
         //# - element scrollIntoView
         //# - element scrollIntoView (retry animation coords)
         //# - window
         //# - container
-        {
+        return cy.get('#button-covered-in-nav').click().then(() => {
           return expect(scrolled).to.deep.eq(['element', 'element', 'window', 'container'])
-        }
-        )
+        })
       })
 
       it('waits until element becomes visible', () => {
@@ -891,8 +871,7 @@ describe('src/cy/commands/actions/click', function () {
         cy.on('command:retry', _.after(3, () => {
           $btn.show()
           retried = true
-        })
-        )
+        }))
 
         return cy.get('#button').click().then(() => {
           return expect(retried).to.be.true
@@ -912,8 +891,7 @@ describe('src/cy/commands/actions/click', function () {
         cy.on('command:retry', _.after(3, () => {
           $btn.prop('disabled', false)
           retried = true
-        })
-        )
+        }))
 
         return cy.get('#button').click().then(() => {
           expect(clicks).to.eq(1)
@@ -925,7 +903,7 @@ describe('src/cy/commands/actions/click', function () {
       it('waits until element stops animating', () => {
         let retries = 0
 
-        cy.on('command:retry', (obj) => {
+        cy.on('command:retry', () => {
           return retries += 1
         })
 
@@ -995,7 +973,7 @@ describe('src/cy/commands/actions/click', function () {
       })
     })
 
-    describe('assertion verification', function () {
+    describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
@@ -1006,7 +984,7 @@ describe('src/cy/commands/actions/click', function () {
         return null
       })
 
-      it('eventually passes the assertion', function () {
+      it('eventually passes the assertion', () => {
         cy.$$('button:first').click(function () {
           _.delay(() => {
             return $(this).addClass('clicked')
@@ -1026,7 +1004,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      return it('eventually passes the assertion on multiple buttons', function () {
+      return it('eventually passes the assertion on multiple buttons', () => {
         cy.$$('button').click(function () {
           _.delay(() => {
             return $(this).addClass('clicked')
@@ -1188,7 +1166,8 @@ describe('src/cy/commands/actions/click', function () {
 
       return it('can pass options along with position', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo(cy.$$('body'))
+
+        $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo(cy.$$('body'))
 
         $btn.on('click', () => {
           return done()
@@ -1221,7 +1200,8 @@ describe('src/cy/commands/actions/click', function () {
 
       return it('can pass options along with x, y', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
-        const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo(cy.$$('body'))
+
+        $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo(cy.$$('body'))
 
         $btn.on('click', () => {
           return done()
@@ -1290,8 +1270,7 @@ describe('src/cy/commands/actions/click', function () {
           return input.get(0).addEventListener(event, () => {
             return events.push(event)
           })
-        }
-        )
+        })
 
         return cy.get('input:first').click().then(() => {
           return expect(events).to.deep.eq(['mousedown', 'focus', 'focusin', 'mouseup', 'click'])
@@ -1301,7 +1280,7 @@ describe('src/cy/commands/actions/click', function () {
       it('does not give focus if mousedown is defaultPrevented', (done) => {
         const input = cy.$$('input:first')
 
-        input.get(0).addEventListener('focus', (e) => {
+        input.get(0).addEventListener('focus', () => {
           return done('should not have recieved focused event')
         })
 
@@ -1318,7 +1297,8 @@ describe('src/cy/commands/actions/click', function () {
 
       it('still gives focus to the focusable element even when click is issued to child element', () => {
         const $btn = $('<button>', { id: 'button-covered-in-span' }).prependTo(cy.$$('body'))
-        const span = $('<span>span in button</span>').css({ padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
+
+        $('<span>span in button</span>').css({ padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         return cy
         .get('#button-covered-in-span').click()
@@ -1364,7 +1344,7 @@ describe('src/cy/commands/actions/click', function () {
 
     // win.on "mousedown", -> console.log("win mousedown")
 
-    describe('errors', function () {
+    describe('errors', () => {
       beforeEach(function () {
         Cypress.config('defaultCommandTimeout', 100)
 
@@ -1402,7 +1382,7 @@ describe('src/cy/commands/actions/click', function () {
       it('throws when subject is not in the document', (done) => {
         let clicked = 0
 
-        const $checkbox = cy.$$(':checkbox:first').click((e) => {
+        const $checkbox = cy.$$(':checkbox:first').click(() => {
           clicked += 1
           $checkbox.remove()
 
@@ -1435,7 +1415,7 @@ describe('src/cy/commands/actions/click', function () {
       it('throws when any member of the subject isnt visible', function (done) {
         cy.timeout(250)
 
-        const $btn = cy.$$('#three-buttons button').show().last().hide()
+        cy.$$('#three-buttons button').show().last().hide()
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -1451,7 +1431,7 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('throws when subject is disabled', function (done) {
-        const $btn = cy.$$('#button').prop('disabled', true)
+        cy.$$('#button').prop('disabled', true)
 
         cy.on('fail', (err) => {
           //# get + click logs
@@ -1531,12 +1511,12 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('throws when element is fixed position and being covered', function (done) {
-        const $btn = $('<button>button covered</button>')
+        $('<button>button covered</button>')
         .attr('id', 'button-covered-in-span')
         .css({ position: 'fixed', left: 0, top: 0 })
         .prependTo(cy.$$('body'))
 
-        const $span = $('<span>span on button</span>')
+        $('<span>span on button</span>')
         .css({ position: 'fixed', left: 0, top: 0, padding: 20, display: 'inline-block', backgroundColor: 'yellow', zIndex: 10 })
         .prependTo(cy.$$('body'))
 
@@ -1655,7 +1635,7 @@ describe('src/cy/commands/actions/click', function () {
       })
     })
 
-    return describe('.log', function () {
+    return describe('.log', () => {
       beforeEach(function () {
         this.logs = []
 
@@ -1698,7 +1678,7 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('snapshots after clicking', () => {
-        return cy.get('button:first').click().then(function ($button) {
+        return cy.get('button:first').click().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(2)
@@ -1706,8 +1686,7 @@ describe('src/cy/commands/actions/click', function () {
 
           return expect(lastLog.get('snapshots')[1].body).to.be.an('object')
         })
-      }
-      )
+      })
 
       it('returns only the $el for the element of the subject that was clicked', () => {
         const clicks = []
@@ -1756,8 +1735,7 @@ describe('src/cy/commands/actions/click', function () {
 
           return expect(lastLog.get('coords')).to.deep.eq(fromWindow)
         })
-      }
-      )
+      })
 
       it('ends', () => {
         const logs = []
@@ -1774,8 +1752,7 @@ describe('src/cy/commands/actions/click', function () {
 
             return expect(log.get('ended')).to.be.true
           })
-        }
-        )
+        })
       })
 
       it('logs { multiple: true} options', () => {
@@ -1786,8 +1763,7 @@ describe('src/cy/commands/actions/click', function () {
 
           return expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ multiple: true, timeout: 1000 })
         })
-      }
-      )
+      })
 
       it('#consoleProps', () => {
         return cy.get('button').first().click().then(function ($button) {
@@ -1806,10 +1782,9 @@ describe('src/cy/commands/actions/click', function () {
 
           return expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
         })
-      }
-      ) //# ensure we are within 1
+      }) //# ensure we are within 1
 
-      it('#consoleProps actual element clicked', function () {
+      it('#consoleProps actual element clicked', () => {
         const $btn = $('<button>', {
           id: 'button-covered-in-span',
         })
@@ -1824,7 +1799,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it('#consoleProps groups MouseDown', function () {
+      it('#consoleProps groups MouseDown', () => {
         cy.$$('input:first').mousedown(() => {
           return false
         })
@@ -1856,7 +1831,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it('#consoleProps groups MouseUp', function () {
+      it('#consoleProps groups MouseUp', () => {
         cy.$$('input:first').mouseup(() => {
           return false
         })
@@ -1888,7 +1863,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it('#consoleProps groups Click', function () {
+      it('#consoleProps groups Click', () => {
         cy.$$('input:first').click(() => {
           return false
         })
@@ -1920,7 +1895,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it('#consoleProps groups have activated modifiers', function () {
+      it('#consoleProps groups have activated modifiers', () => {
         cy.$$('input:first').click(() => {
           return false
         })
@@ -1957,7 +1932,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       }) //# clear modifiers
 
-      it('#consoleProps when no mouseup or click', function () {
+      it('#consoleProps when no mouseup or click', () => {
         const $btn = cy.$$('button:first')
 
         $btn.on('mousedown', function () {
@@ -1978,7 +1953,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it('#consoleProps when no click', function () {
+      it('#consoleProps when no click', () => {
         const $btn = cy.$$('button:first')
 
         $btn.on('mouseup', function () {
@@ -2006,7 +1981,7 @@ describe('src/cy/commands/actions/click', function () {
         })
       })
 
-      it('does not fire a click when element has been removed on mouseup', function () {
+      it('does not fire a click when element has been removed on mouseup', () => {
         const $btn = cy.$$('button:first')
 
         $btn.on('mouseup', function () {
@@ -2031,14 +2006,13 @@ describe('src/cy/commands/actions/click', function () {
 
           return expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })
-      }
-      )
+      })
     })
   })
 
-  return context('#dblclick', function () {
+  return context('#dblclick', () => {
     it('sends a dblclick event', (done) => {
-      cy.$$('#button').dblclick((e) => {
+      cy.$$('#button').dblclick(() => {
         return done()
       })
 
@@ -2193,7 +2167,7 @@ describe('src/cy/commands/actions/click', function () {
       })
     })
 
-    describe('errors', function () {
+    describe('errors', () => {
       beforeEach(function () {
         Cypress.config('defaultCommandTimeout', 100)
 
@@ -2219,7 +2193,7 @@ describe('src/cy/commands/actions/click', function () {
       it('throws when subject is not in the document', (done) => {
         let dblclicked = 0
 
-        const $button = cy.$$('button:first').dblclick((e) => {
+        const $button = cy.$$('button:first').dblclick(() => {
           dblclicked += 1
           $button.remove()
 
@@ -2237,7 +2211,7 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('throws when any member of the subject isnt visible', (done) => {
-        const $btn = cy.$$('button').slice(0, 3).show().last().hide()
+        cy.$$('button').slice(0, 3).show().last().hide()
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.dblclick() failed because this element is not visible')
@@ -2262,7 +2236,7 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       return it('throws when any member of the subject isnt visible', function (done) {
-        const $btn = cy.$$('#three-buttons button').show().last().hide()
+        cy.$$('#three-buttons button').show().last().hide()
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -2278,7 +2252,7 @@ describe('src/cy/commands/actions/click', function () {
       })
     })
 
-    return describe('.log', function () {
+    return describe('.log', () => {
       beforeEach(function () {
         this.logs = []
 
@@ -2307,15 +2281,14 @@ describe('src/cy/commands/actions/click', function () {
       })
 
       it('snapshots after clicking', () => {
-        return cy.get('button:first').dblclick().then(function ($button) {
+        return cy.get('button:first').dblclick().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
 
           return expect(lastLog.get('snapshots')[0]).to.be.an('object')
         })
-      }
-      )
+      })
 
       it('returns only the $el for the element of the subject that was dblclicked', () => {
         const dblclicks = []
@@ -2361,7 +2334,7 @@ describe('src/cy/commands/actions/click', function () {
 
         })
 
-        return cy.get('button').first().dblclick().then(function ($button) {
+        return cy.get('button').first().dblclick().then(function () {
           const { lastLog } = this
 
           return expect(lastLog.invoke('consoleProps')).to.deep.eq({
