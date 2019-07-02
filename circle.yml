@@ -205,7 +205,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: npm run lint
+      ## this will catch .only's in js/coffee as well
+      - run: npm run lint-all
 
   unit-tests:
     <<: *defaults

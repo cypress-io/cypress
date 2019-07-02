@@ -25,3 +25,4 @@ packages/launcher/lib/**/*.js
 
 **/package-lock.json
 **/tsconfig.json
+**/.vscode
