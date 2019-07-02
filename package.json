@@ -45,6 +45,7 @@
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "npm run check-deps-pre",
     "start": "node ./cli/bin/cypress open --dev --global",
+    "stop-only": "stop-only --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "test-debug-package": "node ./scripts/test-debug-package.js",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
@@ -55,7 +56,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-pre-commit --silent"
+      "pre-commit": "npm run lint-pre-commit --silent && npm run stop-only --silent"
     }
   },
   "devDependencies": {
@@ -145,6 +146,7 @@
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
     "snap-shot-it": "7.7.1",
+    "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",
     "typescript": "3.4.5",
