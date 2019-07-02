@@ -38,9 +38,9 @@
     "lint-all": "npm run lint && npm run lint-coffee",
     "lint-changed": "lint-changed",
     "lint-changed-fix": "npm run lint-changed -- --fix",
-    "lint-coffee": "coffeelint scripts/**/*.coffee && eslint --ext .coffee . && npm run all lint-coffee",
+    "lint-coffee": "coffeelint scripts/**/*.coffee && npm run all lint-coffee && npm run stop-only",
     "lint-fix": "npm run lint -- --fix",
-    "lint-pre-commit": "lint-pre-commit",
+    "lint-pre-commit": "lint-pre-commit && npm run stop-only",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "npm run check-deps-pre",
@@ -56,7 +56,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-pre-commit --silent && npm run stop-only --silent"
+      "pre-commit": "npm run lint-pre-commit --silent"
     }
   },
   "devDependencies": {
