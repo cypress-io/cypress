@@ -6,14 +6,12 @@
     "lint-changed": "node ./scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
     "lint-pre-commit": "node ./scripts/lint-pre-commit",
-    "lint-pre-push": "node ./scripts/lint-pre-push",
     "semantic-release": "semantic-release",
     "test": "jest"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-pre-commit --silent",
-      "pre-push": "npm run lint-pre-push --silent"
+      "pre-commit": "npm run lint-pre-commit --silent"
     }
   },
   "dependencies": {
@@ -55,8 +53,7 @@
   },
   "bin": {
     "lint-changed": "./scripts/lint-changed.js",
-    "lint-pre-commit": "./scripts/lint-pre-commit.js",
-    "lint-pre-push": "./scripts/lint-pre-push.js"
+    "lint-pre-commit": "./scripts/lint-pre-commit.js"
   },
   "description": "Common ESLint rules shared by Cypress packages",
   "homepage": "https://github.com/cypress-io/cypress-eslint-plugin-dev#readme",
