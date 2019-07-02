@@ -7,6 +7,12 @@ $Location = require("../../cypress/location")
 
 server = null
 
+tryDecodeUri = (uri) ->
+  try
+    return decodeURI(uri)
+  catch
+    return uri
+
 getServer = ->
   server ? unavailableErr()
 
@@ -408,7 +414,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         urlString = url.toString()
 
         ## https://github.com/cypress-io/cypress/issues/2372
-        if (decodedUrl = decodeURI(urlString)) and urlString != decodedUrl
+        if (decodedUrl = tryDecodeUri(urlString)) and urlString != decodedUrl
           $utils.warnByPath("route.url_percentencoding_warning", { args: { decodedUrl }})
 
         options.log = Cypress.log({

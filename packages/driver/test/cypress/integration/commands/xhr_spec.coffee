@@ -1339,6 +1339,13 @@ describe "src/cy/commands/xhr", ->
         Did you mean to pass "/foo%bar"?
         """
 
+    it "does not warn if an invalid percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "http://example.com/%E0%A4%A")
+      .then ->
+        expect(Cypress.utils.warning).to.not.be.called
+
     it.skip "does not error when response is null but respond is false", ->
       cy.route
         url: /foo/
