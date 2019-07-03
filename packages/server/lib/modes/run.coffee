@@ -25,11 +25,8 @@ terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
-<<<<<<< HEAD
 settings   = require("../util/settings")
-=======
 chromePolicyCheck = require("../util/chrome_policy_check")
->>>>>>> origin/develop
 
 color = (val, c) ->
   chalk[c](val)

@@ -132,15 +132,15 @@ module.exports = {
   exists (projectRoot, options = {}) {
     const file = this.pathToConfigFile(projectRoot, options)
 
-    //# first check if cypress.json exists
+    // first check if cypress.json exists
     return maybeVerifyConfigFile(options.configFile)
     .then(() =>
-    //# if it does also check that the projectRoot
-    //# directory is writable
+    // if it does also check that the projectRoot
+    // directory is writable
     {
       return fs.accessAsync(projectRoot, fs.W_OK)
     }).catch({ code: 'ENOENT' }, (err) => {
-      //# cypress.json does not exist, we missing project
+      // cypress.json does not exist, we missing project
       log('cannot find file %s', file)
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
@@ -149,7 +149,7 @@ module.exports = {
         throw err
       }
 
-      //# else we cannot read due to folder permissions
+      // else we cannot read due to folder permissions
       return this._logReadErr(file, err)
     })
   },
