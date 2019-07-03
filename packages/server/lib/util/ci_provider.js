@@ -39,9 +39,9 @@ const isCodeshipPro = () => {
 }
 
 const isConcourse = () => {
-  return (_.filter(Object.keys(process.env), (key) => {
+  return _.some(process.env, (val, key) => {
     return /^CONCOURSE_/.test(key)
-  }).length > 0)
+  })
 }
 
 const isGitlab = () => {

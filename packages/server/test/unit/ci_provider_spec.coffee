@@ -339,6 +339,7 @@ describe "lib/util/ci_provider", ->
     expectsCiParams({
       buildId: "ciBuildId"
     })
+    expectsCommitParams(null)
 
   it "drone", ->
     resetEnv = mockedEnv({
