@@ -49,6 +49,11 @@ describe "src/cy/commands/actions/scroll", ->
         cy.window().scrollTo("10px").then (win) ->
           expect(win.pageXOffset).to.eq(10)
 
+      it "can handle window w/length > 1 as a subject", ->
+        cy.visit('/fixtures/dom.html')
+        cy.window().should('have.length.gt', 1)
+        .scrollTo('10px')
+
     describe "x axis only", ->
       it "scrolls x axis to num px", ->
         expect(@scrollHoriz.get(0).scrollTop).to.eq(0)

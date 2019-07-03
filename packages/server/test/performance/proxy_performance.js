@@ -21,9 +21,7 @@ const { _getArgs } = require('../../lib/browsers/chrome')
 
 const CHROME_PATH = 'google-chrome'
 const URLS_UNDER_TEST = [
-  // TODO: disabling for now because the https tests are
-  // running too fast
-  // 'https://test-page-speed.cypress.io/index1000.html',
+  'https://test-page-speed.cypress.io/index1000.html',
   'http://test-page-speed.cypress.io/index1000.html',
 ]
 
@@ -35,11 +33,11 @@ const CDP_PORT = 45679 /** port range starts here, not the actual port */
 const CY_PROXY_PORT = 45680
 
 const TEST_CASES = [
+  // these first 4 cases don't involve Cypress, don't need to run every time
   // {
   //   name: 'Chrome w/o HTTP/2',
   //   disableHttp2: true,
   // },
-  // these 5 test cases cover Chrome, useful only for comparison
   // {
   //   name: 'Chrome',
   // },
@@ -51,10 +49,16 @@ const TEST_CASES = [
   //   name: 'With HTTPS proxy',
   //   httpsUpstreamProxy: true,
   // },
+  // baseline test that all other tests are compared to
   {
     name: 'Chrome w/ proxy w/o HTTP/2 (baseline)',
     disableHttp2: true,
     upstreamProxy: true,
+  },
+  {
+    name: 'With Cypress proxy, Intercepted',
+    cyProxy: true,
+    cyIntercept: true,
   },
   {
     name: 'With Cypress proxy, Not Intercepted',
@@ -64,11 +68,6 @@ const TEST_CASES = [
     name: 'With Cypress proxy w/o HTTP/2, Not Intercepted',
     cyProxy: true,
     disableHttp2: true,
-  },
-  {
-    name: 'With Cypress proxy, Intercepted',
-    cyProxy: true,
-    cyIntercept: true,
   },
   {
     name: 'With Cypress proxy and upstream, Intercepted',
@@ -92,7 +91,16 @@ const TEST_CASES = [
     cyProxy: true,
     httpsUpstreamProxy: true,
   },
-]
+].map((v) => {
+  // fill in all the fields so the keys are in the correct order for readability
+  return _.defaults(v, {
+    disableHttp2: false,
+    upstreamProxy: false,
+    httpsUpstreamProxy: false,
+    cyProxy: false,
+    cyIntercept: false,
+  })
+})
 
 let defaultArgs = _getArgs()
 
@@ -103,45 +111,76 @@ defaultArgs = defaultArgs.concat([
   '--no-sandbox', // allows us to run as root, for CI
 ])
 
-const getResultsFromHar = (har, testCase) => {
-  // HAR 1.2 Spec:
-  // http://www.softwareishard.com/blog/har-12-spec/
+const average = (arr) => {
+  return _.sum(arr) / arr.length
+}
+
+const percentile = (sortedArr, p) => {
+  const i = Math.floor(p / 100 * sortedArr.length - 1)
+
+  return Math.round(sortedArr[i])
+}
+
+const getResultsFromHar = (har) => {
+  // HAR 1.2 Spec: http://www.softwareishard.com/blog/har-12-spec/
   const { entries } = har.log
+  const results = {}
 
   const first = entries[0]
   const last = entries[entries.length - 1]
   const elapsed = Number(new Date(last.startedDateTime)) + last.time - Number(new Date(first.startedDateTime))
 
-  testCase['Total'] = `${Math.round(elapsed)}ms`
+  results['Total'] = Math.round(elapsed)
 
   let mins = {}
   let maxes = {}
 
-  const keys = ['receive', 'wait', 'send']
+  const timings = {
+    'receive': [],
+    'wait': [],
+    'send': [],
+    'total': [],
+  }
 
-  const aggTimings = entries.reduce((prev, cur) => {
-    cur = cur.timings
-    Object.keys(cur).forEach((timingKey) => {
-      if (cur[timingKey] === -1) return
+  entries.forEach((entry) => {
+    const blockedTime = _.get(entry.timings, 'blocked', -1) === -1 ? 0 : entry.timings.blocked
+    const totalTime = entry.time - blockedTime
 
-      const ms = Math.round(cur[timingKey])
+    timings.total.push(totalTime)
 
-      if (!mins[timingKey] || ms < mins[timingKey]) mins[timingKey] = ms
+    Object.keys(entry.timings).forEach((timingKey) => {
+      if (entry.timings[timingKey] === -1 || !entry.timings[timingKey]) return
 
-      if (!maxes[timingKey] || ms > maxes[timingKey]) maxes[timingKey] = ms
+      const ms = Math.round(entry.timings[timingKey])
 
-      if (!prev[timingKey]) prev[timingKey] = ms
-      else prev[timingKey] += ms
+      if (timings[timingKey]) timings[timingKey].push(ms)
+    })
+  })
+
+  for (const key in timings) {
+    const arr = timings[key]
+
+    arr.sort((a, b) => {
+      return a - b
     })
 
-    return prev
-  }, {})
+    mins[key] = Math.round(arr[0])
+    maxes[key] = Math.round(arr[arr.length - 1])
 
-  _.forEach(aggTimings, (value, timingKey) => {
-    if (_.includes(keys, timingKey)) {
-      testCase[`Avg ${timingKey}`] = `${Math.round(value / entries.length)}ms`
-    }
+    _.merge(results, {
+      [`Avg ${_.upperFirst(key)}`]: Math.round(average(arr)),
+    })
+  }
+
+  results['Min'] = mins.total
+
+  ;[1, 5, 25, 50, 75, 95, 99, 99.7].forEach((p) => {
+    results[`${p}% <=`] = percentile(timings.total, p)
   })
+
+  results['Max'] = maxes.total
+
+  return results
 }
 
 const runBrowserTest = (urlUnderTest, testCase) => {
@@ -256,12 +295,12 @@ const runBrowserTest = (urlUnderTest, testCase) => {
       .then((har) => {
         proc.kill(9)
         debug('Received HAR from Chrome')
-        getResultsFromHar(har, testCase)
+        const results = getResultsFromHar(har)
 
-        const runtime = Number(testCase['Total'].replace('ms', ''))
+        _.merge(testCase, results)
 
         return storeHar(testCase.name, har)
-        .return(runtime)
+        .return(results)
       })
       .catch({ code: 'ECONNREFUSED' }, (err) => {
         // sometimes chrome takes surprisingly long, just reconn
@@ -278,12 +317,10 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 let cyServer
 
 describe('Proxy Performance', function () {
-  this.timeout(240 * 1000)
+  this.timeout(60 * 1000)
+  this.retries(3)
 
   beforeEach(function () {
-    this.timeout(240 * 1000)
-    this.currentTest.timeout(240 * 1000)
-
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   })
 
@@ -326,29 +363,32 @@ describe('Proxy Performance', function () {
         // run baseline test
         return runBrowserTest(urlUnderTest, testCases[0])
         .then((runtime) => {
-          debug('baseline runtime total is: ', runtime)
+          debug('baseline runtime is: ', runtime)
 
           baseline = runtime
         })
       })
 
       testCases.slice(1).map((testCase) => {
-        it(`${testCase.name} loads 1000 images in less than 4x the speed of regular Chrome`, function () {
+        it(`${testCase.name} loads 1000 images, with 75% loading no more than 2x as slow as the slowest baseline request`, function () {
           debug('Current test: ', testCase.name)
 
           return runBrowserTest(urlUnderTest, testCase)
-          .then((runtime) => {
-            expect(runtime).to.be.lessThan(baseline * 4)
+          .then((results) => {
+            expect(results['75% <=']).to.be.lessThan(baseline['Max'] * 2)
           })
         })
       })
 
       after(() => {
         debug(`Done in ${Math.round((new Date() / 1000) - start)}s`)
-        // console.table has forsaken us :(
+        // console.table not available until Node 10
         const t = new Table()
 
         t.addRows(testCases)
+
+        // console.log is bad for eslint, but nobody never said nothing about process.stdout.write
+        process.stdout.write('Note: All times are in milliseconds.\n')
         t.printTable()
       })
     })
