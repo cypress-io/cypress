@@ -15,9 +15,9 @@ describe('Settings', function () {
     }
 
     cy.visitIndex().then(function (win) {
-      let start; // don't remove this semicolon 😅
+      let start
 
-      ({ start, ipc: this.ipc } = win.App)
+      ;({ start, ipc: this.ipc } = win.App) // don't remove this semicolon 😅
 
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)

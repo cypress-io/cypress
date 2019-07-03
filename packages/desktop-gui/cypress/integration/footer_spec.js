@@ -3,9 +3,9 @@ describe('Footer', function () {
     cy.fixture('user').as('user')
 
     cy.visitIndex().then(function (win) {
-      let start; // don't remove this semicolon 😅
+      let start
 
-      ({ start, ipc: this.ipc } = win.App)
+      ;({ start, ipc: this.ipc } = win.App) // don't remove this semicolon 😅
 
       this.version = '1.0.0'
 

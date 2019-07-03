@@ -1,9 +1,9 @@
 describe('App', function () {
   beforeEach(() => {
     cy.visitIndex().then(function (win) {
-      this.win = win; // don't remove this semicolon 😅
+      this.win = win
 
-      ({ start: this.start, ipc: this.ipc } = this.win.App)
+      ;({ start: this.start, ipc: this.ipc } = this.win.App) // don't remove this semicolon 😅
 
       cy.stub(this.ipc, 'getOptions').resolves({})
       cy.stub(this.ipc, 'onMenuClicked')
