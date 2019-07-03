@@ -60,6 +60,8 @@ function getStdio (needsXvfb) {
 }
 
 module.exports = {
+  isGarbageLineWarning,
+
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
     let executable = state.getPathToExecutable(state.getBinaryDir())
