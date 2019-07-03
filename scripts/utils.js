@@ -89,9 +89,26 @@ const getCIName = () => {
   }
 }
 
+/**
+ * Returns the current CI build url
+ */
+const getCIBuildUrl = () => {
+  if (process.env.CIRCLE) {
+    // https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
+    return process.env.CIRCLE_BUILD_URL
+  }
+
+  if (process.env.APPVEYOR) {
+    // https://www.appveyor.com/docs/environment-variables/
+    // there is no single url, but we can form one
+    // TODO form AppVeyor build url
+  }
+}
+
 module.exports = {
   getNameAndBinary,
   getJustVersion,
   getShortCommit,
   getCIName,
+  getCIBuildUrl,
 }
