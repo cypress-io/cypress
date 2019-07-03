@@ -455,7 +455,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We could not find a project with the ID: #{chalk.yellow(arg1)}
 
-      This projectId came from your #{arg2} file or an environment variable.
+      This projectId came from your '#{arg2}' file or an environment variable.
 
       Please log into the Dashboard and find your project.
 
