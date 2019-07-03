@@ -10,9 +10,11 @@ debug = require('gulp-debug')
 gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
+hasha = require('hasha')
 
 konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
+s3helpers = require("./s3-api").s3helpers
 
 # we zip the binary on every platform and upload under same name
 binaryExtension = ".zip"
@@ -70,6 +72,8 @@ uploadFile = (options) ->
     headers = {}
     headers["Cache-Control"] = "no-cache"
 
+    key = null
+
     gulp.src(options.file)
     .pipe rename (p) =>
       p.basename = path.basename(uploadFileName, binaryExtension)
@@ -77,12 +81,37 @@ uploadFile = (options) ->
       console.log("renaming upload to", p.dirname, p.basename)
       la(check.unemptyString(p.basename), "missing basename")
       la(check.unemptyString(p.dirname), "missing dirname")
+      key = p.dirname + uploadFileName
       p
     .pipe debug()
     .pipe publisher.publish(headers)
     .pipe awspublish.reporter()
     .on "error", reject
-    .on "end", resolve
+    .on "end", () -> resolve(key)
+
+setChecksum = (filename, key) =>
+  console.log('setting checksum for file %s', filename)
+  console.log('on s3 object %s', key)
+
+  la(check.unemptyString(filename), 'expected filename', filename)
+  la(check.unemptyString(key), 'expected uploaded S3 key', key)
+
+  checksum = hasha.fromFileSync(filename)
+  size = fs.statSync(filename).size
+  console.log('SHA256 checksum %s', checksum)
+  console.log('size', size)
+
+  aws = uploadUtils.getS3Credentials()
+  s3 = s3helpers.makeS3(aws)
+  # S3 object metadata can only have string values
+  metadata = {
+    checksum,
+    size: String(size)
+  }
+  # by default s3.copyObject does not preserve ACL when copying
+  # thus we need to reset it for our public files
+  s3helpers.setUserMetadata(aws.bucket, key, metadata,
+    'application/zip', 'public-read', s3)
 
 uploadUniqueBinary = (args = []) ->
   options = minimist(args, {
@@ -114,6 +143,8 @@ uploadUniqueBinary = (args = []) ->
   options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
   uploadFile(options)
+  .then (key) ->
+    setChecksum(options.file, key)
   .then () ->
     cdnUrl = getCDN({
       version: options.version,

@@ -329,6 +329,12 @@ cy.get('#result').should('be.selected')
 
 cy.get('#result').should('be.visible')
 
+cy.get('#result').should('be.focused')
+cy.get('#result').should('not.be.focused')
+
+cy.get('#result').should('have.focus')
+cy.get('#result').should('not.have.focus')
+
 cy.get('#result').should('be.contain', 'text')
 
 cy.get('#result').should('have.attr', 'role')
@@ -418,3 +424,9 @@ cy
   })
 
 cy.get('#result').should('have.text', 'John Doe')
+
+cy.writeFile('../file.path', '', 'utf-8')
+cy.writeFile('../file.path', '', {
+  flag: 'a+',
+  encoding: 'utf-8'
+})

@@ -4,9 +4,8 @@ import https from 'https'
 import _ from 'lodash'
 import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
-import tls from 'tls'
 import url from 'url'
-import { getAddress } from './connect'
+import { createRetryingSocket, getAddress } from './connect'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -14,6 +13,7 @@ const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
 interface RequestOptionsWithProxy extends http.RequestOptions {
   proxy: string
+  shouldRetry?: boolean
 }
 
 type FamilyCache = {
@@ -32,18 +32,42 @@ export function buildConnectReqHead(hostname: string, port: string, proxy: url.U
   return connectReq.join(CRLF) + _.repeat(CRLF, 2)
 }
 
-export const createProxySock = (proxy: url.Url) => {
-  if (proxy.protocol === 'http:') {
-    return net.connect(Number(proxy.port || 80), proxy.hostname)
+interface CreateProxySockOpts {
+  proxy: url.Url
+  shouldRetry?: boolean
+}
+
+type CreateProxySockCb = (
+  (err: undefined, result: net.Socket, triggerRetry: (err: Error) => void) => void
+) & (
+  (err: Error) => void
+)
+
+export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb) => {
+  if (opts.proxy.protocol !== 'https:' && opts.proxy.protocol !== 'http:') {
+    return cb(new Error(`Unsupported proxy protocol: ${opts.proxy.protocol}`))
   }
 
-  if (proxy.protocol === 'https:') {
-    // if the upstream is https, we need to wrap the socket with tls
-    return tls.connect(Number(proxy.port || 443), proxy.hostname)
+  const isHttps = opts.proxy.protocol === 'https:'
+  const port = opts.proxy.port || (isHttps ? 443 : 80)
+
+  let connectOpts: any = {
+    port: Number(port),
+    host: opts.proxy.hostname,
+    useTls: isHttps
   }
 
-  // socksv5, etc...
-  throw new Error(`Unsupported proxy protocol: ${proxy.protocol}`)
+  if (!opts.shouldRetry) {
+    connectOpts.getDelayMsForRetry = () => undefined
+  }
+
+  createRetryingSocket(connectOpts, (err, sock, triggerRetry) => {
+    if (err) {
+      return cb(err)
+    }
+
+    cb(undefined, <net.Socket>sock, <CreateProxySockCb>triggerRetry)
+  })
 }
 
 export const isRequestHttps = (options: http.RequestOptions) => {
@@ -103,33 +127,6 @@ const getFirstWorkingFamily = (
   })
 }
 
-const addRequest = http.Agent.prototype.addRequest
-
-http.Agent.prototype.addRequest = function (req, options) {
-  // get all the TCP handles for the free sockets
-  const hasNullHandle = _
-  .chain(this.freeSockets)
-  .values()
-  .flatten()
-  .find((socket) => {
-    return !socket._handle
-  })
-  .value()
-
-  // if any of our freeSockets have a null handle
-  // then immediately return on nextTick to prevent
-  // a node 8.2.1 bug where socket._handle is null
-  // https://github.com/nodejs/node/blob/v8.2.1/lib/_http_agent.js#L171
-  // https://github.com/nodejs/node/blame/a3cf96c76f92e39c8bf8121525275ed07063fda9/lib/_http_agent.js#L167
-  if (hasNullHandle) {
-    return process.nextTick(() => {
-      this.addRequest(req, options)
-    })
-  }
-
-  return addRequest.call(this, req, options)
-}
-
 export class CombinedAgent {
   httpAgent: HttpAgent
   httpsAgent: HttpsAgent
@@ -141,7 +138,18 @@ export class CombinedAgent {
   }
 
   // called by Node.js whenever a new request is made internally
-  addRequest(req: http.ClientRequest, options: http.RequestOptions) {
+  addRequest(req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
+    // Legacy API: addRequest(req, host, port, localAddress)
+    // https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
+    if (typeof options === 'string') {
+      // @ts-ignore
+      options = {
+        host: options,
+        port: port!,
+        localAddress
+      }
+    }
+
     const isHttps = isRequestHttps(options)
 
     if (!options.href) {
@@ -159,10 +167,12 @@ export class CombinedAgent {
       }
     }
 
-    debug(`addRequest called for ${options.href}`)
+    debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
     return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
       options.family = family
+
+      debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
         return this.httpsAgent.addRequest(req, options)
@@ -183,22 +193,22 @@ class HttpAgent extends http.Agent {
     this.httpsAgent = new https.Agent({ keepAlive: true })
   }
 
-  createSocket (req: http.ClientRequest, options: http.RequestOptions, cb: http.SocketCallback) {
+  addRequest (req: http.ClientRequest, options: http.RequestOptions) {
     if (process.env.HTTP_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
       if (proxy) {
         options.proxy = proxy
 
-        return this._createProxiedSocket(req, <RequestOptionsWithProxy>options, cb)
+        return this._addProxiedRequest(req, <RequestOptionsWithProxy>options)
       }
     }
 
-    super.createSocket(req, options, cb)
+    super.addRequest(req, options)
   }
 
-  _createProxiedSocket (req: http.ClientRequest, options: RequestOptionsWithProxy, cb: http.SocketCallback) {
-    debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
+  _addProxiedRequest (req: http.ClientRequest, options: RequestOptionsWithProxy) {
+    debug(`Creating proxied request for ${options.href} through ${options.proxy}`)
 
     const proxy = url.parse(options.proxy)
 
@@ -229,7 +239,7 @@ class HttpAgent extends http.Agent {
       return this.httpsAgent.addRequest(req, options)
     }
 
-    super.createSocket(req, options, cb)
+    super.addRequest(req, options)
   }
 }
 
@@ -243,10 +253,10 @@ class HttpsAgent extends https.Agent {
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
-      if (typeof proxy === "string") {
+      if (proxy) {
         options.proxy = <string>proxy
 
-        return this.createProxiedConnection(<RequestOptionsWithProxy>options, cb)
+        return this.createUpstreamProxyConnection(<RequestOptionsWithProxy>options, cb)
       }
     }
 
@@ -254,7 +264,7 @@ class HttpsAgent extends https.Agent {
     cb(null, super.createConnection(options))
   }
 
-  createProxiedConnection (options: RequestOptionsWithProxy, cb: http.SocketCallback) {
+  createUpstreamProxyConnection (options: RequestOptionsWithProxy, cb: http.SocketCallback) {
     // heavily inspired by
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
@@ -263,54 +273,63 @@ class HttpsAgent extends https.Agent {
     const port = options.uri.port || '443'
     const hostname = options.uri.hostname || 'localhost'
 
-    const proxySocket = createProxySock(proxy)
-
-    const onClose = () => {
-      onError(new Error("Connection closed while sending request to upstream proxy"))
-    }
-
-    const onError = (err: Error) => {
-      proxySocket.destroy()
-      cb(err, undefined)
-    }
-
-    let buffer = ''
-
-    const onData = (data: Buffer) => {
-      debug(`Proxy socket for ${options.href} established`)
-
-      buffer += data.toString()
-
-      if (!_.includes(buffer, _.repeat(CRLF, 2))) {
-        // haven't received end of headers yet, keep buffering
-        proxySocket.once('data', onData)
-        return
+    createProxySock({ proxy, shouldRetry: options.shouldRetry }, (originalErr?, proxySocket?, triggerRetry?) => {
+      if (originalErr) {
+        const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
+        err[0] = originalErr
+        err.upstreamProxyConnect = true
+        return cb(err, undefined)
       }
 
-      proxySocket.removeListener('error', onError)
-      proxySocket.removeListener('close', onClose)
-
-      if (!isResponseStatusCode200(buffer)) {
-        return onError(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`))
+      const onClose = () => {
+        triggerRetry(new Error('The upstream proxy closed the socket after connecting but before sending a response.'))
       }
 
-      if (options._agentKey) {
-        // https.Agent will upgrade and reuse this socket now
-        options.socket = proxySocket
-        options.servername = hostname
-        return cb(undefined, super.createConnection(options, undefined))
+      const onError = (err: Error) => {
+        triggerRetry(err)
+        proxySocket.destroy()
       }
 
-      cb(undefined, proxySocket)
-    }
+      let buffer = ''
 
-    proxySocket.once('error', onError)
-    proxySocket.once('close', onClose)
-    proxySocket.once('data', onData)
+      const onData = (data: Buffer) => {
+        debug(`Proxy socket for ${options.href} established`)
 
-    const connectReq = buildConnectReqHead(hostname, port, proxy)
+        buffer += data.toString()
 
-    proxySocket.write(connectReq)
+        if (!_.includes(buffer, _.repeat(CRLF, 2))) {
+          // haven't received end of headers yet, keep buffering
+          proxySocket.once('data', onData)
+          return
+        }
+
+        // we've now gotten enough of a response not to retry
+        // connecting to the proxy
+        proxySocket.removeListener('error', onError)
+        proxySocket.removeListener('close', onClose)
+
+        if (!isResponseStatusCode200(buffer)) {
+          return cb(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`), undefined)
+        }
+
+        if (options._agentKey) {
+          // https.Agent will upgrade and reuse this socket now
+          options.socket = proxySocket
+          options.servername = hostname
+          return cb(undefined, super.createConnection(options, undefined))
+        }
+
+        cb(undefined, proxySocket)
+      }
+
+      proxySocket.once('close', onClose)
+      proxySocket.once('error', onError)
+      proxySocket.once('data', onData)
+
+      const connectReq = buildConnectReqHead(hostname, port, proxy)
+
+      proxySocket.write(connectReq)
+    })
   }
 }
 

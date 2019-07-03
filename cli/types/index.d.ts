@@ -62,6 +62,20 @@ declare namespace Cypress {
     isHeadless: boolean
   }
 
+  interface LocalStorage {
+    /**
+     * Called internally to clear `localStorage` in two situations.
+     *
+     * 1. Before every test, this is called with no argument to clear all keys.
+     * 2. On `cy.clearLocalStorage(keys)` this is called with `keys` as an argument.
+     *
+     * You should not call this method directly to clear `localStorage`; instead, use `cy.clearLocalStorage(key)`.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     */
+    clear: (keys?: string[]) => void
+  }
+
   /**
    * Several libraries are bundled with Cypress by default.
    *
@@ -172,6 +186,11 @@ declare namespace Cypress {
     browser: Browser
 
     /**
+     * Internal class for LocalStorage management.
+     */
+    LocalStorage: LocalStorage
+
+    /**
      * Returns all configuration objects.
      * @see https://on.cypress.io/config
      * @example
@@ -244,6 +263,16 @@ declare namespace Cypress {
      *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
      */
     env(object: ObjectLike): void
+
+    /**
+     * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
+     *
+     * @see https://on.cypress.io/iscy
+     * @example
+     *    Cypress.isCy(cy) // => true
+     */
+    isCy<TSubject = any>(obj: Chainable<TSubject>): obj is Chainable<TSubject>
+    isCy(obj: any): obj is Chainable
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -510,7 +539,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval'>, options?: Loggable): Chainable<Clock>
+    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -1747,16 +1776,33 @@ declare namespace Cypress {
       })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<Loggable>): Chainable<C>
+    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings): Chainable<C>
     /**
      * Write to a file with the specified encoding and contents.
      *
      * @see https://on.cypress.io/writefile
+    ```
+    cy.writeFile('path/to/ascii.txt', 'Hello World', {
+      flag: 'a+',
+      encoding: 'ascii'
+    }).then((text) => {
+      expect(text).to.equal('Hello World') // true
+    })
+    ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<Loggable>): Chainable<C>
+    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions>): Chainable<C>
+
+    /**
+     * jQuery library bound to the AUT
+     *
+     * @see https://on.cypress.io/$
+     * @example
+     *    cy.$$('p')
+     */
+    $$: JQueryStatic
   }
 
-  interface Agent<A extends sinon.SinonSpy> {
+  interface SinonSpyAgent<A extends sinon.SinonSpy> {
     log(shouldOutput?: boolean): Omit<A, 'withArgs'> & Agent<A>
 
     /**
@@ -1780,8 +1826,33 @@ declare namespace Cypress {
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
   }
 
+  type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
+
   interface CookieDefaults {
     whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
+  }
+
+  interface Failable {
+    /**
+     * Whether to fail on response codes other than 2xx and 3xx
+     *
+     * @default {true}
+     */
+    failOnStatusCode: boolean
+
+    /**
+     * Whether Cypress should automatically retry status code errors under the hood
+     *
+     * @default {false}
+     */
+    retryOnStatusCodeFailure: boolean
+
+    /**
+     * Whether Cypress should automatically retry transient network errors under the hood
+     *
+     * @default {true}
+     */
+    retryOnNetworkFailure: boolean
   }
 
   /**
@@ -2034,10 +2105,9 @@ declare namespace Cypress {
   /**
    * Full set of possible options for cy.request call
    */
-  interface RequestOptions extends Loggable, Timeoutable {
+  interface RequestOptions extends Loggable, Timeoutable, Failable {
     auth: object
     body: RequestBody
-    failOnStatusCode: boolean
     followRedirect: boolean
     form: boolean
     gzip: boolean
@@ -2140,6 +2210,9 @@ declare namespace Cypress {
     force404: boolean
     urlMatchingOptions: object
     whitelist(xhr: Request): void
+    onAnyRequest(route: RouteOptions, proxy: any): void
+    onAnyResponse(route: RouteOptions, proxy: any): void
+    onAnyAbort(route: RouteOptions, proxy: any): void
   }
 
   interface SetCookieOptions extends Loggable, Timeoutable {
@@ -2181,7 +2254,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/visit
    */
-  interface VisitOptions extends Loggable, Timeoutable {
+  interface VisitOptions extends Loggable, Timeoutable, Failable {
     /**
      * The URL to visit. Behaves the same as the `url` argument.
      */
@@ -2237,13 +2310,6 @@ declare namespace Cypress {
     onLoad(win: Window): void
 
     /**
-     * Whether to fail on response codes other than 2xx and 3xx
-     *
-     * @default {true}
-     */
-    failOnStatusCode: boolean
-
-    /**
      * Cypress will automatically apply the right authorization headers
      * if you’re attempting to visit an application that requires
      * Basic Authentication.
@@ -2275,6 +2341,12 @@ declare namespace Cypress {
      * @default true
      */
     cancelable: boolean
+  }
+
+  /** Options to change the default behavior of .writeFile */
+  interface WriteFileOptions extends Loggable {
+    flag: string
+    encoding: Encodings
   }
 
   // Kind of onerous, but has a nice auto-complete. Also fallbacks at the end for custom stuff
@@ -3564,6 +3636,22 @@ declare namespace Cypress {
      */
     (chainer: 'contain', value: string): Chainable<Subject>
     /**
+     * Assert that at least one element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('have.focus')
+     *    cy.get('#result').should('be.focused')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.focus'): Chainable<Subject>
+    /**
+     * Assert that at least one element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('be.focused')
+     *    cy.get('#result').should('have.focus')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.focused'): Chainable<Subject>
+    /**
      * Assert that the selection is not empty. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
      *    cy.get('#result').should('exist')
@@ -3719,6 +3807,22 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.be.visible'): Chainable<Subject>
+    /**
+     * Assert that no element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('not.have.focus')
+     *    cy.get('#result').should('not.be.focused')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.focus'): Chainable<Subject>
+    /**
+     * Assert that no element of the selection is focused.
+     * @example
+     *    cy.get('#result').should('not.be.focused')
+     *    cy.get('#result').should('not.have.focus')
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.focused'): Chainable<Subject>
     /**
      * Assert that the selection does not contain the given text, using `:contains()`. If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original implementation will be called.
      * @example
@@ -3916,7 +4020,7 @@ declare namespace Cypress {
     })
     ```
      */
-    (action: 'window:confirm', fn: ((text: string) => false | void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
+    (action: 'window:confirm', fn: ((text: string) => false | void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
@@ -3933,7 +4037,7 @@ declare namespace Cypress {
     ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: ((text: string) => void) | Agent<sinon.SinonSpy> | Agent<sinon.SinonStub>): void
+    (action: 'window:alert', fn: ((text: string) => void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
     /**
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events

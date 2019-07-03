@@ -83,7 +83,7 @@ describe "lib/util/ci_provider", ->
     })
     expectsCommitParams({
       sha: "repoCommit"
-      branch: "repoBranch"
+      branch: "appveyorPullRequestHeadRepoBranch"
       message: "repoCommitMessage"
       authorName: "repoCommitAuthor"
       authorEmail: "repoCommitAuthorEmail"
@@ -154,6 +154,13 @@ describe "lib/util/ci_provider", ->
       sha: "bitbucketCommit"
       branch: "gitFoundBranch"
     })
+    expectsCommitDefaults({
+      sha: undefined
+      branch: ""
+    }, {
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
 
   it "buildkite", ->
     resetEnv = mockedEnv({
@@ -202,7 +209,14 @@ describe "lib/util/ci_provider", ->
     # in this test only interested in branch and sha for example
     expectsCommitDefaults({
       sha: null,
-      branch: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "buildKiteCommit",
+      branch: "gitFoundBranch"
+    })
+    expectsCommitDefaults({
+      sha: undefined,
+      branch: ""
     }, {
       sha: "buildKiteCommit",
       branch: "buildKiteBranch"
@@ -314,6 +328,19 @@ describe "lib/util/ci_provider", ->
       authorEmail: "ciCommitterEmail"
     })
 
+  it "concourse", ->
+    resetEnv = mockedEnv({
+      CONCOURSE_WORK_DIR: "/opt/concourse/worker"
+
+      BUILD_ID: "ciBuildId"
+    }, {clear: true})
+
+    expectsName("concourse")
+    expectsCiParams({
+      buildId: "ciBuildId"
+    })
+    expectsCommitParams(null)
+
   it "drone", ->
     resetEnv = mockedEnv({
       DRONE: "true"
@@ -404,6 +431,76 @@ describe "lib/util/ci_provider", ->
     }, {clear: true})
 
     expectsName("gitlab")
+  it "goCD", ->
+    resetEnv = mockedEnv({
+      GO_SERVER_URL: "https://127.0.0.1:8154/go",
+      GO_ENVIRONMENT_NAME: "Development",
+      GO_PIPELINE_NAME: "main",
+      GO_PIPELINE_COUNTER: "2345",
+      GO_PIPELINE_LABEL: "1.1.2345",
+      GO_STAGE_NAME: "dev",
+      GO_STAGE_COUNTER: "1",
+      GO_JOB_NAME: "linux-firefox",
+      GO_TRIGGER_USER: "changes",
+      GO_REVISION: "123",
+      GO_TO_REVISION: "123",
+      GO_FROM_REVISION: "121",
+      GO_MATERIAL_HAS_CHANGED: "true",
+    }, {clear: true})
+
+    expectsName("goCD")
+    expectsCiParams({
+      goServerUrl: "https://127.0.0.1:8154/go",
+      goEnvironmentName: "Development",
+      goPipelineName: "main",
+      goPipelineCounter: "2345",
+      goPipelineLabel: "1.1.2345",
+      goStageName: "dev",
+      goStageCounter: "1",
+      goJobName: "linux-firefox",
+      goTriggerUser: "changes",
+      goRevision: "123",
+      goToRevision: "123",
+      goFromRevision: "121",
+      goMaterialHasChanged: "true",
+    })
+    expectsCommitParams(null)
+
+  it "google cloud", ->
+    resetEnv = mockedEnv({
+      GCP_PROJECT: "123"
+
+      BUILD_ID: "buildId"
+
+      PROJECT_ID: "projectId"
+
+      COMMIT_SHA: "commitSha"
+      BRANCH_NAME: "branchName"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+    expectsCiParams({
+      buildId: "buildId"
+      projectId: "projectId"
+      commitSha: "commitSha"
+      branchName: "branchName"
+    })
+    expectsCommitParams({
+      sha: "commitSha"
+      branch: "branchName"
+    })
+
+    resetEnv = mockedEnv({
+      GCLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+
+    resetEnv = mockedEnv({
+      GOOGLE_CLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
 
   it "jenkins", ->
     resetEnv = mockedEnv({
@@ -568,15 +665,6 @@ describe "lib/util/ci_provider", ->
       message: "commitMessage"
       authorName: "committer"
     })
-
-  it "snap", ->
-    resetEnv = mockedEnv({
-      SNAP_CI: "true"
-    }, {clear: true})
-
-    expectsName("snap")
-    expectsCiParams(null)
-    expectsCommitParams(null)
 
   it "teamcity", ->
     resetEnv = mockedEnv({

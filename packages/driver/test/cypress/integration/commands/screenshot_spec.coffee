@@ -310,6 +310,11 @@ describe "src/cy/commands/screenshot", ->
           height: $(window.parent).height()
         })
 
+    it "can handle window w/length > 1 as a subject", ->
+      cy.visit('/fixtures/dom.html')
+      cy.window().should('have.length.gt', 1)
+      .screenshot()
+
     describe "before/after events", ->
       beforeEach ->
         Cypress.automation.withArgs("take:screenshot").resolves(@serverResult)

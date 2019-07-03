@@ -370,4 +370,20 @@ module.exports = {
 
   getTestFromRunnable: (r) =>
     return r.ctx.currentTest || r
+
+  memoize: (func, cacheInstance = new Map()) ->
+    memoized = (args...) ->
+      key = args[0]
+      cache = memoized.cache
+
+      return cache.get(key) if cache.has(key)
+
+      result = func.apply(this, args)
+      memoized.cache = cache.set(key, result) || cache
+
+      return result
+
+    memoized.cache = cacheInstance
+
+    return memoized
 }

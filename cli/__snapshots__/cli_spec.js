@@ -34,7 +34,7 @@ exports['cli help command shows help 1'] = `
 
   stdout:
   -------
-  Usage: cypress [options] [command]
+  Usage: cypress <command> [options]
 
   Options:
 
@@ -48,7 +48,7 @@ exports['cli help command shows help 1'] = `
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
     install [options]  Installs the Cypress executable matching this package's version
-    verify             Verifies that Cypress is installed correctly and executable
+    verify [options]   Verifies that Cypress is installed correctly and executable
     cache [options]    Manages the Cypress binary cache
   -------
   stderr:
@@ -69,7 +69,7 @@ exports['cli help command shows help for --help 1'] = `
 
   stdout:
   -------
-  Usage: cypress [options] [command]
+  Usage: cypress <command> [options]
 
   Options:
 
@@ -83,7 +83,7 @@ exports['cli help command shows help for --help 1'] = `
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
     install [options]  Installs the Cypress executable matching this package's version
-    verify             Verifies that Cypress is installed correctly and executable
+    verify [options]   Verifies that Cypress is installed correctly and executable
     cache [options]    Manages the Cypress binary cache
   -------
   stderr:
@@ -104,7 +104,7 @@ exports['cli help command shows help for -h 1'] = `
 
   stdout:
   -------
-  Usage: cypress [options] [command]
+  Usage: cypress <command> [options]
 
   Options:
 
@@ -118,7 +118,7 @@ exports['cli help command shows help for -h 1'] = `
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
     install [options]  Installs the Cypress executable matching this package's version
-    verify             Verifies that Cypress is installed correctly and executable
+    verify [options]   Verifies that Cypress is installed correctly and executable
     cache [options]    Manages the Cypress binary cache
   -------
   stderr:
@@ -141,7 +141,7 @@ exports['cli unknown command shows usage and exits 1'] = `
   -------
   Unknown command "foo"
 
-    Usage: cypress [options] [command]
+    Usage: cypress <command> [options]
 
     Options:
 
@@ -155,7 +155,7 @@ exports['cli unknown command shows usage and exits 1'] = `
       run [options]      Runs Cypress tests from the CLI without the GUI
       open [options]     Opens Cypress in the interactive GUI.
       install [options]  Installs the Cypress executable matching this package's version
-      verify             Verifies that Cypress is installed correctly and executable
+      verify [options]   Verifies that Cypress is installed correctly and executable
       cache [options]    Manages the Cypress binary cache
   -------
   stderr:

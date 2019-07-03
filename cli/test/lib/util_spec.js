@@ -15,6 +15,37 @@ describe('util', () => {
     sinon.stub(logger, 'error')
   })
 
+  context('.isBrokenGtkDisplay', () => {
+    it('detects only GTK message', () => {
+      os.platform.returns('linux')
+      const text = '[some noise here] Gtk: cannot open display: 99'
+
+      expect(util.isBrokenGtkDisplay(text)).to.be.true
+      // and not for the other messages
+      expect(util.isBrokenGtkDisplay('display was set incorrectly')).to.be.false
+    })
+  })
+
+  context('.getGitHubIssueUrl', () => {
+    it('returls url for issue number', () => {
+      const url = util.getGitHubIssueUrl(4034)
+
+      expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')
+    })
+
+    it('throws for anything but a positive integer', () => {
+      expect(() => {
+        return util.getGitHubIssueUrl('4034')
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(-5)
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(5.19)
+      }).to.throw
+    })
+  })
+
   context('.stdoutLineMatches', () => {
     const { stdoutLineMatches } = util
 
@@ -253,6 +284,30 @@ describe('util', () => {
     })
     it('is false with file path', () => {
       expect(util.isSemver('0/path/1.2.3/mypath/2.3')).to.equal(false)
+    })
+  })
+
+  describe('.calculateEta', () => {
+    it('Remaining eta is same as elapsed when 50%', () => {
+      expect(util.calculateEta('50', 1000)).to.equal(1000)
+    })
+
+    it('Remaining eta is 0 when 100%', () => {
+      expect(util.calculateEta('100', 500)).to.equal(0)
+    })
+  })
+
+  describe('.convertPercentToPercentage', () => {
+    it('converts to 100 when 1', () => {
+      expect(util.convertPercentToPercentage(1)).to.equal(100)
+    })
+
+    it('strips out extra decimals', () => {
+      expect(util.convertPercentToPercentage(0.37892)).to.equal(38)
+    })
+
+    it('returns 0 if null num', () => {
+      expect(util.convertPercentToPercentage(null)).to.equal(0)
     })
   })
 

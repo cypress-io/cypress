@@ -216,6 +216,8 @@ jobs:
           at: ~/
       # make sure mocha runs
       - run: npm run test-mocha
+      # test binary build code
+      - run: npm run test-scripts
       # make sure our snapshots are compared correctly
       - run: npm run test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
@@ -276,9 +278,7 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
-      - run: 
-          environment:
-            DEBUG: test:proxy-performance 
+      - run:
           command: npm run all test-performance -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -790,6 +790,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -797,6 +798,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -804,6 +806,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - binary-metadata
         requires:
           - build-npm-package
           - build-binary
@@ -852,6 +855,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - test-example-repos-on-mac-4526
         requires:
           - Mac build
 
@@ -863,6 +867,8 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - binary-metadata
+              - test-example-repos-on-mac-4526
         requires:
           - Mac build
 
@@ -887,6 +893,19 @@ mac-workflow: &mac-workflow
         requires:
           - Mac NPM package
           - Mac binary
+
+    - test-binary-and-npm-against-other-projects:
+        name: Test Mac binary against other projects
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+              - test-example-repos-on-mac-4526
+        requires:
+          - Mac NPM package
+          - Mac binary
+
 workflows:
   linux:
     <<: *linux-workflow

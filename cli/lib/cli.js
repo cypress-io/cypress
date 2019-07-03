@@ -153,6 +153,8 @@ module.exports = {
     // in usage help docs
     program._name = 'cypress'
 
+    program.usage('<command> [options]')
+
     program
     .command('help')
     .description('Shows CLI help and exits')
@@ -228,6 +230,7 @@ module.exports = {
     .command('verify')
     .usage('[options]')
     .description('Verifies that Cypress is installed correctly and executable')
+    .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       const defaultOpts = { force: true, welcomeMessage: false }
       const parsedOpts = parseOpts(opts)
