@@ -5,6 +5,7 @@ EE       = require("events")
 extension = require("@packages/extension")
 electron = require("electron")
 Promise  = require("bluebird")
+chromePolicyCheck = require("#{root}../lib/util/chrome_policy_check")
 cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/logger")
 Project  = require("#{root}../lib/project")
@@ -487,6 +488,34 @@ describe "lib/gui/events", ->
                 browsers: [
                   {
                     foo: "bar"
+                  }
+                ]
+              }
+            }
+          )
+
+      it "attaches warning to Chrome browsers when Chrome policy check fails", ->
+        sinon.stub(openProject, "create").resolves()
+        @options.browser = "/foo"
+
+        browsers.getAllBrowsersWith.withArgs("/foo").resolves([{family: 'chrome'}, {family: 'some other'}])
+
+        sinon.stub(chromePolicyCheck, "run").callsArgWith(0, new Error)
+
+        @handleEvent("open:project", "/_test-output/path/to/project").then =>
+          expect(browsers.getAllBrowsersWith).to.be.calledWith(@options.browser)
+          expect(openProject.create).to.be.calledWithMatch(
+            "/_test-output/path/to/project",
+            {
+              browser: "/foo",
+              config: {
+                browsers: [
+                  {
+                    family: "chrome"
+                    warning: "Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy"
+                  },
+                  {
+                    family: "some other"
                   }
                 ]
               }
