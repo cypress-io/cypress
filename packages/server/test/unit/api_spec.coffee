@@ -14,7 +14,7 @@ API_BASEURL = "http://localhost:1234"
 DASHBOARD_BASEURL = "http://localhost:3000"
 AUTH_URLS = {
   "dashboardAuthUrl": "http://localhost:3000/test-runner.html"
-  "logoutUrl": "http://localhost:3000/logout"
+  "dashboardLogoutUrl": "http://localhost:3000/logout"
 }
 
 makeError = (details = {}) ->

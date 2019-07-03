@@ -271,7 +271,7 @@ module.exports = {
     @getAuthUrls()
     .then (urls) ->
       rp.get({
-        url: urls.logoutUrl
+        url: urls.dashboardLogoutUrl
         json: true
         auth: {
           bearer: authToken
