@@ -3,7 +3,7 @@
   "main": "index.js",
   "private": true,
   "dependencies": {
-    "coffee-script": "1.12.5"
+    "coffeescript": "1.12.7"
   },
   "files": [
     "register.js"

@@ -19,33 +19,35 @@
     "clean-deps": "rm -rf node_modules",
     "pretest": "npm run check-deps-pre",
     "test": "node ./scripts/test.js",
-    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
+    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*",
+    "cypress:open": "node ../../scripts/cypress open --project .",
+    "cypress:run": "node ../../scripts/cypress run --project ."
   },
   "files": [
     "dist"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.2.0",
-    "@cypress/react-tooltip": "0.4.0",
-    "bin-up": "1.1.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
+    "@cypress/react-tooltip": "0.5.0",
+    "bin-up": "1.2.0",
     "chai": "3.5.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
-    "css-element-queries": "0.4.0",
-    "enzyme": "3.8.0",
-    "enzyme-adapter-react-16": "1.7.1",
+    "css-element-queries": "1.2.0",
+    "enzyme": "3.9.0",
+    "enzyme-adapter-react-16": "1.12.1",
     "font-awesome": "4.7.0",
-    "jsdom": "9.4.1",
+    "jsdom": "13.2.0",
     "lodash": "4.17.11",
     "markdown-it": "6.1.1",
-    "mobx": "3.1.15",
-    "mobx-react": "4.2.1",
-    "prop-types": "15.6.2",
-    "react": "16.5.2",
-    "react-dom": "16.5.2",
+    "mobx": "3.6.2",
+    "mobx-react": "4.4.3",
+    "prop-types": "15.7.2",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
     "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
-    "sinon-chai": "3.2.0",
-    "zunder": "6.2.1"
+    "sinon-chai": "3.3.0",
+    "zunder": "6.4.1"
   }
 }

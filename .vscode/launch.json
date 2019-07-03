@@ -14,7 +14,7 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
-        "test-debug-package",
+        "test-debug-package"
       ],
       "args": [
         "${file}"
@@ -26,7 +26,24 @@
       "type": "node",
       "request": "attach",
       "name": "electron",
-      "port": 5567,
+      "port": 5567
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "dev-debug",
+      "port": 5566,
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev-debug"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "dev-debug w/ electron",
+      "configurations": ["dev-debug", "electron"]
+    }
   ]
 }

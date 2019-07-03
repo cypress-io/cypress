@@ -103,7 +103,7 @@ http://localhost:16795/
 
 We attempted to make an http request to this URL but the request failed without a response.
 
-We received this error at stack trace line
+We received this error at the network level:
 
   > Error: connect ECONNREFUSED 127.0.0.1:16795
 
@@ -246,6 +246,7 @@ The request we sent was:
 Method: GET
 URL: http://localhost:2294/statusCode?code=503
 Headers: {
+  "Connection": "keep-alive",
   "user-agent": "foo",
   "accept": "*/*",
   "accept-encoding": "gzip, deflate"
@@ -262,7 +263,7 @@ Headers: {
   "content-length": "19",
   "etag": "W/13-52060a5f",
   "date": "Fri, 18 Aug 2017    XX:XX GMT",
-  "connection": "close"
+  "connection": "keep-alive"
 }
 Body: Service Unavailable
 

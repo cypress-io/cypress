@@ -20,8 +20,8 @@ export default class TimerDisplay extends Component {
 
   render () {
     return (
-      <span>
-        <i className='fa fa-hourglass-end'></i>{' '}
+      <span className='env-duration'>
+        <i className='fa fa-hourglass-half'></i>
         {this.timerStore.mainDisplay}
       </span>
     )

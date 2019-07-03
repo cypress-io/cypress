@@ -24,24 +24,53 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const AliasesReferences = observer(({ model }) => (
-  <span>
-    {_.map([].concat(model.referencesAlias), (alias) => (
-      <Tooltip key={alias} placement='top' title={`Found an alias for: '${alias}'`}>
-        <span className={`command-alias ${model.aliasType}`}>@{alias}</span>
+const shouldShowCount = (aliasesWithDuplicates, aliasName, model) => {
+  if (model.aliasType !== 'route') {
+    return false
+  }
+
+  return _.includes(aliasesWithDuplicates, aliasName)
+}
+
+const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }) => {
+  if (shouldShowCount(aliasesWithDuplicates, aliasObj.name, model)) {
+    return (
+      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`}>
+        <span>
+          <span className={`command-alias ${model.aliasType} show-count`}>@{aliasObj.name}</span>
+          <span className={'command-alias-count'}>{aliasObj.cardinal}</span>
+        </span>
       </Tooltip>
+    )
+  }
+
+  return (
+    <Tooltip placement='top' title={`Found an alias for: '${aliasObj.name}'`}>
+      <span className={`command-alias ${model.aliasType}`}>@{aliasObj.name}</span>
+    </Tooltip>
+  )
+})
+
+const AliasesReferences = observer(({ model, aliasesWithDuplicates }) => (
+  <span>
+    {_.map([].concat(model.referencesAlias), (aliasObj) => (
+      <span className="command-alias-container" key={aliasObj.name + aliasObj.cardinal}>
+        <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+      </span>
     ))}
   </span>
 ))
 
-const Aliases = observer(({ model }) => {
+const Aliases = observer(({ model, aliasesWithDuplicates }) => {
   if (!model.alias) return null
 
   return (
     <span>
       {_.map([].concat(model.alias), (alias) => (
         <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`}>
-          <span className={`command-alias ${model.aliasType}`}>{alias}</span>
+          <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': shouldShowCount(aliasesWithDuplicates, alias, model) })}>
+            {alias}
+          </span>
         </Tooltip>
       ))}
     </span>
@@ -69,14 +98,14 @@ class Command extends Component {
   }
 
   render () {
-    const { model } = this.props
+    const { model, aliasesWithDuplicates } = this.props
     const message = model.displayMessage
 
     return (
       <li
         className={cs(
           'command',
-          `command-name-${nameClassName(model.name)}`,
+          `command-name-${model.name ? nameClassName(model.name) : ''}`,
           `command-state-${model.state}`,
           `command-type-${model.type}`,
           {
@@ -117,19 +146,21 @@ class Command extends Component {
               <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
             </span>
             <span className='command-message'>
-              {model.referencesAlias ? <AliasesReferences model={model} /> : <Message model={model} />}
+              {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
-              <Aliases model={model} />
               <Tooltip placement='top' title={visibleMessage(model)}>
                 <i className='command-invisible fa fa-eye-slash'></i>
               </Tooltip>
               <Tooltip placement='top' title={`${model.numElements} matched elements`}>
                 <span className='num-elements'>{model.numElements}</span>
               </Tooltip>
-              <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`}>
-                <span className='num-duplicates'>{model.numDuplicates}</span>
-              </Tooltip>
+              <span className='alias-container'>
+                <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`}>
+                  <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
+                </Tooltip>
+              </span>
             </span>
           </div>
         </FlashOnClick>

@@ -20,7 +20,7 @@
       "focus": true,
       "onlySingle": true,
       "execute": false,
-      "cwd": "[workspaceFolder]/packages/server",
+      "cwd": "[cwd]/packages/server",
       "command": "npm run test-watch -- [file]"
     },
     {
@@ -28,29 +28,36 @@
       "focus": true,
       "onlySingle": true,
       "execute": false,
-      "cwd": "[workspaceFolder]/packages/server",
+      "cwd": "[cwd]/packages/server",
       "command": "npm run test-e2e -- --spec name"
     },
     {
       "name": "packages/runner watch",
       "focus": true,
       "onlySingle": true,
-      "cwd": "[workspaceFolder]/packages/runner",
+      "cwd": "[cwd]/packages/runner",
       "command": "npm run watch"
     },
     {
       "name": "packages/driver cypress open",
       "focus": true,
       "onlySingle": true,
-      "cwd": "[workspaceFolder]/packages/driver",
+      "cwd": "[cwd]/packages/driver",
       "command": "npm run cypress:open"
     },
     {
       "name": "packages/desktop-gui cypress open",
       "focus": true,
       "onlySingle": true,
-      "cwd": "[workspaceFolder]/packages/desktop-gui",
+      "cwd": "[cwd]/packages/desktop-gui",
       "command": "npm run cypress:open"
+    },
+    {
+      "name": "packages/desktop-gui watch",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/desktop-gui",
+      "command": "npm run watch"
     }
   ]
 }

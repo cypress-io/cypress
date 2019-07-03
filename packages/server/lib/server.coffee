@@ -2,21 +2,24 @@ _            = require("lodash")
 exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
+concatStream = require("concat-stream")
 cookie       = require("cookie")
 stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
 evilDns      = require("evil-dns")
+isHtml       = require("is-html")
 httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
+agent        = require("@packages/network").agent
 cors         = require("./util/cors")
 uri          = require("./util/uri")
 origin       = require("./util/origin")
-connect      = require("./util/connect")
+ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 blacklist    = require("./util/blacklist")
@@ -33,6 +36,15 @@ fileServer   = require("./file_server")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
+isResponseHtml = (contentType, responseBuffer) ->
+  if contentType
+    return contentType is "text/html"
+
+  if body = _.invoke(responseBuffer, 'toString')
+    return isHtml(body)
+
+  return false
+
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
   return if req.proxiedUrl
@@ -42,7 +54,7 @@ setProxiedUrl = (req) ->
   ## and only leave the path which is
   ## how browsers would normally send
   ## use their url
-  req.proxiedUrl = uri.removeDefaultPort(req.url)
+  req.proxiedUrl = uri.removeDefaultPort(req.url).format()
 
   req.url = uri.getPath(req.url)
 
@@ -64,6 +76,7 @@ class Server
     @_nodeProxy  = null
     @_fileServer = null
     @_httpsProxy = null
+    @_urlResolver = null
 
   createExpressApp: (morgan) ->
     app = express()
@@ -116,7 +129,7 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project) ->
+  open: (config = {}, project, onWarning) ->
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -140,13 +153,13 @@ class Server
 
       @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
 
-      @createServer(app, config, @_request)
+      @createServer(app, config, project, @_request, onWarning)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
 
-  createServer: (app, config, request) ->
+  createServer: (app, config, project, request, onWarning) ->
     new Promise (resolve, reject) =>
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
@@ -232,13 +245,17 @@ class Server
           if baseUrl
             @_baseUrl = baseUrl
 
-            connect.ensureUrl(baseUrl)
-            .return(null)
-            .catch (err) =>
-              if config.isTextTerminal
+            if config.isTextTerminal
+              return @_retryBaseUrlCheck(baseUrl, onWarning)
+              .return(null)
+              .catch (e) ->
+                debug(e)
                 reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
-              else
-                errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+
+            ensureUrl.isListening(baseUrl)
+            .return(null)
+            .catch (err) ->
+              errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
 
         .then (warning) =>
           ## once we open set the domain
@@ -255,20 +272,17 @@ class Server
   _listen: (port, onError) ->
     new Promise (resolve) =>
       listener = =>
-        port = @_server.address().port
+        address = @_server.address()
 
         @isListening = true
 
-        debug("Server listening on port %s", port)
+        debug("Server listening on ", address)
 
         @_server.removeListener "error", onError
 
-        resolve(port)
+        resolve(address.port)
 
-      ## nuke port from our args if its falsy
-      args = _.compact([port, listener])
-
-      @_server.listen.apply(@_server, args)
+      @_server.listen(port || 0, '127.0.0.1', listener)
 
   _getRemoteState: ->
     # {
@@ -305,7 +319,7 @@ class Server
     return props
 
   _onRequest: (headers, automationRequest, options) ->
-    @_request.send(headers, automationRequest, options)
+    @_request.sendPromise(headers, automationRequest, options)
 
   _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
     debug("resolving visit %o", {
@@ -313,6 +327,13 @@ class Server
       headers
       options
     })
+
+    startTime = new Date()
+
+    ## if we have an existing url resolver
+    ## in flight then cancel it
+    if @_urlResolver
+      @_urlResolver.cancel()
 
     request = @_request
 
@@ -328,64 +349,73 @@ class Server
 
     originalUrl = urlStr
 
-    ## if we have a buffer for this url
-    ## then just respond with its details
-    ## so we are idempotant and do not make
-    ## another request
-    if obj = buffers.getByOriginalUrl(urlStr)
-      debug("got previous request buffer for url:", urlStr)
+    reqStream = null
+    currentPromisePhase = null
 
-      ## reset the cookies from the existing stream's jar
-      request.setJarCookies(obj.jar, automationRequest)
-      .then (c) ->
-        return obj.details
-    else
-      p = new Promise (resolve, reject) =>
-        redirects = []
-        newUrl = null
+    runPhase = (fn) ->
+      return currentPromisePhase = fn()
 
-        if not fullyQualifiedRe.test(urlStr)
-          handlingLocalFile = true
+    return @_urlResolver = p = new Promise (resolve, reject, onCancel) =>
+      onCancel ->
+        p.currentPromisePhase = currentPromisePhase
+        p.reqStream = reqStream
 
-          @_remoteVisitingUrl = true
+        _.invoke(reqStream, "abort")
+        _.invoke(currentPromisePhase, "cancel")
 
-          @_onDomainSet(urlStr, options)
+      ## if we have a buffer for this url
+      ## then just respond with its details
+      ## so we are idempotant and do not make
+      ## another request
+      if obj = buffers.getByOriginalUrl(urlStr)
+        debug("got previous request buffer for url:", urlStr)
 
-          ## TODO: instead of joining remoteOrigin here
-          ## we can simply join our fileServer origin
-          ## and bypass all the remoteState.visiting shit
-          urlFile = url.resolve(@_remoteFileServer, urlStr)
-          urlStr  = url.resolve(@_remoteOrigin, urlStr)
+        ## reset the cookies from the existing stream's jar
+        return runPhase ->
+          resolve(
+            request.setJarCookies(obj.jar, automationRequest)
+            .then (c) ->
+              return obj.details
+          )
 
-        error = (err) ->
-          ## only restore the previous state
-          ## if our promise is still pending
-          if p.isPending()
-            restorePreviousState()
+      redirects = []
+      newUrl = null
 
-          reject(err)
+      if not fullyQualifiedRe.test(urlStr)
+        handlingLocalFile = true
 
-        handleReqStream = (str) =>
-          pt = str
-          .on("error", error)
-          .on "response", (incomingRes) =>
-            debug(
-              "got resolve:url response %o",
-              _.pick(incomingRes, "headers", "statusCode")
-            )
+        @_remoteVisitingUrl = true
 
-            str.removeListener("error", error)
-            str.on "error", (err) ->
-              ## if we have listeners on our
-              ## passthru stream just emit error
-              if pt.listeners("error").length
-                pt.emit("error", err)
-              else
-                ## else store the error for later
-                pt.error = err
+        @_onDomainSet(urlStr, options)
 
-            jar = str.getJar()
+        ## TODO: instead of joining remoteOrigin here
+        ## we can simply join our fileServer origin
+        ## and bypass all the remoteState.visiting shit
+        urlFile = url.resolve(@_remoteFileServer, urlStr)
+        urlStr  = url.resolve(@_remoteOrigin, urlStr)
 
+      onReqError = (err) =>
+        ## only restore the previous state
+        ## if our promise is still pending
+        if p.isPending()
+          restorePreviousState()
+
+        reject(err)
+
+      onReqStreamReady = (str) =>
+        reqStream = str
+
+        str
+        .on("error", onReqError)
+        .on "response", (incomingRes) =>
+          debug(
+            "resolve:url headers received, buffering response %o",
+            _.pick(incomingRes, "headers", "statusCode")
+          )
+
+          jar = str.getJar()
+
+          runPhase =>
             request.setJarCookies(jar, automationRequest)
             .then (c) =>
               @_remoteVisitingUrl = false
@@ -399,18 +429,16 @@ class Server
 
               isOk        = statusIs2xxOrAllowedFailure()
               contentType = headersUtil.getContentType(incomingRes)
-              isHtml      = contentType is "text/html"
 
               details = {
                 isOkStatusCode: isOk
-                isHtml: isHtml
-                contentType: contentType
+                contentType
                 url: newUrl
                 status: incomingRes.statusCode
                 cookies: c
                 statusText: statusCode.getText(incomingRes.statusCode)
-                redirects: redirects
-                originalUrl: originalUrl
+                redirects
+                originalUrl
               }
 
               ## does this response have this cypress header?
@@ -420,67 +448,102 @@ class Server
 
               debug("setting details resolving url %o", details)
 
-              ## TODO: think about moving this logic back into the
-              ## frontend so that the driver can be in control of
-              ## when the server should cache the request buffer
-              ## and set the domain vs not
-              if isOk and isHtml
-                ## reset the domain to the new url if we're not
-                ## handling a local file
-                @_onDomainSet(newUrl, options) if not handlingLocalFile
+              concatStr = concatStream (responseBuffer) =>
+                ## buffer the entire response before resolving.
+                ## this allows us to detect & reject ETIMEDOUT errors
+                ## where the headers have been sent but the
+                ## connection hangs before receiving a body.
 
-                debug("setting buffer for url:", newUrl)
+                if !_.get(responseBuffer, 'length')
+                  ## concatStream can yield an empty array, which is
+                  ## not a valid chunk
+                  responseBuffer = undefined
 
-                buffers.set({
-                  url: newUrl
-                  jar: jar
-                  stream: pt
-                  details: details
-                  originalUrl: originalUrl
-                  response: incomingRes
-                })
-              else
-                ## TODO: move this logic to the driver too for
-                ## the same reasons listed above
-                restorePreviousState()
+                ## if there is not a content-type, try to determine
+                ## if the response content is HTML-like
+                ## https://github.com/cypress-io/cypress/issues/1727
+                details.isHtml = isResponseHtml(contentType, responseBuffer)
 
-              resolve(details)
+                debug("resolve:url response ended, setting buffer %o", { newUrl, details })
 
-            .catch(error)
-          .pipe(stream.PassThrough())
+                details.totalTime = new Date() - startTime
 
-        restorePreviousState = =>
-          @_remoteAuth         = previousState.auth
-          @_remoteProps        = previousState.props
-          @_remoteOrigin       = previousState.origin
-          @_remoteStrategy     = previousState.strategy
-          @_remoteFileServer   = previousState.fileServer
-          @_remoteDomainName   = previousState.domainName
-          @_remoteVisitingUrl  = previousState.visiting
+                ## TODO: think about moving this logic back into the
+                ## frontend so that the driver can be in control of
+                ## when the server should cache the request buffer
+                ## and set the domain vs not
+                if isOk and details.isHtml
+                  ## reset the domain to the new url if we're not
+                  ## handling a local file
+                  @_onDomainSet(newUrl, options) if not handlingLocalFile
 
-        request.sendStream(headers, automationRequest, {
-          ## turn off gzip since we need to eventually
-          ## rewrite these contents
-          auth: options.auth
-          gzip: false
-          url: urlFile ? urlStr
-          headers: {
-            accept: "text/html,*/*"
-          }
-          followRedirect: (incomingRes) ->
-            status = incomingRes.statusCode
-            next = incomingRes.headers.location
+                  responseBufferStream = new stream.PassThrough({
+                    highWaterMark: Number.MAX_SAFE_INTEGER
+                  })
 
-            curr = newUrl ? urlStr
+                  responseBufferStream.end(responseBuffer)
 
-            newUrl = url.resolve(curr, next)
+                  buffers.set({
+                    url: newUrl
+                    jar: jar
+                    stream: responseBufferStream
+                    details: details
+                    originalUrl: originalUrl
+                    response: incomingRes
+                  })
+                else
+                  ## TODO: move this logic to the driver too for
+                  ## the same reasons listed above
+                  restorePreviousState()
 
-            redirects.push([status, newUrl].join(": "))
+                resolve(details)
 
-            return true
-        })
-        .then(handleReqStream)
-        .catch(error)
+              str.pipe(concatStr)
+            .catch(onReqError)
+
+      restorePreviousState = =>
+        @_remoteAuth         = previousState.auth
+        @_remoteProps        = previousState.props
+        @_remoteOrigin       = previousState.origin
+        @_remoteStrategy     = previousState.strategy
+        @_remoteFileServer   = previousState.fileServer
+        @_remoteDomainName   = previousState.domainName
+        @_remoteVisitingUrl  = previousState.visiting
+
+      # if they're POSTing an object, querystringify their POST body
+      if options.method == 'POST' and _.isObject(options.body)
+        options.form = options.body
+        delete options.body
+
+      _.assign(options, {
+        ## turn off gzip since we need to eventually
+        ## rewrite these contents
+        gzip: false
+        url: urlFile ? urlStr
+        headers: _.assign({
+          accept: "text/html,*/*"
+        }, options.headers)
+        onBeforeReqInit: runPhase
+        followRedirect: (incomingRes) ->
+          status = incomingRes.statusCode
+          next = incomingRes.headers.location
+
+          curr = newUrl ? urlStr
+
+          newUrl = url.resolve(curr, next)
+
+          redirects.push([status, newUrl].join(": "))
+
+          return true
+      })
+
+      debug('sending request with options %o', options)
+
+      runPhase ->
+        request.sendStream(headers, automationRequest, options)
+        .then (createReqStream) ->
+          onReqStreamReady(createReqStream())
+        .catch(onReqError)
 
   _onDomainSet: (fullyQualifiedUrl, options = {}) ->
     l = (type, val) ->
@@ -546,6 +609,20 @@ class Server
 
       @_callRequestListeners(server, listeners, req, res)
 
+  _retryBaseUrlCheck: (baseUrl, onWarning) ->
+    ensureUrl.retryIsListening(baseUrl, {
+      retryIntervals: [3000, 3000, 4000],
+      onRetry: ({ attempt, delay, remaining }) ->
+        warning = errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
+          remaining
+          attempt
+          delay
+          baseUrl
+        })
+
+        onWarning(warning)
+    })
+
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
     return if req.url.startsWith(socketIoRoute)
@@ -591,6 +668,7 @@ class Server
           port: port
           protocol: protocol
         }
+        agent: agent
       }, onProxyErr)
     else
       ## we can't do anything with this socket

@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const tty = require('tty')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
 
@@ -13,6 +13,37 @@ describe('util', () => {
   beforeEach(() => {
     sinon.stub(process, 'exit')
     sinon.stub(logger, 'error')
+  })
+
+  context('.isBrokenGtkDisplay', () => {
+    it('detects only GTK message', () => {
+      os.platform.returns('linux')
+      const text = '[some noise here] Gtk: cannot open display: 99'
+
+      expect(util.isBrokenGtkDisplay(text)).to.be.true
+      // and not for the other messages
+      expect(util.isBrokenGtkDisplay('display was set incorrectly')).to.be.false
+    })
+  })
+
+  context('.getGitHubIssueUrl', () => {
+    it('returls url for issue number', () => {
+      const url = util.getGitHubIssueUrl(4034)
+
+      expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')
+    })
+
+    it('throws for anything but a positive integer', () => {
+      expect(() => {
+        return util.getGitHubIssueUrl('4034')
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(-5)
+      }).to.throw
+      expect(() => {
+        return util.getGitHubIssueUrl(5.19)
+      }).to.throw
+    })
   })
 
   context('.stdoutLineMatches', () => {
@@ -58,7 +89,7 @@ describe('util', () => {
         foo: 'bar',
       }
 
-      snapshot('others_unchanged', normalizeModuleOptions(options))
+      snapshot('others_unchanged 1', normalizeModuleOptions(options))
     })
 
     it('passes string env unchanged', () => {
@@ -66,7 +97,7 @@ describe('util', () => {
         env: 'foo=bar',
       }
 
-      snapshot('env_as_string', normalizeModuleOptions(options))
+      snapshot('env_as_string 1', normalizeModuleOptions(options))
     })
 
     it('converts environment object', () => {
@@ -78,7 +109,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('env_as_object', normalizeModuleOptions(options))
+      snapshot('env_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts config object', () => {
@@ -89,7 +120,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('config_as_object', normalizeModuleOptions(options))
+      snapshot('config_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts reporterOptions object', () => {
@@ -100,7 +131,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('reporter_options_as_object', normalizeModuleOptions(options))
+      snapshot('reporter_options_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts specs array', () => {
@@ -110,7 +141,7 @@ describe('util', () => {
         ],
       }
 
-      snapshot('spec_as_array', normalizeModuleOptions(options))
+      snapshot('spec_as_array 1', normalizeModuleOptions(options))
     })
 
     it('does not convert spec when string', () => {
@@ -118,7 +149,7 @@ describe('util', () => {
         spec: 'x,y,z',
       }
 
-      snapshot('spec_as_string', normalizeModuleOptions(options))
+      snapshot('spec_as_string 1', normalizeModuleOptions(options))
     })
   })
 
@@ -253,6 +284,30 @@ describe('util', () => {
     })
     it('is false with file path', () => {
       expect(util.isSemver('0/path/1.2.3/mypath/2.3')).to.equal(false)
+    })
+  })
+
+  describe('.calculateEta', () => {
+    it('Remaining eta is same as elapsed when 50%', () => {
+      expect(util.calculateEta('50', 1000)).to.equal(1000)
+    })
+
+    it('Remaining eta is 0 when 100%', () => {
+      expect(util.calculateEta('100', 500)).to.equal(0)
+    })
+  })
+
+  describe('.convertPercentToPercentage', () => {
+    it('converts to 100 when 1', () => {
+      expect(util.convertPercentToPercentage(1)).to.equal(100)
+    })
+
+    it('strips out extra decimals', () => {
+      expect(util.convertPercentToPercentage(0.37892)).to.equal(38)
+    })
+
+    it('returns 0 if null num', () => {
+      expect(util.convertPercentToPercentage(null)).to.equal(0)
     })
   })
 

@@ -25,6 +25,15 @@ displayFlags = (obj, mapper) ->
   .join("\n")
   .value()
 
+displayRetriesRemaining = (tries) ->
+  times = pluralize('time', tries)
+
+  lastTryNewLine = if tries is 1 then "\n" else ""
+
+  chalk.gray(
+    "We will try connecting to it #{tries} more #{times}...#{lastTryNewLine}"
+  )
+
 warnIfExplicitCiBuildId = (ciBuildId) ->
   if not ciBuildId
     return ""
@@ -82,14 +91,21 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1}
       """
-    when "BROWSER_NOT_FOUND"
+    when "BROWSER_NOT_FOUND_BY_NAME"
       """
-      Can't run because you've entered an invalid browser.
+      Can't run because you've entered an invalid browser name.
 
       Browser: '#{arg1}' was not found on your system.
 
       Available browsers found are: #{arg2}
       """
+    when "BROWSER_NOT_FOUND_BY_PATH"
+      msg = """
+      We could not identify a known browser at the path you provided: `#{arg1}`
+
+      The output from the command we ran was:
+      """
+      return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
       Warning: Cypress can only record videos when running headlessly.
@@ -156,6 +172,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The server's response was:
 
       #{arg1.response}
+      """
+    when "DASHBOARD_UNKNOWN_CREATE_RUN_WARNING"
+      """
+      Warning from Cypress Dashboard: #{arg1.message}
+
+      Details:
+      #{JSON.stringify(arg1.props, null, 2)}
       """
     when "DASHBOARD_STALE_RUN"
       """
@@ -420,13 +443,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_RECORD_KEY_NOT_VALID"
       """
-      We failed trying to authenticate this project: #{chalk.blue(arg2)}
-
-      Your Record Key is invalid: #{chalk.yellow(arg1)}
+      Your Record Key #{chalk.yellow(arg1)} is not valid with this project: #{chalk.blue(arg2)}
 
       It may have been recently revoked by you or another user.
 
-      Please log into the Dashboard to see the updated token.
+      Please log into the Dashboard to see the valid record keys.
 
       https://on.cypress.io/dashboard/projects/#{arg2}
       """
@@ -620,20 +641,36 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CANNOT_CONNECT_BASE_URL"
       """
-      Cypress could not verify that the server set as your `baseUrl` is running:
-
-        > #{chalk.blue(arg1)}
-
-      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
+      Cypress failed to verify that your server is running.
 
       Please start this server and then run Cypress again.
       """
     when "CANNOT_CONNECT_BASE_URL_WARNING"
       """
-      Cypress could not verify that the server set as your `baseUrl` is running: #{arg1}
+      Cypress could not verify that this server is running:
 
-      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
+        > #{chalk.blue(arg1)}
+
+      This server has been configured as your `baseUrl`, and tests will likely fail if it is not running.
       """
+    when "CANNOT_CONNECT_BASE_URL_RETRYING"
+      switch arg1.attempt
+        when 1
+          """
+          Cypress could not verify that this server is running:
+
+            > #{chalk.blue(arg1.baseUrl)}
+
+          We are verifying this server because it has been configured as your `baseUrl`.
+
+          Cypress automatically waits until your server is accessible before running tests.
+
+          #{displayRetriesRemaining(arg1.remaining)}
+          """
+        else
+          """
+          #{displayRetriesRemaining(arg1.remaining)}
+          """
     when "INVALID_REPORTER_NAME"
       """
       Could not load reporter by name: #{chalk.yellow(arg1.name)}
@@ -660,7 +697,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
 
       To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
@@ -668,7 +705,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
 
       Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
@@ -676,7 +713,31 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
 
       To upgrade your account, please visit your billing to upgrade to another billing plan.
 
@@ -713,6 +774,19 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
 
       #{arg1.link}
+      """
+    when "FIXTURE_NOT_FOUND"
+      """
+      A fixture file could not be found at any of the following paths:
+
+       > #{arg1}
+       > #{arg1}{{extension}}
+
+      Cypress looked for these file extensions at the provided path:
+
+       > #{arg2.join(', ')}
+
+      Provide a path to an existing fixture file.
       """
 
 get = (type, arg1, arg2) ->
