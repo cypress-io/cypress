@@ -12,6 +12,12 @@ format = (data) ->
     else
       data
 
+formatConfigFile = (configFile) ->
+  if configFile == false
+    return "'cypress.json' (currently disabled by --config-file=false)"
+
+  return "'#{format(configFile)}'"
+
 formatRedirect = (redirect) -> "  - #{redirect}"
 
 formatRedirects = (redirects = []) ->
@@ -549,13 +555,13 @@ module.exports = {
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
 
   navigation:
-    cross_origin: """
+    cross_origin: ({ message, originPolicy, configFile }) -> """
       Cypress detected a cross origin error happened on page load:
 
-        > {{message}}
+        > #{message}
 
       Before the page load, you were bound to the origin policy:
-        > {{originPolicy}}
+        > #{originPolicy}
 
       A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -569,17 +575,17 @@ module.exports = {
 
       You may need to restructure some of your test code to avoid this problem.
 
-      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your configuration file.
+      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in #{formatConfigFile(configFile)}.
 
       https://on.cypress.io/cross-origin-violation
 
     """
-    timed_out: """
-      Timed out after waiting '{{ms}}ms' for your remote page to load.
+    timed_out: ({ ms, configFile }) -> """
+      Timed out after waiting '#{ms}ms' for your remote page to load.
 
-      Your page did not fire its 'load' event within '{{ms}}ms'.
+      Your page did not fire its 'load' event within '#{ms}ms'.
 
-      You can try increasing the 'pageLoadTimeout' value in your configuration file to wait longer.
+      You can try increasing the 'pageLoadTimeout' value in #{formatConfigFile(configFile)} to wait longer.
 
       Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
@@ -701,7 +707,8 @@ module.exports = {
       No response was received within the timeout.
       """
     url_missing: "#{cmd('request')} requires a url. You did not provide a url."
-    url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in your configuration file. Neither of those values were present."
+    url_invalid: ({configFile}) ->
+      "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in #{formatConfigFile(configFile)}. Neither of those values were present."
     url_wrong_type: "#{cmd('request')} requires the url to be a string."
 
   route:

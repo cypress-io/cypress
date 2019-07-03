@@ -507,7 +507,7 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
 
 Your page did not fire its 'load' event within '1000ms'.
 
-You can try increasing the 'pageLoadTimeout' value in your configuration file to wait longer.
+You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
 
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
@@ -534,7 +534,7 @@ When this 'load' event occurs, Cypress will continue running commands.
 
 Your page did not fire its 'load' event within '500ms'.
 
-You can try increasing the 'pageLoadTimeout' value in your configuration file to wait longer.
+You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
 
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
