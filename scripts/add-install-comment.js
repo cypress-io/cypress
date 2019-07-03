@@ -70,5 +70,5 @@ addCommitComment({
   owner: 'cypress-io',
   repo: 'cypress',
   sha,
-  comment: getInstallMessage()
+  comment: getInstallMessage(),
 })
