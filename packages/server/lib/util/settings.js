@@ -31,6 +31,14 @@ const flattenCypress = function (obj) {
   }
 }
 
+const maybeVerifyConfigFile = Promise.method((configFile) => {
+  if (configFile === false) {
+    return true
+  }
+
+  return fs.statAsync(configFile)
+})
+
 const renameVisitToPageLoad = function (obj) {
   let v
 
@@ -125,16 +133,7 @@ module.exports = {
     const file = this.pathToConfigFile(projectRoot, options)
 
     //# first check if cypress.json exists
-    return (
-      () => {
-        if (options.configFile === false) {
-          return Promise.resolve(true)
-        }
-
-        return fs.statAsync(file)
-
-      }
-    )()
+    return maybeVerifyConfigFile(options.configFile)
     .then(() =>
     //# if it does also check that the projectRoot
     //# directory is writable
