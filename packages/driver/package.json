@@ -38,7 +38,7 @@
     "compression": "1.7.4",
     "cors": "2.8.5",
     "debug": "4.1.1",
-    "errorhandler": "1.5.0",
+    "errorhandler": "1.5.1",
     "eventemitter2": "4.1.2",
     "express": "4.16.4",
     "jquery": "2.2.4",

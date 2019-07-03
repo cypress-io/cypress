@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "private": true,
   "scripts": {
     "all": "node ./scripts/run.js",
@@ -35,7 +35,7 @@
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "link": "node ./scripts/link-packages.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.eslintrc .",
-    "lint-all": "npm run lint && npm run lint-coffee",
+    "lint-all": "npm run lint-coffee && npm run lint",
     "lint-changed": "lint-changed",
     "lint-changed-fix": "npm run lint-changed -- --fix",
     "lint-coffee": "coffeelint scripts/**/*.coffee && npm run all lint-coffee && npm run stop-only",
@@ -60,7 +60,7 @@
     }
   },
   "devDependencies": {
-    "@cypress/bumpercar": "2.0.7",
+    "@cypress/bumpercar": "2.0.9",
     "@cypress/commit-message-install": "2.6.2",
     "@cypress/env-or-json-file": "2.0.0",
     "@cypress/eslint-plugin-dev": "3.2.0",
@@ -144,7 +144,6 @@
     "ramda": "0.24.1",
     "shelljs": "0.8.3",
     "sinon": "7.3.2",
-    "sinon-chai": "3.3.0",
     "snap-shot-it": "7.7.1",
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",

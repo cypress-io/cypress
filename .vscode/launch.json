@@ -43,10 +43,7 @@
   "compounds": [
     {
       "name": "dev-debug w/ electron",
-      "configurations": [
-        "dev-debug",
-        "electron"
-      ]
+      "configurations": ["dev-debug", "electron"]
     }
   ]
 }
