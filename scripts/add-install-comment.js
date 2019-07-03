@@ -10,7 +10,7 @@ const {
   getNameAndBinary,
   getShortCommit,
   getCIName,
-  getCIBuildUrl,
+  getCIBuildUrl
 } = require('./utils')
 const { addCommitComment } = require('@cypress/github-commit-status-check')
 const { stripIndent } = require('common-tags')
@@ -45,7 +45,7 @@ const buildInfo = buildUrl ? `The build is [here](${buildUrl})` : ''
 const instructionsAt =
   'https://on.cypress.io/installing-cypress#Install-pre-release-version'
 const preamble = stripIndent`
-  CI ${ciName} has built ${platform} ${arch} version of the Test Runner. ${buildInfo}
+  ${ciName} CI has built ${platform} ${arch} version of the Test Runner. ${buildInfo}
   You can install this pre-release platform-specific build using instructions at [${instructionsAt}](${instructionsAt}).
 
   You will need to use custom \`CYPRESS_INSTALL_BINARY\` url and install Cypress using an url instead of the version.
@@ -56,7 +56,7 @@ const getLinuxInstallMessage = () => {
     ${preamble}
 
     export CYPRESS_INSTALL_BINARY=${binary}
-    npm install ${binary}
+    npm install ${npm}
   `
 }
 
@@ -79,7 +79,7 @@ addCommitComment({
   owner: 'cypress-io',
   repo: 'cypress',
   sha,
-  comment: getInstallMessage(),
+  comment: getInstallMessage()
 }).then(() => {
   console.log('Comment posted for commit %s ✅', sha)
 })

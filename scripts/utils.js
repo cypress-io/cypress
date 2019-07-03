@@ -30,7 +30,7 @@ function getNameAndBinary (args = process.argv) {
 
   return {
     npm,
-    binary,
+    binary
   }
 }
 
@@ -55,7 +55,7 @@ function getJustVersion (npmNameOrUrl) {
   return npmNameOrUrl
 }
 
-const shorten = (s) => {
+const shorten = s => {
   return s.substr(0, 7)
 }
 
@@ -71,7 +71,7 @@ const getShortCommit = () => {
   if (sha) {
     return {
       sha,
-      short: shorten(sha),
+      short: shorten(sha)
     }
   }
 }
@@ -80,7 +80,7 @@ const getShortCommit = () => {
  * Returns CI name for know CIs
  */
 const getCIName = () => {
-  if (process.env.CIRCLE) {
+  if (process.env.CIRCLECI) {
     return 'Circle'
   }
 
@@ -93,7 +93,7 @@ const getCIName = () => {
  * Returns the current CI build url
  */
 const getCIBuildUrl = () => {
-  if (process.env.CIRCLE) {
+  if (process.env.CIRCLECI) {
     // https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
     return process.env.CIRCLE_BUILD_URL
   }
@@ -110,5 +110,5 @@ module.exports = {
   getJustVersion,
   getShortCommit,
   getCIName,
-  getCIBuildUrl,
+  getCIBuildUrl
 }
