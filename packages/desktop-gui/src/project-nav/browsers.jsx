@@ -23,7 +23,7 @@ export default class Browsers extends Component {
           others={project.otherBrowsers}
           onSelect={this._onSelect}
           renderItem={this._browser}
-          keyProperty='name'
+          keyProperty='path'
           browserState={project.browserState}
         />
       </ul>

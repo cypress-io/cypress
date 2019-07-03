@@ -200,6 +200,7 @@ describe "lib/request", ->
         opts = {
           url: "http://localhost:9988/econnreset"
           retryIntervals: [0, 1, 2, 3]
+          timeout: 250
         }
 
         stream = request.create(opts)
@@ -252,6 +253,7 @@ describe "lib/request", ->
         opts = {
           url: "http://localhost:9988/econnreset"
           retryIntervals: [0, 1, 2, 3]
+          timeout: 250
         }
 
         request.create(opts, true)

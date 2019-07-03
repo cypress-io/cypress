@@ -72,7 +72,7 @@ describe "lib/plugins/child/run_plugins", ->
       @ipc.on.withArgs("load").yields({})
       runPlugins(@ipc, "plugins-file")
 
-      @ipc.send = (event, errorType, pluginsFile, stack) ->
+      @ipc.send = _.once (event, errorType, pluginsFile, stack) ->
         expect(event).to.eq("load:error")
         expect(errorType).to.eq("PLUGINS_FUNCTION_ERROR")
         expect(pluginsFile).to.eq("plugins-file")
@@ -96,7 +96,7 @@ describe "lib/plugins/child/run_plugins", ->
       runPlugins(@ipc, "plugins-file")
       @ipc.on.withArgs("load").yield()
 
-      @ipc.send = (event, errorType, pluginsFile, stack) ->
+      @ipc.send = _.once (event, errorType, pluginsFile, stack) ->
         expect(event).to.eq("load:error")
         expect(errorType).to.eq("PLUGINS_FUNCTION_ERROR")
         expect(pluginsFile).to.eq("plugins-file")
