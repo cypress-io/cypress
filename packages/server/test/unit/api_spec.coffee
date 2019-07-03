@@ -928,7 +928,7 @@ describe "lib/api", ->
       .catch (err) ->
         expect(err.isApiError).to.be.true
 
-  context ".createRaygunException", ->
+  context ".createCrashReport", ->
     beforeEach ->
       @setup = (body, authToken, delay = 0) ->
         nock(API_BASEURL)
@@ -941,7 +941,7 @@ describe "lib/api", ->
 
     it "POSTs /exceptions", ->
       @setup({foo: "bar"}, "auth-token-123")
-      api.createRaygunException({foo: "bar"}, "auth-token-123")
+      api.createCrashReport({foo: "bar"}, "auth-token-123")
 
     it "by default times outs after 3 seconds", ->
       ## return our own specific promise
@@ -951,7 +951,7 @@ describe "lib/api", ->
       sinon.stub(api.rp, "post").returns(p)
 
       @setup({foo: "bar"}, "auth-token-123")
-      api.createRaygunException({foo: "bar"}, "auth-token-123").then ->
+      api.createCrashReport({foo: "bar"}, "auth-token-123").then ->
         expect(p.timeout).to.be.calledWith(3000)
 
     it "times out after exceeding timeout", ->
@@ -959,7 +959,7 @@ describe "lib/api", ->
       @setup({foo: "bar"}, "auth-token-123", 5000)
 
       ## and set the timeout to only be 50ms
-      api.createRaygunException({foo: "bar"}, "auth-token-123", 50)
+      api.createCrashReport({foo: "bar"}, "auth-token-123", 50)
       .then ->
         throw new Error("errored: it did not catch the timeout error!")
       .catch Promise.TimeoutError, ->
@@ -973,7 +973,7 @@ describe "lib/api", ->
       .post("/exceptions", {foo: "bar"})
       .reply(500, {})
 
-      api.createRaygunException({foo: "bar"}, "auth-token-123")
+      api.createCrashReport({foo: "bar"}, "auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->

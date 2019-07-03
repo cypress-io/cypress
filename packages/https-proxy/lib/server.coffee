@@ -98,13 +98,18 @@ class Server
       res.end()
     .pipe(res)
 
-  _getProxyForUrl: (url) ->
-    if url == "https://localhost:#{@_sniPort}"
+  _getProxyForUrl: (urlStr) ->
+    port = Number(_.get(url.parse(urlStr), 'port'))
+
+    debug('getting proxy URL %o', { port, serverPort: @_port, sniPort: @_sniPort, url: urlStr })
+
+    if [@_sniPort, @_port].includes(port)
       ## https://github.com/cypress-io/cypress/issues/4257
-      ## this is a tunnel to the SNI server, it should never go through a proxy
+      ## this is a tunnel to the SNI server or to the main server,
+      ## it should never go through a proxy
       return undefined
 
-    getProxyForUrl(url)
+    getProxyForUrl(urlStr)
 
   _makeDirectConnection: (req, browserSocket, head) ->
     { port, hostname } = url.parse("https://#{req.url}")
@@ -167,7 +172,7 @@ class Server
       return makeConnection(@_port)
 
     ## else spin up the SNI server
-    { hostname } = url.parse("http://#{req.url}")
+    { hostname } = url.parse("https://#{req.url}")
 
     if sslServer = sslServers[hostname]
       return makeConnection(sslServer.port)

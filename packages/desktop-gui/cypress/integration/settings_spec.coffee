@@ -49,8 +49,7 @@ describe "Settings", ->
       cy.contains("Configuration")
 
     it "highlight settings nav", ->
-      cy
-        .contains("a", "Settings").should("have.class", "active")
+      cy.contains("a", "Settings").should("have.class", "active")
 
     it "collapses panels by default", ->
       cy.contains("Your project's configuration is displayed").should("not.exist")

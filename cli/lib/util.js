@@ -189,7 +189,7 @@ const util = {
   calculateEta (percent, elapsed) {
     // returns the number of seconds remaining
 
-    // if we're at 100 already just return 0
+    // if we're at 100% already just return 0
     if (percent === 100) {
       return 0
     }
@@ -198,6 +198,13 @@ const util = {
     // and multiple that against elapsed
     // subtracting what's already elapsed
     return elapsed * (1 / (percent / 100)) - elapsed
+  },
+
+  convertPercentToPercentage (num) {
+    // convert a percent with values between 0 and 1
+    // with decimals, so that it is between 0 and 100
+    // and has no decimal places
+    return Math.round(_.isFinite(num) ? (num * 100) : 0)
   },
 
   secsRemaining (eta) {

@@ -21,7 +21,6 @@
     "check-deps-pre": "npm run check-deps -- --prescript",
     "test-dependencies": "npm run check-deps && dependency-check . --no-dev",
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
-    "test-cov": "nyc npm run unit",
     "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
     "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "dtslint": "dtslint types",
@@ -30,12 +29,6 @@
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
-  },
-  "nyc": {
-    "exclude": [
-      "test",
-      "scripts"
-    ]
   },
   "types": "types",
   "dependencies": {
@@ -52,7 +45,7 @@
     "execa": "0.10.0",
     "executable": "4.1.1",
     "extract-zip": "1.6.7",
-    "fs-extra": "4.0.3",
+    "fs-extra": "5.0.0",
     "getos": "3.1.1",
     "glob": "7.1.3",
     "is-ci": "1.2.1",
@@ -65,7 +58,7 @@
     "moment": "2.24.0",
     "ramda": "0.24.1",
     "request": "2.88.0",
-    "request-progress": "0.4.0",
+    "request-progress": "3.0.0",
     "supports-color": "5.5.0",
     "tmp": "0.1.0",
     "url": "0.11.0",
@@ -95,11 +88,10 @@
     "mock-fs": "4.9.0",
     "mocked-env": "1.2.4",
     "nock": "9.6.1",
-    "nyc": "13.3.0",
     "proxyquire": "2.1.0",
     "shelljs": "0.8.3",
     "sinon": "7.2.2",
-    "snap-shot-it": "7.4.4",
+    "snap-shot-it": "7.7.1",
     "spawn-mock": "1.0.0"
   },
   "files": [

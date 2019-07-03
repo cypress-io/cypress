@@ -13,6 +13,7 @@ errors     = require("../errors")
 capture    = require("../capture")
 upload     = require("../upload")
 env        = require("../util/env")
+keys       = require("../util/keys")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 ciProvider = require("../util/ci_provider")
@@ -337,6 +338,11 @@ createRun = (options = {}) ->
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
+        else
+          errors.warning("DASHBOARD_UNKNOWN_CREATE_RUN_WARNING", {
+            message: warning.message,
+            props: _.omit(warning, 'message')
+          })
 
   .catch (err) ->
     debug("failed creating run %o", {
@@ -345,7 +351,7 @@ createRun = (options = {}) ->
 
     switch err.statusCode
       when 401
-        recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+        recordKey = keys.hide(recordKey)
         errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
       when 402
         { code, payload } = err.error
