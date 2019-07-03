@@ -2196,6 +2196,9 @@ declare namespace Cypress {
     force404: boolean
     urlMatchingOptions: object
     whitelist(xhr: Request): void
+    onAnyRequest(route: RouteOptions, proxy: any): void
+    onAnyResponse(route: RouteOptions, proxy: any): void
+    onAnyAbort(route: RouteOptions, proxy: any): void
   }
 
   interface SetCookieOptions extends Loggable, Timeoutable {
