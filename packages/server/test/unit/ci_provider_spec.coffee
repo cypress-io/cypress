@@ -418,6 +418,40 @@ describe "lib/util/ci_provider", ->
     }, {clear: true})
 
     expectsName("gitlab")
+  it "goCD", ->
+    resetEnv = mockedEnv({
+      GO_SERVER_URL: "https://127.0.0.1:8154/go",
+      GO_ENVIRONMENT_NAME: "Development",
+      GO_PIPELINE_NAME: "main",
+      GO_PIPELINE_COUNTER: "2345",
+      GO_PIPELINE_LABEL: "1.1.2345",
+      GO_STAGE_NAME: "dev",
+      GO_STAGE_COUNTER: "1",
+      GO_JOB_NAME: "linux-firefox",
+      GO_TRIGGER_USER: "changes",
+      GO_REVISION: "123",
+      GO_TO_REVISION: "123",
+      GO_FROM_REVISION: "121",
+      GO_MATERIAL_HAS_CHANGED: "true",
+    }, {clear: true})
+
+    expectsName("goCD")
+    expectsCiParams({
+      goServerUrl: "https://127.0.0.1:8154/go",
+      goEnvironmentName: "Development",
+      goPipelineName: "main",
+      goPipelineCounter: "2345",
+      goPipelineLabel: "1.1.2345",
+      goStageName: "dev",
+      goStageCounter: "1",
+      goJobName: "linux-firefox",
+      goTriggerUser: "changes",
+      goRevision: "123",
+      goToRevision: "123",
+      goFromRevision: "121",
+      goMaterialHasChanged: "true",
+    })
+    expectsCommitParams(null)
 
   it "google cloud", ->
     resetEnv = mockedEnv({
@@ -618,55 +652,6 @@ describe "lib/util/ci_provider", ->
       message: "commitMessage"
       authorName: "committer"
     })
-
-  it "goCD", ->
-    resetEnv = mockedEnv({
-      GO_CD: "true"
-            
-      GO_SERVER_URL: "goServerUrl",
-      GO_ENVIRONMENT_NAME: "goEnvironmentName",
-      GO_PIPELINE_NAME: "goPipelineName",
-      GO_PIPELINE_COUNTER: "goPipelineCounter",
-      GO_PIPELINE_LABEL: "goPipelineLabel",
-      GO_STAGE_NAME: "goStageName",
-      GO_STAGE_COUNTER: "goStageCounter",
-      GO_JOB_NAME: "goJobName",
-      GO_TRIGGER_USER: "goTriggerUser",
-      "GO_DEPENDENCY_LABEL_${pipeline_name}": "goDependencyLabelUpstream",
-      "GO_DEPENDENCY_LOCATOR_${pipeline_name}": "goDependencyLocatorUpstream",
-      GO_REVISION: "goRevision",
-      "GO_REVISION_${material_name}": "goRevisionMaterial",
-      GO_TO_REVISION: "goToRevision",
-      "GO_TO_REVISION_${material_name}": "goToRevisionMaterial",
-      GO_FROM_REVISION: "goFromRevision",
-      "GO_FROM_REVISION_${material_name}": "goFromRevisionMaterial",
-      GO_MATERIAL_HAS_CHANGED: "goMaterialHasChanged",
-      "GO_MATERIAL_${material_name}_HAS_CHANGED": "goMaterialMaterialNameHasChanged"
-    }, {clear: true})
-
-    expectsName("goCD")
-    expectsCiParams({
-      goServerUrl: "goServerUrl",
-      goEnvironmentName: "goEnvironmentName",
-      goPipelineName: "goPipelineName",
-      goPipelineCounter: "goPipelineCounter",
-      goPipelineLabel: "goPipelineLabel",
-      goStageName: "goStageName",
-      goStageCounter: "goStageCounter",
-      goJobName: "goJobName",
-      goTriggerUser: "goTriggerUser",
-      goDependencyLabelUpstream: "goDependencyLabelUpstream",
-      goDependencyLocatorUpstream: "goDependencyLocatorUpstream",
-      goRevision: "goRevision",
-      goRevisionMaterial: "goRevisionMaterial",
-      goToRevision: "goToRevision",
-      goToRevisionMaterial: "goToRevisionMaterial",
-      goFromRevision: "goFromRevision",
-      goFromRevisionMaterial: "goFromRevisionMaterial",
-      goMaterialHasChanged: "goMaterialHasChanged",
-      goMaterialMaterialNameHasChanged: "goMaterialMaterialNameHasChanged"
-    })
-    expectsCommitParams(null)
 
   it "teamcity", ->
     resetEnv = mockedEnv({
