@@ -248,9 +248,7 @@ describe "Project Nav", ->
         @openProject.resolve(@config)
 
       it "shows warning icon with linkified tooltip", ->
-        cy.get(".browsers .fa-exclamation-triangle")
-          .then ($el) ->
-            $el[0].dispatchEvent(new Event("mouseover", {bubbles: true}))
+        cy.get(".browsers .fa-exclamation-triangle").trigger("mouseover")
         cy.get(".cy-tooltip")
           .should("contain", "Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see")
           .get(".cy-tooltip a")
@@ -300,7 +298,6 @@ describe "Project Nav", ->
 
       it "shows info icon with tooltip", ->
         cy.get(".browsers .fa-info-circle")
-          .then ($el) ->
-            $el[0].dispatchEvent(new Event("mouseover", {bubbles: true}))
+          .trigger("mouseover")
         cy.get(".cy-tooltip")
           .should("contain", @info)
