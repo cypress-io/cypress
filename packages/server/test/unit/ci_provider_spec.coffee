@@ -83,7 +83,7 @@ describe "lib/util/ci_provider", ->
     })
     expectsCommitParams({
       sha: "repoCommit"
-      branch: "repoBranch"
+      branch: "appveyorPullRequestHeadRepoBranch"
       message: "repoCommitMessage"
       authorName: "repoCommitAuthor"
       authorEmail: "repoCommitAuthorEmail"
@@ -154,6 +154,13 @@ describe "lib/util/ci_provider", ->
       sha: "bitbucketCommit"
       branch: "gitFoundBranch"
     })
+    expectsCommitDefaults({
+      sha: undefined
+      branch: ""
+    }, {
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
 
   it "buildkite", ->
     resetEnv = mockedEnv({
@@ -202,7 +209,14 @@ describe "lib/util/ci_provider", ->
     # in this test only interested in branch and sha for example
     expectsCommitDefaults({
       sha: null,
-      branch: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "buildKiteCommit",
+      branch: "gitFoundBranch"
+    })
+    expectsCommitDefaults({
+      sha: undefined,
+      branch: ""
     }, {
       sha: "buildKiteCommit",
       branch: "buildKiteBranch"
@@ -405,6 +419,42 @@ describe "lib/util/ci_provider", ->
 
     expectsName("gitlab")
 
+  it "google cloud", ->
+    resetEnv = mockedEnv({
+      GCP_PROJECT: "123"
+
+      BUILD_ID: "buildId"
+
+      PROJECT_ID: "projectId"
+
+      COMMIT_SHA: "commitSha"
+      BRANCH_NAME: "branchName"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+    expectsCiParams({
+      buildId: "buildId"
+      projectId: "projectId"
+      commitSha: "commitSha"
+      branchName: "branchName"
+    })
+    expectsCommitParams({
+      sha: "commitSha"
+      branch: "branchName"
+    })
+
+    resetEnv = mockedEnv({
+      GCLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+
+    resetEnv = mockedEnv({
+      GOOGLE_CLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+
   it "jenkins", ->
     resetEnv = mockedEnv({
       JENKINS_URL: "true"
@@ -587,9 +637,43 @@ describe "lib/util/ci_provider", ->
     expectsCiParams(null)
     expectsCommitParams(null)
 
+  it "azure", ->
+    resetEnv = mockedEnv({
+      # these two variables tell us it is Azure CI
+      TF_BUILD: "true"
+      AZURE_HTTP_USER_AGENT: "VSTS_5e0090d5-c5b9-4fab-8fd8-ce288e9fb666_build_2_0"
+
+      BUILD_BUILDID: "buildId"
+      BUILD_BUILDNUMBER: "buildNumber"
+      BUILD_CONTAINERID: "containerId"
+      BUILD_REPOSITORY_URI: "buildRepositoryUri"
+
+      BUILD_SOURCEVERSION: "commit"
+      BUILD_SOURCEBRANCHNAME: "branch"
+      BUILD_SOURCEVERSIONMESSAGE: "message"
+      BUILD_SOURCEVERSIONAUTHOR: "name"
+      BUILD_REQUESTEDFOREMAIL: "email"
+    }, {clear: true})
+
+    expectsName("azure")
+    expectsCiParams({
+      buildBuildid: "buildId"
+      buildBuildnumber: "buildNumber"
+      buildContainerid: "containerId"
+      buildRepositoryUri: "buildRepositoryUri"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+      message: "message"
+      authorName: "name"
+      authorEmail: "email"
+    })
+
   it "teamfoundation", ->
     resetEnv = mockedEnv({
       TF_BUILD: "true"
+      TF_BUILD_BUILDNUMBER: "CIBuild_20130613.6"
 
       BUILD_BUILDID: "buildId"
       BUILD_BUILDNUMBER: "buildNumber"

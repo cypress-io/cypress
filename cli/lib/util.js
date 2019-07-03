@@ -1,6 +1,8 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 const tty = require('tty')
 const path = require('path')
 const isCi = require('is-ci')
@@ -9,14 +11,20 @@ const getos = require('getos')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const cachedir = require('cachedir')
+const logSymbols = require('log-symbols')
 const executable = require('executable')
+const { stripIndent } = require('common-tags')
 const supportsColor = require('supports-color')
 const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
 
+const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
+
 const getosAsync = Promise.promisify(getos)
+
+const isBrokenGtkDisplayRe = /Gtk: cannot open display/
 
 const stringify = (val) => {
   return _.isObject(val) ? JSON.stringify(val) : val
@@ -24,6 +32,46 @@ const stringify = (val) => {
 
 function normalizeModuleOptions (options = {}) {
   return _.mapValues(options, stringify)
+}
+
+/**
+ * Returns true if the platform is Linux. We do a lot of different
+ * stuff on Linux (like Xvfb) and it helps to has readable code
+ */
+const isLinux = () => {
+  return os.platform() === 'linux'
+}
+
+/**
+   * If the DISPLAY variable is set incorrectly, when trying to spawn
+   * Cypress executable we get an error like this:
+  ```
+  [1005:0509/184205.663837:WARNING:browser_main_loop.cc(258)] Gtk: cannot open display: 99
+  ```
+   */
+const isBrokenGtkDisplay = (str) => {
+  return isBrokenGtkDisplayRe.test(str)
+}
+
+const isPossibleLinuxWithIncorrectDisplay = () => {
+  return isLinux() && process.env.DISPLAY
+}
+
+const logBrokenGtkDisplayWarning = () => {
+  debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting Xvfb')
+
+  // if we get this error, we are on Linux and DISPLAY is set
+  logger.warn(stripIndent`
+
+    ${logSymbols.warning} Warning: Cypress failed to start.
+
+    This is likely due to a misconfigured DISPLAY environment variable.
+
+    DISPLAY was set to: "${process.env.DISPLAY}"
+
+    Cypress will attempt to fix the problem and rerun.
+  `)
+  logger.warn()
 }
 
 function stdoutLineMatches (expectedLine, stdout) {
@@ -141,7 +189,7 @@ const util = {
   calculateEta (percent, elapsed) {
     // returns the number of seconds remaining
 
-    // if we're at 100 already just return 0
+    // if we're at 100% already just return 0
     if (percent === 100) {
       return 0
     }
@@ -150,6 +198,13 @@ const util = {
     // and multiple that against elapsed
     // subtracting what's already elapsed
     return elapsed * (1 / (percent / 100)) - elapsed
+  },
+
+  convertPercentToPercentage (num) {
+    // convert a percent with values between 0 and 1
+    // with decimals, so that it is between 0 and 100
+    // and has no decimal places
+    return Math.round(_.isFinite(num) ? (num * 100) : 0)
   },
 
   secsRemaining (eta) {
@@ -176,9 +231,11 @@ const util = {
     return Promise.resolve(executable(filePath))
   },
 
+  isLinux,
+
   getOsVersionAsync () {
     return Promise.try(() => {
-      if (os.platform() === 'linux') {
+      if (isLinux()) {
         return getosAsync()
         .then((osInfo) => {
           return [osInfo.dist, osInfo.release].join(' - ')
@@ -243,6 +300,22 @@ const util = {
   exec: execa,
 
   stdoutLineMatches,
+
+  issuesUrl,
+
+  isBrokenGtkDisplay,
+
+  logBrokenGtkDisplayWarning,
+
+  isPossibleLinuxWithIncorrectDisplay,
+
+  getGitHubIssueUrl (number) {
+    la(is.positive(number), 'github issue should be a positive number', number)
+    la(_.isInteger(number), 'github issue should be an integer', number)
+
+    return `${issuesUrl}/${number}`
+  },
+
 }
 
 module.exports = util

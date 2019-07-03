@@ -1,29 +1,33 @@
-/* global document */
-
-'use strict'
-
 const chai = require('chai')
-const jsdom = require('jsdom').jsdom
+const JSDOM = require('jsdom').JSDOM
 const sinonChai = require('sinon-chai')
 const $Cypress = require('@packages/driver')
-const io = require('@packages/socket')
-
-const exposedProperties = ['window', 'navigator', 'document']
+const { client } = require('@packages/socket')
 
 // http://airbnb.io/enzyme/docs/guides/jsdom.html
-global.document = jsdom('')
-global.window = document.defaultView
-Object.keys(document.defaultView).forEach((property) => {
-  if (typeof global[property] === 'undefined') {
-    exposedProperties.push(property)
-    global[property] = document.defaultView[property]
-  }
-})
+const jsdom = new JSDOM('<!doctype html><html><body></body></html>')
+const { window } = jsdom
+
+global.window = window
+global.document = window.document
 global.navigator = {
   userAgent: 'node.js',
 }
-global.requestAnimationFrame = (fn) => fn()
-global.cancelAnimationFrame = () => {}
+global.requestAnimationFrame = function (callback) {
+  return setTimeout(callback, 0)
+}
+global.cancelAnimationFrame = function (id) {
+  clearTimeout(id)
+}
+Object.keys(window.document.defaultView).forEach((property) => {
+  if (
+    property === 'localStorage' ||
+    property === 'sessionStorage' ||
+    typeof global[property] !== 'undefined'
+  ) return
+
+  global[property] = window.document.defaultView[property]
+})
 
 // enzyme, and therefore chai-enzyme, needs to be required after
 // global.navigator is set up (https://github.com/airbnb/enzyme/issues/395)
@@ -48,4 +52,6 @@ class Runner {
 
 global.Mocha = { Runnable, Runner }
 $Cypress.create = () => {}
-io.connect = () => { return { emit: () => {}, on: () => {} } }
+client.connect = () => {
+  return { emit: () => {}, on: () => {} }
+}

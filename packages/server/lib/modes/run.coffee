@@ -312,12 +312,12 @@ iterateThroughSpecs = (options = {}) ->
       ## else iterate in serial
       serial()
 
-getProjectId = (project, id) ->
+getProjectId = Promise.method (project, id) ->
   id ?= env.get("CYPRESS_PROJECT_ID")
 
   ## if we have an ID just use it
   if id
-    return Promise.resolve(id)
+    return id
 
   project
   .getProjectId()
@@ -351,6 +351,8 @@ openProjectCreate = (projectRoot, socketId, options) ->
     morgan:       false
     report:       true
     isTextTerminal: options.isTextTerminal
+    onWarning: (err) ->
+      console.log(err.message)
     onError: (err) ->
       console.log("")
       if err.details

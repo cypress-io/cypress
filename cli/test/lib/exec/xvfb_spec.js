@@ -33,11 +33,13 @@ describe('lib/exec/xvfb', function () {
   context('#start', function () {
     it('passes', function () {
       sinon.stub(xvfb._xvfb, 'startAsync').resolves()
+
       return xvfb.start()
     })
 
     it('fails with error message', function () {
       const message = 'nope'
+
       sinon.stub(xvfb._xvfb, 'startAsync').rejects(new Error(message))
 
       return xvfb.start()
@@ -51,6 +53,7 @@ describe('lib/exec/xvfb', function () {
 
     it('fails when xvfb exited with non zero exit code', function () {
       const e = new Error('something bad happened')
+
       e.nonZeroExitCode = true
 
       sinon.stub(xvfb._xvfb, 'startAsync').rejects(e)
@@ -62,7 +65,7 @@ describe('lib/exec/xvfb', function () {
       .catch((err) => {
         expect(err.known).to.be.true
         expect(err.message).to.include('something bad happened')
-        expect(err.message).to.include('XVFB exited with a non zero exit code.')
+        expect(err.message).to.include('Xvfb exited with a non zero exit code.')
       })
     })
   })

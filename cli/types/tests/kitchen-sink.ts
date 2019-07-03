@@ -11,9 +11,12 @@ cy.wrap('foo').then(subject => {
   subject // $ExpectType string
 })
 
-Cypress.minimatch('/users/1/comments', '/users/*/comments', {
+const result = Cypress.minimatch('/users/1/comments', '/users/*/comments', {
   matchBase: true,
 })
+result // $ExpectType boolean
+
+Cypress.minimatch('/users/1/comments', '/users/*/comments') // $ExpectType boolean
 
 // check if cy.server() yields default server options
 cy.server().should((server) => {
@@ -52,6 +55,13 @@ Cypress.on('window:alert', cy.stub())
 cy.on('window:alert', () => { })
 cy.on('window:alert', cy.spy())
 cy.on('window:alert', cy.stub())
+
+// sinon-chai example
+const stub = cy.stub()
+expect(stub).to.not.have.been.called
+stub()
+expect(stub).to.have.been.calledOnce
+cy.wrap(stub).should('have.been.calledOnce')
 
 // window:confirm stubbing
 Cypress.on('window:confirm', () => { })

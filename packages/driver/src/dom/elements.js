@@ -25,8 +25,17 @@ const $utils = require('../cypress/utils')
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
-const focusable = 'body,a[href],link[href],button,select,[tabindex],input,textarea,[contenteditable]'
-
+const focusable = [
+  'a[href]',
+  'area[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'button:not([disabled])',
+  'iframe',
+  '[tabindex]',
+  '[contentEditable]',
+]
 const inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 
@@ -197,6 +206,7 @@ const nativeMethods = {
   setSelectionRange: _nativeSetSelectionRange,
   modify: window.Selection.prototype.modify,
   focus: _nativeFocus,
+  hasFocus: window.document.hasFocus,
   blur: _nativeBlur,
   select: _nativeSelect,
 }
@@ -307,14 +317,48 @@ const isSelect = (el) => {
   return getTagName(el) === 'select'
 }
 
+const isOption = (el) => {
+  return getTagName(el) === 'option'
+}
+
+const isOptgroup = (el) => {
+  return getTagName(el) === 'optgroup'
+}
+
 const isBody = (el) => {
   return getTagName(el) === 'body'
+}
+
+const isHTML = (el) => {
+  return getTagName(el) === 'html'
 }
 
 const isSvg = function (el) {
   try {
     return 'ownerSVGElement' in el
   } catch (error) {
+    return false
+  }
+}
+
+// active element is the default if its null
+// or its equal to document.body
+const activeElementIsDefault = (activeElement, body) => {
+  return (!activeElement) || (activeElement === body)
+}
+
+const isFocused = (el) => {
+  try {
+    const doc = $document.getDocumentFromElement(el)
+
+    const { activeElement, body } = doc
+
+    if (activeElementIsDefault(activeElement, body)) {
+      return false
+    }
+
+    return doc.activeElement === el
+  } catch (err) {
     return false
   }
 }
@@ -332,7 +376,9 @@ const isElement = function (obj) {
 }
 
 const isFocusable = ($el) => {
-  return $el.is(focusable)
+  return _.some(focusable, (sel) => {
+    return $el.is(sel)
+  })
 }
 
 const isType = function ($el, type) {
@@ -354,6 +400,10 @@ const isScrollOrAuto = (prop) => {
 
 const isAncestor = ($el, $maybeAncestor) => {
   return $el.parents().index($maybeAncestor) >= 0
+}
+
+const isChild = ($el, $maybeChild) => {
+  return $el.children().index($maybeChild) >= 0
 }
 
 const isSelector = ($el, selector) => {
@@ -525,10 +575,26 @@ const getFirstFocusableEl = ($el) => {
   return getFirstFocusableEl($el.parent())
 }
 
-const getFirstFixedOrStickyPositionParent = ($el) => {
-  // return null if we're at body/html
+const getFirstParentWithTagName = ($el, tagName) => {
+  // return null if we're at body/html/document
   // cuz that means nothing has fixed position
-  if (!$el || $el.is('body,html')) {
+  if (!$el[0] || !tagName || $el.is('body,html') || $document.isDocument($el)) {
+    return null
+  }
+
+  // if we are the matching element return ourselves
+  if (getTagName($el[0]) === tagName) {
+    return $el
+  }
+
+  // else recursively continue to walk up the parent node chain
+  return getFirstParentWithTagName($el.parent(), tagName)
+}
+
+const getFirstFixedOrStickyPositionParent = ($el) => {
+  // return null if we're at body/html/document
+  // cuz that means nothing has fixed position
+  if (!$el || $el.is('body,html') || $document.isDocument($el)) {
     return null
   }
 
@@ -611,7 +677,16 @@ const getElements = ($el) => {
 const getContainsSelector = (text, filter = '') => {
   const escapedText = $utils.escapeQuotes(text)
 
-  return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+  // they may have written the filter as
+  // comma separated dom els, so we want to search all
+  // https://github.com/cypress-io/cypress/issues/2407
+  const filters = filter.trim().split(',')
+
+  const selectors = _.map(filters, (filter) => {
+    return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+  })
+
+  return selectors.join()
 }
 
 const priorityElement = 'input[type=\'submit\'], button, a, label'
@@ -648,7 +723,6 @@ const getFirstDeepestElement = (elements, index = 0) => {
   }
 
   return $current
-
 }
 
 // short form css-inlines the element
@@ -730,6 +804,8 @@ module.exports = {
 
   isAncestor,
 
+  isChild,
+
   isScrollable,
 
   isTextLike,
@@ -740,13 +816,21 @@ module.exports = {
 
   isSame,
 
+  isOption,
+
+  isOptgroup,
+
   isBody,
+
+  isHTML,
 
   isInput,
 
   isTextarea,
 
   isType,
+
+  isFocused,
 
   isNeedSingleValueChangeInputElement,
 
@@ -769,6 +853,8 @@ module.exports = {
   getContainsSelector,
 
   getFirstDeepestElement,
+
+  getFirstParentWithTagName,
 
   getFirstFixedOrStickyPositionParent,
 

@@ -59,6 +59,7 @@ In order to use either of these features a ciBuildId must be determined.
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
+- azure
 - bamboo
 - bitbucket
 - buildkite
@@ -67,6 +68,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipPro
 - drone
 - gitlab
+- googleCloud
 - jenkins
 - semaphore
 - shippable
@@ -88,6 +90,7 @@ In order to use either of these features a ciBuildId must be determined.
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
+- azure
 - bamboo
 - bitbucket
 - buildkite
@@ -96,6 +99,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipPro
 - drone
 - gitlab
+- googleCloud
 - jenkins
 - semaphore
 - shippable
@@ -118,6 +122,7 @@ In order to use either of these features a ciBuildId must be determined.
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
 - appveyor
+- azure
 - bamboo
 - bitbucket
 - buildkite
@@ -126,6 +131,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipPro
 - drone
 - gitlab
+- googleCloud
 - jenkins
 - semaphore
 - shippable
