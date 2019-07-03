@@ -38,6 +38,12 @@ const isCodeshipPro = () => {
   return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && !process.env.CODESHIP
 }
 
+const isConcourse = () => {
+  return (_.filter(Object.keys(process.env), (key) => {
+    return /^CONCOURSE_/.test(key)
+  }).length > 0)
+}
+
 const isGitlab = () => {
   return process.env.GITLAB_CI || (process.env.CI_SERVER_NAME && /^GitLab/.test(process.env.CI_SERVER_NAME))
 }
@@ -78,13 +84,14 @@ const CI_PROVIDERS = {
   'circle': 'CIRCLECI',
   'codeshipBasic': isCodeshipBasic,
   'codeshipPro': isCodeshipPro,
+  'concourse': isConcourse,
   'drone': 'DRONE',
   'gitlab': isGitlab,
+  'goCD': 'GO_JOB_NAME',
   'googleCloud': isGoogleCloud,
   'jenkins': isJenkins,
   'semaphore': 'SEMAPHORE',
   'shippable': 'SHIPPABLE',
-  'snap': 'SNAP_CI',
   'teamcity': 'TEAMCITY_VERSION',
   'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
@@ -176,6 +183,14 @@ const _providerCiParams = () => {
       'CI_REPO_NAME',
       'CI_PROJECT_ID',
     ]),
+    concourse: extract([
+      'BUILD_ID',
+      'BUILD_NAME',
+      'BUILD_JOB_NAME',
+      'BUILD_PIPELINE_NAME',
+      'BUILD_TEAM_NAME',
+      'ATC_EXTERNAL_URL',
+    ]),
     drone: extract([
       'DRONE_JOB_NUMBER',
       'DRONE_BUILD_LINK',
@@ -263,7 +278,21 @@ const _providerCiParams = () => {
       'PULL_REQUEST_BASE_BRANCH', // Name of the branch that the pull request will be merged into. It should be the same as BASE_BRANCH.
       'PULL_REQUEST_REPO_FULL_NAME', // Full name of the repository from where the pull request originated.
     ]),
-    snap: null,
+    goCD: extract([
+      'GO_SERVER_URL',
+      'GO_ENVIRONMENT_NAME',
+      'GO_PIPELINE_NAME',
+      'GO_PIPELINE_COUNTER',
+      'GO_PIPELINE_LABEL',
+      'GO_STAGE_NAME',
+      'GO_STAGE_COUNTER',
+      'GO_JOB_NAME',
+      'GO_TRIGGER_USER',
+      'GO_REVISION',
+      'GO_TO_REVISION',
+      'GO_FROM_REVISION',
+      'GO_MATERIAL_HAS_CHANGED',
+    ]),
     teamcity: null,
     teamfoundation: extract([
       'BUILD_BUILDID',
