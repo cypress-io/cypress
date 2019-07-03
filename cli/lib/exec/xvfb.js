@@ -22,7 +22,7 @@ module.exports = {
   _xvfb: xvfb, // expose for testing
 
   start () {
-    debug('Starting XVFB')
+    debug('Starting Xvfb')
 
     return xvfb.startAsync()
     .return(null)
@@ -37,7 +37,7 @@ module.exports = {
   },
 
   stop () {
-    debug('Stopping XVFB')
+    debug('Stopping Xvfb')
 
     return xvfb.stopAsync()
     .return(null)
@@ -57,7 +57,7 @@ module.exports = {
       const message = stripIndent`
         DISPLAY environment variable is set to ${process.env.DISPLAY} on Linux
         Assuming this DISPLAY points at working X11 server,
-        Cypress will not spawn own XVFB
+        Cypress will not spawn own Xvfb
 
         NOTE: if the X11 server is NOT working, Cypress will exit without explanation,
           see ${issueUrl}
@@ -71,7 +71,7 @@ module.exports = {
     }
 
     debug('undefined DISPLAY environment variable')
-    debug('Cypress will spawn its own XVFB')
+    debug('Cypress will spawn its own Xvfb')
 
     return true
   },

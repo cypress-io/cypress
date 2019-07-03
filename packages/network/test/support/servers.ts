@@ -14,13 +14,16 @@ export interface AsyncServer {
 function addDestroy(server: http.Server | https.Server) {
   let connections = []
 
-  server.on('connection', function(conn) {
+  function trackConn(conn) {
     connections.push(conn)
 
     conn.on('close', () => {
       connections = connections.filter(connection => connection !== conn)
     })
-  })
+  }
+
+  server.on('connection', trackConn)
+  server.on('secureConnection', trackConn)
 
   // @ts-ignore Property 'destroy' does not exist on type 'Server'.
   server.destroy = function(cb) {

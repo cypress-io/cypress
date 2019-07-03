@@ -13,8 +13,9 @@ const { throwFormErrorText, errors } = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
+const isRenderWorkerRe = /\.RenderWorker-/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe]
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
@@ -51,7 +52,7 @@ function getStdio (needsXvfb) {
   if (needsStderrPiped(needsXvfb)) {
     // returning pipe here so we can massage stderr
     // and remove garbage from Xlib and libuv
-    // due to starting the XVFB process on linux
+    // due to starting the Xvfb process on linux
     return ['inherit', 'inherit', 'pipe']
   }
 
@@ -59,6 +60,8 @@ function getStdio (needsXvfb) {
 }
 
 module.exports = {
+  isGarbageLineWarning,
+
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
     let executable = state.getPathToExecutable(state.getBinaryDir())
@@ -67,7 +70,7 @@ module.exports = {
       executable = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
     }
 
-    debug('needs to start own XVFB?', needsXvfb)
+    debug('needs to start own Xvfb?', needsXvfb)
 
     // always push cwd into the args
     args = [].concat(args, '--cwd', process.cwd())
@@ -227,7 +230,7 @@ module.exports = {
 
     // if we are on linux and there's already a DISPLAY
     // set, then we may need to rerun cypress after
-    // spawning our own XVFB server
+    // spawning our own Xvfb server
     const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
 
     return userFriendlySpawn(linuxWithDisplayEnv)

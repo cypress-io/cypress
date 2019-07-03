@@ -36,7 +36,7 @@ function normalizeModuleOptions (options = {}) {
 
 /**
  * Returns true if the platform is Linux. We do a lot of different
- * stuff on Linux (like XVFB) and it helps to has readable code
+ * stuff on Linux (like Xvfb) and it helps to has readable code
  */
 const isLinux = () => {
   return os.platform() === 'linux'
@@ -58,7 +58,7 @@ const isPossibleLinuxWithIncorrectDisplay = () => {
 }
 
 const logBrokenGtkDisplayWarning = () => {
-  debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting XVFB')
+  debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting Xvfb')
 
   // if we get this error, we are on Linux and DISPLAY is set
   logger.warn(stripIndent`
@@ -189,7 +189,7 @@ const util = {
   calculateEta (percent, elapsed) {
     // returns the number of seconds remaining
 
-    // if we're at 100 already just return 0
+    // if we're at 100% already just return 0
     if (percent === 100) {
       return 0
     }
@@ -198,6 +198,13 @@ const util = {
     // and multiple that against elapsed
     // subtracting what's already elapsed
     return elapsed * (1 / (percent / 100)) - elapsed
+  },
+
+  convertPercentToPercentage (num) {
+    // convert a percent with values between 0 and 1
+    // with decimals, so that it is between 0 and 100
+    // and has no decimal places
+    return Math.round(_.isFinite(num) ? (num * 100) : 0)
   },
 
   secsRemaining (eta) {
