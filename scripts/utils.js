@@ -9,10 +9,8 @@ const fs = require('fs')
 function getNameAndBinary (args = process.argv) {
   const options = minimist(args)
 
-  la(is.unemptyString(options.npm),
-    'missing --npm option', options)
-  la(is.unemptyString(options.binary),
-    'missing --binary option', options)
+  la(is.unemptyString(options.npm), 'missing --npm option', options)
+  la(is.unemptyString(options.binary), 'missing --binary option', options)
 
   let npm = options.npm
 
@@ -57,7 +55,43 @@ function getJustVersion (npmNameOrUrl) {
   return npmNameOrUrl
 }
 
+const shorten = (s) => {
+  return s.substr(0, 7)
+}
+
+/**
+ * Grabs the full commit SHA and its short version from CI environment variables
+ */
+const getShortCommit = () => {
+  const sha =
+    process.env.APPVEYOR_REPO_COMMIT ||
+    process.env.CIRCLE_SHA1 ||
+    process.env.BUILDKITE_COMMIT
+
+  if (sha) {
+    return {
+      sha,
+      short: shorten(sha),
+    }
+  }
+}
+
+/**
+ * Returns CI name for know CIs
+ */
+const getCIName = () => {
+  if (process.env.CIRCLE) {
+    return 'Circle'
+  }
+
+  if (process.env.APPVEYOR) {
+    return 'AppVeyor'
+  }
+}
+
 module.exports = {
   getNameAndBinary,
   getJustVersion,
+  getShortCommit,
+  getCIName,
 }

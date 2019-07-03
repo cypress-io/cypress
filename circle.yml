@@ -616,6 +616,12 @@ jobs:
           working_directory: /tmp/testing
           command: $(npm bin)/cypress verify
       - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm /tmp/urls/npm-package-url.json \
+              --binary /tmp/urls/binary-url.json
+      - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
@@ -790,7 +796,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              # TODO remove extra branches
               - binary-metadata
+              - add-comment-how-to-install-4525
         requires:
           - build
     - build-binary:
@@ -798,7 +806,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              # TODO remove extra branches
               - binary-metadata
+              - add-comment-how-to-install-4525
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -806,7 +816,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              # TODO remove extra branches
               - binary-metadata
+              - add-comment-how-to-install-4525
         requires:
           - build-npm-package
           - build-binary
