@@ -243,10 +243,17 @@ module.exports = {
             target: wsUrl,
             local: true
           })
+          # ? should we keep the CRI client reference around
+          global.criClient = client
         .then (client) ->
           la(client, "could not get CRI client")
           debug("received CRI client")
 
           # THIRD send visit command to load the actual page
-          client.send('Page.navigate', { url })
+          console.log('navigating to page %s', url)
+
+          # client.send('Page.navigate', { url })
+          # equivalent
+          { Page } = client
+          Page.navigate({ url })
 }
