@@ -673,7 +673,7 @@ describe "lib/api", ->
       .then (urls) ->
         expect(urls).to.deep.eq(AUTH_URLS)
 
-  context ".getLogout", ->
+  context ".postLogout", ->
     it "GETs /logout", ->
       nock(DASHBOARD_BASEURL)
       .matchHeader("x-os-name", "linux")
@@ -683,7 +683,7 @@ describe "lib/api", ->
       .get("/logout")
       .reply(200)
 
-      api.getLogout("auth-token-123")
+      api.postLogout("auth-token-123")
 
     it "tags errors", ->
       nock(DASHBOARD_BASEURL)
@@ -692,7 +692,7 @@ describe "lib/api", ->
       .get("/logout")
       .reply(500, {})
 
-      api.getLogout("auth-token-123")
+      api.postLogout("auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->

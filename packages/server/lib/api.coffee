@@ -267,10 +267,10 @@ module.exports = {
     .timeout(timeout)
     .catch(tagError)
 
-  getLogout: (authToken) ->
+  postLogout: (authToken) ->
     @getAuthUrls()
     .then (urls) ->
-      rp.get({
+      rp.post({
         url: urls.dashboardLogoutUrl
         json: true
         auth: {
