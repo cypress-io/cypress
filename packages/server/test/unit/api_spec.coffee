@@ -674,13 +674,13 @@ describe "lib/api", ->
         expect(urls).to.deep.eq(AUTH_URLS)
 
   context ".postLogout", ->
-    it "GETs /logout", ->
+    it "POSTs /logout", ->
       nock(DASHBOARD_BASEURL)
       .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
-      .get("/logout")
+      .post("/logout")
       .reply(200)
 
       api.postLogout("auth-token-123")
@@ -689,7 +689,7 @@ describe "lib/api", ->
       nock(DASHBOARD_BASEURL)
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
-      .get("/logout")
+      .post("/logout")
       .reply(500, {})
 
       api.postLogout("auth-token-123")
