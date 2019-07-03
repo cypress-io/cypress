@@ -139,10 +139,13 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
       // starting on our first progress notification
       const elapsed = new Date() - started
 
-      const eta = util.calculateEta(state.percent, elapsed)
+      // request-progress sends a value between 0 and 1
+      const percentage = util.convertPercentToPercentage(state.percent)
+
+      const eta = util.calculateEta(percentage, elapsed)
 
       // send up our percent and seconds remaining
-      progress.onProgress(state.percent, util.secsRemaining(eta))
+      progress.onProgress(percentage, util.secsRemaining(eta))
     })
     // save this download here
     .pipe(fs.createWriteStream(downloadDestination))

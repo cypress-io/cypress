@@ -82,7 +82,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "get:current:user"
-      user.get()
+      user.getSafely()
       .then(send)
       .catch(sendErr)
 
