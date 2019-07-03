@@ -102,8 +102,8 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - concourse
 - drone
 - gitlab
-- googleCloud
 - goCD
+- googleCloud
 - jenkins
 - semaphore
 - shippable
