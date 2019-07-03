@@ -887,9 +887,6 @@ describe "lib/cypress", ->
           @expectExitWith(0)
 
     describe "--config-file", ->
-      beforeEach ->
-        @filename = "abcdefgh.test.json"
-
       it "false does not require cypress.json to run", ->
         fs.statAsync(path.join(@pristinePath, 'cypress.json'))
           .then =>
@@ -904,6 +901,8 @@ describe "lib/cypress", ->
               @expectExitWith(0)
 
       it "with a custom config file fails when it doesn't exist", ->
+        @filename = "abcdefgh.test.json"
+
         fs.statAsync(path.join(@todosPath, @filename))
           .then =>
             throw new Error("#{@filename} should not exist")

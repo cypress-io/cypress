@@ -130,10 +130,10 @@ module.exports = {
   },
 
   exists (projectRoot, options = {}) {
-    const file = this.pathToConfigFile(projectRoot, options)
+    const file = options.configFile && this.pathToConfigFile(projectRoot, options)
 
     // first check if cypress.json exists
-    return maybeVerifyConfigFile(options.configFile)
+    return maybeVerifyConfigFile(file)
     .then(() =>
     // if it does also check that the projectRoot
     // directory is writable
