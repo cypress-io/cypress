@@ -10,7 +10,7 @@ const {
   getNameAndBinary,
   getShortCommit,
   getCIName,
-  getCIBuildUrl
+  getCIBuildUrl,
 } = require('./utils')
 const { addCommitComment } = require('@cypress/github-commit-status-check')
 const { stripIndent } = require('common-tags')
@@ -79,7 +79,7 @@ addCommitComment({
   owner: 'cypress-io',
   repo: 'cypress',
   sha,
-  comment: getInstallMessage()
+  comment: getInstallMessage(),
 }).then(() => {
   console.log('Comment posted for commit %s ✅', sha)
 })

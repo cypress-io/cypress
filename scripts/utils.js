@@ -30,7 +30,7 @@ function getNameAndBinary (args = process.argv) {
 
   return {
     npm,
-    binary
+    binary,
   }
 }
 
@@ -55,7 +55,7 @@ function getJustVersion (npmNameOrUrl) {
   return npmNameOrUrl
 }
 
-const shorten = s => {
+const shorten = (s) => {
   return s.substr(0, 7)
 }
 
@@ -71,7 +71,7 @@ const getShortCommit = () => {
   if (sha) {
     return {
       sha,
-      short: shorten(sha)
+      short: shorten(sha),
     }
   }
 }
@@ -110,5 +110,5 @@ module.exports = {
   getJustVersion,
   getShortCommit,
   getCIName,
-  getCIBuildUrl
+  getCIBuildUrl,
 }
