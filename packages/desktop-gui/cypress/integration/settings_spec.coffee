@@ -315,7 +315,7 @@ describe "Settings", ->
       cy.contains("Configuration").click()
 
     it "notes that cypress.json is disabled", ->
-      cy.contains("set from cypress.json file (currently disabled by --config-file false)").should("exist")
+      cy.contains("set from cypress.json file (currently disabled by --config-file false)").should("be.visible")
 
   context "when configFile is set", ->
     beforeEach ->
@@ -324,4 +324,4 @@ describe "Settings", ->
       cy.contains("Configuration").click()
 
     it "notes that a custom config is in use", ->
-      cy.contains("set from custom config file special-cypress.json").should("exist")
+      cy.contains("set from custom config file special-cypress.json").should("be.visible")
