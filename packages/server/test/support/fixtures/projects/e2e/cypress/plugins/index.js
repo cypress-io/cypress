@@ -7,13 +7,17 @@ const fs = require('fs')
 module.exports = (on) => {
   // save some time by only reading the originals once
   let cache = {}
+
   function getCachedImage (name) {
     const cachedImage = cache[name]
+
     if (cachedImage) return Promise.resolve(cachedImage)
 
     const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
+
     return Jimp.read(imagePath).then((image) => {
       cache[name] = image
+
       return image
     })
   }
@@ -53,6 +57,7 @@ module.exports = (on) => {
       }
 
       const comparePath = path.join(__dirname, '..', 'screenshots', `${b}.png`)
+
       return Promise.all([
         getCachedImage(a),
         Jimp.read(comparePath),
@@ -94,6 +99,11 @@ module.exports = (on) => {
     },
     'modify:cypress:json' () {
       fs.writeFileSync('./cypress.json', '{}')
+      
+      return null
+
+    'console:log' (obj) {
+      console.log(obj) // eslint-disable-line no-console
 
       return null
     },

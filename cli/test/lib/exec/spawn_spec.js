@@ -5,6 +5,7 @@ const os = require('os')
 const tty = require('tty')
 const path = require('path')
 const EE = require('events')
+const mockedEnv = require('mocked-env')
 
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -56,7 +57,8 @@ describe('lib/exec/spawn', function () {
           '--cwd',
           cwd,
         ], {
-          foo: 'bar',
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
         })
       })
     })
@@ -74,7 +76,8 @@ describe('lib/exec/spawn', function () {
           '--cwd',
           cwd,
         ], {
-          foo: 'bar',
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
         })
       })
     })
@@ -120,6 +123,42 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    describe('Linux display', () => {
+      let restore
+
+      beforeEach(() => {
+        restore = mockedEnv({
+          DISPLAY: 'test-display',
+        })
+      })
+
+      afterEach(() => {
+        restore()
+      })
+
+      it('retries with xvfb if fails with display exit code', function () {
+        this.spawnedProcess.on.withArgs('close').onFirstCall().yieldsAsync(1)
+        this.spawnedProcess.on.withArgs('close').onSecondCall().yieldsAsync(0)
+
+        const buf1 = '[some noise here] Gtk: cannot open display: 987'
+
+        this.spawnedProcess.stderr.on
+        .withArgs('data')
+        .yields(buf1)
+
+        os.platform.returns('linux')
+
+        return spawn.start('--foo')
+        .then((code) => {
+          expect(xvfb.start).to.have.been.calledOnce
+          expect(xvfb.stop).to.have.been.calledOnce
+          expect(cp.spawn).to.have.been.calledTwice
+          // second code should be 0 after successfully running with Xvfb
+          expect(code).to.equal(0)
+        })
+      })
+    })
+
     it('rejects with error from spawn', function () {
       const msg = 'the error message'
 
@@ -130,41 +169,6 @@ describe('lib/exec/spawn', function () {
         throw new Error('should have hit error handler but did not')
       }, (e) => {
         expect(e.message).to.include(msg)
-      })
-    })
-
-    context('proxy', function () {
-      beforeEach(function () {
-        this.oldEnv = Object.assign({}, process.env)
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = process.env.NO_PROXY = undefined
-      })
-
-      it('loads proxy settings from Windows registry', function () {
-        this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-        os.platform.returns('win32')
-        sinon.stub(util, '_getWindowsProxy').returns({
-          httpProxy: 'http://foo-bar.baz',
-          noProxy: 'a,b,c',
-        })
-
-        return spawn.start([], {})
-        .then(() => {
-          return expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
-            '--cwd',
-            cwd,
-            '--proxy-source="win32"',
-          ], {
-            env: {
-              'HTTP_PROXY': 'http://foo-bar.baz',
-              'HTTPS_PROXY': 'http://foo-bar.baz',
-              'NO_PROXY': 'a,b,c',
-            },
-          })
-        })
-      })
-
-      afterEach(function () {
-        Object.assign(process.env, this.oldEnv)
       })
     })
 

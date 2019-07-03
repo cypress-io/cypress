@@ -1,12 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const debug = require('debug')('cypress:server')
 
@@ -22,6 +13,23 @@ const extract = (envKeys) => {
   return _.transform(envKeys, toCamelObject, {})
 }
 
+/**
+ * Returns true if running on TeamFoundation server.
+ * @see https://technet.microsoft.com/en-us/hh850448(v=vs.92)
+ */
+const isTeamFoundation = () => {
+  return process.env.TF_BUILD && process.env.TF_BUILD_BUILDNUMBER
+}
+
+/**
+ * Returns true if running on Azure CI pipeline.
+ * See environment variables in the issue #3657
+ * @see https://github.com/cypress-io/cypress/issues/3657
+*/
+const isAzureCi = () => {
+  return process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
+}
+
 const isCodeshipBasic = () => {
   return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
 }
@@ -32,6 +40,13 @@ const isCodeshipPro = () => {
 
 const isGitlab = () => {
   return process.env.GITLAB_CI || (process.env.CI_SERVER_NAME && /^GitLab/.test(process.env.CI_SERVER_NAME))
+}
+
+const isGoogleCloud = () => {
+  // set automatically for the Node.js 6, Node.js 8 runtimes (not in Node 10)
+  // TODO: may also potentially have X_GOOGLE_* env var set
+  // https://cloud.google.com/functions/docs/env-var#environment_variables_set_automatically
+  return process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT
 }
 
 const isJenkins = () => {
@@ -46,10 +61,17 @@ const isWercker = () => {
   return process.env.WERCKER || process.env.WERCKER_MAIN_PIPELINE_STARTED
 }
 
-// top level detection of CI providers by environment variable
-// or a predicate function
+/**
+ * We detect CI providers by detecting an environment variable
+ * unique to the provider, or by calling a function that returns true
+ * for that provider.
+ *
+ * For example, AppVeyor CI has environment the
+ * variable "APPVEYOR" set during run
+ */
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
+  'azure': isAzureCi,
   'bamboo': 'bamboo.buildNumber',
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
@@ -58,12 +80,13 @@ const CI_PROVIDERS = {
   'codeshipPro': isCodeshipPro,
   'drone': 'DRONE',
   'gitlab': isGitlab,
+  'googleCloud': isGoogleCloud,
   'jenkins': isJenkins,
   'semaphore': 'SEMAPHORE',
   'shippable': 'SHIPPABLE',
   'snap': 'SNAP_CI',
   'teamcity': 'TEAMCITY_VERSION',
-  'teamfoundation': 'TF_BUILD',
+  'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
   'wercker': isWercker,
 }
@@ -96,6 +119,12 @@ const _providerCiParams = () => {
       'APPVEYOR_BUILD_VERSION',
       'APPVEYOR_PULL_REQUEST_NUMBER',
       'APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH',
+    ]),
+    azure: extract([
+      'BUILD_BUILDID',
+      'BUILD_BUILDNUMBER',
+      'BUILD_CONTAINERID',
+      'BUILD_REPOSITORY_URI',
     ]),
     bamboo: extract([
       'bamboo.resultsUrl',
@@ -169,6 +198,18 @@ const _providerCiParams = () => {
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
     //# for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+    ]),
+    googleCloud: extract([
+      // individual jobs
+      'BUILD_ID',
+      'PROJECT_ID',
+      // other information
+      'REPO_NAME',
+      'BRANCH_NAME',
+      'TAG_NAME',
+      'COMMIT_SHA',
+      'SHORT_SHA',
+      // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
     ]),
     jenkins: extract([
       'BUILD_ID',
@@ -252,12 +293,24 @@ const _providerCommitParams = function () {
   return {
     appveyor: {
       sha: env.APPVEYOR_REPO_COMMIT,
-      branch: env.APPVEYOR_REPO_BRANCH,
+      // since APPVEYOR_REPO_BRANCH will be the target branch on a PR
+      // we need to use PULL_REQUEST_HEAD_REPO_BRANCH if it exists.
+      // e.g. if you have a PR: develop <- my-feature-branch
+      // my-feature-branch is APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH
+      // develop           is APPVEYOR_REPO_BRANCH
+      branch: env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH || env.APPVEYOR_REPO_BRANCH,
       message: join('\n', env.APPVEYOR_REPO_COMMIT_MESSAGE, env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED),
       authorName: env.APPVEYOR_REPO_COMMIT_AUTHOR,
       authorEmail: env.APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL,
       // remoteOrigin: ???
       // defaultBranch: ???
+    },
+    azure: {
+      sha: env.BUILD_SOURCEVERSION,
+      branch: env.BUILD_SOURCEBRANCHNAME,
+      message: env.BUILD_SOURCEVERSIONMESSAGE,
+      authorName: env.BUILD_SOURCEVERSIONAUTHOR,
+      authorEmail: env.BUILD_REQUESTEDFOREMAIL,
     },
     bamboo: {
       // sha: ???
@@ -271,6 +324,11 @@ const _providerCommitParams = function () {
     bitbucket: {
       sha: env.BITBUCKET_COMMIT,
       branch: env.BITBUCKET_BRANCH,
+      // message: ???
+      // authorName: ???
+      // authorEmail: ???
+      // remoteOrigin: ???
+      // defaultBranch: ???
     },
     buildkite: {
       sha: env.BUILDKITE_COMMIT,
@@ -325,6 +383,15 @@ const _providerCommitParams = function () {
       authorEmail: env.GITLAB_USER_EMAIL,
       // remoteOrigin: ???
       // defaultBranch: ???
+    },
+    googleCloud: {
+      sha: env.COMMIT_SHA,
+      branch: env.BRANCH_NAME,
+      // message: ??
+      // authorName: ??
+      // authorEmail: ??
+      // remoteOrigin: ???
+      // defaultBranch: ??
     },
     jenkins: {
       sha: env.GIT_COMMIT,
@@ -426,7 +493,7 @@ const commitDefaults = function (existingInfo) {
   // defaulting back to null if all fails
   // NOTE: only properties defined in "existingInfo" will be returned
   const combined = _.transform(existingInfo, (memo, value, key) => {
-    return memo[key] = _.defaultTo(value != null ? value : commitParamsObj[key], null)
+    return memo[key] = _.defaultTo(value || commitParamsObj[key], null)
   })
 
   debug('combined git and environment variables from provider')

@@ -387,16 +387,22 @@ describe "lib/project", ->
 
     it "does nothing when {pluginsFile: false}", ->
       @config.pluginsFile = false
-      @project.watchPluginsFile(@config).then =>
+      @project.watchPluginsFile(@config, {}).then =>
         expect(@project.watchers.watchTree).not.to.be.called
 
     it "does nothing if pluginsFile does not exist", ->
       fs.pathExists.resolves(false)
-      @project.watchPluginsFile(@config).then =>
+      @project.watchPluginsFile(@config, {}).then =>
+        expect(@project.watchers.watchTree).not.to.be.called
+
+    it "does nothing if in run mode", ->
+      @project.watchPluginsFile(@config, {
+        isTextTerminal: true
+      }).then =>
         expect(@project.watchers.watchTree).not.to.be.called
 
     it "watches the pluginsFile", ->
-      @project.watchPluginsFile(@config).then =>
+      @project.watchPluginsFile(@config, {}).then =>
         expect(@project.watchers.watchTree).to.be.calledWith(@config.pluginsFile)
         expect(@project.watchers.watchTree.lastCall.args[1]).to.be.an("object")
         expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
@@ -409,6 +415,23 @@ describe "lib/project", ->
 
         expect(options.onPluginsChanged).to.be.calledWith(@config.pluginsFile)
         expect(@project.server.onConfigurationChange).to.be.calledWith(@config.pluginsFile)
+        
+    it "calls plugins.init when file changes", ->
+      @project.watchPluginsFile(@config, {}).then =>
+        @project.watchers.watchTree.firstCall.args[1].onChange()
+        expect(plugins.init).to.be.calledWith(@config)
+
+    it "handles errors from calling plugins.init", (done) ->
+      error = {name: "foo", message: "foo"}
+      plugins.init.rejects(error)
+      @project.watchPluginsFile(@config, {
+        onError: (err) ->
+          expect(err).to.eql(error)
+          done()
+      })
+      .then =>
+        @project.watchers.watchTree.firstCall.args[1].onChange()
+      return
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->

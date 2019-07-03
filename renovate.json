@@ -21,9 +21,9 @@
         "bin-up",
         "check-dependencies",
         "check-more-types",
-        "commit-message-install",
         "console-table",
         "execa-wrap",
+        "is-fork-pr",
         "lazy-ass",
         "make-empty-github-commit",
         "mocha-banner",
@@ -61,12 +61,19 @@
       "schedule": "before 3am on Monday"
     },
     {
-      "packageNames": ["typescript", "ts-node", "tslint-config-standard"],
+      "packageNames": [
+        "typescript",
+        "ts-node",
+        "tslint-config-standard"
+      ],
       "groupName": "typescript"
     }
   ],
   "separateMultipleMajor": true,
-  "labels": ["type: dependencies", "renovate"],
+  "labels": [
+    "type: dependencies",
+    "renovate"
+  ],
   "commitMessage": "{{semanticPrefix}}Update {{depName}} to {{newVersion}} 🌟",
   "prTitle": "{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}} 🌟",
   "prHourlyLimit": 1,

@@ -269,6 +269,7 @@ module.exports = {
     options = _.omit(options, configKeys)
 
     options = normalizeBackslashes(options)
+    debug('options %o', options)
 
     // normalize project to projectRoot
     if (p = options.project || options.runProject) {

@@ -5,7 +5,7 @@ const la = require('lazy-ass')
 const is = require('check-more-types')
 const path = require('path')
 const nock = require('nock')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
@@ -201,17 +201,6 @@ describe('lib/tasks/download', function () {
       logger.error(err)
 
       return snapshot('download status errors 1', normalize(ctx.stdout.toString()))
-    })
-  })
-
-  it('calls loadSystemProxySettings before downloading', function () {
-    sinon.stub(fs, 'ensureDirAsync').rejects({ type: 'FAKE_ERR' })
-    sinon.spy(util, 'loadSystemProxySettings')
-
-    return download.start(this.options)
-    .catch(() => {})
-    .finally(() => {
-      expect(util.loadSystemProxySettings).to.be.calledOnce
     })
   })
 })

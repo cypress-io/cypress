@@ -19,6 +19,7 @@ debug = require("debug")("cypress:binary")
 R = require("ramda")
 la = require("lazy-ass")
 check = require("check-more-types")
+humanInterval = require("human-interval")
 
 meta = require("./meta")
 smoke = require("./smoke")
@@ -54,14 +55,21 @@ buildCypressApp = (platform, version, options = {}) ->
   log = _.partialRight(logger, platform)
 
   testVersion = (folderNameFn) -> () ->
+    log("#testVersion")
     dir = folderNameFn()
     la(check.unemptyString(dir), "missing folder for platform", platform)
-    console.log("testing package version in folder", dir)
+    console.log("testing dist package version")
+    console.log("by calling: node index.js --version")
+    console.log("in the folder %s", dir)
+
     execa("node", ["index.js", "--version"], {
       cwd: dir
     }).then (result) ->
-      console.log('built version', result.stdout)
-      la(check.unemptyString(result.stdout), 'missing output', result)
+      la(check.unemptyString(result.stdout),
+        'missing output when getting built version', result)
+
+      console.log('app in %s', dir)
+      console.log('built app version', result.stdout)
       la(result.stdout == version, "different version reported",
         result.stdout, "from input version to build", version)
 
@@ -116,17 +124,7 @@ buildCypressApp = (platform, version, options = {}) ->
   npmInstallPackages = ->
     log("#npmInstallPackages")
 
-    packages.npmInstallAll(distDir("packages", "*"))
-    .then () ->
-      if os.platform() != "win32"
-        return
-      # on windows include both versions of FFMPEG
-      console.log("installing FFMPEG win32-x64")
-      serverFolder = distDir("packages", "server")
-      packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-x64")
-      .then () ->
-        console.log("installing FFMPEG win32-ia32")
-        packages.forceNpmInstall(serverFolder, "@ffmpeg-installer/win32-ia32")
+    packages.npmInstallAll(distDir("packages", "*"), options)
 
   createRootPackage = ->
     log("#createRootPackage #{platform} #{version}")
@@ -251,14 +249,43 @@ buildCypressApp = (platform, version, options = {}) ->
     else
       run()
 
-  codeSign = ->
+  codeSign = Promise.method ->
     if platform isnt "darwin"
       # do we need to code sign on Windows?
-      return Promise.resolve()
+      return
 
     appFolder = meta.zipDir(platform)
-    log("#codeSign #{appFolder}")
-    execa('build', ["--publish", "never", "--prepackaged", appFolder], {stdio: "inherit"})
+    fiveMinutes = humanInterval("5 minutes")
+
+    execaBuild = Promise.method ->
+      log("#codeSign #{appFolder}")
+
+      execa('build', ["--publish", "never", "--prepackaged", appFolder], {
+        stdio: "inherit"
+      })
+      .catch (err) ->
+        ## ignore canceled errors
+        if err.isCanceled
+          return
+
+        throw err
+
+    ## try to build and if we timeout in 5 minutes
+    ## then try again - which sometimes happens in
+    ## circle CI
+    b = execaBuild()
+
+    b
+    .timeout(fiveMinutes)
+    .catch Promise.TimeoutError, (err) ->
+      console.log(
+        chalk.red("timed out signing binary after #{fiveMinutes}ms. retrying...")
+      )
+
+      b.cancel()
+
+      execaBuild()
+
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()
