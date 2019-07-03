@@ -16,8 +16,8 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
-    "cypress:open": "node ../../scripts/cypress open --project .",
-    "cypress:run": "node ../../scripts/cypress run --project ."
+    "cypress:open": "TZ=America/New_York node ../../scripts/cypress open --project .",
+    "cypress:run": "TZ=America/New_York node ../../scripts/cypress run --project ."
   },
   "files": [
     "dist",
@@ -26,8 +26,8 @@
   "devDependencies": {
     "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/icons": "0.7.0",
-    "@cypress/json-schemas": "5.31.3",
-    "@cypress/react-tooltip": "0.4.0",
+    "@cypress/json-schemas": "5.32.1",
+    "@cypress/react-tooltip": "0.5.0",
     "bin-up": "1.2.0",
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
@@ -47,10 +47,10 @@
     "prop-types": "15.7.2",
     "rc-collapse": "1.11.3",
     "react": "16.8.6",
-    "rebuild-node-sass": "1.1.0",
     "react-bootstrap-modal": "4.2.0",
     "react-dom": "16.8.6",
     "react-loader": "2.4.5",
+    "rebuild-node-sass": "1.1.0",
     "zunder": "6.4.1"
   }
 }
