@@ -342,7 +342,8 @@ writeOutput = (outputPath, results) ->
 
     fs.outputJsonAsync(outputPath, results)
 
-onWarning = _.partialRight(errors.log, 'yellow')
+onWarning = (err) ->
+  console.log(chalk.yellow(err.message))
 
 openProjectCreate = (projectRoot, socketId, options) ->
   ## now open the project to boot the server
