@@ -788,6 +788,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Provide a path to an existing fixture file.
       """
+    when "BAD_POLICY_WARNING"
+      """
+      Cypress detected policy settings on your computer that may cause issues.
+
+      The following policies were detected that may prevent Cypress from automating Chrome:
+
+       > #{arg1.join('\n > ')}
+
+      For more information, see https://on.cypress.io/bad-browser-policy
+      """
+    when "BAD_POLICY_WARNING_TOOLTIP"
+      """
+      Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

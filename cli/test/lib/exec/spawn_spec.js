@@ -1,5 +1,6 @@
 require('../../spec_helper')
 
+const _ = require('lodash')
 const cp = require('child_process')
 const os = require('os')
 const tty = require('tty')
@@ -44,6 +45,30 @@ describe('lib/exec/spawn', function () {
     sinon.stub(xvfb, 'isNeeded').returns(false)
     sinon.stub(state, 'getBinaryDir').returns(defaultBinaryDir)
     sinon.stub(state, 'getPathToExecutable').withArgs(defaultBinaryDir).returns('/path/to/cypress')
+  })
+
+  context('.isGarbageLineWarning', () => {
+    it('returns true', () => {
+      const str = `
+        [46454:0702/140217.292422:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete
+        [46454:0702/140217.292466:ERROR:gles2_cmd_decoder.cc(17788)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+        [46454:0702/140217.292526:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glClear: framebuffer incomplete
+        [46454:0702/140217.292555:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete
+        [46454:0702/140217.292584:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glClear: framebuffer incomplete
+        [46454:0702/140217.292612:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete'
+      `
+
+      const lines = _
+      .chain(str)
+      .split('\n')
+      .invokeMap('trim')
+      .compact()
+      .value()
+
+      _.each(lines, (line) => {
+        expect(spawn.isGarbageLineWarning(line), `expected line to be garbage: ${line}`).to.be.true
+      })
+    })
   })
 
   context('.start', function () {

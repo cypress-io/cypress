@@ -54,7 +54,7 @@ export default class Project {
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
-  @observable warning
+  @observable warnings = []
   @observable apiError
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
@@ -210,18 +210,23 @@ export default class Project {
     this.error = null
   }
 
-  @action setWarning (warning) {
+  @action addWarning (warning) {
     if (!this.dismissedWarnings[this._serializeWarning(warning)]) {
-      this.warning = warning
+      this.warnings.push(warning)
     }
   }
 
-  @action clearWarning () {
-    if (this.warning) {
-      this.dismissedWarnings[this._serializeWarning(this.warning)] = true
+  @action clearWarning (warning) {
+    if (!warning) {
+      // calling with no warning clears all warnings
+      return this.warnings.map((warning) => {
+        return this.clearWarning(warning)
+      })
     }
 
-    this.warning = null
+    this.dismissedWarnings[this._serializeWarning(warning)] = true
+
+    this.warnings = _.without(this.warnings, warning)
   }
 
   _serializeWarning (warning) {

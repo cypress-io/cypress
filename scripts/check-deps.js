@@ -6,6 +6,10 @@ const fs = require('fs')
 const path = require('path')
 const stripAnsi = require('strip-ansi')
 
+if (process.env.NO_CHECK_DEPS) {
+  process.exit(0)
+}
+
 const args = require('minimist')(process.argv.slice(2))
 const cwd = args.cwd || process.cwd()
 
