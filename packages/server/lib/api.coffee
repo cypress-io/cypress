@@ -7,6 +7,7 @@ Promise    = require("bluebird")
 humanInterval = require("human-interval")
 agent      = require("@packages/network").agent
 pkg        = require("@packages/root")
+machineId  = require("./util/machine_id")
 routes     = require("./util/routes")
 system     = require("./util/system")
 cache      = require("./cache")
@@ -14,7 +15,6 @@ cache      = require("./cache")
 THIRTY_SECONDS = humanInterval("30 seconds")
 SIXTY_SECONDS = humanInterval("60 seconds")
 TWO_MINUTES = humanInterval("2 minutes")
-
 
 DELAYS = [
   THIRTY_SECONDS
@@ -268,17 +268,23 @@ module.exports = {
     .catch(tagError)
 
   postLogout: (authToken) ->
-    @getAuthUrls()
-    .then (urls) ->
-      rp.post({
-        url: urls.dashboardLogoutUrl
-        json: true
-        auth: {
-          bearer: authToken
-        }
-      })
-      .catch({statusCode: 401}, ->) ## do nothing on 401
-      .catch(tagError)
+    Promise.join(
+      @getAuthUrls(),
+      machineId.machineId(),
+      (urls, machineId) ->
+        rp.post({
+          url: urls.dashboardLogoutUrl
+          json: true
+          auth: {
+            bearer: authToken
+          }
+          headers: {
+            "x-machine-id": machineId
+          }
+        })
+        .catch({statusCode: 401}, ->) ## do nothing on 401
+        .catch(tagError)
+  )
 
   createProject: (projectDetails, remoteOrigin, authToken) ->
     rp.post({

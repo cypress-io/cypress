@@ -2,12 +2,12 @@ require("../spec_helper")
 
 _        = require("lodash")
 os       = require("os")
-nmi      = require("node-machine-id")
 agent    = require("@packages/network").agent
 pkg      = require("@packages/root")
 api      = require("#{root}lib/api")
 browsers = require("#{root}lib/browsers")
 cache    = require("#{root}lib/cache")
+machineId = require("#{root}lib/util/machine_id")
 Promise  = require("bluebird")
 
 API_BASEURL = "http://localhost:1234"
@@ -674,10 +674,14 @@ describe "lib/api", ->
         expect(urls).to.deep.eq(AUTH_URLS)
 
   context ".postLogout", ->
+    beforeEach ->
+      sinon.stub(machineId, 'machineId').resolves('foo')
+
     it "POSTs /logout", ->
       nock(DASHBOARD_BASEURL)
       .matchHeader("x-os-name", "linux")
       .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-machine-id", "foo")
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
       .post("/logout")
@@ -687,6 +691,9 @@ describe "lib/api", ->
 
     it "tags errors", ->
       nock(DASHBOARD_BASEURL)
+      .matchHeader("x-os-name", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-machine-id", "foo")
       .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("accept-encoding", /gzip/)
       .post("/logout")
