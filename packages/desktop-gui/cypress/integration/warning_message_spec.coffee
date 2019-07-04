@@ -80,3 +80,41 @@ describe "WarningMessage", ->
       .click()
       .then ->
         expect(@ipc.externalOpen).not.to.be.called
+
+  context "with multiple warnings", ->
+    beforeEach ->
+      @warningObj2 = {type: "GOOD_BUT_NOT_TOO_GOOD", name: "Fairly good warning", message: "Other message"}
+
+    it "shows multiple warnings", ->
+      cy.shouldBeOnProjectSpecs().then =>
+        @ipc.onProjectWarning.yield(null, @warningObj)
+        @ipc.onProjectWarning.yield(null, @warningObj2)
+
+      cy.get(".alert-warning")
+        .should("have.length", 2)
+        .should("be.visible")
+        .first()
+        .should("contain", "Some warning")
+      cy.get(".alert-warning")
+        .its('1')
+        .should("contain", "Other message")
+
+    it "can dismiss the warnings", ->
+      cy.shouldBeOnProjectSpecs().then =>
+        @ipc.onProjectWarning.yield(null, @warningObj)
+        @ipc.onProjectWarning.yield(null, @warningObj2)
+
+      cy.get(".alert-warning")
+        .should("contain", "Some warning")
+        .should("contain", "Other message")
+        .get(".alert-warning button")
+        .first()
+        .click()
+      cy.get(".alert-warning")
+        .should("not.contain", "Some warning")
+        .should("contain", "Other message")
+        .get(".alert-warning button")
+        .click()
+      cy.get(".alert-warning")
+        .should("not.contain", "Some warning")
+        .should("not.contain", "Other message")

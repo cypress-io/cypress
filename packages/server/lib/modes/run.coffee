@@ -25,6 +25,7 @@ terminal   = require("../util/terminal")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
+chromePolicyCheck = require("../util/chrome_policy_check")
 
 color = (val, c) ->
   chalk[c](val)
@@ -341,6 +342,9 @@ writeOutput = (outputPath, results) ->
 
     fs.outputJsonAsync(outputPath, results)
 
+onWarning = (err) ->
+  console.log(chalk.yellow(err.message))
+
 openProjectCreate = (projectRoot, socketId, options) ->
   ## now open the project to boot the server
   ## putting our web client app in headless mode
@@ -351,8 +355,7 @@ openProjectCreate = (projectRoot, socketId, options) ->
     morgan:       false
     report:       true
     isTextTerminal: options.isTextTerminal
-    onWarning: (err) ->
-      console.log(err.message)
+    onWarning
     onError: (err) ->
       console.log("")
       if err.details
@@ -952,6 +955,9 @@ module.exports = {
 
         if not specs.length
           errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+
+        if browser.family == 'chrome'
+          chromePolicyCheck.run(onWarning)
 
         runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) =>
           @runSpecs({

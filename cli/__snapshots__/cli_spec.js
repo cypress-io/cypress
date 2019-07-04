@@ -34,7 +34,7 @@ exports['cli help command shows help 1'] = `
 
   stdout:
   -------
-  Usage: cypress [options] [command]
+  Usage: cypress <command> [options]
 
   Options:
 
@@ -70,7 +70,7 @@ exports['cli help command shows help for --help 1'] = `
 
   stdout:
   -------
-  Usage: cypress [options] [command]
+  Usage: cypress <command> [options]
 
   Options:
 
@@ -106,7 +106,7 @@ exports['cli help command shows help for -h 1'] = `
 
   stdout:
   -------
-  Usage: cypress [options] [command]
+  Usage: cypress <command> [options]
 
   Options:
 
@@ -144,7 +144,7 @@ exports['cli unknown command shows usage and exits 1'] = `
   -------
   Unknown command "foo"
 
-    Usage: cypress [options] [command]
+    Usage: cypress <command> [options]
 
     Options:
 

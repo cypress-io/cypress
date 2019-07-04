@@ -173,6 +173,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1.response}
       """
+    when "DASHBOARD_UNKNOWN_CREATE_RUN_WARNING"
+      """
+      Warning from Cypress Dashboard: #{arg1.message}
+
+      Details:
+      #{JSON.stringify(arg1.props, null, 2)}
+      """
     when "DASHBOARD_STALE_RUN"
       """
       You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
@@ -780,6 +787,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
        > #{arg2.join(', ')}
 
       Provide a path to an existing fixture file.
+      """
+    when "BAD_POLICY_WARNING"
+      """
+      Cypress detected policy settings on your computer that may cause issues.
+
+      The following policies were detected that may prevent Cypress from automating Chrome:
+
+       > #{arg1.join('\n > ')}
+
+      For more information, see https://on.cypress.io/bad-browser-policy
+      """
+    when "BAD_POLICY_WARNING_TOOLTIP"
+      """
+      Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
 
 get = (type, arg1, arg2) ->
