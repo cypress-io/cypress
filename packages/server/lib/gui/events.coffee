@@ -14,6 +14,7 @@ Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
 ensureUrl   = require("../util/ensure-url")
+chromePolicyCheck = require("../util/chrome_policy_check")
 browsers    = require("../browsers")
 konfig      = require("../konfig")
 
@@ -204,6 +205,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then (browsers = []) ->
         options.config = _.assign(options.config, { browsers })
       .then ->
+        chromePolicyCheck.run (err) ->
+          options.config.browsers.forEach (browser) ->
+            if browser.family == 'chrome'
+              browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
+
         openProject.create(arg, options, {
           onFocusTests: onFocusTests
           onSpecChanged: onSpecChanged

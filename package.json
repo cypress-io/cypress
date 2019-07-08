@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "engines": {
@@ -67,7 +67,7 @@
     ]
   },
   "devDependencies": {
-    "@cypress/bumpercar": "2.0.7",
+    "@cypress/bumpercar": "2.0.9",
     "@cypress/commit-message-install": "2.6.2",
     "@cypress/env-or-json-file": "2.0.0",
     "@cypress/npm-run-all": "4.0.5",
@@ -113,7 +113,7 @@
     "execa-wrap": "1.4.0",
     "filesize": "4.1.2",
     "find-package-json": "1.2.0",
-    "fs-extra": "7.0.1",
+    "fs-extra": "8.1.0",
     "gift": "0.10.2",
     "gulp": "3.9.1",
     "gulp-awspublish": "3.4.0",
