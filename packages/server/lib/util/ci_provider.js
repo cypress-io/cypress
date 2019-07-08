@@ -38,6 +38,12 @@ const isCodeshipPro = () => {
   return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && !process.env.CODESHIP
 }
 
+const isConcourse = () => {
+  return _.some(process.env, (val, key) => {
+    return /^CONCOURSE_/.test(key)
+  })
+}
+
 const isGitlab = () => {
   return process.env.GITLAB_CI || (process.env.CI_SERVER_NAME && /^GitLab/.test(process.env.CI_SERVER_NAME))
 }
@@ -78,13 +84,14 @@ const CI_PROVIDERS = {
   'circle': 'CIRCLECI',
   'codeshipBasic': isCodeshipBasic,
   'codeshipPro': isCodeshipPro,
+  'concourse': isConcourse,
   'drone': 'DRONE',
   'gitlab': isGitlab,
+  'goCD': 'GO_JOB_NAME',
   'googleCloud': isGoogleCloud,
   'jenkins': isJenkins,
   'semaphore': 'SEMAPHORE',
   'shippable': 'SHIPPABLE',
-  'snap': 'SNAP_CI',
   'teamcity': 'TEAMCITY_VERSION',
   'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
@@ -94,8 +101,8 @@ const CI_PROVIDERS = {
 const _detectProviderName = function () {
   const { env } = process
 
-  //# return the key of the first provider
-  //# which is truthy
+  // return the key of the first provider
+  // which is truthy
   return _.findKey(CI_PROVIDERS, (value) => {
     if (_.isString(value)) {
       return env[value]
@@ -107,8 +114,8 @@ const _detectProviderName = function () {
   })
 }
 
-//# TODO: dont forget about buildNumber!
-//# look at the old commit that was removed to see how we did it
+// TODO: dont forget about buildNumber!
+// look at the old commit that was removed to see how we did it
 const _providerCiParams = () => {
   return {
     appveyor: extract([
@@ -176,6 +183,15 @@ const _providerCiParams = () => {
       'CI_REPO_NAME',
       'CI_PROJECT_ID',
     ]),
+    // https://concourse-ci.org/implementing-resource-types.html#resource-metadata
+    concourse: extract([
+      'BUILD_ID',
+      'BUILD_NAME',
+      'BUILD_JOB_NAME',
+      'BUILD_PIPELINE_NAME',
+      'BUILD_TEAM_NAME',
+      'ATC_EXTERNAL_URL',
+    ]),
     drone: extract([
       'DRONE_JOB_NUMBER',
       'DRONE_BUILD_LINK',
@@ -197,7 +213,23 @@ const _providerCiParams = () => {
       'CI_PROJECT_URL',
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
-    //# for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+    // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+    ]),
+    // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
+    goCD: extract([
+      'GO_SERVER_URL',
+      'GO_ENVIRONMENT_NAME',
+      'GO_PIPELINE_NAME',
+      'GO_PIPELINE_COUNTER',
+      'GO_PIPELINE_LABEL',
+      'GO_STAGE_NAME',
+      'GO_STAGE_COUNTER',
+      'GO_JOB_NAME',
+      'GO_TRIGGER_USER',
+      'GO_REVISION',
+      'GO_TO_REVISION',
+      'GO_FROM_REVISION',
+      'GO_MATERIAL_HAS_CHANGED',
     ]),
     googleCloud: extract([
       // individual jobs
@@ -235,10 +267,9 @@ const _providerCiParams = () => {
       'SEMAPHORE_TRIGGER_SOURCE',
       'PULL_REQUEST_NUMBER', // pull requests from forks ONLY
     ]),
-
     // see http://docs.shippable.com/ci/env-vars/
     shippable: extract([
-    //# build variables
+    // build variables
       'SHIPPABLE_BUILD_ID', // "5b93354cabfabb07007f01fd"
       'SHIPPABLE_BUILD_NUMBER', // "4"
       'SHIPPABLE_COMMIT_RANGE', // "sha1...sha2"
@@ -246,7 +277,7 @@ const _providerCiParams = () => {
       'SHIPPABLE_JOB_ID', // "1"
       'SHIPPABLE_JOB_NUMBER', // "1"
       'SHIPPABLE_REPO_SLUG', // "<username>/<repo>"
-      //# additional information that Shippable provides
+      // additional information that Shippable provides
       'IS_FORK', // "true"
       'IS_GIT_TAG', // "false"
       'IS_PRERELEASE', // "false"
@@ -255,7 +286,7 @@ const _providerCiParams = () => {
       'REPO_FULL_NAME', // "<username>/<repo>"
       'REPO_NAME', // "cypress-example-kitchensink"
       'BUILD_URL', // "https://app.shippable.com/github/<username>/<repo>/runs/1"
-      //# Pull request information
+      // Pull request information
       'BASE_BRANCH', // Name of the target branch into which the pull request changes will be merged.
       'HEAD_BRANCH', // This is only set for pull requests and is the name of the branch the pull request was opened from.
       'IS_PULL_REQUEST', // "false" or "true"
@@ -263,7 +294,6 @@ const _providerCiParams = () => {
       'PULL_REQUEST_BASE_BRANCH', // Name of the branch that the pull request will be merged into. It should be the same as BASE_BRANCH.
       'PULL_REQUEST_REPO_FULL_NAME', // Full name of the repository from where the pull request originated.
     ]),
-    snap: null,
     teamcity: null,
     teamfoundation: extract([
       'BUILD_BUILDID',
@@ -402,7 +432,7 @@ const _providerCommitParams = function () {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
-    //# Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
+    // Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
     semaphore: {
       sha: env.REVISION,
       branch: env.BRANCH_NAME,
@@ -431,7 +461,7 @@ const _providerCommitParams = function () {
     },
     travis: {
       sha: env.TRAVIS_COMMIT,
-      //# for PRs, TRAVIS_BRANCH is the base branch being merged into
+      // for PRs, TRAVIS_BRANCH is the base branch being merged into
       branch: env.TRAVIS_PULL_REQUEST_BRANCH || env.TRAVIS_BRANCH,
       // authorName: ???
       // authorEmail: ???
