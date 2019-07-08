@@ -113,7 +113,7 @@
     "execa-wrap": "1.4.0",
     "filesize": "4.1.2",
     "find-package-json": "1.2.0",
-    "fs-extra": "8.0.1",
+    "fs-extra": "8.1.0",
     "gift": "0.10.2",
     "gulp": "3.9.1",
     "gulp-awspublish": "3.4.0",
