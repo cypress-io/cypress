@@ -796,9 +796,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              # TODO remove extra branches
-              - binary-metadata
-              - add-comment-how-to-install-4525
         requires:
           - build
     - build-binary:
@@ -806,9 +803,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              # TODO remove extra branches
-              - binary-metadata
-              - add-comment-how-to-install-4525
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -816,9 +810,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              # TODO remove extra branches
-              - binary-metadata
-              - add-comment-how-to-install-4525
         requires:
           - build-npm-package
           - build-binary
