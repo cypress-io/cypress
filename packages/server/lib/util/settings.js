@@ -116,7 +116,7 @@ module.exports = {
   },
 
   configFile (options = {}) {
-    return options.configFile || 'cypress.json'
+    return options.configFile === false ? false : (options.configFile || 'cypress.json')
   },
 
   id (projectRoot, options = {}) {
@@ -130,7 +130,7 @@ module.exports = {
   },
 
   exists (projectRoot, options = {}) {
-    const file = options.configFile && this.pathToConfigFile(projectRoot, options)
+    const file = this.pathToConfigFile(projectRoot, options)
 
     // first check if cypress.json exists
     return maybeVerifyConfigFile(file)
@@ -186,7 +186,7 @@ module.exports = {
   },
 
   readEnv (projectRoot) {
-    const file = this._pathToFile(projectRoot, 'cypress.env.json')
+    const file = this.pathToCypressEnvJson(projectRoot)
 
     return fs.readJsonAsync(file)
     .catch({ code: 'ENOENT' }, () => {
@@ -221,7 +221,9 @@ module.exports = {
   },
 
   pathToConfigFile (projectRoot, options = {}) {
-    return this._pathToFile(projectRoot, this.configFile(options))
+    const configFile = this.configFile(options)
+
+    return configFile && this._pathToFile(projectRoot, configFile)
   },
 
   pathToCypressEnvJson (projectRoot) {
