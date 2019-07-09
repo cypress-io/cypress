@@ -189,7 +189,7 @@ jobs:
           paths:
             - packages/ts/node_modules
 
-      - run: npm run stop-only
+      - run: npm run stop-only-all
       ## now go build all of subpackages
       - run: npm run prebuild -- --serial
       - run: npm run build -- --serial

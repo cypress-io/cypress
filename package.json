@@ -38,13 +38,14 @@
     "lint-all": "npm run lint-coffee && npm run lint",
     "lint-changed": "lint-changed",
     "lint-changed-fix": "npm run lint-changed -- --fix",
-    "lint-coffee": "coffeelint scripts/**/*.coffee && npm run all lint-coffee && npm run stop-only",
+    "lint-coffee": "coffeelint scripts/**/*.coffee && npm run all lint-coffee && npm run stop-only-all",
     "lint-fix": "npm run lint -- --fix",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "npm run check-deps-pre",
     "start": "node ./cli/bin/cypress open --dev --global",
-    "stop-only": "stop-only --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
+    "stop-only": "stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
+    "stop-only-all": "npm run stop-only -- --folder packages",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "test-debug-package": "node ./scripts/test-debug-package.js",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
@@ -55,7 +56,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run stop-only --silent && lint-staged"
+      "pre-commit": "lint-staged"
     }
   },
   "devDependencies": {
@@ -183,6 +184,7 @@
   ],
   "lint-staged": {
     "*.{js,jsx,ts,tsx,coffee,json,eslintrc}": [
+      "npm run stop-only -- --folder",
       "eslint --fix",
       "git add"
     ]
