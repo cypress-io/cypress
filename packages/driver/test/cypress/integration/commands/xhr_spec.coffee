@@ -1327,6 +1327,25 @@ describe "src/cy/commands/xhr", ->
         .wait("@getFoo").then (xhr) ->
           expect(xhr.responseBody).to.eq "foo bar baz"
 
+    ## https://github.com/cypress-io/cypress/issues/2372
+    it "warns if a percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "/foo%25bar")
+      .then ->
+        expect(Cypress.utils.warning).to.be.calledWith """
+        A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.
+
+        Did you mean to pass "/foo%bar"?
+        """
+
+    it "does not warn if an invalid percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "http://example.com/%E0%A4%A")
+      .then ->
+        expect(Cypress.utils.warning).to.not.be.called
+
     it.skip "does not error when response is null but respond is false", ->
       cy.route
         url: /foo/
