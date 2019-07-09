@@ -3191,7 +3191,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").type(val)
 
-      it "throws when type is cancelled by preventingDefault mousedown"
+      it "throws when type is canceled by preventingDefault mousedown"
 
       it "throws when element animation exceeds timeout", (done) ->
         ## force the animation calculation to think we moving at a huge distance ;-)

@@ -32,10 +32,10 @@ module.exports = {
       return stopPropagation.apply(this, args)
     }
 
-    const cancelled = !el.dispatchEvent(mdownEvt)
+    const canceled = !el.dispatchEvent(mdownEvt)
 
     const props = {
-      preventedDefault: cancelled,
+      preventedDefault: canceled,
       stoppedPropagation: !!mdownEvt._hasStoppedPropagation,
     }
 
@@ -76,10 +76,10 @@ module.exports = {
       return stopPropagation.apply(this, args)
     }
 
-    const cancelled = !el.dispatchEvent(mupEvt)
+    const canceled = !el.dispatchEvent(mupEvt)
 
     const props = {
-      preventedDefault: cancelled,
+      preventedDefault: canceled,
       stoppedPropagation: !!mupEvt._hasStoppedPropagation,
     }
 
@@ -120,10 +120,10 @@ module.exports = {
       return stopPropagation.apply(this, args)
     }
 
-    const cancelled = !el.dispatchEvent(clickEvt)
+    const canceled = !el.dispatchEvent(clickEvt)
 
     const props = {
-      preventedDefault: cancelled,
+      preventedDefault: canceled,
       stoppedPropagation: !!clickEvt._hasStoppedPropagation,
     }
 

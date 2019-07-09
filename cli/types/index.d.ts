@@ -4044,7 +4044,7 @@ declare namespace Cypress {
     (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
     /**
      * Fires when your app calls the global `window.confirm()` method.
-     * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.
+     * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be canceled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      * @example
     ```
