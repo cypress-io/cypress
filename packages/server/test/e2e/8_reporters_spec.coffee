@@ -112,5 +112,5 @@ describe "e2e reporters", ->
       expectedExitCode: 0
       snapshot: true
       reporter: "teamcity"
-      reporterOptions: "topLevelSuite=top suite,flowId=12345"
+      reporterOptions: "topLevelSuite=top suite,flowId=12345,useStdError='true',useStdError='true',recordHookFailures='true',actualVsExpected='true'"
     })
