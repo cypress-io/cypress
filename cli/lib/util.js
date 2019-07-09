@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const crypto = require('crypto')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const tty = require('tty')
@@ -19,10 +20,46 @@ const isInstalledGlobally = require('is-installed-globally')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 const logger = require('./logger')
 const debug = require('debug')('cypress:cli')
+const fs = require('./fs')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
 const getosAsync = Promise.promisify(getos)
+
+/**
+ * Returns SHA512 of a file
+ *
+ * Implementation lifted from https://github.com/sindresorhus/hasha
+ * but without bringing that dependency (since hasha is Node v8+)
+ */
+const getFileChecksum = (filename) => {
+  la(is.unemptyString(filename), 'expected filename', filename)
+
+  const hashStream = () => {
+    const s = crypto.createHash('sha512')
+
+    s.setEncoding('hex')
+
+    return s
+  }
+
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(filename)
+
+    stream.on('error', reject)
+    .pipe(hashStream())
+    .on('error', reject)
+    .on('finish', function () {
+      resolve(this.read())
+    })
+  })
+}
+
+const getFileSize = (filename) => {
+  la(is.unemptyString(filename), 'expected filename', filename)
+
+  return fs.statAsync(filename).get('size')
+}
 
 const isBrokenGtkDisplayRe = /Gtk: cannot open display/
 
@@ -348,6 +385,9 @@ const util = {
     return `${issuesUrl}/${number}`
   },
 
+  getFileChecksum,
+
+  getFileSize,
 }
 
 module.exports = util

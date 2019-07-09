@@ -5,6 +5,8 @@ const tty = require('tty')
 const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
+const hasha = require('hasha')
+const la = require('lazy-ass')
 
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
@@ -481,6 +483,18 @@ describe('util', () => {
       it('keeps whitespace inside removed quotes', () => {
         process.env.FOO = '"foo.txt "'
         expect(util.getEnv('FOO', true)).to.equal('foo.txt ')
+      })
+    })
+  })
+
+  context('.getFileChecksum', () => {
+    it('computes same hash as Hasha SHA512', () => {
+      return Promise.all([
+        util.getFileChecksum(__filename),
+        hasha.fromFile(__filename, { algorithm: 'sha512' }),
+      ]).then(([checksum, expectedChecksum]) => {
+        la(checksum === expectedChecksum, 'our computed checksum', checksum,
+          'is different from expected', expectedChecksum)
       })
     })
   })
