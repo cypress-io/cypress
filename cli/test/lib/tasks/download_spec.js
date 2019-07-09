@@ -224,6 +224,7 @@ describe('lib/tasks/download', function () {
       .query(true)
       .reply(200, () => {
         debug('creating read stream for %s', examplePath)
+
         return fs.createReadStream(examplePath)
       }, {
         'x-amz-meta-checksum': this.expectedChecksum,
@@ -232,6 +233,7 @@ describe('lib/tasks/download', function () {
 
       debug('downloading %s to %s for test version %s',
         examplePath, this.options.downloadDestination, this.options.version)
+
       return download.start({
         downloadDestination: this.options.downloadDestination,
         version: this.options.version,
