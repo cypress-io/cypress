@@ -15,8 +15,6 @@ recentlyCreatedWindow = false
 
 getUrl = (type) ->
   switch type
-    when "GITHUB_LOGIN"
-      user.getLoginUrl()
     when "INDEX"
       cyDesktop.getPathToIndex()
     else
@@ -63,6 +61,9 @@ module.exports = {
 
     ## else hide all windows
     _.invoke windows, "hide"
+
+  focusMainWindow: ->
+    getByType('INDEX').show()
 
   getByWebContents: (webContents) ->
     BrowserWindow.fromWebContents(webContents)
@@ -237,12 +238,7 @@ module.exports = {
     if win = getByType(options.type)
       win.show()
 
-      if options.type is "GITHUB_LOGIN"
-        err = new Error
-        err.alreadyOpen = true
-        return Promise.reject(err)
-      else
-        return Promise.resolve(win)
+      return Promise.resolve(win)
 
     recentlyCreatedWindow = true
 
@@ -250,29 +246,13 @@ module.exports = {
       width:  600
       height: 500
       show:   true
-      url:    getUrl(options.type)
       webPreferences: {
         preload: cwd("lib", "ipc", "ipc.js")
       }
     })
 
-    urlChanged = (url, resolve) ->
-      parsed = uri.parse(url, true)
-
-      if code = parsed.query.code
-        ## there is a bug with electron
-        ## crashing when attemping to
-        ## destroy this window synchronously
-        _.defer -> win.destroy()
-
-        resolve(code)
-
-    # if args.transparent and args.show
-    #   {width, height} = args
-
-    #   args.show = false
-    #   args.width = 0
-    #   args.height = 0
+    if not options.url
+      options.url = getUrl(options.type)
 
     win = @create(projectRoot, options)
 
@@ -293,35 +273,12 @@ module.exports = {
       setWindowProxy(win)
     )
     .spread (url) ->
-      if options.type is "GITHUB_LOGIN"
-        ## remove the GitHub warning banner about an outdated browser
-        ## TODO: remove this once we have upgraded Electron or added native browser auth
-        newUserAgent = win.webContents.getUserAgent()
-        .replace(/Chrome\/\d+\.\d+\.\d+\.\d+/, 'Chrome/72.0.3626.121')
-        .replace(/Electron\/\d+\.\d+\.\d+/, 'Electron/4.0.5')
-        debug('changing user agent to ', newUserAgent)
-        win.webContents.setUserAgent(newUserAgent)
-
       ## navigate the window here!
       win.loadURL(url)
 
       ## reset this back to false
       recentlyCreatedWindow = false
-
-      if options.type is "GITHUB_LOGIN"
-        new Promise (resolve, reject) ->
-          win.once "closed", ->
-            err = new Error("Window closed by user")
-            err.windowClosed = true
-            reject(err)
-
-          win.webContents.on "will-navigate", (e, url) ->
-            urlChanged(url, resolve)
-
-          win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
-            urlChanged(newUrl, resolve)
-      else
-        return win
+    .thenReturn(win)
 
   trackState: (projectRoot, isTextTerminal, win, keys) ->
     isDestroyed = ->
