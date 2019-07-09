@@ -574,6 +574,27 @@ const isDescendent = ($el1, $el2) => {
   return !!(($el1.get(0) === $el2.get(0)) || $el1.has($el2).length)
 }
 
+const findParent = (el, fn) => {
+
+  const recurse = (curEl, prevEl) => {
+    if (!curEl) {
+      return null
+    }
+
+    const retEl = fn(curEl, prevEl)
+
+    if (retEl) {
+      return retEl
+    }
+
+    const nextEl = curEl.parentElement
+
+    return recurse(nextEl, curEl)
+  }
+
+  return recurse(el.parentElement, el) || el
+}
+
 // in order to simulate actual user behavior we need to do the following:
 // 1. take our element and figure out its center coordinate
 // 2. check to figure out the element listed at those coordinates
@@ -869,6 +890,8 @@ module.exports = {
   callNativeMethod,
 
   tryCallNativeMethod,
+
+  findParent,
 
   getElements,
 
