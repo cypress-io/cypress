@@ -750,7 +750,7 @@ declare namespace Cypress {
      *    cy.get('input').should('be.disabled')
      *    cy.get('button').should('be.visible')
      */
-    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get one or more DOM elements by selector.
      * The querying behavior of this command matches exactly how $(…) works in jQuery.
@@ -760,7 +760,7 @@ declare namespace Cypress {
      *    cy.get('ul li:first').should('have.class', 'active')
      *    cy.get('.dropdown-menu').click()
      */
-    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<E>>
     /**
      * Get one or more DOM elements by alias.
      * @see https://on.cypress.io/get#Alias
@@ -771,7 +771,7 @@ declare namespace Cypress {
      *    //later retrieve the todos
      *    cy.get('@todos')
      */
-    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<S>
+    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<S>
 
     /**
      * Get a browser cookie by its name.
@@ -1853,6 +1853,20 @@ declare namespace Cypress {
      * @default {true}
      */
     retryOnNetworkFailure: boolean
+  }
+
+  /**
+   * Options that control how a command behaves in the `within` scope.
+   * These options will determine how nodes are selected.
+   */
+
+  interface Withinable {
+    /**
+     * Element to search for children in. If null, search begins from root-level DOM element.
+     *
+     * @default depends on context, null if outside of within wrapper
+     */
+    withinSubject: JQuery | HTMLElement | null
   }
 
   /**
