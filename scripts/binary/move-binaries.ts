@@ -198,7 +198,7 @@ export const moveBinaries = async (args = []) => {
   try {
     await prompts.shouldCopy()
   } catch (e) {
-    console.log('Copying has been cancelled')
+    console.log('Copying has been canceled')
 
     return
   }

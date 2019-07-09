@@ -219,6 +219,12 @@ cy.get('body').within({ log: false }, body => {
   body // $ExpectType JQuery<HTMLBodyElement>
 })
 
+cy.get('body').within(() => {
+  cy.get('body', { withinSubject: null }).then(body => {
+    body // $ExpectType JQuery<HTMLBodyElement>
+  })
+})
+
 cy
   .get('body')
   .then(() => {
