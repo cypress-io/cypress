@@ -1541,7 +1541,7 @@ describe "src/cy/commands/xhr", ->
 
         cy.on "command:retry", =>
           if cy.state("error")
-            done("should have cancelled and not retried after failing")
+            done("should have canceled and not retried after failing")
 
         cy.on "fail", (err) =>
           p = cy.state("promise")
