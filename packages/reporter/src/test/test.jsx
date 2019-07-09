@@ -38,7 +38,7 @@ class Test extends Component {
           >
             {model.title}
             <span className="visually-hidden">{model.state}</span>
-          </div>
+          </span>
           <div className='runnable-controls'>
             <Tooltip placement='top' title='One or more commands failed'>
               <i className='fa fa-warning'></i>
