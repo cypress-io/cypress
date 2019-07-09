@@ -143,6 +143,11 @@ module.exports = {
 
     @throwErr(err, options)
 
+  warnByPath: (errPath, options = {}) ->
+    err = @errMessageByPath errPath, options.args
+
+    @warning(err)
+
   internalErr: (err) ->
     err = new Error(err)
     err.name = "InternalError"

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import Dropdown from '../dropdown/dropdown'
+import MarkdownRenderer from '../lib/markdown-renderer'
 
 import projectsApi from '../projects/projects-api'
 
@@ -73,7 +74,24 @@ export default class Browsers extends Component {
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
+        {this._warn(browser)}
         {this._info(browser)}
+      </span>
+    )
+  }
+
+  _warn (browser) {
+    if (!browser.warning) return null
+
+    return (
+      <span className='browser-warning'>
+        <Tooltip
+          title={<MarkdownRenderer markdown={browser.warning}/>}
+          placement='bottom'
+          className='browser-info-tooltip cy-tooltip'
+        >
+          <i className='fa fa-exclamation-triangle' />
+        </Tooltip>
       </span>
     )
   }

@@ -3,7 +3,7 @@ Promise = Cypress.Promise
 previousTestWasCanceled = false
 calledAfterDoneEarly = false
 
-describe "cancelling command queues", ->
+describe "canceling command queues", ->
   it "Cypress.stop()", (done) ->
     cy.stub(Cypress.runner, "stop")
 
