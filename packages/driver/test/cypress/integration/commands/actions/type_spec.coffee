@@ -2348,6 +2348,87 @@ describe "src/cy/commands/actions/type", ->
 
       it "respects being formatted by input event handlers"
 
+      it "accurately returns host contenteditable attr", ->
+        hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=true attr", ->
+        hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=\"\" attr", ->
+        hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=\"foo\" attr", ->
+        hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns same el with no falsey contenteditable=\"false\" attr", ->
+        hostEl = cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+
+            
+      ## https://github.com/cypress-io/cypress/issues/3001
+      describe('skip actionability if already focused', () =>
+        it('inside input', () =>
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+            <input type="text" id="foo">
+            '))
+
+          cy.$$('#foo').focus()
+          
+
+          cy.focused().type('new text').should('have.prop', 'value', 'new text')
+        )
+
+        it('inside textarea', () =>
+         
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
+            <textarea id="foo"></textarea>
+            '))
+
+          cy.$$('#foo').focus()
+        
+
+          cy.focused().type('new text').should('have.prop', 'value', 'new text')
+        )
+
+        it('inside contenteditable', () =>
+      
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+            <div id="foo" contenteditable>
+            <div>foo</div><div>bar</div><div>baz</div>
+            </div>
+            '))
+          win = cy.state('window')
+          doc = window.document
+
+          cy.$$('#foo').focus()
+          inner = cy.$$('div:contains(bar):last')
+
+          range = doc.createRange()
+
+          range.selectNodeContents(inner[0])
+          sel = win.getSelection()
+
+          sel.removeAllRanges()
+
+          sel.addRange(range)
+        
+
+          cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
+        )
+      )
+
       it "can arrow from maxlength", ->
         cy.get('input:first').invoke('attr', 'maxlength', "5").type('foobar{leftarrow}')
         cy.window().then (win) ->
@@ -2569,11 +2650,20 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#single-input input").type("f").type("f{enter}").then -> done()
 
-      context "2 inputs, no 'submit' elements", ->
+      # https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+      context "2 inputs, no 'submit' elements, no inputs allowing implicit submission", ->
         it "does not trigger submit event", (done) ->
-          form = @$forms.find("#no-buttons").submit -> done("err: should not have submitted")
+          form = @$forms.find("#no-buttons-more-than-one-input-allowing-implicit-submission").submit -> done("err: should not have submitted")
 
-          cy.get("#no-buttons input:first").type("f").type("{enter}").then -> done()
+          cy.get("#no-buttons-more-than-one-input-allowing-implicit-submission input:first").type("f").type("{enter}").then -> done()
+
+      context "2 inputs, no 'submit' elements, only 1 input allowing implicit submission", ->
+        it "does submit event", (done) ->
+          form = @$forms.find("#no-buttons-and-only-one-input-allowing-implicit-submission").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#no-buttons-and-only-one-input-allowing-implicit-submission input:first").type("f{enter}")
 
       context "2 inputs, no 'submit' elements but 1 button[type=button]", ->
         it "does not trigger submit event", (done) ->

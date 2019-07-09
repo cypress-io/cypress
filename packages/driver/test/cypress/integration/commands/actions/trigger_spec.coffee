@@ -158,6 +158,10 @@ describe "src/cy/commands/actions/trigger", ->
       cy.document().trigger("dragover").then ->
         expect(expected).to.be.true
 
+    it "can handle window w/length > 1 as a subject", ->
+      cy.window().should('have.length.gt', 1)
+      .trigger('click')
+
     describe "actionability", ->
       it "can trigger on elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").trigger("mousedown")

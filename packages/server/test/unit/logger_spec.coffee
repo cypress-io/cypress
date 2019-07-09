@@ -2,7 +2,6 @@ require("../spec_helper")
 
 _             = require("lodash")
 path          = require("path")
-winston       = require("winston")
 Promise       = require("bluebird")
 appData       = require("#{root}lib/util/app_data")
 konfig        = require("#{root}lib/konfig")

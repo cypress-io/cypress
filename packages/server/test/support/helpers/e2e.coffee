@@ -356,14 +356,14 @@ module.exports = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
-          DEBUG_COLORS: "1"
-
           ## FYI: color will already be disabled
           ## because we are piping the child process
           COLUMNS: 100
           LINES: 24
         })
         .defaults({
+          DEBUG_COLORS: "1"
+
           ## prevent any Compression progress
           ## messages from showing up
           VIDEO_COMPRESSION_THROTTLE: 120000
