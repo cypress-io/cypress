@@ -213,18 +213,26 @@ create = (state, expect) ->
 
     cy.ensureExistence($el)
 
-  ensurePointerEvents = ($el, onFail) ->
+  ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, onFail) ->
     cmd = state("current").get("name")
     el = $el[0]
     win = $dom.getWindowByElement(el)
-    pointerEvents = win.getComputedStyle(el).pointerEvents
-    if pointerEvents is 'none'
+    value = win.getComputedStyle(el)[cssProperty]
+    if value is cssValue
       elInherited = $elements.findParent el, (el, prevEl) ->
-        if win.getComputedStyle(el).pointerEvents isnt 'none'
+        if win.getComputedStyle(el)[cssProperty] isnt cssValue
           return prevEl
     
       element = $dom.stringify(el)
       elementInherited = (el isnt elInherited) && $dom.stringify(elInherited)
+
+      consoleProps = {
+        'But it has CSS': "#{cssProperty}: #{cssValue}"
+      }
+
+      if elementInherited then _.extend(consoleProps, {
+        'Inherited From': elInherited
+      })
 
       $utils.throwErrByPath("dom.pointer_events_none", {
         onFail
@@ -232,6 +240,9 @@ create = (state, expect) ->
           cmd
           element
           elementInherited
+        }
+        errProps: {
+          consoleProps
         }
       })
 
@@ -245,12 +256,22 @@ create = (state, expect) ->
         $utils.throwErrByPath("dom.covered", {
           onFail
           args: { cmd, element1, element2 }
+          errProps: {
+            consoleProps: {
+              "But its Covered By": $dom.getElements($el2)
+            }
+          }
         })
       else
         node = $dom.stringify($el1)
         $utils.throwErrByPath("dom.center_hidden", {
           onFail
           args: { cmd, node }
+          errProps: {
+            consoleProps: {
+              "But its Covered By": $dom.getElements($el2)
+            }
+          }
         })
 
   ensureValidPosition = (position, log) ->
@@ -290,7 +311,7 @@ create = (state, expect) ->
 
     ensureDocument
 
-    ensurePointerEvents
+    ensureElDoesNotHaveCSS
 
     ensureElementIsNotAnimating
 

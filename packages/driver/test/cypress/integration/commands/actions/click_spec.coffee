@@ -134,8 +134,16 @@ describe "src/cy/commands/actions/click", ->
     describe 'pointer-events:none', ->
       beforeEach ->
         cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo cy.$$('#dom')
-        ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>').appendTo(cy.$$('#dom'))
-        cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red">#ptrNone > div</div>').appendTo ptrNone
+        @ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>').appendTo(cy.$$('#dom'))
+        cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red">#ptrNone > div</div>').appendTo @ptrNone
+        
+        @logs = []
+        cy.on "log:added", (attrs, log) =>
+          @lastLog = log
+          @logs.push(log)
+
+        return null
+
         
       it 'element behind pointer-events:none should still get click', ->
         cy.get('#ptr').click() # should pass with flying colors
@@ -144,9 +152,19 @@ describe "src/cy/commands/actions/click", ->
         cy.get('#ptrNone').click {timeout: 300, force:true}
         
       it 'should error with message about pointer-events', ->
-        onError = cy.stub().callsFake (err) ->
+        onError = cy.stub().callsFake (err) =>
+          lastLog = @lastLog
           expect(err.message).to.contain 'has style \'pointer-events: none\''
           expect(err.message).to.not.contain 'inherited from'
+          consoleProps = lastLog.invoke("consoleProps")
+          expect(_.keys(consoleProps)).deep.eq([
+            "Command"
+            "Tried to Click"
+            "But it has CSS"
+            "Error"
+          ])
+          expect(consoleProps["But it has CSS"]).to.eq('pointer-events: none')
+        
       
         cy.once 'fail', onError
           
@@ -155,9 +173,20 @@ describe "src/cy/commands/actions/click", ->
         
 
       it 'should error with message about pointer-events and include inheritance', ->
-        onError = cy.stub().callsFake (err) ->
+        onError = cy.stub().callsFake (err) =>
+          lastLog = @lastLog
           expect(err.message).to.contain 'has style \'pointer-events: none\', inherited from this element:'
           expect(err.message).to.contain '<div id="ptrNone"'
+          consoleProps = lastLog.invoke("consoleProps")
+          expect(_.keys(consoleProps)).deep.eq([
+            "Command"
+            "Tried to Click"
+            "But it has CSS"
+            "Inherited From"
+            "Error"
+          ])
+          expect(consoleProps["But it has CSS"]).to.eq('pointer-events: none')
+          expect(consoleProps["Inherited From"]).to.eq(@ptrNone.get(0))
         
         cy.once 'fail', onError
 

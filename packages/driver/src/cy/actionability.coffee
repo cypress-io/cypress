@@ -50,7 +50,7 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
     ## with at these coordinates
     $elAtCoords = getElementAtPointFromViewport(fromViewport)
 
-    cy.ensurePointerEvents($el, log)
+    cy.ensureElDoesNotHaveCSS($el, 'pointer-events', 'none', log)
     cy.ensureDescendents($el, $elAtCoords, log)
 
     return $elAtCoords
@@ -175,11 +175,14 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
     ensureDescendentsAndScroll()
   catch err
     if log
-      log.set consoleProps: ->
-        obj = {}
-        obj["Tried to Click"]     = $dom.getElements($el)
-        obj["But its Covered By"] = $dom.getElements($elAtCoords)
-        obj
+      log.set {
+        consoleProps: ->
+          obj = {}
+          obj["Tried to Click"] = $dom.getElements($el)
+          _.extend(obj, err.consoleProps)
+          obj
+      }
+      
 
     throw err
 
