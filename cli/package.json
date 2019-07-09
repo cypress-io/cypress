@@ -85,6 +85,7 @@
     "dependency-check": "3.3.0",
     "dtslint": "0.7.6",
     "execa-wrap": "1.4.0",
+    "hasha": "5.0.0",
     "mock-fs": "4.9.0",
     "mocked-env": "1.2.4",
     "nock": "9.6.1",

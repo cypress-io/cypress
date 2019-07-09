@@ -750,7 +750,7 @@ declare namespace Cypress {
      *    cy.get('input').should('be.disabled')
      *    cy.get('button').should('be.visible')
      */
-    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get one or more DOM elements by selector.
      * The querying behavior of this command matches exactly how $(…) works in jQuery.
@@ -760,7 +760,7 @@ declare namespace Cypress {
      *    cy.get('ul li:first').should('have.class', 'active')
      *    cy.get('.dropdown-menu').click()
      */
-    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<E>>
     /**
      * Get one or more DOM elements by alias.
      * @see https://on.cypress.io/get#Alias
@@ -771,7 +771,7 @@ declare namespace Cypress {
      *    //later retrieve the todos
      *    cy.get('@todos')
      */
-    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable>): Chainable<S>
+    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<S>
 
     /**
      * Get a browser cookie by its name.
@@ -1853,6 +1853,20 @@ declare namespace Cypress {
      * @default {true}
      */
     retryOnNetworkFailure: boolean
+  }
+
+  /**
+   * Options that control how a command behaves in the `within` scope.
+   * These options will determine how nodes are selected.
+   */
+
+  interface Withinable {
+    /**
+     * Element to search for children in. If null, search begins from root-level DOM element.
+     *
+     * @default depends on context, null if outside of within wrapper
+     */
+    withinSubject: JQuery | HTMLElement | null
   }
 
   /**
@@ -3709,6 +3723,14 @@ declare namespace Cypress {
      */
     (chainer: 'have.html', value: string): Chainable<Subject>
     /**
+     * Assert that the html of the first element of the selection partially contains the given html, using `.html()`.
+     * @example
+     *    cy.get('#result').should('contain.html', '<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'contain.html', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection has the given id, using `.attr('id')`.
      * @example
      *    cy.get('#result').should('have.id', 'result')
@@ -3734,6 +3756,14 @@ declare namespace Cypress {
      */
     (chainer: 'have.text', value: string): Chainable<Subject>
     /**
+     * Assert that the text of the first element of the selection partially contains the given text, using `.text()`.
+     * @example
+     *    cy.get('#result').should('contain.text', 'John Doe')
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'contain.text', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection has the given value, using `.val()`.
      * @example
      *    cy.get('textarea').should('have.value', 'foo bar baz')
@@ -3741,6 +3771,14 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'have.value', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection partially contains the given value, using `.val()`.
+     * @example
+     *    cy.get('textarea').should('contain.value', 'foo bar baz')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'contain.value', value: string): Chainable<Subject>
     /**
      * Assert that the selection matches a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
@@ -3889,6 +3927,14 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.html', value: string): Chainable<Subject>
     /**
+     * Assert that the html of the first element of the selection does not contain the given html, using `.html()`.
+     * @example
+     *    cy.get('#result').should('not.contain.html', '<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.contain.html', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection does not have the given id, using `.attr('id')`.
      * @example
      *    cy.get('#result').should('not.have.id', 'result')
@@ -3914,6 +3960,14 @@ declare namespace Cypress {
      */
     (chainer: 'not.have.text', value: string): Chainable<Subject>
     /**
+     * Assert that the text of the first element of the selection does not contain the given text, using `.text()`.
+     * @example
+     *    cy.get('#result').should('not.contain.text', 'John Doe')
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.contain.text', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection does not have the given value, using `.val()`.
      * @example
      *    cy.get('textarea').should('not.have.value', 'foo bar baz')
@@ -3921,6 +3975,14 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.have.value', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not contain the given value, using `.val()`.
+     * @example
+     *    cy.get('textarea').should('not.contain.value', 'foo bar baz')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.contain.value', value: string): Chainable<Subject>
     /**
      * Assert that the selection does not match a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
@@ -4010,7 +4072,7 @@ declare namespace Cypress {
     (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
     /**
      * Fires when your app calls the global `window.confirm()` method.
-     * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be cancelled.
+     * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be canceled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      * @example
     ```

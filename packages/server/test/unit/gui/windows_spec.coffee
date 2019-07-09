@@ -75,55 +75,6 @@ describe "lib/gui/windows", ->
 
         expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
 
-    it "updates the user agent for GITHUB_LOGIN", ->
-      options = {
-        type: "GITHUB_LOGIN"
-      }
-
-      sinon.stub(user, "getLoginUrl").resolves("about:blank")
-      @win.loadURL.throws()
-
-      Windows.open("/path/to/project", options).catch =>
-        newUserAgent = @win.webContents.setUserAgent.getCall(0).args[0]
-        expected = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/72.0.3626.121 Electron/4.0.5 Safari/537.36"
-        expect(newUserAgent).to.eq(expected)
-
-    it "resolves with code on GITHUB_LOGIN for will-navigate", ->
-      options = {
-        type: "GITHUB_LOGIN"
-      }
-
-      url = "https://github.com/login"
-      url2 = "https://github.com?code=code123"
-
-      sinon.stub(user, "getLoginUrl").resolves(url)
-
-      sinon.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
-
-      Windows.open("/path/to/project", options)
-      .then (code) =>
-        expect(code).to.eq("code123")
-        expect(options.type).eq("GITHUB_LOGIN")
-        expect(@win.loadURL).to.be.calledWith(url)
-
-    it "resolves with code on GITHUB_LOGIN for did-get-redirect-request", ->
-      options = {
-        type: "GITHUB_LOGIN"
-      }
-
-      url = "https://github.com/login"
-      url2 = "https://github.com?code=code123"
-
-      sinon.stub(user, "getLoginUrl").resolves(url)
-
-      sinon.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
-
-      Windows.open("/path/to/project", options)
-      .then (code) =>
-        expect(code).to.eq("code123")
-        expect(options.type).eq("GITHUB_LOGIN")
-        expect(@win.loadURL).to.be.calledWith(url)
-
   context ".create", ->
     it "opens dev tools if saved state is open", ->
       Windows.create("/foo/", {devTools: true})

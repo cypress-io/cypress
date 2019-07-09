@@ -96,7 +96,7 @@ setChecksum = (filename, key) =>
   la(check.unemptyString(filename), 'expected filename', filename)
   la(check.unemptyString(key), 'expected uploaded S3 key', key)
 
-  checksum = hasha.fromFileSync(filename)
+  checksum = hasha.fromFileSync(filename, { algorithm: 'sha512' })
   size = fs.statSync(filename).size
   console.log('SHA256 checksum %s', checksum)
   console.log('size', size)

@@ -152,7 +152,12 @@ $ as-a move-binaries npm run move-binaries -- --sha 455046b928c861d4457b2ec5426a
 - Push out an updated kitchen sink if needed.
 - Close the release in Zenhub.
 - Bump `version` in `package.json` from `develop` branch and then merge into `master`.
-- Publish GitHub release doc using [cypress-io/set-releases](https://github.com/cypress-io/set-releases)
-- Add a note to each GH issue that has been resolved with the new published version using [https://github.com/cypress-io/issues-in-release](cypress-io/issues-in-release)
+
+Use [cypress-io/release-automations][release-automations] to perform the next tasks:
+
+- publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases` (see its README for details).
+- Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release` (see its README for details)
 
 Take a break, you deserve it! :sunglasses:
+
+[release-automations]: https://github.com/cypress-io/release-automations

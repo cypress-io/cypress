@@ -669,6 +669,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureAttached: ensures.ensureAttached
     ensureExistence: ensures.ensureExistence
     ensureElExistence: ensures.ensureElExistence
+    ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
     ensureReceivability: ensures.ensureReceivability
@@ -960,7 +961,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## listeners returned false
       return if _.some(results, returnedFalse)
 
-      ## do all the normal fail stuff and promise cancellation
+      ## do all the normal fail stuff and promise cancelation
       ## but dont re-throw the error
       if r = state("reject")
         r(err)

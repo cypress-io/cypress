@@ -1,6 +1,5 @@
 _          = require("lodash")
 os         = require("os")
-nmi        = require("node-machine-id")
 debug      = require("debug")("cypress:server:api")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
@@ -8,13 +7,10 @@ Promise    = require("bluebird")
 humanInterval = require("human-interval")
 agent      = require("@packages/network").agent
 pkg        = require("@packages/root")
+machineId  = require("./util/machine_id")
 routes     = require("./util/routes")
 system     = require("./util/system")
-
-## TODO: improve this, dont just use
-## requests because its way too verbose
-# if debug.enabled
-#   request.debug = true
+cache      = require("./cache")
 
 THIRTY_SECONDS = humanInterval("30 seconds")
 SIXTY_SECONDS = humanInterval("60 seconds")
@@ -26,6 +22,8 @@ DELAYS = [
   TWO_MINUTES
 ]
 
+responseCache = {}
+
 if intervals = process.env.API_RETRY_INTERVALS
   DELAYS = _
   .chain(intervals)
@@ -34,10 +32,15 @@ if intervals = process.env.API_RETRY_INTERVALS
   .value()
 
 rp = request.defaults (params = {}, callback) ->
+  if params.cacheable and resp = getCachedResponse(params)
+    debug("resolving with cached response for ", params.url)
+    return Promise.resolve(resp)
+
   _.defaults(params, {
     agent: agent
     proxy: null
     gzip: true
+    cacheable: false
   })
 
   headers = params.headers ?= {}
@@ -51,15 +54,26 @@ rp = request.defaults (params = {}, callback) ->
 
   # use %j argument to ensure deep nested properties are serialized
   debug(
-    "request to url: %s with params: %j",
+    "request to url: %s with params: %j and token: %s",
     "#{params.method} #{params.url}",
-    _.pick(params, "body", "headers")
+    _.pick(params, "body", "headers"),
+    params.auth && params.auth.bearer
   )
 
   request[method](params, callback)
   .promise()
   .tap (resp) ->
+    if params.cacheable
+      debug("caching response for ", params.url)
+      cacheResponse(resp, params)
+
     debug("response %o", resp)
+
+cacheResponse = (resp, params) ->
+  responseCache[params.url] = resp
+
+getCachedResponse = (params) ->
+  responseCache[params.url]
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -75,11 +89,6 @@ tagError = (err) ->
   err.isApiError = true
   throw err
 
-machineId = ->
-  nmi.machineId()
-  .catch ->
-    return null
-
 ## retry on timeouts, 5xx errors, or any error without a status code
 isRetriableError = (err) ->
   (err instanceof Promise.TimeoutError) or
@@ -91,6 +100,26 @@ module.exports = {
 
   ping: ->
     rp.get(routes.ping())
+    .catch(tagError)
+
+  getMe: (authToken) ->
+    rp.get({
+      url: routes.me()
+      json: true
+      auth: {
+        bearer: authToken
+      }
+    })
+
+  getAuthUrls: ->
+    rp.get({
+      url: routes.auth(),
+      json: true
+      cacheable: true
+      headers: {
+        "x-route-version": "2"
+      }
+    })
     .catch(tagError)
 
   getOrgs: (authToken) ->
@@ -238,41 +267,24 @@ module.exports = {
     .timeout(timeout)
     .catch(tagError)
 
-  createSignin: (code) ->
-    machineId()
-    .then (id) ->
-      h = {
-        "x-route-version": "3"
-        "x-accept-terms": "true"
-      }
-
-      if id
-        h["x-machine-id"] = id
-
-      rp.post({
-        url: routes.signin({code: code})
-        json: true
-        headers: h
-      })
-      .catch errors.StatusCodeError, (err) ->
-        ## reset message to error which is a pure body
-        ## representation of what was sent back from
-        ## the API
-        err.message = err.error
-
-        throw err
-      .catch(tagError)
-
-  createSignout: (authToken) ->
-    rp.post({
-      url: routes.signout()
-      json: true
-      auth: {
-        bearer: authToken
-      }
-    })
-    .catch({statusCode: 401}, ->) ## do nothing on 401
-    .catch(tagError)
+  postLogout: (authToken) ->
+    Promise.join(
+      @getAuthUrls(),
+      machineId.machineId(),
+      (urls, machineId) ->
+        rp.post({
+          url: urls.dashboardLogoutUrl
+          json: true
+          auth: {
+            bearer: authToken
+          }
+          headers: {
+            "x-machine-id": machineId
+          }
+        })
+        .catch({statusCode: 401}, ->) ## do nothing on 401
+        .catch(tagError)
+  )
 
   createProject: (projectDetails, remoteOrigin, authToken) ->
     rp.post({
@@ -313,14 +325,6 @@ module.exports = {
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
-
-  getLoginUrl: ->
-    rp.get({
-      url: routes.auth(),
-      json: true
-    })
-    .get("url")
     .catch(tagError)
 
   _projectToken: (method, projectId, authToken) ->
@@ -375,4 +379,6 @@ module.exports = {
           debug("retry ##{retryIndex} after #{delay}ms")
           attempt(retryIndex)
 
+  clearCache: () ->
+    responseCache = {}
 }
