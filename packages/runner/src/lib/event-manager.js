@@ -72,7 +72,7 @@ const eventManager = {
     })
 
     _.each(socketToDriverEvents, (event) => {
-      channel.on(event, (...args) => {
+      ws.on(event, (...args) => {
         // TODO: will this cause a loop?
         Cypress.emit(event, ...args)
       })
