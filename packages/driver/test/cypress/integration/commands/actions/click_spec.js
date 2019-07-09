@@ -180,7 +180,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain('has style \'pointer-events: none\'')
+          expect(err.message).to.contain('has CSS \'pointer-events: none\'')
           expect(err.message).to.not.contain('inherited from')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -206,7 +206,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain('has style \'pointer-events: none\', inherited from this element:')
+          expect(err.message).to.contain('has CSS \'pointer-events: none\', inherited from this element:')
           expect(err.message).to.contain('<div id="ptrNone"')
           const consoleProps = lastLog.invoke('consoleProps')
 
