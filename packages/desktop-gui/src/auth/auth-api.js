@@ -22,20 +22,14 @@ class AuthApi {
   }
 
   login () {
-    return ipc.windowOpen({
-      position: 'center',
-      focus: true,
-      width: 1000,
-      height: 635,
-      preload: false,
-      title: 'Login',
-      type: 'GITHUB_LOGIN',
+    ipc.onAuthMessage((__, message) => {
+      authStore.setMessage(message)
     })
-    .then((code) => {
-      return ipc.logIn(code)
-    })
+
+    return ipc.beginAuth()
     .then((user) => {
       authStore.setUser(user)
+      authStore.setMessage(null)
 
       return null
     })

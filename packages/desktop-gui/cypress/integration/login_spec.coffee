@@ -6,7 +6,6 @@ describe "Login", ->
       { start, @ipc } = win.App
 
       cy.stub(@ipc, "onMenuClicked")
-      cy.stub(@ipc, "onFocusTests")
       cy.stub(@ipc, "getOptions").resolves({})
       cy.stub(@ipc, "getCurrentUser").resolves(null)
       cy.stub(@ipc, "updaterCheck").resolves(false)
@@ -18,14 +17,14 @@ describe "Login", ->
       cy.stub(@ipc, "clearGithubCookies")
       cy.stub(@ipc, "logOut").resolves()
 
+      cy.stub(@ipc, "onAuthMessage").callsFake (cb) =>
+        @onAuthMessageCb = cb
+
       @pingApiServer = @util.deferred()
       cy.stub(@ipc, "pingApiServer").returns(@pingApiServer.promise)
 
-      @openWindow = @util.deferred()
-      cy.stub(@ipc, "windowOpen").returns(@openWindow.promise)
-
-      @login = @util.deferred()
-      cy.stub(@ipc, "logIn").returns(@login.promise)
+      @beginAuth = @util.deferred()
+      cy.stub(@ipc, "beginAuth").returns(@beginAuth.promise)
 
       start()
       cy.contains("Log In").click()
@@ -38,53 +37,41 @@ describe "Login", ->
     beforeEach ->
       @pingApiServer.resolve()
 
-    it "has Github Login button", ->
-      cy.get(".login").contains("button", "Log In with GitHub")
+    it "has dashboard login button", ->
+      cy.get(".login").contains("button", "Log In to Dashboard")
 
     it "opens dashboard on clicking 'Cypress Dashboard'", ->
       cy.contains("Cypress Dashboard").click().then ->
         expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/dashboard")
 
-    describe "click 'Log In with GitHub'", ->
+    describe "click 'Log In to Dashboard'", ->
       beforeEach ->
         cy
           .get(".login")
-            .contains("button", "Log In with GitHub").as("loginBtn")
+            .contains("button", "Log In to Dashboard").as("loginBtn")
             .click()
 
-      it "triggers ipc 'window:open' on click", ->
+      it "triggers ipc 'begin:auth' on click", ->
         cy
           .then ->
-            expect(@ipc.windowOpen).to.be.calledWithExactly({
-              position: "center"
-              focus: true
-              width: 1000
-              height: 635
-              preload: false
-              title: "Login"
-              type: "GITHUB_LOGIN"
-            })
+            expect(@ipc.beginAuth).to.be.calledOnce
 
       it "disables login button", ->
         cy.get("@loginBtn").should("be.disabled")
 
-      it "shows spinner with 'Logging In'", ->
-        cy.get("@loginBtn").invoke("text").should("contain", "Logging in...")
+      it "shows spinner with 'Opening browser'", ->
+        cy.get("@loginBtn").invoke("text").should("contain", "Opening browser...")
 
-      context "on 'window:open' ipc response", ->
+      context "on 'begin:auth'", ->
         beforeEach ->
-          cy.get("@loginBtn").then ->
-            @openWindow.resolve("code-123")
+          cy.get("@loginBtn")
 
-        it "triggers ipc 'log:in'", ->
-          cy.wrap(@ipc.logIn).should("be.calledWith", "code-123")
+        it "displays spinner with 'Opening browser...' and disables button", ->
+          cy.contains("Opening browser...").should("be.disabled")
 
-        it "displays spinner with 'Logging in...' and disables button", ->
-          cy.contains("Logging in...").should("be.disabled")
-
-        describe "on ipc log:in success", ->
+        describe "on ipc begin:auth success", ->
           beforeEach ->
-            @login.resolve(@user)
+            @beginAuth.resolve(@user)
 
           it "goes to previous view", ->
             cy.shouldBeOnIntro()
@@ -94,43 +81,52 @@ describe "Login", ->
               .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-          it "closes modal", ->
-            cy.get(".modal").should("not.be.visible")
+          it "displays username in success dialog", ->
+            cy.get(".modal").contains("Jane Lane")
 
-          context "log out", ->
-            it "displays login button on logout", ->
-              cy
-                .get("nav a").contains("Jane").click()
-              cy
-                .contains("Log Out").click()
-                .get(".nav").contains("Log In")
+          it "can close modal by clicking Continue", ->
+            cy.get(".modal .btn:contains(Continue)").click()
+            .then ->
+              cy.get(".modal").should("not.be.visible")
 
-            it "calls clear:github:cookies", ->
-              cy
-                .get("nav a").contains("Jane").click()
-              cy
-                .contains("Log Out").click().then ->
-                  expect(@ipc.clearGithubCookies).to.be.called
+          context "after clicking Continue", ->
+            beforeEach ->
+              cy.get(".modal .btn:contains(Continue)").click()
 
-            it "calls log:out", ->
-              cy
-                .get("nav a").contains("Jane").click()
-              cy
-                .contains("Log Out").click().then ->
-                  expect(@ipc.logOut).to.be.called
+            context "log out", ->
+              it "displays login button on logout", ->
+                cy
+                  .get("nav a").contains("Jane").click()
+                cy
+                  .contains("Log Out").click()
+                  .get(".nav").contains("Log In")
 
-            it "has login button enabled when returning to login after logout", ->
-              cy.get("nav a").contains("Jane").click()
-              cy.contains("Log Out").click()
-              cy.contains("Log In").click()
-              cy.get(".login button").eq(1)
-                .should("not.be.disabled")
-                .invoke("text")
-                .should("include", "Log In with GitHub")
+              it "calls clear:github:cookies", ->
+                cy
+                  .get("nav a").contains("Jane").click()
+                cy
+                  .contains("Log Out").click().then ->
+                    expect(@ipc.clearGithubCookies).to.be.called
 
-        describe "on ipc 'log:in' error", ->
+              it "calls log:out", ->
+                cy
+                  .get("nav a").contains("Jane").click()
+                cy
+                  .contains("Log Out").click().then ->
+                    expect(@ipc.logOut).to.be.called
+
+              it "has login button enabled when returning to login after logout", ->
+                cy.get("nav a").contains("Jane").click()
+                cy.contains("Log Out").click()
+                cy.contains("Log In").click()
+                cy.get(".login button").eq(1)
+                  .should("not.be.disabled")
+                  .invoke("text")
+                  .should("include", "Log In to Dashboard")
+
+        describe "on ipc 'begin:auth' error", ->
           beforeEach ->
-            @login.reject({name: "foo", message: "There's an error"})
+            @beginAuth.reject({name: "foo", message: "There's an error"})
 
           it "displays error in ui", ->
             cy
@@ -142,13 +138,52 @@ describe "Login", ->
             cy
               .get("@loginBtn").should("not.be.disabled")
 
-      describe "when user closes window before logging in", ->
-        beforeEach ->
-          @openWindow.reject({windowClosed: true, name: "foo", message: "There's an error"})
+        describe "on ipc 'on:auth:message'", ->
+          beforeEach ->
+            @onAuthMessageCb(null, {
+              message: "some warning here"
+              type: "warning"
+            })
 
-        it "no longer shows logging in spinner", ->
-          cy.get(".login-content .alert").should("not.exist")
-          cy.contains("button", "Log In with GitHub").should("not.be.disabled")
+          it "displays warning in ui", ->
+            cy
+              .get(".warning")
+                .should("be.visible")
+                .contains("some warning here")
+
+          it "login button should be disabled", ->
+            cy
+              .get("@loginBtn").should("be.disabled")
+
+          it "on AUTH_COULD_NOT_LAUNCH_BROWSER login button changes", ->
+            @onAuthMessageCb(null, {
+              name: "AUTH_COULD_NOT_LAUNCH_BROWSER"
+              type: "warning"
+              message: "foo"
+            })
+
+            cy
+            .get(".login-content .btn-login")
+            .should("be.disabled")
+            .should("have.text", " Could not open browser.")
+
+          it "<pre> can be click-selected", ->
+            @onAuthMessageCb(null, {
+              message: """
+              foo
+              ```
+              bar
+              ```
+              """
+              type: "warning"
+            })
+
+            cy
+            .get(".login-content .message pre")
+            .click()
+            .document()
+            .then ($doc) ->
+              expect($doc.getSelection().toString()).to.eq('bar')
 
     describe "Dashboard link in message", ->
       it "opens link to Dashboard Service on click", ->
@@ -197,7 +232,7 @@ describe "Login", ->
 
       it "shows login on success", ->
         @pingApiServerAgain.resolve()
-        cy.get(".login").contains("button", "Log In with GitHub")
+        cy.get(".login").contains("button", "Log In to Dashboard")
 
     describe "api help link", ->
       it "goes to external api help link", ->
@@ -211,4 +246,4 @@ describe "Login", ->
       it "shows log in if connected and opened again", ->
         @pingApiServerAgain.resolve()
         cy.contains("Log In").click()
-        cy.get(".login").contains("button", "Log In with GitHub")
+        cy.get(".login").contains("button", "Log In to Dashboard")

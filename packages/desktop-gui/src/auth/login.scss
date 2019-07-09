@@ -55,6 +55,19 @@
     color: $brand-primary;
   }
 
+  .message {
+    color: #666;
+    line-height: 1.5em;
+
+    pre {
+      cursor: pointer;
+    }
+
+    &.warning {
+      color: $red-primary;
+    }
+  }
+
   .terms {
     color: #aaa;
     font-size: 0.9em;
