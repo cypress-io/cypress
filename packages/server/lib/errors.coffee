@@ -788,6 +788,32 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Provide a path to an existing fixture file.
       """
+    when "AUTH_COULD_NOT_LAUNCH_BROWSER"
+      """
+      Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
+
+      ```
+      #{arg1}
+      ```
+      """
+    when "AUTH_BROWSER_LAUNCHED"
+      """
+      Check your browser to continue logging in.
+      """
+    when "BAD_POLICY_WARNING"
+      """
+      Cypress detected policy settings on your computer that may cause issues.
+
+      The following policies were detected that may prevent Cypress from automating Chrome:
+
+       > #{arg1.join('\n > ')}
+
+      For more information, see https://on.cypress.io/bad-browser-policy
+      """
+    when "BAD_POLICY_WARNING_TOOLTIP"
+      """
+      Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

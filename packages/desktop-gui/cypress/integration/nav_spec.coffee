@@ -38,7 +38,7 @@ describe "Navigation", ->
 
     it "displays login modal when clicking login button", ->
       cy.contains("Log In").click()
-      cy.contains(".btn", "Log In with GitHub")
+      cy.contains(".btn", "Log In to Dashboard")
 
   context "with a current user", ->
     beforeEach ->
