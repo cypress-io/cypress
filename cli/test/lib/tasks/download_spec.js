@@ -6,6 +6,7 @@ const is = require('check-more-types')
 const path = require('path')
 const nock = require('nock')
 const hasha = require('hasha')
+const debug = require('debug')('test')
 const snapshot = require('../../support/snapshot')
 
 const fs = require(`${lib}/fs`)
@@ -18,6 +19,7 @@ const normalize = require('../../support/normalize')
 
 const downloadDestination = path.join(os.tmpdir(), 'Cypress', 'download', 'cypress.zip')
 const version = '1.2.3'
+const examplePath = 'test/fixture/example.zip'
 
 describe('lib/tasks/download', function () {
   require('mocha-banner').register()
@@ -111,7 +113,7 @@ describe('lib/tasks/download', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
     .reply(200, () => {
-      return fs.createReadStream('test/fixture/example.zip')
+      return fs.createReadStream(examplePath)
     })
 
     nock('https://download.cypress.io')
@@ -138,9 +140,11 @@ describe('lib/tasks/download', function () {
 
   describe('verify downloaded file', function () {
     before(function () {
-      this.expectedChecksum = hasha.fromFileSync('test/fixture/example.zip')
-      this.expectedFileSize = fs.statSync('test/fixture/example.zip').size
+      this.expectedChecksum = hasha.fromFileSync(examplePath)
+      this.expectedFileSize = fs.statSync(examplePath).size
       this.onProgress = sinon.stub().returns(undefined)
+      debug('example file %s should have checksum %s and file size %d',
+        examplePath, this.expectedChecksum, this.expectedFileSize)
     })
 
     it('throws if file size is different from expected', function () {
@@ -148,7 +152,7 @@ describe('lib/tasks/download', function () {
       .get('/desktop/1.2.3')
       .query(true)
       .reply(200, () => {
-        return fs.createReadStream('test/fixture/example.zip')
+        return fs.createReadStream(examplePath)
       }, {
         // definitely incorrect file size
         'content-length': '10',
@@ -166,7 +170,7 @@ describe('lib/tasks/download', function () {
       .get('/desktop/1.2.3')
       .query(true)
       .reply(200, () => {
-        return fs.createReadStream('test/fixture/example.zip')
+        return fs.createReadStream(examplePath)
       }, {
         // definitely incorrect file size
         'x-amz-meta-size': '10',
@@ -184,7 +188,7 @@ describe('lib/tasks/download', function () {
       .get('/desktop/1.2.3')
       .query(true)
       .reply(200, () => {
-        return fs.createReadStream('test/fixture/example.zip')
+        return fs.createReadStream(examplePath)
       }, {
         'x-amz-meta-checksum': 'incorrect-checksum',
       })
@@ -201,7 +205,7 @@ describe('lib/tasks/download', function () {
       .get('/desktop/1.2.3')
       .query(true)
       .reply(200, () => {
-        return fs.createReadStream('test/fixture/example.zip')
+        return fs.createReadStream(examplePath)
       }, {
         'x-amz-meta-checksum': 'incorrect-checksum',
         'x-amz-meta-size': '10',
@@ -219,12 +223,15 @@ describe('lib/tasks/download', function () {
       .get('/desktop/1.2.3')
       .query(true)
       .reply(200, () => {
-        return fs.createReadStream('test/fixture/example.zip')
+        debug('creating read stream for %s', examplePath)
+        return fs.createReadStream(examplePath)
       }, {
         'x-amz-meta-checksum': this.expectedChecksum,
         'x-amz-meta-size': String(this.expectedFileSize),
       })
 
+      debug('downloading %s to %s for test version %s',
+        examplePath, this.options.downloadDestination, this.options.version)
       return download.start({
         downloadDestination: this.options.downloadDestination,
         version: this.options.version,
@@ -237,7 +244,7 @@ describe('lib/tasks/download', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
     .reply(200, () => {
-      return fs.createReadStream('test/fixture/example.zip')
+      return fs.createReadStream(examplePath)
     })
 
     nock('https://download.cypress.io')
@@ -259,7 +266,7 @@ describe('lib/tasks/download', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
     .reply(200, () => {
-      return fs.createReadStream('test/fixture/example.zip')
+      return fs.createReadStream(examplePath)
     })
 
     nock('https://download.cypress.io')

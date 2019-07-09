@@ -90,7 +90,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
     return Promise.join(
       util.getFileChecksum(filename),
       util.getFileSize(filename),
-      ([checksum, filesize]) => {
+      (checksum, filesize) => {
         if (checksum === expectedChecksum && filesize === expectedSize) {
           debug('downloaded file has the expected checksum and size ✅')
 
