@@ -45,6 +45,6 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
-    "lodash": "4.17.11"
+    "lodash": "4.17.13"
   }
 }
