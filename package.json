@@ -132,7 +132,7 @@
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
     "lint-staged": "8.2.1",
-    "lodash": "4.17.11",
+    "lodash": "4.17.13",
     "make-empty-github-commit": "1.2.0",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",
