@@ -3,7 +3,7 @@
 Anyone can build the binary and NPM package, but you can only deploy the Cypress application
 and publish the NPM module `cypress` if you are a member of `cypress` NPM organization.
 
-> :information: See the [publishing](#publishing) section for how to build, test and publish a
+> :information_source: See the [publishing](#publishing) section for how to build, test and publish a
 new official version of the binary and `cypress` NPM package.
 
 ## Set next version on CIs
