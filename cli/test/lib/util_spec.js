@@ -5,6 +5,8 @@ const tty = require('tty')
 const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
+const hasha = require('hasha')
+const la = require('lazy-ass')
 
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
@@ -380,6 +382,32 @@ describe('util', () => {
     })
   })
 
+  describe('dequote', () => {
+    it('removes double quotes', () => {
+      expect(util.dequote('"foo"')).to.equal('foo')
+    })
+
+    it('keeps single quotes', () => {
+      expect(util.dequote('\'foo\'')).to.equal('\'foo\'')
+    })
+
+    it('keeps unbalanced double quotes', () => {
+      expect(util.dequote('"foo')).to.equal('"foo')
+    })
+
+    it('keeps inner double quotes', () => {
+      expect(util.dequote('a"b"c')).to.equal('a"b"c')
+    })
+
+    it('passes empty strings', () => {
+      expect(util.dequote('')).to.equal('')
+    })
+
+    it('keeps single double quote character', () => {
+      expect(util.dequote('"')).to.equal('"')
+    })
+  })
+
   describe('.getEnv', () => {
     it('reads from package.json config', () => {
       process.env.npm_package_config_CYPRESS_FOO = 'bar'
@@ -402,6 +430,59 @@ describe('util', () => {
       process.env.npm_package_config_CYPRESS_FOO = 'baz'
       process.env.npm_config_CYPRESS_FOO = 'bloop'
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bloop')
+    })
+    it('throws on non-string name', () => {
+      expect(() => {
+        util.getEnv()
+      }).to.throw()
+
+      expect(() => {
+        util.getEnv(42)
+      }).to.throw()
+    })
+
+    context('with trim = true', () => {
+      it('trims returned string', () => {
+        process.env.FOO = '  bar  '
+        expect(util.getEnv('FOO', true)).to.equal('bar')
+      })
+
+      it('removes quotes from the returned string', () => {
+        process.env.FOO = '  "bar"  '
+        expect(util.getEnv('FOO', true)).to.equal('bar')
+      })
+
+      it('removes only single level of double quotes', () => {
+        process.env.FOO = '  ""bar""  '
+        expect(util.getEnv('FOO', true)).to.equal('"bar"')
+      })
+
+      it('keeps unbalanced double quote', () => {
+        process.env.FOO = '  "bar  '
+        expect(util.getEnv('FOO', true)).to.equal('"bar')
+      })
+
+      it('trims but does not remove single quotes', () => {
+        process.env.FOO = '  \'bar\'  '
+        expect(util.getEnv('FOO', true)).to.equal('\'bar\'')
+      })
+
+      it('keeps whitespace inside removed quotes', () => {
+        process.env.FOO = '"foo.txt "'
+        expect(util.getEnv('FOO', true)).to.equal('foo.txt ')
+      })
+    })
+  })
+
+  context('.getFileChecksum', () => {
+    it('computes same hash as Hasha SHA512', () => {
+      return Promise.all([
+        util.getFileChecksum(__filename),
+        hasha.fromFile(__filename, { algorithm: 'sha512' }),
+      ]).then(([checksum, expectedChecksum]) => {
+        la(checksum === expectedChecksum, 'our computed checksum', checksum,
+          'is different from expected', expectedChecksum)
+      })
     })
   })
 })

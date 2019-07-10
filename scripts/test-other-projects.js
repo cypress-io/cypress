@@ -2,7 +2,7 @@ require('@packages/coffee/register')
 
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const { getNameAndBinary, getJustVersion } = require('./utils')
+const { getNameAndBinary, getJustVersion, getShortCommit } = require('./utils')
 const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
@@ -30,24 +30,6 @@ const cliOptions = minimist(process.argv, {
     provider: 'p',
   },
 })
-
-const shorten = (s) => {
-  return s.substr(0, 7)
-}
-
-const getShortCommit = () => {
-  const sha =
-    process.env.APPVEYOR_REPO_COMMIT ||
-    process.env.CIRCLE_SHA1 ||
-    process.env.BUILDKITE_COMMIT
-
-  if (sha) {
-    return {
-      sha,
-      short: shorten(sha),
-    }
-  }
-}
 
 /**
  * Returns given string surrounded by ```json + ``` quotes
@@ -121,7 +103,8 @@ const getStatusAndMessage = (projectRepoName) => {
     status,
   })
   const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
-  const footer = 'Use tool `@cypress/commit-message-install` to install from above block'
+  const footer =
+    'Use tool `@cypress/commit-message-install` to install from above block'
   let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
 
   if (process.env.CIRCLE_BUILD_URL) {
@@ -158,5 +141,10 @@ const onError = (e) => {
 }
 
 bump
-.runTestProjects(getStatusAndMessage, cliOptions.provider, shortNpmVersion, platform)
+.runTestProjects(
+  getStatusAndMessage,
+  cliOptions.provider,
+  shortNpmVersion,
+  platform
+)
 .catch(onError)

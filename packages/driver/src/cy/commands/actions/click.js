@@ -169,7 +169,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
             domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
 
-            //# if mousedown was cancelled then or caused
+            //# if mousedown was canceled then or caused
             //# our element to be removed from the DOM
             //# just resolve after mouse down and dont
             //# send a focus event
@@ -291,7 +291,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       //# create a new promise and chain off of it using reduce to insert
-      //# the artificial delays.  we have to set this as cancellable for it
+      //# the artificial delays.  we have to set this as cancelable for it
       //# to propogate since this is an "inner" promise
 
       //# return our original subject when our promise resolves

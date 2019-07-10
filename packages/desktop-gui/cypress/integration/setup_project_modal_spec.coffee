@@ -337,13 +337,12 @@ describe "Set Up Project", ->
       cy.get(".btn").contains("Set up project").click()
 
     it "shows login", ->
-      cy.get(".modal").contains("Log In with GitHub")
+      cy.get(".modal").contains("Log In to Dashboard")
 
     describe "when login succeeds", ->
       beforeEach ->
-        cy.stub(@ipc, "windowOpen").resolves()
-        cy.stub(@ipc, "logIn").resolves(@user)
-        cy.contains("button", "Log In with GitHub").click()
+        cy.stub(@ipc, "beginAuth").resolves(@user)
+        cy.contains("button", "Log In to Dashboard").click()
 
       it "shows setup", ->
         cy.contains("h4", "Set up project")

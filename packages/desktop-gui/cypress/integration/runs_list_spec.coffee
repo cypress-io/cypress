@@ -30,7 +30,7 @@ describe "Runs List", ->
       cy.stub(@ipc, "requestAccess")
       cy.stub(@ipc, "setupDashboardProject")
       cy.stub(@ipc, "externalOpen")
-      cy.stub(@ipc, "windowOpen").resolves()
+      cy.stub(@ipc, "beginAuth").resolves()
 
       @openProject = @util.deferred()
       cy.stub(@ipc, "openProject").returns(@openProject.promise)
@@ -264,10 +264,9 @@ describe "Runs List", ->
       it "shows login message", ->
         cy.get(".login h1").should("contain", "Log in")
 
-      it "clicking 'Log In with GitHub' opens login", ->
-        cy.contains("button", "Log In with GitHub").click().then ->
-          expect(@ipc.windowOpen).to.be.called
-          expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("GITHUB_LOGIN")
+      it "clicking 'Log In to Dashboard' opens login", ->
+        cy.contains("button", "Log In to Dashboard").click().then ->
+          expect(@ipc.beginAuth).to.be.called
 
   describe "polling runs", ->
     beforeEach ->
@@ -487,10 +486,9 @@ describe "Runs List", ->
               it "shows login message", ->
                 cy.get(".empty h4").should("contain", "Log in")
 
-              it "clicking 'Log In with GitHub' opens login", ->
-                cy.contains("button", "Log In with GitHub").click().then ->
-                  expect(@ipc.windowOpen).to.be.called
-                  expect(@ipc.windowOpen.lastCall.args[0].type).to.equal("GITHUB_LOGIN")
+              it "clicking 'Log In to Dashboard' opens login", ->
+                cy.contains("button", "Log In to Dashboard").click().then ->
+                  expect(@ipc.beginAuth).to.be.called
 
     describe "timed out error", ->
       beforeEach ->
