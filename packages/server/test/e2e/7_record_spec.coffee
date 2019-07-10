@@ -164,7 +164,7 @@ defaultRoutes = [
   }, {
     method: "put"
     url: "/instances/:id"
-    req: "putInstanceRequest@2.0.0",
+    req: "putInstanceRequest@2.1.0"
     resSchema: "putInstanceResponse@2.0.0"
     res: sendUploadUrls
   }, {
@@ -756,7 +756,7 @@ describe "e2e record", ->
       routes[2] = {
         method: "put"
         url: "/instances/:id"
-        req: "putInstanceRequest@2.0.0",
+        req: "putInstanceRequest@2.1.0",
         res: (req, res) -> res.sendStatus(500)
       }
 
@@ -1015,7 +1015,7 @@ describe "e2e record", ->
         }, {
           method: "put"
           url: "/instances/:id"
-          req: "putInstanceRequest@2.0.0",
+          req: "putInstanceRequest@2.1.0",
           res: (req, res) -> res.sendStatus(500)
         }
       ]
@@ -1058,7 +1058,7 @@ describe "e2e record", ->
         }, {
           method: "put"
           url: "/instances/:id"
-          req: "putInstanceRequest@2.0.0",
+          req: "putInstanceRequest@2.1.0",
           resSchema: "putInstanceResponse@2.0.0"
           res: sendUploadUrls
         }, {
@@ -1121,7 +1121,7 @@ describe "e2e record", ->
         }, {
           method: "put"
           url: "/instances/:id"
-          req: "putInstanceRequest@2.0.0",
+          req: "putInstanceRequest@2.1.0",
           resSchema: "putInstanceResponse@2.0.0"
           res: sendUploadUrls
         }, {
@@ -1470,4 +1470,3 @@ describe "e2e record", ->
             snapshot: true
             expectedExitCode: 0
           })
-
