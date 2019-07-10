@@ -63,7 +63,7 @@
     "chai-uuid": "1.0.6",
     "chokidar-cli": "1.2.2",
     "chrome-har-capturer": "0.13.4",
-    "coffee-coverage": "1.0.1",
+    "coffee-coverage": "3.0.1",
     "console-table-printer": "1.0.0-beta12",
     "cors": "2.8.5",
     "electron-osx-sign": "0.4.11",
