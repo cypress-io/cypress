@@ -119,7 +119,7 @@
     "content-type": "1.0.4",
     "cookie": "0.4.0",
     "cookie-parser": "1.4.4",
-    "data-uri-to-buffer": "1.2.0",
+    "data-uri-to-buffer": "2.0.1",
     "debug": "4.1.1",
     "dependency-tree": "7.0.2",
     "duplexify": "4.0.0",
