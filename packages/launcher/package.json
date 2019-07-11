@@ -39,8 +39,8 @@
     "bluebird": "3.5.3",
     "debug": "4.1.1",
     "execa": "1.0.0",
-    "fs-extra": "4.0.3",
-    "lodash": "4.17.11",
+    "fs-extra": "8.1.0",
+    "lodash": "4.17.13",
     "plist": "2.1.0",
     "pluralize": "8.0.0",
     "ramda": "0.24.1"

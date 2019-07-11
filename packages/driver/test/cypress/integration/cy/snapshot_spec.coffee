@@ -1,11 +1,6 @@
 $ = Cypress.$.bind(Cypress)
 $Snapshots = require("../../../../src/cy/snapshots")
 
-normalizeStyles = (styles) ->
-  styles
-  .replace(/\s+/gm, "")
-  .replace(/['"]/gm, "'")
-
 describe "driver/src/cy/snapshots", ->
   context "invalid snapshot html", ->
     beforeEach ->
@@ -53,19 +48,19 @@ describe "driver/src/cy/snapshots", ->
     it "does not clone scripts", ->
       $("<script type='text/javascript' />").appendTo(cy.$$("body"))
 
-      { body } = cy.createSnapshot(@$el)
+      { body } = cy.createSnapshot(null, @$el)
       expect(body.find("script")).not.to.exist
 
     it "does not clone css stylesheets", ->
       $("<link rel='stylesheet' />").appendTo(cy.$$("body"))
 
-      { body } = cy.createSnapshot(@$el)
+      { body } = cy.createSnapshot(null, @$el)
       expect(body.find("link")).not.to.exist
 
     it "does not clone style tags", ->
       $("<style>.foo { color: blue }</style>").appendTo(cy.$$("body"))
 
-      { body } = cy.createSnapshot(@$el)
+      { body } = cy.createSnapshot(null, @$el)
       expect(body.find("style")).not.to.exist
 
     it "preserves classes on the <html> tag", ->
@@ -74,7 +69,7 @@ describe "driver/src/cy/snapshots", ->
       $html[0].id = "baz"
       $html.css("margin", "10px")
 
-      { htmlAttrs } = cy.createSnapshot(@$el)
+      { htmlAttrs } = cy.createSnapshot(null, @$el)
       expect(htmlAttrs).to.eql({
         class: "foo bar"
         id: "baz"
@@ -197,11 +192,11 @@ describe "driver/src/cy/snapshots", ->
 
     it "sets data-cypress-el attr", ->
       attr = cy.spy(@$el, "attr")
-      cy.createSnapshot(@$el)
+      cy.createSnapshot(null, @$el)
       expect(attr).to.be.calledWith("data-cypress-el", true)
 
     it "removes data-cypress-el attr", ->
-      cy.createSnapshot(@$el)
+      cy.createSnapshot(null, @$el)
       expect(@$el.attr("data-cypress-el")).to.be.undefined
 
     it "replaces CSS paths of style tags with absolute paths", ->
@@ -245,44 +240,36 @@ describe "driver/src/cy/snapshots", ->
       it "replaces with placeholders that have src in content", ->
         $("<iframe src='generic.html' />").appendTo(cy.$$("body"))
 
-        { body } = cy.createSnapshot(@$el)
+        { body } = cy.createSnapshot(null, @$el)
         expect(body.find("iframe").length).to.equal(1)
         expect(body.find("iframe")[0].src).to.include("generic.html")
 
       it "placeholders have same id", ->
         $("<iframe id='foo-bar' />").appendTo(cy.$$("body"))
 
-        { body } = cy.createSnapshot(@$el)
+        { body } = cy.createSnapshot(null, @$el)
         expect(body.find("iframe")[0].id).to.equal("foo-bar")
 
       it "placeholders have same classes", ->
         $("<iframe class='foo bar' />").appendTo(cy.$$("body"))
 
-        { body } = cy.createSnapshot(@$el)
+        { body } = cy.createSnapshot(null, @$el)
         expect(body.find("iframe")[0].className).to.equal("foo bar")
 
       it "placeholders have inline styles", ->
         $("<iframe style='margin: 40px' />").appendTo(cy.$$("body"))
 
-        { body } = cy.createSnapshot(@$el)
+        { body } = cy.createSnapshot(null, @$el)
         expect(body.find("iframe").css("margin")).to.equal("40px")
 
       it "placeholders have width set to outer width", ->
         $("<iframe style='width: 40px; padding: 20px; border: solid 5px' />").appendTo(cy.$$("body"))
 
-        { body } = cy.createSnapshot(@$el)
+        { body } = cy.createSnapshot(null, @$el)
         expect(body.find("iframe").css("width")).to.equal("90px")
 
       it "placeholders have height set to outer height", ->
         $("<iframe style='height: 40px; padding: 10px; border: solid 5px' />").appendTo(cy.$$("body"))
 
-        { body } = cy.createSnapshot(@$el)
+        { body } = cy.createSnapshot(null, @$el)
         expect(body.find("iframe").css("height")).to.equal("70px")
-
-  context ".getDocumentStylesheets", ->
-    it "returns empty obj when no document", ->
-      fn = ->
-
-      snapshot = $Snapshots.create(fn, fn)
-      
-      expect(snapshot.getDocumentStylesheets(null)).to.deep.eq({})

@@ -119,6 +119,7 @@ module.exports = {
       err = @cypressErr(err)
 
     onFail = options.onFail
+    errProps = options.errProps
     ## assume onFail is a command if
     ## onFail is present and isnt a function
     if onFail and not _.isFunction(onFail)
@@ -130,6 +131,7 @@ module.exports = {
         command.error(err)
 
     err.onFail = onFail if onFail
+    if errProps then _.extend(err, errProps)
 
     throw err
 
@@ -140,6 +142,11 @@ module.exports = {
       err = @internalErr e
 
     @throwErr(err, options)
+
+  warnByPath: (errPath, options = {}) ->
+    err = @errMessageByPath errPath, options.args
+
+    @warning(err)
 
   internalErr: (err) ->
     err = new Error(err)
@@ -363,4 +370,20 @@ module.exports = {
           values
 
     run(0)
+
+  memoize: (func, cacheInstance = new Map()) ->
+    memoized = (args...) ->
+      key = args[0]
+      cache = memoized.cache
+
+      return cache.get(key) if cache.has(key)
+
+      result = func.apply(this, args)
+      memoized.cache = cache.set(key, result) || cache
+
+      return result
+
+    memoized.cache = cacheInstance
+
+    return memoized
 }

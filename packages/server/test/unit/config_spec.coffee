@@ -497,6 +497,9 @@ describe "lib/config", ->
     it "port=null", ->
       @defaults "port", null
 
+    it "projectId=null", ->
+      @defaults("projectId", null)
+
     it "autoOpen=false", ->
       @defaults "autoOpen", false
 
@@ -727,6 +730,7 @@ describe "lib/config", ->
         .then (cfg) ->
           expect(cfg.resolved).to.deep.eq({
             env:                        { }
+            projectId:                  { value: null, from: "default" },
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
@@ -764,7 +768,12 @@ describe "lib/config", ->
           })
 
       it "sets config, envFile and env", ->
-        sinon.stub(config, "getProcessEnvVars").returns({quux: "quux"})
+        sinon.stub(config, "getProcessEnvVars").returns({
+          quux: "quux"
+          RECORD_KEY: "foobarbazquux",
+          CI_KEY: "justanothercikey",
+          PROJECT_ID: "projectId123"
+        })
 
         obj = {
           projectRoot: "/foo/bar"
@@ -787,6 +796,7 @@ describe "lib/config", ->
         config.mergeDefaults(obj, options)
         .then (cfg) ->
           expect(cfg.resolved).to.deep.eq({
+            projectId:                  { value: "projectId123", from: "env" },
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
@@ -836,6 +846,14 @@ describe "lib/config", ->
               }
               quux: {
                 value: "quux"
+                from: "env"
+              }
+              RECORD_KEY: {
+                value: "fooba...zquux",
+                from: "env"
+              }
+              CI_KEY: {
+                value: "justa...cikey",
                 from: "env"
               }
             }
@@ -903,7 +921,10 @@ describe "lib/config", ->
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
-      sinon.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
+      sinon.stub(config, "getProcessEnvVars").returns({
+        version: "0.12.1",
+        user: "bob",
+      })
 
       obj = {
         env: {
@@ -936,7 +957,6 @@ describe "lib/config", ->
 
   context ".getProcessEnvVars", ->
     ["cypress_", "CYPRESS_"].forEach (key) ->
-
       it "reduces key: #{key}", ->
         obj = {
           cypress_host: "http://localhost:8888"
@@ -951,14 +971,18 @@ describe "lib/config", ->
           version: "0.12.0"
         })
 
-    it "does not merge CYPRESS_ENV", ->
+    it "does not merge reserved environment variables", ->
       obj = {
         CYPRESS_ENV: "production"
         CYPRESS_FOO: "bar"
+        CYPRESS_CRASH_REPORTS: "0"
+        CYPRESS_PROJECT_ID: "abc123"
       }
 
       expect(config.getProcessEnvVars(obj)).to.deep.eq({
         FOO: "bar"
+        PROJECT_ID: "abc123"
+        CRASH_REPORTS: 0
       })
 
   context ".setUrls", ->
