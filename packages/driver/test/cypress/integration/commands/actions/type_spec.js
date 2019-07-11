@@ -1,169 +1,180 @@
-$ = Cypress.$.bind(Cypress)
-_ = Cypress._
-Keyboard = Cypress.Keyboard
-Promise = Cypress.Promise
-$selection = require("../../../../../src/dom/selection")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $ = Cypress.$.bind(Cypress);
+const { _ } = Cypress;
+const { Keyboard } = Cypress;
+const { Promise } = Cypress;
+const $selection = require("../../../../../src/dom/selection");
 
-## trim new lines at the end of innerText
-## due to changing browser versions implementing
-## this differently
-trimInnerText = ($el) ->
-  _.trimEnd($el.get(0).innerText, "\n")
+//# trim new lines at the end of innerText
+//# due to changing browser versions implementing
+//# this differently
+const trimInnerText = $el => _.trimEnd($el.get(0).innerText, "\n");
 
-describe "src/cy/commands/actions/type", ->
-  before ->
+describe("src/cy/commands/actions/type", function() {
+  before(() =>
     cy
       .visit("/fixtures/dom.html")
-      .then (win) ->
-        @body = win.document.body.outerHTML
+      .then(function(win) {
+        this.body = win.document.body.outerHTML;
 
-        el = cy.$$('[contenteditable]:first').get(0)
+        const el = cy.$$('[contenteditable]:first').get(0);
 
-        innerHtml = el.innerHTML
+        const innerHtml = el.innerHTML;
 
-        ## by default... the last new line by itself
-        ## will only ever count as a single new line...
-        ## but new lines above it will count as 2 new lines...
-        ## so by adding "3" new lines, the last counts as 1
-        ## and the first 2 count as 2...
-        el.innerHTML = '<div><br></div>'.repeat(3)
+        //# by default... the last new line by itself
+        //# will only ever count as a single new line...
+        //# but new lines above it will count as 2 new lines...
+        //# so by adding "3" new lines, the last counts as 1
+        //# and the first 2 count as 2...
+        el.innerHTML = '<div><br></div>'.repeat(3);
 
-        ## browsers changed their implementation
-        ## of the number of newlines that <div><br></div>
-        ## create. newer versions of chrome set 2 new lines
-        ## per set - whereas older ones create only 1 new line.
-        ## so we grab the current sets for the assertion later
-        ## so this test is browser version agnostic
-        newLines = el.innerText
+        //# browsers changed their implementation
+        //# of the number of newlines that <div><br></div>
+        //# create. newer versions of chrome set 2 new lines
+        //# per set - whereas older ones create only 1 new line.
+        //# so we grab the current sets for the assertion later
+        //# so this test is browser version agnostic
+        const newLines = el.innerText;
 
-        ## disregard the last new line, and divide by 2...
-        ## this tells us how many multiples of new lines
-        ## the browser inserts for new lines other than
-        ## the last new line
-        @multiplierNumNewLines = (newLines.length - 1) / 2
+        //# disregard the last new line, and divide by 2...
+        //# this tells us how many multiples of new lines
+        //# the browser inserts for new lines other than
+        //# the last new line
+        return this.multiplierNumNewLines = (newLines.length - 1) / 2;
+    })
+  );
 
-  beforeEach ->
-    doc = cy.state("document")
+  beforeEach(function() {
+    const doc = cy.state("document");
 
-    $(doc.body).empty().html(@body)
+    return $(doc.body).empty().html(this.body);
+  });
 
-  context "#type", ->
-    it "does not change the subject", ->
-      input = cy.$$("input:first")
+  context("#type", function() {
+    it("does not change the subject", function() {
+      const input = cy.$$("input:first");
 
-      cy.get("input:first").type("foo").then ($input) ->
-        expect($input).to.match input
+      return cy.get("input:first").type("foo").then($input => expect($input).to.match(input));
+    });
 
-    it "changes the value", ->
-      input = cy.$$("input:text:first")
+    it("changes the value", function() {
+      const input = cy.$$("input:text:first");
 
-      input.val("")
+      input.val("");
 
-      ## make sure we are starting from a
-      ## clean state
-      expect(input).to.have.value("")
+      //# make sure we are starting from a
+      //# clean state
+      expect(input).to.have.value("");
 
-      cy.get("input:text:first").type("foo").then ($input) ->
-        expect($input).to.have.value("foo")
+      return cy.get("input:text:first").type("foo").then($input => expect($input).to.have.value("foo"));
+    });
 
-    it "appends subsequent type commands", ->
+    it("appends subsequent type commands", () =>
       cy
         .get("input:first").type("123").type("456")
         .should("have.value", "123456")
+    );
 
-    it "appends subsequent commands when value is changed in between", ->
+    it("appends subsequent commands when value is changed in between", () =>
       cy
         .get("input:first")
         .type("123")
-        .then ($input) ->
-          $input[0].value += '-'
-          return $input
-        .type("456")
+        .then(function($input) {
+          $input[0].value += '-';
+          return $input;}).type("456")
         .should("have.value", "123-456")
+    );
 
-    it "can type numbers", ->
-      cy.get(":text:first").type(123).then ($text) ->
-        expect($text).to.have.value("123")
+    it("can type numbers", () =>
+      cy.get(":text:first").type(123).then($text => expect($text).to.have.value("123"))
+    );
 
-    it "triggers focus event on the input", (done) ->
-      cy.$$("input:text:first").focus -> done()
+    it("triggers focus event on the input", function(done) {
+      cy.$$("input:text:first").focus(() => done());
 
-      cy.get("input:text:first").type("bar")
+      return cy.get("input:text:first").type("bar");
+    });
 
-    it "lists the input as the focused element", ->
-      $input = cy.$$("input:text:first")
+    it("lists the input as the focused element", function() {
+      const $input = cy.$$("input:text:first");
 
-      cy.get("input:text:first").type("bar").focused().then ($focused) ->
-        expect($focused.get(0)).to.eq $input.get(0)
+      return cy.get("input:text:first").type("bar").focused().then($focused => expect($focused.get(0)).to.eq($input.get(0)));
+    });
 
-    it "causes previous input to receive blur", ->
-      blurred = false
+    it("causes previous input to receive blur", function() {
+      let blurred = false;
 
-      cy.$$("input:text:first").blur ->
-        blurred = true
+      cy.$$("input:text:first").blur(() => blurred = true);
 
-      cy
+      return cy
         .get("input:text:first").type("foo")
         .get("input:text:last").type("bar")
-        .then ->
-          expect(blurred).to.be.true
+        .then(() => expect(blurred).to.be.true);
+    });
 
-    it "can type into contenteditable", ->
-      oldText = cy.$$("#contenteditable").get(0).innerText
+    it("can type into contenteditable", function() {
+      const oldText = cy.$$("#contenteditable").get(0).innerText;
 
-      cy.get("#contenteditable")
+      return cy.get("#contenteditable")
       .type(" foo")
-      .then ($div) ->
-        expect($div.get(0).innerText).to.eq (oldText + " foo")
+      .then($div => expect($div.get(0).innerText).to.eq((oldText + " foo")));
+    });
 
-    it "delays 50ms before resolving", ->
-      cy.$$(":text:first").on "change", (e) =>
-        cy.spy(Promise, "delay")
+    it("delays 50ms before resolving", function() {
+      cy.$$(":text:first").on("change", e => {
+        return cy.spy(Promise, "delay");
+      });
 
-      cy.get(":text:first").type("foo{enter}").then ->
-        expect(Promise.delay).to.be.calledWith(50, "type")
+      return cy.get(":text:first").type("foo{enter}").then(() => expect(Promise.delay).to.be.calledWith(50, "type"));
+    });
 
-    it "increases the timeout delta", ->
-      cy.spy(cy, "timeout")
+    it("increases the timeout delta", function() {
+      cy.spy(cy, "timeout");
 
-      cy.get(":text:first").type("foo{enter}").then ->
-        expect(cy.timeout).to.be.calledWith(40, true, "type")
-        expect(cy.timeout).to.be.calledWith(50, true, "type")
+      return cy.get(":text:first").type("foo{enter}").then(function() {
+        expect(cy.timeout).to.be.calledWith(40, true, "type");
+        return expect(cy.timeout).to.be.calledWith(50, true, "type");
+      });
+    });
 
-    it "accepts body as subject", ->
-      cy.get("body").type("foo")
+    it("accepts body as subject", () => cy.get("body").type("foo"));
 
-    it "does not click when body is subject", ->
-      bodyClicked = false
-      cy.$$("body").on "click", -> bodyClicked = true
+    it("does not click when body is subject", function() {
+      let bodyClicked = false;
+      cy.$$("body").on("click", () => bodyClicked = true);
 
-      cy.get("body").type("foo").then ->
-        expect(bodyClicked).to.be.false
+      return cy.get("body").type("foo").then(() => expect(bodyClicked).to.be.false);
+    });
 
-    describe "actionability", ->
-      it "can forcibly click even when element is invisible", ->
-        $txt = cy.$$(":text:first").hide()
+    describe("actionability", function() {
+      it("can forcibly click even when element is invisible", function() {
+        const $txt = cy.$$(":text:first").hide();
 
-        expect($txt).not.to.have.value("foo")
+        expect($txt).not.to.have.value("foo");
 
-        clicked = false
+        let clicked = false;
 
-        $txt.on "click", ->
-          clicked = true
+        $txt.on("click", () => clicked = true);
 
-        cy.get(":text:first").type("foo", {force: true}).then ($input) ->
-          expect(clicked).to.be.true
-          expect($input).to.have.value("foo")
+        return cy.get(":text:first").type("foo", {force: true}).then(function($input) {
+          expect(clicked).to.be.true;
+          return expect($input).to.have.value("foo");
+        });
+      });
 
-      it "can forcibly click even when being covered by another element", ->
-        $input = $("<input />")
+      it("can forcibly click even when being covered by another element", function() {
+        const $input = $("<input />")
         .attr("id", "input-covered-in-span")
         .css({
           width: 50
         })
-        .prependTo(cy.$$("body"))
+        .prependTo(cy.$$("body"));
 
-        $span = $("<span>span on input</span>")
+        const $span = $("<span>span on input</span>")
         .css({
           position: "absolute",
           left: $input.offset().left,
@@ -172,508 +183,525 @@ describe "src/cy/commands/actions/type", ->
           display: "inline-block",
           backgroundColor: "yellow"
         })
-        .prependTo(cy.$$("body"))
+        .prependTo(cy.$$("body"));
 
-        clicked = false
+        let clicked = false;
 
-        $input.on "click", ->
-          clicked = true
+        $input.on("click", () => clicked = true);
 
-        cy.get("#input-covered-in-span").type("foo", {force: true}).then ($input) ->
-          expect(clicked).to.be.true
-          expect($input).to.have.value("foo")
+        return cy.get("#input-covered-in-span").type("foo", {force: true}).then(function($input) {
+          expect(clicked).to.be.true;
+          return expect($input).to.have.value("foo");
+        });
+      });
 
-      it "waits until element becomes visible", ->
-        $txt = cy.$$(":text:first").hide()
+      it("waits until element becomes visible", function() {
+        const $txt = cy.$$(":text:first").hide();
 
-        retried = false
+        let retried = false;
 
-        cy.on "command:retry", _.after 3, ->
-          $txt.show()
-          retried = true
+        cy.on("command:retry", _.after(3, function() {
+          $txt.show();
+          return retried = true;
+        })
+        );
 
-        cy.get(":text:first").type("foo").then ->
-          expect(retried).to.be.true
+        return cy.get(":text:first").type("foo").then(() => expect(retried).to.be.true);
+      });
 
-      it "waits until element is no longer disabled", ->
-        $txt = cy.$$(":text:first").prop("disabled", true)
+      it("waits until element is no longer disabled", function() {
+        const $txt = cy.$$(":text:first").prop("disabled", true);
 
-        retried = false
-        clicks = 0
+        let retried = false;
+        let clicks = 0;
 
-        $txt.on "click", ->
-          clicks += 1
+        $txt.on("click", () => clicks += 1);
 
-        cy.on "command:retry", _.after 3, ->
-          $txt.prop("disabled", false)
-          retried = true
+        cy.on("command:retry", _.after(3, function() {
+          $txt.prop("disabled", false);
+          return retried = true;
+        })
+        );
 
-        cy.get(":text:first").type("foo").then ->
-          expect(clicks).to.eq(1)
-          expect(retried).to.be.true
+        return cy.get(":text:first").type("foo").then(function() {
+          expect(clicks).to.eq(1);
+          return expect(retried).to.be.true;
+        });
+      });
 
-      it "waits until element stops animating", ->
-        retries = 0
+      it("waits until element stops animating", function() {
+        let retries = 0;
 
-        cy.on "command:retry", (obj) ->
-          retries += 1
+        cy.on("command:retry", obj => retries += 1);
 
         cy.stub(cy, "ensureElementIsNotAnimating")
         .throws(new Error("animating!"))
-        .onThirdCall().returns()
+        .onThirdCall().returns();
 
-        cy.get(":text:first").type("foo").then ->
-          ## - retry animation coords
-          ## - retry animation
-          ## - retry animation
-          expect(retries).to.eq(3)
-          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+        return cy.get(":text:first").type("foo").then(function() {
+          //# - retry animation coords
+          //# - retry animation
+          //# - retry animation
+          expect(retries).to.eq(3);
+          return expect(cy.ensureElementIsNotAnimating).to.be.calledThrice;
+        });
+      });
 
-      it "does not throw when waiting for animations is disabled", ->
-        cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
-        Cypress.config("waitForAnimations", false)
+      it("does not throw when waiting for animations is disabled", function() {
+        cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"));
+        Cypress.config("waitForAnimations", false);
 
-        cy.get(":text:first").type("foo").then ->
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        return cy.get(":text:first").type("foo").then(() => expect(cy.ensureElementIsNotAnimating).not.to.be.called);
+      });
 
-      it "does not throw when turning off waitForAnimations in options", ->
-        cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
+      it("does not throw when turning off waitForAnimations in options", function() {
+        cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"));
 
-        cy.get(":text:first").type("foo", {waitForAnimations: false}).then ->
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        return cy.get(":text:first").type("foo", {waitForAnimations: false}).then(() => expect(cy.ensureElementIsNotAnimating).not.to.be.called);
+      });
 
-      it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
-        $txt = cy.$$(":text:first")
+      it("passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", function() {
+        const $txt = cy.$$(":text:first");
 
-        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt);
 
-        cy.spy(cy, "ensureElementIsNotAnimating")
+        cy.spy(cy, "ensureElementIsNotAnimating");
 
-        cy.get(":text:first").type("foo", {animationDistanceThreshold: 1000}).then ->
-          args = cy.ensureElementIsNotAnimating.firstCall.args
+        return cy.get(":text:first").type("foo", {animationDistanceThreshold: 1000}).then(function() {
+          const { args } = cy.ensureElementIsNotAnimating.firstCall;
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
-          expect(args[2]).to.eq(1000)
+          expect(args[1]).to.deep.eq([fromWindow, fromWindow]);
+          return expect(args[2]).to.eq(1000);
+        });
+      });
 
-      it "passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
-        animationDistanceThreshold = Cypress.config("animationDistanceThreshold")
+      return it("passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating", function() {
+        const animationDistanceThreshold = Cypress.config("animationDistanceThreshold");
 
-        $txt = cy.$$(":text:first")
+        const $txt = cy.$$(":text:first");
 
-        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt);
 
-        cy.spy(cy, "ensureElementIsNotAnimating")
+        cy.spy(cy, "ensureElementIsNotAnimating");
 
-        cy.get(":text:first").type("foo").then ->
-          args = cy.ensureElementIsNotAnimating.firstCall.args
+        return cy.get(":text:first").type("foo").then(function() {
+          const { args } = cy.ensureElementIsNotAnimating.firstCall;
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
-          expect(args[2]).to.eq(animationDistanceThreshold)
+          expect(args[1]).to.deep.eq([fromWindow, fromWindow]);
+          return expect(args[2]).to.eq(animationDistanceThreshold);
+        });
+      });
+    });
 
-    describe "input types where no extra formatting required", ->
-      _.each [
-        "password"
-        "email"
-        "number"
-        "search"
-        "url"
+    describe("input types where no extra formatting required", () =>
+      _.each([
+        "password",
+        "email",
+        "number",
+        "search",
+        "url",
         "tel"
-        ], (type) ->
-          it "accepts input [type=#{type}]", ->
-            input = cy.$$("<input type='#{type}' id='input-type-#{type}' />")
+        ], function(type) {
+          it(`accepts input [type=${type}]`, function() {
+            const input = cy.$$(`<input type='${type}' id='input-type-${type}' />`);
 
-            cy.$$("body").append(input)
+            cy.$$("body").append(input);
 
-            cy.get("#input-type-#{type}").type("1234").then ($input) ->
-              expect($input).to.have.value "1234"
-              expect($input.get(0)).to.eq $input.get(0)
+            return cy.get(`#input-type-${type}`).type("1234").then(function($input) {
+              expect($input).to.have.value("1234");
+              return expect($input.get(0)).to.eq($input.get(0));
+            });
+          });
 
-          it "accepts type [type=#{type}], regardless of capitalization", ->
-            input = cy.$$("<input type='#{type.toUpperCase()}' id='input-type-#{type}' />")
+          return it(`accepts type [type=${type}], regardless of capitalization`, function() {
+            const input = cy.$$(`<input type='${type.toUpperCase()}' id='input-type-${type}' />`);
 
-            cy.$$("body").append(input)
+            cy.$$("body").append(input);
 
-            cy.get("#input-type-#{type}").type("1234")
+            return cy.get(`#input-type-${type}`).type("1234");
+          });
+      })
+    );
 
-    describe "tabindex", ->
-      beforeEach ->
-        @$div = cy.$$("#tabindex")
+    describe("tabindex", function() {
+      beforeEach(function() {
+        return this.$div = cy.$$("#tabindex");
+      });
 
-      it "receives keydown, keyup, keypress", ->
-        keydown  = false
-        keypress = false
-        keyup    = false
+      it("receives keydown, keyup, keypress", function() {
+        let keydown  = false;
+        let keypress = false;
+        let keyup    = false;
 
-        @$div.keydown ->
-          keydown = true
+        this.$div.keydown(() => keydown = true);
 
-        @$div.keypress ->
-          keypress = true
+        this.$div.keypress(() => keypress = true);
 
-        @$div.keyup ->
-          keyup = true
+        this.$div.keyup(() => keyup = true);
 
-        cy.get("#tabindex").type("a").then ->
-          expect(keydown).to.be.true
-          expect(keypress).to.be.true
-          expect(keyup).to.be.true
+        return cy.get("#tabindex").type("a").then(function() {
+          expect(keydown).to.be.true;
+          expect(keypress).to.be.true;
+          return expect(keyup).to.be.true;
+        });
+      });
 
-      it "does not receive textInput", ->
-        textInput = false
+      it("does not receive textInput", function() {
+        let textInput = false;
 
-        @$div.on "textInput", ->
-          textInput = true
+        this.$div.on("textInput", () => textInput = true);
 
-        cy.get("#tabindex").type("f").then ->
-          expect(textInput).to.be.false
+        return cy.get("#tabindex").type("f").then(() => expect(textInput).to.be.false);
+      });
 
-      it "does not receive input", ->
-        input = false
+      it("does not receive input", function() {
+        let input = false;
 
-        @$div.on "input", ->
-          input = true
+        this.$div.on("input", () => input = true);
 
-        cy.get("#tabindex").type("f").then ->
-          expect(input).to.be.false
+        return cy.get("#tabindex").type("f").then(() => expect(input).to.be.false);
+      });
 
-      it "does not receive change event", ->
-        innerText = @$div.text()
+      it("does not receive change event", function() {
+        const innerText = this.$div.text();
 
-        change = false
+        let change = false;
 
-        @$div.on "change", ->
-          change = true
+        this.$div.on("change", () => change = true);
 
-        cy.get("#tabindex").type("foo{enter}").then ($el) ->
-          expect(change).to.be.false
-          expect($el.text()).to.eq(innerText)
+        return cy.get("#tabindex").type("foo{enter}").then(function($el) {
+          expect(change).to.be.false;
+          return expect($el.text()).to.eq(innerText);
+        });
+      });
 
-      it "does not change inner text", ->
-        innerText = @$div.text()
+      it("does not change inner text", function() {
+        const innerText = this.$div.text();
 
-        cy.get("#tabindex").type("foo{leftarrow}{del}{rightarrow}{enter}").should("have.text", innerText)
+        return cy.get("#tabindex").type("foo{leftarrow}{del}{rightarrow}{enter}").should("have.text", innerText);
+      });
 
-      it "receives focus", ->
-        focus = false
+      it("receives focus", function() {
+        let focus = false;
 
-        @$div.focus ->
-          focus = true
+        this.$div.focus(() => focus = true);
 
-        cy.get("#tabindex").type("f").then ->
-          expect(focus).to.be.true
+        return cy.get("#tabindex").type("f").then(() => expect(focus).to.be.true);
+      });
 
-      it "receives blur", ->
-        blur = false
+      it("receives blur", function() {
+        let blur = false;
 
-        @$div.blur ->
-          blur = true
+        this.$div.blur(() => blur = true);
 
-        cy
+        return cy
           .get("#tabindex").type("f")
-          .get("input:first").focus().then ->
-            expect(blur).to.be.true
+          .get("input:first").focus().then(() => expect(blur).to.be.true);
+      });
 
-      it "receives keydown and keyup for other special characters and keypress for enter and regular characters", ->
-        keydowns = []
-        keyups = []
-        keypresses = []
+      return it("receives keydown and keyup for other special characters and keypress for enter and regular characters", function() {
+        const keydowns = [];
+        const keyups = [];
+        const keypresses = [];
 
-        @$div.keydown (e) ->
-          keydowns.push(e)
+        this.$div.keydown(e => keydowns.push(e));
 
-        @$div.keypress (e) ->
-          keypresses.push(e)
+        this.$div.keypress(e => keypresses.push(e));
 
-        @$div.keyup (e) ->
-          keyups.push(e)
+        this.$div.keyup(e => keyups.push(e));
 
-        cy
+        return cy
           .get("#tabindex").type("f{leftarrow}{rightarrow}{enter}")
-          .then ->
-            expect(keydowns).to.have.length(4)
-            expect(keypresses).to.have.length(2)
-            expect(keyups).to.have.length(4)
+          .then(function() {
+            expect(keydowns).to.have.length(4);
+            expect(keypresses).to.have.length(2);
+            return expect(keyups).to.have.length(4);
+        });
+      });
+    });
 
-    describe "delay", ->
-      it "adds delay to delta for each key sequence", ->
-        cy.spy(cy, "timeout")
+    describe("delay", function() {
+      it("adds delay to delta for each key sequence", function() {
+        cy.spy(cy, "timeout");
 
-        cy
+        return cy
           .get(":text:first")
           .type("foo{enter}bar{leftarrow}", { delay: 5 })
-          .then ->
-            expect(cy.timeout).to.be.calledWith(5 * 8, true, "type")
+          .then(() => expect(cy.timeout).to.be.calledWith(5 * 8, true, "type"));
+      });
 
-      it "can cancel additional keystrokes", (done) ->
-        cy.stub(Cypress.runner, "stop")
+      return it("can cancel additional keystrokes", function(done) {
+        cy.stub(Cypress.runner, "stop");
 
-        text = cy.$$(":text:first").keydown _.after 3, ->
-          Cypress.stop()
+        const text = cy.$$(":text:first").keydown(_.after(3, () => Cypress.stop())
+        );
 
-        cy.on "stop", ->
-          _.delay ->
-            expect(text).to.have.value("foo")
-            done()
-          , 50
-
-        cy.get(":text:first").type("foo{enter}bar{leftarrow}")
-
-    describe "events", ->
-      it "receives keydown event", (done) ->
-        $txt = cy.$$(":text:first")
-
-        $txt.on "keydown", (e) =>
-          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key")
-          expect(obj).to.deep.eq {
-            altKey: false
-            bubbles: true
-            cancelable: true
-            charCode: 0 ## deprecated
-            ctrlKey: false
-            detail: 0
-            key: "a"
-            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
-            layerX: 0
-            layerY: 0
-            location: 0
-            metaKey: false
-            pageX: 0
-            pageY: 0
-            repeat: false
-            shiftKey: false
-            type: "keydown"
-            view: cy.state("window")
-            which: 65 ## deprecated but fired by chrome
+        cy.on("stop", () =>
+          _.delay(function() {
+            expect(text).to.have.value("foo");
+            return done();
           }
-          done()
+          , 50)
+        );
 
-        cy.get(":text:first").type("a")
+        return cy.get(":text:first").type("foo{enter}bar{leftarrow}");
+      });
+    });
 
-      it "receives keypress event", (done) ->
-        $txt = cy.$$(":text:first")
+    describe("events", function() {
+      it("receives keydown event", function(done) {
+        const $txt = cy.$$(":text:first");
 
-        $txt.on "keypress", (e) =>
-          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key")
-          expect(obj).to.deep.eq {
-            altKey: false
-            bubbles: true
-            cancelable: true
-            charCode: 97 ## deprecated
-            ctrlKey: false
-            detail: 0
-            key: "a"
-            keyCode: 97 ## deprecated
-            layerX: 0
-            layerY: 0
-            location: 0
-            metaKey: false
-            pageX: 0
-            pageY: 0
-            repeat: false
-            shiftKey: false
-            type: "keypress"
-            view: cy.state("window")
-            which: 97 ## deprecated
-          }
-          done()
+        $txt.on("keydown", e => {
+          const obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key");
+          expect(obj).to.deep.eq({
+            altKey: false,
+            bubbles: true,
+            cancelable: true,
+            charCode: 0, //# deprecated
+            ctrlKey: false,
+            detail: 0,
+            key: "a",
+            keyCode: 65, //# deprecated but fired by chrome always uppercase in the ASCII table
+            layerX: 0,
+            layerY: 0,
+            location: 0,
+            metaKey: false,
+            pageX: 0,
+            pageY: 0,
+            repeat: false,
+            shiftKey: false,
+            type: "keydown",
+            view: cy.state("window"),
+            which: 65 //# deprecated but fired by chrome
+          });
+          return done();
+        });
 
-        cy.get(":text:first").type("a")
+        return cy.get(":text:first").type("a");
+      });
 
-      it "receives keyup event", (done) ->
-        $txt = cy.$$(":text:first")
+      it("receives keypress event", function(done) {
+        const $txt = cy.$$(":text:first");
 
-        $txt.on "keyup", (e) =>
-          obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key")
-          expect(obj).to.deep.eq {
-            altKey: false
-            bubbles: true
-            cancelable: true
-            charCode: 0 ## deprecated
-            ctrlKey: false
-            detail: 0
-            key: "a"
-            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
-            layerX: 0
-            layerY: 0
-            location: 0
-            metaKey: false
-            pageX: 0
-            pageY: 0
-            repeat: false
-            shiftKey: false
-            type: "keyup"
-            view: cy.state("window")
-            which: 65 ## deprecated but fired by chrome
-          }
-          done()
+        $txt.on("keypress", e => {
+          const obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key");
+          expect(obj).to.deep.eq({
+            altKey: false,
+            bubbles: true,
+            cancelable: true,
+            charCode: 97, //# deprecated
+            ctrlKey: false,
+            detail: 0,
+            key: "a",
+            keyCode: 97, //# deprecated
+            layerX: 0,
+            layerY: 0,
+            location: 0,
+            metaKey: false,
+            pageX: 0,
+            pageY: 0,
+            repeat: false,
+            shiftKey: false,
+            type: "keypress",
+            view: cy.state("window"),
+            which: 97 //# deprecated
+          });
+          return done();
+        });
 
-        cy.get(":text:first").type("a")
+        return cy.get(":text:first").type("a");
+      });
 
-      it "receives textInput event", (done) ->
-        $txt = cy.$$(":text:first")
+      it("receives keyup event", function(done) {
+        const $txt = cy.$$(":text:first");
 
-        $txt.on "textInput", (e) =>
-          obj = _.pick e.originalEvent, "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which"
-          expect(obj).to.deep.eq {
-            bubbles: true
-            cancelable: true
-            charCode: 0
-            data: "a"
-            detail: 0
-            keyCode: 0
-            layerX: 0
-            layerY: 0
-            pageX: 0
-            pageY: 0
-            type: "textInput"
-            view: cy.state("window")
+        $txt.on("keyup", e => {
+          const obj = _.pick(e.originalEvent, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which", "key");
+          expect(obj).to.deep.eq({
+            altKey: false,
+            bubbles: true,
+            cancelable: true,
+            charCode: 0, //# deprecated
+            ctrlKey: false,
+            detail: 0,
+            key: "a",
+            keyCode: 65, //# deprecated but fired by chrome always uppercase in the ASCII table
+            layerX: 0,
+            layerY: 0,
+            location: 0,
+            metaKey: false,
+            pageX: 0,
+            pageY: 0,
+            repeat: false,
+            shiftKey: false,
+            type: "keyup",
+            view: cy.state("window"),
+            which: 65 //# deprecated but fired by chrome
+          });
+          return done();
+        });
+
+        return cy.get(":text:first").type("a");
+      });
+
+      it("receives textInput event", function(done) {
+        const $txt = cy.$$(":text:first");
+
+        $txt.on("textInput", e => {
+          const obj = _.pick(e.originalEvent, "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which");
+          expect(obj).to.deep.eq({
+            bubbles: true,
+            cancelable: true,
+            charCode: 0,
+            data: "a",
+            detail: 0,
+            keyCode: 0,
+            layerX: 0,
+            layerY: 0,
+            pageX: 0,
+            pageY: 0,
+            type: "textInput",
+            view: cy.state("window"),
             which: 0
-          }
-          done()
+          });
+          return done();
+        });
 
-        cy.get(":text:first").type("a")
+        return cy.get(":text:first").type("a");
+      });
 
-      it "receives input event", (done) ->
-        $txt = cy.$$(":text:first")
+      it("receives input event", function(done) {
+        const $txt = cy.$$(":text:first");
 
-        $txt.on "input", (e) =>
-          obj = _.pick e.originalEvent, "bubbles", "cancelable", "type"
-          expect(obj).to.deep.eq {
-            bubbles: true
-            cancelable: false
+        $txt.on("input", e => {
+          const obj = _.pick(e.originalEvent, "bubbles", "cancelable", "type");
+          expect(obj).to.deep.eq({
+            bubbles: true,
+            cancelable: false,
             type: "input"
-          }
-          done()
+          });
+          return done();
+        });
 
-        cy.get(":text:first").type("a")
+        return cy.get(":text:first").type("a");
+      });
 
-      it "fires events in the correct order"
+      it("fires events in the correct order");
 
-      it "fires events for each key stroke"
+      it("fires events for each key stroke");
 
-      it "does fire input event when value changes", ->
-        fired = false
-        cy.$$(":text:first").on "input", ->
-          fired = true
+      it("does fire input event when value changes", function() {
+        let fired = false;
+        cy.$$(":text:first").on("input", () => fired = true);
 
-        fired = false
+        fired = false;
         cy.get(":text:first")
           .invoke("val", "bar")
           .type("{selectAll}{rightarrow}{backspace}")
-          .then ->
-            expect(fired).to.eq true
+          .then(() => expect(fired).to.eq(true));
 
-        fired = false
+        fired = false;
         cy.get(":text:first")
           .invoke("val", "bar")
           .type("{selectAll}{leftarrow}{del}")
-          .then ->
-            expect(fired).to.eq true
+          .then(() => expect(fired).to.eq(true));
 
-        cy.$$('[contenteditable]:first').on "input", () ->
-          fired = true
+        cy.$$('[contenteditable]:first').on("input", () => fired = true);
 
-        fired = false
+        fired = false;
         cy.get('[contenteditable]:first')
           .invoke('html', 'foobar')
           .type('{selectAll}{rightarrow}{backspace}')
-          .then ->
-            expect(fired).to.eq true
+          .then(() => expect(fired).to.eq(true));
 
-        fired = false
-        cy.get('[contenteditable]:first')
+        fired = false;
+        return cy.get('[contenteditable]:first')
           .invoke('html', 'foobar')
           .type('{selectAll}{leftarrow}{del}')
-          .then ->
-            expect(fired).to.eq true
+          .then(() => expect(fired).to.eq(true));
+      });
 
-      it "does not fire input event when value does not change", ->
-        fired = false
-        cy.$$(":text:first").on "input", (e) ->
-          fired = true
+      return it("does not fire input event when value does not change", function() {
+        let fired = false;
+        cy.$$(":text:first").on("input", e => fired = true);
 
-        fired = false
+        fired = false;
         cy.get(":text:first")
           .invoke("val", "bar")
           .type('{selectAll}{rightarrow}{del}')
-          .then ->
-            expect(fired).to.eq false
+          .then(() => expect(fired).to.eq(false));
 
-        fired = false
+        fired = false;
         cy.get(":text:first")
           .invoke("val", "bar")
           .type('{selectAll}{leftarrow}{backspace}')
-          .then ->
-            expect(fired).to.eq false
+          .then(() => expect(fired).to.eq(false));
 
-        cy.$$("textarea:first").on "input", (e) ->
-          fired = true
+        cy.$$("textarea:first").on("input", e => fired = true);
 
-        fired = false
+        fired = false;
         cy.get("textarea:first")
           .invoke("val", "bar")
           .type('{selectAll}{rightarrow}{del}')
-          .then ->
-            expect(fired).to.eq false
+          .then(() => expect(fired).to.eq(false));
 
-        fired = false
+        fired = false;
         cy.get("textarea:first")
           .invoke("val", "bar")
           .type('{selectAll}{leftarrow}{backspace}')
-          .then ->
-            expect(fired).to.eq false
+          .then(() => expect(fired).to.eq(false));
 
-        cy.$$('[contenteditable]:first').on "input", () ->
-          fired = true
+        cy.$$('[contenteditable]:first').on("input", () => fired = true);
 
-        fired = false
+        fired = false;
         cy.get('[contenteditable]:first')
           .invoke('html', 'foobar')
           .type('{selectAll}{rightarrow}{del}')
-          .then ->
-            expect(fired).to.eq false
+          .then(() => expect(fired).to.eq(false));
 
-        fired = false
-        cy.get('[contenteditable]:first')
+        fired = false;
+        return cy.get('[contenteditable]:first')
           .invoke('html', 'foobar')
           .type('{selectAll}{leftarrow}{backspace}')
-          .then ->
-            expect(fired).to.eq false
+          .then(() => expect(fired).to.eq(false));
+      });
+    });
 
-    describe "maxlength", ->
-      it "limits text entered to the maxlength attribute of a text input", ->
-        $input = cy.$$(":text:first")
-        $input.attr("maxlength", 5)
+    describe("maxlength", function() {
+      it("limits text entered to the maxlength attribute of a text input", function() {
+        const $input = cy.$$(":text:first");
+        $input.attr("maxlength", 5);
 
-        cy.get(":text:first")
+        return cy.get(":text:first")
           .type("1234567890")
-          .then (input) ->
-            expect(input).to.have.value("12345")
+          .then(input => expect(input).to.have.value("12345"));
+      });
 
-      it "ignores an invalid maxlength attribute", ->
-        $input = cy.$$(":text:first")
-        $input.attr("maxlength", "five")
+      it("ignores an invalid maxlength attribute", function() {
+        const $input = cy.$$(":text:first");
+        $input.attr("maxlength", "five");
 
-        cy.get(":text:first")
+        return cy.get(":text:first")
           .type("1234567890")
-          .then (input) ->
-            expect(input).to.have.value("1234567890")
+          .then(input => expect(input).to.have.value("1234567890"));
+      });
 
-      it "handles special characters", ->
-        $input = cy.$$(":text:first")
-        $input.attr("maxlength", 5)
+      it("handles special characters", function() {
+        const $input = cy.$$(":text:first");
+        $input.attr("maxlength", 5);
 
-        cy.get(":text:first")
+        return cy.get(":text:first")
           .type("12{selectall}")
-          .then (input) ->
-            expect(input).to.have.value("12")
+          .then(input => expect(input).to.have.value("12"));
+      });
 
-      it "maxlength=0 events", ->
-        events = []
+      it("maxlength=0 events", function() {
+        const events = [];
 
-        push = (evt) ->
-          return ->
-            events.push(evt)
+        const push = evt =>
+          () => events.push(evt)
+        ;
 
         cy
         .$$(":text:first")
@@ -682,21 +710,23 @@ describe "src/cy/commands/actions/type", ->
         .on("keypress", push("keypress"))
         .on("textInput", push("textInput"))
         .on("input", push("input"))
-        .on("keyup", push("keyup"))
+        .on("keyup", push("keyup"));
 
-        cy.get(":text:first")
+        return cy.get(":text:first")
           .type("1")
-          .then ->
+          .then(() =>
             expect(events).to.deep.eq([
               "keydown", "keypress", "textInput", "keyup"
             ])
+        );
+      });
 
-      it "maxlength=1 events", ->
-        events = []
+      return it("maxlength=1 events", function() {
+        const events = [];
 
-        push = (evt) ->
-          return ->
-            events.push(evt)
+        const push = evt =>
+          () => events.push(evt)
+        ;
 
         cy
         .$$(":text:first")
@@ -705,2397 +735,2613 @@ describe "src/cy/commands/actions/type", ->
         .on("keypress", push("keypress"))
         .on("textInput", push("textInput"))
         .on("input", push("input"))
-        .on("keyup", push("keyup"))
+        .on("keyup", push("keyup"));
 
-        cy.get(":text:first")
+        return cy.get(":text:first")
           .type("12")
-          .then ->
+          .then(() =>
             expect(events).to.deep.eq([
-              "keydown", "keypress", "textInput", "input", "keyup"
+              "keydown", "keypress", "textInput", "input", "keyup",
               "keydown", "keypress", "textInput", "keyup"
             ])
+        );
+      });
+    });
 
-    describe "value changing", ->
-      it "changes the elements value", ->
-        cy.get("#input-without-value").type("a").then ($text) ->
-          expect($text).to.have.value("a")
+    describe("value changing", function() {
+      it("changes the elements value", () =>
+        cy.get("#input-without-value").type("a").then($text => expect($text).to.have.value("a"))
+      );
 
-      it "changes the elements value for multiple keys", ->
-        cy.get("#input-without-value").type("foo").then ($text) ->
-          expect($text).to.have.value("foo")
+      it("changes the elements value for multiple keys", () =>
+        cy.get("#input-without-value").type("foo").then($text => expect($text).to.have.value("foo"))
+      );
 
-      it "inserts text after existing text", ->
-        cy.get("#input-with-value").type(" bar").then ($text) ->
-          expect($text).to.have.value("foo bar")
+      it("inserts text after existing text", () =>
+        cy.get("#input-with-value").type(" bar").then($text => expect($text).to.have.value("foo bar"))
+      );
 
-      it "inserts text after existing text input by invoking val", ->
-        cy.get("#input-without-value").invoke("val", "foo").type(" bar").then ($text) ->
-          expect($text).to.have.value("foo bar")
+      it("inserts text after existing text input by invoking val", () =>
+        cy.get("#input-without-value").invoke("val", "foo").type(" bar").then($text => expect($text).to.have.value("foo bar"))
+      );
 
-      it "overwrites text when currently has selection", ->
-        cy.get("#input-without-value").invoke('val', '0').then (el) ->
-          el.select()
+      it("overwrites text when currently has selection", function() {
+        cy.get("#input-without-value").invoke('val', '0').then(el => el.select());
 
-        cy.get("#input-without-value").type("50").then ($input) ->
-          expect($input).to.have.value("50")
+        return cy.get("#input-without-value").type("50").then($input => expect($input).to.have.value("50"));
+      });
 
-      it "overwrites text when selectAll in click handler", ->
-        cy.$$("#input-without-value").val("0").click ->
-          $(@).select()
+      it("overwrites text when selectAll in click handler", () =>
+        cy.$$("#input-without-value").val("0").click(function() {
+          return $(this).select();
+        })
+      );
 
-      it "overwrites text when selectAll in mouseup handler", ->
-        cy.$$("#input-without-value").val("0").mouseup ->
-          $(@).select()
+      it("overwrites text when selectAll in mouseup handler", () =>
+        cy.$$("#input-without-value").val("0").mouseup(function() {
+          return $(this).select();
+        })
+      );
 
-      it "overwrites text when selectAll in mouseup handler", ->
-        cy.$$("#input-without-value").val("0").mouseup ->
-          $(@).select()
+      it("overwrites text when selectAll in mouseup handler", () =>
+        cy.$$("#input-without-value").val("0").mouseup(function() {
+          return $(this).select();
+        })
+      );
 
-      it "responsive to keydown handler", ->
-        cy.$$("#input-without-value").val("1234").keydown ->
-          $(@).get(0).setSelectionRange(0,0)
-        cy.get("#input-without-value").type("56").then ($input) ->
-          expect($input).to.have.value("651234")
+      it("responsive to keydown handler", function() {
+        cy.$$("#input-without-value").val("1234").keydown(function() {
+          return $(this).get(0).setSelectionRange(0,0);
+        });
+        return cy.get("#input-without-value").type("56").then($input => expect($input).to.have.value("651234"));
+      });
 
-      it "responsive to keyup handler", ->
-        cy.$$("#input-without-value").val("1234").keyup ->
-          $(@).get(0).setSelectionRange(0,0)
-        cy.get("#input-without-value").type("56").then ($input) ->
-          expect($input).to.have.value("612345")
+      it("responsive to keyup handler", function() {
+        cy.$$("#input-without-value").val("1234").keyup(function() {
+          return $(this).get(0).setSelectionRange(0,0);
+        });
+        return cy.get("#input-without-value").type("56").then($input => expect($input).to.have.value("612345"));
+      });
 
-      it "responsive to input handler", ->
-        cy.$$("#input-without-value").val("1234").keyup ->
-          $(@).get(0).setSelectionRange(0,0)
-        cy.get("#input-without-value").type("56").then ($input) ->
-          expect($input).to.have.value("612345")
+      it("responsive to input handler", function() {
+        cy.$$("#input-without-value").val("1234").keyup(function() {
+          return $(this).get(0).setSelectionRange(0,0);
+        });
+        return cy.get("#input-without-value").type("56").then($input => expect($input).to.have.value("612345"));
+      });
 
-      it "responsive to change handler", ->
-        cy.$$("#input-without-value").val("1234").change ->
-          $(@).get(0).setSelectionRange(0,0)
-        ## no change event should be fired
-        cy.get("#input-without-value").type("56").then ($input) ->
-          expect($input).to.have.value("123456")
+      it("responsive to change handler", function() {
+        cy.$$("#input-without-value").val("1234").change(function() {
+          return $(this).get(0).setSelectionRange(0,0);
+        });
+        //# no change event should be fired
+        return cy.get("#input-without-value").type("56").then($input => expect($input).to.have.value("123456"));
+      });
 
-      it "automatically moves the caret to the end if value is changed manually", ->
-        cy.$$("#input-without-value").keypress (e) ->
-          e.preventDefault()
+      it("automatically moves the caret to the end if value is changed manually", function() {
+        cy.$$("#input-without-value").keypress(function(e) {
+          e.preventDefault();
 
-          key = String.fromCharCode(e.which)
+          const key = String.fromCharCode(e.which);
 
-          $input = $(e.target)
+          const $input = $(e.target);
 
-          val = $input.val()
+          const val = $input.val();
 
-          ## setting value updates cursor to the end of input
-          $input.val(val + key + "-")
+          //# setting value updates cursor to the end of input
+          return $input.val(val + key + "-");
+        });
 
-        cy.get("#input-without-value").type("foo").then ($input) ->
-          expect($input).to.have.value("f-o-o-")
+        return cy.get("#input-without-value").type("foo").then($input => expect($input).to.have.value("f-o-o-"));
+      });
 
-      it "automatically moves the caret to the end if value is changed manually asynchronously", ->
-        cy.$$("#input-without-value").keypress (e) ->
-          key = String.fromCharCode(e.which)
+      it("automatically moves the caret to the end if value is changed manually asynchronously", function() {
+        cy.$$("#input-without-value").keypress(function(e) {
+          const key = String.fromCharCode(e.which);
 
-          $input = $(e.target)
+          const $input = $(e.target);
 
-          _.defer ->
-            val = $input.val()
-            $input.val(val + "-")
+          return _.defer(function() {
+            const val = $input.val();
+            return $input.val(val + "-");
+          });
+        });
 
-        cy.get("#input-without-value").type("foo").then ($input) ->
-          expect($input).to.have.value("f-o-o-")
+        return cy.get("#input-without-value").type("foo").then($input => expect($input).to.have.value("f-o-o-"));
+      });
 
-      it "does not fire keypress when keydown is preventedDefault", (done) ->
-        cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
-          done("should not have received keypress event")
+      it("does not fire keypress when keydown is preventedDefault", function(done) {
+        cy.$$("#input-without-value").get(0).addEventListener("keypress", e => done("should not have received keypress event"));
 
-        cy.$$("#input-without-value").get(0).addEventListener "keydown", (e) ->
-          e.preventDefault()
+        cy.$$("#input-without-value").get(0).addEventListener("keydown", e => e.preventDefault());
 
-        cy.get("#input-without-value").type("foo").then -> done()
+        return cy.get("#input-without-value").type("foo").then(() => done());
+      });
 
-      it "does not insert key when keydown is preventedDefault", ->
-        cy.$$("#input-without-value").get(0).addEventListener "keydown", (e) ->
-          e.preventDefault()
+      it("does not insert key when keydown is preventedDefault", function() {
+        cy.$$("#input-without-value").get(0).addEventListener("keydown", e => e.preventDefault());
 
-        cy.get("#input-without-value").type("foo").then ($text) ->
-          expect($text).to.have.value("")
+        return cy.get("#input-without-value").type("foo").then($text => expect($text).to.have.value(""));
+      });
 
-      it "does not insert key when keypress is preventedDefault", ->
-        cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
-          e.preventDefault()
+      it("does not insert key when keypress is preventedDefault", function() {
+        cy.$$("#input-without-value").get(0).addEventListener("keypress", e => e.preventDefault());
 
-        cy.get("#input-without-value").type("foo").then ($text) ->
-          expect($text).to.have.value("")
+        return cy.get("#input-without-value").type("foo").then($text => expect($text).to.have.value(""));
+      });
 
-      it "does not fire textInput when keypress is preventedDefault", (done) ->
-        cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
-          done("should not have received textInput event")
+      it("does not fire textInput when keypress is preventedDefault", function(done) {
+        cy.$$("#input-without-value").get(0).addEventListener("textInput", e => done("should not have received textInput event"));
 
-        cy.$$("#input-without-value").get(0).addEventListener "keypress", (e) ->
-          e.preventDefault()
+        cy.$$("#input-without-value").get(0).addEventListener("keypress", e => e.preventDefault());
 
-        cy.get("#input-without-value").type("foo").then -> done()
+        return cy.get("#input-without-value").type("foo").then(() => done());
+      });
 
-      it "does not insert key when textInput is preventedDefault", ->
-        cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
-          e.preventDefault()
+      it("does not insert key when textInput is preventedDefault", function() {
+        cy.$$("#input-without-value").get(0).addEventListener("textInput", e => e.preventDefault());
 
-        cy.get("#input-without-value").type("foo").then ($text) ->
-          expect($text).to.have.value("")
+        return cy.get("#input-without-value").type("foo").then($text => expect($text).to.have.value(""));
+      });
 
-      it "does not fire input when textInput is preventedDefault", (done) ->
-        cy.$$("#input-without-value").get(0).addEventListener "input", (e) ->
-          done("should not have received input event")
+      it("does not fire input when textInput is preventedDefault", function(done) {
+        cy.$$("#input-without-value").get(0).addEventListener("input", e => done("should not have received input event"));
 
-        cy.$$("#input-without-value").get(0).addEventListener "textInput", (e) ->
-          e.preventDefault()
+        cy.$$("#input-without-value").get(0).addEventListener("textInput", e => e.preventDefault());
 
-        cy.get("#input-without-value").type("foo").then -> done()
+        return cy.get("#input-without-value").type("foo").then(() => done());
+      });
 
-      it "preventing default to input event should not affect anything", ->
-        cy.$$("#input-without-value").get(0).addEventListener "input", (e) ->
-          e.preventDefault()
+      it("preventing default to input event should not affect anything", function() {
+        cy.$$("#input-without-value").get(0).addEventListener("input", e => e.preventDefault());
 
-        cy.get("#input-without-value").type("foo").then ($input) ->
-          expect($input).to.have.value("foo")
+        return cy.get("#input-without-value").type("foo").then($input => expect($input).to.have.value("foo"));
+      });
 
-      describe "input[type=number]", ->
-        it "can change values", ->
-          cy.get("#number-without-value").type("42").then ($text) ->
-            expect($text).to.have.value("42")
+      describe("input[type=number]", function() {
+        it("can change values", () =>
+          cy.get("#number-without-value").type("42").then($text => expect($text).to.have.value("42"))
+        );
 
-        it "can input decimal", ->
-          cy.get("#number-without-value").type("2.0").then ($input) ->
-            expect($input).to.have.value("2.0")
+        it("can input decimal", () =>
+          cy.get("#number-without-value").type("2.0").then($input => expect($input).to.have.value("2.0"))
+        );
 
-        it "can utilize {selectall}", ->
-          cy.get("#number-with-value").type("{selectall}99").then ($input) ->
-            expect($input).to.have.value("99")
+        it("can utilize {selectall}", () =>
+          cy.get("#number-with-value").type("{selectall}99").then($input => expect($input).to.have.value("99"))
+        );
 
-        it "can utilize arrows", ->
-          cy.get("#number-with-value").type("{leftarrow}{leftarrow}{rightarrow}9").then ($input) ->
-            expect($input).to.have.value("192")
+        it("can utilize arrows", () =>
+          cy.get("#number-with-value").type("{leftarrow}{leftarrow}{rightarrow}9").then($input => expect($input).to.have.value("192"))
+        );
 
-        it "inserts text after existing text ", ->
-          cy.get("#number-with-value").type("34").then ($text) ->
-            expect($text).to.have.value("1234")
+        it("inserts text after existing text ", () =>
+          cy.get("#number-with-value").type("34").then($text => expect($text).to.have.value("1234"))
+        );
 
-        it "inserts text after existing text input by invoking val", ->
-          cy.get("#number-without-value").invoke("val", "12").type("34").then ($text) ->
-            expect($text).to.have.value("1234")
+        it("inserts text after existing text input by invoking val", () =>
+          cy.get("#number-without-value").invoke("val", "12").type("34").then($text => expect($text).to.have.value("1234"))
+        );
 
-        it "overwrites text on input[type=number] when input has existing text selected", ->
-          cy.get("#number-without-value").invoke('val', "0").then (el) ->
-            el.get(0).select()
+        it("overwrites text on input[type=number] when input has existing text selected", function() {
+          cy.get("#number-without-value").invoke('val', "0").then(el => el.get(0).select());
 
-          cy.get("#number-without-value").type("50").then ($input) ->
-            expect($input).to.have.value("50")
+          return cy.get("#number-without-value").type("50").then($input => expect($input).to.have.value("50"));
+        });
 
-        it "can type negative numbers", ->
+        it("can type negative numbers", () =>
           cy.get('#number-without-value')
             .type('-123.12')
             .should('have.value', '-123.12')
+        );
 
-        it "type=number blurs consistently", ->
-          blurred = 0
-          cy.$$("#number-without-value").blur ->
-            blurred++
-          cy.get("#number-without-value")
+        return it("type=number blurs consistently", function() {
+          let blurred = 0;
+          cy.$$("#number-without-value").blur(() => blurred++);
+          return cy.get("#number-without-value")
           .type('200').blur()
-          .then ->
-            expect(blurred).to.eq 1
+          .then(() => expect(blurred).to.eq(1));
+        });
+      });
 
-      describe "input[type=email]", ->
-        it "can change values", ->
-          cy.get("#email-without-value").type("brian@foo.com").then ($text) ->
-            expect($text).to.have.value("brian@foo.com")
+      describe("input[type=email]", function() {
+        it("can change values", () =>
+          cy.get("#email-without-value").type("brian@foo.com").then($text => expect($text).to.have.value("brian@foo.com"))
+        );
 
-        it "can utilize {selectall}", ->
-          cy.get("#email-with-value").type("{selectall}brian@foo.com").then ($text) ->
-            expect($text).to.have.value("brian@foo.com")
+        it("can utilize {selectall}", () =>
+          cy.get("#email-with-value").type("{selectall}brian@foo.com").then($text => expect($text).to.have.value("brian@foo.com"))
+        );
 
-        it "can utilize arrows", ->
-          cy.get("#email-with-value").type("{leftarrow}{rightarrow}om").then ($text) ->
-            expect($text).to.have.value("brian@foo.com")
+        it("can utilize arrows", () =>
+          cy.get("#email-with-value").type("{leftarrow}{rightarrow}om").then($text => expect($text).to.have.value("brian@foo.com"))
+        );
 
-        it "inserts text after existing text", ->
-          cy.get("#email-with-value").type("om").then ($text) ->
-            expect($text).to.have.value("brian@foo.com")
+        it("inserts text after existing text", () =>
+          cy.get("#email-with-value").type("om").then($text => expect($text).to.have.value("brian@foo.com"))
+        );
 
-        it "inserts text after existing text input by invoking val", ->
-          cy.get("#email-without-value").invoke("val", "brian@foo.c").type("om").then ($text) ->
-            expect($text).to.have.value("brian@foo.com")
+        it("inserts text after existing text input by invoking val", () =>
+          cy.get("#email-without-value").invoke("val", "brian@foo.c").type("om").then($text => expect($text).to.have.value("brian@foo.com"))
+        );
 
-        it "overwrites text when input has existing text selected", ->
-          cy.get("#email-without-value").invoke('val', "foo@bar.com").invoke('select')
+        it("overwrites text when input has existing text selected", function() {
+          cy.get("#email-without-value").invoke('val', "foo@bar.com").invoke('select');
 
-          cy.get("#email-without-value").type("bar@foo.com").then ($input) ->
-            expect($input).to.have.value("bar@foo.com")
+          return cy.get("#email-without-value").type("bar@foo.com").then($input => expect($input).to.have.value("bar@foo.com"));
+        });
 
-        it "type=email blurs consistently", ->
-          blurred = 0
-          cy.$$("#email-without-value").blur ->
-            blurred++
-          cy.get("#email-without-value")
+        return it("type=email blurs consistently", function() {
+          let blurred = 0;
+          cy.$$("#email-without-value").blur(() => blurred++);
+          return cy.get("#email-without-value")
           .type('foo@bar.com').blur()
-          .then ->
-            expect(blurred).to.eq 1
+          .then(() => expect(blurred).to.eq(1));
+        });
+      });
 
-      describe "input[type=password]", ->
-        it "can change values", ->
-          cy.get("#password-without-value").type("password").then ($text) ->
-            expect($text).to.have.value("password")
+      describe("input[type=password]", function() {
+        it("can change values", () =>
+          cy.get("#password-without-value").type("password").then($text => expect($text).to.have.value("password"))
+        );
 
-        it "inserts text after existing text", ->
-          cy.get("#password-with-value").type("word").then ($text) ->
-            expect($text).to.have.value("password")
+        it("inserts text after existing text", () =>
+          cy.get("#password-with-value").type("word").then($text => expect($text).to.have.value("password"))
+        );
 
-        it "inserts text after existing text input by invoking val", ->
-          cy.get("#password-without-value").invoke("val", "secr").type("et").then ($text) ->
-            expect($text).to.have.value("secret")
+        it("inserts text after existing text input by invoking val", () =>
+          cy.get("#password-without-value").invoke("val", "secr").type("et").then($text => expect($text).to.have.value("secret"))
+        );
 
-        it "overwrites text when input has existing text selected", ->
-          cy.get("#password-without-value").invoke('val', "secret").invoke('select')
+        it("overwrites text when input has existing text selected", function() {
+          cy.get("#password-without-value").invoke('val', "secret").invoke('select');
 
-          cy.get("#password-without-value").type("agent").then ($input) ->
-            expect($input).to.have.value("agent")
+          return cy.get("#password-without-value").type("agent").then($input => expect($input).to.have.value("agent"));
+        });
 
-        it "overwrites text when input has selected range of text in click handler", ->
-          cy.$$("#input-with-value").mouseup (e) ->
-            # e.preventDefault()
+        return it("overwrites text when input has selected range of text in click handler", function() {
+          cy.$$("#input-with-value").mouseup(e =>
+            // e.preventDefault()
 
             e.target.setSelectionRange(1, 1)
+          );
 
-          select = (e) ->
-            e.target.select()
+          const select = e => e.target.select();
 
           cy
           .$$("#password-without-value")
           .val("secret")
           .click(select)
-          .keyup (e) ->
-            switch e.key
-              when "g"
-                select(e)
-              when "n"
-                e.target.setSelectionRange(0, 1)
+          .keyup(function(e) {
+            switch (e.key) {
+              case "g":
+                return select(e);
+              case "n":
+                return e.target.setSelectionRange(0, 1);
+            }
+          });
 
-          cy.get("#password-without-value").type("agent").then ($input) ->
-            expect($input).to.have.value("tn")
+          return cy.get("#password-without-value").type("agent").then($input => expect($input).to.have.value("tn"));
+        });
+      });
 
-      describe "input[type=date]", ->
-        it "can change values", ->
-          cy.get("#date-without-value").type("1959-09-13").then ($text) ->
-            expect($text).to.have.value("1959-09-13")
+      describe("input[type=date]", function() {
+        it("can change values", () =>
+          cy.get("#date-without-value").type("1959-09-13").then($text => expect($text).to.have.value("1959-09-13"))
+        );
 
-        it "overwrites existing value", ->
-          cy.get("#date-with-value").type("1959-09-13").then ($text) ->
-            expect($text).to.have.value("1959-09-13")
+        it("overwrites existing value", () =>
+          cy.get("#date-with-value").type("1959-09-13").then($text => expect($text).to.have.value("1959-09-13"))
+        );
 
-        it "overwrites existing value input by invoking val", ->
-          cy.get("#date-without-value").invoke("val", "2016-01-01").type("1959-09-13").then ($text) ->
-            expect($text).to.have.value("1959-09-13")
+        return it("overwrites existing value input by invoking val", () =>
+          cy.get("#date-without-value").invoke("val", "2016-01-01").type("1959-09-13").then($text => expect($text).to.have.value("1959-09-13"))
+        );
+      });
 
-      describe "input[type=month]", ->
-        it "can change values", ->
-          cy.get("#month-without-value").type("1959-09").then ($text) ->
-            expect($text).to.have.value("1959-09")
+      describe("input[type=month]", function() {
+        it("can change values", () =>
+          cy.get("#month-without-value").type("1959-09").then($text => expect($text).to.have.value("1959-09"))
+        );
 
-        it "overwrites existing value", ->
-          cy.get("#month-with-value").type("1959-09").then ($text) ->
-            expect($text).to.have.value("1959-09")
+        it("overwrites existing value", () =>
+          cy.get("#month-with-value").type("1959-09").then($text => expect($text).to.have.value("1959-09"))
+        );
 
-        it "overwrites existing value input by invoking val", ->
-          cy.get("#month-without-value").invoke("val", "2016-01").type("1959-09").then ($text) ->
-            expect($text).to.have.value("1959-09")
+        return it("overwrites existing value input by invoking val", () =>
+          cy.get("#month-without-value").invoke("val", "2016-01").type("1959-09").then($text => expect($text).to.have.value("1959-09"))
+        );
+      });
 
-      describe "input[type=week]", ->
-        it "can change values", ->
-          cy.get("#week-without-value").type("1959-W09").then ($text) ->
-            expect($text).to.have.value("1959-W09")
+      describe("input[type=week]", function() {
+        it("can change values", () =>
+          cy.get("#week-without-value").type("1959-W09").then($text => expect($text).to.have.value("1959-W09"))
+        );
 
-        it "overwrites existing value", ->
-          cy.get("#week-with-value").type("1959-W09").then ($text) ->
-            expect($text).to.have.value("1959-W09")
+        it("overwrites existing value", () =>
+          cy.get("#week-with-value").type("1959-W09").then($text => expect($text).to.have.value("1959-W09"))
+        );
 
-        it "overwrites existing value input by invoking val", ->
-          cy.get("#week-without-value").invoke("val", "2016-W01").type("1959-W09").then ($text) ->
-            expect($text).to.have.value("1959-W09")
+        return it("overwrites existing value input by invoking val", () =>
+          cy.get("#week-without-value").invoke("val", "2016-W01").type("1959-W09").then($text => expect($text).to.have.value("1959-W09"))
+        );
+      });
 
-      describe "input[type=time]", ->
-        it "can change values", ->
-          cy.get("#time-without-value").type("01:23:45").then ($text) ->
-            expect($text).to.have.value("01:23:45")
+      describe("input[type=time]", function() {
+        it("can change values", () =>
+          cy.get("#time-without-value").type("01:23:45").then($text => expect($text).to.have.value("01:23:45"))
+        );
 
-        it "overwrites existing value", ->
-          cy.get("#time-with-value").type("12:34:56").then ($text) ->
-            expect($text).to.have.value("12:34:56")
+        it("overwrites existing value", () =>
+          cy.get("#time-with-value").type("12:34:56").then($text => expect($text).to.have.value("12:34:56"))
+        );
 
-        it "overwrites existing value input by invoking val", ->
-          cy.get("#time-without-value").invoke("val", "01:23:45").type("12:34:56").then ($text) ->
-            expect($text).to.have.value("12:34:56")
+        it("overwrites existing value input by invoking val", () =>
+          cy.get("#time-without-value").invoke("val", "01:23:45").type("12:34:56").then($text => expect($text).to.have.value("12:34:56"))
+        );
 
-        it "can be formatted HH:mm", ->
-          cy.get("#time-without-value").type("01:23").then ($text) ->
-            expect($text).to.have.value("01:23")
+        it("can be formatted HH:mm", () =>
+          cy.get("#time-without-value").type("01:23").then($text => expect($text).to.have.value("01:23"))
+        );
 
-        it "can be formatted HH:mm:ss", ->
-          cy.get("#time-without-value").type("01:23:45").then ($text) ->
-            expect($text).to.have.value("01:23:45")
+        it("can be formatted HH:mm:ss", () =>
+          cy.get("#time-without-value").type("01:23:45").then($text => expect($text).to.have.value("01:23:45"))
+        );
 
-        it "can be formatted HH:mm:ss.S", ->
-          cy.get("#time-without-value").type("01:23:45.9").then ($text) ->
-            expect($text).to.have.value("01:23:45.9")
+        it("can be formatted HH:mm:ss.S", () =>
+          cy.get("#time-without-value").type("01:23:45.9").then($text => expect($text).to.have.value("01:23:45.9"))
+        );
 
-        it "can be formatted HH:mm:ss.SS", ->
-          cy.get("#time-without-value").type("01:23:45.99").then ($text) ->
-            expect($text).to.have.value("01:23:45.99")
+        it("can be formatted HH:mm:ss.SS", () =>
+          cy.get("#time-without-value").type("01:23:45.99").then($text => expect($text).to.have.value("01:23:45.99"))
+        );
 
-        it "can be formatted HH:mm:ss.SSS", ->
-          cy.get("#time-without-value").type("01:23:45.999").then ($text) ->
-            expect($text).to.have.value("01:23:45.999")
+        return it("can be formatted HH:mm:ss.SSS", () =>
+          cy.get("#time-without-value").type("01:23:45.999").then($text => expect($text).to.have.value("01:23:45.999"))
+        );
+      });
 
-      describe "[contenteditable]", ->
-        it "can change values", ->
-          cy.get("#input-types [contenteditable]").type("foo").then ($div) ->
-            expect($div).to.have.text("foo")
+      describe("[contenteditable]", function() {
+        it("can change values", () =>
+          cy.get("#input-types [contenteditable]").type("foo").then($div => expect($div).to.have.text("foo"))
+        );
 
-        it "inserts text after existing text", ->
-          cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
-            expect($text).to.have.text("foo bar")
+        it("inserts text after existing text", () =>
+          cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then($text => expect($text).to.have.text("foo bar"))
+        );
 
-        it "can type into [contenteditable] with existing <div>", ->
-          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>foo</div>'
-          cy.get("[contenteditable]:first")
-          .type("bar").then ($div) ->
-            expect(trimInnerText($div)).to.eql("foobar")
-            expect($div.get(0).textContent).to.eql("foobar")
-            expect($div.get(0).innerHTML).to.eql("<div>foobar</div>")
+        it("can type into [contenteditable] with existing <div>", function() {
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>foo</div>';
+          return cy.get("[contenteditable]:first")
+          .type("bar").then(function($div) {
+            expect(trimInnerText($div)).to.eql("foobar");
+            expect($div.get(0).textContent).to.eql("foobar");
+            return expect($div.get(0).innerHTML).to.eql("<div>foobar</div>");
+          });
+        });
 
-        it "can type into [contenteditable] with existing <p>", ->
-          cy.$$('[contenteditable]:first').get(0).innerHTML = '<p>foo</p>'
-          cy.get("[contenteditable]:first")
-          .type("bar").then ($div) ->
-            expect(trimInnerText($div)).to.eql("foobar")
-            expect($div.get(0).textContent).to.eql("foobar")
-            expect($div.get(0).innerHTML).to.eql("<p>foobar</p>")
+        it("can type into [contenteditable] with existing <p>", function() {
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<p>foo</p>';
+          return cy.get("[contenteditable]:first")
+          .type("bar").then(function($div) {
+            expect(trimInnerText($div)).to.eql("foobar");
+            expect($div.get(0).textContent).to.eql("foobar");
+            return expect($div.get(0).innerHTML).to.eql("<p>foobar</p>");
+          });
+        });
 
-        it "collapses selection to start on {leftarrow}", ->
-          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
-          cy.get("[contenteditable]:first")
-          .type("{selectall}{leftarrow}foo").then ($div) ->
-            expect(trimInnerText($div)).to.eql("foobar")
+        it("collapses selection to start on {leftarrow}", function() {
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>';
+          return cy.get("[contenteditable]:first")
+          .type("{selectall}{leftarrow}foo").then($div => expect(trimInnerText($div)).to.eql("foobar"));
+        });
 
-        it "collapses selection to end on {rightarrow}", ->
-          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
-          cy.get("[contenteditable]:first")
-          .type("{selectall}{leftarrow}foo{selectall}{rightarrow}baz").then ($div) ->
-            expect(trimInnerText($div)).to.eql("foobarbaz")
+        it("collapses selection to end on {rightarrow}", function() {
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>';
+          return cy.get("[contenteditable]:first")
+          .type("{selectall}{leftarrow}foo{selectall}{rightarrow}baz").then($div => expect(trimInnerText($div)).to.eql("foobarbaz"));
+        });
 
-        it "can remove a placeholder <br>", ->
-          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div><br></div>'
-          cy.get("[contenteditable]:first")
-          .type("foobar").then ($div) ->
-            expect($div.get(0).innerHTML).to.eql("<div>foobar</div>")
+        it("can remove a placeholder <br>", function() {
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div><br></div>';
+          return cy.get("[contenteditable]:first")
+          .type("foobar").then($div => expect($div.get(0).innerHTML).to.eql("<div>foobar</div>"));
+        });
 
-        it "can type into an iframe with designmode = 'on'", ->
-          ## append a new iframe to the body
+        return it("can type into an iframe with designmode = 'on'", function() {
+          //# append a new iframe to the body
           cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
-            .appendTo cy.$$('body')
+            .appendTo(cy.$$('body'));
 
-          ## wait for iframe to load
-          loaded = false
+          //# wait for iframe to load
+          let loaded = false;
           cy.get('#generic-iframe')
-            .then ($iframe) ->
-              $iframe.load ->
-                loaded = true
-            .scrollIntoView()
-            .should ->
-              expect(loaded).to.eq true
+            .then($iframe =>
+              $iframe.load(() => loaded = true)).scrollIntoView()
+            .should(() => expect(loaded).to.eq(true));
 
-          ## type text into iframe
+          //# type text into iframe
           cy.get('#generic-iframe')
-            .then ($iframe) ->
-              $iframe[0].contentDocument.designMode = 'on'
-              iframe = $iframe.contents()
-              cy.wrap(iframe.find('html')).first()
-                .type('{selectall}{del} foo bar baz{enter}ac{leftarrow}b')
+            .then(function($iframe) {
+              $iframe[0].contentDocument.designMode = 'on';
+              const iframe = $iframe.contents();
+              return cy.wrap(iframe.find('html')).first()
+                .type('{selectall}{del} foo bar baz{enter}ac{leftarrow}b');
+          });
 
-          # assert that text was typed
-          cy.get('#generic-iframe')
-            .then ($iframe) ->
-              iframeText = $iframe[0].contentDocument.body.innerText
-              expect(iframeText).to.include('foo bar baz\nabc')
+          // assert that text was typed
+          return cy.get('#generic-iframe')
+            .then(function($iframe) {
+              const iframeText = $iframe[0].contentDocument.body.innerText;
+              return expect(iframeText).to.include('foo bar baz\nabc');
+          });
+        });
+      });
 
-      ## TODO: fix this with 4.0 updates
-      describe.skip "element reference loss", ->
-        it 'follows the focus of the cursor', ->
-          charCount = 0
-          cy.$$('input:first').keydown ->
-            if charCount is 3
-              cy.$$('input').eq(1).focus()
-            charCount++
-          cy.get('input:first').type('foobar').then ->
-            cy.get('input:first').should('have.value', 'foo')
-            cy.get('input').eq(1).should('have.value', 'bar')
+      //# TODO: fix this with 4.0 updates
+      return describe.skip("element reference loss", () =>
+        it('follows the focus of the cursor', function() {
+          let charCount = 0;
+          cy.$$('input:first').keydown(function() {
+            if (charCount === 3) {
+              cy.$$('input').eq(1).focus();
+            }
+            return charCount++;
+          });
+          return cy.get('input:first').type('foobar').then(function() {
+            cy.get('input:first').should('have.value', 'foo');
+            return cy.get('input').eq(1).should('have.value', 'bar');
+          });
+        })
+      );
+    });
 
-    describe "specialChars", ->
-      context "{{}", ->
-        it "sets which and keyCode to 219", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            expect(e.which).to.eq 219
-            expect(e.keyCode).to.eq 219
-            done()
+    describe("specialChars", function() {
+      context("{{}", function() {
+        it("sets which and keyCode to 219", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            expect(e.which).to.eq(219);
+            expect(e.keyCode).to.eq(219);
+            return done();
+          });
 
-          cy.get(":text:first").invoke("val", "ab").type("{{}")
+          return cy.get(":text:first").invoke("val", "ab").type("{{}");
+        });
 
-        it "fires keypress event with 123 charCode", (done) ->
-          cy.$$(":text:first").on "keypress", (e) ->
-            expect(e.charCode).to.eq 123
-            expect(e.which).to.eq 123
-            expect(e.keyCode).to.eq 123
-            done()
+        it("fires keypress event with 123 charCode", function(done) {
+          cy.$$(":text:first").on("keypress", function(e) {
+            expect(e.charCode).to.eq(123);
+            expect(e.which).to.eq(123);
+            expect(e.keyCode).to.eq(123);
+            return done();
+          });
 
-          cy.get(":text:first").invoke("val", "ab").type("{{}")
+          return cy.get(":text:first").invoke("val", "ab").type("{{}");
+        });
 
-        it "fires textInput event with e.data", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            expect(e.originalEvent.data).to.eq "{"
-            done()
+        it("fires textInput event with e.data", function(done) {
+          cy.$$(":text:first").on("textInput", function(e) {
+            expect(e.originalEvent.data).to.eq("{");
+            return done();
+          });
 
-          cy.get(":text:first").invoke("val", "ab").type("{{}")
+          return cy.get(":text:first").invoke("val", "ab").type("{{}");
+        });
 
-        it "fires input event", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done()
+        it("fires input event", function(done) {
+          cy.$$(":text:first").on("input", e => done());
 
-          cy.get(":text:first").invoke("val", "ab").type("{{}")
+          return cy.get(":text:first").invoke("val", "ab").type("{{}");
+        });
 
-        it "can prevent default character insertion", ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 219
-              e.preventDefault()
+        return it("can prevent default character insertion", function() {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 219) {
+              return e.preventDefault();
+            }
+          });
 
-          cy.get(":text:first").invoke("val", "foo").type("{{}").then ($input) ->
-            expect($input).to.have.value("foo")
+          return cy.get(":text:first").invoke("val", "foo").type("{{}").then($input => expect($input).to.have.value("foo"));
+        });
+      });
 
-      context "{esc}", ->
-        it "sets which and keyCode to 27 and does not fire keypress events", (done) ->
-          cy.$$(":text:first").on "keypress", ->
-            done("should not have received keypress")
+      context("{esc}", function() {
+        it("sets which and keyCode to 27 and does not fire keypress events", function(done) {
+          cy.$$(":text:first").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$(":text:first").on "keydown", (e) ->
-            expect(e.which).to.eq 27
-            expect(e.keyCode).to.eq 27
-            expect(e.key).to.eq "Escape"
-            done()
+          cy.$$(":text:first").on("keydown", function(e) {
+            expect(e.which).to.eq(27);
+            expect(e.keyCode).to.eq(27);
+            expect(e.key).to.eq("Escape");
+            return done();
+          });
 
-          cy.get(":text:first").invoke("val", "ab").type("{esc}")
+          return cy.get(":text:first").invoke("val", "ab").type("{esc}");
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{esc}").then(() => done());
+        });
 
-        it "does not fire input event", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("input should not have fired")
+        it("does not fire input event", function(done) {
+          cy.$$(":text:first").on("input", e => done("input should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{esc}").then(() => done());
+        });
 
-        it "can prevent default esc movement", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 27
-              e.preventDefault()
+        return it("can prevent default esc movement", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 27) {
+              return e.preventDefault();
+            }
+          });
 
-          cy.get(":text:first").invoke("val", "foo").type("d{esc}").then ($input) ->
-            expect($input).to.have.value("food")
-            done()
+          return cy.get(":text:first").invoke("val", "foo").type("d{esc}").then(function($input) {
+            expect($input).to.have.value("food");
+            return done();
+          });
+        });
+      });
 
-      context "{backspace}", ->
-        it "backspaces character to the left", ->
-          cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{backspace}u").then ($input) ->
-            expect($input).to.have.value("bur")
+      context("{backspace}", function() {
+        it("backspaces character to the left", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{backspace}u").then($input => expect($input).to.have.value("bur"))
+        );
 
-        it "can backspace a selection range of characters", ->
+        it("can backspace a selection range of characters", () =>
           cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the 'ar' characters
-              $input.get(0).setSelectionRange(1,3)
-            .get(":text:first").type("{backspace}").then ($input) ->
-              expect($input).to.have.value("b")
+            .get(":text:first").invoke("val", "bar").focus().then($input =>
+              //# select the 'ar' characters
+              $input.get(0).setSelectionRange(1,3)).get(":text:first").type("{backspace}").then($input => expect($input).to.have.value("b"))
+        );
 
-        it "sets which and keyCode to 8 and does not fire keypress events", (done) ->
-          cy.$$(":text:first").on "keypress", ->
-            done("should not have received keypress")
+        it("sets which and keyCode to 8 and does not fire keypress events", function(done) {
+          cy.$$(":text:first").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$(":text:first").on "keydown", _.after 2, (e) ->
-            expect(e.which).to.eq 8
-            expect(e.keyCode).to.eq 8
-            expect(e.key).to.eq "Backspace"
-            done()
+          cy.$$(":text:first").on("keydown", _.after(2, function(e) {
+            expect(e.which).to.eq(8);
+            expect(e.keyCode).to.eq(8);
+            expect(e.key).to.eq("Backspace");
+            return done();
+          })
+          );
 
-          cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}")
+          return cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}");
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{backspace}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{backspace}").then(() => done());
+        });
 
-        it "can prevent default backspace movement", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 8
-              e.preventDefault()
+        return it("can prevent default backspace movement", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 8) {
+              return e.preventDefault();
+            }
+          });
 
-          cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{backspace}").then ($input) ->
-            expect($input).to.have.value("foo")
-            done()
+          return cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{backspace}").then(function($input) {
+            expect($input).to.have.value("foo");
+            return done();
+          });
+        });
+      });
 
-      context "{del}", ->
-        it "deletes character to the right", ->
-          cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{del}").then ($input) ->
-            expect($input).to.have.value("ba")
+      context("{del}", function() {
+        it("deletes character to the right", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{del}").then($input => expect($input).to.have.value("ba"))
+        );
 
-        it "can delete a selection range of characters", ->
+        it("can delete a selection range of characters", () =>
           cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the 'ar' characters
-              $input.get(0).setSelectionRange(1,3)
-            .get(":text:first").type("{del}").then ($input) ->
-              expect($input).to.have.value("b")
+            .get(":text:first").invoke("val", "bar").focus().then($input =>
+              //# select the 'ar' characters
+              $input.get(0).setSelectionRange(1,3)).get(":text:first").type("{del}").then($input => expect($input).to.have.value("b"))
+        );
 
-        it "sets which and keyCode to 46 and does not fire keypress events", (done) ->
-          cy.$$(":text:first").on "keypress", ->
-            done("should not have received keypress")
+        it("sets which and keyCode to 46 and does not fire keypress events", function(done) {
+          cy.$$(":text:first").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$(":text:first").on "keydown", _.after 2, (e) ->
-            expect(e.which).to.eq 46
-            expect(e.keyCode).to.eq 46
-            expect(e.key).to.eq "Delete"
-            done()
+          cy.$$(":text:first").on("keydown", _.after(2, function(e) {
+            expect(e.which).to.eq(46);
+            expect(e.keyCode).to.eq(46);
+            expect(e.key).to.eq("Delete");
+            return done();
+          })
+          );
 
-          cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}")
+          return cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}");
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{del}").then(() => done());
+        });
 
-        it "does fire input event when value changes", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done()
+        it("does fire input event when value changes", function(done) {
+          cy.$$(":text:first").on("input", e => done());
 
+          return cy
+            .get(":text:first").invoke("val", "bar").focus().then($input =>
+              //# select the 'a' characters
+              $input.get(0).setSelectionRange(0,1)).get(":text:first").type("{del}");
+        });
+
+        it("does not fire input event when value does not change", function(done) {
+          cy.$$(":text:first").on("input", e => done("should not have fired input"));
+
+          return cy.get(":text:first").invoke("val", "ab").type("{del}").then(() => done());
+        });
+
+        return it("can prevent default del movement", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 46) {
+              return e.preventDefault();
+            }
+          });
+
+          return cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{del}").then(function($input) {
+            expect($input).to.have.value("foo");
+            return done();
+          });
+        });
+      });
+
+      context("{leftarrow}", function() {
+        it("can move the cursor from the end to end - 1", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{leftarrow}n").then($input => expect($input).to.have.value("banr"))
+        );
+
+        it("does not move the cursor if already at bounds 0", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}n").then($input => expect($input).to.have.value("nbar"))
+        );
+
+        it("sets the cursor to the left bounds", () =>
           cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the 'a' characters
-              $input.get(0).setSelectionRange(0,1)
-            .get(":text:first").type("{del}")
+            .get(":text:first").invoke("val", "bar").focus().then($input =>
+              //# select the 'a' character
+              $input.get(0).setSelectionRange(1,2)).get(":text:first").type("{leftarrow}n").then($input => expect($input).to.have.value("bnar"))
+        );
 
-        it "does not fire input event when value does not change", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("should not have fired input")
-
-          cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
-
-        it "can prevent default del movement", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 46
-              e.preventDefault()
-
-          cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{del}").then ($input) ->
-            expect($input).to.have.value("foo")
-            done()
-
-      context "{leftarrow}", ->
-        it "can move the cursor from the end to end - 1", ->
-          cy.get(":text:first").invoke("val", "bar").type("{leftarrow}n").then ($input) ->
-            expect($input).to.have.value("banr")
-
-        it "does not move the cursor if already at bounds 0", ->
-          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}n").then ($input) ->
-            expect($input).to.have.value("nbar")
-
-        it "sets the cursor to the left bounds", ->
+        it("sets the cursor to the very beginning", () =>
           cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the 'a' character
-              $input.get(0).setSelectionRange(1,2)
-            .get(":text:first").type("{leftarrow}n").then ($input) ->
-              expect($input).to.have.value("bnar")
+            .get(":text:first").invoke("val", "bar").focus().then($input =>
+              //# select the 'a' character
+              $input.get(0).setSelectionRange(0,1)).get(":text:first").type("{leftarrow}n").then($input => expect($input).to.have.value("nbar"))
+        );
 
-        it "sets the cursor to the very beginning", ->
+        it("sets which and keyCode to 37 and does not fire keypress events", function(done) {
+          cy.$$(":text:first").on("keypress", () => done("should not have received keypress"));
+
+          cy.$$(":text:first").on("keydown", function(e) {
+            expect(e.which).to.eq(37);
+            expect(e.keyCode).to.eq(37);
+            expect(e.key).to.eq("ArrowLeft");
+            return done();
+          });
+
+          return cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then($input => done());
+        });
+
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
+
+          return cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then(() => done());
+        });
+
+        it("does not fire input event", function(done) {
+          cy.$$(":text:first").on("input", e => done("input should not have fired"));
+
+          return cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then(() => done());
+        });
+
+        return it("can prevent default left arrow movement", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 37) {
+              return e.preventDefault();
+            }
+          });
+
+          return cy.get(":text:first").invoke("val", "foo").type("{leftarrow}d").then(function($input) {
+            expect($input).to.have.value("food");
+            return done();
+          });
+        });
+      });
+
+      context("{rightarrow}", function() {
+        it("can move the cursor from the beginning to beginning + 1", () =>
+          cy.get(":text:first").invoke("val", "bar").focus().then($input =>
+            //# select the beginning
+            $input.get(0).setSelectionRange(0,0)).get(":text:first").type("{rightarrow}n").then($input => expect($input).to.have.value("bnar"))
+        );
+
+        it("does not move the cursor if already at end of bounds", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}n").then($input => expect($input).to.have.value("barn"))
+        );
+
+        it("sets the cursor to the rights bounds", () =>
           cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the 'a' character
-              $input.get(0).setSelectionRange(0,1)
+            .get(":text:first").invoke("val", "bar").focus().then($input =>
+              //# select the 'a' character
+              $input.get(0).setSelectionRange(1,2)).get(":text:first").type("{rightarrow}n").then($input => expect($input).to.have.value("banr"))
+        );
 
-            .get(":text:first").type("{leftarrow}n").then ($input) ->
-              expect($input).to.have.value("nbar")
-
-        it "sets which and keyCode to 37 and does not fire keypress events", (done) ->
-          cy.$$(":text:first").on "keypress", ->
-            done("should not have received keypress")
-
-          cy.$$(":text:first").on "keydown", (e) ->
-            expect(e.which).to.eq 37
-            expect(e.keyCode).to.eq 37
-            expect(e.key).to.eq "ArrowLeft"
-            done()
-
-          cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then ($input) ->
-            done()
-
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
-
-          cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
-
-        it "does not fire input event", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("input should not have fired")
-
-          cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
-
-        it "can prevent default left arrow movement", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 37
-              e.preventDefault()
-
-          cy.get(":text:first").invoke("val", "foo").type("{leftarrow}d").then ($input) ->
-            expect($input).to.have.value("food")
-            done()
-
-      context "{rightarrow}", ->
-        it "can move the cursor from the beginning to beginning + 1", ->
-          cy.get(":text:first").invoke("val", "bar").focus().then ($input) ->
-            ## select the beginning
-            $input.get(0).setSelectionRange(0,0)
-
-          .get(":text:first").type("{rightarrow}n").then ($input) ->
-            expect($input).to.have.value("bnar")
-
-        it "does not move the cursor if already at end of bounds", ->
-          cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}n").then ($input) ->
-            expect($input).to.have.value("barn")
-
-        it "sets the cursor to the rights bounds", ->
+        it("sets the cursor to the very beginning", () =>
           cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the 'a' character
-              $input.get(0).setSelectionRange(1,2)
+            .get(":text:first").invoke("val", "bar").focus().then($input => $input.select()).get(":text:first").type("{leftarrow}n").then($input => expect($input).to.have.value("nbar"))
+        );
 
-            .get(":text:first").type("{rightarrow}n").then ($input) ->
-              expect($input).to.have.value("banr")
+        it("sets which and keyCode to 39 and does not fire keypress events", function(done) {
+          cy.$$(":text:first").on("keypress", () => done("should not have received keypress"));
 
-        it "sets the cursor to the very beginning", ->
-          cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              $input.select()
+          cy.$$(":text:first").on("keydown", function(e) {
+            expect(e.which).to.eq(39);
+            expect(e.keyCode).to.eq(39);
+            expect(e.key).to.eq("ArrowRight");
+            return done();
+          });
 
-            .get(":text:first").type("{leftarrow}n").then ($input) ->
-              expect($input).to.have.value("nbar")
+          return cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then($input => done());
+        });
 
-        it "sets which and keyCode to 39 and does not fire keypress events", (done) ->
-          cy.$$(":text:first").on "keypress", ->
-            done("should not have received keypress")
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
 
-          cy.$$(":text:first").on "keydown", (e) ->
-            expect(e.which).to.eq 39
-            expect(e.keyCode).to.eq 39
-            expect(e.key).to.eq "ArrowRight"
-            done()
+          return cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then(() => done());
+        });
 
-          cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then ($input) ->
-            done()
+        it("does not fire input event", function(done) {
+          cy.$$(":text:first").on("input", e => done("input should not have fired"));
 
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
+          return cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then(() => done());
+        });
 
-          cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
+        return it("can prevent default right arrow movement", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 39) {
+              return e.preventDefault();
+            }
+          });
 
-        it "does not fire input event", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("input should not have fired")
+          return cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{rightarrow}d").then(function($input) {
+            expect($input).to.have.value("fodo");
+            return done();
+          });
+        });
+      });
 
-          cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
+      context("{home}", function() {
+        it("sets which and keyCode to 36 and does not fire keypress events", function(done) {
+          cy.$$("#comments").on("keypress", () => done("should not have received keypress"));
 
-        it "can prevent default right arrow movement", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 39
-              e.preventDefault()
+          cy.$$("#comments").on("keydown", function(e) {
+            expect(e.which).to.eq(36);
+            expect(e.keyCode).to.eq(36);
+            expect(e.key).to.eq("Home");
+            return done();
+          });
 
-          cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{rightarrow}d").then ($input) ->
-            expect($input).to.have.value("fodo")
-            done()
+          return cy.get("#comments").type("{home}").then($input => done());
+        });
 
-      context "{home}", ->
-        it "sets which and keyCode to 36 and does not fire keypress events", (done) ->
-          cy.$$("#comments").on "keypress", ->
-            done("should not have received keypress")
+        it("does not fire textInput event", function(done) {
+          cy.$$("#comments").on("textInput", e => done("textInput should not have fired"));
 
-          cy.$$("#comments").on "keydown", (e) ->
-            expect(e.which).to.eq 36
-            expect(e.keyCode).to.eq 36
-            expect(e.key).to.eq "Home"
-            done()
+          return cy.get("#comments").type("{home}").then(() => done());
+        });
 
-          cy.get("#comments").type("{home}").then ($input) ->
-            done()
+        it("does not fire input event", function(done) {
+          cy.$$("#comments").on("input", e => done("input should not have fired"));
 
-        it "does not fire textInput event", (done) ->
-          cy.$$("#comments").on "textInput", (e) ->
-            done("textInput should not have fired")
+          return cy.get("#comments").type("{home}").then(() => done());
+        });
 
-          cy.get("#comments").type("{home}").then -> done()
+        it("can move the cursor to input start", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{home}n").then($input => expect($input).to.have.value("nbar"))
+        );
 
-        it "does not fire input event", (done) ->
-          cy.$$("#comments").on "input", (e) ->
-            done("input should not have fired")
+        it("does not move the cursor if already at bounds 0", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}{home}n").then($input => expect($input).to.have.value("nbar"))
+        );
 
-          cy.get("#comments").type("{home}").then -> done()
+        it("should move the cursor to the start of each line in textarea", function() {
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz';
 
-        it "can move the cursor to input start", ->
-          cy.get(":text:first").invoke("val", "bar").type("{home}n").then ($input) ->
-            expect($input).to.have.value("nbar")
+          return cy.get("textarea:first")
+          .type("{home}11{uparrow}{home}22{uparrow}{home}33").should('have.value', "33foo\n22bar\n11baz");
+        });
 
-        it "does not move the cursor if already at bounds 0", ->
-          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}{home}n").then ($input) ->
-            expect($input).to.have.value("nbar")
-
-        it "should move the cursor to the start of each line in textarea", ->
-          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
-
-          cy.get("textarea:first")
-          .type("{home}11{uparrow}{home}22{uparrow}{home}33").should('have.value', "33foo\n22bar\n11baz")
-
-        it "should move cursor to the start of each line in contenteditable", ->
+        return it("should move cursor to the start of each line in contenteditable", function() {
           cy.$$('[contenteditable]:first').get(0).innerHTML =
             '<div>foo</div>' +
             '<div>bar</div>' +
-            '<div>baz</div>'
+            '<div>baz</div>';
 
-          cy.get("[contenteditable]:first")
-          .type("{home}11{uparrow}{home}22{uparrow}{home}33").then ($div) ->
-            expect(trimInnerText($div)).to.eql("33foo\n22bar\n11baz")
+          return cy.get("[contenteditable]:first")
+          .type("{home}11{uparrow}{home}22{uparrow}{home}33").then($div => expect(trimInnerText($div)).to.eql("33foo\n22bar\n11baz"));
+        });
+      });
 
-      context "{end}", ->
-        it "sets which and keyCode to 35 and does not fire keypress events", (done) ->
-          cy.$$("#comments").on "keypress", ->
-            done("should not have received keypress")
+      context("{end}", function() {
+        it("sets which and keyCode to 35 and does not fire keypress events", function(done) {
+          cy.$$("#comments").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$("#comments").on "keydown", (e) ->
-            expect(e.which).to.eq 35
-            expect(e.keyCode).to.eq 35
-            expect(e.key).to.eq "End"
-            done()
+          cy.$$("#comments").on("keydown", function(e) {
+            expect(e.which).to.eq(35);
+            expect(e.keyCode).to.eq(35);
+            expect(e.key).to.eq("End");
+            return done();
+          });
 
-          cy.get("#comments").type("{end}").then ($input) ->
-            done()
+          return cy.get("#comments").type("{end}").then($input => done());
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$("#comments").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$("#comments").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get("#comments").type("{end}").then -> done()
+          return cy.get("#comments").type("{end}").then(() => done());
+        });
 
-        it "does not fire input event", (done) ->
-          cy.$$("#comments").on "input", (e) ->
-            done("input should not have fired")
+        it("does not fire input event", function(done) {
+          cy.$$("#comments").on("input", e => done("input should not have fired"));
 
-          cy.get("#comments").type("{end}").then -> done()
+          return cy.get("#comments").type("{end}").then(() => done());
+        });
 
-        it "can move the cursor to input end", ->
-          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}{end}n").then ($input) ->
-            expect($input).to.have.value("barn")
+        it("can move the cursor to input end", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}{end}n").then($input => expect($input).to.have.value("barn"))
+        );
 
-        it "does not move the cursor if already at end of bounds", ->
-          cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}{end}n").then ($input) ->
-            expect($input).to.have.value("barn")
+        it("does not move the cursor if already at end of bounds", () =>
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}{end}n").then($input => expect($input).to.have.value("barn"))
+        );
 
-        it "should move the cursor to the end of each line in textarea", ->
-          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+        it("should move the cursor to the end of each line in textarea", function() {
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz';
 
-          cy.get("textarea:first")
-          .type("{end}11{uparrow}{end}22{uparrow}{end}33").should('have.value', "foo33\nbar22\nbaz11")
+          return cy.get("textarea:first")
+          .type("{end}11{uparrow}{end}22{uparrow}{end}33").should('have.value', "foo33\nbar22\nbaz11");
+        });
 
-        it "should move cursor to the end of each line in contenteditable", ->
+        return it("should move cursor to the end of each line in contenteditable", function() {
           cy.$$('[contenteditable]:first').get(0).innerHTML =
             '<div>foo</div>' +
             '<div>bar</div>' +
-            '<div>baz</div>'
+            '<div>baz</div>';
 
-          cy.get("[contenteditable]:first")
-          .type("{end}11{uparrow}{end}22{uparrow}{end}33").then ($div) ->
-            expect(trimInnerText($div)).to.eql("foo33\nbar22\nbaz11")
+          return cy.get("[contenteditable]:first")
+          .type("{end}11{uparrow}{end}22{uparrow}{end}33").then($div => expect(trimInnerText($div)).to.eql("foo33\nbar22\nbaz11"));
+        });
+      });
 
-      context "{uparrow}", ->
-        beforeEach ->
-          cy.$$("#comments").val("foo\nbar\nbaz")
+      context("{uparrow}", function() {
+        beforeEach(() => cy.$$("#comments").val("foo\nbar\nbaz"));
 
-        it "sets which and keyCode to 38 and does not fire keypress events", (done) ->
-          cy.$$("#comments").on "keypress", ->
-            done("should not have received keypress")
+        it("sets which and keyCode to 38 and does not fire keypress events", function(done) {
+          cy.$$("#comments").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$("#comments").on "keydown", (e) ->
-            expect(e.which).to.eq 38
-            expect(e.keyCode).to.eq 38
-            expect(e.key).to.eq "ArrowUp"
-            done()
+          cy.$$("#comments").on("keydown", function(e) {
+            expect(e.which).to.eq(38);
+            expect(e.keyCode).to.eq(38);
+            expect(e.key).to.eq("ArrowUp");
+            return done();
+          });
 
-          cy.get("#comments").type("{uparrow}").then ($input) ->
-            done()
+          return cy.get("#comments").type("{uparrow}").then($input => done());
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$("#comments").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$("#comments").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get("#comments").type("{uparrow}").then -> done()
+          return cy.get("#comments").type("{uparrow}").then(() => done());
+        });
 
-        it "does not fire input event", (done) ->
-          cy.$$("#comments").on "input", (e) ->
-            done("input should not have fired")
+        it("does not fire input event", function(done) {
+          cy.$$("#comments").on("input", e => done("input should not have fired"));
 
-          cy.get("#comments").type("{uparrow}").then -> done()
+          return cy.get("#comments").type("{uparrow}").then(() => done());
+        });
 
-        it "up and down arrow on contenteditable", ->
+        it("up and down arrow on contenteditable", function() {
           cy.$$('[contenteditable]:first').get(0).innerHTML =
                       '<div>foo</div>' +
                       '<div>bar</div>' +
-                      '<div>baz</div>'
+                      '<div>baz</div>';
 
-          cy.get("[contenteditable]:first")
-          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33").then ($div) ->
-            expect(trimInnerText($div)).to.eql("foo22\nb11ar\nbaz33")
+          return cy.get("[contenteditable]:first")
+          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33").then($div => expect(trimInnerText($div)).to.eql("foo22\nb11ar\nbaz33"));
+        });
 
-        it "uparrow ignores current selection", ->
-          ce = cy.$$('[contenteditable]:first').get(0)
+        it("uparrow ignores current selection", function() {
+          const ce = cy.$$('[contenteditable]:first').get(0);
           ce.innerHTML =
                       '<div>foo</div>' +
                       '<div>bar</div>' +
-                      '<div>baz</div>'
-          ## select 'bar'
-          line = cy.$$('[contenteditable]:first div:nth-child(1)').get(0)
-          cy.document().then (doc) ->
-            ce.focus()
-            doc.getSelection().selectAllChildren(line)
+                      '<div>baz</div>';
+          //# select 'bar'
+          const line = cy.$$('[contenteditable]:first div:nth-child(1)').get(0);
+          cy.document().then(function(doc) {
+            ce.focus();
+            return doc.getSelection().selectAllChildren(line);
+          });
 
-          cy.get("[contenteditable]:first")
-          .type("{uparrow}11").then ($div) ->
-            expect(trimInnerText($div)).to.eql("11foo\nbar\nbaz")
+          return cy.get("[contenteditable]:first")
+          .type("{uparrow}11").then($div => expect(trimInnerText($div)).to.eql("11foo\nbar\nbaz"));
+        });
 
-        it "up and down arrow on textarea", ->
-          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+        it("up and down arrow on textarea", function() {
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz';
 
-          cy.get("textarea:first")
-          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33").should('have.value', "foo22\nb11ar\nbaz33")
+          return cy.get("textarea:first")
+          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33").should('have.value', "foo22\nb11ar\nbaz33");
+        });
 
-        it "increments input[type=number]", ->
+        return it("increments input[type=number]", () =>
           cy.get('input[type="number"]:first')
             .invoke('val', '12.34')
             .type('{uparrow}{uparrow}')
             .should('have.value', '14')
+        );
+      });
 
-      context "{downarrow}", ->
-        beforeEach ->
-          cy.$$("#comments").val("foo\nbar\nbaz")
+      context("{downarrow}", function() {
+        beforeEach(() => cy.$$("#comments").val("foo\nbar\nbaz"));
 
-        it "sets which and keyCode to 40 and does not fire keypress events", (done) ->
-          cy.$$("#comments").on "keypress", ->
-            done("should not have received keypress")
+        it("sets which and keyCode to 40 and does not fire keypress events", function(done) {
+          cy.$$("#comments").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$("#comments").on "keydown", (e) ->
-            expect(e.which).to.eq 40
-            expect(e.keyCode).to.eq 40
-            expect(e.key).to.eq "ArrowDown"
-            done()
+          cy.$$("#comments").on("keydown", function(e) {
+            expect(e.which).to.eq(40);
+            expect(e.keyCode).to.eq(40);
+            expect(e.key).to.eq("ArrowDown");
+            return done();
+          });
 
-          cy.get("#comments").type("{downarrow}").then ($input) ->
-            done()
+          return cy.get("#comments").type("{downarrow}").then($input => done());
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$("#comments").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$("#comments").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get("#comments").type("{downarrow}").then -> done()
+          return cy.get("#comments").type("{downarrow}").then(() => done());
+        });
 
-        it "does not fire input event", (done) ->
-          cy.$$("#comments").on "input", (e) ->
-            done("input should not have fired")
+        it("does not fire input event", function(done) {
+          cy.$$("#comments").on("input", e => done("input should not have fired"));
 
-          cy.get("#comments").type("{downarrow}").then -> done()
+          return cy.get("#comments").type("{downarrow}").then(() => done());
+        });
 
-        it "{downarrow} will move to EOL on textarea", ->
-          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+        it("{downarrow} will move to EOL on textarea", function() {
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz';
 
-          cy.get("textarea:first")
-          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33{leftarrow}{downarrow}44").should('have.value', "foo22\nb11ar\nbaz3344")
+          return cy.get("textarea:first")
+          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33{leftarrow}{downarrow}44").should('have.value', "foo22\nb11ar\nbaz3344");
+        });
 
-        it "decrements input[type='number']", ->
+        it("decrements input[type='number']", () =>
           cy.get('input[type="number"]:first')
             .invoke('val', '12.34')
             .type('{downarrow}{downarrow}')
             .should('have.value', '11')
+        );
 
-        it "downarrow ignores current selection", ->
-          ce = cy.$$('[contenteditable]:first').get(0)
+        return it("downarrow ignores current selection", function() {
+          const ce = cy.$$('[contenteditable]:first').get(0);
           ce.innerHTML =
                       '<div>foo</div>' +
                       '<div>bar</div>' +
-                      '<div>baz</div>'
-          ## select 'foo'
-          line = cy.$$('[contenteditable]:first div:first').get(0)
-          cy.document().then (doc) ->
-            ce.focus()
-            doc.getSelection().selectAllChildren(line)
+                      '<div>baz</div>';
+          //# select 'foo'
+          const line = cy.$$('[contenteditable]:first div:first').get(0);
+          cy.document().then(function(doc) {
+            ce.focus();
+            return doc.getSelection().selectAllChildren(line);
+          });
 
-          cy.get("[contenteditable]:first")
-          .type("{downarrow}22").then ($div) ->
-            expect(trimInnerText($div)).to.eql("foo\n22bar\nbaz")
+          return cy.get("[contenteditable]:first")
+          .type("{downarrow}22").then($div => expect(trimInnerText($div)).to.eql("foo\n22bar\nbaz"));
+        });
+      });
 
-      context "{selectall}{del}", ->
-        it "can select all the text and delete", ->
-          cy.get(":text:first").invoke("val", "1234").type("{selectall}{del}").type("foo").then ($text) ->
-            expect($text).to.have.value("foo")
+      context("{selectall}{del}", function() {
+        it("can select all the text and delete", () =>
+          cy.get(":text:first").invoke("val", "1234").type("{selectall}{del}").type("foo").then($text => expect($text).to.have.value("foo"))
+        );
 
-        it "can select all [contenteditable] and delete", ->
-          cy.get("#input-types [contenteditable]").invoke("text", "1234").type("{selectall}{del}").type("foo").then ($div) ->
-            expect($div).to.have.text("foo")
+        return it("can select all [contenteditable] and delete", () =>
+          cy.get("#input-types [contenteditable]").invoke("text", "1234").type("{selectall}{del}").type("foo").then($div => expect($div).to.have.text("foo"))
+        );
+      });
 
-      context "{selectall} then type something", ->
-        it "replaces the text", ->
-          cy.get("#input-with-value").type("{selectall}new").then ($text) ->
-            expect($text).to.have.value("new")
+      context("{selectall} then type something", () =>
+        it("replaces the text", () =>
+          cy.get("#input-with-value").type("{selectall}new").then($text => expect($text).to.have.value("new"))
+        )
+      );
 
-      context "{enter}", ->
-        it "sets which and keyCode to 13 and prevents EOL insertion", (done) ->
-          cy.$$("#input-types textarea").on "keypress", _.after 2, (e) ->
-            done("should not have received keypress event")
+      context("{enter}", function() {
+        it("sets which and keyCode to 13 and prevents EOL insertion", function(done) {
+          cy.$$("#input-types textarea").on("keypress", _.after(2, e => done("should not have received keypress event"))
+          );
 
-          cy.$$("#input-types textarea").on "keydown", _.after 2, (e) ->
-            expect(e.which).to.eq 13
-            expect(e.keyCode).to.eq 13
-            expect(e.key).to.eq "Enter"
-            e.preventDefault()
+          cy.$$("#input-types textarea").on("keydown", _.after(2, function(e) {
+            expect(e.which).to.eq(13);
+            expect(e.keyCode).to.eq(13);
+            expect(e.key).to.eq("Enter");
+            return e.preventDefault();
+          })
+          );
 
-          cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
-            expect($textarea).to.have.value("food")
-            done()
+          return cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then(function($textarea) {
+            expect($textarea).to.have.value("food");
+            return done();
+          });
+        });
 
-        it "sets which and keyCode and charCode to 13 and prevents EOL insertion", (done) ->
-          cy.$$("#input-types textarea").on "keypress", _.after 2, (e) ->
-            expect(e.which).to.eq 13
-            expect(e.keyCode).to.eq 13
-            expect(e.charCode).to.eq 13
-            expect(e.key).to.eq "Enter"
-            e.preventDefault()
+        it("sets which and keyCode and charCode to 13 and prevents EOL insertion", function(done) {
+          cy.$$("#input-types textarea").on("keypress", _.after(2, function(e) {
+            expect(e.which).to.eq(13);
+            expect(e.keyCode).to.eq(13);
+            expect(e.charCode).to.eq(13);
+            expect(e.key).to.eq("Enter");
+            return e.preventDefault();
+          })
+          );
 
-          cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
-            expect($textarea).to.have.value("food")
-            done()
+          return cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then(function($textarea) {
+            expect($textarea).to.have.value("food");
+            return done();
+          });
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{enter}").then(() => done());
+        });
 
-        it "does not fire input event", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("input should not have fired")
+        it("does not fire input event", function(done) {
+          cy.$$(":text:first").on("input", e => done("input should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{enter}").then(() => done());
+        });
 
-        it "inserts new line into textarea", ->
-          cy.get("#input-types textarea").invoke("val", "foo").type("bar{enter}baz{enter}quux").then ($textarea) ->
-            expect($textarea).to.have.value("foobar\nbaz\nquux")
+        it("inserts new line into textarea", () =>
+          cy.get("#input-types textarea").invoke("val", "foo").type("bar{enter}baz{enter}quux").then($textarea => expect($textarea).to.have.value("foobar\nbaz\nquux"))
+        );
 
-        it "inserts new line into [contenteditable] ", ->
+        it("inserts new line into [contenteditable] ", () =>
           cy.get("#input-types [contenteditable]:first").invoke("text", "foo")
-          .type("bar{enter}baz{enter}{enter}{enter}quux").then ($div) ->
-            conditionalNewLines = "\n\n".repeat(@multiplierNumNewLines)
+          .type("bar{enter}baz{enter}{enter}{enter}quux").then(function($div) {
+            const conditionalNewLines = "\n\n".repeat(this.multiplierNumNewLines);
 
-            expect(trimInnerText($div)).to.eql("foobar\nbaz#{conditionalNewLines}\nquux")
-            expect($div.get(0).textContent).to.eql("foobarbazquux")
-            expect($div.get(0).innerHTML).to.eql("foobar<div>baz</div><div><br></div><div><br></div><div>quux</div>")
+            expect(trimInnerText($div)).to.eql(`foobar\nbaz${conditionalNewLines}\nquux`);
+            expect($div.get(0).textContent).to.eql("foobarbazquux");
+            return expect($div.get(0).innerHTML).to.eql("foobar<div>baz</div><div><br></div><div><br></div><div>quux</div>");
+          })
+        );
 
-        it "inserts new line into [contenteditable] from midline", ->
+        return it("inserts new line into [contenteditable] from midline", () =>
           cy.get("#input-types [contenteditable]:first").invoke("text", "foo")
-          .type("bar{leftarrow}{enter}baz{leftarrow}{enter}quux").then ($div) ->
-            expect(trimInnerText($div)).to.eql("fooba\nba\nquuxzr")
-            expect($div.get(0).textContent).to.eql("foobabaquuxzr")
-            expect($div.get(0).innerHTML).to.eql("fooba<div>ba</div><div>quuxzr</div>")
+          .type("bar{leftarrow}{enter}baz{leftarrow}{enter}quux").then(function($div) {
+            expect(trimInnerText($div)).to.eql("fooba\nba\nquuxzr");
+            expect($div.get(0).textContent).to.eql("foobabaquuxzr");
+            return expect($div.get(0).innerHTML).to.eql("fooba<div>ba</div><div>quuxzr</div>");
+          })
+        );
+      });
 
-      context "{insert}", ->
-        it "sets which and keyCode to 45 and does not fire keypress events", (done) ->
-          cy.$$(":text:first").on "keypress", ->
-            done("should not have received keypress")
+      context("{insert}", function() {
+        it("sets which and keyCode to 45 and does not fire keypress events", function(done) {
+          cy.$$(":text:first").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$(":text:first").on "keydown", (e) ->
-            expect(e.which).to.eq 45
-            expect(e.keyCode).to.eq 45
-            expect(e.key).to.eq "Insert"
-            done()
+          cy.$$(":text:first").on("keydown", function(e) {
+            expect(e.which).to.eq(45);
+            expect(e.keyCode).to.eq(45);
+            expect(e.key).to.eq("Insert");
+            return done();
+          });
 
-          cy.get(":text:first").invoke("val", "ab").type("{insert}")
+          return cy.get(":text:first").invoke("val", "ab").type("{insert}");
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{insert}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{insert}").then(() => done());
+        });
 
-        it "does not fire input event", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("input should not have fired")
+        it("does not fire input event", function(done) {
+          cy.$$(":text:first").on("input", e => done("input should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{insert}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{insert}").then(() => done());
+        });
 
-        it "can prevent default insert movement", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 45
-              e.preventDefault()
+        return it("can prevent default insert movement", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 45) {
+              return e.preventDefault();
+            }
+          });
 
-          cy.get(":text:first").invoke("val", "foo").type("d{insert}").then ($input) ->
-            expect($input).to.have.value("food")
-            done()
+          return cy.get(":text:first").invoke("val", "foo").type("d{insert}").then(function($input) {
+            expect($input).to.have.value("food");
+            return done();
+          });
+        });
+      });
 
-      context "{pageup}", ->
-        it "sets which and keyCode to 33 and does not fire keypress events", (done) ->
-          cy.$$(":text:first").on "keypress", ->
-            done("should not have received keypress")
+      context("{pageup}", function() {
+        it("sets which and keyCode to 33 and does not fire keypress events", function(done) {
+          cy.$$(":text:first").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$(":text:first").on "keydown", (e) ->
-            expect(e.which).to.eq 33
-            expect(e.keyCode).to.eq 33
-            expect(e.key).to.eq "PageUp"
-            done()
+          cy.$$(":text:first").on("keydown", function(e) {
+            expect(e.which).to.eq(33);
+            expect(e.keyCode).to.eq(33);
+            expect(e.key).to.eq("PageUp");
+            return done();
+          });
 
-          cy.get(":text:first").invoke("val", "ab").type("{pageup}")
+          return cy.get(":text:first").invoke("val", "ab").type("{pageup}");
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{pageup}").then(() => done());
+        });
 
-        it "does not fire input event", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("input should not have fired")
+        it("does not fire input event", function(done) {
+          cy.$$(":text:first").on("input", e => done("input should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{pageup}").then(() => done());
+        });
 
-        it "can prevent default pageup movement", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 33
-              e.preventDefault()
+        return it("can prevent default pageup movement", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 33) {
+              return e.preventDefault();
+            }
+          });
 
-          cy.get(":text:first").invoke("val", "foo").type("d{pageup}").then ($input) ->
-            expect($input).to.have.value("food")
-            done()
+          return cy.get(":text:first").invoke("val", "foo").type("d{pageup}").then(function($input) {
+            expect($input).to.have.value("food");
+            return done();
+          });
+        });
+      });
 
-      context "{pagedown}", ->
-        it "sets which and keyCode to 34 and does not fire keypress events", (done) ->
-          cy.$$(":text:first").on "keypress", ->
-            done("should not have received keypress")
+      return context("{pagedown}", function() {
+        it("sets which and keyCode to 34 and does not fire keypress events", function(done) {
+          cy.$$(":text:first").on("keypress", () => done("should not have received keypress"));
 
-          cy.$$(":text:first").on "keydown", (e) ->
-            expect(e.which).to.eq 34
-            expect(e.keyCode).to.eq 34
-            expect(e.key).to.eq "PageDown"
-            done()
+          cy.$$(":text:first").on("keydown", function(e) {
+            expect(e.which).to.eq(34);
+            expect(e.keyCode).to.eq(34);
+            expect(e.key).to.eq("PageDown");
+            return done();
+          });
 
-          cy.get(":text:first").invoke("val", "ab").type("{pagedown}")
+          return cy.get(":text:first").invoke("val", "ab").type("{pagedown}");
+        });
 
-        it "does not fire textInput event", (done) ->
-          cy.$$(":text:first").on "textInput", (e) ->
-            done("textInput should not have fired")
+        it("does not fire textInput event", function(done) {
+          cy.$$(":text:first").on("textInput", e => done("textInput should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then(() => done());
+        });
 
-        it "does not fire input event", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("input should not have fired")
+        it("does not fire input event", function(done) {
+          cy.$$(":text:first").on("input", e => done("input should not have fired"));
 
-          cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then -> done()
+          return cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then(() => done());
+        });
 
-        it "can prevent default pagedown movement", (done) ->
-          cy.$$(":text:first").on "keydown", (e) ->
-            if e.keyCode is 34
-              e.preventDefault()
+        return it("can prevent default pagedown movement", function(done) {
+          cy.$$(":text:first").on("keydown", function(e) {
+            if (e.keyCode === 34) {
+              return e.preventDefault();
+            }
+          });
 
-          cy.get(":text:first").invoke("val", "foo").type("d{pagedown}").then ($input) ->
-            expect($input).to.have.value("food")
-            done()
+          return cy.get(":text:first").invoke("val", "foo").type("d{pagedown}").then(function($input) {
+            expect($input).to.have.value("food");
+            return done();
+          });
+        });
+      });
+    });
 
-    describe "modifiers", ->
+    describe("modifiers", function() {
 
-      describe "activating modifiers", ->
+      describe("activating modifiers", function() {
 
-        it "sends keydown event for modifiers in order", (done) ->
-          $input = cy.$$("input:text:first")
-          events = []
-          $input.on "keydown", (e) ->
-            events.push(e)
+        it("sends keydown event for modifiers in order", function(done) {
+          const $input = cy.$$("input:text:first");
+          const events = [];
+          $input.on("keydown", e => events.push(e));
 
-          cy.get("input:text:first").type("{shift}{ctrl}").then ->
-            expect(events[0].shiftKey).to.be.true
-            expect(events[0].which).to.equal(16)
+          return cy.get("input:text:first").type("{shift}{ctrl}").then(function() {
+            expect(events[0].shiftKey).to.be.true;
+            expect(events[0].which).to.equal(16);
 
-            expect(events[1].ctrlKey).to.be.true
-            expect(events[1].which).to.equal(17)
+            expect(events[1].ctrlKey).to.be.true;
+            expect(events[1].which).to.equal(17);
 
-            $input.off("keydown")
-            done()
+            $input.off("keydown");
+            return done();
+          });
+        });
 
-        it "maintains modifiers for subsequent characters", (done) ->
-          $input = cy.$$("input:text:first")
-          events = []
-          $input.on "keydown", (e) ->
-            events.push(e)
+        it("maintains modifiers for subsequent characters", function(done) {
+          const $input = cy.$$("input:text:first");
+          const events = [];
+          $input.on("keydown", e => events.push(e));
 
-          cy.get("input:text:first").type("{command}{control}ok").then ->
-            expect(events[2].metaKey).to.be.true
-            expect(events[2].ctrlKey).to.be.true
-            expect(events[2].which).to.equal(79)
+          return cy.get("input:text:first").type("{command}{control}ok").then(function() {
+            expect(events[2].metaKey).to.be.true;
+            expect(events[2].ctrlKey).to.be.true;
+            expect(events[2].which).to.equal(79);
 
-            expect(events[3].metaKey).to.be.true
-            expect(events[3].ctrlKey).to.be.true
-            expect(events[3].which).to.equal(75)
+            expect(events[3].metaKey).to.be.true;
+            expect(events[3].ctrlKey).to.be.true;
+            expect(events[3].which).to.equal(75);
 
-            $input.off("keydown")
-            done()
+            $input.off("keydown");
+            return done();
+          });
+        });
 
-        it "does not maintain modifiers for subsequent type commands", (done) ->
-          $input = cy.$$("input:text:first")
-          events = []
-          $input.on "keydown", (e) ->
-            events.push(e)
+        it("does not maintain modifiers for subsequent type commands", function(done) {
+          const $input = cy.$$("input:text:first");
+          const events = [];
+          $input.on("keydown", e => events.push(e));
 
-          cy
+          return cy
           .get("input:text:first")
           .type("{command}{control}")
           .type("ok")
-          .then ->
-            expect(events[2].metaKey).to.be.false
-            expect(events[2].ctrlKey).to.be.false
-            expect(events[2].which).to.equal(79)
+          .then(function() {
+            expect(events[2].metaKey).to.be.false;
+            expect(events[2].ctrlKey).to.be.false;
+            expect(events[2].which).to.equal(79);
 
-            expect(events[3].metaKey).to.be.false
-            expect(events[3].ctrlKey).to.be.false
-            expect(events[3].which).to.equal(75)
+            expect(events[3].metaKey).to.be.false;
+            expect(events[3].ctrlKey).to.be.false;
+            expect(events[3].which).to.equal(75);
 
-            $input.off("keydown")
-            done()
+            $input.off("keydown");
+            return done();
+          });
+        });
 
-        it "does not maintain modifiers for subsequent click commands", (done) ->
-          $button = cy.$$("button:first")
-          mouseDownEvent = null
-          mouseUpEvent = null
-          clickEvent = null
-          $button.on "mousedown", (e)-> mouseDownEvent = e
-          $button.on "mouseup", (e)-> mouseUpEvent = e
-          $button.on "click", (e)-> clickEvent = e
+        it("does not maintain modifiers for subsequent click commands", function(done) {
+          const $button = cy.$$("button:first");
+          let mouseDownEvent = null;
+          let mouseUpEvent = null;
+          let clickEvent = null;
+          $button.on("mousedown", e=> mouseDownEvent = e);
+          $button.on("mouseup", e=> mouseUpEvent = e);
+          $button.on("click", e=> clickEvent = e);
 
-          cy
+          return cy
             .get("input:text:first")
             .type("{cmd}{option}")
-            .get("button:first").click().then ->
-              expect(mouseDownEvent.metaKey).to.be.false
-              expect(mouseDownEvent.altKey).to.be.false
+            .get("button:first").click().then(function() {
+              expect(mouseDownEvent.metaKey).to.be.false;
+              expect(mouseDownEvent.altKey).to.be.false;
 
-              expect(mouseUpEvent.metaKey).to.be.false
-              expect(mouseUpEvent.altKey).to.be.false
+              expect(mouseUpEvent.metaKey).to.be.false;
+              expect(mouseUpEvent.altKey).to.be.false;
 
-              expect(clickEvent.metaKey).to.be.false
-              expect(clickEvent.altKey).to.be.false
+              expect(clickEvent.metaKey).to.be.false;
+              expect(clickEvent.altKey).to.be.false;
 
-              $button.off "mousedown"
-              $button.off "mouseup"
-              $button.off "click"
-              done()
+              $button.off("mousedown");
+              $button.off("mouseup");
+              $button.off("click");
+              return done();
+          });
+        });
 
-        it "sends keyup event for activated modifiers when typing is finished", (done) ->
-          $input = cy.$$("input:text:first")
-          events = []
-          $input.on "keyup", (e) ->
-            events.push(e)
+        return it("sends keyup event for activated modifiers when typing is finished", function(done) {
+          const $input = cy.$$("input:text:first");
+          const events = [];
+          $input.on("keyup", e => events.push(e));
 
-          cy
+          return cy
           .get("input:text:first")
             .type("{alt}{ctrl}{meta}{shift}ok")
-          .then ->
-            # first keyups should be for the chars typed, "ok"
-            expect(events[0].which).to.equal(79)
-            expect(events[1].which).to.equal(75)
+          .then(function() {
+            // first keyups should be for the chars typed, "ok"
+            expect(events[0].which).to.equal(79);
+            expect(events[1].which).to.equal(75);
 
-            expect(events[2].which).to.equal(18)
-            expect(events[3].which).to.equal(17)
-            expect(events[4].which).to.equal(91)
-            expect(events[5].which).to.equal(16)
+            expect(events[2].which).to.equal(18);
+            expect(events[3].which).to.equal(17);
+            expect(events[4].which).to.equal(91);
+            expect(events[5].which).to.equal(16);
 
-            $input.off("keyup")
-            done()
+            $input.off("keyup");
+            return done();
+          });
+        });
+      });
 
-      describe "release: false", ->
+      describe("release: false", function() {
 
-        it "maintains modifiers for subsequent type commands", (done) ->
-          $input = cy.$$("input:text:first")
-          events = []
+        it("maintains modifiers for subsequent type commands", function(done) {
+          const $input = cy.$$("input:text:first");
+          const events = [];
 
-          $input.on "keydown", (e) ->
-            events.push(e)
+          $input.on("keydown", e => events.push(e));
 
-          cy
+          return cy
           .get("input:text:first")
           .type("{command}{control}", { release: false })
           .type("ok")
-          .then ->
-            expect(events[2].metaKey).to.be.true
-            expect(events[2].ctrlKey).to.be.true
-            expect(events[2].which).to.equal(79)
+          .then(function() {
+            expect(events[2].metaKey).to.be.true;
+            expect(events[2].ctrlKey).to.be.true;
+            expect(events[2].which).to.equal(79);
 
-            expect(events[3].metaKey).to.be.true
-            expect(events[3].ctrlKey).to.be.true
-            expect(events[3].which).to.equal(75)
+            expect(events[3].metaKey).to.be.true;
+            expect(events[3].ctrlKey).to.be.true;
+            expect(events[3].which).to.equal(75);
 
-            done()
+            return done();
+          });
+        });
 
-        it "maintains modifiers for subsequent click commands", (done) ->
-          $button = cy.$$("button:first")
-          mouseDownEvent = null
-          mouseUpEvent = null
-          clickEvent = null
+        it("maintains modifiers for subsequent click commands", function(done) {
+          const $button = cy.$$("button:first");
+          let mouseDownEvent = null;
+          let mouseUpEvent = null;
+          let clickEvent = null;
 
-          $button.on "mousedown", (e) -> mouseDownEvent = e
-          $button.on "mouseup", (e) -> mouseUpEvent = e
-          $button.on "click", (e) -> clickEvent = e
+          $button.on("mousedown", e => mouseDownEvent = e);
+          $button.on("mouseup", e => mouseUpEvent = e);
+          $button.on("click", e => clickEvent = e);
 
-          cy
+          return cy
             .get("input:text:first")
             .type("{meta}{alt}", { release: false })
-            .get("button:first").click().then ->
-              expect(mouseDownEvent.metaKey).to.be.true
-              expect(mouseDownEvent.altKey).to.be.true
+            .get("button:first").click().then(function() {
+              expect(mouseDownEvent.metaKey).to.be.true;
+              expect(mouseDownEvent.altKey).to.be.true;
 
-              expect(mouseUpEvent.metaKey).to.be.true
-              expect(mouseUpEvent.altKey).to.be.true
+              expect(mouseUpEvent.metaKey).to.be.true;
+              expect(mouseUpEvent.altKey).to.be.true;
 
-              expect(clickEvent.metaKey).to.be.true
-              expect(clickEvent.altKey).to.be.true
+              expect(clickEvent.metaKey).to.be.true;
+              expect(clickEvent.altKey).to.be.true;
 
-              done()
+              return done();
+          });
+        });
 
-        it "resets modifiers before next test", ->
-          ## this test will fail if you comment out
-          ## $Keyboard.resetModifiers
+        return it("resets modifiers before next test", function() {
+          //# this test will fail if you comment out
+          //# $Keyboard.resetModifiers
 
-          $input = cy.$$("input:text:first")
-          events = []
+          const $input = cy.$$("input:text:first");
+          const events = [];
 
-          $input.on "keyup", (e) ->
-            events.push(e)
+          $input.on("keyup", e => events.push(e));
 
-          cy
+          return cy
           .get("input:text:first")
           .type("a", { release: false })
-          .then ->
-            expect(events[0].metaKey).to.be.false
-            expect(events[0].ctrlKey).to.be.false
-            expect(events[0].altKey).to.be.false
+          .then(function() {
+            expect(events[0].metaKey).to.be.false;
+            expect(events[0].ctrlKey).to.be.false;
+            return expect(events[0].altKey).to.be.false;
+          });
+        });
+      });
 
-      describe "changing modifiers", ->
-        beforeEach ->
-          @$input = cy.$$("input:text:first")
-          cy.get("input:text:first").type("{command}{option}", { release: false })
+      return describe("changing modifiers", function() {
+        beforeEach(function() {
+          this.$input = cy.$$("input:text:first");
+          return cy.get("input:text:first").type("{command}{option}", { release: false });
+        });
 
-        afterEach ->
-          @$input.off("keydown")
+        afterEach(function() {
+          return this.$input.off("keydown");
+        });
 
-        it "sends keydown event for new modifiers", (done) ->
-          event = null
-          @$input.on "keydown", (e)->
-            event = e
+        it("sends keydown event for new modifiers", function(done) {
+          let event = null;
+          this.$input.on("keydown", e=> event = e);
 
-          cy.get("input:text:first").type("{shift}").then ->
-            expect(event.shiftKey).to.be.true
-            expect(event.which).to.equal(16)
-            done()
+          return cy.get("input:text:first").type("{shift}").then(function() {
+            expect(event.shiftKey).to.be.true;
+            expect(event.which).to.equal(16);
+            return done();
+          });
+        });
 
-        it "does not send keydown event for already activated modifiers", (done) ->
-          triggered = false
-          @$input.on "keydown", (e)->
-            triggered = true if e.which is 18 or e.which is 17
+        return it("does not send keydown event for already activated modifiers", function(done) {
+          let triggered = false;
+          this.$input.on("keydown", function(e){
+            if ((e.which === 18) || (e.which === 17)) { return triggered = true; }
+          });
 
-          cy.get("input:text:first").type("{cmd}{alt}").then ->
-            expect(triggered).to.be.false
-            done()
+          return cy.get("input:text:first").type("{cmd}{alt}").then(function() {
+            expect(triggered).to.be.false;
+            return done();
+          });
+        });
+      });
+    });
 
-    describe "case-insensitivity", ->
+    describe("case-insensitivity", function() {
 
-      it "special chars are case-insensitive", ->
-        cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{DeL}").then ($input) ->
-          expect($input).to.have.value("ba")
+      it("special chars are case-insensitive", () =>
+        cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{DeL}").then($input => expect($input).to.have.value("ba"))
+      );
 
-      it "modifiers are case-insensitive", (done) ->
-        $input = cy.$$("input:text:first")
-        alt = false
-        $input.on "keydown", (e) ->
-          alt = true if e.altKey
+      it("modifiers are case-insensitive", function(done) {
+        const $input = cy.$$("input:text:first");
+        let alt = false;
+        $input.on("keydown", function(e) {
+          if (e.altKey) { return alt = true; }
+        });
 
-        cy.get("input:text:first").type("{aLt}").then ->
-          expect(alt).to.be.true
+        return cy.get("input:text:first").type("{aLt}").then(function() {
+          expect(alt).to.be.true;
 
-          $input.off("keydown")
-          done()
+          $input.off("keydown");
+          return done();
+        });
+      });
 
-      it "letters are case-sensitive", ->
-        cy.get("input:text:first").type("FoO").then ($input) ->
-          expect($input).to.have.value("FoO")
+      return it("letters are case-sensitive", () =>
+        cy.get("input:text:first").type("FoO").then($input => expect($input).to.have.value("FoO"))
+      );
+    });
 
-    describe "click events", ->
-      it "passes timeout and interval down to click", (done) ->
-        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(cy.$$("body"))
-        span = $("<span>span on input</span>")
-          .css {
-            position: "absolute"
-            left: input.offset().left
-            top: input.offset().top
-            padding: 5
-            display: "inline-block"
+    describe("click events", function() {
+      it("passes timeout and interval down to click", function(done) {
+        const input  = $("<input />").attr("id", "input-covered-in-span").prependTo(cy.$$("body"));
+        const span = $("<span>span on input</span>")
+          .css({
+            position: "absolute",
+            left: input.offset().left,
+            top: input.offset().top,
+            padding: 5,
+            display: "inline-block",
             backgroundColor: "yellow"
-          }
-          .prependTo cy.$$("body")
+          })
+          .prependTo(cy.$$("body"));
 
-        cy.on "command:retry", (options) ->
-          expect(options.timeout).to.eq 1000
-          expect(options.interval).to.eq 60
-          done()
+        cy.on("command:retry", function(options) {
+          expect(options.timeout).to.eq(1000);
+          expect(options.interval).to.eq(60);
+          return done();
+        });
 
-        cy.get("#input-covered-in-span").type("foobar", {timeout: 1000, interval: 60})
+        return cy.get("#input-covered-in-span").type("foobar", {timeout: 1000, interval: 60});
+      });
 
-      it "does not issue another click event between type/type", ->
-        clicked = 0
+      it("does not issue another click event between type/type", function() {
+        let clicked = 0;
 
-        cy.$$(":text:first").click ->
-          clicked += 1
+        cy.$$(":text:first").click(() => clicked += 1);
 
-        cy.get(":text:first").type("f").type("o").then ->
-          expect(clicked).to.eq 1
+        return cy.get(":text:first").type("f").type("o").then(() => expect(clicked).to.eq(1));
+      });
 
-      it "does not issue another click event if element is already in focus from click", ->
-        clicked = 0
+      return it("does not issue another click event if element is already in focus from click", function() {
+        let clicked = 0;
 
-        cy.$$(":text:first").click ->
-          clicked += 1
+        cy.$$(":text:first").click(() => clicked += 1);
 
-        cy.get(":text:first").click().type("o").then ->
-          expect(clicked).to.eq 1
+        return cy.get(":text:first").click().type("o").then(() => expect(clicked).to.eq(1));
+      });
+    });
 
-    describe "change events", ->
-      it "fires when enter is pressed and value has changed", ->
-        changed = 0
+    describe("change events", function() {
+      it("fires when enter is pressed and value has changed", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then ->
-          expect(changed).to.eq 1
+        return cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then(() => expect(changed).to.eq(1));
+      });
 
-      it "fires twice when enter is pressed and then again after losing focus", ->
-        changed = 0
+      it("fires twice when enter is pressed and then again after losing focus", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then ->
-          expect(changed).to.eq 2
+        return cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then(() => expect(changed).to.eq(2));
+      });
 
-      it "fires when element loses focus due to another action (click)", ->
-        changed = 0
+      it("fires when element loses focus due to another action (click)", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy
-          .get(":text:first").type("foo").then ->
-            expect(changed).to.eq 0
-          .get("button:first").click().then ->
-            expect(changed).to.eq 1
+        return cy
+          .get(":text:first").type("foo").then(() => expect(changed).to.eq(0)).get("button:first").click().then(() => expect(changed).to.eq(1));
+      });
 
-      it "fires when element loses focus due to another action (type)", ->
-        changed = 0
+      it("fires when element loses focus due to another action (type)", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy
-          .get(":text:first").type("foo").then ->
-            expect(changed).to.eq 0
-          .get("textarea:first").type("bar").then ->
-            expect(changed).to.eq 1
+        return cy
+          .get(":text:first").type("foo").then(() => expect(changed).to.eq(0)).get("textarea:first").type("bar").then(() => expect(changed).to.eq(1));
+      });
 
-      it "fires when element is directly blurred", ->
-        changed = 0
+      it("fires when element is directly blurred", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy
-          .get(":text:first").type("foo").blur().then ->
-            expect(changed).to.eq 1
+        return cy
+          .get(":text:first").type("foo").blur().then(() => expect(changed).to.eq(1));
+      });
 
-      it "fires when element is tabbed away from"#, ->
-      #   changed = 0
+      it("fires when element is tabbed away from");//, ->
+      //   changed = 0
 
-      #   cy.$$(":text:first").change ->
-      #     changed += 1
+      //   cy.$$(":text:first").change ->
+      //     changed += 1
 
-      #   cy.get(":text:first").invoke("val", "foo").type("b{tab}").then ->
-      #     expect(changed).to.eq 1
+      //   cy.get(":text:first").invoke("val", "foo").type("b{tab}").then ->
+      //     expect(changed).to.eq 1
 
-      it "does not fire twice if element is already in focus between type/type", ->
-        changed = 0
+      it("does not fire twice if element is already in focus between type/type", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").type("f").type("o{enter}").then ->
-          expect(changed).to.eq 1
+        return cy.get(":text:first").invoke("val", "foo").type("f").type("o{enter}").then(() => expect(changed).to.eq(1));
+      });
 
-      it "does not fire twice if element is already in focus between clear/type", ->
-        changed = 0
+      it("does not fire twice if element is already in focus between clear/type", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").clear().type("o{enter}").then ->
-          expect(changed).to.eq 1
+        return cy.get(":text:first").invoke("val", "foo").clear().type("o{enter}").then(() => expect(changed).to.eq(1));
+      });
 
-      it "does not fire twice if element is already in focus between click/type", ->
-        changed = 0
+      it("does not fire twice if element is already in focus between click/type", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").click().type("o{enter}").then ->
-          expect(changed).to.eq 1
+        return cy.get(":text:first").invoke("val", "foo").click().type("o{enter}").then(() => expect(changed).to.eq(1));
+      });
 
-      it "does not fire twice if element is already in focus between type/click", ->
-        changed = 0
+      it("does not fire twice if element is already in focus between type/click", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").type("d{enter}").click().then ->
-          expect(changed).to.eq 1
+        return cy.get(":text:first").invoke("val", "foo").type("d{enter}").click().then(() => expect(changed).to.eq(1));
+      });
 
-      it "does not fire at all between clear/type/click", ->
-        changed = 0
+      it("does not fire at all between clear/type/click", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").clear().type("o").click().then ($el) ->
-          expect(changed).to.eq 0
-          $el
-        .blur()
-        .then ->
-          expect(changed).to.eq 1
+        return cy.get(":text:first").invoke("val", "foo").clear().type("o").click().then(function($el) {
+          expect(changed).to.eq(0);
+          return $el;}).blur()
+        .then(() => expect(changed).to.eq(1));
+      });
 
-      it "does not fire if {enter} is preventedDefault", ->
-        changed = 0
+      it("does not fire if {enter} is preventedDefault", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").keypress (e) ->
-          e.preventDefault() if e.which is 13
+        cy.$$(":text:first").keypress(function(e) {
+          if (e.which === 13) { return e.preventDefault(); }
+        });
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").type("b{enter}").then ->
-          expect(changed).to.eq 0
+        return cy.get(":text:first").invoke("val", "foo").type("b{enter}").then(() => expect(changed).to.eq(0));
+      });
 
-      it "does not fire when enter is pressed and value hasnt changed", ->
-        changed = 0
+      it("does not fire when enter is pressed and value hasnt changed", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.get(":text:first").invoke("val", "foo").type("b{backspace}{enter}").then ->
-          expect(changed).to.eq 0
+        return cy.get(":text:first").invoke("val", "foo").type("b{backspace}{enter}").then(() => expect(changed).to.eq(0));
+      });
 
-      it "does not fire at the end of the type", ->
-        changed = 0
+      it("does not fire at the end of the type", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy
-          .get(":text:first").type("foo").then ->
-            expect(changed).to.eq 0
+        return cy
+          .get(":text:first").type("foo").then(() => expect(changed).to.eq(0));
+      });
 
-      it "does not fire change event if value hasnt actually changed", ->
-        changed = 0
+      it("does not fire change event if value hasnt actually changed", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy
-          .get(":text:first").invoke("val", "foo").type("{backspace}{backspace}oo{enter}").blur().then ->
-            expect(changed).to.eq 0
+        return cy
+          .get(":text:first").invoke("val", "foo").type("{backspace}{backspace}oo{enter}").blur().then(() => expect(changed).to.eq(0));
+      });
 
-      it "does not fire if mousedown is preventedDefault which prevents element from losing focus", ->
-        changed = 0
+      it("does not fire if mousedown is preventedDefault which prevents element from losing focus", function() {
+        let changed = 0;
 
-        cy.$$(":text:first").change ->
-          changed += 1
+        cy.$$(":text:first").change(() => changed += 1);
 
-        cy.$$("textarea:first").mousedown -> return false
+        cy.$$("textarea:first").mousedown(() => false);
 
-        cy
+        return cy
           .get(":text:first").invoke("val", "foo").type("bar")
-          .get("textarea:first").click().then ->
-            expect(changed).to.eq 0
+          .get("textarea:first").click().then(() => expect(changed).to.eq(0));
+      });
 
-      it "does not fire hitting {enter} inside of a textarea", ->
-        changed = 0
+      it("does not fire hitting {enter} inside of a textarea", function() {
+        let changed = 0;
 
-        cy.$$("textarea:first").change ->
-          changed += 1
+        cy.$$("textarea:first").change(() => changed += 1);
 
-        cy
-          .get("textarea:first").type("foo{enter}bar").then ->
-            expect(changed).to.eq 0
+        return cy
+          .get("textarea:first").type("foo{enter}bar").then(() => expect(changed).to.eq(0));
+      });
 
-      it "does not fire hitting {enter} inside of [contenteditable]", ->
-        changed = 0
+      it("does not fire hitting {enter} inside of [contenteditable]", function() {
+        let changed = 0;
 
-        cy.$$("[contenteditable]:first").change ->
-          changed += 1
+        cy.$$("[contenteditable]:first").change(() => changed += 1);
 
-        cy
-          .get("[contenteditable]:first").type("foo{enter}bar").then ->
-            expect(changed).to.eq 0
+        return cy
+          .get("[contenteditable]:first").type("foo{enter}bar").then(() => expect(changed).to.eq(0));
+      });
 
-      ## [contenteditable] does not fire ANY change events ever.
-      it "does not fire at ALL for [contenteditable]", ->
-        changed = 0
+      //# [contenteditable] does not fire ANY change events ever.
+      it("does not fire at ALL for [contenteditable]", function() {
+        let changed = 0;
 
-        cy.$$("[contenteditable]:first").change ->
-          changed += 1
+        cy.$$("[contenteditable]:first").change(() => changed += 1);
 
-        cy
+        return cy
           .get("[contenteditable]:first").type("foo")
-          .get("button:first").click().then ->
-            expect(changed).to.eq 0
+          .get("button:first").click().then(() => expect(changed).to.eq(0));
+      });
 
-      it "does not fire on .clear() without blur", ->
-        changed = 0
+      it("does not fire on .clear() without blur", function() {
+        let changed = 0;
 
-        cy.$$("input:first").change ->
-          changed += 1
+        cy.$$("input:first").change(() => changed += 1);
 
-        cy.get("input:first").invoke('val', 'foo')
+        return cy.get("input:first").invoke('val', 'foo')
         .clear()
-        .then ($el) ->
-          expect(changed).to.eq 0
-          $el
-        .type('foo')
+        .then(function($el) {
+          expect(changed).to.eq(0);
+          return $el;}).type('foo')
         .blur()
-        .then ->
-          expect(changed).to.eq 0
+        .then(() => expect(changed).to.eq(0));
+      });
 
-      it "fires change for single value change inputs", ->
-        changed = 0
-        cy.$$('input[type="date"]:first').change ->
-          changed++
-        cy.get('input[type="date"]:first')
+      it("fires change for single value change inputs", function() {
+        let changed = 0;
+        cy.$$('input[type="date"]:first').change(() => changed++);
+        return cy.get('input[type="date"]:first')
           .type("1959-09-13")
           .blur()
-          .then ->
-            expect(changed).to.eql 1
+          .then(() => expect(changed).to.eql(1));
+      });
 
-      it "does not fire change for non-change single value input", ->
-        changed = 0
-        cy.$$('input[type="date"]:first').change ->
-          changed++
-        cy.get('input[type="date"]:first')
+      it("does not fire change for non-change single value input", function() {
+        let changed = 0;
+        cy.$$('input[type="date"]:first').change(() => changed++);
+        return cy.get('input[type="date"]:first')
           .invoke('val', "1959-09-13")
           .type("1959-09-13")
           .blur()
-          .then ->
-            expect(changed).to.eql(0)
+          .then(() => expect(changed).to.eql(0));
+      });
 
-      it "does not fire change for type'd change that restores value", ->
-        changed = 0
-        cy.$$('input:first').change ->
-          changed++
-        cy.get('input:first')
+      return it("does not fire change for type'd change that restores value", function() {
+        let changed = 0;
+        cy.$$('input:first').change(() => changed++);
+        return cy.get('input:first')
         .invoke('val', 'foo')
         .type('{backspace}o')
         .invoke('val', 'bar')
         .type('{backspace}r')
         .blur()
-        .then ->
-          expect(changed).to.eql 0
+        .then(() => expect(changed).to.eql(0));
+      });
+    });
 
-    describe "caret position", ->
+    describe("caret position", function() {
 
-      it "respects being formatted by input event handlers"
+      it("respects being formatted by input event handlers");
 
-      it "accurately returns host contenteditable attr", ->
-        hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
-        cy.get('#ce-inner1').then ($el) ->
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+      it("accurately returns host contenteditable attr", function() {
+        const hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'));
+        return cy.get('#ce-inner1').then($el => expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0]));
+      });
 
-      it "accurately returns host contenteditable=true attr", ->
-        hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
-        cy.get('#ce-inner1').then ($el) ->
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+      it("accurately returns host contenteditable=true attr", function() {
+        const hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'));
+        return cy.get('#ce-inner1').then($el => expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0]));
+      });
 
-      it "accurately returns host contenteditable=\"\" attr", ->
-        hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
-        cy.get('#ce-inner1').then ($el) ->
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+      it("accurately returns host contenteditable=\"\" attr", function() {
+        const hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'));
+        return cy.get('#ce-inner1').then($el => expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0]));
+      });
 
-      it "accurately returns host contenteditable=\"foo\" attr", ->
-        hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
-        cy.get('#ce-inner1').then ($el) ->
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+      it("accurately returns host contenteditable=\"foo\" attr", function() {
+        const hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'));
+        return cy.get('#ce-inner1').then($el => expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0]));
+      });
 
-      it "accurately returns same el with no falsey contenteditable=\"false\" attr", ->
-        hostEl = cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
-        cy.get('#ce-inner1').then ($el) ->
-          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+      it("accurately returns same el with no falsey contenteditable=\"false\" attr", function() {
+        const hostEl = cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'));
+        return cy.get('#ce-inner1').then($el => expect($selection.getHostContenteditable($el[0])).to.eq($el[0]));
+      });
 
             
-      ## https://github.com/cypress-io/cypress/issues/3001
-      describe('skip actionability if already focused', () =>
-        it('inside input', () =>
-          cy.$$('body').append(Cypress.$('
-            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
-            <input type="text" id="foo">
-            '))
+      //# https://github.com/cypress-io/cypress/issues/3001
+      describe('skip actionability if already focused', () => {
+        it('inside input', () => {
+          cy.$$('body').append(Cypress.$(`\
+<div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
+<input type="text" id="foo">\
+`));
 
-          cy.$$('#foo').focus()
+          cy.$$('#foo').focus();
           
 
-          cy.focused().type('new text').should('have.prop', 'value', 'new text')
-        )
+          return cy.focused().type('new text').should('have.prop', 'value', 'new text');
+        });
 
-        it('inside textarea', () =>
+        it('inside textarea', () => {
          
-          cy.$$('body').append(Cypress.$('
-            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
-            <textarea id="foo"></textarea>
-            '))
+          cy.$$('body').append(Cypress.$(`\
+<div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
+<textarea id="foo"></textarea>\
+`));
 
-          cy.$$('#foo').focus()
+          cy.$$('#foo').focus();
         
 
-          cy.focused().type('new text').should('have.prop', 'value', 'new text')
-        )
+          return cy.focused().type('new text').should('have.prop', 'value', 'new text');
+        });
 
-        it('inside contenteditable', () =>
+        return it('inside contenteditable', () => {
       
-          cy.$$('body').append(Cypress.$('
-            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
-            <div id="foo" contenteditable>
-            <div>foo</div><div>bar</div><div>baz</div>
-            </div>
-            '))
-          win = cy.state('window')
-          doc = window.document
+          cy.$$('body').append(Cypress.$(`\
+<div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
+<div id="foo" contenteditable> \
+<div>foo</div><div>bar</div><div>baz</div> \
+</div>\
+`));
+          const win = cy.state('window');
+          const doc = window.document;
 
-          cy.$$('#foo').focus()
-          inner = cy.$$('div:contains(bar):last')
+          cy.$$('#foo').focus();
+          const inner = cy.$$('div:contains(bar):last');
 
-          range = doc.createRange()
+          const range = doc.createRange();
 
-          range.selectNodeContents(inner[0])
-          sel = win.getSelection()
+          range.selectNodeContents(inner[0]);
+          const sel = win.getSelection();
 
-          sel.removeAllRanges()
+          sel.removeAllRanges();
 
-          sel.addRange(range)
+          sel.addRange(range);
         
 
-          cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
-        )
-      )
+          return cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text');
+        });
+      });
 
-      it "can arrow from maxlength", ->
-        cy.get('input:first').invoke('attr', 'maxlength', "5").type('foobar{leftarrow}')
-        cy.window().then (win) ->
-          expect $selection.getSelectionBounds Cypress.$('input:first').get(0)
+      it("can arrow from maxlength", function() {
+        cy.get('input:first').invoke('attr', 'maxlength', "5").type('foobar{leftarrow}');
+        return cy.window().then(win =>
+          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({start:4, end:4})
+        );
+      });
 
-      it "won't arrowright past length", ->
-        cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
-        cy.window().then (win) ->
-          expect $selection.getSelectionBounds Cypress.$('input:first').get(0)
+      it("won't arrowright past length", function() {
+        cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}');
+        return cy.window().then(win =>
+          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({start:6, end:6})
+        );
+      });
 
-      it "won't arrowleft before word", ->
-        cy.get('input:first').type('oo' + '{leftarrow}{leftarrow}{leftarrow}' + 'f' + '{leftarrow}'.repeat(5))
-        cy.window().then (win) ->
-          expect $selection.getSelectionBounds Cypress.$('input:first').get(0)
+      it("won't arrowleft before word", function() {
+        cy.get('input:first').type(`oo{leftarrow}{leftarrow}{leftarrow}f${'{leftarrow}'.repeat(5)}`);
+        return cy.window().then(win =>
+          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({start:0, end:0})
+        );
+      });
 
-      it "leaves caret at the end of contenteditable", ->
-        cy.get('[contenteditable]:first').type('foobar')
-        cy.window().then (win) ->
-          expect $selection.getSelectionBounds Cypress.$('[contenteditable]:first').get(0)
+      it("leaves caret at the end of contenteditable", function() {
+        cy.get('[contenteditable]:first').type('foobar');
+        return cy.window().then(win =>
+          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({start:6, end:6})
+        );
+      });
 
-      it "leaves caret at the end of contenteditable when prefilled", ->
-        $el = cy.$$('[contenteditable]:first')
-        el = $el.get(0)
-        el.innerHTML = 'foo'
-        cy.get('[contenteditable]:first').type('bar')
-        cy.window().then (win) ->
-          expect $selection.getSelectionBounds Cypress.$('[contenteditable]:first').get(0)
+      it("leaves caret at the end of contenteditable when prefilled", function() {
+        const $el = cy.$$('[contenteditable]:first');
+        const el = $el.get(0);
+        el.innerHTML = 'foo';
+        cy.get('[contenteditable]:first').type('bar');
+        return cy.window().then(win =>
+          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({start:6, end:6})
+        );
+      });
 
-      it "can move the caret left on contenteditable", ->
-        cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
-        cy.window().then (win) ->
-          expect $selection.getSelectionBounds Cypress.$('[contenteditable]:first').get(0)
+      it("can move the caret left on contenteditable", function() {
+        cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}');
+        return cy.window().then(win =>
+          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({start:1, end:1})
+        );
+      });
 
-        ##make sure caret is correct
-        ## type left left
-        ## make sure caret correct
-        ## text is fboo
-        ## fix input-mask issue
+        //#make sure caret is correct
+        //# type left left
+        //# make sure caret correct
+        //# text is fboo
+        //# fix input-mask issue
 
-      it "leaves caret at the end of input", ->
-        cy.get(':text:first').type('foobar')
-        cy.window().then (win) ->
-          expect $selection.getSelectionBounds Cypress.$(':text:first').get(0)
+      it("leaves caret at the end of input", function() {
+        cy.get(':text:first').type('foobar');
+        return cy.window().then(win =>
+          expect($selection.getSelectionBounds(Cypress.$(':text:first').get(0)))
           .to.deep.eq({start:6, end:6})
+        );
+      });
 
-      it "leaves caret at the end of textarea", ->
-        cy.get('#comments').type('foobar')
-        cy.window().then (win) ->
-          expect $selection.getSelectionBounds Cypress.$('#comments').get(0)
+      it("leaves caret at the end of textarea", function() {
+        cy.get('#comments').type('foobar');
+        return cy.window().then(win =>
+          expect($selection.getSelectionBounds(Cypress.$('#comments').get(0)))
           .to.deep.eq({start:6, end:6})
+        );
+      });
 
-      it "can wrap cursor to next line in [contenteditable] with {rightarrow}", ->
-        $el = cy.$$('[contenteditable]:first')
-        el = $el.get(0)
+      it("can wrap cursor to next line in [contenteditable] with {rightarrow}", function() {
+        const $el = cy.$$('[contenteditable]:first');
+        const el = $el.get(0);
         el.innerHTML = 'start'+
         '<div>middle</div>'+
-        '<div>end</div>'
+        '<div>end</div>';
 
-        cy.get('[contenteditable]:first')
-        ## move cursor to beginning of div
+        return cy.get('[contenteditable]:first')
+        //# move cursor to beginning of div
         .type('{selectall}{leftarrow}')
-        .type('{rightarrow}'.repeat(14)+'[_I_]').then ($el) ->
-          expect(trimInnerText($el)).to.eql('start\nmiddle\ne[_I_]nd')
+        .type('{rightarrow}'.repeat(14)+'[_I_]').then($el => expect(trimInnerText($el)).to.eql('start\nmiddle\ne[_I_]nd'));
+      });
 
-      it "can wrap cursor to prev line in [contenteditable] with {leftarrow}", ->
-        $el = cy.$$('[contenteditable]:first')
-        el = $el.get(0)
+      it("can wrap cursor to prev line in [contenteditable] with {leftarrow}", function() {
+        const $el = cy.$$('[contenteditable]:first');
+        const el = $el.get(0);
 
         el.innerHTML = 'start'+
         '<div>middle</div>'+
-        '<div>end</div>'
+        '<div>end</div>';
 
-        cy.get('[contenteditable]:first').type('{leftarrow}'.repeat(12)+'[_I_]').then ($el) ->
-          expect(trimInnerText($el)).to.eql('star[_I_]t\nmiddle\nend')
+        return cy.get('[contenteditable]:first').type('{leftarrow}'.repeat(12)+'[_I_]').then($el => expect(trimInnerText($el)).to.eql('star[_I_]t\nmiddle\nend'));
+      });
 
-      it "can wrap cursor to next line in [contenteditable] with {rightarrow} and empty lines", ->
-        $el = cy.$$('[contenteditable]:first')
-        el = $el.get(0)
-        el.innerHTML = '<div><br></div>'.repeat(4) + '<div>end</div>'
+      it("can wrap cursor to next line in [contenteditable] with {rightarrow} and empty lines", function() {
+        const $el = cy.$$('[contenteditable]:first');
+        const el = $el.get(0);
+        el.innerHTML = '<div><br></div>'.repeat(4) + '<div>end</div>';
 
-        newLines = "\n\n\n".repeat(@multiplierNumNewLines)
+        const newLines = "\n\n\n".repeat(this.multiplierNumNewLines);
 
-        cy.get('[contenteditable]:first')
+        return cy.get('[contenteditable]:first')
         .type('{selectall}{leftarrow}')
-        .type('foobar'+'{rightarrow}'.repeat(6)+'[_I_]').then ->
-          expect(trimInnerText($el)).to.eql("foobar#{newLines}\nen[_I_]d")
+        .type(`foobar${'{rightarrow}'.repeat(6)}[_I_]`).then(() => expect(trimInnerText($el)).to.eql(`foobar${newLines}\nen[_I_]d`));
+      });
 
-      it "can use {rightarrow} and nested elements", ->
-        $el = cy.$$('[contenteditable]:first')
-        el = $el.get(0)
-        el.innerHTML = '<div><b>s</b>ta<b>rt</b></div>'
+      it("can use {rightarrow} and nested elements", function() {
+        const $el = cy.$$('[contenteditable]:first');
+        const el = $el.get(0);
+        el.innerHTML = '<div><b>s</b>ta<b>rt</b></div>';
 
-        cy.get('[contenteditable]:first')
+        return cy.get('[contenteditable]:first')
         .type('{selectall}{leftarrow}')
-        .type('{rightarrow}'.repeat(3)+'[_I_]').then ->
-          expect(trimInnerText($el)).to.eql('sta[_I_]rt')
+        .type('{rightarrow}'.repeat(3)+'[_I_]').then(() => expect(trimInnerText($el)).to.eql('sta[_I_]rt'));
+      });
 
-      it "enter and \\n should act the same for [contenteditable]", ->
-        cleanseText = (text) ->
-          ## non breaking white space
+      it("enter and \\n should act the same for [contenteditable]", function() {
+        const cleanseText = text =>
+          //# non breaking white space
           text.split('\u00a0').join(' ')
+        ;
 
-        expectMatchInnerText = ($el , innerText) ->
-          expect(cleanseText(trimInnerText($el))).to.eql(innerText)
+        const expectMatchInnerText = ($el , innerText) => expect(cleanseText(trimInnerText($el))).to.eql(innerText);
 
-        ## NOTE: this may only pass in Chrome since the whitespace may be different in other browsers
-        ##  even if actual and expected appear the same.
-        expected = "{\n  foo:   1\n  bar:   2\n  baz:   3\n}"
-        cy.get('[contenteditable]:first')
+        //# NOTE: this may only pass in Chrome since the whitespace may be different in other browsers
+        //#  even if actual and expected appear the same.
+        const expected = "{\n  foo:   1\n  bar:   2\n  baz:   3\n}";
+        return cy.get('[contenteditable]:first')
         .invoke('html', '<div><br></div>')
         .type('{{}{enter}  foo:   1{enter}  bar:   2{enter}  baz:   3{enter}}')
-        .should ($el) ->
-          expectMatchInnerText($el, expected)
-        .clear()
+        .should($el => expectMatchInnerText($el, expected)).clear()
         .type('{{}\n  foo:   1\n  bar:   2\n  baz:   3\n}')
-        .should ($el) ->
-          expectMatchInnerText($el, expected)
+        .should($el => expectMatchInnerText($el, expected));
+      });
 
-      it "enter and \\n should act the same for textarea", ->
-        expected = "{\n  foo:   1\n  bar:   2\n  baz:   3\n}"
-        cy.get('textarea:first')
+      return it("enter and \\n should act the same for textarea", function() {
+        const expected = "{\n  foo:   1\n  bar:   2\n  baz:   3\n}";
+        return cy.get('textarea:first')
         .clear()
         .type('{{}{enter}  foo:   1{enter}  bar:   2{enter}  baz:   3{enter}}')
         .should('have.prop', 'value', expected)
         .clear()
         .type('{{}\n  foo:   1\n  bar:   2\n  baz:   3\n}')
-        .should('have.prop', 'value', expected)
+        .should('have.prop', 'value', expected);
+      });
+    });
 
-    describe "{enter}", ->
-      beforeEach ->
-        @$forms = cy.$$("#form-submits")
+    describe("{enter}", function() {
+      beforeEach(function() {
+        return this.$forms = cy.$$("#form-submits");
+      });
 
-      context "1 input, no 'submit' elements", ->
-        it "triggers form submit", (done) ->
-          @foo = {}
+      context("1 input, no 'submit' elements", function() {
+        it("triggers form submit", function(done) {
+          this.foo = {};
 
-          @$forms.find("#single-input").submit (e) ->
-            e.preventDefault()
-            done()
+          this.$forms.find("#single-input").submit(function(e) {
+            e.preventDefault();
+            return done();
+          });
 
-          cy.get("#single-input input").type("foo{enter}")
+          return cy.get("#single-input input").type("foo{enter}");
+        });
 
-        it "triggers form submit synchronously before type logs or resolves", ->
-          events = []
+        it("triggers form submit synchronously before type logs or resolves", function() {
+          const events = [];
 
-          cy.on "command:start", (cmd) ->
-            events.push "#{cmd.get('name')}:start"
+          cy.on("command:start", cmd => events.push(`${cmd.get('name')}:start`));
 
-          @$forms.find("#single-input").submit (e) ->
-            e.preventDefault()
-            events.push "submit"
+          this.$forms.find("#single-input").submit(function(e) {
+            e.preventDefault();
+            return events.push("submit");
+          });
 
-          cy.on "log:added", (attrs, log) ->
-            state = log.get("state")
+          cy.on("log:added", function(attrs, log) {
+            const state = log.get("state");
 
-            if state is "pending"
-              log.on "state:changed", (state) ->
-                events.push "#{log.get('name')}:log:#{state}"
+            if (state === "pending") {
+              log.on("state:changed", state => events.push(`${log.get('name')}:log:${state}`));
 
-              events.push "#{log.get('name')}:log:#{state}"
+              return events.push(`${log.get('name')}:log:${state}`);
+            }
+          });
 
-          cy.on "command:end", (cmd) ->
-            events.push "#{cmd.get('name')}:end"
+          cy.on("command:end", cmd => events.push(`${cmd.get('name')}:end`));
 
-          cy.get("#single-input input").type("f{enter}").then ->
-            expect(events).to.deep.eq [
+          return cy.get("#single-input input").type("f{enter}").then(() =>
+            expect(events).to.deep.eq([
               "get:start", "get:log:pending", "get:end", "type:start", "type:log:pending", "submit", "type:end", "then:start"
-            ]
-
-        it "triggers 2 form submit event", ->
-          submits = 0
-
-          @$forms.find("#single-input").submit (e) ->
-            e.preventDefault()
-            submits += 1
-
-          cy.get("#single-input input").type("f{enter}{enter}").then ->
-            expect(submits).to.eq 2
-
-        it "does not submit when keydown is defaultPrevented on input", (done) ->
-          form = @$forms.find("#single-input").submit -> done("err: should not have submitted")
-          form.find("input").keydown (e) -> e.preventDefault()
-
-          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
-
-        it "does not submit when keydown is defaultPrevented on wrapper", (done) ->
-          form = @$forms.find("#single-input").submit -> done("err: should not have submitted")
-          form.find("div").keydown (e) -> e.preventDefault()
-
-          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
-
-        it "does not submit when keydown is defaultPrevented on form", (done) ->
-          form = @$forms.find("#single-input").submit -> done("err: should not have submitted")
-          form.keydown (e) -> e.preventDefault()
-
-          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
-
-        it "does not submit when keypress is defaultPrevented on input", (done) ->
-          form = @$forms.find("#single-input").submit -> done("err: should not have submitted")
-          form.find("input").keypress (e) -> e.preventDefault()
-
-          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
-
-        it "does not submit when keypress is defaultPrevented on wrapper", (done) ->
-          form = @$forms.find("#single-input").submit -> done("err: should not have submitted")
-          form.find("div").keypress (e) -> e.preventDefault()
-
-          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
-
-        it "does not submit when keypress is defaultPrevented on form", (done) ->
-          form = @$forms.find("#single-input").submit -> done("err: should not have submitted")
-          form.keypress (e) -> e.preventDefault()
-
-          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
-
-      # https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
-      context "2 inputs, no 'submit' elements, no inputs allowing implicit submission", ->
-        it "does not trigger submit event", (done) ->
-          form = @$forms.find("#no-buttons-more-than-one-input-allowing-implicit-submission").submit -> done("err: should not have submitted")
-
-          cy.get("#no-buttons-more-than-one-input-allowing-implicit-submission input:first").type("f").type("{enter}").then -> done()
-
-      context "2 inputs, no 'submit' elements, only 1 input allowing implicit submission", ->
-        it "does submit event", (done) ->
-          form = @$forms.find("#no-buttons-and-only-one-input-allowing-implicit-submission").submit (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#no-buttons-and-only-one-input-allowing-implicit-submission input:first").type("f{enter}")
-
-      context "2 inputs, no 'submit' elements but 1 button[type=button]", ->
-        it "does not trigger submit event", (done) ->
-          form = @$forms.find("#one-button-type-button").submit -> done("err: should not have submitted")
-
-          cy.get("#one-button-type-button input:first").type("f").type("{enter}").then -> done()
-
-      context "2 inputs, 1 'submit' element input[type=submit]", ->
-        it "triggers form submit", (done) ->
-          @$forms.find("#multiple-inputs-and-input-submit").submit (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-input-submit input:first").type("foo{enter}")
-
-        it "causes click event on the input[type=submit]", (done) ->
-          @$forms.find("#multiple-inputs-and-input-submit input[type=submit]").click (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-input-submit input:first").type("foo{enter}")
-
-        it "does not cause click event on the input[type=submit] if keydown is defaultPrevented on input", (done) ->
-          form = @$forms.find("#multiple-inputs-and-input-submit").submit -> done("err: should not have submitted")
-          form.find("input").keypress (e) -> e.preventDefault()
-
-          cy.get("#multiple-inputs-and-input-submit input:first").type("f{enter}").then -> done()
-
-      context "2 inputs, 1 'submit' element button[type=submit]", ->
-        it "triggers form submit", (done) ->
-          @$forms.find("#multiple-inputs-and-button-submit").submit (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-button-submit input:first").type("foo{enter}")
-
-        it "causes click event on the button[type=submit]", (done) ->
-          @$forms.find("#multiple-inputs-and-button-submit button[type=submit]").click (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-button-submit input:first").type("foo{enter}")
-
-        it "does not cause click event on the button[type=submit] if keydown is defaultPrevented on input", (done) ->
-          form = @$forms.find("#multiple-inputs-and-button-submit").submit ->
-            done("err: should not have submitted")
-          form.find("input").keypress (e) -> e.preventDefault()
-
-          cy.get("#multiple-inputs-and-button-submit input:first").type("f{enter}").then -> done()
-
-      context "2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=reset]", ->
-        it "triggers form submit", (done) ->
-          @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}")
-
-        it "causes click event on the button[type=submit]", (done) ->
-          @$forms.find("#multiple-inputs-and-reset-and-submit-buttons button[type=submit]").click (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}")
-
-        it "does not cause click event on the button[type=submit] if keydown is defaultPrevented on input", (done) ->
-          form = @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit ->
-            done("err: should not have submitted")
-          form.find("input").keypress (e) -> e.preventDefault()
-
-          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("f{enter}").then -> done()
-
-      context "2 inputs, 1 'reset' button, 1 'button' button, and 1 button with no type (default submit)", ->
-        it "triggers form submit", (done) ->
-          @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}")
-
-        it "causes click event on the button", (done) ->
-          @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type button:last").click (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}")
-
-        it "does not cause click event on the button if keydown is defaultPrevented on input", (done) ->
-          form = @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit ->
-            done("err: should not have submitted")
-          form.find("input").keypress (e) -> e.preventDefault()
-
-          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("f{enter}").then -> done()
-
-      context "2 inputs, 1 'submit' element button", ->
-        it "triggers form submit", (done) ->
-          @$forms.find("#multiple-inputs-and-button-with-no-type").submit (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-button-with-no-type input:first").type("foo{enter}")
-
-        it "causes click event on the button", (done) ->
-          @$forms.find("#multiple-inputs-and-button-with-no-type button").click (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-button-with-no-type input:first").type("foo{enter}")
-
-        it "does not cause click event on the button if keydown is defaultPrevented on input", (done) ->
-          form = @$forms.find("#multiple-inputs-and-button-with-no-type").submit -> done("err: should not have submitted")
-          form.find("input").keypress (e) -> e.preventDefault()
-
-          cy.get("#multiple-inputs-and-button-with-no-type input:first").type("f{enter}").then -> done()
-
-      context "2 inputs, 2 'submit' elements", ->
-        it "triggers form submit", (done) ->
-          @$forms.find("#multiple-inputs-and-multiple-submits").submit (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}")
-
-        it "causes click event on the button", (done) ->
-          @$forms.find("#multiple-inputs-and-multiple-submits button").click (e) ->
-            e.preventDefault()
-            done()
-
-          cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}")
-
-        it "does not cause click event on the button if keydown is defaultPrevented on input", (done) ->
-          form = @$forms.find("#multiple-inputs-and-multiple-submits").submit -> done("err: should not have submitted")
-          form.find("input").keypress (e) -> e.preventDefault()
-
-          cy.get("#multiple-inputs-and-multiple-submits input:first").type("f{enter}").then -> done()
-
-      context "disabled default button", ->
-        beforeEach ->
-          @$forms.find("#multiple-inputs-and-multiple-submits").find("button").prop("disabled", true)
-
-        it "will not receive click event", (done) ->
-          @$forms.find("#multiple-inputs-and-multiple-submits button").click -> done("err: should not receive click event")
-
-          cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}").then -> done()
-
-        it "will not submit the form", (done) ->
-          @$forms.find("#multiple-inputs-and-multiple-submits").submit -> done("err: should not receive submit event")
-
-          cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}").then -> done()
-
-    describe "assertion verification", ->
-      beforeEach ->
-        cy.on "log:added", (attrs, log) =>
-          if log.get("name") is "assert"
-            @lastLog = log
-
-        return null
-
-      it "eventually passes the assertion", ->
-        cy.$$("input:first").keyup ->
-          _.delay =>
-            $(@).addClass("typed")
-          , 100
-
-        cy.get("input:first").type("f").should("have.class", "typed").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("name")).to.eq("assert")
-          expect(lastLog.get("state")).to.eq("passed")
-          expect(lastLog.get("ended")).to.be.true
-
-    describe ".log", ->
-      beforeEach ->
-        cy.on "log:added", (attrs, log) =>
-          @lastLog = log
-
-        return null
-
-      it "passes in $el", ->
-        cy.get("input:first").type("foobar").then ($input) ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("$el")).to.eq $input
-
-      it "logs message", ->
-        cy.get(":text:first").type("foobar").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("message")).to.eq "foobar"
-
-      it "logs delay arguments", ->
-        cy.get(":text:first").type("foo", {delay: 20}).then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("message")).to.eq "foo, {delay: 20}"
-
-      it "clones textarea value after the type happens", ->
-        expectToHaveValueAndCoords = =>
-          cmd = cy.queue.find({name: "type"})
-          log = cmd.get("logs")[0]
-          txt = log.get("snapshots")[1].body.find("#comments")
-          expect(txt).to.have.value("foobarbaz")
-          expect(log.get("coords")).to.be.ok
-
-        cy
-          .get("#comments").type("foobarbaz").then ($txt) ->
-            expectToHaveValueAndCoords()
-          .get("#comments").clear().type("onetwothree").then ->
-            expectToHaveValueAndCoords()
-
-      it "clones textarea value when textarea is focused first", ->
-        expectToHaveValueAndNoCoords = =>
-          cmd = cy.queue.find({name: "type"})
-          log = cmd.get("logs")[0]
-          txt = log.get("snapshots")[1].body.find("#comments")
-          expect(txt).to.have.value("foobarbaz")
-          expect(log.get("coords")).not.to.be.ok
-
-        cy
-          .get("#comments").focus().type("foobarbaz").then ($txt) ->
-            expectToHaveValueAndNoCoords()
-          .get("#comments").clear().type("onetwothree").then ->
-            expectToHaveValueAndNoCoords()
-
-      it "logs only one type event", ->
-        logs = []
-        types = []
-
-        cy.on "log:added", (attrs, log) ->
-          logs.push(log)
-          if log.get("name") is "type"
-            types.push(log)
-
-        cy.get(":text:first").type("foo").then ->
-          expect(logs.length).to.eq(2)
-          expect(types.length).to.eq(1)
-
-      it "logs immediately before resolving", ->
-        $txt = cy.$$(":text:first")
-
-        expected = false
-
-        cy.on "log:added", (attrs, log) ->
-          if log.get("name") is "type"
-            expect(log.get("state")).to.eq("pending")
-            expect(log.get("$el").get(0)).to.eq $txt.get(0)
-
-            expected = true
-
-        cy.get(":text:first").type("foo").then ->
-        cy.get(":text:first").type("foo")
-
-      it "snapshots before typing", ->
-        expected = false
-
-        cy.$$(":text:first").one "keydown", =>
-          lastLog = @lastLog
-
-          expect(lastLog.get("snapshots").length).to.eq(1)
-          expect(lastLog.get("snapshots")[0].name).to.eq("before")
-          expect(lastLog.get("snapshots")[0].body).to.be.an("object")
-
-          expected = true
-
-        cy.get(":text:first").type("foo").then ->
-          expect(expected).to.be.true
-
-      it "snapshots after typing", ->
-        cy.get(":text:first").type("foo").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("snapshots").length).to.eq(2)
-          expect(lastLog.get("snapshots")[1].name).to.eq("after")
-          expect(lastLog.get("snapshots")[1].body).to.be.an("object")
-
-      it "logs deltaOptions", ->
-        cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("message")).to.eq "foo, {force: true, timeout: 1000}"
-          expect(lastLog.invoke("consoleProps").Options).to.deep.eq {force: true, timeout: 1000}
-
-      context "#consoleProps", ->
-        it "has all of the regular options", ->
-          cy.get("input:first").type("foobar").then ($input) ->
-            { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-            console = @lastLog.invoke("consoleProps")
-            expect(console.Command).to.eq("type")
-            expect(console.Typed).to.eq("foobar")
-            expect(console["Applied To"]).to.eq $input.get(0)
-            expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1)
-            expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
-
-        it "has a table of keys", ->
-          cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then ->
-            table = @lastLog.invoke("consoleProps").table()
-            console.table(table.data, table.columns)
-            expect(table.columns).to.deep.eq [
+            ]));
+      });
+
+        it("triggers 2 form submit event", function() {
+          let submits = 0;
+
+          this.$forms.find("#single-input").submit(function(e) {
+            e.preventDefault();
+            return submits += 1;
+          });
+
+          return cy.get("#single-input input").type("f{enter}{enter}").then(() => expect(submits).to.eq(2));
+        });
+
+        it("does not submit when keydown is defaultPrevented on input", function(done) {
+          const form = this.$forms.find("#single-input").submit(() => done("err: should not have submitted"));
+          form.find("input").keydown(e => e.preventDefault());
+
+          return cy.get("#single-input input").type("f").type("f{enter}").then(() => done());
+        });
+
+        it("does not submit when keydown is defaultPrevented on wrapper", function(done) {
+          const form = this.$forms.find("#single-input").submit(() => done("err: should not have submitted"));
+          form.find("div").keydown(e => e.preventDefault());
+
+          return cy.get("#single-input input").type("f").type("f{enter}").then(() => done());
+        });
+
+        it("does not submit when keydown is defaultPrevented on form", function(done) {
+          const form = this.$forms.find("#single-input").submit(() => done("err: should not have submitted"));
+          form.keydown(e => e.preventDefault());
+
+          return cy.get("#single-input input").type("f").type("f{enter}").then(() => done());
+        });
+
+        it("does not submit when keypress is defaultPrevented on input", function(done) {
+          const form = this.$forms.find("#single-input").submit(() => done("err: should not have submitted"));
+          form.find("input").keypress(e => e.preventDefault());
+
+          return cy.get("#single-input input").type("f").type("f{enter}").then(() => done());
+        });
+
+        it("does not submit when keypress is defaultPrevented on wrapper", function(done) {
+          const form = this.$forms.find("#single-input").submit(() => done("err: should not have submitted"));
+          form.find("div").keypress(e => e.preventDefault());
+
+          return cy.get("#single-input input").type("f").type("f{enter}").then(() => done());
+        });
+
+        return it("does not submit when keypress is defaultPrevented on form", function(done) {
+          const form = this.$forms.find("#single-input").submit(() => done("err: should not have submitted"));
+          form.keypress(e => e.preventDefault());
+
+          return cy.get("#single-input input").type("f").type("f{enter}").then(() => done());
+        });
+      });
+
+      // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+      context("2 inputs, no 'submit' elements, no inputs allowing implicit submission", () =>
+        it("does not trigger submit event", function(done) {
+          const form = this.$forms.find("#no-buttons-more-than-one-input-allowing-implicit-submission").submit(() => done("err: should not have submitted"));
+
+          return cy.get("#no-buttons-more-than-one-input-allowing-implicit-submission input:first").type("f").type("{enter}").then(() => done());
+        })
+      );
+
+      context("2 inputs, no 'submit' elements, only 1 input allowing implicit submission", () =>
+        it("does submit event", function(done) {
+          const form = this.$forms.find("#no-buttons-and-only-one-input-allowing-implicit-submission").submit(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#no-buttons-and-only-one-input-allowing-implicit-submission input:first").type("f{enter}");
+        })
+      );
+
+      context("2 inputs, no 'submit' elements but 1 button[type=button]", () =>
+        it("does not trigger submit event", function(done) {
+          const form = this.$forms.find("#one-button-type-button").submit(() => done("err: should not have submitted"));
+
+          return cy.get("#one-button-type-button input:first").type("f").type("{enter}").then(() => done());
+        })
+      );
+
+      context("2 inputs, 1 'submit' element input[type=submit]", function() {
+        it("triggers form submit", function(done) {
+          this.$forms.find("#multiple-inputs-and-input-submit").submit(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-input-submit input:first").type("foo{enter}");
+        });
+
+        it("causes click event on the input[type=submit]", function(done) {
+          this.$forms.find("#multiple-inputs-and-input-submit input[type=submit]").click(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-input-submit input:first").type("foo{enter}");
+        });
+
+        return it("does not cause click event on the input[type=submit] if keydown is defaultPrevented on input", function(done) {
+          const form = this.$forms.find("#multiple-inputs-and-input-submit").submit(() => done("err: should not have submitted"));
+          form.find("input").keypress(e => e.preventDefault());
+
+          return cy.get("#multiple-inputs-and-input-submit input:first").type("f{enter}").then(() => done());
+        });
+      });
+
+      context("2 inputs, 1 'submit' element button[type=submit]", function() {
+        it("triggers form submit", function(done) {
+          this.$forms.find("#multiple-inputs-and-button-submit").submit(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-button-submit input:first").type("foo{enter}");
+        });
+
+        it("causes click event on the button[type=submit]", function(done) {
+          this.$forms.find("#multiple-inputs-and-button-submit button[type=submit]").click(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-button-submit input:first").type("foo{enter}");
+        });
+
+        return it("does not cause click event on the button[type=submit] if keydown is defaultPrevented on input", function(done) {
+          const form = this.$forms.find("#multiple-inputs-and-button-submit").submit(() => done("err: should not have submitted"));
+          form.find("input").keypress(e => e.preventDefault());
+
+          return cy.get("#multiple-inputs-and-button-submit input:first").type("f{enter}").then(() => done());
+        });
+      });
+
+      context("2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=reset]", function() {
+        it("triggers form submit", function(done) {
+          this.$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}");
+        });
+
+        it("causes click event on the button[type=submit]", function(done) {
+          this.$forms.find("#multiple-inputs-and-reset-and-submit-buttons button[type=submit]").click(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}");
+        });
+
+        return it("does not cause click event on the button[type=submit] if keydown is defaultPrevented on input", function(done) {
+          const form = this.$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit(() => done("err: should not have submitted"));
+          form.find("input").keypress(e => e.preventDefault());
+
+          return cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("f{enter}").then(() => done());
+        });
+      });
+
+      context("2 inputs, 1 'reset' button, 1 'button' button, and 1 button with no type (default submit)", function() {
+        it("triggers form submit", function(done) {
+          this.$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}");
+        });
+
+        it("causes click event on the button", function(done) {
+          this.$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type button:last").click(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}");
+        });
+
+        return it("does not cause click event on the button if keydown is defaultPrevented on input", function(done) {
+          const form = this.$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit(() => done("err: should not have submitted"));
+          form.find("input").keypress(e => e.preventDefault());
+
+          return cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("f{enter}").then(() => done());
+        });
+      });
+
+      context("2 inputs, 1 'submit' element button", function() {
+        it("triggers form submit", function(done) {
+          this.$forms.find("#multiple-inputs-and-button-with-no-type").submit(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-button-with-no-type input:first").type("foo{enter}");
+        });
+
+        it("causes click event on the button", function(done) {
+          this.$forms.find("#multiple-inputs-and-button-with-no-type button").click(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-button-with-no-type input:first").type("foo{enter}");
+        });
+
+        return it("does not cause click event on the button if keydown is defaultPrevented on input", function(done) {
+          const form = this.$forms.find("#multiple-inputs-and-button-with-no-type").submit(() => done("err: should not have submitted"));
+          form.find("input").keypress(e => e.preventDefault());
+
+          return cy.get("#multiple-inputs-and-button-with-no-type input:first").type("f{enter}").then(() => done());
+        });
+      });
+
+      context("2 inputs, 2 'submit' elements", function() {
+        it("triggers form submit", function(done) {
+          this.$forms.find("#multiple-inputs-and-multiple-submits").submit(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}");
+        });
+
+        it("causes click event on the button", function(done) {
+          this.$forms.find("#multiple-inputs-and-multiple-submits button").click(function(e) {
+            e.preventDefault();
+            return done();
+          });
+
+          return cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}");
+        });
+
+        return it("does not cause click event on the button if keydown is defaultPrevented on input", function(done) {
+          const form = this.$forms.find("#multiple-inputs-and-multiple-submits").submit(() => done("err: should not have submitted"));
+          form.find("input").keypress(e => e.preventDefault());
+
+          return cy.get("#multiple-inputs-and-multiple-submits input:first").type("f{enter}").then(() => done());
+        });
+      });
+
+      return context("disabled default button", function() {
+        beforeEach(function() {
+          return this.$forms.find("#multiple-inputs-and-multiple-submits").find("button").prop("disabled", true);
+        });
+
+        it("will not receive click event", function(done) {
+          this.$forms.find("#multiple-inputs-and-multiple-submits button").click(() => done("err: should not receive click event"));
+
+          return cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}").then(() => done());
+        });
+
+        return it("will not submit the form", function(done) {
+          this.$forms.find("#multiple-inputs-and-multiple-submits").submit(() => done("err: should not receive submit event"));
+
+          return cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}").then(() => done());
+        });
+      });
+    });
+
+    describe("assertion verification", function() {
+      beforeEach(function() {
+        cy.on("log:added", (attrs, log) => {
+          if (log.get("name") === "assert") {
+            return this.lastLog = log;
+          }
+        });
+
+        return null;
+      });
+
+      return it("eventually passes the assertion", function() {
+        cy.$$("input:first").keyup(function() {
+          return _.delay(() => {
+            return $(this).addClass("typed");
+          }
+          , 100);
+        });
+
+        return cy.get("input:first").type("f").should("have.class", "typed").then(function() {
+          const { lastLog } = this;
+
+          expect(lastLog.get("name")).to.eq("assert");
+          expect(lastLog.get("state")).to.eq("passed");
+          return expect(lastLog.get("ended")).to.be.true;
+        });
+      });
+    });
+
+    describe(".log", function() {
+      beforeEach(function() {
+        cy.on("log:added", (attrs, log) => {
+          return this.lastLog = log;
+        });
+
+        return null;
+      });
+
+      it("passes in $el", () =>
+        cy.get("input:first").type("foobar").then(function($input) {
+          const { lastLog } = this;
+
+          return expect(lastLog.get("$el")).to.eq($input);
+        })
+      );
+
+      it("logs message", () =>
+        cy.get(":text:first").type("foobar").then(function() {
+          const { lastLog } = this;
+
+          return expect(lastLog.get("message")).to.eq("foobar");
+        })
+      );
+
+      it("logs delay arguments", () =>
+        cy.get(":text:first").type("foo", {delay: 20}).then(function() {
+          const { lastLog } = this;
+
+          return expect(lastLog.get("message")).to.eq("foo, {delay: 20}");
+        })
+      );
+
+      it("clones textarea value after the type happens", function() {
+        const expectToHaveValueAndCoords = () => {
+          const cmd = cy.queue.find({name: "type"});
+          const log = cmd.get("logs")[0];
+          const txt = log.get("snapshots")[1].body.find("#comments");
+          expect(txt).to.have.value("foobarbaz");
+          return expect(log.get("coords")).to.be.ok;
+        };
+
+        return cy
+          .get("#comments").type("foobarbaz").then($txt => expectToHaveValueAndCoords()).get("#comments").clear().type("onetwothree").then(() => expectToHaveValueAndCoords());
+      });
+
+      it("clones textarea value when textarea is focused first", function() {
+        const expectToHaveValueAndNoCoords = () => {
+          const cmd = cy.queue.find({name: "type"});
+          const log = cmd.get("logs")[0];
+          const txt = log.get("snapshots")[1].body.find("#comments");
+          expect(txt).to.have.value("foobarbaz");
+          return expect(log.get("coords")).not.to.be.ok;
+        };
+
+        return cy
+          .get("#comments").focus().type("foobarbaz").then($txt => expectToHaveValueAndNoCoords()).get("#comments").clear().type("onetwothree").then(() => expectToHaveValueAndNoCoords());
+      });
+
+      it("logs only one type event", function() {
+        const logs = [];
+        const types = [];
+
+        cy.on("log:added", function(attrs, log) {
+          logs.push(log);
+          if (log.get("name") === "type") {
+            return types.push(log);
+          }
+        });
+
+        return cy.get(":text:first").type("foo").then(function() {
+          expect(logs.length).to.eq(2);
+          return expect(types.length).to.eq(1);
+        });
+      });
+
+      it("logs immediately before resolving", function() {
+        const $txt = cy.$$(":text:first");
+
+        let expected = false;
+
+        cy.on("log:added", function(attrs, log) {
+          if (log.get("name") === "type") {
+            expect(log.get("state")).to.eq("pending");
+            expect(log.get("$el").get(0)).to.eq($txt.get(0));
+
+            return expected = true;
+          }
+        });
+
+        cy.get(":text:first").type("foo").then(function() {});
+        return cy.get(":text:first").type("foo");
+      });
+
+      it("snapshots before typing", function() {
+        let expected = false;
+
+        cy.$$(":text:first").one("keydown", () => {
+          const { lastLog } = this;
+
+          expect(lastLog.get("snapshots").length).to.eq(1);
+          expect(lastLog.get("snapshots")[0].name).to.eq("before");
+          expect(lastLog.get("snapshots")[0].body).to.be.an("object");
+
+          return expected = true;
+        });
+
+        return cy.get(":text:first").type("foo").then(() => expect(expected).to.be.true);
+      });
+
+      it("snapshots after typing", () =>
+        cy.get(":text:first").type("foo").then(function() {
+          const { lastLog } = this;
+
+          expect(lastLog.get("snapshots").length).to.eq(2);
+          expect(lastLog.get("snapshots")[1].name).to.eq("after");
+          return expect(lastLog.get("snapshots")[1].body).to.be.an("object");
+        })
+      );
+
+      it("logs deltaOptions", () =>
+        cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then(function() {
+          const { lastLog } = this;
+
+          expect(lastLog.get("message")).to.eq("foo, {force: true, timeout: 1000}");
+          return expect(lastLog.invoke("consoleProps").Options).to.deep.eq({force: true, timeout: 1000});})
+    );
+
+      return context("#consoleProps", function() {
+        it("has all of the regular options", () =>
+          cy.get("input:first").type("foobar").then(function($input) {
+            const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input);
+            const console = this.lastLog.invoke("consoleProps");
+            expect(console.Command).to.eq("type");
+            expect(console.Typed).to.eq("foobar");
+            expect(console["Applied To"]).to.eq($input.get(0));
+            expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1);
+            return expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1);
+          })
+        );
+
+        it("has a table of keys", () =>
+          cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then(function() {
+            const table = this.lastLog.invoke("consoleProps").table();
+            console.table(table.data, table.columns);
+            expect(table.columns).to.deep.eq([
               "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"
-            ]
-            expect(table.name).to.eq "Key Events Table"
-            expectedTable = {
-              1: {typed: "<meta>", which: 91, keydown: true, modifiers: "meta"}
-              2: {typed: "<alt>", which: 18, keydown: true, modifiers: "alt, meta"}
-              3: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
-              4: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
-              5: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
-              6: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, modifiers: "alt, meta"}
-              7: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
-              8: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true, modifiers: "alt, meta"}
-              9: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true, modifiers: "alt, meta"}
+            ]);
+            expect(table.name).to.eq("Key Events Table");
+            const expectedTable = {
+              1: {typed: "<meta>", which: 91, keydown: true, modifiers: "meta"},
+              2: {typed: "<alt>", which: 18, keydown: true, modifiers: "alt, meta"},
+              3: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"},
+              4: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"},
+              5: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"},
+              6: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, modifiers: "alt, meta"},
+              7: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"},
+              8: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true, modifiers: "alt, meta"},
+              9: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true, modifiers: "alt, meta"},
               10: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, modifiers: "alt, meta"}
-            }
+            };
 
-            for i in [1..10]
-              expect(table.data[i]).to.deep.eq(expectedTable[i])
+            return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
+              expect(table.data[i]).to.deep.eq(expectedTable[i]));
+          })
+        );
 
-            # table.data.forEach (item, i) ->
-            #   expect(item).to.deep.eq(expectedTable[i])
+            // table.data.forEach (item, i) ->
+            //   expect(item).to.deep.eq(expectedTable[i])
 
-            # expect(table.data).to.deep.eq(expectedTable)
+            // expect(table.data).to.deep.eq(expectedTable)
 
-        it "has no modifiers when there are none activated", ->
-          cy.get(":text:first").type("f").then ->
-            table = @lastLog.invoke("consoleProps").table()
-            expect(table.data).to.deep.eq {
+        it("has no modifiers when there are none activated", () =>
+          cy.get(":text:first").type("f").then(function() {
+            const table = this.lastLog.invoke("consoleProps").table();
+            return expect(table.data).to.deep.eq({
               1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-            }
+            });})
+      );
 
-        it "has a table of keys with preventedDefault", ->
-          cy.$$(":text:first").keydown -> return false
+        return it("has a table of keys with preventedDefault", function() {
+          cy.$$(":text:first").keydown(() => false);
 
-          cy.get(":text:first").type("f").then ->
-            table = @lastLog.invoke("consoleProps").table()
-            console.table(table.data, table.columns)
-            expect(table.data).to.deep.eq {
+          return cy.get(":text:first").type("f").then(function() {
+            const table = this.lastLog.invoke("consoleProps").table();
+            console.table(table.data, table.columns);
+            return expect(table.data).to.deep.eq({
               1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true}
-            }
+            });});
+      });
+    });
+  });
 
-    describe "errors", ->
-      beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
+    return describe("errors", function() {
+      beforeEach(function() {
+        Cypress.config("defaultCommandTimeout", 100);
 
-        @logs = []
+        this.logs = [];
 
-        cy.on "log:added", (attrs, log) =>
-          @lastLog = log
-          @logs.push(log)
+        cy.on("log:added", (attrs, log) => {
+          this.lastLog = log;
+          return this.logs.push(log);
+        });
 
-        return null
+        return null;
+      });
 
-      it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+      it("throws when not a dom subject", function(done) {
+        cy.on("fail", () => done());
 
-        cy.noop({}).type("foo")
+        return cy.noop({}).type("foo");
+      });
 
-      it "throws when subject is not in the document", (done) ->
-        typed = 0
+      it("throws when subject is not in the document", function(done) {
+        let typed = 0;
 
-        input = cy.$$("input:first").keypress (e) ->
-          typed += 1
-          input.remove()
+        var input = cy.$$("input:first").keypress(function(e) {
+          typed += 1;
+          return input.remove();
+        });
 
-        cy.on "fail", (err) ->
-          expect(typed).to.eq 1
-          expect(err.message).to.include "cy.type() failed because this element"
-          done()
+        cy.on("fail", function(err) {
+          expect(typed).to.eq(1);
+          expect(err.message).to.include("cy.type() failed because this element");
+          return done();
+        });
 
-        cy.get("input:first").type("a").type("b")
+        return cy.get("input:first").type("a").type("b");
+      });
 
-      it "throws when not textarea or text-like", (done) ->
-        cy.get("form").type("foo")
+      it("throws when not textarea or text-like", function(done) {
+        cy.get("form").type("foo");
 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.type() failed because it requires a valid typeable element."
-          expect(err.message).to.include "The element typed into was:"
-          expect(err.message).to.include "<form id=\"by-id\">...</form>"
-          expect(err.message).to.include "Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements."
-          done()
+        return cy.on("fail", function(err) {
+          expect(err.message).to.include("cy.type() failed because it requires a valid typeable element.");
+          expect(err.message).to.include("The element typed into was:");
+          expect(err.message).to.include("<form id=\"by-id\">...</form>");
+          expect(err.message).to.include("Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.");
+          return done();
+        });
+      });
 
-      it "throws when subject is a collection of elements", (done) ->
-        cy.get("textarea,:text").then ($inputs) ->
-            @num = $inputs.length
-            return $inputs
-          .type("foo")
+      it("throws when subject is a collection of elements", function(done) {
+        cy.get("textarea,:text").then(function($inputs) {
+            this.num = $inputs.length;
+            return $inputs;}).type("foo");
 
-        cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.type() can only be called on a single element. Your subject contained #{@num} elements."
-          done()
+        return cy.on("fail", err => {
+          expect(err.message).to.include(`cy.type() can only be called on a single element. Your subject contained ${this.num} elements.`);
+          return done();
+        });
+      });
 
-      it "throws when the subject isnt visible", (done) ->
-        input = cy.$$("input:text:first").show().hide()
+      it("throws when the subject isnt visible", function(done) {
+        const input = cy.$$("input:text:first").show().hide();
 
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+        cy.on("fail", err => {
+          const { lastLog } = this;
 
-          expect(@logs.length).to.eq(2)
-          expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.type() failed because this element is not visible"
-          done()
+          expect(this.logs.length).to.eq(2);
+          expect(lastLog.get("error")).to.eq(err);
+          expect(err.message).to.include("cy.type() failed because this element is not visible");
+          return done();
+        });
 
-        cy.get("input:text:first").type("foo")
+        return cy.get("input:text:first").type("foo");
+      });
 
-      it "throws when subject is disabled", (done) ->
-        cy.$$("input:text:first").prop("disabled", true)
+      it("throws when subject is disabled", function(done) {
+        cy.$$("input:text:first").prop("disabled", true);
 
-        cy.on "fail", (err) =>
-          ## get + type logs
-          expect(@logs.length).eq(2)
-          expect(err.message).to.include("cy.type() failed because this element is disabled:\n")
-          done()
+        cy.on("fail", err => {
+          //# get + type logs
+          expect(this.logs.length).eq(2);
+          expect(err.message).to.include("cy.type() failed because this element is disabled:\n");
+          return done();
+        });
 
-        cy.get("input:text:first").type("foo")
+        return cy.get("input:text:first").type("foo");
+      });
 
-      it "throws when submitting within nested forms"
+      it("throws when submitting within nested forms");
 
-      it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+      it("logs once when not dom subject", function(done) {
+        cy.on("fail", err => {
+          const { lastLog } = this;
 
-          expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.eq(err)
-          done()
+          expect(this.logs.length).to.eq(1);
+          expect(lastLog.get("error")).to.eq(err);
+          return done();
+        });
 
-        cy.type("foobar")
+        return cy.type("foobar");
+      });
 
-      it "throws when input cannot be clicked", (done) ->
-        $input = $("<input />")
+      it("throws when input cannot be clicked", function(done) {
+        const $input = $("<input />")
         .attr("id", "input-covered-in-span")
-        .prependTo(cy.$$("body"))
+        .prependTo(cy.$$("body"));
 
-        $span = $("<span>span on button</span>")
+        const $span = $("<span>span on button</span>")
         .css({
           position: "absolute",
           left: $input.offset().left,
@@ -3104,301 +3350,363 @@ describe "src/cy/commands/actions/type", ->
           display: "inline-block",
           backgroundColor: "yellow"
         })
-        .prependTo(cy.$$("body"))
+        .prependTo(cy.$$("body"));
 
-        cy.on "fail", (err) =>
-          expect(@logs.length).to.eq(2)
-          expect(err.message).to.include "cy.type() failed because this element"
-          expect(err.message).to.include "is being covered by another element"
-          done()
+        cy.on("fail", err => {
+          expect(this.logs.length).to.eq(2);
+          expect(err.message).to.include("cy.type() failed because this element");
+          expect(err.message).to.include("is being covered by another element");
+          return done();
+        });
 
-        cy.get("#input-covered-in-span").type("foo")
+        return cy.get("#input-covered-in-span").type("foo");
+      });
 
-      it "throws when special characters dont exist", (done) ->
-        cy.on "fail", (err) =>
-          expect(@logs.length).to.eq 2
+      it("throws when special characters dont exist", function(done) {
+        cy.on("fail", err => {
+          expect(this.logs.length).to.eq(2);
 
-          allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(", ")
+          const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(", ");
 
-          expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
-          done()
+          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}`);
+          return done();
+        });
 
-        cy.get(":text:first").type("foo{bar}")
+        return cy.get(":text:first").type("foo{bar}");
+      });
 
-      it "throws when attemping to type tab", (done) ->
-        cy.on "fail", (err) =>
-          expect(@logs.length).to.eq 2
-          expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command cy.tab(), which is not ready yet, but when it is done that's what you'll use."
-          done()
+      it("throws when attemping to type tab", function(done) {
+        cy.on("fail", err => {
+          expect(this.logs.length).to.eq(2);
+          expect(err.message).to.eq("{tab} isn't a supported character sequence. You'll want to use the command cy.tab(), which is not ready yet, but when it is done that's what you'll use.");
+          return done();
+        });
 
-        cy.get(":text:first").type("foo{tab}")
+        return cy.get(":text:first").type("foo{tab}");
+      });
 
-      it "throws on an empty string", (done) ->
-        cy.on "fail", (err) =>
-          expect(@logs.length).to.eq 2
-          expect(err.message).to.eq "cy.type() cannot accept an empty String. You need to actually type something."
-          done()
+      it("throws on an empty string", function(done) {
+        cy.on("fail", err => {
+          expect(this.logs.length).to.eq(2);
+          expect(err.message).to.eq("cy.type() cannot accept an empty String. You need to actually type something.");
+          return done();
+        });
 
-        cy.get(":text:first").type("")
+        return cy.get(":text:first").type("");
+      });
 
-      it "allows typing spaces", ->
+      it("allows typing spaces", () =>
         cy
           .get(":text:first").type(" ")
           .should("have.value", " ")
+      );
 
-      it "allows typing special characters", ->
+      it("allows typing special characters", () =>
         cy
             .get(":text:first").type("{esc}")
             .should("have.value", "")
+      );
             
-      _.each ["toString", "toLocaleString", "hasOwnProperty", "valueOf"
-         "undefined", "null", "true", "false", "True", "False"], (val) =>
-       it "allows typing reserved Javscript word (#{val})", ->
+      _.each(["toString", "toLocaleString", "hasOwnProperty", "valueOf",
+         "undefined", "null", "true", "false", "True", "False"], val => {
+       return it(`allows typing reserved Javscript word (${val})`, () =>
          cy
            .get(":text:first").type(val)
            .should("have.value", val)
+       );
+      });
 
-      _.each ["Ω≈ç√∫˜µ≤≥÷", "2.2250738585072011e-308", "田中さんにあげて下さい",
+      _.each(["Ω≈ç√∫˜µ≤≥÷", "2.2250738585072011e-308", "田中さんにあげて下さい",
          "<foo val=`bar' />", "⁰⁴⁵₀₁₂", "🐵 🙈 🙉 🙊",
-         "<script>alert(123)</script>", "$USER"], (val) =>
-       it "allows typing some naughtly strings (#{val})", ->
+         "<script>alert(123)</script>", "$USER"], val => {
+       return it(`allows typing some naughtly strings (${val})`, () =>
          cy
            .get(":text:first").type(val)
            .should("have.value", val)
+       );
+      });
 
-      it "allows typing special characters", ->
+      it("allows typing special characters", () =>
         cy
             .get(":text:first").type("{esc}")
             .should("have.value", "")
+      );
 
-      it "can type into input with invalid type attribute", ->
+      it("can type into input with invalid type attribute", () =>
         cy.get(':text:first')
           .invoke('attr', 'type', 'asdf')
           .type('foobar')
           .should('have.value', 'foobar')
+      );
 
-      _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
-        it "throws when trying to type: #{val}", (done) ->
-          logs = []
+      _.each([NaN, Infinity, [], {}, null, undefined], val => {
+        return it(`throws when trying to type: ${val}`, function(done) {
+          const logs = [];
 
-          cy.on "log:added", (attrs, log) ->
-            logs.push(log)
+          cy.on("log:added", (attrs, log) => logs.push(log));
 
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq 2
-            expect(err.message).to.eq "cy.type() can only accept a String or Number. You passed in: '#{val}'"
-            done()
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq(`cy.type() can only accept a String or Number. You passed in: '${val}'`);
+            return done();
+          });
 
-          cy.get(":text:first").type(val)
+          return cy.get(":text:first").type(val);
+        });
+      });
 
-      it "throws when type is canceled by preventingDefault mousedown"
+      it("throws when type is canceled by preventingDefault mousedown");
 
-      it "throws when element animation exceeds timeout", (done) ->
-        ## force the animation calculation to think we moving at a huge distance ;-)
-        cy.stub(Cypress.utils, "getDistanceBetween").returns(100000)
+      it("throws when element animation exceeds timeout", function(done) {
+        //# force the animation calculation to think we moving at a huge distance ;-)
+        cy.stub(Cypress.utils, "getDistanceBetween").returns(100000);
 
-        keydowns = 0
+        let keydowns = 0;
 
-        cy.$$(":text:first").on "keydown", ->
-          keydowns += 1
+        cy.$$(":text:first").on("keydown", () => keydowns += 1);
 
-        cy.on "fail", (err) ->
-          expect(keydowns).to.eq(0)
-          expect(err.message).to.include("cy.type() could not be issued because this element is currently animating:\n")
-          done()
+        cy.on("fail", function(err) {
+          expect(keydowns).to.eq(0);
+          expect(err.message).to.include("cy.type() could not be issued because this element is currently animating:\n");
+          return done();
+        });
 
-        cy.get(":text:first").type("foo")
+        return cy.get(":text:first").type("foo");
+      });
 
-      it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+      it("eventually fails the assertion", function(done) {
+        cy.on("fail", err => {
+          const { lastLog } = this;
 
-          expect(err.message).to.include(lastLog.get("error").message)
-          expect(err.message).not.to.include("undefined")
-          expect(lastLog.get("name")).to.eq("assert")
-          expect(lastLog.get("state")).to.eq("failed")
-          expect(lastLog.get("error")).to.be.an.instanceof(chai.AssertionError)
+          expect(err.message).to.include(lastLog.get("error").message);
+          expect(err.message).not.to.include("undefined");
+          expect(lastLog.get("name")).to.eq("assert");
+          expect(lastLog.get("state")).to.eq("failed");
+          expect(lastLog.get("error")).to.be.an.instanceof(chai.AssertionError);
 
-          done()
+          return done();
+        });
 
-        cy.get("input:first").type("f").should("have.class", "typed")
+        return cy.get("input:first").type("f").should("have.class", "typed");
+      });
 
-      it "does not log an additional log on failure", (done) ->
-        cy.on "fail", =>
-          expect(@logs.length).to.eq(3)
-          done()
+      it("does not log an additional log on failure", function(done) {
+        cy.on("fail", () => {
+          expect(this.logs.length).to.eq(3);
+          return done();
+        });
 
-        cy.get("input:first").type("f").should("have.class", "typed")
+        return cy.get("input:first").type("f").should("have.class", "typed");
+      });
 
-      context "[type=date]", ->
-        it "throws when chars is not a string", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989")
-            done()
+      context("[type=date]", function() {
+        it("throws when chars is not a string", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989");
+            return done();
+          });
 
-          cy.get("#date-without-value").type(1989)
+          return cy.get("#date-without-value").type(1989);
+        });
 
-        it "throws when chars is invalid format", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989")
-            done()
+        it("throws when chars is invalid format", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 01-01-1989");
+            return done();
+          });
 
-          cy.get("#date-without-value").type("01-01-1989")
+          return cy.get("#date-without-value").type("01-01-1989");
+        });
 
-        it "throws when chars is invalid date", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31")
-            done()
+        return it("throws when chars is invalid date", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a date input with cy.type() requires a valid date with the format 'yyyy-MM-dd'. You passed: 1989-04-31");
+            return done();
+          });
 
-          cy.get("#date-without-value").type("1989-04-31")
+          return cy.get("#date-without-value").type("1989-04-31");
+        });
+      });
 
-      context "[type=month]", ->
-        it "throws when chars is not a string", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 6")
-            done()
+      context("[type=month]", function() {
+        it("throws when chars is not a string", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 6");
+            return done();
+          });
 
-          cy.get("#month-without-value").type(6)
+          return cy.get("#month-without-value").type(6);
+        });
 
-        it "throws when chars is invalid format", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 01/2000")
-            done()
+        it("throws when chars is invalid format", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 01/2000");
+            return done();
+          });
 
-          cy.get("#month-without-value").type("01/2000")
+          return cy.get("#month-without-value").type("01/2000");
+        });
 
-        it "throws when chars is invalid month", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 1989-13")
-            done()
+        return it("throws when chars is invalid month", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a month input with cy.type() requires a valid month with the format 'yyyy-MM'. You passed: 1989-13");
+            return done();
+          });
 
-          cy.get("#month-without-value").type("1989-13")
+          return cy.get("#month-without-value").type("1989-13");
+        });
+      });
 
-      context "[type=tel]", ->
-        it "can edit tel", ->
+      context("[type=tel]", () =>
+        it("can edit tel", () =>
           cy.get('#by-name > input[type="tel"]')
           .type('1234567890')
           .should('have.prop', 'value', '1234567890')
+        )
+      );
 
-        # it "throws when chars is invalid format", (done) ->
-        #   cy.on "fail", (err) =>
-        #     expect(@logs.length).to.eq(2)
-        #     expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
-        #     done()
+        // it "throws when chars is invalid format", (done) ->
+        //   cy.on "fail", (err) =>
+        //     expect(@logs.length).to.eq(2)
+        //     expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
+        //     done()
 
 
-      context "[type=week]", ->
-        it "throws when chars is not a string", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 23")
-            done()
+      context("[type=week]", function() {
+        it("throws when chars is not a string", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 23");
+            return done();
+          });
 
-          cy.get("#week-without-value").type(23)
+          return cy.get("#week-without-value").type(23);
+        });
 
-        it "throws when chars is invalid format", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
-            done()
+        it("throws when chars is invalid format", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18");
+            return done();
+          });
 
-          cy.get("#week-without-value").type("2005/W18")
+          return cy.get("#week-without-value").type("2005/W18");
+        });
 
-        it "throws when chars is invalid week", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.eq(2)
-            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 1995-W60")
-            done()
+        return it("throws when chars is invalid week", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.eq(2);
+            expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 1995-W60");
+            return done();
+          });
 
-          cy.get("#week-without-value").type("1995-W60")
+          return cy.get("#week-without-value").type("1995-W60");
+        });
+      });
 
-      context "[type=time]", ->
-        it "throws when chars is not a string", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 9999")
-            done()
+      return context("[type=time]", function() {
+        it("throws when chars is not a string", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.equal(2);
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 9999");
+            return done();
+          });
 
-          cy.get("#time-without-value").type(9999)
+          return cy.get("#time-without-value").type(9999);
+        });
 
-        it "throws when chars is invalid format (1:30)", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 1:30")
-            done()
+        it("throws when chars is invalid format (1:30)", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.equal(2);
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 1:30");
+            return done();
+          });
 
-          cy.get("#time-without-value").type("1:30")
+          return cy.get("#time-without-value").type("1:30");
+        });
 
-        it "throws when chars is invalid format (01:30pm)", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30pm")
-            done()
+        it("throws when chars is invalid format (01:30pm)", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.equal(2);
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30pm");
+            return done();
+          });
 
-          cy.get("#time-without-value").type("01:30pm")
+          return cy.get("#time-without-value").type("01:30pm");
+        });
 
-        it "throws when chars is invalid format (01:30:30.3333)", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30:30.3333")
-            done()
+        it("throws when chars is invalid format (01:30:30.3333)", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.equal(2);
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30:30.3333");
+            return done();
+          });
 
-          cy.get("#time-without-value").type("01:30:30.3333")
+          return cy.get("#time-without-value").type("01:30:30.3333");
+        });
 
-        it "throws when chars is invalid time", (done) ->
-          cy.on "fail", (err) =>
-            expect(@logs.length).to.equal(2)
-            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:60")
-            done()
+        return it("throws when chars is invalid time", function(done) {
+          cy.on("fail", err => {
+            expect(this.logs.length).to.equal(2);
+            expect(err.message).to.equal("Typing into a time input with cy.type() requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:60");
+            return done();
+          });
 
-          cy.get("#time-without-value").type("01:60")
+          return cy.get("#time-without-value").type("01:60");
+        });
+      });
+    });
+  });
 
-  context "#clear", ->
-    it "does not change the subject", ->
-      textarea = cy.$$("textarea")
+  return context("#clear", function() {
+    it("does not change the subject", function() {
+      const textarea = cy.$$("textarea");
 
-      cy.get("textarea").clear().then ($textarea) ->
-        expect($textarea).to.match textarea
+      return cy.get("textarea").clear().then($textarea => expect($textarea).to.match(textarea));
+    });
 
-    it "removes the current value", ->
-      textarea = cy.$$("#comments")
-      textarea.val("foo bar")
+    it("removes the current value", function() {
+      const textarea = cy.$$("#comments");
+      textarea.val("foo bar");
 
-      ## make sure it really has that value first
-      expect(textarea).to.have.value("foo bar")
+      //# make sure it really has that value first
+      expect(textarea).to.have.value("foo bar");
 
-      cy.get("#comments").clear().then ($textarea) ->
-        expect($textarea).to.have.value("")
+      return cy.get("#comments").clear().then($textarea => expect($textarea).to.have.value(""));
+    });
 
-    it "waits until element is no longer disabled", ->
-      textarea = cy.$$("#comments").val("foo bar").prop("disabled", true)
+    it("waits until element is no longer disabled", function() {
+      const textarea = cy.$$("#comments").val("foo bar").prop("disabled", true);
 
-      retried = false
-      clicks = 0
+      let retried = false;
+      let clicks = 0;
 
-      textarea.on "click", ->
-        clicks += 1
+      textarea.on("click", () => clicks += 1);
 
-      cy.on "command:retry", _.after 3, ->
-        textarea.prop("disabled", false)
-        retried = true
+      cy.on("command:retry", _.after(3, function() {
+        textarea.prop("disabled", false);
+        return retried = true;
+      })
+      );
 
-      cy.get("#comments").clear().then ->
-        expect(clicks).to.eq(1)
-        expect(retried).to.be.true
+      return cy.get("#comments").clear().then(function() {
+        expect(clicks).to.eq(1);
+        return expect(retried).to.be.true;
+      });
+    });
 
-    it "can forcibly click even when being covered by another element", ->
-      $input = $("<input />")
+    it("can forcibly click even when being covered by another element", function() {
+      const $input = $("<input />")
       .attr("id", "input-covered-in-span")
-      .prependTo(cy.$$("body"))
+      .prependTo(cy.$$("body"));
 
-      $span = $("<span>span on input</span>")
+      const $span = $("<span>span on input</span>")
       .css({
         position: "absolute",
         left: $input.offset().left,
@@ -3407,29 +3715,30 @@ describe "src/cy/commands/actions/type", ->
         display: "inline-block",
         backgroundColor: "yellow"
       })
-      .prependTo(cy.$$("body"))
+      .prependTo(cy.$$("body"));
 
-      clicked = false
+      let clicked = false;
 
-      $input.on "click", ->
-        clicked = true
+      $input.on("click", () => clicked = true);
 
-      cy.get("#input-covered-in-span").clear({force: true}).then ->
-        expect(clicked).to.be.true
+      return cy.get("#input-covered-in-span").clear({force: true}).then(() => expect(clicked).to.be.true);
+    });
 
-    it "passes timeout and interval down to click", (done) ->
-      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(cy.$$("body"))
-      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
+    it("passes timeout and interval down to click", function(done) {
+      const input  = $("<input />").attr("id", "input-covered-in-span").prependTo(cy.$$("body"));
+      const span = $("<span>span on input</span>").css({position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow"}).prependTo(cy.$$("body"));
 
-      cy.on "command:retry", (options) ->
-        expect(options.timeout).to.eq 1000
-        expect(options.interval).to.eq 60
-        done()
+      cy.on("command:retry", function(options) {
+        expect(options.timeout).to.eq(1000);
+        expect(options.interval).to.eq(60);
+        return done();
+      });
 
-      cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
+      return cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60});
+    });
 
-    context "works on input type", ->
-      inputTypes = [
+    context("works on input type", function() {
+      const inputTypes = [
         "date",
         "datetime",
         "datetime-local",
@@ -3443,153 +3752,186 @@ describe "src/cy/commands/actions/type", ->
         "time",
         "url",
         "week"
-      ]
+      ];
 
-      inputTypes.forEach (type) ->
-        it type, ->
-          cy.get("##{type}-with-value").clear().then ($input) ->
-            expect($input.val()).to.equal("")
+      return inputTypes.forEach(type =>
+        it(type, () =>
+          cy.get(`#${type}-with-value`).clear().then($input => expect($input.val()).to.equal(""))
+        )
+      );
+    });
 
-    describe "assertion verification", ->
-      beforeEach ->
-        cy.on "log:added", (attrs, log) =>
-          if log.get("name") is "assert"
-            @lastLog = log
+    describe("assertion verification", function() {
+      beforeEach(function() {
+        cy.on("log:added", (attrs, log) => {
+          if (log.get("name") === "assert") {
+            return this.lastLog = log;
+          }
+        });
 
-        return null
+        return null;
+      });
 
-      it "eventually passes the assertion", ->
-        cy.$$("input:first").keyup ->
-          _.delay =>
-            $(@).addClass("cleared")
-          , 100
+      it("eventually passes the assertion", function() {
+        cy.$$("input:first").keyup(function() {
+          return _.delay(() => {
+            return $(this).addClass("cleared");
+          }
+          , 100);
+        });
 
-        cy.get("input:first").clear().should("have.class", "cleared").then ->
-          lastLog = @lastLog
+        return cy.get("input:first").clear().should("have.class", "cleared").then(function() {
+          const { lastLog } = this;
 
-          expect(lastLog.get("name")).to.eq("assert")
-          expect(lastLog.get("state")).to.eq("passed")
-          expect(lastLog.get("ended")).to.be.true
+          expect(lastLog.get("name")).to.eq("assert");
+          expect(lastLog.get("state")).to.eq("passed");
+          return expect(lastLog.get("ended")).to.be.true;
+        });
+      });
 
-      it "eventually passes the assertion on multiple inputs", ->
-        cy.$$("input").keyup ->
-          _.delay =>
-            $(@).addClass("cleared")
-          , 100
+      return it("eventually passes the assertion on multiple inputs", function() {
+        cy.$$("input").keyup(function() {
+          return _.delay(() => {
+            return $(this).addClass("cleared");
+          }
+          , 100);
+        });
 
-        cy.get("input").invoke("slice", 0, 2).clear().should("have.class", "cleared")
+        return cy.get("input").invoke("slice", 0, 2).clear().should("have.class", "cleared");
+      });
+    });
 
-    describe "errors", ->
-      beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
+    describe("errors", function() {
+      beforeEach(function() {
+        Cypress.config("defaultCommandTimeout", 100);
 
-        @logs = []
+        this.logs = [];
 
-        cy.on "log:added", (attrs, log) =>
-          @lastLog = log
-          @logs.push(log)
+        cy.on("log:added", (attrs, log) => {
+          this.lastLog = log;
+          return this.logs.push(log);
+        });
 
-        return null
+        return null;
+      });
 
-      it "throws when not a dom subject", (done) ->
-        cy.on "fail", (err) -> done()
+      it("throws when not a dom subject", function(done) {
+        cy.on("fail", err => done());
 
-        cy.noop({}).clear()
+        return cy.noop({}).clear();
+      });
 
-      it "throws when subject is not in the document", (done) ->
-        cleared = 0
+      it("throws when subject is not in the document", function(done) {
+        let cleared = 0;
 
-        input = cy.$$("input:first").val("123").keydown (e) ->
-          cleared += 1
-          input.remove()
+        var input = cy.$$("input:first").val("123").keydown(function(e) {
+          cleared += 1;
+          return input.remove();
+        });
 
-        cy.on "fail", (err) ->
-          expect(cleared).to.eq 1
-          expect(err.message).to.include "cy.clear() failed because this element"
-          done()
+        cy.on("fail", function(err) {
+          expect(cleared).to.eq(1);
+          expect(err.message).to.include("cy.clear() failed because this element");
+          return done();
+        });
 
-        cy.get("input:first").clear().clear()
+        return cy.get("input:first").clear().clear();
+      });
 
-      it "throws if any subject isnt a textarea or text-like", (done) ->
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+      it("throws if any subject isnt a textarea or text-like", function(done) {
+        cy.on("fail", err => {
+          const { lastLog } = this;
 
-          expect(@logs.length).to.eq(3)
-          expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
-          expect(err.message).to.include "The element cleared was:"
-          expect(err.message).to.include "<form id=\"checkboxes\">...</form>"
-          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
-          done()
+          expect(this.logs.length).to.eq(3);
+          expect(lastLog.get("error")).to.eq(err);
+          expect(err.message).to.include("cy.clear() failed because it requires a valid clearable element.");
+          expect(err.message).to.include("The element cleared was:");
+          expect(err.message).to.include("<form id=\"checkboxes\">...</form>");
+          expect(err.message).to.include("Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.");
+          return done();
+        });
 
-        cy.get("textarea:first,form#checkboxes").clear()
+        return cy.get("textarea:first,form#checkboxes").clear();
+      });
 
-      it "throws if any subject isnt a :text", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
-          expect(err.message).to.include "The element cleared was:"
-          expect(err.message).to.include "<div id=\"dom\">...</div>"
-          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
-          done()
+      it("throws if any subject isnt a :text", function(done) {
+        cy.on("fail", function(err) {
+          expect(err.message).to.include("cy.clear() failed because it requires a valid clearable element.");
+          expect(err.message).to.include("The element cleared was:");
+          expect(err.message).to.include("<div id=\"dom\">...</div>");
+          expect(err.message).to.include("Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.");
+          return done();
+        });
 
-        cy.get("div").clear()
+        return cy.get("div").clear();
+      });
 
-      it "throws on an input radio", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
-          expect(err.message).to.include "The element cleared was:"
-          expect(err.message).to.include "<input type=\"radio\" name=\"gender\" value=\"male\">"
-          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
-          done()
+      it("throws on an input radio", function(done) {
+        cy.on("fail", function(err) {
+          expect(err.message).to.include("cy.clear() failed because it requires a valid clearable element.");
+          expect(err.message).to.include("The element cleared was:");
+          expect(err.message).to.include("<input type=\"radio\" name=\"gender\" value=\"male\">");
+          expect(err.message).to.include("Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.");
+          return done();
+        });
 
-        cy.get(":radio").clear()
+        return cy.get(":radio").clear();
+      });
 
-      it "throws on an input checkbox", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
-          expect(err.message).to.include "The element cleared was:"
-          expect(err.message).to.include "<input type=\"checkbox\" name=\"colors\" value=\"blue\">"
-          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
-          done()
+      it("throws on an input checkbox", function(done) {
+        cy.on("fail", function(err) {
+          expect(err.message).to.include("cy.clear() failed because it requires a valid clearable element.");
+          expect(err.message).to.include("The element cleared was:");
+          expect(err.message).to.include("<input type=\"checkbox\" name=\"colors\" value=\"blue\">");
+          expect(err.message).to.include("Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.");
+          return done();
+        });
 
-        cy.get(":checkbox").clear()
+        return cy.get(":checkbox").clear();
+      });
 
-      it "throws when the subject isnt visible", (done) ->
-        input = cy.$$("input:text:first").show().hide()
+      it("throws when the subject isnt visible", function(done) {
+        const input = cy.$$("input:text:first").show().hide();
 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() failed because this element is not visible"
-          done()
+        cy.on("fail", function(err) {
+          expect(err.message).to.include("cy.clear() failed because this element is not visible");
+          return done();
+        });
 
-        cy.get("input:text:first").clear()
+        return cy.get("input:text:first").clear();
+      });
 
-      it "throws when subject is disabled", (done) ->
-        cy.$$("input:text:first").prop("disabled", true)
+      it("throws when subject is disabled", function(done) {
+        cy.$$("input:text:first").prop("disabled", true);
 
-        cy.on "fail", (err) =>
-          ## get + type logs
-          expect(@logs.length).eq(2)
-          expect(err.message).to.include("cy.clear() failed because this element is disabled:\n")
-          done()
+        cy.on("fail", err => {
+          //# get + type logs
+          expect(this.logs.length).eq(2);
+          expect(err.message).to.include("cy.clear() failed because this element is disabled:\n");
+          return done();
+        });
 
-        cy.get("input:text:first").clear()
+        return cy.get("input:text:first").clear();
+      });
 
-      it "logs once when not dom subject", (done) ->
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+      it("logs once when not dom subject", function(done) {
+        cy.on("fail", err => {
+          const { lastLog } = this;
 
-          expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.eq(err)
-          done()
+          expect(this.logs.length).to.eq(1);
+          expect(lastLog.get("error")).to.eq(err);
+          return done();
+        });
 
-        cy.clear()
+        return cy.clear();
+      });
 
-      it "throws when input cannot be cleared", (done) ->
-        $input = $("<input />")
+      it("throws when input cannot be cleared", function(done) {
+        const $input = $("<input />")
         .attr("id", "input-covered-in-span")
-        .prependTo(cy.$$("body"))
+        .prependTo(cy.$$("body"));
 
-        $span = $("<span>span on input</span>")
+        const $span = $("<span>span on input</span>")
         .css({
           position: "absolute",
           left: $input.offset().left,
@@ -3598,86 +3940,106 @@ describe "src/cy/commands/actions/type", ->
           display: "inline-block",
           backgroundColor: "yellow"
         })
-        .prependTo(cy.$$("body"))
+        .prependTo(cy.$$("body"));
 
-        cy.on "fail", (err) =>
-          expect(@logs.length).to.eq(2)
-          expect(err.message).to.include "cy.clear() failed because this element"
-          expect(err.message).to.include "is being covered by another element"
-          done()
+        cy.on("fail", err => {
+          expect(this.logs.length).to.eq(2);
+          expect(err.message).to.include("cy.clear() failed because this element");
+          expect(err.message).to.include("is being covered by another element");
+          return done();
+        });
 
-        cy.get("#input-covered-in-span").clear()
+        return cy.get("#input-covered-in-span").clear();
+      });
 
-      it "eventually fails the assertion", (done) ->
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+      it("eventually fails the assertion", function(done) {
+        cy.on("fail", err => {
+          const { lastLog } = this;
 
-          expect(err.message).to.include(lastLog.get("error").message)
-          expect(err.message).not.to.include("undefined")
-          expect(lastLog.get("name")).to.eq("assert")
-          expect(lastLog.get("state")).to.eq("failed")
-          expect(lastLog.get("error")).to.be.an.instanceof(chai.AssertionError)
+          expect(err.message).to.include(lastLog.get("error").message);
+          expect(err.message).not.to.include("undefined");
+          expect(lastLog.get("name")).to.eq("assert");
+          expect(lastLog.get("state")).to.eq("failed");
+          expect(lastLog.get("error")).to.be.an.instanceof(chai.AssertionError);
 
-          done()
+          return done();
+        });
 
-        cy.get("input:first").clear().should("have.class", "cleared")
+        return cy.get("input:first").clear().should("have.class", "cleared");
+      });
 
-      it "does not log an additional log on failure", (done) ->
-        logs = []
+      return it("does not log an additional log on failure", function(done) {
+        const logs = [];
 
-        cy.on "log:added", (attrs, log) ->
-          logs.push(log)
+        cy.on("log:added", (attrs, log) => logs.push(log));
 
-        cy.on "fail", =>
-          expect(@logs.length).to.eq(3)
-          done()
+        cy.on("fail", () => {
+          expect(this.logs.length).to.eq(3);
+          return done();
+        });
 
-        cy.get("input:first").clear().should("have.class", "cleared")
+        return cy.get("input:first").clear().should("have.class", "cleared");
+      });
+    });
 
-    describe ".log", ->
-      beforeEach ->
-        cy.on "log:added", (attrs, log) =>
-          @lastLog = log
+    return describe(".log", function() {
+      beforeEach(function() {
+        cy.on("log:added", (attrs, log) => {
+          return this.lastLog = log;
+        });
 
-        return null
+        return null;
+      });
 
-      it "logs immediately before resolving", ->
-        $input = cy.$$("input:first")
+      it("logs immediately before resolving", function() {
+        const $input = cy.$$("input:first");
 
-        expected = false
+        let expected = false;
 
-        cy.on "log:added", (attrs, log) ->
-          if log.get("name") is "clear"
-            expect(log.get("state")).to.eq("pending")
-            expect(log.get("$el").get(0)).to.eq $input.get(0)
+        cy.on("log:added", function(attrs, log) {
+          if (log.get("name") === "clear") {
+            expect(log.get("state")).to.eq("pending");
+            expect(log.get("$el").get(0)).to.eq($input.get(0));
 
-            expected = true
+            return expected = true;
+          }
+        });
 
-        cy.get("input:first").clear().then ->
-          expect(expected).to.be.true
+        return cy.get("input:first").clear().then(() => expect(expected).to.be.true);
+      });
 
-      it "ends", ->
-        logs = []
+      it("ends", function() {
+        const logs = [];
 
-        cy.on "log:added", (attrs, log) ->
-          logs.push(log) if log.get("name") is "clear"
+        cy.on("log:added", function(attrs, log) {
+          if (log.get("name") === "clear") { return logs.push(log); }
+        });
 
-        cy.get("input").invoke("slice", 0, 2).clear().then ->
-          _.each logs, (log) ->
-            expect(log.get("state")).to.eq("passed")
-            expect(log.get("ended")).to.be.true
+        return cy.get("input").invoke("slice", 0, 2).clear().then(() =>
+          _.each(logs, function(log) {
+            expect(log.get("state")).to.eq("passed");
+            return expect(log.get("ended")).to.be.true;
+          })
+        );
+      });
 
-      it "snapshots after clicking", ->
-        cy.get("input:first").clear().then ($input) ->
-          lastLog = @lastLog
+      it("snapshots after clicking", () =>
+        cy.get("input:first").clear().then(function($input) {
+          const { lastLog } = this;
 
-          expect(lastLog.get("snapshots").length).to.eq(1)
-          expect(lastLog.get("snapshots")[0]).to.be.an("object")
+          expect(lastLog.get("snapshots").length).to.eq(1);
+          return expect(lastLog.get("snapshots")[0]).to.be.an("object");
+        })
+      );
 
-      it "logs deltaOptions", ->
-        cy.get("input:first").clear({force: true, timeout: 1000}).then ->
-          lastLog = @lastLog
+      return it("logs deltaOptions", () =>
+        cy.get("input:first").clear({force: true, timeout: 1000}).then(function() {
+          const { lastLog } = this;
 
-          expect(lastLog.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(lastLog.get("message")).to.eq("{force: true, timeout: 1000}");
 
-          expect(lastLog.invoke("consoleProps").Options).to.deep.eq {force: true, timeout: 1000}
+          return expect(lastLog.invoke("consoleProps").Options).to.deep.eq({force: true, timeout: 1000});})
+    );
+  });
+});
+});
