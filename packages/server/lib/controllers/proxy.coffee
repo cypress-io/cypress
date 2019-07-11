@@ -1,5 +1,6 @@
 _             = require("lodash")
 zlib          = require("zlib")
+charset       = require("charset")
 concat        = require("concat-stream")
 Promise       = require("bluebird")
 accept        = require("http-accept")
@@ -14,6 +15,7 @@ conditional   = require("../util/conditional_stream")
 
 REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 NO_BODY_STATUS_CODES = [204, 304]
+HTTP_EQUIV_CHARSET_RE = /<\s*meta\s+http-equiv=['"]content-type['"][^>]*content\s*=\s*['"]text\/html;\s*charset=([^'"]+)/i
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -21,6 +23,27 @@ zlibOptions = {
   flush: zlib.Z_SYNC_FLUSH
   finishFlush: zlib.Z_SYNC_FLUSH
 }
+
+getCharsetFromHttpEquiv = (body) ->
+  try
+    return HTTP_EQUIV_CHARSET_RE.exec(body.toString().substring(0,1024))[1]
+  catch
+    return null
+
+## https://github.com/cypress-io/cypress/issues/1543
+getNodeCharsetFromResponse = (headers, body) ->
+  httpCharset = (charset(headers, body) || getCharsetFromHttpEquiv(body) || '').toLowerCase()
+
+  debug("inferred charset from response %o", { httpCharset })
+
+  ## https://w3techs.com/technologies/overview/character_encoding/all - most common charsets
+  ## https://stackoverflow.com/questions/14551608/list-of-encodings-that-node-js-supports
+  ## ~97% of websites use utf-8 or latin1, the other 3% use encodings
+  ## not supported natively by Node. browsers also default to latin1 parsing
+  if httpCharset == "utf8" || httpCharset == "utf-8"
+    return "utf-8"
+
+  "latin1"
 
 isGzipError = (err) ->
   Object.prototype.hasOwnProperty.call(zlib.constants, err.code)
@@ -176,7 +199,9 @@ module.exports = {
       ## bypass the stream buffer and pipe this back
       if wantsInjection
         rewrite = (body) ->
-          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          nodeCharset = getNodeCharsetFromResponse(headers, body)
+          body = rewriter.html(body.toString(nodeCharset), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          Buffer.from(body, nodeCharset)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
@@ -246,6 +271,16 @@ module.exports = {
 
     onResponse = (str, incomingRes) =>
       {headers, statusCode} = incomingRes
+
+      res.originalSetHeader = res.setHeader
+
+      ## express does all kinds of silly/nasty stuff to the content-type...
+      ## but we don't want to change it at all!
+      res.setHeader = (k, v) ->
+        if k == 'content-type'
+          v = incomingRes.headers['content-type']
+
+        res.originalSetHeader(k, v)
 
       wantsInjection ?= do ->
         return false if not resContentTypeIs(headers, "text/html")
