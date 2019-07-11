@@ -48,5 +48,4 @@ describe "e2e interception spec", ->
         }
         snapshot: true
         expectedExitCode: 0
-        exit: false
       })
