@@ -1,6 +1,10 @@
 <!--
 Thanks for contributing!
 
-Please explain what changes were made and also
-reference any issues that were fixed with #[ISSUE]
+- Add tests! This is what we do afterall. 😉
+- If you haven't already, complete the CLA.
+
+Read more about contributing: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md
 -->
+
+- close <!--Add issue number here -->
