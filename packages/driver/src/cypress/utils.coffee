@@ -1,7 +1,10 @@
 $ = require("jquery")
 _ = require("lodash")
+methods = require("methods")
 moment = require("moment")
+Promise = require("bluebird")
 
+$jquery = require("../dom/jquery")
 $Location = require("./location")
 $errorMessages = require("./error_messages")
 
@@ -20,6 +23,30 @@ defaultOptions = {
   animationDistanceThreshold: 5
 }
 
+USER_FRIENDLY_TYPE_DETECTORS = _.map([
+  [_.isUndefined, "undefined"]
+  [_.isNull, "null"]
+  [_.isBoolean, "boolean"]
+  [_.isNumber, "number"]
+  [_.isString, "string"]
+  [_.isRegExp, "regexp"]
+  [_.isSymbol, "symbol"]
+  [_.isElement, "element"]
+  [_.isError, "error"]
+  [_.isSet, "set"]
+  [_.isWeakSet, "set"]
+  [_.isMap, "map"]
+  [_.isWeakMap, "map"]
+  [_.isFunction, "function"]
+  [_.isArrayLikeObject, "array"]
+  [_.isBuffer, "buffer"]
+  [_.isDate, "date"]
+  [_.isObject, "object"]
+  [_.stubTrue, "unknown"]
+], ([ fn, type]) ->
+  return [fn, _.constant(type)]
+)
+
 module.exports = {
   warning: (msg) ->
     console.warn("Cypress Warning: " + msg)
@@ -30,6 +57,27 @@ module.exports = {
   logInfo: (msgs...) ->
     console.info(msgs...)
 
+  unwrapFirst: (val) ->
+    ## this method returns the first item in an array
+    ## and if its still a jquery object, then we return
+    ## the first() jquery element
+    item = [].concat(val)[0]
+
+    if $jquery.isJquery(item)
+      return item.first()
+
+    return item
+
+  switchCase: (value, casesObj, defaultKey = "default") ->
+    if _.has(casesObj, value)
+      return _.result(casesObj, value)
+
+    if _.has(casesObj, defaultKey)
+      return _.result(casesObj, defaultKey)
+
+    keys = _.keys(casesObj)
+    throw new Error("The switch/case value: '#{value}' did not match any cases: #{keys.join(', ')}.")
+
   appendErrMsg: (err, message) ->
     ## preserve stack
     ## this is the critical part
@@ -39,10 +87,9 @@ module.exports = {
     stack = err.stack
 
     ## preserve message
+    ## and toString
     msg = err.message
-
-    ## slice out message
-    stack = stack.split(msg)
+    str = err.toString()
 
     ## append message
     msg += "\n\n" + message
@@ -50,8 +97,9 @@ module.exports = {
     ## set message
     err.message = msg
 
-    ## reset stack
-    err.stack = stack.join(msg)
+    ## reset stack by replacing the original first line
+    ## with the new one
+    err.stack = stack.replace(str, err.toString())
 
     return err
 
@@ -71,6 +119,7 @@ module.exports = {
       err = @cypressErr(err)
 
     onFail = options.onFail
+    errProps = options.errProps
     ## assume onFail is a command if
     ## onFail is present and isnt a function
     if onFail and not _.isFunction(onFail)
@@ -82,6 +131,7 @@ module.exports = {
         command.error(err)
 
     err.onFail = onFail if onFail
+    if errProps then _.extend(err, errProps)
 
     throw err
 
@@ -92,6 +142,11 @@ module.exports = {
       err = @internalErr e
 
     @throwErr(err, options)
+
+  warnByPath: (errPath, options = {}) ->
+    err = @errMessageByPath errPath, options.args
+
+    @warning(err)
 
   internalErr: (err) ->
     err = new Error(err)
@@ -197,6 +252,9 @@ module.exports = {
       else
         "" + value
 
+  ## give us some user-friendly "types"
+  stringifyFriendlyTypeof: _.cond(USER_FRIENDLY_TYPE_DETECTORS)
+
   stringify: (values) ->
     ## if we already have an array
     ## then nest it again so that
@@ -266,6 +324,9 @@ module.exports = {
       args.length is 3 and
         _.every(args, _.isFunction)
 
+  isValidHttpMethod: (str) ->
+    _.isString(str) and _.includes(methods, str.toLowerCase())
+
   addTwentyYears: ->
     moment().add(20, "years").unix()
 
@@ -292,4 +353,37 @@ module.exports = {
     deltaY = point1.y - point2.y
 
     Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+  runSerially: (fns) ->
+    values = []
+
+    run = (index) ->
+      Promise
+      .try ->
+        fns[index]()
+      .then (value) ->
+        values.push(value)
+        index++
+        if fns[index]
+          run(index)
+        else
+          values
+
+    run(0)
+
+  memoize: (func, cacheInstance = new Map()) ->
+    memoized = (args...) ->
+      key = args[0]
+      cache = memoized.cache
+
+      return cache.get(key) if cache.has(key)
+
+      result = func.apply(this, args)
+      memoized.cache = cache.set(key, result) || cache
+
+      return result
+
+    memoized.cache = cacheInstance
+
+    return memoized
 }

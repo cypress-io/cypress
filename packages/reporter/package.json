@@ -6,64 +6,48 @@
   "browser": "src/main",
   "scripts": {
     "postinstall": "echo '@packages/reporter needs: npm run build'",
-    "prebuild": "rebuild-node-sass",
+    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
     "build": "node ./scripts/build-dev.js",
+    "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "node ./scripts/build-prod.js",
+    "prewatch": "npm run check-deps-pre",
     "watch": "node ./scripts/watch.js",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "preclean": "npm run check-deps-pre",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
+    "pretest": "npm run check-deps-pre",
     "test": "node ./scripts/test.js",
-    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*"
+    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*",
+    "cypress:open": "node ../../scripts/cypress open --project .",
+    "cypress:run": "node ../../scripts/cypress run --project ."
   },
   "files": [
     "dist"
   ],
-  "browserify": {
-    "transform": [
-      [
-        "babelify",
-        {
-          "presets": [
-            "env",
-            "react",
-            "stage-1"
-          ],
-          "plugins": [
-            "add-module-exports",
-            "transform-decorators-legacy"
-          ]
-        }
-      ]
-    ]
-  },
   "devDependencies": {
-    "@cypress/react-tooltip": "0.3.1",
-    "@cypress/releaser": "0.1.12",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-1": "^6.24.1",
-    "bin-up": "^1.1.0",
-    "chai": "^3.5.0",
-    "chai-enzyme": "^0.8.0",
-    "classnames": "^2.2.5",
-    "css-element-queries": "^0.3.2",
-    "enzyme": "^2.9.1",
-    "font-awesome": "^4.6.3",
-    "jsdom": "^9.4.1",
-    "lodash": "4.17.4",
-    "markdown-it": "^6.1.1",
-    "mobx": "^3.1.15",
-    "mobx-react": "^4.2.1",
-    "prop-types": "^15.5.9",
-    "react": "15.6.2",
-    "react-addons-test-utils": "15.6.2",
-    "react-dom": "15.6.2",
-    "react-test-renderer": "15.6.2",
-    "rebuild-node-sass": "^1.1.0",
-    "sinon": "^1.17.4",
-    "sinon-chai": "^2.8.0",
-    "zunder": "5.5.2"
+    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
+    "@cypress/react-tooltip": "0.5.0",
+    "bin-up": "1.2.0",
+    "chai": "3.5.0",
+    "chai-enzyme": "1.0.0-beta.1",
+    "classnames": "2.2.6",
+    "css-element-queries": "1.2.0",
+    "enzyme": "3.9.0",
+    "enzyme-adapter-react-16": "1.12.1",
+    "font-awesome": "4.7.0",
+    "jsdom": "13.2.0",
+    "lodash": "4.17.13",
+    "markdown-it": "6.1.1",
+    "mobx": "3.6.2",
+    "mobx-react": "4.4.3",
+    "prop-types": "15.7.2",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
+    "rebuild-node-sass": "1.1.0",
+    "sinon": "7.0.0",
+    "sinon-chai": "3.3.0",
+    "zunder": "6.4.1"
   }
 }

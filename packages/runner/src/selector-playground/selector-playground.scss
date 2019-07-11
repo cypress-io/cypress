@@ -12,8 +12,11 @@ $cy-tooltip-border-color: #333;
 .highlight {
   background: rgba(159, 196, 231, 0.6);
   border: solid 2px #9FC4E7;
+  cursor: pointer;
 }
 
 .tooltip {
+  font-family: sans-serif;
+  font-size: 14px;
   max-width: 400px !important;
 }

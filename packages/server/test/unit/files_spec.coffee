@@ -1,63 +1,9 @@
 require("../spec_helper")
 
-Promise        = require("bluebird")
-human          = require("human-interval")
-path           = require("path")
-R              = require("ramda")
-
-api            = require("#{root}lib/api")
 config         = require("#{root}lib/config")
-user           = require("#{root}lib/user")
 files          = require("#{root}lib/files")
 FixturesHelper = require("#{root}/test/support/helpers/fixtures")
 filesController = require("#{root}lib/controllers/files")
-
-describe "lib/controllers/files", ->
-  beforeEach ->
-    FixturesHelper.scaffold()
-
-    @todosPath = FixturesHelper.projectPath("todos")
-
-    config.get(@todosPath).then (cfg) =>
-      @config = cfg
-
-  afterEach ->
-    FixturesHelper.remove()
-
-  context "#getTestFiles", ->
-
-    checkFoundSpec = (foundSpec) ->
-      if not path.isAbsolute(foundSpec.absolute)
-        throw new Error("path to found spec should be absolute #{JSON.stringify(foundSpec)}")
-
-    it "returns absolute filenames", ->
-      filesController
-      .getTestFiles(@config)
-      .then (R.prop("integration"))
-      .then (R.forEach(checkFoundSpec))
-
-    it "handles fixturesFolder being false", ->
-      @config.fixturesFolder = false
-      expect(=> filesController.getTestFiles(@config)).not.to.throw()
-
-    it "by default, returns all files as long as they have a name and extension", ->
-      config.get(FixturesHelper.projectPath("various-file-types"))
-      .then (cfg) ->
-        filesController.getTestFiles(cfg)
-      .then (files) ->
-        expect(files.integration.length).to.equal(3)
-        expect(files.integration[0].name).to.equal("coffee_spec.coffee")
-        expect(files.integration[1].name).to.equal("js_spec.js")
-        expect(files.integration[2].name).to.equal("ts_spec.ts")
-
-    it "returns files matching config.testFiles", ->
-      config.get(FixturesHelper.projectPath("various-file-types"))
-      .then (cfg) ->
-        cfg.testFiles = "**/*.coffee"
-        filesController.getTestFiles(cfg)
-      .then (files) ->
-        expect(files.integration.length).to.equal(1)
-        expect(files.integration[0].name).to.equal("coffee_spec.coffee")
 
 describe "lib/files", ->
   beforeEach ->
@@ -73,7 +19,6 @@ describe "lib/files", ->
     FixturesHelper.remove()
 
   context "#readFile", ->
-
     it "returns contents and full file path", ->
       files.readFile(@projectRoot, "tests/_fixtures/message.txt").then ({ contents, filePath }) ->
         expect(contents).to.eq "foobarbaz"
@@ -100,7 +45,6 @@ describe "lib/files", ->
         ]
 
   context "#writeFile", ->
-
     it "writes the file's contents and returns contents and full file path", ->
       files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
         files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents, filePath }) ->
@@ -112,10 +56,18 @@ describe "lib/files", ->
         files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
           expect(contents).to.equal("�")
 
-    it "overwrites existing file without issue", ->
+    it "overwrites existing file by default", ->
       files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
         files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) =>
           expect(contents).to.equal("foo")
           files.writeFile(@projectRoot, ".projects/write_file.txt", "bar").then =>
             files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
               expect(contents).to.equal("bar")
+
+    it "appends content to file when specified", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) =>
+          expect(contents).to.equal("foo")
+          files.writeFile(@projectRoot, ".projects/write_file.txt", "bar", {flag: "a+"}).then =>
+            files.readFile(@projectRoot, ".projects/write_file.txt").then ({ contents }) ->
+              expect(contents).to.equal("foobar")

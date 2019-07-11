@@ -77,7 +77,7 @@ describe "src/cy/commands/navigation", ->
         expect(timeout).to.be.calledWith(4567, "reload")
 
     it "fires stability:changed and window events events", ->
-      stub1= cy.stub()
+      stub1 = cy.stub()
       stub2 = cy.stub()
       stub3 = cy.stub()
 
@@ -243,6 +243,7 @@ describe "src/cy/commands/navigation", ->
 
     it "removes listeners", ->
       cy
+        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then ->
           winLoadListeners = cy.listeners("window:load")
@@ -266,6 +267,7 @@ describe "src/cy/commands/navigation", ->
       stub3 = cy.stub()
 
       cy
+        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then ->
           cy.on("stability:changed", stub1)
@@ -279,6 +281,7 @@ describe "src/cy/commands/navigation", ->
 
     it "removes listeners from window", ->
       cy
+        .visit("/fixtures/generic.html")
         .visit("/fixtures/jquery.html")
         .then (win) ->
           rel = cy.stub(win, "removeEventListener")
@@ -369,6 +372,7 @@ describe "src/cy/commands/navigation", ->
 
       it "logs go", ->
         cy
+          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             lastLog = @lastLog
@@ -378,12 +382,14 @@ describe "src/cy/commands/navigation", ->
 
       it "can turn off logging", ->
         cy
+          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back", {log: false}).then ->
             expect(@lastLog).to.be.undefined
 
       it "does not log 'Page Load' events", ->
         cy
+          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
@@ -393,6 +399,7 @@ describe "src/cy/commands/navigation", ->
         beforeunload = false
 
         cy
+          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
             cy.on "window:before:unload", =>
@@ -513,6 +520,32 @@ describe "src/cy/commands/navigation", ->
         .visit("localhost:3500/status-404", { failOnStatusCode: false })
         .visit("localhost:3500/status-500", { failOnStatusCode: false })
 
+    it "strips username + password out of the url when provided", ->
+      backend = cy.spy(Cypress, "backend")
+
+      cy
+        .visit("http://cypress:password123@localhost:3500/timeout")
+        .then ->
+          expect(backend).to.be.calledWith("resolve:url", "http://localhost:3500/timeout")
+
+    it "passes auth options", ->
+      backend = cy.spy(Cypress, "backend")
+
+      auth = {
+        username: "cypress"
+        password: "password123"
+      }
+
+      cy
+        .visit("http://localhost:3500/timeout", { auth })
+        .then ->
+          expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
+
+    ## https://github.com/cypress-io/cypress/issues/1727
+    it "can visit a page with undefined content type and html-shaped body", ->
+      cy
+        .visit("http://localhost:3500/undefined-content-type")
+
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0
@@ -545,6 +578,59 @@ describe "src/cy/commands/navigation", ->
               "http://localhost:3500/fixtures/dimensions.html#bar"
               "http://localhost:3500/fixtures/dimensions.html"
             ])
+
+    ## https://github.com/cypress-io/cypress/issues/1311
+    it "window immediately resolves and doesn't reload when visiting the same URL with hashes", ->
+      onLoad = cy.stub()
+
+      cy
+        .visit("http://localhost:3500/fixtures/generic.html#foo").then (win) ->
+          win.foo = 'bar'
+        .visit("http://localhost:3500/fixtures/generic.html#foo", {
+          onLoad: onLoad
+        }).then (win) ->
+          expect(win.bar).to.not.exist
+          expect(onLoad).not.to.have.been.called
+
+    it "can send headers", ->
+      cy.visit({
+        url: "http://localhost:3500/dump-headers",
+        headers: {
+          "x-foo-baz": "bar-quux"
+        }
+      })
+      cy.contains('"x-foo-baz":"bar-quux"')
+
+    it "can send user-agent header", ->
+      cy.visit({
+        url: "http://localhost:3500/dump-headers",
+        headers: {
+          "user-agent": "something special"
+        }
+      })
+      cy.contains('"user-agent":"something special"')
+
+    describe "can send a POST request", ->
+      it "automatically urlencoded using an object body", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST",
+          body: {
+            bar: "baz"
+          }
+        })
+        cy.contains("it worked!").contains("{\"bar\":\"baz\"}")
+
+      it "with any string body and headers", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json"
+          }
+          body: JSON.stringify({
+            bar: "baz"
+          })
+        })
+        cy.contains("it worked!").contains("{\"bar\":\"baz\"}")
 
     describe "when origins don't match", ->
       beforeEach ->
@@ -711,6 +797,21 @@ describe "src/cy/commands/navigation", ->
           _.each obj, (value, key) =>
             expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
+      it "logs obj once complete when onLoad is not called", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo")
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo").then ->
+          obj = {
+            state: "passed"
+            name: "visit"
+            message: "http://localhost:3500/fixtures/generic.html#foo"
+            url: "http://localhost:3500/fixtures/generic.html#foo"
+          }
+
+          lastLog = @lastLog
+
+          _.each obj, (value, key) =>
+            expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
       it "snapshots once", ->
         cy.visit("/fixtures/generic.html").then ->
           lastLog = @lastLog
@@ -807,6 +908,46 @@ describe "src/cy/commands/navigation", ->
             "http://localhost:3500/foo -> 1 -> 2"
           )
 
+      it "indicates POST in the message", ->
+        cy.visit("http://localhost:3500/post-only", {
+          method: "POST"
+        }).then ->
+          lastLog = @lastLog
+
+          expect(lastLog.get("message")).to.eq(
+            "POST http://localhost:3500/post-only"
+          )
+
+      it "displays note in consoleProps when visiting the same page with a hash", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html#foo")
+          .visit("http://localhost:3500/fixtures/generic.html#foo")
+          .then ->
+            expect(@lastLog.invoke("consoleProps")).to.deep.eq({
+              "Command": "visit"
+              "Note": "Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire."
+          })
+
+      it "logs options if they are supplied", ->
+        cy.visit({
+          url: "http://localhost:3500/fixtures/generic.html"
+          headers: {
+            "foo": "bar"
+          },
+          notReal: "baz"
+        })
+        .then ->
+          expect(@lastLog.invoke("consoleProps")["Options"]).to.deep.eq({
+            url: "http://localhost:3500/fixtures/generic.html"
+            headers: {
+              "foo": "bar"
+            }
+          })
+
+      it "does not log options if they are not supplied", ->
+        cy.visit("http://localhost:3500/fixtures/generic.html")
+        .then ->
+          expect(@lastLog.invoke("consoleProps")["Options"]).to.be.undefined
+
     describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)
@@ -876,10 +1017,50 @@ describe "src/cy/commands/navigation", ->
 
       it "throws when url isnt a string", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
+          expect(err.message).to.eq "cy.visit() must be called with a URL or an options object containing a URL as its 1st argument"
           done()
 
         cy.visit()
+
+      it "throws when url is specified twice", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() must be called with only one URL. You specified two URLs"
+          done()
+
+        cy.visit("http://foobarbaz", {
+          url: "http://foobarbaz"
+        })
+
+      it "throws when method is unsupported", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() was called with an invalid method: 'FOO'"
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          method: "FOO"
+        })
+
+      it "throws when headers is not an object", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() requires the 'headers' option to be an object"
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          headers: "quux"
+        })
+
+      it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.visit() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          failOnStatusCode: false
+          retryOnStatusCodeFailure: true
+        })
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
         cy.on "fail", (err) =>
@@ -1199,50 +1380,39 @@ describe "src/cy/commands/navigation", ->
 
         cy.visit("https://google.com/foo")
 
-      it "displays loading_invalid_content_type when isHtml is false on http requests", (done) ->
-        obj = {
-          isOkStatusCode: true
-          isHtml: false
-          contentType: "application/json"
-          originalUrl: "https://google.com/foo"
-          status: 200
-          statusText: "OK"
-        }
+      ## https://github.com/cypress-io/cypress/issues/3101
+      [{
+        contentType: 'application/json',
+        pathName: 'json-content-type'
+      }, {
+        contentType: 'text/html; charset=utf-8,text/html',
+        pathName: 'invalid-content-type'
+      }]
+      .forEach ({contentType, pathName}) ->
+        it "displays loading_invalid_content_type when content type is #{contentType} on http requests", (done) ->
+          cy.on "fail", (err) =>
+            lastLog = @lastLog
 
-        visitErrObj = _.clone(obj)
-        obj.url = obj.originalUrl
+            expect(err.message).to.include("""
+              cy.visit() failed trying to load:
 
-        cy.stub(Cypress, "backend")
-        .withArgs("resolve:url", "https://google.com/foo")
-        .resolves(obj)
+              http://localhost:3500/#{pathName}
 
-        ## dont log else we create an endless loop!
-        emit = cy.spy(Cypress, "emit").log(false)
+              The content-type of the response we received from your web server was:
 
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+                > #{contentType}
 
-          expect(err.message).to.include("""
-            cy.visit() failed trying to load:
+              This was considered a failure because responses must have content-type: 'text/html'
 
-            https://google.com/foo
+              However, you can likely use cy.request() instead of cy.visit().
 
-            The content-type of the response we received from your web server was:
+              cy.request() will automatically get and set cookies and enable you to parse responses.
+            """)
+            expect(@logs.length).to.eq(1)
+            expect(lastLog.get("error")).to.eq(err)
+            done()
 
-              > application/json
-
-            This was considered a failure because responses must have content-type: 'text/html'
-
-            However, you can likely use cy.request() instead of cy.visit().
-
-            cy.request() will automatically get and set cookies and enable you to parse responses.
-          """)
-          expect(emit).to.be.calledWithMatch("visit:failed", obj)
-          expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.eq(err)
-          done()
-
-        cy.visit("https://google.com/foo")
+          cy.visit("http://localhost:3500/#{pathName}")
 
       it "displays loading_invalid_content_type when isHtml is false on file requests", (done) ->
         obj = {
@@ -1289,6 +1459,34 @@ describe "src/cy/commands/navigation", ->
           done()
 
         cy.visit("https://google.com/foo")
+
+      it "displays body_circular when body is circular", (done) ->
+        foo = {
+          bar: {
+            baz: {}
+          }
+        }
+
+        foo.bar.baz.quux = foo
+
+        cy.visit({
+          method: "POST"
+          url: "http://foo.invalid/"
+          body: foo
+        })
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq """
+          The `body` parameter supplied to cy.visit() contained a circular reference at the path "bar.baz.quux".
+
+          `body` can only be a string or an object with no circular references.
+          """
+
+          done()
 
   context "#page load", ->
     it "sets initial=true and then removes", ->

@@ -22,7 +22,7 @@
 #   context ".open", ->
 #     beforeEach ->
 #       @projectInstance = {
-#         getConfig: @sandbox.stub().resolves({proxyUrl: "foo", socketIoRoute: "bar"})
+#         getConfig: sinon.stub().resolves({proxyUrl: "foo", socketIoRoute: "bar"})
 #       }
 #
 #       browsers = [{
@@ -31,9 +31,9 @@
 #         path: "/path/to/Chrome.app"
 #         majorVersion: "2077"
 #       }]
-#       @sandbox.stub(launcher, "getBrowsers").resolves(browsers)
-#       @sandbox.stub(extension, "setHostAndPath").withArgs("foo", "bar").resolves()
-#       @open = @sandbox.stub(Project.prototype, "open").resolves(@projectInstance)
+#       sinon.stub(launcher, "getBrowsers").resolves(browsers)
+#       sinon.stub(extension, "setHostAndPath").withArgs("foo", "bar").resolves()
+#       @open = sinon.stub(Project.prototype, "open").resolves(@projectInstance)
 #
 #     it "resolves with opened project instance", ->
 #       project.open(@todosPath)
@@ -55,7 +55,7 @@
 #         expect(@open.getCall(0).args[0].onReloadBrowser).to.be.a("function")
 #
 #     it "passes onReloadBrowser which calls relaunch with url + browser", ->
-#       relaunch = @sandbox.stub(project, "relaunch")
+#       relaunch = sinon.stub(project, "relaunch")
 #
 #       project.open(@todosPath)
 #       .then =>

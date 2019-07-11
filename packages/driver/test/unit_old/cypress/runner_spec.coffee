@@ -321,8 +321,8 @@ describe "$Cypress.Runner API", ->
     it "sets test hook to hook", ->
       expect(@relatedTest.hookName).to.eq "before each"
 
-    it "sets test failedFromHook", ->
-      expect(@relatedTest.failedFromHook).to.be.true
+    it "sets test failedFromHookId", ->
+      expect(@relatedTest.failedFromHookId).to.be.true
 
   context "#getTestFromHook", ->
     beforeEach ->

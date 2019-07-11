@@ -23,6 +23,7 @@ upload   = require("./upload")
 uploadUtils = require("./util/upload")
 {uploadNpmPackage} = require("./upload-npm-package")
 {uploadUniqueBinary} = require("./upload-unique-binary")
+{moveBinaries} = require('./move-binaries')
 
 ## initialize on existing repo
 repo = Promise.promisifyAll(gift(cwd))
@@ -132,7 +133,7 @@ deploy = {
         fail("Release Failed")
         throw err
 
-    askMissingOptions(['version', 'commit', 'nextVersion'])(options)
+    askMissingOptions(['version', 'nextVersion'])(options)
     .then(release)
 
   build: (options) ->
@@ -152,20 +153,24 @@ deploy = {
       options.zip = path.resolve(zippedFilename(options.platform))
       zip.ditto(zipDir, options.zip)
 
-  # upload Cypres NPM package file
+  # upload Cypress NPM package file
   "upload-npm-package": (args = process.argv) ->
     console.log('#packageUpload')
     uploadNpmPackage(args)
 
-  # upload Cypres binary zip file under unique hash
+  # upload Cypress binary zip file under unique hash
   "upload-unique-binary": (args = process.argv) ->
     console.log('#uniqueBinaryUpload')
     uploadUniqueBinary(args)
 
-  # upload Cypress binary ZIP file
+  # uploads a single built Cypress binary ZIP file
+  # usually a binary is built on CI and is uploaded
   upload: (options) ->
     console.log('#upload')
-    if !options then options = @parseOptions(process.argv)
+
+    if not options
+      options = @parseOptions(process.argv)
+
     askMissingOptions(['version', 'platform', 'zip'])(options)
     .then (options) ->
       la(check.unemptyString(options.zip),
@@ -180,8 +185,12 @@ deploy = {
       upload.toS3({
         zipFile: options.zip,
         version: options.version,
-        platform: options.platform
+        platform: options.platform,
       })
+
+  "move-binaries": (args = process.argv) ->
+    console.log('#moveBinaries')
+    moveBinaries(args)
 
   # purge all platforms of a desktop app for specific version
   "purge-version": (args = process.argv) ->

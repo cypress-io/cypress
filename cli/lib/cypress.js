@@ -10,11 +10,14 @@ const util = require('./util')
 
 const cypressModuleApi = {
   open (options = {}) {
+    options = util.normalizeModuleOptions(options)
+
     return open.start(options)
   },
 
   run (options = {}) {
     options = util.normalizeModuleOptions(options)
+
     return tmp.fileAsync()
     .then((outputPath) => {
       options.outputPath = outputPath
@@ -29,6 +32,7 @@ const cypressModuleApi = {
               message: 'Could not find Cypress test run results',
             }
           }
+
           return output
         })
       })

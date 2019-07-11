@@ -6,6 +6,7 @@ check = require("check-more-types")
 debug = require("debug")("cypress:driver")
 
 $dom = require("../dom")
+$selection = require("../dom/selection")
 $utils = require("./utils")
 $Chai = require("../cy/chai")
 $Xhrs = require("../cy/xhrs")
@@ -14,10 +15,12 @@ $Aliases = require("../cy/aliases")
 $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
+$Focused = require("../cy/focused")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
 $Chainer = require("./chainer")
+$Timers = require("../cy/timers")
 $Timeouts = require("../cy/timeouts")
 $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
@@ -39,12 +42,6 @@ isPromiseLike = (ret) ->
 
 returnedFalse = (result) ->
   result is false
-
-silenceConsole = (contentWindow) ->
-  if c = contentWindow.console
-    c.log = ->
-    c.warn = ->
-    c.info = ->
 
 getContentWindow = ($autIframe) ->
   $autIframe.prop("contentWindow")
@@ -74,7 +71,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   $$ = (selector, context) ->
     context ?= state("document")
-    new $.fn.init(selector, context)
+    $dom.query(selector, context)
 
   queue = $CommandQueue.create()
 
@@ -85,6 +82,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   jquery = $jQuery.create(state)
   location = $Location.create(state)
+  focused = $Focused.create(state)
+  timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
 
@@ -121,6 +120,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         Cookies.setInitial()
 
+        timers.reset()
+
         Cypress.action("app:window:before:unload", e)
 
         ## return undefined so our beforeunload handler
@@ -143,6 +144,43 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         return ret
     })
+
+  wrapNativeMethods = (contentWindow) ->
+    try
+      ## return null to trick contentWindow into thinking
+      ## its not been iframed if modifyObstructiveCode is true
+      if config("modifyObstructiveCode")
+        Object.defineProperty(contentWindow, "frameElement", {
+          get: -> null
+        })
+
+      contentWindow.HTMLElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(this, contentWindow, focusOption)
+
+      contentWindow.HTMLElement.prototype.blur = ->
+        focused.interceptBlur(this)
+
+      contentWindow.SVGElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(this, contentWindow, focusOption)
+
+      contentWindow.SVGElement.prototype.blur = ->
+        focused.interceptBlur(this)
+
+      contentWindow.HTMLInputElement.prototype.select = ->
+        $selection.interceptSelect.call(this)
+
+      contentWindow.document.hasFocus = ->
+        focused.documentHasFocus.call(@)
+
+      cssModificationSpy = (original, args...) ->
+        snapshots.onCssModified(@href)
+        original.apply(@, args)
+
+      insertRule = contentWindow.CSSStyleSheet.prototype.insertRule
+      deleteRule = contentWindow.CSSStyleSheet.prototype.deleteRule
+
+      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -275,15 +313,23 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     .then (subject) ->
       state("commandIntermediateValue", undefined)
 
+      ## we may be given a regular array here so
+      ## we need to re-wrap the array in jquery
+      ## if that's the case if the first item
+      ## in this subject is a jquery element.
+      ## we want to do this because in 3.1.2 there
+      ## was a regression when wrapping an array of elements
+      firstSubject = $utils.unwrapFirst(subject)
+
       ## if ret is a DOM element and its not an instance of our own jQuery
-      if subject and $dom.isElement(subject) and not $utils.isInstanceOf(subject, $)
+      if subject and $dom.isElement(firstSubject) and not $utils.isInstanceOf(subject, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
         ## TODO: enable turning this off
         ## wrapSubjectsInJquery: false
         ## which will just pass subjects downstream
         ## without modifying them
-        subject = $(subject)
+        subject = $dom.wrap(subject)
 
       command.set({ subject: subject })
 
@@ -442,10 +488,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## if we have a prevSubject then error
       ## since we're invoking this improperly
       if prevSubject and ("optional" not in [].concat(prevSubject))
+        stringifiedArg = $utils.stringifyActual(args[0])
         $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
           args: {
             cmd:  name
-            args: $utils.stringifyActual(args[0])
+            args: if _.isString(args[0]) then "\"#{stringifiedArg}\"" else stringifiedArg
           }
         })
 
@@ -598,6 +645,15 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## jquery sync methods
     getRemotejQueryInstance: jquery.getRemotejQueryInstance
 
+    ## focused sync methods
+    getFocused: focused.getFocused
+    needsFocus: focused.needsFocus
+    fireFocus: focused.fireFocus
+    fireBlur: focused.fireBlur
+
+    ## timer sync methods
+    pauseTimers: timers.pauseTimers
+
     ## snapshots sync methods
     createSnapshot: snapshots.createSnapshot
 
@@ -615,6 +671,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureAttached: ensures.ensureAttached
     ensureExistence: ensures.ensureExistence
     ensureElExistence: ensures.ensureElExistence
+    ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
     ensureReceivability: ensures.ensureReceivability
@@ -701,6 +758,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state(backup)
 
       queue.reset()
+      timers.reset()
 
       cy.removeAllListeners()
 
@@ -857,12 +915,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       return null
 
     onBeforeAppWindowLoad: (contentWindow) ->
-      ## we silence the console when running headlessly
-      ## because console logs are kept around in memory for
-      ## inspection via the developer
-      if not config("isInteractive")
-        silenceConsole(contentWindow)
-
       ## we set window / document props before the window load event
       ## so that we properly handle events coming from the application
       ## from the time that happens BEFORE the load event occurs
@@ -871,6 +923,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       urlNavigationEvent("before:load")
 
       contentWindowListeners(contentWindow)
+
+      wrapNativeMethods(contentWindow)
+
+      snapshots.onBeforeWindowLoad()
+
+      timers.wrap(contentWindow)
 
     onSpecWindowUncaughtException: ->
       ## create the special uncaught exception err
@@ -902,7 +960,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## listeners returned false
       return if _.some(results, returnedFalse)
 
-      ## do all the normal fail stuff and promise cancellation
+      ## do all the normal fail stuff and promise cancelation
       ## but dont re-throw the error
       if r = state("reject")
         r(err)
@@ -912,8 +970,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## When the function returns true, this prevents the firing of the default event handler.
       return true
 
-    getStyles: ->
-      snapshots.getStyles()
+    detachDom: (args...) ->
+      snapshots.detachDom(args...)
+
+    getStyles: (args...) ->
+      snapshots.getStyles(args...)
 
     setRunnable: (runnable, hookName) ->
       debug("setting runnable for", hookName)
@@ -1038,7 +1099,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## but we should still teardown and handle
           ## the error
           fail(err, runnable)
-
   }
 
   _.each privateProps, (obj, key) =>

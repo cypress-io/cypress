@@ -1,6 +1,9 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 
+getActiveElement = ->
+  cy.state("document").activeElement
+
 describe "src/cy/commands/actions/focus", ->
   before ->
     cy
@@ -20,8 +23,9 @@ describe "src/cy/commands/actions/focus", ->
       cy.$$("#focus input").focus ->
         focus = true
 
-      cy.get("#focus input").focus().then ->
+      cy.get("#focus input").focus().then ($input) ->
         expect(focus).to.be.true
+        expect(getActiveElement()).to.eq($input.get(0))
 
     it "bubbles focusin event",  ->
       focusin = false
@@ -44,25 +48,12 @@ describe "src/cy/commands/actions/focus", ->
         .then ->
            expect(blurred).to.be.true
 
-    it "sets forceFocusedEl", ->
-      input = cy.$$("#focus input")
-
-      cy
-        .get("#focus input").focus()
-        .focused().then ($focused) ->
-          expect($focused.get(0)).to.eq(input.get(0))
-
-          ## make sure we have either set the property
-          ## or havent
-          if cy.state("document").hasFocus()
-            expect(cy.state("forceFocusedEl")).not.to.be.ok
-          else
-            expect(cy.state("forceFocusedEl")).to.eq(input.get(0))
-
     it "matches cy.focused()", ->
       button = cy.$$("#button")
 
-      cy.get("#button").focus().focused().then ($focused) ->
+      cy
+      .get("#button").focus().focused()
+      .then ($focused) ->
         expect($focused.get(0)).to.eq button.get(0)
 
     it "returns the original subject", ->
@@ -83,15 +74,68 @@ describe "src/cy/commands/actions/focus", ->
         .then ->
           expect(blurred).to.be.true
 
-    it "can focus the window", ->
+    ## https://allyjs.io/data-tables/focusable.html#footnote-3
+    ## body is focusable, but it will not steal focus away
+    ## from another activeElement or cause any focus or blur events
+    ## to fire
+    it "can focus the body but does not fire focus or blur events", ->
+      { body } = doc = cy.state("document")
+
+      focused = false
+      blurred = false
+
+      onFocus = ->
+        focused = true
+
+      onBlur = ->
+        blurred = true
+
+      cy
+      .get("input:first").focus().then ($input) ->
+        expect(doc.activeElement).to.eq($input.get(0))
+
+        $input.get(0).addEventListener("blur", onBlur)
+        body.addEventListener("focus", onFocus)
+
+        cy.get("body").focus().then ->
+          ## should not have changed actual activeElement
+          expect(doc.activeElement).to.eq($input.get(0))
+
+          $input.get(0).removeEventListener("blur", onBlur)
+          body.removeEventListener("focus", onFocus)
+
+          expect(focused).to.be.false
+          expect(blurred).to.be.false
+
+    it "can focus the window but does not change activeElement or fire blur events", ->
       win = cy.state("window")
+      doc = cy.state("document")
 
-      stub = cy.stub()
+      focused = false
+      blurred = false
 
-      $(win).on("focus", stub)
+      onFocus = ->
+        focused = true
 
-      cy.window().focus().then ->
-        expect(stub).to.be.calledOnce
+      onBlur = ->
+        blurred = true
+
+      cy
+      .get("input:first").focus().then ($input) ->
+        expect(doc.activeElement).to.eq($input.get(0))
+
+        $input.get(0).addEventListener("blur", onBlur)
+        win.addEventListener("focus", onFocus)
+
+        cy.window().focus().then ->
+          ## should not have changed actual activeElement
+          expect(doc.activeElement).to.eq($input.get(0))
+
+          $input.get(0).removeEventListener("blur", onBlur)
+          win.removeEventListener("focus", onFocus)
+
+          expect(focused).to.be.true
+          expect(blurred).to.be.false
 
     it "can focus [contenteditable]", ->
       ce = cy.$$("[contenteditable]:first")
@@ -101,11 +145,13 @@ describe "src/cy/commands/actions/focus", ->
         .focused().then ($ce) ->
           expect($ce.get(0)).to.eq ce.get(0)
 
-    it "increases the timeout delta", ->
-      cy.spy(cy, "timeout")
+    it "can focus svg elements", ->
+      onFocus = cy.stub()
 
-      cy.get("#focus input").focus().then ->
-        expect(cy.timeout).to.be.calledWith(50, true)
+      cy.$$("[data-cy=rect]").focus(onFocus)
+
+      cy.get("[data-cy=rect]").focus().then ->
+        expect(onFocus).to.be.calledOnce
 
     describe "assertion verification", ->
       beforeEach ->
@@ -146,7 +192,7 @@ describe "src/cy/commands/actions/focus", ->
 
         ## we can't end early here because our focus()
         ## command will still be in flight and the promise
-        ## chain will get cancelled before it gets attached
+        ## chain will get canceled before it gets attached
         ## (besides the code will continue to run and create
         ## side effects)
         cy.on "log:added", (attrs, log) ->
@@ -320,25 +366,14 @@ describe "src/cy/commands/actions/focus", ->
 
       cy.get("#focus").within ->
         cy
-          .get("input").focus()
-          .get("button").focus()
-          .then ->
-            expect(blurred).to.be.true
+        .get("input").focus()
+        .then ($input) ->
+          expect(getActiveElement()).to.eq($input.get(0))
 
-    it "black lists the focused element", ->
-      input = cy.$$("#focus input")
-
-      cy
-        .get("#focus input").focus().blur()
-        .focused().should("not.exist").then ($focused) ->
-          expect($focused).to.be.null
-
-          ## make sure we have either set the property
-          ## or havent
-          if cy.state("document").hasFocus()
-            expect(cy.state("blacklistFocusedEl")).not.to.be.ok
-          else
-            expect(cy.state("blacklistFocusedEl")).to.eq(input.get(0))
+        .get("button").focus()
+        .then ($btn) ->
+          expect(blurred).to.be.true
+          expect(getActiveElement()).to.eq($btn.get(0))
 
     it "sends a focusout event", ->
       focusout = false
@@ -365,15 +400,48 @@ describe "src/cy/commands/actions/focus", ->
       cy.get("input:first").focus().blur().then ($input) ->
         expect($input).to.match input
 
-    it "can blur the window", ->
+    it "can blur the body but does not change activeElement or fire blur events", ->
+      { body } = doc = cy.state("document")
+
+      blurred = false
+
+      onBlur = ->
+        blurred = true
+
+      body.addEventListener("blur", onBlur)
+
+      cy
+      .get("body").blur().then ->
+        expect(blurred).to.be.false
+      .get("input:first").focus().then ($input) ->
+        cy
+        .get("body").blur({ force: true })
+        .then ->
+          expect(doc.activeElement).to.eq($input.get(0))
+          body.removeEventListener("blur", onBlur)
+
+          expect(blurred).to.be.false
+
+    it "can blur the window but does not change activeElement", ->
       win = cy.state("window")
+      doc = cy.state("document")
 
-      stub = cy.stub()
+      blurred = false
 
-      $(win).on("blur", stub)
+      onBlur = ->
+        blurred = true
 
-      cy.window().focus().blur().then ->
-        expect(stub).to.be.calledOnce
+      win.addEventListener("blur", onBlur)
+
+      cy
+      .window().blur().then ->
+        expect(blurred).to.be.true
+      .get("input:first").focus().then ($input) ->
+        cy
+        .window().blur({ force: true })
+        .then ->
+          expect(doc.activeElement).to.eq($input.get(0))
+          win.removeEventListener("blur", onBlur)
 
     it "can blur [contenteditable]", ->
       ce = cy.$$("[contenteditable]:first")
@@ -393,11 +461,16 @@ describe "src/cy/commands/actions/focus", ->
         .then ->
           expect(blurred).to.be.true
 
-    it "increases the timeout delta", ->
-      cy.spy(cy, "timeout")
+    it "can blur tabindex", ->
+      blurred = false
 
-      cy.get("input:first").focus().blur().then ->
-        expect(cy.timeout).to.be.calledWith(50, true)
+      cy
+      .$$("#comments").blur ->
+        blurred = true
+      .get(0).focus()
+
+      cy.get("#comments").blur().then ->
+        expect(blurred).to.be.true
 
     it "can force blurring on a non-focused element", ->
       blurred = false
@@ -422,6 +495,14 @@ describe "src/cy/commands/actions/focus", ->
         .get("input:first").blur({force: true})
         .then ->
           expect(blurred).to.be.true
+
+    it "can focus svg elements", ->
+      onBlur = cy.stub()
+
+      cy.$$("[data-cy=rect]").blur(onBlur)
+
+      cy.get("[data-cy=rect]").focus().blur().then ->
+        expect(onBlur).to.be.calledOnce
 
     describe "assertion verification", ->
       beforeEach ->
@@ -603,3 +684,7 @@ describe "src/cy/commands/actions/focus", ->
           done()
 
         cy.get(":text:first").focus().blur().should("have.class", "blured")
+
+      it "can handle window w/length > 1 as a subject", ->
+        cy.window().should('have.length', 2)
+        .focus()

@@ -1,18 +1,16 @@
 require("../spec_helper")
 
-fs             = require("fs-extra")
 path           = require("path")
 Promise        = require("bluebird")
 config         = require("#{root}lib/config")
 fixture        = require("#{root}lib/fixture")
+fs             = require("#{root}lib/util/fs")
 FixturesHelper = require("#{root}/test/support/helpers/fixtures")
 os             = require("os")
 eol            = require("eol")
 
 isWindows = () ->
   os.platform() == "win32"
-
-fs = Promise.promisifyAll(fs)
 
 describe "lib/fixture", ->
   beforeEach ->
@@ -34,7 +32,7 @@ describe "lib/fixture", ->
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) =>
-        expect(err.message).to.include "No fixture exists at:"
+        expect(err.message).to.include "A fixture file could not be found"
         expect(err.message).to.include p
 
   context "unicode escape syntax", ->
@@ -133,6 +131,15 @@ describe "lib/fixture", ->
               }
             }
           """
+
+    ## https://github.com/cypress-io/cypress/issues/3739
+    it "can load a fixture with no extension when a same-named folder also exists", ->
+      projectPath = FixturesHelper.projectPath("folder-same-as-fixture")
+      config.get(projectPath)
+      .then (cfg) =>
+        fixture.get(cfg.fixturesFolder, "foo")
+        .then (fixture) ->
+          expect(fixture).to.deep.eq({ "bar": "baz" })
 
   context "js files", ->
     it "returns valid JS object", ->
@@ -317,7 +324,8 @@ describe "lib/fixture", ->
         throw new Error("should have failed but did not")
       .catch (err) =>
         p = @fixturesFolder + "/does-not-exist"
-        expect(err.message).to.eq "No fixture file found with an acceptable extension. Searched in: #{p}"
+        expect(err.message).to.include "A fixture file could not be found"
+        expect(err.message).to.include "/does-not-exist"
 
   context "new lines", ->
     it "does not remove trailing new lines on .txt", ->

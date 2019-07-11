@@ -1,81 +1,194 @@
-const _ = require('lodash')
-const os = require('os')
-const path = require('path')
-const progress = require('request-progress')
-const Promise = require('bluebird')
-const request = require('request')
-const url = require('url')
-const debug = require('debug')('cypress:cli')
-const { stripIndent } = require('common-tags')
+const arch = require('arch')
+const la = require('lazy-ass')
 const is = require('check-more-types')
+const os = require('os')
+const url = require('url')
+const path = require('path')
+const debug = require('debug')('cypress:cli')
+const request = require('request')
+const Promise = require('bluebird')
+const requestProgress = require('request-progress')
+const { stripIndent } = require('common-tags')
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
-const info = require('./info')
 
-const baseUrl = 'https://download.cypress.io/'
+const defaultBaseUrl = 'https://download.cypress.io/'
+
+const getRealOsArch = () => {
+  // os.arch() returns the arch for which this node was compiled
+  // we want the operating system's arch instead: x64 or x86
+
+  const osArch = arch()
+
+  if (osArch === 'x86') {
+    // match process.platform output
+    return 'ia32'
+  }
+
+  return osArch
+}
+
+const getBaseUrl = () => {
+  if (util.getEnv('CYPRESS_DOWNLOAD_MIRROR')) {
+    let baseUrl = util.getEnv('CYPRESS_DOWNLOAD_MIRROR')
+
+    if (!baseUrl.endsWith('/')) {
+      baseUrl += '/'
+    }
+
+    return baseUrl
+  }
+
+  return defaultBaseUrl
+}
 
 const prepend = (urlPath) => {
-  const endpoint = url.resolve(baseUrl, urlPath)
+  const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
-  const arch = os.arch()
+  const arch = getRealOsArch()
+
   return `${endpoint}?platform=${platform}&arch=${arch}`
 }
 
 const getUrl = (version) => {
   if (is.url(version)) {
     debug('version is already an url', version)
+
     return version
   }
+
   return version ? prepend(`desktop/${version}`) : prepend('desktop')
 }
 
-const statusMessage = (err) =>
-  (err.statusCode
+const statusMessage = (err) => {
+  return (err.statusCode
     ? [err.statusCode, err.statusMessage].join(' - ')
     : err.toString())
+}
 
 const prettyDownloadErr = (err, version) => {
   const msg = stripIndent`
     URL: ${getUrl(version)}
     ${statusMessage(err)}
   `
+
   debug(msg)
 
   return throwFormErrorText(errors.failedDownload)(msg)
 }
 
-// attention:
-// when passing relative path to NPM post install hook, the current working
-// directory is set to the `node_modules/cypress` folder
-// the user is probably passing relative path with respect to root package folder
-function formAbsolutePath (filename) {
-  if (path.isAbsolute(filename)) {
-    return filename
+/**
+ * Checks checksum and file size for the given file. Allows both
+ * values or just one of them to be checked.
+ */
+const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
+  if (expectedSize && expectedChecksum) {
+    debug('verifying checksum and file size')
+
+    return Promise.join(
+      util.getFileChecksum(filename),
+      util.getFileSize(filename),
+      (checksum, filesize) => {
+        if (checksum === expectedChecksum && filesize === expectedSize) {
+          debug('downloaded file has the expected checksum and size ✅')
+
+          return
+        }
+
+        debug('raising error: checksum or file size mismatch')
+        const text = stripIndent`
+          Corrupted download
+
+          Expected downloaded file to have checksum: ${expectedChecksum}
+          Computed checksum: ${checksum}
+
+          Expected downloaded file to have size: ${expectedSize}
+          Computed size: ${filesize}
+        `
+
+        debug(text)
+
+        throw new Error(text)
+      })
   }
-  return path.join(process.cwd(), '..', '..', filename)
+
+  if (expectedChecksum) {
+    debug('only checking expected file checksum %d', expectedChecksum)
+
+    return util.getFileChecksum(filename)
+    .then((checksum) => {
+      if (checksum === expectedChecksum) {
+        debug('downloaded file has the expected checksum ✅')
+
+        return
+      }
+
+      debug('raising error: file checksum mismatch')
+      const text = stripIndent`
+        Corrupted download
+
+        Expected downloaded file to have checksum: ${expectedChecksum}
+        Computed checksum: ${checksum}
+      `
+
+      throw new Error(text)
+    })
+  }
+
+  if (expectedSize) {
+    // maybe we don't have a checksum, but at least CDN returns content length
+    // which we can check against the file size
+    debug('only checking expected file size %d', expectedSize)
+
+    return util.getFileSize(filename)
+    .then((filesize) => {
+      if (filesize === expectedSize) {
+        debug('downloaded file has the expected size ✅')
+
+        return
+      }
+
+      debug('raising error: file size mismatch')
+      const text = stripIndent`
+          Corrupted download
+
+          Expected downloaded file to have size: ${expectedSize}
+          Computed size: ${filesize}
+        `
+
+      throw new Error(text)
+    })
+  }
+
+  debug('downloaded file lacks checksum or size to verify')
+
+  return Promise.resolve()
+
 }
 
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = (options) => {
+const downloadFromUrl = ({ url, downloadDestination, progress }) => {
   return new Promise((resolve, reject) => {
-    const url = getUrl(options.version)
-
     debug('Downloading from', url)
-    debug('Saving file to', options.downloadDestination)
+    debug('Saving file to', downloadDestination)
+
+    let redirectVersion
 
     const req = request({
       url,
       followRedirect (response) {
         const version = response.headers['x-version']
+
+        debug('redirect version:', version)
         if (version) {
           // set the version in options if we have one.
           // this insulates us from potential redirect
           // problems where version would be set to undefined.
-          options.version = version
+          redirectVersion = version
         }
 
         // yes redirect
@@ -85,11 +198,31 @@ const downloadFromUrl = (options) => {
 
     // closure
     let started = null
+    let expectedSize
+    let expectedChecksum
 
-    progress(req, {
-      throttle: options.throttle,
+    requestProgress(req, {
+      throttle: progress.throttle,
     })
     .on('response', (response) => {
+      // we have computed checksum and filesize during test runner binary build
+      // and have set it on the S3 object as user meta data, available via
+      // these custom headers "x-amz-meta-..."
+      // see https://github.com/cypress-io/cypress/pull/4092
+      expectedSize = response.headers['x-amz-meta-size'] ||
+        response.headers['content-length']
+      expectedChecksum = response.headers['x-amz-meta-checksum']
+
+      if (expectedChecksum) {
+        debug('expected checksum %s', expectedChecksum)
+      }
+
+      if (expectedSize) {
+        // convert from string (all Amazon custom headers are strings)
+        expectedSize = Number(expectedSize)
+        debug('expected file size %d', expectedSize)
+      }
+
       // start counting now once we've gotten
       // response headers
       started = new Date()
@@ -115,78 +248,58 @@ const downloadFromUrl = (options) => {
       // starting on our first progress notification
       const elapsed = new Date() - started
 
-      const eta = util.calculateEta(state.percent, elapsed)
+      // request-progress sends a value between 0 and 1
+      const percentage = util.convertPercentToPercentage(state.percent)
+
+      const eta = util.calculateEta(percentage, elapsed)
 
       // send up our percent and seconds remaining
-      options.onProgress(state.percent, util.secsRemaining(eta))
+      progress.onProgress(percentage, util.secsRemaining(eta))
     })
     // save this download here
-    .pipe(fs.createWriteStream(options.downloadDestination))
+    .pipe(fs.createWriteStream(downloadDestination))
     .on('finish', () => {
       debug('downloading finished')
 
-      resolve({
-        filename: options.downloadDestination,
-        downloaded: true,
-      })
+      verifyDownloadedFile(downloadDestination, expectedSize, expectedChecksum)
+      .then(() => {
+        return resolve(redirectVersion)
+      }, reject)
     })
   })
 }
 
-// returns an object with zip filename
-// and a flag if the file was really downloaded
-// or not. Maybe it was already there!
-// {filename: ..., downloaded: true|false}
-const download = (options = {}) => {
-  if (!options.version) {
-    debug('empty Cypress version to download, will try latest')
-    return downloadFromUrl(options)
+/**
+ * Download Cypress.zip from external url to local file.
+ * @param [string] version Could be "3.3.0" or full URL
+ * @param [string] downloadDestination Local filename to save as
+ */
+const start = ({ version, downloadDestination, progress }) => {
+  if (!downloadDestination) {
+    la(is.unemptyString(downloadDestination), 'missing download dir', arguments)
   }
 
-  debug('need to download Cypress version %s', options.version)
-  // first check the original filename
-  return fs.pathExists(options.version).then((exists) => {
-    if (exists) {
-      debug('found file right away', options.version)
-      return {
-        filename: options.version,
-        downloaded: false,
-      }
-    }
+  if (!progress) {
+    progress = { onProgress: () => {
+      return {}
+    } }
+  }
 
-    const possibleFile = formAbsolutePath(options.version)
-    debug('checking local file', possibleFile, 'cwd', process.cwd())
-    return fs.pathExists(possibleFile).then((exists) => {
-      if (exists) {
-        debug('found local file', possibleFile)
-        debug('skipping download')
-        return {
-          filename: possibleFile,
-          downloaded: false,
-        }
-      } else {
-        return downloadFromUrl(options)
-      }
-    })
-  })
-}
+  const url = getUrl(version)
 
-const start = (options) => {
-  _.defaults(options, {
-    version: null,
-    throttle: 100,
-    onProgress: () => {},
-    downloadDestination: path.join(info.getInstallationDir(), 'cypress.zip'),
-  })
+  progress.throttle = 100
 
-  // make sure our 'dist' installation dir exists
-  return info
-  .ensureInstallationDir()
+  debug('needed Cypress version: %s', version)
+  debug('source url %s', url)
+  debug(`downloading cypress.zip to "${downloadDestination}"`)
+
+  // ensure download dir exists
+  return fs.ensureDirAsync(path.dirname(downloadDestination))
   .then(() => {
-    return download(options)
+    return downloadFromUrl({ url, downloadDestination, progress })
   })
   .catch((err) => {
-    return prettyDownloadErr(err, options.version)
+    return prettyDownloadErr(err, version)
   })
 }
 

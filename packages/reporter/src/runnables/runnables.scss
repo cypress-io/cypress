@@ -15,7 +15,6 @@
 
   .runnables {
     padding-left: 0;
-    user-select: none;
   }
 
   .runnable {
@@ -40,6 +39,10 @@
       word-break: break-word;
       user-select: initial;
 
+      a {
+        text-decoration: underline;
+      }
+
       &:empty {
         display: none;
       }
@@ -57,7 +60,11 @@
       > .runnable-wrapper .runnable-controls i.fa-repeat {
         visibility: visible !important;
       }
+    }
 
+    &:focus {
+      outline: 1px dotted #6c6c6c;
+      outline-offset: -1px;
     }
 
     &.runnable-active {
@@ -71,7 +78,9 @@
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
-      width: 12px;
+      min-width: 12px;
+      height: 18px;
+      text-align: center;
     }
 
     &.suite .collapsible-indicator  {
@@ -95,20 +104,30 @@
       }
     }
 
-    &.suite.runnable-pending > div > .runnable-wrapper {
-      border-left: 10px solid lighten($pending, 25%);
-    }
-
+    &.suite.runnable-pending > div > .runnable-wrapper,
     &.test.runnable-pending > .runnable-wrapper {
       border-left: 10px solid lighten($pending, 25%);
     }
 
+    &.suite.runnable-passed > div > .runnable-wrapper,
     &.test.runnable-passed > .runnable-wrapper {
       border-left: 10px solid $pass;
     }
 
-    &.suite.runnable-passed > div > .runnable-wrapper {
-      border-left: 10px solid $pass;
+    &.runnable-skipped > .runnable-wrapper {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-ban;
+        color: #888;
+      }
+
+      .runnable-title {
+        color: #aaa;
+      }
+    }
+
+    &.suite.runnable-skipped > div > .runnable-wrapper,
+    &.test.runnable-skipped > .runnable-wrapper {
+      border-left: 10px solid #9a9aaa;
     }
 
     &.suite.runnable-failed > div > .runnable-wrapper {
@@ -136,6 +155,14 @@
         color: #111;
         font-weight: 800;
         font-size: 13px;
+      }
+    }
+
+    &.suite > div > .runnable-wrapper:focus {
+      outline: 0;
+
+      .runnable-title {
+        outline: 1px dotted;
       }
     }
 
@@ -170,11 +197,23 @@
 
   .runnable-title {
     font-size: 12.5px;
+    min-width: $reporter-contents-min-width;
+    white-space: pre-line;
+
+    &:focus {
+      outline: 1px dotted #6c6c6c;
+    }
   }
 
   .runnable-content-region {
     overflow: auto;
     position: relative;
+    display: inline-flex;
+
+    &:focus {
+      outline: 1px dotted #6c6c6c;
+      outline-offset: 3px;
+    }
   }
 
   .suite > div > .runnable-wrapper,
@@ -209,6 +248,10 @@
 
   .test.runnable-failed .runnable-controls i {
     visibility: visible;
+  }
+
+  .collapsible-header {
+    display: flex;
   }
 
   .test > .runnable-wrapper > .collapsible > .collapsible-header {

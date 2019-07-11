@@ -252,7 +252,10 @@ describe "src/cy/commands/files", ->
           "write:file",
           "foo.txt",
           "contents",
-          { encoding: "utf8" }
+          {
+            encoding: "utf8"
+            flag: "w"
+          }
         )
 
     it "can take encoding as third argument", ->
@@ -263,7 +266,24 @@ describe "src/cy/commands/files", ->
           "write:file",
           "foo.txt",
           "contents",
-          { encoding: "ascii" }
+          {
+            encoding: "ascii"
+            flag: "w"
+          }
+        )
+
+    it "can take encoding as part of options", ->
+      Cypress.backend.resolves(okResponse)
+
+      cy.writeFile("foo.txt", "contents", {encoding: "ascii"}).then ->
+        expect(Cypress.backend).to.be.calledWith(
+          "write:file",
+          "foo.txt",
+          "contents",
+          {
+            encoding: "ascii"
+            flag: "w"
+          }
         )
 
     it "sets the contents as the subject", ->
@@ -271,6 +291,12 @@ describe "src/cy/commands/files", ->
 
       cy.writeFile("foo.txt", "contents").then (subject) ->
         expect(subject).to.equal("contents")
+       
+    it "sets a JSON as the subject", ->
+      Cypress.backend.resolves(okResponse)
+
+      cy.writeFile("foo.json", { name: "Test" }).then (subject) ->
+        expect(subject.name).to.equal("Test")
 
     it "can write a string", ->
       Cypress.backend.resolves(okResponse)
@@ -287,12 +313,33 @@ describe "src/cy/commands/files", ->
 
       cy.writeFile("foo.json", {})
 
-    it "writes the file to the filesystem, overriding existing file", ->
+    it "writes the file to the filesystem, overwriting existing file", ->
       cy
         .writeFile("cypress/fixtures/foo.txt", "")
         .writeFile("cypress/fixtures/foo.txt", "bar")
         .readFile("cypress/fixtures/foo.txt").should("equal", "bar")
         .exec("rm cypress/fixtures/foo.txt")
+
+    describe ".flag", ->
+      it "sends a flag if specified", ->
+        Cypress.backend.resolves(okResponse)
+
+        cy.writeFile("foo.txt", "contents", { flag: "a+" }).then ->
+          expect(Cypress.backend).to.be.calledWith(
+            "write:file",
+            "foo.txt",
+            "contents",
+            {
+              encoding: "utf8",
+              flag: "a+"
+            })
+
+      it "appends content to existing file if specified", ->
+        cy
+          .writeFile("cypress/fixtures/foo.txt", "foo")
+          .writeFile("cypress/fixtures/foo.txt", "bar", { flag: "a+"})
+          .readFile("cypress/fixtures/foo.txt").should("equal", "foobar")
+          .exec("rm cypress/fixtures/foo.txt")
 
     describe ".log", ->
       beforeEach ->

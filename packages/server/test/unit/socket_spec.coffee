@@ -3,21 +3,21 @@ require("../spec_helper")
 _            = require("lodash")
 os           = require("os")
 path         = require("path")
-uuid         = require("node-uuid")
 Promise      = require("bluebird")
 socketIo     = require("@packages/socket")
 extension    = require("@packages/extension")
 httpsAgent   = require("https-proxy-agent")
-open         = require("#{root}lib/util/open")
 errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
 Automation   = require("#{root}lib/automation")
-Fixtures     = require("#{root}/test/support/helpers/fixtures")
 exec         = require("#{root}lib/exec")
 savedState   = require("#{root}lib/saved_state")
 preprocessor = require("#{root}lib/plugins/preprocessor")
+fs           = require("#{root}lib/util/fs")
+open         = require("#{root}lib/util/open")
+Fixtures     = require("#{root}/test/support/helpers/fixtures")
 
 describe "lib/socket", ->
   beforeEach ->
@@ -40,7 +40,7 @@ describe "lib/socket", ->
       @server.open(@cfg)
       .then =>
         @options = {
-          onSavedStateChanged: @sandbox.spy()
+          onSavedStateChanged: sinon.spy()
         }
 
         @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
@@ -64,11 +64,28 @@ describe "lib/socket", ->
           agent: agent
           path: socketIoRoute
           transports: ["websocket"]
+          parser: socketIo.circularParser
         })
       return
 
     afterEach ->
       @client.disconnect()
+
+    ## https://github.com/cypress-io/cypress/issues/4346
+    it "can emit a circular object without crashing", (done) ->
+      foo = {
+        bar: {}
+      }
+
+      foo.bar.baz = foo
+
+      ## going to stub exec here just so we have something that we can
+      ## control the resolved value of
+      sinon.stub(exec, 'run').resolves(foo)
+
+      @client.emit "backend:request", "exec", "quuz", (res) ->
+        expect(res.response).to.deep.eq(foo)
+        done()
 
     context "on(automation:request)", ->
       describe "#onAutomation", ->
@@ -105,7 +122,7 @@ describe "lib/socket", ->
           delete global.chrome
 
         it "does not return cypress namespace or socket io cookies", (done) ->
-          @sandbox.stub(chrome.cookies, "getAll")
+          sinon.stub(chrome.cookies, "getAll")
           .withArgs({domain: "localhost"})
           .yieldsAsync([
             {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
@@ -125,13 +142,13 @@ describe "lib/socket", ->
             done()
 
         it "does not clear any namespaced cookies", (done) ->
-          @sandbox.stub(chrome.cookies, "getAll")
+          sinon.stub(chrome.cookies, "getAll")
           .withArgs({name: "session"})
           .yieldsAsync([
             {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
           ])
 
-          @sandbox.stub(chrome.cookies, "remove")
+          sinon.stub(chrome.cookies, "remove")
           .withArgs({name: "session", url: "https://google.com/"})
           .yieldsAsync(
             {name: "session", url: "https://google.com/", storeId: "123"}
@@ -169,11 +186,11 @@ describe "lib/socket", ->
         it "returns true when tab matches magic string", (done) ->
           code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
-          @sandbox.stub(chrome.tabs, "query")
+          sinon.stub(chrome.tabs, "query")
           .withArgs({windowType: "normal"})
           .yieldsAsync([{id: 1, url: "http://localhost"}])
 
-          @sandbox.stub(chrome.tabs, "executeScript")
+          sinon.stub(chrome.tabs, "executeScript")
           .withArgs(1, {code: code})
           .yieldsAsync(["string"])
 
@@ -182,10 +199,10 @@ describe "lib/socket", ->
             done()
 
         it "returns true after retrying", (done) ->
-          @sandbox.stub(extension.app, "query").resolves(true)
+          sinon.stub(extension.app, "query").resolves(true)
 
           ## just force isSocketConnected to return false until the 4th retry
-          iSC = @sandbox.stub(@socket, "isSocketConnected")
+          iSC = sinon.stub(@socket, "isSocketConnected")
 
           iSC
           .onCall(0).returns(false)
@@ -205,11 +222,11 @@ describe "lib/socket", ->
         it "returns false when times out", (done) ->
           code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
-          @sandbox.stub(chrome.tabs, "query")
+          sinon.stub(chrome.tabs, "query")
           .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
           .yieldsAsync([{id: 1}])
 
-          @sandbox.stub(chrome.tabs, "executeScript")
+          sinon.stub(chrome.tabs, "executeScript")
           .withArgs(1, {code: code})
           .yieldsAsync(["foobarbaz"])
 
@@ -220,7 +237,7 @@ describe "lib/socket", ->
 
         it "retries multiple times and stops after timing out", (done) ->
           ## just force isSocketConnected to return false until the 4th retry
-          iSC = @sandbox.stub(@socket, "isSocketConnected")
+          iSC = sinon.stub(@socket, "isSocketConnected")
 
           ## reduce the timeout so we dont have to wait so long
           @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
@@ -234,11 +251,11 @@ describe "lib/socket", ->
 
             _.delay ->
               ## wait another 100ms and make sure
-              ## that it was cancelled and not continuously
+              ## that it was canceled and not continuously
               ## retried!
               ## if we remove Promise.config({cancellation: true})
               ## then this will fail. bluebird has changed its
-              ## cancellation logic before and so we want to use
+              ## cancelation logic before and so we want to use
               ## an integration test to ensure this works as expected
               expect(callCount).to.eq(iSC.callCount)
               done()
@@ -246,7 +263,7 @@ describe "lib/socket", ->
 
       describe "options.onAutomationRequest", ->
         beforeEach ->
-          @ar = @sandbox.stub(@automation, "request")
+          @ar = sinon.stub(@automation, "request")
 
         it "calls onAutomationRequest with message and data", (done) ->
           @ar.withArgs("focus", {foo: "bar"}).resolves([])
@@ -284,7 +301,7 @@ describe "lib/socket", ->
       it "emits 'automation:push:message'", (done) ->
         data = {cause: "explicit", cookie: {name: "foo", value: "bar"}, removed: true}
 
-        emit = @sandbox.stub(@socket.io, "emit")
+        emit = sinon.stub(@socket.io, "emit")
 
         @client.emit "automation:push:request", "change:cookie", data, ->
           expect(emit).to.be.calledWith("automation:push:message", "change:cookie", {
@@ -296,7 +313,7 @@ describe "lib/socket", ->
 
     context "on(open:finder)", ->
       beforeEach ->
-        @sandbox.stub(open, "opn").resolves()
+        sinon.stub(open, "opn").resolves()
 
       it "calls opn with path", (done) ->
         @client.emit "open:finder", @cfg.parentTestsFolder, =>
@@ -305,7 +322,7 @@ describe "lib/socket", ->
 
     context "on(watch:test:file)", ->
       it "calls socket#watchTestFileByPath with config, filePath", (done) ->
-        @sandbox.stub(@socket, "watchTestFileByPath")
+        sinon.stub(@socket, "watchTestFileByPath")
 
         @client.emit "watch:test:file", "path/to/file", =>
           expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file")
@@ -332,14 +349,15 @@ describe "lib/socket", ->
 
       it "errors when fixtures fails", (done) ->
         cb = (resp) ->
-          expect(resp.error.message).to.include "No fixture exists at:"
+          expect(resp.error.message).to.include "A fixture file could not be found"
+          expect(resp.error.message).to.include "does-not-exist.txt"
           done()
 
         @client.emit("backend:request", "get:fixture", "does-not-exist.txt", {}, cb)
 
     context "on(http:request)", ->
       it "calls socket#onRequest", (done) ->
-        @sandbox.stub(@options, "onRequest").resolves({foo: "bar"})
+        sinon.stub(@options, "onRequest").resolves({foo: "bar"})
 
         @client.emit "backend:request", "http:request", "foo", (resp) ->
           expect(resp.response).to.deep.eq({foo: "bar"})
@@ -349,7 +367,7 @@ describe "lib/socket", ->
       it "catches errors and clones them", (done) ->
         err = new Error("foo bar baz")
 
-        @sandbox.stub(@options, "onRequest").rejects(err)
+        sinon.stub(@options, "onRequest").rejects(err)
 
         @client.emit "backend:request", "http:request", "foo", (resp) ->
           expect(resp.error).to.deep.eq(errors.clone(err))
@@ -358,21 +376,21 @@ describe "lib/socket", ->
 
     context "on(exec)", ->
       it "calls exec#run with project root and options", (done) ->
-        run = @sandbox.stub(exec, "run").returns(Promise.resolve("Desktop Music Pictures"))
+        run = sinon.stub(exec, "run").returns(Promise.resolve("Desktop Music Pictures"))
 
         @client.emit "backend:request", "exec", { cmd: "ls" }, (resp) =>
           expect(run).to.be.calledWith(@cfg.projectRoot, { cmd: "ls" })
           expect(resp.response).to.eq("Desktop Music Pictures")
           done()
 
-      it "errors when execution fails, passing through timedout", (done) ->
+      it "errors when execution fails, passing through timedOut", (done) ->
         error = new Error("command not found: lsd")
-        error.timedout = true
-        @sandbox.stub(exec, "run").rejects(error)
+        error.timedOut = true
+        sinon.stub(exec, "run").rejects(error)
 
         @client.emit "backend:request", "exec", { cmd: "lsd" }, (resp) =>
           expect(resp.error.message).to.equal("command not found: lsd")
-          expect(resp.error.timedout).to.be.true
+          expect(resp.error.timedOut).to.be.true
           done()
 
     context "on(save:app:state)", ->
@@ -383,20 +401,20 @@ describe "lib/socket", ->
 
   context "unit", ->
     beforeEach ->
-      @mockClient = @sandbox.stub({
+      @mockClient = sinon.stub({
         on: ->
         emit: ->
       })
 
       @io = {
-        of: @sandbox.stub().returns({on: ->})
-        on: @sandbox.stub().withArgs("connection").yields(@mockClient)
-        emit: @sandbox.stub()
-        close: @sandbox.stub()
+        of: sinon.stub().returns({on: ->})
+        on: sinon.stub().withArgs("connection").yields(@mockClient)
+        emit: sinon.stub()
+        close: sinon.stub()
       }
 
-      @sandbox.stub(Socket.prototype, "createIo").returns(@io)
-      @sandbox.stub(preprocessor.emitter, "on")
+      sinon.stub(Socket.prototype, "createIo").returns(@io)
+      sinon.stub(preprocessor.emitter, "on")
 
       @server.open(@cfg)
       .then =>
@@ -431,7 +449,7 @@ describe "lib/socket", ->
         @socket.testsDir = Fixtures.project "todos/tests"
         @filePath        = @socket.testsDir + "/test1.js"
 
-        @sandbox.stub(preprocessor, "getFile").resolves()
+        sinon.stub(preprocessor, "getFile").resolves()
 
       it "returns undefined if trying to watch special path __all", ->
         result = @socket.watchTestFileByPath(@cfg, "integration/__all")
@@ -443,25 +461,25 @@ describe "lib/socket", ->
         expect(result).to.be.undefined
 
       it "closes existing watched test file", ->
-        @sandbox.stub(preprocessor, "removeFile")
+        sinon.stub(preprocessor, "removeFile")
         @socket.testFilePath = "tests/test1.js"
         @socket.watchTestFileByPath(@cfg, "test2.js").then =>
           expect(preprocessor.removeFile).to.be.calledWithMatch("test1.js", @cfg)
 
       it "sets #testFilePath", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js").then =>
-          expect(@socket.testFilePath).to.eq "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "integration#{path.sep}test1.js").then =>
+          expect(@socket.testFilePath).to.eq "tests#{path.sep}test1.js"
 
       it "can normalizes leading slash", ->
-        @socket.watchTestFileByPath(@cfg, "/integration/test1.js").then =>
-          expect(@socket.testFilePath).to.eq "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "#{path.sep}integration#{path.sep}test1.js").then =>
+          expect(@socket.testFilePath).to.eq "tests#{path.sep}test1.js"
 
       it "watches file by path", ->
-        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
-        expect(preprocessor.getFile).to.be.calledWith("tests/test2.coffee", @cfg)
+        @socket.watchTestFileByPath(@cfg, "integration#{path.sep}test2.coffee")
+        expect(preprocessor.getFile).to.be.calledWith("tests#{path.sep}test2.coffee", @cfg)
 
       it "triggers watched:file:changed event when preprocessor 'file:updated' is received", (done) ->
-        @sandbox.stub(fs, "statAsync").resolves()
+        sinon.stub(fs, "statAsync").resolves()
         @cfg.watchForFileChanges = true
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee")
         preprocessor.emitter.on.withArgs("file:updated").yield("integration/test2.coffee")
@@ -483,7 +501,7 @@ describe "lib/socket", ->
           expect(@mockClient.on).to.be.calledWith("watch:test:file")
 
         it "passes filePath to #watchTestFileByPath", ->
-          watchTestFileByPath = @sandbox.stub(@socket, "watchTestFileByPath")
+          watchTestFileByPath = sinon.stub(@socket, "watchTestFileByPath")
 
           @mockClient.on.withArgs("watch:test:file").yields("foo/bar/baz")
 
@@ -492,7 +510,7 @@ describe "lib/socket", ->
 
       describe "#onTestFileChange", ->
         beforeEach ->
-          @sandbox.spy(fs, "statAsync")
+          sinon.spy(fs, "statAsync")
 
         it "calls statAsync on .js file", ->
           @socket.onTestFileChange("foo/bar.js").catch(->).then =>

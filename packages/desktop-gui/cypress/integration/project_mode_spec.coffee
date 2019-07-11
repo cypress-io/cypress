@@ -4,25 +4,56 @@ describe "Project Mode", ->
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
 
-    cy.visitIndex().then (win) =>
-      { start, @ipc } = win.App
+  context "Mac", ->
+    beforeEach ->
+      cy.visitIndex().then (win) =>
+        { start, @ipc } = win.App
 
-      cy.stub(@ipc, "onMenuClicked")
-      cy.stub(@ipc, "onFocusTests")
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
-      cy.stub(@ipc, "updaterCheck").resolves(false)
-      cy.stub(@ipc, "openProject").resolves(@config)
-      cy.stub(@ipc, "getSpecs").yields(null, @specs)
+        @config.projectName = "my-kitchen-sink"
 
-      @getCurrentUser = @util.deferred()
+        cy.stub(@ipc, "onMenuClicked")
+        cy.stub(@ipc, "onFocusTests")
+        cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
+        cy.stub(@ipc, "updaterCheck").resolves(false)
+        cy.stub(@ipc, "openProject").resolves(@config)
+        cy.stub(@ipc, "getSpecs").yields(null, @specs)
 
-      start()
+        @getCurrentUser = @util.deferred()
 
-  it "goes straight to project specs list", ->
-    cy.shouldBeOnProjectSpecs()
+        start()
 
-  it "sets title as project path", ->
-    cy.title().should("eq", "/foo/bar")
+    it "goes straight to project specs list", ->
+      cy.shouldBeOnProjectSpecs()
 
-  it "shows project name in nav", ->
-    cy.get('.left-nav').should("have.text", "bar")
+    it "sets title as project path", ->
+      cy.title().should("eq", "/foo/bar")
+
+    it "shows project name in nav", ->
+      cy.get('.left-nav').should("contain", @config.projectName)
+        .and("not.contain", "foo")
+
+  context "Windows", ->
+    beforeEach ->
+      cy.visitIndex().then (win) =>
+        { start, @ipc } = win.App
+
+        cy.stub(@ipc, "onMenuClicked")
+        cy.stub(@ipc, "onFocusTests")
+        cy.stub(@ipc, "getOptions").resolves({projectRoot: "C:\\foo\\bar"})
+        cy.stub(@ipc, "updaterCheck").resolves(false)
+        cy.stub(@ipc, "openProject").resolves(@config)
+        cy.stub(@ipc, "getSpecs").yields(null, @specs)
+
+        @getCurrentUser = @util.deferred()
+
+        start()
+
+    it "goes straight to project specs list", ->
+      cy.shouldBeOnProjectSpecs()
+
+    it "sets title as project path", ->
+      cy.title().should("eq", "C:\\foo\\bar")
+
+    it "shows project name in nav", ->
+      cy.get('.left-nav').should("contain", @config.projectName)
+        .and("not.contain", "foo")

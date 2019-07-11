@@ -1,28 +1,19 @@
-<!-- Want a bug fixed quickly? Please provide a repository to reproduce the issue. -->
-
-- Operating System:
-- Cypress Version:
-- Browser Version:
-
-### Is this a Feature or Bug?
-
+<!-- Is this a question? Don't open an issue. Ask in our chat https://on.cypress.io/chat  -->
 
 ### Current behavior:
 
+<!-- images, stack traces, etc -->
 
 ### Desired behavior:
 
+<!-- A clear concise description of what you want to happen -->
 
-### How to reproduce:
+### Steps to reproduce: (app code and test code)
 
+<!-- Issues without reproducible steps WILL BE CLOSED -->
 
-#### Test code:
+<!-- You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then tell us the repo/branch to try. -->
 
-```js
+### Versions
 
-```
-
-**Tip** in order for us to reproduce the bug you can fork [cypress-io/cypress-test-tiny](https://github.com/cypress-io/cypress-test-tiny) repo and setup the failing test. Then just tells us the repo and branch to try!
-
-### Additional Info (images, stack traces, etc)
-
+<!-- Cypress, operating system, browser -->

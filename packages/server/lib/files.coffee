@@ -1,12 +1,10 @@
-fs      = require("fs-extra")
 path    = require("path")
 Promise = require("bluebird")
-
-fs = Promise.promisifyAll(fs)
+fs      = require("./util/fs")
 
 module.exports = {
   readFile: (projectRoot, file, options = {}) ->
-    filePath = path.join(projectRoot, file)
+    filePath = path.resolve(projectRoot, file)
     readFn = if path.extname(filePath) is ".json"
       fs.readJsonAsync
     else
@@ -23,8 +21,12 @@ module.exports = {
       throw err
 
   writeFile: (projectRoot, file, contents, options = {}) ->
-    filePath = path.join(projectRoot, file)
-    fs.outputFileAsync(filePath, contents, options.encoding or "utf8")
+    filePath = path.resolve(projectRoot, file)
+    writeOptions = {
+      encoding: options.encoding or "utf8"
+      flag: options.flag or "w"
+    }
+    fs.outputFile(filePath, contents, writeOptions)
     .then ->
       {
         contents: contents

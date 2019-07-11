@@ -25,16 +25,23 @@ const nonPackageDirs = ['cli/']
 const getDirs = () => {
   const logDirs = (dirs) => {
     log('found packages\n%s', dirs.join('\n'))
+
     return dirs
   }
+
   return globAsync('packages/*/')
   .then(logDirs)
-  .then((dirs) => dirs.concat(nonPackageDirs))
-  .map((dir) => path.join(process.cwd(), dir).replace(/\/$/, ''))
+  .then((dirs) => {
+    return dirs.concat(nonPackageDirs)
+  })
+  .map((dir) => {
+    return path.join(process.cwd(), dir).replace(/\/$/, '')
+  })
 }
 
 const packageNameInArray = (dir, packages) => {
   const packageName = packageNameFromPath(dir)
+
   return _.includes(packages, packageName)
 }
 
@@ -63,15 +70,19 @@ const filterDirsByCmd = (dirs, cmd) => {
     default:
       return dirs.filter((dir) => {
         const packageJson = require(path.resolve(dir, 'package'))
+
         return !!packageJson.scripts && !!packageJson.scripts[cmd]
       })
   }
 }
 
 const checkDirsLength = (dirs, errMessage) => {
-  if (dirs.length) { return dirs }
+  if (dirs.length) {
+    return dirs
+  }
 
   const err = new Error(errMessage)
+
   err.noPackages = true
   throw err
 }
@@ -81,7 +92,9 @@ const mapTasks = (cmd, packages) => {
 
   let runCommand
 
-  switch (cmd) {
+  const command = cmd.split(' ', 2)[0]
+
+  switch (command) {
     case 'install':
     case 'i':
     case 'test':
@@ -97,6 +110,7 @@ const mapTasks = (cmd, packages) => {
 
   return packages.map((dir, index) => {
     const packageName = packageNameFromPath(dir)
+
     return {
       command: runCommand,
       options: {
@@ -113,15 +127,22 @@ const mapTasks = (cmd, packages) => {
 let stderrOutput = ''
 const collectStderr = through(function (data) {
   stderrOutput += data.toString()
+
   return this.queue(data)
 })
 
 collectStderr.pipe(process.stderr)
 
-const noPackagesError = (err) => err.noPackages
+const noPackagesError = (err) => {
+  return err.noPackages
+}
 // only consider printing a list of errors
-const resultsError = (err) => Array.isArray(err.results)
-const failProcess = () => process.exit(1)
+const resultsError = (err) => {
+  return Array.isArray(err.results)
+}
+const failProcess = () => {
+  return process.exit(1)
+}
 
 const printOtherErrors = (err) => {
   console.error(err.message)
@@ -132,6 +153,7 @@ const printOtherErrors = (err) => {
 
 function hasPackageJson (dir) {
   const packagePath = path.join(dir, 'package.json')
+
   return fs.existsSync(packagePath)
 }
 
@@ -143,26 +165,47 @@ module.exports = (cmd, options) => {
   const packagesFilter = options.package || options.packages
   const packagesReject = options['skip-package'] || options['skip-packages']
 
+  if (packagesFilter === 'none') return
+
   return getDirs()
   .then(keepDirsWithPackageJson)
-  .then((dirs) => filterDirsByPackage(dirs, packagesFilter))
-  .then((dirs) => rejectDirsByPackage(dirs, packagesReject))
-  .then((dirs) => checkDirsLength(dirs, `No packages were found with the filter '${packagesFilter}'`))
-  .then((dirs) => filterDirsByCmd(dirs, cmd))
+  .then((dirs) => {
+    return filterDirsByPackage(dirs, packagesFilter)
+  })
+  .then((dirs) => {
+    return rejectDirsByPackage(dirs, packagesReject)
+  })
+  .then((dirs) => {
+    return checkDirsLength(dirs, `No packages were found with the filter '${packagesFilter}'`)
+  })
+  .then((dirs) => {
+    return filterDirsByCmd(dirs, cmd)
+  })
   .then((dirs) => {
     let errMessage = `No packages were found with the task '${cmd}'`
+
     if (packagesFilter) {
       errMessage += ` and the filter '${packagesFilter}'`
     }
+
     return checkDirsLength(dirs, errMessage)
   })
-  .then((dirs) => mapTasks(cmd, dirs))
+  .then((dirs) => {
+    if (options.args) {
+      cmd += ` ${options.args}`
+    }
+
+    return mapTasks(cmd, dirs)
+  })
   .then((tasks) => {
     const runSerially = Boolean(options.serial)
+
     if (runSerially) {
       console.log('⚠️ running jobs serially')
     }
+
     const parallel = !runSerially
+
     return runAll(tasks, {
       parallel,
       printLabel: tasks.length > 1,
@@ -177,12 +220,15 @@ module.exports = (cmd, options) => {
   // http://bluebirdjs.com/docs/api/catch.html#filtered-catch
   .catch(noPackagesError, (err) => {
     console.error(chalk.red(`\n${err.message}`))
+
     return failProcess()
   })
   .catch(resultsError, (err) => {
     const results = AsciiTable.factory({
       heading: ['package', 'exit code'],
-      rows: err.results.map((result) => [result.name.replace(`:${cmd}`, ''), result.code]),
+      rows: err.results.map((result) => {
+        return [result.name.replace(`:${cmd}`, ''), result.code]
+      }),
     }).toString()
 
     console.error(chalk.red(`\nOne or more tasks failed running 'npm run all ${cmd}'.`))

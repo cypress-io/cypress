@@ -2,7 +2,17 @@ _ = require("lodash")
 $ = require("jquery")
 $dom = require("../dom")
 
-selectors = "visible hidden selected checked enabled disabled".split(" ")
+selectors = {
+  visible: "visible"
+  hidden: "hidden"
+  selected: "selected"
+  checked: "checked"
+  enabled: "enabled"
+  disabled: "disabled"
+  focus: "focused"
+  focused: "focused"
+}
+
 attrs = {
   attr: "attribute"
   css: "CSS property"
@@ -33,14 +43,37 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
     try
       # ## reset obj to wrapped
+      orig = ctx._obj
       ctx._obj = wrap(ctx)
+
+      if ctx._obj.length is 0
+        ctx._obj = ctx._obj.selector
 
       ## apply the assertion
       ctx.assert(bool, args...)
+      ctx._obj = orig
     catch err
       ## send it up with the obj and whether it was negated
       callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
 
+  assertPartial = (ctx, method, actual, expected, message, notMessage, args...) ->
+    if ctx.__flags.contains
+      return assert(
+        ctx
+        method
+        _.includes(actual, expected),
+        'expected #{this}'+ ' to contain ' + message
+        'expected #{this}'+ ' not to contain ' + notMessage
+        args...
+      )
+    return assert(
+      ctx
+      method
+      actual is expected
+      'expected #{this}'+ ' to have ' + message
+      'expected #{this}'+ ' not to have ' + notMessage
+      args...
+    )
   chai.Assertion.addMethod "data", ->
     assertDom(@, "data")
 
@@ -82,12 +115,13 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
     actual = wrap(@).html()
 
-    assert(
+    assertPartial(
       @,
       "html",
-      actual is html,
-      'expected #{this} to have HTML #{exp}, but the HTML was #{act}',
-      'expected #{this} not to have HTML #{exp}',
+      actual
+      html
+      'HTML #{exp}, but the HTML was #{act}',
+      'HTML #{exp}',
       html,
       actual
     )
@@ -103,12 +137,13 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
     actual = wrap(@).text()
 
-    assert(
+    assertPartial(
       @,
       "text",
-      actual is text,
-      'expected #{this} to have text #{exp}, but the text was #{act}',
-      'expected #{this} not to have text #{exp}',
+      actual
+      text
+      'text #{exp}, but the text was #{act}',
+      'text #{exp}',
       text,
       actual
     )
@@ -124,12 +159,13 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
     actual = wrap(@).val()
 
-    assert(
+    assertPartial(
       @,
       "value",
-      actual is value,
-      'expected #{this} to have value #{exp}, but the value was #{act}',
-      'expected #{this} not to have value #{exp}',
+      actual
+      value
+      'value #{exp}, but the value was #{act}',
+      'value #{exp}',
       value,
       actual
     )
@@ -172,7 +208,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       else
         _super.apply(@, arguments)
 
-  _.each selectors, (selector) ->
+  _.each selectors, (selectorName, selector) ->
     chai.Assertion.addProperty selector, ->
       assert(
         @,
@@ -180,7 +216,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
         wrap(@).is(":" + selector),
         'expected #{this} to be #{exp}',
         'expected #{this} not to be #{exp}',
-        selector
+        selectorName
       )
 
   _.each attrs, (description, attr) ->
@@ -224,7 +260,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
         assert(
           @,
           attr,
-          actual and actual is val,
+          actual? and actual is val,
           message,
           negatedMessage,
           val,

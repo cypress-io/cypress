@@ -9,6 +9,7 @@ describe('Cypress Example', function () {
   it('returns path to example_spec', function () {
     let result = example.getPathToExample()
     let expected = `${cwd}/cypress/integration/example_spec.js`
+
     expect(normalize(result)).to.eq(normalize(expected))
   })
 })

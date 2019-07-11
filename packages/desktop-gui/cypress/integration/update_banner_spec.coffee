@@ -79,13 +79,14 @@ describe "Update Banner", ->
 
   describe "in project mode", ->
     beforeEach ->
-      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectRoot: "/foo/bar"})
       @start()
       @updaterCheck.resolve(NEW_VERSION)
       cy.contains("Update").click()
 
     it "modal has info about updating package.json", ->
       cy.get(".modal").contains("npm install --save-dev cypress@#{NEW_VERSION}")
+      cy.get(".modal").contains("yarn add cypress@#{NEW_VERSION}")
 
     it "links to 'open' doc on click of open command", ->
       cy.get(".modal").contains("cypress open").click().then =>
@@ -97,7 +98,7 @@ describe "Update Banner", ->
 
   describe "in specs list", ->
     beforeEach ->
-      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({version: OLD_VERSION, projectRoot: "/foo/bar"})
       cy.stub(@ipc, "openProject").resolves(@config)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       @start()
@@ -105,7 +106,7 @@ describe "Update Banner", ->
       cy.get("#updates-available")
 
     it "displays all folders/specs within visible area", ->
-      cy.get(".folder-display-name")
+      cy.get(".folder-name")
         .last()
         .scrollIntoView()
         .should("be.visible")

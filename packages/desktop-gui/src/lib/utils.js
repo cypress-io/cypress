@@ -1,18 +1,14 @@
 import _ from 'lodash'
-import moment from 'moment'
 import gravatar from 'gravatar'
+import duration from '../../../server/lib/util/duration'
 
-const osNameLookup = {
-  darwin: 'apple',
-}
+const cyDirRegex = /^cypress\/integration\//g
 
 const osIconLookup = {
-  windows: 'windows',
+  win32: 'windows',
   darwin: 'apple',
   linux: 'linux',
 }
-
-const browserNameLookup = {}
 
 const browserIconLookup = {
   chrome: 'chrome',
@@ -22,16 +18,12 @@ const browserIconLookup = {
 }
 
 module.exports = {
+  durationFormatted: duration.format,
+
   osIcon: (osName) => {
     if (!osName) return ''
 
     return osIconLookup[osName] || 'desktop'
-  },
-
-  osNameFormatted: (osName) => {
-    if (!osName) return ''
-
-    return _.capitalize(osNameLookup[osName] || osName)
   },
 
   browserIcon: (browserName) => {
@@ -43,9 +35,8 @@ module.exports = {
   browserNameFormatted: (browserName) => {
     if (!browserName) return ''
 
-    return _.capitalize(browserNameLookup[browserName] || browserName)
+    return _.capitalize(browserName)
   },
-
 
   browserVersionFormatted: (browserVersion) => {
     if (!browserVersion) return ''
@@ -57,7 +48,9 @@ module.exports = {
   gravatarUrl: (email) => {
     let opts = { size: '13', default: 'mm' }
 
-    if (!email) { opts.forcedefault = 'y' }
+    if (!email) {
+      opts.forcedefault = 'y'
+    }
 
     return gravatar.url(email, opts, true)
   },
@@ -85,13 +78,38 @@ module.exports = {
     }
   },
 
-  durationFormatted: (durationInMs) => {
-    const duration = moment.duration(durationInMs)
+  stripLeadingCyDirs (spec) {
+    if (!spec) return null
 
-    let durationHours = duration.hours() ? `${duration.hours()}h ` : ''
-    let durationMinutes = duration.minutes() ? `${duration.minutes()}m ` : ''
-    let durationSeconds = duration.seconds() ? `${duration.seconds()}s ` : ''
+    // remove leading 'cypress/integration' from spec
+    return spec.replace(cyDirRegex, '')
+  },
 
-    return durationHours + durationMinutes + durationSeconds
+  stripSharedDirsFromDir2 (dir1, dir2, osName) {
+    const sep = osName === 'win32' ? '\\' : '/'
+
+    const arr1 = dir1.split(sep)
+    const arr2 = dir2.split(sep)
+
+    let found = false
+
+    return _
+    .chain(arr2)
+    .transform((memo, segment, index) => {
+      const segmentsFromEnd1 = arr1.slice(-(index + 1))
+      const segmentsFromBeg2 = arr2.slice(0, index + 1)
+
+      if (_.isEqual(segmentsFromBeg2, segmentsFromEnd1)) {
+        return found = arr2.slice(index + 1)
+      }
+
+      if (found) {
+        memo.push(...found)
+
+        return false
+      }
+    })
+    .join(sep)
+    .value()
   },
 }

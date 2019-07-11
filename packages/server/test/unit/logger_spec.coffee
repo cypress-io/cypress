@@ -2,7 +2,6 @@ require("../spec_helper")
 
 _             = require("lodash")
 path          = require("path")
-winston       = require("winston")
 Promise       = require("bluebird")
 appData       = require("#{root}lib/util/app_data")
 konfig        = require("#{root}lib/konfig")
@@ -80,7 +79,7 @@ describe "lib/logger", ->
   describe "#exitOnError", ->
     it "invokes logger.defaultErrorHandler", ->
       err = new Error()
-      defaultErrorHandler = @sandbox.stub(logger, "defaultErrorHandler")
+      defaultErrorHandler = sinon.stub(logger, "defaultErrorHandler")
       logger.exitOnError(err)
       expect(defaultErrorHandler).to.be.calledWith err
 
@@ -89,8 +88,8 @@ describe "lib/logger", ->
       logger.unsetSettings()
 
       @err    = new Error()
-      @exit   = @sandbox.stub(process, "exit")
-      @create = @sandbox.stub(exception, "create").resolves()
+      @exit   = sinon.stub(process, "exit")
+      @create = sinon.stub(exception, "create").resolves()
 
     afterEach ->
       logger.unsetSettings()
@@ -125,7 +124,7 @@ describe "lib/logger", ->
           expect(@exit).to.be.calledWith(1)
 
       it "calls Log#errorhandler", ->
-        fn = @sandbox.spy()
+        fn = sinon.spy()
         logger.setErrorHandler(fn)
         logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
@@ -139,7 +138,7 @@ describe "lib/logger", ->
 
   describe "unhandledRejection", ->
     it "passes error to defaultErrorHandler", ->
-      defaultErrorHandler = @sandbox.stub(logger, "defaultErrorHandler")
+      defaultErrorHandler = sinon.stub(logger, "defaultErrorHandler")
 
       handlers = process.listeners("unhandledRejection")
 
@@ -150,7 +149,7 @@ describe "lib/logger", ->
       handlers[0](err)
 
     it "catches unhandled rejections", ->
-      defaultErrorHandler = @sandbox.stub(logger, "defaultErrorHandler")
+      defaultErrorHandler = sinon.stub(logger, "defaultErrorHandler")
 
       Promise
         .resolve("")

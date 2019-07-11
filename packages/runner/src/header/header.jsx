@@ -29,11 +29,12 @@ export default class Header extends Component {
             wrapperClassName='selector-playground-toggle-tooltip-wrapper'
           >
             <button
+              aria-label='Open Selector Playground'
               className='selector-playground-toggle'
               onClick={this._togglePlaygroundOpen}
               disabled={state.isLoading || state.isRunning}
             >
-              <i className='fa fa-crosshairs' />
+              <i aria-hidden="true" className='fa fa-crosshairs' />
             </button>
           </Tooltip>
           <div
@@ -51,7 +52,7 @@ export default class Header extends Component {
         <ul className='menu'>
           <li className={cs('viewport-info', { 'open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
-              {state.width} x {state.height} <span className='viewport-scale'>({state.displayScale}%)</span>
+              {state.width} <span className='the-x'>x</span> {state.height} <span className='viewport-scale'>({state.displayScale}%)</span>
               <i className='fa fa-fw fa-info-circle'></i>
             </button>
             <div className='viewport-menu'>
@@ -59,12 +60,12 @@ export default class Header extends Component {
               <p>Additionally you can override the default viewport dimensions by specifying these values in your <code>cypress.json</code>.</p>
               <pre>{/* eslint-disable indent */}
 {`{
-  viewportWidth: ${state.defaults.width},
-  viewportHeight: ${state.defaults.height}
+  "viewportWidth": ${state.defaults.width},
+  "viewportHeight": ${state.defaults.height}
 }`}
               </pre>{/* eslint-enable indent */}
               <p>
-                <a href='https://on.cypress.io/viewport' target='_blank' rel="noopener noreferrer">
+                <a href='https://on.cypress.io/viewport' target='_blank'>
                   <i className='fa fa-info-circle'></i>
                   Read more about viewport here.
                 </a>

@@ -75,3 +75,19 @@ describe "src/dom/elements", ->
       $el = $(null)
 
       expect(Cypress.dom.isDetached($el)).to.be.true
+
+  context ".isType", ->
+    beforeEach ->
+      cy.visit("/fixtures/dom.html")
+
+    it "when type is a string", ->
+      $el = $('input[type="number"]')
+
+      expect(Cypress.dom.isType($el, 'number')).to.be.true
+      expect(Cypress.dom.isType($el, 'text')).to.be.false
+
+    it "when type is an array", ->
+      $el = $('input[type="number"]')
+
+      expect(Cypress.dom.isType($el, ['number', 'text', 'email'])).to.be.true
+      expect(Cypress.dom.isType($el, ['text', 'email'])).to.be.false

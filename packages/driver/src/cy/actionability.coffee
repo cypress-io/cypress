@@ -8,6 +8,7 @@ $utils = require("../cypress/utils")
 delay = 50
 
 getFixedOrStickyEl = $dom.getFirstFixedOrStickyPositionParent
+getStickyEl = $dom.getFirstStickyPositionParent
 
 dispatchPrimedChangeEvents = (state) ->
   ## if we have a changeEvent, dispatch it
@@ -49,6 +50,7 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
     ## with at these coordinates
     $elAtCoords = getElementAtPointFromViewport(fromViewport)
 
+    cy.ensureElDoesNotHaveCSS($el, 'pointer-events', 'none', log)
     cy.ensureDescendents($el, $elAtCoords, log)
 
     return $elAtCoords
@@ -173,11 +175,14 @@ ensureElIsNotCovered = (cy, win, $el, fromViewport, options, log, onScroll) ->
     ensureDescendentsAndScroll()
   catch err
     if log
-      log.set consoleProps: ->
-        obj = {}
-        obj["Tried to Click"]     = $dom.getElements($el)
-        obj["But its Covered By"] = $dom.getElements($elAtCoords)
-        obj
+      log.set {
+        consoleProps: ->
+          obj = {}
+          obj["Tried to Click"] = $dom.getElements($el)
+          _.extend(obj, err.consoleProps)
+          obj
+      }
+      
 
     throw err
 
@@ -246,8 +251,11 @@ verify = (cy, $el, options, callbacks) ->
       ## then do not perform these additional ensures...
       if (force isnt true) and (options.waitForAnimations isnt false)
         ## store the coords that were absolute
-        ## from the window
-        coordsHistory.push(coords.fromWindow)
+        ## from the window or from the viewport for sticky elements
+        ## (see https://github.com/cypress-io/cypress/pull/1478)
+
+        sticky = !!getStickyEl($el)
+        coordsHistory.push(if sticky then coords.fromViewport else coords.fromWindow)
 
         ## then we ensure the element isnt animating
         ensureNotAnimating(cy, $el, coordsHistory, options.animationDistanceThreshold)

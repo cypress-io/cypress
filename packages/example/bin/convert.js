@@ -33,14 +33,14 @@ function replaceStringsIn (file) {
   })
 }
 
-glob('./app/**/*.html', { realpath: true }, function (err, files) {
+glob('./app/**/*.html', { realpath: true }, (err, htmlFiles) => {
   if (err) throw err
 
-  const spec = path.join(process.cwd(), 'cypress', 'integration', 'example_spec.js')
+  glob('./cypress/integration/examples/**/*', { realpath: true }, (err, specFiles) => {
+    if (err) throw err
 
-  files.push(spec)
-
-  files.forEach(function (file) {
-    return replaceStringsIn(file)
+    htmlFiles.concat(specFiles).forEach(function (file) {
+      return replaceStringsIn(file)
+    })
   })
 })

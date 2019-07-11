@@ -6,12 +6,15 @@ import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
 import appStore from '../lib/app-store'
 import viewStore from '../lib/view-store'
+import ipc from '../lib/ipc'
 
 import Settings from '../settings/settings'
 import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
-import Runs from '../runs/runs-list'
+import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
+import ErrorMessage from './error-message'
+import WarningMessage from './warning-message'
 
 @observer
 class Project extends Component {
@@ -34,13 +37,13 @@ class Project extends Component {
   render () {
     if (this.props.project.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (this.props.project.error) return this._error()
+    if (this.props.project.error) return <ErrorMessage error={this.props.project.error} onTryAgain={this._reopenProject}/>
 
     return (
       <div>
         <ProjectNav project={this.props.project}/>
         <div className='project-content'>
-          {this._warning()}
+          {this._renderWarnings()}
           {this._currentView()}
         </div>
         <OnBoarding project={this.props.project}/>
@@ -48,69 +51,33 @@ class Project extends Component {
     )
   }
 
+  _externalOpen (e) {
+    e.preventDefault()
+
+    return ipc.externalOpen(e.target.href)
+  }
+
   _currentView () {
     switch (viewStore.currentView.name) {
       case C.PROJECT_RUNS:
-        return <Runs project={this.props.project} />
+        return <RunsList project={this.props.project} />
       case C.PROJECT_SETTINGS:
-        return <Settings project={this.props.project} />
+        return <Settings project={this.props.project} app={this.props.app}/>
       default:
         return <SpecsList project={this.props.project} />
     }
   }
 
-  _warning () {
-    const { warning } = this.props.project
+  _renderWarnings = () => {
+    const { warnings } = this.props.project
 
-    if (!warning) return null
-
-    return (
-      <div className='alert alert-warning'>
-        <p>
-          <i className='fa fa-warning'></i>{' '}
-          <strong>Warning</strong>
-        </p>
-        <p dangerouslySetInnerHTML={{
-          __html: warning.message.split('\n').join('<br />'),
-        }} />
-        <button className='btn btn-link close' onClick={this._removeWarning}>
-          <i className='fa fa-remove' />
-        </button>
-      </div>
+    return warnings.map((warning, i) =>
+      (<WarningMessage key={i} warning={warning} onClearWarning={() => this._removeWarning(warning)}/>)
     )
   }
 
-  _error () {
-    let err = this.props.project.error
-
-    return (
-      <div className='full-alert alert alert-danger error'>
-        <p>
-          <i className='fa fa-warning'></i>{' '}
-          <strong>{err.title || 'Can\'t start server'}</strong>
-        </p>
-        <p dangerouslySetInnerHTML={{
-          __html: err.message.split('\n').join('<br />'),
-        }} />
-        {err.portInUse && (
-          <div>
-            <hr />
-            <p>To fix, stop the other running process or change the port in cypress.json</p>
-          </div>
-        )}
-        <button
-          className='btn btn-default btn-sm'
-          onClick={this._reopenProject}
-        >
-          <i className='fa fa-refresh'></i>{' '}
-          Try Again
-        </button>
-      </div>
-    )
-  }
-
-  _removeWarning = () => {
-    this.props.project.clearWarning()
+  _removeWarning = (warning) => {
+    this.props.project.clearWarning(warning)
   }
 
   _reopenProject = () => {

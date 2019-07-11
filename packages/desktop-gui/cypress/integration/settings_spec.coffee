@@ -16,7 +16,7 @@ describe "Settings", ->
     cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "updaterCheck").resolves(false)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
@@ -49,8 +49,7 @@ describe "Settings", ->
       cy.contains("Configuration")
 
     it "highlight settings nav", ->
-      cy
-        .contains("a", "Settings").should("have.class", "active")
+      cy.contains("a", "Settings").should("have.class", "active")
 
     it "collapses panels by default", ->
       cy.contains("Your project's configuration is displayed").should("not.exist")
@@ -81,12 +80,25 @@ describe "Settings", ->
       it "displays 'null' values", ->
         cy.get(".line").contains("null")
 
-      it "displays 'object' values for environmentVariables and hosts", ->
+      it "displays 'object' values for env and hosts", ->
         cy
-          .get(".nested").first()
+          .get(".nested-obj").eq(0)
             .contains("fixturesFolder")
-          .get(".nested").eq(1)
+          .get(".nested-obj").eq(1)
             .contains("*.foobar.com")
+
+      it "displays 'array' values for blacklistHosts", ->
+        cy
+          .get(".nested-arr")
+          .parent()
+            .should('contain', '[')
+            .and('contain', ']')
+            .and('not.contain', '0')
+            .and('not.contain', '1')
+          .find('.line .config').should ($lines) ->
+            expect($lines).to.have.length(2)
+            expect($lines).to.contain('www.google-analytics.com')
+            expect($lines).to.contain('hotjar.com')
 
       it "opens help link on click", ->
         cy
@@ -100,7 +112,7 @@ describe "Settings", ->
       it "displays project id section", ->
         cy.contains(@config.projectId)
 
-    describe "when record key panels is opened", ->
+    describe "when record key panel is opened", ->
       beforeEach ->
         cy.contains("Record Key").click()
 
@@ -157,15 +169,53 @@ describe "Settings", ->
           cy.get(".login")
 
         it "re-loads and shows the record key when user logs in", ->
-          cy.stub(@ipc, "windowOpen").resolves("code-123")
-          cy.stub(@ipc, "logIn").resolves(@user)
+          cy.stub(@ipc, "beginAuth").resolves(@user)
           @ipc.getRecordKeys.onCall(1).resolves(@keys)
 
           cy.get(".empty-well button").click()
-          cy.contains("Log In with GitHub").click().should =>
+          cy.contains("Log In to Dashboard").click().should =>
             expect(@ipc.getRecordKeys).to.be.calledTwice
           cy.get(".settings-record-key")
             .contains("cypress run --record --key #{@keys[0].id}")
+
+    describe "when proxy settings panel is opened", ->
+      beforeEach ->
+        cy.contains("Proxy Settings").click()
+
+      it "with no proxy config set informs the user no proxy configuration is active", ->
+        cy.get(".settings-proxy").should("contain", "There is no active proxy configuration.")
+
+      it "opens help link on click", ->
+        cy.get(".settings-proxy .learn-more").click().then ->
+          expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/proxy-configuration")
+
+      it "with Windows proxy settings indicates proxy and the source", ->
+        cy.setAppStore({
+          projectRoot: "/foo/bar",
+          proxySource: "win32",
+          proxyServer: "http://foo-bar.baz",
+          proxyBypassList: "a,b,c,d"
+        })
+        cy.get(".settings-proxy").should("contain", "from Windows system settings")
+        cy.get(".settings-proxy tr:nth-child(1) > td > code").should("contain", "http://foo-bar.baz")
+        cy.get(".settings-proxy tr:nth-child(2) > td > code").should("contain", "a, b, c, d")
+
+      it "with environment proxy settings indicates proxy and the source", ->
+        cy.setAppStore({
+          projectRoot: "/foo/bar",
+          proxyServer: "http://foo-bar.baz",
+          proxyBypassList: "a,b,c,d"
+        })
+        cy.get(".settings-proxy").should("contain", "from environment variables")
+        cy.get(".settings-proxy tr:nth-child(1) > td > code").should("contain", "http://foo-bar.baz")
+        cy.get(".settings-proxy tr:nth-child(2) > td > code").should("contain", "a, b, c, d")
+
+      it "with no bypass list but a proxy set shows 'none' in bypass list", ->
+        cy.setAppStore({
+          projectRoot: "/foo/bar",
+          proxyServer: "http://foo-bar.baz",
+        })
+        cy.get(".settings-proxy tr:nth-child(2) > td").should("contain", "none")
 
     context "on:focus:tests clicked", ->
       beforeEach ->

@@ -1,13 +1,13 @@
 _              = require("lodash")
-fs             = require("fs-extra")
-nmi            = require("node-machine-id")
 debug          = require("debug")("cypress:server:updater")
 semver         = require("semver")
 request        = require("request")
 NwUpdater      = require("node-webkit-updater")
 pkg            = require("@packages/root")
+agent          = require("@packages/network").agent
 cwd            = require("./cwd")
 konfig         = require("./konfig")
+{ machineId }  = require('./util/machine_id')
 
 ## backup the original cwd
 localCwd = cwd()
@@ -42,15 +42,15 @@ NwUpdater.prototype.checkNewVersion = (cb) ->
       headers: {
         "x-cypress-version": pkg.version
         "x-machine-id": id
-      }
+      },
+      agent: agent
+      proxy: null
     }, gotManifest.bind(@))
 
   ## return hashed value because we dont care nor want
   ## to know anything about you or your machine
-  nmi.machineId()
+  machineId()
   .then(sendReq)
-  .catch ->
-    sendReq(null)
 
 class Updater
   constructor: (callbacks) ->

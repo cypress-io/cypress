@@ -420,6 +420,12 @@
         color :#333;
       }
     }
+
+    // HACK: Do not change this. It preloads the font to prevent rendering
+    // issues in the reporter when taking screenshots
+    .the-x {
+      font-family: $open-sans;
+    }
   }
 
   .viewport-scale {

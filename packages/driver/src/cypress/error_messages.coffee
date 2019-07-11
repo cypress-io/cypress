@@ -53,6 +53,9 @@ module.exports = {
   add:
     type_missing: "Cypress.add(key, fn, type) must include a type!"
 
+  agents:
+    deprecated_warning: "cy.agents() is deprecated. Use cy.stub() and cy.spy() instead."
+
   alias:
     invalid: "Invalid alias: '{{name}}'.\nYou forgot the '@'. It should be written as: '@{{displayName}}'."
     not_registered_with_available: "#{cmd('{{cmd}}')} could not find a registered alias for: '@{{displayName}}'.\nAvailable aliases are: '{{availableAliases}}'."
@@ -61,6 +64,7 @@ module.exports = {
   as:
     empty_string: "#{cmd('as')} cannot be passed an empty string."
     invalid_type: "#{cmd('as')} can only accept a string."
+    invalid_first_token: "'{{alias}}' cannot be named starting with the '@' symbol. Try renaming the alias to '{{suggestedName}}', or something else that does not start with the '@' symbol."
     reserved_word: "#{cmd('as')} cannot be aliased as: '{{alias}}'. This word is reserved."
 
   blur:
@@ -100,7 +104,15 @@ module.exports = {
     invalid_element: "#{cmd('{{cmd}}')} can only be called on :checkbox{{phrase}}. Your subject {{word}} a: {{node}}"
 
   clear:
-    invalid_element: "#{cmd('clear')} can only be called on textarea or :text. Your subject {{word}} a: {{node}}"
+    invalid_element: """
+      #{cmd('clear')} failed because it requires a valid clearable element.
+
+      The element cleared was:
+
+        > {{node}}
+
+      Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.
+    """
 
   clearCookie:
     invalid_argument: "#{cmd('clearCookie')} must be passed a string argument for name."
@@ -169,6 +181,20 @@ module.exports = {
       is being covered by another element:
 
       #{obj.element2}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+      """
+    pointer_events_none: (obj) ->
+      """
+      #{cmd(obj.cmd)} failed because this element:
+
+      #{obj.element}
+
+      has CSS 'pointer-events: none'#{if obj.elementInherited then ", inherited from this element:\n\n#{obj.elementInherited}\n" else ""}
+
+      'pointer-events: none' prevents user mouse interaction.
 
       Fix this problem, or use {force: true} to disable error checking.
 
@@ -268,33 +294,109 @@ module.exports = {
 
   hover:
     not_implemented: """
-      #{cmd('hover')} is not currently implemented.\n
-      However it is usually easy to workaround.\n
-      Read the following document for a detailed explanation.\n
+      #{cmd('hover')} is not currently implemented.
+
+      However it is usually easy to workaround.
+
+      Read the following document for a detailed explanation.
+
       https://on.cypress.io/hover
     """
 
   invoke:
-    invalid_type: "Cannot call #{cmd('invoke')} because '{{prop}}' is not a function. You probably want to use #{cmd('its', '\'{{prop}}\'')}."
+    prop_not_a_function:
+      """
+      #{cmd('invoke')} errored because the property: '{{prop}}' returned a '{{type}}' value instead of a function. #{cmd('invoke')} can only be used on properties that return callable functions.
+
+      #{cmd('invoke')} waited for the specified property '{{prop}}' to return a function, but it never did.
+
+      If you want to assert on the property's value, then switch to use #{cmd('its')} and add an assertion such as:
+
+      cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')
+      """
+    subject_null_or_undefined:
+      """
+      #{cmd('invoke')} errored because your subject is: '{{value}}'. You cannot invoke any functions such as '{{prop}}' on a '{{value}}' value.
+
+      If you expect your subject to be '{{value}}', then add an assertion such as:
+
+      cy.wrap({{value}}).should('be.{{value}}')
+      """
+    null_or_undefined_prop_value:
+      """
+      #{cmd('invoke')} errored because the property: '{{prop}}' is not a function, and instead returned a '{{value}}' value.
+
+      #{cmd('invoke')} waited for the specified property '{{prop}}' to become a callable function, but it never did.
+
+      If you expect the property '{{prop}}' to be '{{value}}', then switch to use #{cmd('its')} and add an assertion such as:
+
+      cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')
+      """
+
+  its:
+    subject_null_or_undefined:
+      """
+      #{cmd('its')} errored because your subject is: '{{value}}'. You cannot access any properties such as '{{prop}}' on a '{{value}}' value.
+
+      If you expect your subject to be '{{value}}', then add an assertion such as:
+
+      cy.wrap({{value}}).should('be.{{value}}')
+      """
+    null_or_undefined_prop_value:
+      """
+      #{cmd('its')} errored because the property: '{{prop}}' returned a '{{value}}' value.
+
+      #{cmd('its')} waited for the specified property '{{prop}}' to become accessible, but it never did.
+
+      If you expect the property '{{prop}}' to be '{{value}}', then add an assertion such as:
+
+      cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')
+      """
 
   invoke_its:
-    current_prop_nonexistent: "#{cmd('{{cmd}}')} errored because your subject is currently: '{{value}}'. You cannot call any properties such as '{{prop}}' on a '{{value}}' value."
+    nonexistent_prop:
+      """
+      #{cmd('{{cmd}}')} errored because the property: '{{prop}}' does not exist on your subject.
+
+      #{cmd('{{cmd}}')} waited for the specified property '{{prop}}' to exist, but it never did.
+
+      If you do not expect the property '{{prop}}' to exist, then add an assertion such as:
+
+      cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')
+      """
+    previous_prop_null_or_undefined:
+      """
+      #{cmd('{{cmd}}')} errored because the property: '{{previousProp}}' returned a '{{value}}' value. The property: '{{prop}}' does not exist on a '{{value}}' value.
+
+      #{cmd('{{cmd}}')} waited for the specified property '{{prop}}' to become accessible, but it never did.
+
+      If you do not expect the property '{{prop}}' to exist, then add an assertion such as:
+
+      cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')
+      """
     invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
-    invalid_num_of_args:  """
-      #{cmd('{{cmd}}')} only accepts a single argument.\n
+    invalid_num_of_args:
+      """
+      #{cmd('{{cmd}}')} only accepts a single argument.
+
       If you want to invoke a function with arguments, use cy.invoke().
-    """
-    invalid_property: "#{cmd('{{cmd}}')} errored because the property: '{{prop}}' does not exist on your subject."
-    previous_prop_nonexistent: "#{cmd('{{cmd}}')} errored because the property: '{{previousProp}}' returned a '{{value}}' value. You cannot access any properties such as '{{currentProp}}' on a '{{value}}' value."
-    timed_out: """
-      #{cmd('{{cmd}}')} timed out after waiting '{{timeout}}ms'.\n
-      Your callback function returned a promise which never resolved.\n
-      The callback function was:\n
+      """
+    timed_out:
+      """
+      #{cmd('{{cmd}}')} timed out after waiting '{{timeout}}ms'.
+
+      Your callback function returned a promise which never resolved.
+
+      The callback function was:
+
       {{func}}
     """
 
   location:
     invalid_key: "Location object does not have key: {{key}}"
+
+  log:
+    invalid_argument: "Cypress.log() can only be called with an options object. Your argument was: '{{arg}}'"
 
   miscellaneous:
     custom_command_interface_changed: (obj) ->
@@ -388,6 +490,7 @@ module.exports = {
 
       Please update your code. You should be able to safely do a find/replace.
     """
+
     dangling_commands: """
       Oops, Cypress detected something wrong with your test code.
 
@@ -507,10 +610,25 @@ module.exports = {
     invalid_arguments: "#{cmd('reload')} can only accept a boolean or options as its arguments."
 
   request:
+    body_circular: ({ path }) -> """
+      The `body` parameter supplied to #{cmd('request')} contained a circular reference at the path "#{path.join(".")}".
+
+      `body` can only be a string or an object with no circular references.
+    """
+    status_code_flags_invalid: """
+    #{cmd('request')} was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }.
+
+    These options are incompatible with each other.
+
+     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
+    """
     auth_invalid: "#{cmd('request')} must be passed an object literal for the 'auth' option."
     gzip_invalid: "#{cmd('request')} requires the 'gzip' option to be a boolean."
     headers_invalid: "#{cmd('request')} requires the 'headers' option to be an object literal."
-    invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+    invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser."
+    failonstatus_deprecated_warning: "The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time."
     form_invalid: """
     #{cmd('request')} requires the 'form' option to be a boolean.
 
@@ -607,10 +725,15 @@ module.exports = {
   route:
     failed_prerequisites: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"
     invalid_arguments: "#{cmd('route')} was not provided any arguments. You must provide valid arguments."
-    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser."
     response_invalid: "#{cmd('route')} cannot accept an undefined or null response. It must be set to something, even an empty string will work."
     url_invalid: "#{cmd('route')} was called with an invalid url. Url must be either a string or regular expression."
     url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
+    url_percentencoding_warning: ({ decodedUrl }) -> """
+    A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.
+
+    Did you mean to pass "#{decodedUrl}"?
+    """
 
   scrollIntoView:
     invalid_argument: "#{cmd('scrollIntoView')} can only be called with an options object. Your argument was: {{arg}}"
@@ -626,16 +749,14 @@ module.exports = {
     invalid_duration: "#{cmd('scrollTo')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"
     animation_failed: "#{cmd('scrollTo')} failed."
 
-  select:
-    disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"
-    invalid_element: "#{cmd('select')} can only be called on a <select>. Your subject is a: {{node}}"
-    invalid_multiple: "#{cmd('select')} was called with an array of arguments but does not have a 'multiple' attribute set."
-    multiple_elements: "#{cmd('select')} can only be called on a single <select>. Your subject contained {{num}} elements."
-    multiple_matches: "#{cmd('select')} matched more than one option by value or text: {{value}}"
-    no_matches: "#{cmd('select')} failed because it could not find a single <option> with value or text matching: '{{value}}'"
-    option_disabled: "#{cmd('select')} failed because this <option> you are trying to select is currently disabled:\n\n{{node}}"
-
   screenshot:
+    invalid_arg: "{{cmd}}() must be called with an object. You passed: {{arg}}"
+    invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: {{arg}}"
+    invalid_boolean: "{{cmd}}() '{{option}}' option must be a boolean. You passed: {{arg}}"
+    invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
+    invalid_clip: "{{cmd}}() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"
+    multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
   select:
@@ -647,8 +768,19 @@ module.exports = {
     no_matches: "#{cmd('select')} failed because it could not find a single <option> with value or text matching: '{{value}}'"
     option_disabled: "#{cmd('select')} failed because this <option> you are trying to select is currently disabled:\n\n{{node}}"
 
+  selector_playground:
+    defaults_invalid_arg: "Cypress.SelectorPlayground.defaults() must be called with an object. You passed: {{arg}}"
+    defaults_invalid_priority: "Cypress.SelectorPlayground.defaults() called with invalid 'selectorPriority' property. It must be an array. You passed: {{arg}}"
+    defaults_invalid_on_element: "Cypress.SelectorPlayground.defaults() called with invalid 'onElement' property. It must be a function. You passed: {{arg}}"
+
   server:
+    force404_deprecated: "Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option."
     invalid_argument: "#{cmd('server')} accepts only an object literal as its argument."
+    stub_deprecated: ({ type }) -> """
+      Passing #{cmd(type)}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
+      https://on.cypress.io/deprecated-stub-false-on-#{type}
+    """
+    xhrurl_not_set: "'Server.options.xhrUrl' has not been set"
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
@@ -723,6 +855,22 @@ module.exports = {
     multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
     not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
 
+  task:
+    known_error: """#{cmd('task', '\'{{task}}\'')} failed with the following error:
+
+        {{error}}
+    """
+    failed: """#{cmd('task', '\'{{task}}\'')} failed with the following error:
+
+        > {{error}}
+    """
+    invalid_argument: "#{cmd('task')} must be passed a non-empty string as its 1st argument. You passed: '{{task}}'."
+    timed_out: "#{cmd('task', '\'{{task}}\'')} timed out after waiting {{timeout}}ms."
+    server_timed_out: """#{cmd('task', '\'{{task}}\'')} timed out after waiting {{timeout}}ms.
+
+        {{error}}
+    """
+
   tick:
     invalid_argument: "clock.tick()/#{cmd('tick')} only accept a number as their argument. You passed: {{arg}}"
     no_clock: "#{cmd('tick')} cannot be called without first calling #{cmd('clock')}"
@@ -751,8 +899,16 @@ module.exports = {
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
-    multiple_elements: "#{cmd('type')} can only be called on a single textarea or :text. Your subject contained {{num}} elements."
-    not_on_text_field: "#{cmd('type')} can only be called on textarea or :text. Your subject is a: {{node}}"
+    multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
+    not_on_typeable_element: """
+      #{cmd('type')} failed because it requires a valid typeable element.
+
+      The element typed into was:
+
+        > {{node}}
+
+      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
+    """
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
     wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
 
@@ -803,13 +959,35 @@ module.exports = {
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 200px and 3000px."
+    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 3000px."
     empty_string: "#{cmd('viewport')} cannot be passed an empty string."
     invalid_orientation: "#{cmd('viewport')} can only accept '{{all}}' as valid orientations. Your orientation was: '{{orientation}}'"
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
 
   visit:
-    invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
+    body_circular: ({ path }) -> """
+      The `body` parameter supplied to #{cmd('visit')} contained a circular reference at the path "#{path.join(".")}".
+
+      `body` can only be a string or an object with no circular references.
+    """
+    status_code_flags_invalid: """
+    #{cmd('visit')} was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }.
+
+    These options are incompatible with each other.
+
+     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
+     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
+    """
+    invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
+    invalid_method: "#{cmd('visit')} was called with an invalid method: '{{method}}'. Method can only be GET or POST."
+    invalid_headers: "#{cmd('visit')} requires the 'headers' option to be an object."
+    no_duplicate_url: """
+      #{cmd('visit')} must be called with only one URL. You specified two URLs:
+
+      URL from the `options` object: {{optionsUrl}}
+      URL from the `url` parameter: {{url}}
+    """
     cannot_visit_2nd_domain: """
       #{cmd('visit')} failed because you are attempting to visit a second unique domain.
 
@@ -916,4 +1094,6 @@ module.exports = {
     aborted: "This XHR was aborted by your code -- check this stack trace below."
     missing: "XMLHttpRequest#xhr is missing."
     network_error: "The network request for this XHR could not be made. Check your console for the reason."
+    requestjson_deprecated: "requestJSON is now deprecated and will be removed in the next version. Update this to 'requestBody' or 'request.body'."
+    responsejson_deprecated: "responseJSON is now deprecated and will be removed in the next version. Update this to 'responseBody' or 'response.body'."
 }

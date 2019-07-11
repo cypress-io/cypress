@@ -26,16 +26,29 @@ normalize = (val) ->
 
 nope = -> return null
 
+responseTypeIsTextOrEmptyString = (responseType) ->
+  responseType is "" or responseType is "text"
+
+## when the browser naturally cancels/aborts
+## an XHR because the window is unloading
+## on chrome < 71
+isAbortedThroughUnload = (xhr) ->
+  xhr.canceled isnt true and
+    xhr.readyState is 4 and
+      xhr.status is 0 and
+        ## responseText may be undefined on some responseTypes
+        ## https://github.com/cypress-io/cypress/issues/3008
+        ## TODO: How do we want to handle other responseTypes?
+        (responseTypeIsTextOrEmptyString(xhr.responseType)) and
+          xhr.responseText is ""
+
 warnOnStubDeprecation = (obj, type) ->
   if _.has(obj, "stub")
-    $utils.warning("""
-      Passing cy.#{type}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
-      https://on.cypress.io/deprecated-stub-false-on-#{type}
-    """)
+    $utils.warnByPath("server.stub_deprecated", { args: { type }})
 
 warnOnForce404Default = (obj) ->
   if obj.force404 is false
-    $utils.warning("Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+    $utils.warnByPath("server.force404_deprecated")
 
 whitelist = (xhr) ->
   ## whitelist if we're GET + looks like we're fetching regular resources
@@ -62,6 +75,7 @@ serverDefaults = {
   onOpen: ->
   onSend: ->
   onXhrAbort: ->
+  onXhrCancel: ->
   onError: ->
   onLoad: ->
   onFixtureError: ->
@@ -98,7 +112,7 @@ transformHeaders = (headers) ->
 
 normalizeStubUrl = (xhrUrl, url) ->
   if not xhrUrl
-    $utils.warning("'Server.options.xhrUrl' has not been set")
+    $utils.warnByPath("server.xhrurl_not_set")
 
   ## always ensure this is an absolute-relative url
   ## and remove any double slashes
@@ -266,16 +280,60 @@ create = (options = {}) ->
     getProxyFor: (xhr) ->
       proxies[xhr.id]
 
-    abort: ->
-      ## abort any outstanding xhr's
-      ## which aren't already aborted
-      _.chain(xhrs)
-      .filter (xhr) ->
-        xhr.aborted isnt true and xhr.readyState isnt 4
-      .invokeMap("abort")
-      .value()
+    abortXhr: (xhr) ->
+      proxy = server.getProxyFor(xhr)
 
-      return server
+      ## if the XHR leaks into the next test
+      ## after we've reset our internal server
+      ## then this may be undefined
+      return if not proxy
+
+      ## return if we're already aborted which
+      ## can happen if the browser already canceled
+      ## this xhr but we called abort later
+      return if xhr.aborted
+
+      xhr.aborted = true
+
+      abortStack = server.getStack()
+
+      proxy.aborted = true
+
+      options.onXhrAbort(proxy, abortStack)
+
+      if _.isFunction(options.onAnyAbort)
+        route = server.getRouteForXhr(xhr)
+
+        ## call the onAnyAbort function
+        ## after we've called options.onSend
+        options.onAnyAbort(route, proxy)
+
+    cancelXhr: (xhr) ->
+      proxy = server.getProxyFor(xhr)
+
+      ## if the XHR leaks into the next test
+      ## after we've reset our internal server
+      ## then this may be undefined
+      return if not proxy
+
+      xhr.canceled = true
+
+      proxy.canceled = true
+
+      options.onXhrCancel(proxy)
+
+      return xhr
+
+    cancelPendingXhrs: ->
+      ## cancel any outstanding xhr's
+      ## which aren't already complete
+      ## or already canceled
+      return _
+      .chain(xhrs)
+      .reject({ readyState: 4 })
+      .reject({ canceled: true })
+      .map(server.cancelXhr)
+      .value()
 
     set: (obj) ->
       warnOnStubDeprecation(obj, "server")
@@ -302,9 +360,11 @@ create = (options = {}) ->
           XHR.prototype[key] = value
 
       XHR.prototype.setRequestHeader = ->
-        proxy = server.getProxyFor(@)
-
-        proxy._setRequestHeader.apply(proxy, arguments)
+        ## if the XHR leaks into the next test
+        ## after we've reset our internal server
+        ## then this may be undefined
+        if proxy = server.getProxyFor(@)
+          proxy._setRequestHeader.apply(proxy, arguments)
 
         srh.apply(@, arguments)
 
@@ -313,21 +373,8 @@ create = (options = {}) ->
         ## then do not get the abort stack or
         ## set the aborted property or call onXhrAbort
         ## to test this just use a regular XHR
-        @aborted = true
-
-        abortStack = server.getStack()
-
-        proxy = server.getProxyFor(@)
-        proxy.aborted = true
-
-        options.onXhrAbort(proxy, abortStack)
-
-        if _.isFunction(options.onAnyAbort)
-          route = server.getRouteForXhr(@)
-
-          ## call the onAnyAbort function
-          ## after we've called options.onSend
-          options.onAnyAbort(route, proxy)
+        if @readyState isnt 4
+          server.abortXhr(@)
 
         abort.apply(@, arguments)
 
@@ -359,17 +406,20 @@ create = (options = {}) ->
 
         xhr = @
         fns = {}
-        called = {}
         overrides = {}
-        readyStates = {}
+
+        bailIfRecursive = (fn) ->
+          isCalled = false
+
+          return () ->
+            return if isCalled
+            isCalled = true
+            try
+              return fn.apply(null, arguments)
+            finally
+              isCalled = false
 
         onLoadFn = ->
-          ## bail if we've already been called to prevent
-          ## infinite recursion
-          return if called.onload
-
-          called.onload = true
-
           proxy._setDuration(timeStart)
           proxy._setStatus()
           proxy._setResponseHeaders()
@@ -391,12 +441,6 @@ create = (options = {}) ->
             options.onAnyResponse(route, proxy)
 
         onErrorFn = ->
-          ## bail if we've already been called to prevent
-          ## infinite recursion
-          return if called.onerror
-
-          called.onerror = true
-
           ## its possible our real onerror handler
           ## throws so we need to catch those errors too
           try
@@ -407,15 +451,12 @@ create = (options = {}) ->
             options.onError(proxy, err)
 
         onReadyStateFn = ->
-          ## bail if we've already been called with this
-          ## readyState to prevent infinite recursions
-          return if readyStates[@readyState]
-
-          readyStates[@readyState] = true
-
           ## catch synchronous errors caused
           ## by the onreadystatechange function
           try
+            if isAbortedThroughUnload(xhr)
+              server.abortXhr(xhr)
+
             if _.isFunction(orst = fns.onreadystatechange)
               orst.apply(xhr, arguments)
           catch err
@@ -423,9 +464,11 @@ create = (options = {}) ->
             xhr.onreadystatechange = null
             options.onError(proxy, err)
 
-        overrides.onload             = onLoadFn
-        overrides.onerror            = onErrorFn
-        overrides.onreadystatechange = onReadyStateFn
+        ## bail if eventhandlers have already been called to prevent
+        ## infinite recursion
+        overrides.onload             = bailIfRecursive(onLoadFn)
+        overrides.onerror            = bailIfRecursive(onErrorFn)
+        overrides.onreadystatechange = bailIfRecursive(onReadyStateFn)
 
         props.forEach (prop) ->
           ## if we currently have one of these properties then
@@ -449,6 +492,7 @@ create = (options = {}) ->
                 overrides[prop]
             set: (fn) ->
               fns[prop] = fn
+            configurable: true
           })
 
         options.onOpen(method, url, async, username, password)

@@ -3,11 +3,12 @@ describe "Specs List", ->
     cy.fixture("user").as("user")
     cy.fixture("config").as("config")
     cy.fixture("specs").as("specs")
+    cy.fixture("specs_windows").as("specsWindows")
 
     cy.visitIndex().then (win) ->
       { start, @ipc } = win.App
 
-      cy.stub(@ipc, "getOptions").resolves({projectPath: "/foo/bar"})
+      cy.stub(@ipc, "getOptions").resolves({projectRoot: "/foo/bar"})
       cy.stub(@ipc, "getCurrentUser").resolves(@user)
       cy.stub(@ipc, "getSpecs").yields(null, @specs)
       cy.stub(@ipc, "closeBrowser").resolves(null)
@@ -34,8 +35,7 @@ describe "Specs List", ->
       cy.contains(@config.integrationFolder)
 
     it "triggers open:finder on click of text folder", ->
-      cy
-        .contains(@config.integrationFolder).click().then ->
+      cy.contains(@config.integrationFolder).click().then ->
           expect(@ipc.openFinder).to.be.calledWith(@config.integrationFolder)
 
     it "displays help link", ->
@@ -55,156 +55,222 @@ describe "Specs List", ->
 
     it "displays the scaffolded files", ->
       cy.get(".folder-preview-onboarding").within ->
-        cy.contains("fixtures")
+        cy.contains("span", "fixtures").siblings("ul").within ->
         cy.contains("example.json")
-        cy.contains("integration")
-        cy.contains("example_spec.js")
-        cy.contains("support")
-        cy.contains("commands.js")
-        cy.contains("defaults.js")
-        cy.contains("index.js")
+        cy.contains("span", "integration").siblings("ul").within ->
+          cy.contains("examples")
+        cy.contains("span", "support").siblings("ul").within ->
+          cy.contains("commands.js")
+          cy.contains("defaults.js")
+          cy.contains("index.js")
+        cy.contains("span", "plugins").siblings("ul").within ->
+          cy.contains("index.js")
 
     it "lists folders and files alphabetically", ->
       cy.get(".folder-preview-onboarding").within ->
-        cy
-          .contains("fixtures").parent().next()
+        cy.contains("fixtures").parent().next()
           .contains("integration")
 
+    it "truncates file lists with more than 3 items", ->
+      cy.get(".folder-preview-onboarding").within ->
+        cy.contains("examples").closest(".new-item").find("li")
+          .should("have.length", 3)
+        cy.get(".is-more").should("have.text", " ... 17 more files ...")
+
     it "can dismiss the modal", ->
-      cy
-        .contains("OK, got it!").click()
-        .get(".modal").should("not.be.visible")
+      cy.contains("OK, got it!").click()
+      cy.get(".modal").should("not.be.visible")
         .then ->
           expect(@ipc.onboardingClosed).to.be.called
 
-    it "triggers open:finder on click of example file", ->
-      cy
-        .get(".modal").contains("example_spec.js").click().then ->
-          expect(@ipc.openFinder).to.be.calledWith(@config.integrationExampleFile)
+    it "triggers open:finder on click of example folder", ->
+      cy.get(".modal").contains("examples").click().then =>
+        expect(@ipc.openFinder).to.be.calledWith(@config.integrationExamplePath)
 
     it "triggers open:finder on click of text folder", ->
-      cy
-        .get(".modal").contains("cypress/integration").click().then ->
-          expect(@ipc.openFinder).to.be.calledWith(@config.integrationFolder)
+      cy.get(".modal").contains("cypress/integration").click().then =>
+        expect(@ipc.openFinder).to.be.calledWith(@config.integrationFolder)
 
   describe "lists specs", ->
-    beforeEach ->
-      @ipc.getSpecs.yields(null, @specs)
-      @openProject.resolve(@config)
-
-    context "run all specs", ->
-      it "displays run all specs button", ->
-        cy.contains(".btn", "Run All Tests")
-
-      it "has play icon", ->
-        cy
-          .contains(".btn", "Run All Tests")
-          .find("i").should("have.class", "fa-play")
-
-      it "triggers browser launch on click of button", ->
-        cy
-          .contains(".btn", "Run All Tests").click()
-          .then ->
-            launchArgs = @ipc.launchBrowser.lastCall.args
-
-            expect(launchArgs[0].browser).to.eq "chrome"
-            expect(launchArgs[0].spec).to.eq "__all"
-
-      describe "all specs running in browser", ->
-        beforeEach ->
-          cy.contains(".btn", "Run All Tests").as("allSpecs").click()
-
-        it "updates spec icon", ->
-          cy.get("@allSpecs").find("i").should("have.class", "fa-dot-circle-o")
-          cy.get("@allSpecs").find("i").should("not.have.class", "fa-play")
-
-        it "sets spec as active", ->
-          cy.get("@allSpecs").should("have.class", "active")
-
-    context "displays list of specs", ->
-      it "lists main folders of specs", ->
-        cy.contains(".folder", "integration")
-        cy.contains(".folder", "unit")
-
-      it "lists nested folders", ->
-        cy.get(".folder .folder").contains("accounts")
-
-      it "lists test specs", ->
-        cy.get(".file a").contains("app_spec.coffee")
-
-    context "collapsing specs", ->
-      it "sets folder collapsed when clicked", ->
-        cy.get(".folder:first").should("have.class", "folder-expanded")
-        cy.get(".folder .folder-display-name:first").click()
-        cy.get(".folder:first").should("have.class", "folder-collapsed")
-
-      it "hides children when folder clicked", ->
-        cy.get(".file").should("have.length", 7)
-        cy.get(".folder .folder-display-name:first").click()
-        cy.get(".file").should("have.length", 2)
-
-      it "sets folder expanded when clicked twice", ->
-        cy.get(".folder .folder-display-name:first").click()
-        cy.get(".folder:first").should("have.class", "folder-collapsed")
-        cy.get(".folder .folder-display-name:first").click()
-        cy.get(".folder:first").should("have.class", "folder-expanded")
-
-      it "hides children for every folder collapsed", ->
-        lastExpandedFolderSelector = ".folder-expanded:last > div > div > .folder-display-name:last"
-
-        cy.get(".file").should("have.length", 7)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 6)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 6)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 5)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 5)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 5)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 5)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 4)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 3)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 1)
-
-        cy.get(lastExpandedFolderSelector).click()
-        cy.get(".file").should("have.length", 0)
-
-    context "Searching specs", ->
+    context "Windows paths", ->
       beforeEach ->
-        cy.get("#search-input").type("new")
+        @ipc.getSpecs.yields(null, @specsWindows)
+        @openProject.resolve(@config)
 
-      it "should display only one spec", ->
-        cy.get(".list-as-table .file")
-          .should("have.length", 1)
-          .and("contain", "account_new_spec.coffee")
+      context "displays list of specs", ->
+        it "lists nested folders", ->
+          cy.get(".folder .folder").contains("accounts")
 
-      it "should display the same number of open folders", ->
-        cy.get(".list-as-table .folder")
-          .should("have.length", 10)
+        it "lists test specs", ->
+          cy.get(".file a").last().should("contain", "baz_list_spec.coffee")
+          cy.get(".file a").last().should("not.contain", "admin_users")
 
-      it "should clear the search if the user press ESC key", ->
-        cy.get("#search-input").type("{esc}")
-          .should("have.value", "")
-        cy.get(".list-as-table .file")
-          .should("have.length", 7)
+    context "Linux paths", ->
+      beforeEach ->
+        @ipc.getSpecs.yields(null, @specs)
+        @openProject.resolve(@config)
+
+      context "run all specs", ->
+        it "displays run all specs button", ->
+          cy.contains(".btn", "Run all specs")
+
+        it "has play icon", ->
+          cy
+            .contains(".btn", "Run all specs")
+            .find("i").should("have.class", "fa-play")
+
+        it "triggers browser launch on click of button", ->
+          cy
+            .contains(".btn", "Run all specs").click()
+            .then ->
+              launchArgs = @ipc.launchBrowser.lastCall.args
+
+              expect(launchArgs[0].browser.name).to.eq "chrome"
+              expect(launchArgs[0].spec.name).to.eq "All Specs"
+
+        describe "all specs running in browser", ->
+          beforeEach ->
+            cy.contains(".btn", "Run all specs").as("allSpecs").click()
+
+          it "updates spec icon", ->
+            cy.get("@allSpecs").find("i").should("have.class", "fa-dot-circle-o")
+            cy.get("@allSpecs").find("i").should("not.have.class", "fa-play")
+
+          it "sets spec as active", ->
+            cy.get("@allSpecs").should("have.class", "active")
+
+      context "displays list of specs", ->
+        it "lists main folders of specs", ->
+          cy.contains(".folder.level-0", "integration")
+          cy.contains(".folder.level-0", "unit")
+
+        it "lists nested folders", ->
+          cy.get(".folder.level-0 .folder.level-1").contains("accounts")
+
+        it "lists test specs", ->
+          cy.get(".folder.level-0 .file.level-1 a").contains("app_spec.coffee")
+
+        it "lists folder with '.'", ->
+          cy.get(".file").should("have.length", 7)
+          cy.get(".folder").should("have.length", 10)
+
+      context "collapsing specs", ->
+        it "sets folder collapsed when clicked", ->
+          cy.get(".folder:first").should("have.class", "folder-expanded")
+          cy.get(".folder .folder-name:first").click()
+          cy.get(".folder:first").should("have.class", "folder-collapsed")
+
+        it "hides children when folder clicked", ->
+          cy.get(".file").should("have.length", 7)
+          cy.get(".folder .folder-name:first").click()
+          cy.get(".file").should("have.length", 2)
+
+        it "sets folder expanded when clicked twice", ->
+          cy.get(".folder .folder-name:first").click()
+          cy.get(".folder:first").should("have.class", "folder-collapsed")
+          cy.get(".folder .folder-name:first").click()
+          cy.get(".folder:first").should("have.class", "folder-expanded")
+
+        it "hides children for every folder collapsed", ->
+          lastExpandedFolderSelector = ".folder-expanded:last > div > .folder-name:last"
+
+          cy.get(".file").should("have.length", 7)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 6)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 6)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 5)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 5)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 5)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 5)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 4)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 3)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 1)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get(".file").should("have.length", 0)
+
+    context "filtering specs", ->
+      describe "typing the filter", ->
+        beforeEach ->
+          @ipc.getSpecs.yields(null, @specs)
+          @openProject.resolve(@config)
+          cy.get(".filter").type("new")
+
+        it "displays only matching spec", ->
+          cy.get(".outer-files-container .file")
+            .should("have.length", 1)
+            .and("contain", "account_new_spec.coffee")
+
+        it "only shows matching folders", ->
+          cy.get(".outer-files-container .folder")
+            .should("have.length", 2)
+
+        it "clears the filter on clear button click", ->
+          cy.get(".clear-filter").click()
+          cy.get(".filter")
+            .should("have.value", "")
+          cy.get(".outer-files-container .file")
+            .should("have.length", 7)
+
+        it "clears the filter if the user press ESC key", ->
+          cy.get(".filter").type("{esc}")
+            .should("have.value", "")
+          cy.get(".outer-files-container .file")
+            .should("have.length", 7)
+
+        it "shows empty message if no results", ->
+          cy.get(".filter").clear().type("foobarbaz")
+          cy.get(".outer-files-container").should("not.exist")
+          cy.get(".empty-well").should("contain", 'No specs match your search: "foobarbaz"')
+
+        it "clears and focuses the filter field when clear search is clicked", ->
+          cy.get(".filter").clear().type("foobarbaz")
+          cy.get(".btn").contains("Clear search").click()
+          cy.focused().should("have.id", "filter")
+          cy.get(".outer-files-container .file")
+            .should("have.length", 7)
+
+        it "saves the filter to local storage for the project", ->
+          cy.window().then (win) =>
+            expect(win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"]).to.be.a("string")
+            expect(JSON.parse(win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"])).to.equal("new")
+
+      describe "when there's a saved filter", ->
+        beforeEach ->
+          @ipc.getSpecs.yields(null, @specs)
+          cy.window().then (win) ->
+            win.localStorage["specsFilter-#{@config.projectId}-/foo/bar"] = JSON.stringify("app")
+
+        it "applies it for the appropriate project", ->
+          @openProject.resolve(@config)
+          cy.get(".filter").should("have.value", "app")
+
+        it "does not apply it for a different project", ->
+          @config.projectId = "different"
+          @openProject.resolve(@config)
+          cy.get(".filter").should("have.value", "")
 
     context "click on spec", ->
       beforeEach ->
+        @ipc.getSpecs.yields(null, @specs)
+        @openProject.resolve(@config)
         cy.contains(".file a", "app_spec.coffee").as("firstSpec")
 
       it "closes then launches browser on click of file", ->
@@ -214,8 +280,9 @@ describe "Specs List", ->
             expect(@ipc.closeBrowser).to.be.called
 
             launchArgs = @ipc.launchBrowser.lastCall.args
-            expect(launchArgs[0].browser).to.equal("chrome")
-            expect(launchArgs[0].spec).to.equal("cypress/integration/app_spec.coffee")
+
+            expect(launchArgs[0].browser.name).to.equal("chrome")
+            expect(launchArgs[0].spec.relative).to.equal("cypress/integration/app_spec.coffee")
 
       it "adds 'active' class on click", ->
         cy.get("@firstSpec")
@@ -229,6 +296,10 @@ describe "Specs List", ->
         cy.get("@firstSpec").should("have.class", "active")
 
     context "spec running in browser", ->
+      beforeEach ->
+        @ipc.getSpecs.yields(null, @specs)
+        @openProject.resolve(@config)
+
       context "choose shallow spec", ->
         beforeEach ->
           cy.get(".file a").contains("a", "app_spec.coffee").as("firstSpec").click()
@@ -251,7 +322,10 @@ describe "Specs List", ->
           cy.get("@deepSpec").should("have.class", "active")
 
     context "switching specs", ->
+
       beforeEach ->
+        @ipc.getSpecs.yields(null, @specs)
+        @openProject.resolve(@config)
         cy
           .get(".file").contains("a", "app_spec.coffee").as("firstSpec")
             .click()

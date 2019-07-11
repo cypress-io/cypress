@@ -6,6 +6,7 @@ la = require("lazy-ass")
 check = require("check-more-types")
 
 menu = require("#{root}../lib/gui/menu")
+plugins = require("#{root}../lib/plugins")
 Windows = require("#{root}../lib/gui/windows")
 electron = require("#{root}../lib/browsers/electron")
 savedState = require("#{root}../lib/saved_state")
@@ -17,18 +18,20 @@ describe "lib/browsers/electron", ->
     @state = {}
     @options = {
       some: "var"
-      projectPath: "/foo/"
+      projectRoot: "/foo/"
     }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
-      close: @sandbox.stub()
-      loadURL: @sandbox.stub()
+      isDestroyed: -> false
+      close: sinon.stub()
+      loadURL: sinon.stub()
+      focusOnWebView: sinon.stub()
       webContents: {
         session: {
           cookies: {
-            get: @sandbox.stub()
-            set: @sandbox.stub()
-            remove: @sandbox.stub()
+            get: sinon.stub()
+            set: sinon.stub()
+            remove: sinon.stub()
           }
         }
       }
@@ -36,16 +39,19 @@ describe "lib/browsers/electron", ->
 
   context ".open", ->
     beforeEach ->
-      @sandbox.stub(electron, "_render").resolves(@win)
+      sinon.stub(electron, "_render").resolves(@win)
+      sinon.stub(plugins, "has")
+      sinon.stub(plugins, "execute")
+
       savedState()
       .then (state) =>
         la(check.fn(state.get), "state is missing .get to stub", state)
-        @sandbox.stub(state, "get").resolves(@state)
+        sinon.stub(state, "get").resolves(@state)
 
     it "calls render with url, state, and options", ->
       electron.open("electron", @url, @options, @automation)
       .then =>
-        options = electron._defaultOptions(@options.projectPath, @state, @options)
+        options = electron._defaultOptions(@options.projectRoot, @state, @options)
 
         options = Windows.defaults(options)
 
@@ -55,7 +61,7 @@ describe "lib/browsers/electron", ->
 
         expect(electron._render).to.be.calledWith(
           @url,
-          @options.projectPath,
+          @options.projectRoot,
         )
 
     it "returns custom object emitter interface", ->
@@ -65,16 +71,53 @@ describe "lib/browsers/electron", ->
         expect(obj.kill).to.be.a("function")
         expect(obj.removeAllListeners).to.be.a("function")
 
+    it "registers onRequest automation middleware", ->
+      sinon.spy(@automation, "use")
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        expect(@automation.use).to.be.called
+        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
+
+    it "is noop when before:browser:launch yields null", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves(null)
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        options = electron._render.firstCall.args[2]
+
+        expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
+
+    ## https://github.com/cypress-io/cypress/issues/1992
+    it "it merges in options without removing essential options", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({foo: "bar"})
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        options = electron._render.firstCall.args[2]
+
+        expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
+
   context "._launch", ->
     beforeEach ->
-      @sandbox.stub(menu, "set")
-      @sandbox.stub(electron, "_setProxy").resolves()
-      @sandbox.stub(electron, "_setUserAgent")
+      sinon.stub(menu, "set")
+      sinon.stub(electron, "_attachDebugger").resolves()
+      sinon.stub(electron, "_clearCache").resolves()
+      sinon.stub(electron, "_setProxy").resolves()
+      sinon.stub(electron, "_setUserAgent")
 
-    it "sets dev tools in menu", ->
-      electron._launch(@win, @url, @options)
+    it "sets menu.set whether or not its in headless mode", ->
+      electron._launch(@win, @url, { show: true })
       .then ->
         expect(menu.set).to.be.calledWith({withDevTools: true})
+      .then =>
+        menu.set.reset()
+
+        electron._launch(@win, @url, { show: false })
+      .then ->
+        expect(menu.set).not.to.be.called
 
     it "sets user agent if options.userAgent", ->
       electron._launch(@win, @url, @options)
@@ -108,22 +151,22 @@ describe "lib/browsers/electron", ->
     beforeEach ->
       @newWin = {}
 
-      @sandbox.stub(menu, "set")
-      @sandbox.stub(electron, "_setProxy").resolves()
-      @sandbox.stub(electron, "_launch").resolves()
-      @sandbox.stub(Windows, "create")
-      .withArgs(@options.projectPath, @options)
+      sinon.stub(menu, "set")
+      sinon.stub(electron, "_setProxy").resolves()
+      sinon.stub(electron, "_launch").resolves()
+      sinon.stub(Windows, "create")
+      .withArgs(@options.projectRoot, @options)
       .returns(@newWin)
 
     it "creates window instance and calls launch with window", ->
-      electron._render(@url, @options.projectPath, @options)
+      electron._render(@url, @options.projectRoot, @options)
       .then =>
-        expect(Windows.create).to.be.calledWith(@options.projectPath, @options)
+        expect(Windows.create).to.be.calledWith(@options.projectRoot, @options)
         expect(electron._launch).to.be.calledWith(@newWin, @url, @options)
 
   context "._defaultOptions", ->
     beforeEach ->
-      @sandbox.stub(menu, "set")
+      sinon.stub(menu, "set")
 
     it "uses default width if there isn't one saved", ->
       opts = electron._defaultOptions("/foo", @state, @options)
@@ -163,40 +206,46 @@ describe "lib/browsers/electron", ->
       })
 
     it ".onFocus", ->
-      opts = electron._defaultOptions("/foo", @state, @options)
+      opts = electron._defaultOptions("/foo", @state, { show: true })
       opts.onFocus()
       expect(menu.set).to.be.calledWith({withDevTools: true})
 
+      menu.set.reset()
+
+      opts = electron._defaultOptions("/foo", @state, { show: false })
+      opts.onFocus()
+      expect(menu.set).not.to.be.called
+
     describe ".onNewWindow", ->
       beforeEach ->
-        @sandbox.stub(electron, "_launchChild").resolves(@win)
+        sinon.stub(electron, "_launchChild").resolves(@win)
 
       it "passes along event, url, parent window and options", ->
-        opts = electron._defaultOptions(@options.projectPath, @state, @options)
+        opts = electron._defaultOptions(@options.projectRoot, @state, @options)
 
         event = {}
         parentWindow = {
-          on: @sandbox.stub()
+          on: sinon.stub()
         }
 
         opts.onNewWindow.call(parentWindow, event, @url)
 
         expect(electron._launchChild).to.be.calledWith(
-          event, @url, parentWindow, @options.projectPath, @state, @options
+          event, @url, parentWindow, @options.projectRoot, @state, @options
         )
 
   ## TODO: these all need to be updated
   context.skip "._launchChild", ->
     beforeEach ->
       @childWin = _.extend(new EE(), {
-        close: @sandbox.stub()
-        isDestroyed: @sandbox.stub().returns(false)
+        close: sinon.stub()
+        isDestroyed: sinon.stub().returns(false)
         webContents: new EE()
       })
 
       Windows.create.onCall(1).resolves(@childWin)
 
-      @event = {preventDefault: @sandbox.stub()}
+      @event = {preventDefault: sinon.stub()}
       @win.getPosition = -> [4, 2]
 
       @openNewWindow = (options) =>
@@ -274,8 +323,8 @@ describe "lib/browsers/electron", ->
 
     it "does the same things for children of the child window", ->
       @grandchildWin = _.extend(new EE(), {
-        close: @sandbox.stub()
-        isDestroyed: @sandbox.stub().returns(false)
+        close: sinon.stub()
+        isDestroyed: sinon.stub().returns(false)
         webContents: new EE()
       })
       Windows.create.onCall(2).resolves(@grandchildWin)
@@ -294,7 +343,7 @@ describe "lib/browsers/electron", ->
     it "sets proxy rules for webContents", ->
       webContents = {
         session: {
-          setProxy: @sandbox.stub().yieldsAsync()
+          setProxy: sinon.stub().yieldsAsync()
         }
       }
 
@@ -302,4 +351,5 @@ describe "lib/browsers/electron", ->
       .then ->
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: "proxy rules"
+          proxyBypassRules: "<-loopback>"
         })

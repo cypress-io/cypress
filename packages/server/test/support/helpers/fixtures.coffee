@@ -1,13 +1,9 @@
-path     = require("path")
 fs       = require("fs-extra")
-Promise  = require("bluebird")
-request  = require("request-promise")
+path     = require("path")
 
 root       = path.join(__dirname, "..", "..", "..")
 projects   = path.join(root, "test", "support", "fixtures", "projects")
 tmpDir     = path.join(root, ".projects")
-
-fs = Promise.promisifyAll(fs)
 
 module.exports =
   ## copies all of the project fixtures

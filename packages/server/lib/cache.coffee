@@ -1,12 +1,10 @@
 _          = require("lodash")
-fs         = require("fs-extra")
 path       = require("path")
 Promise    = require("bluebird")
+fs         = require("./util/fs")
 appData    = require("./util/app_data")
 FileUtil   = require("./util/file")
 logger     = require("./logger")
-
-fs = Promise.promisifyAll(fs)
 
 fileUtil = new FileUtil({
   path: appData.path("cache")
@@ -61,7 +59,7 @@ module.exports = {
 
     tx.set({PROJECTS: projects})
 
-  getProjectPaths: ->
+  getProjectRoots: ->
     fileUtil.transaction (tx) =>
       @_getProjects(tx).then (projects) =>
         pathsToRemove = Promise.reduce projects, (memo, path) ->

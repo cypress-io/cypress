@@ -17,11 +17,13 @@ describe('<Stats />', () => {
   context('passed', () => {
     it('renders -- when zero', () => {
       const component = shallow(<Stats stats={statsStub()} />)
+
       expect(component.find('.passed .num')).to.have.text('--')
     })
 
     it('renders number when non-zero', () => {
       const component = shallow(<Stats stats={statsStub({ numPassed: 5 })} />)
+
       expect(component.find('.passed .num')).to.have.text('5')
     })
   })
@@ -29,11 +31,13 @@ describe('<Stats />', () => {
   context('failed', () => {
     it('renders -- when zero', () => {
       const component = shallow(<Stats stats={statsStub()} />)
+
       expect(component.find('.failed .num')).to.have.text('--')
     })
 
     it('renders number when non-zero', () => {
       const component = shallow(<Stats stats={statsStub({ numFailed: 7 })} />)
+
       expect(component.find('.failed .num')).to.have.text('7')
     })
   })
@@ -41,11 +45,13 @@ describe('<Stats />', () => {
   context('pending', () => {
     it('renders -- when zero', () => {
       const component = shallow(<Stats stats={statsStub()} />)
+
       expect(component.find('.pending .num')).to.have.text('--')
     })
 
     it('renders number when non-zero', () => {
       const component = shallow(<Stats stats={statsStub({ numPending: 3 })} />)
+
       expect(component.find('.pending .num')).to.have.text('3')
     })
   })
@@ -53,11 +59,13 @@ describe('<Stats />', () => {
   context('duration', () => {
     it('renders -- when zero', () => {
       const component = shallow(<Stats stats={statsStub()} />)
+
       expect(component.find('.duration .num')).to.have.text('--')
     })
 
     it('renders number when non-zero, converted from milliseconds to seconds and fixed to 2 decimal places', () => {
       const component = shallow(<Stats stats={statsStub({ duration: 10562.452323523 })} />)
+
       expect(component.find('.duration .num')).to.have.text('10.56')
     })
   })

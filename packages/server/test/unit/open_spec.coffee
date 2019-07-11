@@ -12,14 +12,14 @@ describe "lib/util/open", ->
   beforeEach ->
     @platform = process.platform
 
-    cpStub = @sandbox.stub({
+    cpStub = sinon.stub({
       once: ->
       unref: ->
     })
 
     cpStub.once.withArgs("close").yieldsAsync(0)
 
-    @sandbox.stub(cp, "spawn").returns(cpStub)
+    sinon.stub(cp, "spawn").returns(cpStub)
 
   afterEach ->
     ## reset the platform

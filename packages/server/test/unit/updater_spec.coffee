@@ -1,7 +1,5 @@
 require("../spec_helper")
 
-delete global.fs
-
 nmi         = require("node-machine-id")
 cwd         = require("#{root}lib/cwd")
 request     = require("request")
@@ -43,7 +41,7 @@ describe "lib/updater", ->
 
   context "#checkNewVersion", ->
     beforeEach ->
-      @get = @sandbox.spy(request, "get")
+      @get = sinon.spy(request, "get")
 
       @updater = Updater({})
 
@@ -68,7 +66,7 @@ describe "lib/updater", ->
           done()
 
     it "sends x-machine-id as null on error", (done) ->
-      @sandbox.stub(nmi, "machineId").rejects(new Error())
+      sinon.stub(nmi, "machineId").rejects(new Error())
 
       @updater.getClient().checkNewVersion =>
         expect(@get).to.be.calledWithMatch({
@@ -81,9 +79,9 @@ describe "lib/updater", ->
 
   context "#check", ->
     beforeEach ->
-      @updater = Updater({quit: @sandbox.spy()})
+      @updater = Updater({quit: sinon.spy()})
       @updater.getClient()
-      @sandbox.stub(@updater.client, "checkNewVersion")
+      sinon.stub(@updater.client, "checkNewVersion")
 
     it "calls checkNewVersion", ->
       @updater.check()
@@ -92,7 +90,7 @@ describe "lib/updater", ->
     it "calls options.newVersionExists when there is a no version", ->
       @updater.client.checkNewVersion.yields(null, true, {})
 
-      options = {onNewVersion: @sandbox.spy()}
+      options = {onNewVersion: sinon.spy()}
       @updater.check(options)
 
       expect(options.onNewVersion).to.be.calledWith({})
@@ -100,7 +98,7 @@ describe "lib/updater", ->
     it "calls options.newVersionExists when there is a no version", ->
       @updater.client.checkNewVersion.yields(null, false)
 
-      options = {onNoNewVersion: @sandbox.spy()}
+      options = {onNoNewVersion: sinon.spy()}
       @updater.check(options)
 
       expect(options.onNoNewVersion).to.be.called

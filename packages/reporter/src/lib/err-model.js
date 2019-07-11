@@ -19,11 +19,11 @@ export default class Err {
     return /(AssertionError|CypressError)/.test(this.name)
   }
 
-  update (props = {}) {
+  update (props) {
     if (!props) return
 
-    if (props.name) this.name = props.name
-    if (props.message) this.message = props.message
-    if (props.stack) this.stack = props.stack
+    this.name = props.name
+    this.message = props.message
+    this.stack = props.stack
   }
 }

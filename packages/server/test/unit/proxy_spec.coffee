@@ -120,7 +120,7 @@ describe "lib/proxy", ->
 
 #   context "relative files", ->
 #     it "#getRelativeFileContent strips trailing slashes", ->
-#       createReadStream = @sandbox.stub(fs, "createReadStream")
+#       createReadStream = sinon.stub(fs, "createReadStream")
 #       proxy.getRelativeFileContent("index.html/", {})
 #       expect(createReadStream).to.be.calledWith("/Users/brian/app/index.html")
 

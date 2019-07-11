@@ -1,8 +1,14 @@
 $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Keyboard = Cypress.Keyboard
-bililiteRange = Cypress.bililiteRange
 Promise = Cypress.Promise
+$selection = require("../../../../../src/dom/selection")
+
+## trim new lines at the end of innerText
+## due to changing browser versions implementing
+## this differently
+trimInnerText = ($el) ->
+  _.trimEnd($el.get(0).innerText, "\n")
 
 describe "src/cy/commands/actions/type", ->
   before ->
@@ -10,6 +16,31 @@ describe "src/cy/commands/actions/type", ->
       .visit("/fixtures/dom.html")
       .then (win) ->
         @body = win.document.body.outerHTML
+
+        el = cy.$$('[contenteditable]:first').get(0)
+
+        innerHtml = el.innerHTML
+
+        ## by default... the last new line by itself
+        ## will only ever count as a single new line...
+        ## but new lines above it will count as 2 new lines...
+        ## so by adding "3" new lines, the last counts as 1
+        ## and the first 2 count as 2...
+        el.innerHTML = '<div><br></div>'.repeat(3)
+
+        ## browsers changed their implementation
+        ## of the number of newlines that <div><br></div>
+        ## create. newer versions of chrome set 2 new lines
+        ## per set - whereas older ones create only 1 new line.
+        ## so we grab the current sets for the assertion later
+        ## so this test is browser version agnostic
+        newLines = el.innerText
+
+        ## disregard the last new line, and divide by 2...
+        ## this tells us how many multiples of new lines
+        ## the browser inserts for new lines other than
+        ## the last new line
+        @multiplierNumNewLines = (newLines.length - 1) / 2
 
   beforeEach ->
     doc = cy.state("document")
@@ -78,11 +109,12 @@ describe "src/cy/commands/actions/type", ->
           expect(blurred).to.be.true
 
     it "can type into contenteditable", ->
-      oldText = cy.$$("#contenteditable").text()
+      oldText = cy.$$("#contenteditable").get(0).innerText
 
-      cy.get("#contenteditable").type("foo").then ($div) ->
-        text = _.clean $div.text()
-        expect(text).to.eq _.clean(oldText + "foo")
+      cy.get("#contenteditable")
+      .type(" foo")
+      .then ($div) ->
+        expect($div.get(0).innerText).to.eq (oldText + " foo")
 
     it "delays 50ms before resolving", ->
       cy.$$(":text:first").on "change", (e) =>
@@ -239,22 +271,29 @@ describe "src/cy/commands/actions/type", ->
           expect(args[2]).to.eq(animationDistanceThreshold)
 
     describe "input types where no extra formatting required", ->
-      _.each ["password", "email", "number", "search", "url", "tel"], (type) ->
-        it "accepts input [type=#{type}]", ->
-          input = cy.$$("<input type='#{type}' id='input-type-#{type}' />")
+      _.each [
+        "password"
+        "email"
+        "number"
+        "search"
+        "url"
+        "tel"
+        ], (type) ->
+          it "accepts input [type=#{type}]", ->
+            input = cy.$$("<input type='#{type}' id='input-type-#{type}' />")
 
-          cy.$$("body").append(input)
+            cy.$$("body").append(input)
 
-          cy.get("#input-type-#{type}").type("1234").then ($input) ->
-            expect($input).to.have.value "1234"
-            expect($input.get(0)).to.eq $input.get(0)
+            cy.get("#input-type-#{type}").type("1234").then ($input) ->
+              expect($input).to.have.value "1234"
+              expect($input.get(0)).to.eq $input.get(0)
 
-        it "accepts type [type=#{type}], regardless of capitalization", ->
-          input = cy.$$("<input type='#{type.toUpperCase()}' id='input-type-#{type}' />")
+          it "accepts type [type=#{type}], regardless of capitalization", ->
+            input = cy.$$("<input type='#{type.toUpperCase()}' id='input-type-#{type}' />")
 
-          cy.$$("body").append(input)
+            cy.$$("body").append(input)
 
-          cy.get("#input-type-#{type}").type("1234")
+            cy.get("#input-type-#{type}").type("1234")
 
     describe "tabindex", ->
       beforeEach ->
@@ -512,6 +551,95 @@ describe "src/cy/commands/actions/type", ->
 
       it "fires events for each key stroke"
 
+      it "does fire input event when value changes", ->
+        fired = false
+        cy.$$(":text:first").on "input", ->
+          fired = true
+
+        fired = false
+        cy.get(":text:first")
+          .invoke("val", "bar")
+          .type("{selectAll}{rightarrow}{backspace}")
+          .then ->
+            expect(fired).to.eq true
+
+        fired = false
+        cy.get(":text:first")
+          .invoke("val", "bar")
+          .type("{selectAll}{leftarrow}{del}")
+          .then ->
+            expect(fired).to.eq true
+
+        cy.$$('[contenteditable]:first').on "input", () ->
+          fired = true
+
+        fired = false
+        cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar')
+          .type('{selectAll}{rightarrow}{backspace}')
+          .then ->
+            expect(fired).to.eq true
+
+        fired = false
+        cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar')
+          .type('{selectAll}{leftarrow}{del}')
+          .then ->
+            expect(fired).to.eq true
+
+      it "does not fire input event when value does not change", ->
+        fired = false
+        cy.$$(":text:first").on "input", (e) ->
+          fired = true
+
+        fired = false
+        cy.get(":text:first")
+          .invoke("val", "bar")
+          .type('{selectAll}{rightarrow}{del}')
+          .then ->
+            expect(fired).to.eq false
+
+        fired = false
+        cy.get(":text:first")
+          .invoke("val", "bar")
+          .type('{selectAll}{leftarrow}{backspace}')
+          .then ->
+            expect(fired).to.eq false
+
+        cy.$$("textarea:first").on "input", (e) ->
+          fired = true
+
+        fired = false
+        cy.get("textarea:first")
+          .invoke("val", "bar")
+          .type('{selectAll}{rightarrow}{del}')
+          .then ->
+            expect(fired).to.eq false
+
+        fired = false
+        cy.get("textarea:first")
+          .invoke("val", "bar")
+          .type('{selectAll}{leftarrow}{backspace}')
+          .then ->
+            expect(fired).to.eq false
+
+        cy.$$('[contenteditable]:first').on "input", () ->
+          fired = true
+
+        fired = false
+        cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar')
+          .type('{selectAll}{rightarrow}{del}')
+          .then ->
+            expect(fired).to.eq false
+
+        fired = false
+        cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar')
+          .type('{selectAll}{leftarrow}{backspace}')
+          .then ->
+            expect(fired).to.eq false
+
     describe "maxlength", ->
       it "limits text entered to the maxlength attribute of a text input", ->
         $input = cy.$$(":text:first")
@@ -605,11 +733,48 @@ describe "src/cy/commands/actions/type", ->
           expect($text).to.have.value("foo bar")
 
       it "overwrites text when currently has selection", ->
-        cy.$$("#input-without-value").val("0").click ->
-          $(@).select()
+        cy.get("#input-without-value").invoke('val', '0').then (el) ->
+          el.select()
 
         cy.get("#input-without-value").type("50").then ($input) ->
           expect($input).to.have.value("50")
+
+      it "overwrites text when selectAll in click handler", ->
+        cy.$$("#input-without-value").val("0").click ->
+          $(@).select()
+
+      it "overwrites text when selectAll in mouseup handler", ->
+        cy.$$("#input-without-value").val("0").mouseup ->
+          $(@).select()
+
+      it "overwrites text when selectAll in mouseup handler", ->
+        cy.$$("#input-without-value").val("0").mouseup ->
+          $(@).select()
+
+      it "responsive to keydown handler", ->
+        cy.$$("#input-without-value").val("1234").keydown ->
+          $(@).get(0).setSelectionRange(0,0)
+        cy.get("#input-without-value").type("56").then ($input) ->
+          expect($input).to.have.value("651234")
+
+      it "responsive to keyup handler", ->
+        cy.$$("#input-without-value").val("1234").keyup ->
+          $(@).get(0).setSelectionRange(0,0)
+        cy.get("#input-without-value").type("56").then ($input) ->
+          expect($input).to.have.value("612345")
+
+      it "responsive to input handler", ->
+        cy.$$("#input-without-value").val("1234").keyup ->
+          $(@).get(0).setSelectionRange(0,0)
+        cy.get("#input-without-value").type("56").then ($input) ->
+          expect($input).to.have.value("612345")
+
+      it "responsive to change handler", ->
+        cy.$$("#input-without-value").val("1234").change ->
+          $(@).get(0).setSelectionRange(0,0)
+        ## no change event should be fired
+        cy.get("#input-without-value").type("56").then ($input) ->
+          expect($input).to.have.value("123456")
 
       it "automatically moves the caret to the end if value is changed manually", ->
         cy.$$("#input-without-value").keypress (e) ->
@@ -621,6 +786,7 @@ describe "src/cy/commands/actions/type", ->
 
           val = $input.val()
 
+          ## setting value updates cursor to the end of input
           $input.val(val + key + "-")
 
         cy.get("#input-without-value").type("foo").then ($input) ->
@@ -720,11 +886,25 @@ describe "src/cy/commands/actions/type", ->
             expect($text).to.have.value("1234")
 
         it "overwrites text on input[type=number] when input has existing text selected", ->
-          cy.$$("#number-without-value").val("0").click ->
-            $(@).select()
+          cy.get("#number-without-value").invoke('val', "0").then (el) ->
+            el.get(0).select()
 
           cy.get("#number-without-value").type("50").then ($input) ->
             expect($input).to.have.value("50")
+
+        it "can type negative numbers", ->
+          cy.get('#number-without-value')
+            .type('-123.12')
+            .should('have.value', '-123.12')
+
+        it "type=number blurs consistently", ->
+          blurred = 0
+          cy.$$("#number-without-value").blur ->
+            blurred++
+          cy.get("#number-without-value")
+          .type('200').blur()
+          .then ->
+            expect(blurred).to.eq 1
 
       describe "input[type=email]", ->
         it "can change values", ->
@@ -748,11 +928,19 @@ describe "src/cy/commands/actions/type", ->
             expect($text).to.have.value("brian@foo.com")
 
         it "overwrites text when input has existing text selected", ->
-          cy.$$("#email-without-value").val("foo@bar.com").click ->
-            $(@).select()
+          cy.get("#email-without-value").invoke('val', "foo@bar.com").invoke('select')
 
           cy.get("#email-without-value").type("bar@foo.com").then ($input) ->
             expect($input).to.have.value("bar@foo.com")
+
+        it "type=email blurs consistently", ->
+          blurred = 0
+          cy.$$("#email-without-value").blur ->
+            blurred++
+          cy.get("#email-without-value")
+          .type('foo@bar.com').blur()
+          .then ->
+            expect(blurred).to.eq 1
 
       describe "input[type=password]", ->
         it "can change values", ->
@@ -768,11 +956,33 @@ describe "src/cy/commands/actions/type", ->
             expect($text).to.have.value("secret")
 
         it "overwrites text when input has existing text selected", ->
-          cy.$$("#password-without-value").val("secret").click ->
-            $(@).select()
+          cy.get("#password-without-value").invoke('val', "secret").invoke('select')
 
           cy.get("#password-without-value").type("agent").then ($input) ->
             expect($input).to.have.value("agent")
+
+        it "overwrites text when input has selected range of text in click handler", ->
+          cy.$$("#input-with-value").mouseup (e) ->
+            # e.preventDefault()
+
+            e.target.setSelectionRange(1, 1)
+
+          select = (e) ->
+            e.target.select()
+
+          cy
+          .$$("#password-without-value")
+          .val("secret")
+          .click(select)
+          .keyup (e) ->
+            switch e.key
+              when "g"
+                select(e)
+              when "n"
+                e.target.setSelectionRange(0, 1)
+
+          cy.get("#password-without-value").type("agent").then ($input) ->
+            expect($input).to.have.value("tn")
 
       describe "input[type=date]", ->
         it "can change values", ->
@@ -855,6 +1065,81 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
             expect($text).to.have.text("foo bar")
 
+        it "can type into [contenteditable] with existing <div>", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>foo</div>'
+          cy.get("[contenteditable]:first")
+          .type("bar").then ($div) ->
+            expect(trimInnerText($div)).to.eql("foobar")
+            expect($div.get(0).textContent).to.eql("foobar")
+            expect($div.get(0).innerHTML).to.eql("<div>foobar</div>")
+
+        it "can type into [contenteditable] with existing <p>", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<p>foo</p>'
+          cy.get("[contenteditable]:first")
+          .type("bar").then ($div) ->
+            expect(trimInnerText($div)).to.eql("foobar")
+            expect($div.get(0).textContent).to.eql("foobar")
+            expect($div.get(0).innerHTML).to.eql("<p>foobar</p>")
+
+        it "collapses selection to start on {leftarrow}", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
+          cy.get("[contenteditable]:first")
+          .type("{selectall}{leftarrow}foo").then ($div) ->
+            expect(trimInnerText($div)).to.eql("foobar")
+
+        it "collapses selection to end on {rightarrow}", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
+          cy.get("[contenteditable]:first")
+          .type("{selectall}{leftarrow}foo{selectall}{rightarrow}baz").then ($div) ->
+            expect(trimInnerText($div)).to.eql("foobarbaz")
+
+        it "can remove a placeholder <br>", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div><br></div>'
+          cy.get("[contenteditable]:first")
+          .type("foobar").then ($div) ->
+            expect($div.get(0).innerHTML).to.eql("<div>foobar</div>")
+
+        it "can type into an iframe with designmode = 'on'", ->
+          ## append a new iframe to the body
+          cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
+            .appendTo cy.$$('body')
+
+          ## wait for iframe to load
+          loaded = false
+          cy.get('#generic-iframe')
+            .then ($iframe) ->
+              $iframe.load ->
+                loaded = true
+            .scrollIntoView()
+            .should ->
+              expect(loaded).to.eq true
+
+          ## type text into iframe
+          cy.get('#generic-iframe')
+            .then ($iframe) ->
+              $iframe[0].contentDocument.designMode = 'on'
+              iframe = $iframe.contents()
+              cy.wrap(iframe.find('html')).first()
+                .type('{selectall}{del} foo bar baz{enter}ac{leftarrow}b')
+
+          # assert that text was typed
+          cy.get('#generic-iframe')
+            .then ($iframe) ->
+              iframeText = $iframe[0].contentDocument.body.innerText
+              expect(iframeText).to.include('foo bar baz\nabc')
+
+      ## TODO: fix this with 4.0 updates
+      describe.skip "element reference loss", ->
+        it 'follows the focus of the cursor', ->
+          charCount = 0
+          cy.$$('input:first').keydown ->
+            if charCount is 3
+              cy.$$('input').eq(1).focus()
+            charCount++
+          cy.get('input:first').type('foobar').then ->
+            cy.get('input:first').should('have.value', 'foo')
+            cy.get('input').eq(1).should('have.value', 'bar')
+
     describe "specialChars", ->
       context "{{}", ->
         it "sets which and keyCode to 219", (done) ->
@@ -865,11 +1150,11 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
 
-        it "fires keypress event with 219 charCode", (done) ->
+        it "fires keypress event with 123 charCode", (done) ->
           cy.$$(":text:first").on "keypress", (e) ->
-            expect(e.charCode).to.eq 219
-            expect(e.which).to.eq 219
-            expect(e.keyCode).to.eq 219
+            expect(e.charCode).to.eq 123
+            expect(e.which).to.eq 123
+            expect(e.keyCode).to.eq 123
             done()
 
           cy.get(":text:first").invoke("val", "ab").type("{{}")
@@ -931,15 +1216,14 @@ describe "src/cy/commands/actions/type", ->
 
       context "{backspace}", ->
         it "backspaces character to the left", ->
-          cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{backspace}").then ($input) ->
-            expect($input).to.have.value("br")
+          cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{backspace}u").then ($input) ->
+            expect($input).to.have.value("bur")
 
         it "can backspace a selection range of characters", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'ar' characters
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 3]).select()
+              $input.get(0).setSelectionRange(1,3)
             .get(":text:first").type("{backspace}").then ($input) ->
               expect($input).to.have.value("b")
 
@@ -961,28 +1245,6 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").invoke("val", "ab").type("{backspace}").then -> done()
 
-        it "does fire input event when value changes", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done()
-
-          cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the 'a' characters
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 2]).select()
-            .get(":text:first").type("{backspace}")
-
-        it "does not fire input event when value does not change", (done) ->
-          cy.$$(":text:first").on "input", (e) ->
-            done("should not have fired input")
-
-          cy
-            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## set the range at the beggining
-              b = bililiteRange($input.get(0))
-              b.bounds([0, 0]).select()
-            .get(":text:first").type("{backspace}").then -> done()
-
         it "can prevent default backspace movement", (done) ->
           cy.$$(":text:first").on "keydown", (e) ->
             if e.keyCode is 8
@@ -1001,8 +1263,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'ar' characters
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 3]).select()
+              $input.get(0).setSelectionRange(1,3)
             .get(":text:first").type("{del}").then ($input) ->
               expect($input).to.have.value("b")
 
@@ -1031,8 +1292,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' characters
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 2]).select()
+              $input.get(0).setSelectionRange(0,1)
             .get(":text:first").type("{del}")
 
         it "does not fire input event when value does not change", (done) ->
@@ -1063,8 +1323,7 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' character
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 2]).select()
+              $input.get(0).setSelectionRange(1,2)
             .get(":text:first").type("{leftarrow}n").then ($input) ->
               expect($input).to.have.value("bnar")
 
@@ -1072,8 +1331,8 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' character
-              b = bililiteRange($input.get(0))
-              b.bounds("all").select()
+              $input.get(0).setSelectionRange(0,1)
+
             .get(":text:first").type("{leftarrow}n").then ($input) ->
               expect($input).to.have.value("nbar")
 
@@ -1114,9 +1373,9 @@ describe "src/cy/commands/actions/type", ->
       context "{rightarrow}", ->
         it "can move the cursor from the beginning to beginning + 1", ->
           cy.get(":text:first").invoke("val", "bar").focus().then ($input) ->
-            ## select the all characters
-            b = bililiteRange($input.get(0))
-            b.bounds("start").select()
+            ## select the beginning
+            $input.get(0).setSelectionRange(0,0)
+
           .get(":text:first").type("{rightarrow}n").then ($input) ->
             expect($input).to.have.value("bnar")
 
@@ -1128,17 +1387,16 @@ describe "src/cy/commands/actions/type", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
               ## select the 'a' character
-              b = bililiteRange($input.get(0))
-              b.bounds([1, 2]).select()
+              $input.get(0).setSelectionRange(1,2)
+
             .get(":text:first").type("{rightarrow}n").then ($input) ->
               expect($input).to.have.value("banr")
 
         it "sets the cursor to the very beginning", ->
           cy
             .get(":text:first").invoke("val", "bar").focus().then ($input) ->
-              ## select the all characters
-              b = bililiteRange($input.get(0))
-              b.bounds("all").select()
+              $input.select()
+
             .get(":text:first").type("{leftarrow}n").then ($input) ->
               expect($input).to.have.value("nbar")
 
@@ -1176,6 +1434,106 @@ describe "src/cy/commands/actions/type", ->
             expect($input).to.have.value("fodo")
             done()
 
+      context "{home}", ->
+        it "sets which and keyCode to 36 and does not fire keypress events", (done) ->
+          cy.$$("#comments").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$("#comments").on "keydown", (e) ->
+            expect(e.which).to.eq 36
+            expect(e.keyCode).to.eq 36
+            expect(e.key).to.eq "Home"
+            done()
+
+          cy.get("#comments").type("{home}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          cy.$$("#comments").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get("#comments").type("{home}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$("#comments").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get("#comments").type("{home}").then -> done()
+
+        it "can move the cursor to input start", ->
+          cy.get(":text:first").invoke("val", "bar").type("{home}n").then ($input) ->
+            expect($input).to.have.value("nbar")
+
+        it "does not move the cursor if already at bounds 0", ->
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}{home}n").then ($input) ->
+            expect($input).to.have.value("nbar")
+
+        it "should move the cursor to the start of each line in textarea", ->
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+
+          cy.get("textarea:first")
+          .type("{home}11{uparrow}{home}22{uparrow}{home}33").should('have.value', "33foo\n22bar\n11baz")
+
+        it "should move cursor to the start of each line in contenteditable", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML =
+            '<div>foo</div>' +
+            '<div>bar</div>' +
+            '<div>baz</div>'
+
+          cy.get("[contenteditable]:first")
+          .type("{home}11{uparrow}{home}22{uparrow}{home}33").then ($div) ->
+            expect(trimInnerText($div)).to.eql("33foo\n22bar\n11baz")
+
+      context "{end}", ->
+        it "sets which and keyCode to 35 and does not fire keypress events", (done) ->
+          cy.$$("#comments").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$("#comments").on "keydown", (e) ->
+            expect(e.which).to.eq 35
+            expect(e.keyCode).to.eq 35
+            expect(e.key).to.eq "End"
+            done()
+
+          cy.get("#comments").type("{end}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          cy.$$("#comments").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get("#comments").type("{end}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$("#comments").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get("#comments").type("{end}").then -> done()
+
+        it "can move the cursor to input end", ->
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}{end}n").then ($input) ->
+            expect($input).to.have.value("barn")
+
+        it "does not move the cursor if already at end of bounds", ->
+          cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}{end}n").then ($input) ->
+            expect($input).to.have.value("barn")
+
+        it "should move the cursor to the end of each line in textarea", ->
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+
+          cy.get("textarea:first")
+          .type("{end}11{uparrow}{end}22{uparrow}{end}33").should('have.value', "foo33\nbar22\nbaz11")
+
+        it "should move cursor to the end of each line in contenteditable", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML =
+            '<div>foo</div>' +
+            '<div>bar</div>' +
+            '<div>baz</div>'
+
+          cy.get("[contenteditable]:first")
+          .type("{end}11{uparrow}{end}22{uparrow}{end}33").then ($div) ->
+            expect(trimInnerText($div)).to.eql("foo33\nbar22\nbaz11")
+
       context "{uparrow}", ->
         beforeEach ->
           cy.$$("#comments").val("foo\nbar\nbaz")
@@ -1205,6 +1563,44 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#comments").type("{uparrow}").then -> done()
 
+        it "up and down arrow on contenteditable", ->
+          cy.$$('[contenteditable]:first').get(0).innerHTML =
+                      '<div>foo</div>' +
+                      '<div>bar</div>' +
+                      '<div>baz</div>'
+
+          cy.get("[contenteditable]:first")
+          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33").then ($div) ->
+            expect(trimInnerText($div)).to.eql("foo22\nb11ar\nbaz33")
+
+        it "uparrow ignores current selection", ->
+          ce = cy.$$('[contenteditable]:first').get(0)
+          ce.innerHTML =
+                      '<div>foo</div>' +
+                      '<div>bar</div>' +
+                      '<div>baz</div>'
+          ## select 'bar'
+          line = cy.$$('[contenteditable]:first div:nth-child(1)').get(0)
+          cy.document().then (doc) ->
+            ce.focus()
+            doc.getSelection().selectAllChildren(line)
+
+          cy.get("[contenteditable]:first")
+          .type("{uparrow}11").then ($div) ->
+            expect(trimInnerText($div)).to.eql("11foo\nbar\nbaz")
+
+        it "up and down arrow on textarea", ->
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+
+          cy.get("textarea:first")
+          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33").should('have.value', "foo22\nb11ar\nbaz33")
+
+        it "increments input[type=number]", ->
+          cy.get('input[type="number"]:first')
+            .invoke('val', '12.34')
+            .type('{uparrow}{uparrow}')
+            .should('have.value', '14')
+
       context "{downarrow}", ->
         beforeEach ->
           cy.$$("#comments").val("foo\nbar\nbaz")
@@ -1233,6 +1629,34 @@ describe "src/cy/commands/actions/type", ->
             done("input should not have fired")
 
           cy.get("#comments").type("{downarrow}").then -> done()
+
+        it "{downarrow} will move to EOL on textarea", ->
+          cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
+
+          cy.get("textarea:first")
+          .type("{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33{leftarrow}{downarrow}44").should('have.value', "foo22\nb11ar\nbaz3344")
+
+        it "decrements input[type='number']", ->
+          cy.get('input[type="number"]:first')
+            .invoke('val', '12.34')
+            .type('{downarrow}{downarrow}')
+            .should('have.value', '11')
+
+        it "downarrow ignores current selection", ->
+          ce = cy.$$('[contenteditable]:first').get(0)
+          ce.innerHTML =
+                      '<div>foo</div>' +
+                      '<div>bar</div>' +
+                      '<div>baz</div>'
+          ## select 'foo'
+          line = cy.$$('[contenteditable]:first div:first').get(0)
+          cy.document().then (doc) ->
+            ce.focus()
+            doc.getSelection().selectAllChildren(line)
+
+          cy.get("[contenteditable]:first")
+          .type("{downarrow}22").then ($div) ->
+            expect(trimInnerText($div)).to.eql("foo\n22bar\nbaz")
 
       context "{selectall}{del}", ->
         it "can select all the text and delete", ->
@@ -1291,9 +1715,123 @@ describe "src/cy/commands/actions/type", ->
           cy.get("#input-types textarea").invoke("val", "foo").type("bar{enter}baz{enter}quux").then ($textarea) ->
             expect($textarea).to.have.value("foobar\nbaz\nquux")
 
-        it "inserts new line into [contenteditable]", ->
-          cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
-            expect($div).to.have.text("foobar\nbaz\nquux")
+        it "inserts new line into [contenteditable] ", ->
+          cy.get("#input-types [contenteditable]:first").invoke("text", "foo")
+          .type("bar{enter}baz{enter}{enter}{enter}quux").then ($div) ->
+            conditionalNewLines = "\n\n".repeat(@multiplierNumNewLines)
+
+            expect(trimInnerText($div)).to.eql("foobar\nbaz#{conditionalNewLines}\nquux")
+            expect($div.get(0).textContent).to.eql("foobarbazquux")
+            expect($div.get(0).innerHTML).to.eql("foobar<div>baz</div><div><br></div><div><br></div><div>quux</div>")
+
+        it "inserts new line into [contenteditable] from midline", ->
+          cy.get("#input-types [contenteditable]:first").invoke("text", "foo")
+          .type("bar{leftarrow}{enter}baz{leftarrow}{enter}quux").then ($div) ->
+            expect(trimInnerText($div)).to.eql("fooba\nba\nquuxzr")
+            expect($div.get(0).textContent).to.eql("foobabaquuxzr")
+            expect($div.get(0).innerHTML).to.eql("fooba<div>ba</div><div>quuxzr</div>")
+
+      context "{insert}", ->
+        it "sets which and keyCode to 45 and does not fire keypress events", (done) ->
+          cy.$$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 45
+            expect(e.keyCode).to.eq 45
+            expect(e.key).to.eq "Insert"
+            done()
+
+          cy.get(":text:first").invoke("val", "ab").type("{insert}")
+
+        it "does not fire textInput event", (done) ->
+          cy.$$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{insert}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{insert}").then -> done()
+
+        it "can prevent default insert movement", (done) ->
+          cy.$$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 45
+              e.preventDefault()
+
+          cy.get(":text:first").invoke("val", "foo").type("d{insert}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
+      context "{pageup}", ->
+        it "sets which and keyCode to 33 and does not fire keypress events", (done) ->
+          cy.$$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 33
+            expect(e.keyCode).to.eq 33
+            expect(e.key).to.eq "PageUp"
+            done()
+
+          cy.get(":text:first").invoke("val", "ab").type("{pageup}")
+
+        it "does not fire textInput event", (done) ->
+          cy.$$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{pageup}").then -> done()
+
+        it "can prevent default pageup movement", (done) ->
+          cy.$$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 33
+              e.preventDefault()
+
+          cy.get(":text:first").invoke("val", "foo").type("d{pageup}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
+      context "{pagedown}", ->
+        it "sets which and keyCode to 34 and does not fire keypress events", (done) ->
+          cy.$$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          cy.$$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 34
+            expect(e.keyCode).to.eq 34
+            expect(e.key).to.eq "PageDown"
+            done()
+
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}")
+
+        it "does not fire textInput event", (done) ->
+          cy.$$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then -> done()
+
+        it "does not fire input event", (done) ->
+          cy.$$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          cy.get(":text:first").invoke("val", "ab").type("{pagedown}").then -> done()
+
+        it "can prevent default pagedown movement", (done) ->
+          cy.$$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 34
+              e.preventDefault()
+
+          cy.get(":text:first").invoke("val", "foo").type("d{pagedown}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
 
     describe "modifiers", ->
 
@@ -1523,7 +2061,16 @@ describe "src/cy/commands/actions/type", ->
     describe "click events", ->
       it "passes timeout and interval down to click", (done) ->
         input  = $("<input />").attr("id", "input-covered-in-span").prependTo(cy.$$("body"))
-        span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(cy.$$("body"))
+        span = $("<span>span on input</span>")
+          .css {
+            position: "absolute"
+            left: input.offset().left
+            top: input.offset().top
+            padding: 5
+            display: "inline-block"
+            backgroundColor: "yellow"
+          }
+          .prependTo cy.$$("body")
 
         cy.on "command:retry", (options) ->
           expect(options.timeout).to.eq 1000
@@ -1654,8 +2201,12 @@ describe "src/cy/commands/actions/type", ->
         cy.$$(":text:first").change ->
           changed += 1
 
-        cy.get(":text:first").invoke("val", "foo").clear().type("o").click().then ->
+        cy.get(":text:first").invoke("val", "foo").clear().type("o").click().then ($el) ->
           expect(changed).to.eq 0
+          $el
+        .blur()
+        .then ->
+          expect(changed).to.eq 1
 
       it "does not fire if {enter} is preventedDefault", ->
         changed = 0
@@ -1743,10 +2294,274 @@ describe "src/cy/commands/actions/type", ->
           .get("button:first").click().then ->
             expect(changed).to.eq 0
 
-    describe "caret position", ->
-      it "leaves caret at the end of the input"
+      it "does not fire on .clear() without blur", ->
+        changed = 0
 
-      it "always types at the end of the input"
+        cy.$$("input:first").change ->
+          changed += 1
+
+        cy.get("input:first").invoke('val', 'foo')
+        .clear()
+        .then ($el) ->
+          expect(changed).to.eq 0
+          $el
+        .type('foo')
+        .blur()
+        .then ->
+          expect(changed).to.eq 0
+
+      it "fires change for single value change inputs", ->
+        changed = 0
+        cy.$$('input[type="date"]:first').change ->
+          changed++
+        cy.get('input[type="date"]:first')
+          .type("1959-09-13")
+          .blur()
+          .then ->
+            expect(changed).to.eql 1
+
+      it "does not fire change for non-change single value input", ->
+        changed = 0
+        cy.$$('input[type="date"]:first').change ->
+          changed++
+        cy.get('input[type="date"]:first')
+          .invoke('val', "1959-09-13")
+          .type("1959-09-13")
+          .blur()
+          .then ->
+            expect(changed).to.eql(0)
+
+      it "does not fire change for type'd change that restores value", ->
+        changed = 0
+        cy.$$('input:first').change ->
+          changed++
+        cy.get('input:first')
+        .invoke('val', 'foo')
+        .type('{backspace}o')
+        .invoke('val', 'bar')
+        .type('{backspace}r')
+        .blur()
+        .then ->
+          expect(changed).to.eql 0
+
+    describe "caret position", ->
+
+      it "respects being formatted by input event handlers"
+
+      it "accurately returns host contenteditable attr", ->
+        hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=true attr", ->
+        hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=\"\" attr", ->
+        hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns host contenteditable=\"foo\" attr", ->
+        hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+
+      it "accurately returns same el with no falsey contenteditable=\"false\" attr", ->
+        hostEl = cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
+        cy.get('#ce-inner1').then ($el) ->
+          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+
+            
+      ## https://github.com/cypress-io/cypress/issues/3001
+      describe('skip actionability if already focused', () =>
+        it('inside input', () =>
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+            <input type="text" id="foo">
+            '))
+
+          cy.$$('#foo').focus()
+          
+
+          cy.focused().type('new text').should('have.prop', 'value', 'new text')
+        )
+
+        it('inside textarea', () =>
+         
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
+            <textarea id="foo"></textarea>
+            '))
+
+          cy.$$('#foo').focus()
+        
+
+          cy.focused().type('new text').should('have.prop', 'value', 'new text')
+        )
+
+        it('inside contenteditable', () =>
+      
+          cy.$$('body').append(Cypress.$('
+            <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div>
+            <div id="foo" contenteditable>
+            <div>foo</div><div>bar</div><div>baz</div>
+            </div>
+            '))
+          win = cy.state('window')
+          doc = window.document
+
+          cy.$$('#foo').focus()
+          inner = cy.$$('div:contains(bar):last')
+
+          range = doc.createRange()
+
+          range.selectNodeContents(inner[0])
+          sel = win.getSelection()
+
+          sel.removeAllRanges()
+
+          sel.addRange(range)
+        
+
+          cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
+        )
+      )
+
+      it "can arrow from maxlength", ->
+        cy.get('input:first').invoke('attr', 'maxlength', "5").type('foobar{leftarrow}')
+        cy.window().then (win) ->
+          expect $selection.getSelectionBounds Cypress.$('input:first').get(0)
+          .to.deep.eq({start:4, end:4})
+
+      it "won't arrowright past length", ->
+        cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
+        cy.window().then (win) ->
+          expect $selection.getSelectionBounds Cypress.$('input:first').get(0)
+          .to.deep.eq({start:6, end:6})
+
+      it "won't arrowleft before word", ->
+        cy.get('input:first').type('oo' + '{leftarrow}{leftarrow}{leftarrow}' + 'f' + '{leftarrow}'.repeat(5))
+        cy.window().then (win) ->
+          expect $selection.getSelectionBounds Cypress.$('input:first').get(0)
+          .to.deep.eq({start:0, end:0})
+
+      it "leaves caret at the end of contenteditable", ->
+        cy.get('[contenteditable]:first').type('foobar')
+        cy.window().then (win) ->
+          expect $selection.getSelectionBounds Cypress.$('[contenteditable]:first').get(0)
+          .to.deep.eq({start:6, end:6})
+
+      it "leaves caret at the end of contenteditable when prefilled", ->
+        $el = cy.$$('[contenteditable]:first')
+        el = $el.get(0)
+        el.innerHTML = 'foo'
+        cy.get('[contenteditable]:first').type('bar')
+        cy.window().then (win) ->
+          expect $selection.getSelectionBounds Cypress.$('[contenteditable]:first').get(0)
+          .to.deep.eq({start:6, end:6})
+
+      it "can move the caret left on contenteditable", ->
+        cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
+        cy.window().then (win) ->
+          expect $selection.getSelectionBounds Cypress.$('[contenteditable]:first').get(0)
+          .to.deep.eq({start:1, end:1})
+
+        ##make sure caret is correct
+        ## type left left
+        ## make sure caret correct
+        ## text is fboo
+        ## fix input-mask issue
+
+      it "leaves caret at the end of input", ->
+        cy.get(':text:first').type('foobar')
+        cy.window().then (win) ->
+          expect $selection.getSelectionBounds Cypress.$(':text:first').get(0)
+          .to.deep.eq({start:6, end:6})
+
+      it "leaves caret at the end of textarea", ->
+        cy.get('#comments').type('foobar')
+        cy.window().then (win) ->
+          expect $selection.getSelectionBounds Cypress.$('#comments').get(0)
+          .to.deep.eq({start:6, end:6})
+
+      it "can wrap cursor to next line in [contenteditable] with {rightarrow}", ->
+        $el = cy.$$('[contenteditable]:first')
+        el = $el.get(0)
+        el.innerHTML = 'start'+
+        '<div>middle</div>'+
+        '<div>end</div>'
+
+        cy.get('[contenteditable]:first')
+        ## move cursor to beginning of div
+        .type('{selectall}{leftarrow}')
+        .type('{rightarrow}'.repeat(14)+'[_I_]').then ($el) ->
+          expect(trimInnerText($el)).to.eql('start\nmiddle\ne[_I_]nd')
+
+      it "can wrap cursor to prev line in [contenteditable] with {leftarrow}", ->
+        $el = cy.$$('[contenteditable]:first')
+        el = $el.get(0)
+
+        el.innerHTML = 'start'+
+        '<div>middle</div>'+
+        '<div>end</div>'
+
+        cy.get('[contenteditable]:first').type('{leftarrow}'.repeat(12)+'[_I_]').then ($el) ->
+          expect(trimInnerText($el)).to.eql('star[_I_]t\nmiddle\nend')
+
+      it "can wrap cursor to next line in [contenteditable] with {rightarrow} and empty lines", ->
+        $el = cy.$$('[contenteditable]:first')
+        el = $el.get(0)
+        el.innerHTML = '<div><br></div>'.repeat(4) + '<div>end</div>'
+
+        newLines = "\n\n\n".repeat(@multiplierNumNewLines)
+
+        cy.get('[contenteditable]:first')
+        .type('{selectall}{leftarrow}')
+        .type('foobar'+'{rightarrow}'.repeat(6)+'[_I_]').then ->
+          expect(trimInnerText($el)).to.eql("foobar#{newLines}\nen[_I_]d")
+
+      it "can use {rightarrow} and nested elements", ->
+        $el = cy.$$('[contenteditable]:first')
+        el = $el.get(0)
+        el.innerHTML = '<div><b>s</b>ta<b>rt</b></div>'
+
+        cy.get('[contenteditable]:first')
+        .type('{selectall}{leftarrow}')
+        .type('{rightarrow}'.repeat(3)+'[_I_]').then ->
+          expect(trimInnerText($el)).to.eql('sta[_I_]rt')
+
+      it "enter and \\n should act the same for [contenteditable]", ->
+        cleanseText = (text) ->
+          ## non breaking white space
+          text.split('\u00a0').join(' ')
+
+        expectMatchInnerText = ($el , innerText) ->
+          expect(cleanseText(trimInnerText($el))).to.eql(innerText)
+
+        ## NOTE: this may only pass in Chrome since the whitespace may be different in other browsers
+        ##  even if actual and expected appear the same.
+        expected = "{\n  foo:   1\n  bar:   2\n  baz:   3\n}"
+        cy.get('[contenteditable]:first')
+        .invoke('html', '<div><br></div>')
+        .type('{{}{enter}  foo:   1{enter}  bar:   2{enter}  baz:   3{enter}}')
+        .should ($el) ->
+          expectMatchInnerText($el, expected)
+        .clear()
+        .type('{{}\n  foo:   1\n  bar:   2\n  baz:   3\n}')
+        .should ($el) ->
+          expectMatchInnerText($el, expected)
+
+      it "enter and \\n should act the same for textarea", ->
+        expected = "{\n  foo:   1\n  bar:   2\n  baz:   3\n}"
+        cy.get('textarea:first')
+        .clear()
+        .type('{{}{enter}  foo:   1{enter}  bar:   2{enter}  baz:   3{enter}}')
+        .should('have.prop', 'value', expected)
+        .clear()
+        .type('{{}\n  foo:   1\n  bar:   2\n  baz:   3\n}')
+        .should('have.prop', 'value', expected)
 
     describe "{enter}", ->
       beforeEach ->
@@ -1835,11 +2650,20 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get("#single-input input").type("f").type("f{enter}").then -> done()
 
-      context "2 inputs, no 'submit' elements", ->
+      # https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+      context "2 inputs, no 'submit' elements, no inputs allowing implicit submission", ->
         it "does not trigger submit event", (done) ->
-          form = @$forms.find("#no-buttons").submit -> done("err: should not have submitted")
+          form = @$forms.find("#no-buttons-more-than-one-input-allowing-implicit-submission").submit -> done("err: should not have submitted")
 
-          cy.get("#no-buttons input:first").type("f").type("{enter}").then -> done()
+          cy.get("#no-buttons-more-than-one-input-allowing-implicit-submission input:first").type("f").type("{enter}").then -> done()
+
+      context "2 inputs, no 'submit' elements, only 1 input allowing implicit submission", ->
+        it "does submit event", (done) ->
+          form = @$forms.find("#no-buttons-and-only-one-input-allowing-implicit-submission").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#no-buttons-and-only-one-input-allowing-implicit-submission input:first").type("f{enter}")
 
       context "2 inputs, no 'submit' elements but 1 button[type=button]", ->
         it "does not trigger submit event", (done) ->
@@ -1889,6 +2713,50 @@ describe "src/cy/commands/actions/type", ->
           form.find("input").keypress (e) -> e.preventDefault()
 
           cy.get("#multiple-inputs-and-button-submit input:first").type("f{enter}").then -> done()
+
+      context "2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=reset]", ->
+        it "triggers form submit", (done) ->
+          @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}")
+
+        it "causes click event on the button[type=submit]", (done) ->
+          @$forms.find("#multiple-inputs-and-reset-and-submit-buttons button[type=submit]").click (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("foo{enter}")
+
+        it "does not cause click event on the button[type=submit] if keydown is defaultPrevented on input", (done) ->
+          form = @$forms.find("#multiple-inputs-and-reset-and-submit-buttons").submit ->
+            done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-reset-and-submit-buttons input:first").type("f{enter}").then -> done()
+
+      context "2 inputs, 1 'reset' button, 1 'button' button, and 1 button with no type (default submit)", ->
+        it "triggers form submit", (done) ->
+          @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}")
+
+        it "causes click event on the button", (done) ->
+          @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type button:last").click (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("foo{enter}")
+
+        it "does not cause click event on the button if keydown is defaultPrevented on input", (done) ->
+          form = @$forms.find("#multiple-inputs-and-other-type-buttons-and-button-with-no-type").submit ->
+            done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first").type("f{enter}").then -> done()
 
       context "2 inputs, 1 'submit' element button", ->
         it "triggers form submit", (done) ->
@@ -2097,7 +2965,7 @@ describe "src/cy/commands/actions/type", ->
               "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"
             ]
             expect(table.name).to.eq "Key Events Table"
-            expect(table.data).to.deep.eq {
+            expectedTable = {
               1: {typed: "<meta>", which: 91, keydown: true, modifiers: "meta"}
               2: {typed: "<alt>", which: 18, keydown: true, modifiers: "alt, meta"}
               3: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
@@ -2107,8 +2975,16 @@ describe "src/cy/commands/actions/type", ->
               7: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
               8: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true, modifiers: "alt, meta"}
               9: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true, modifiers: "alt, meta"}
-              10: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, modifiers: "alt, meta"}
+              10: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, modifiers: "alt, meta"}
             }
+
+            for i in [1..10]
+              expect(table.data[i]).to.deep.eq(expectedTable[i])
+
+            # table.data.forEach (item, i) ->
+            #   expect(item).to.deep.eq(expectedTable[i])
+
+            # expect(table.data).to.deep.eq(expectedTable)
 
         it "has no modifiers when there are none activated", ->
           cy.get(":text:first").type("f").then ->
@@ -2158,22 +3034,24 @@ describe "src/cy/commands/actions/type", ->
 
         cy.get("input:first").type("a").type("b")
 
-      it "throws when not textarea or :text", (done) ->
+      it "throws when not textarea or text-like", (done) ->
         cy.get("form").type("foo")
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.type() can only be called on textarea or :text. Your subject is a: <form id=\"by-id\">...</form>"
+          expect(err.message).to.include "cy.type() failed because it requires a valid typeable element."
+          expect(err.message).to.include "The element typed into was:"
+          expect(err.message).to.include "<form id=\"by-id\">...</form>"
+          expect(err.message).to.include "Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements."
           done()
 
       it "throws when subject is a collection of elements", (done) ->
-        cy
-          .get("textarea,:text").then ($inputs) ->
+        cy.get("textarea,:text").then ($inputs) ->
             @num = $inputs.length
             return $inputs
           .type("foo")
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.type() can only be called on a single textarea or :text. Your subject contained #{@num} elements."
+          expect(err.message).to.include "cy.type() can only be called on a single element. Your subject contained #{@num} elements."
           done()
 
       it "throws when the subject isnt visible", (done) ->
@@ -2268,6 +3146,37 @@ describe "src/cy/commands/actions/type", ->
           .get(":text:first").type(" ")
           .should("have.value", " ")
 
+      it "allows typing special characters", ->
+        cy
+            .get(":text:first").type("{esc}")
+            .should("have.value", "")
+            
+      _.each ["toString", "toLocaleString", "hasOwnProperty", "valueOf"
+         "undefined", "null", "true", "false", "True", "False"], (val) =>
+       it "allows typing reserved Javscript word (#{val})", ->
+         cy
+           .get(":text:first").type(val)
+           .should("have.value", val)
+
+      _.each ["Ω≈ç√∫˜µ≤≥÷", "2.2250738585072011e-308", "田中さんにあげて下さい",
+         "<foo val=`bar' />", "⁰⁴⁵₀₁₂", "🐵 🙈 🙉 🙊",
+         "<script>alert(123)</script>", "$USER"], (val) =>
+       it "allows typing some naughtly strings (#{val})", ->
+         cy
+           .get(":text:first").type(val)
+           .should("have.value", val)
+
+      it "allows typing special characters", ->
+        cy
+            .get(":text:first").type("{esc}")
+            .should("have.value", "")
+
+      it "can type into input with invalid type attribute", ->
+        cy.get(':text:first')
+          .invoke('attr', 'type', 'asdf')
+          .type('foobar')
+          .should('have.value', 'foobar')
+
       _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
         it "throws when trying to type: #{val}", (done) ->
           logs = []
@@ -2282,7 +3191,7 @@ describe "src/cy/commands/actions/type", ->
 
           cy.get(":text:first").type(val)
 
-      it "throws when type is cancelled by preventingDefault mousedown"
+      it "throws when type is canceled by preventingDefault mousedown"
 
       it "throws when element animation exceeds timeout", (done) ->
         ## force the animation calculation to think we moving at a huge distance ;-)
@@ -2370,6 +3279,19 @@ describe "src/cy/commands/actions/type", ->
             done()
 
           cy.get("#month-without-value").type("1989-13")
+
+      context "[type=tel]", ->
+        it "can edit tel", ->
+          cy.get('#by-name > input[type="tel"]')
+          .type('1234567890')
+          .should('have.prop', 'value', '1234567890')
+
+        # it "throws when chars is invalid format", (done) ->
+        #   cy.on "fail", (err) =>
+        #     expect(@logs.length).to.eq(2)
+        #     expect(err.message).to.eq("Typing into a week input with cy.type() requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: 2005/W18")
+        #     done()
+
 
       context "[type=week]", ->
         it "throws when chars is not a string", (done) ->
@@ -2506,9 +3428,27 @@ describe "src/cy/commands/actions/type", ->
 
       cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
 
-    it "works on input[type=number]", ->
-      cy.get("#number-with-value").clear().then ($input) ->
-        expect($input.val()).to.equal("")
+    context "works on input type", ->
+      inputTypes = [
+        "date",
+        "datetime",
+        "datetime-local",
+        "email",
+        "month",
+        "number",
+        "password",
+        "search",
+        "tel",
+        "text",
+        "time",
+        "url",
+        "week"
+      ]
+
+      inputTypes.forEach (type) ->
+        it type, ->
+          cy.get("##{type}-with-value").clear().then ($input) ->
+            expect($input.val()).to.equal("")
 
     describe "assertion verification", ->
       beforeEach ->
@@ -2570,34 +3510,46 @@ describe "src/cy/commands/actions/type", ->
 
         cy.get("input:first").clear().clear()
 
-      it "throws if any subject isnt a textarea", (done) ->
+      it "throws if any subject isnt a textarea or text-like", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(3)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <form id=\"checkboxes\">...</form>"
+          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "The element cleared was:"
+          expect(err.message).to.include "<form id=\"checkboxes\">...</form>"
+          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get("textarea:first,form#checkboxes").clear()
 
       it "throws if any subject isnt a :text", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <div id=\"dom\">...</div>"
+          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "The element cleared was:"
+          expect(err.message).to.include "<div id=\"dom\">...</div>"
+          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get("div").clear()
 
       it "throws on an input radio", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <input type=\"radio\" name=\"gender\" value=\"male\">"
+          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "The element cleared was:"
+          expect(err.message).to.include "<input type=\"radio\" name=\"gender\" value=\"male\">"
+          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get(":radio").clear()
 
       it "throws on an input checkbox", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
+          expect(err.message).to.include "cy.clear() failed because it requires a valid clearable element."
+          expect(err.message).to.include "The element cleared was:"
+          expect(err.message).to.include "<input type=\"checkbox\" name=\"colors\" value=\"blue\">"
+          expect(err.message).to.include "Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements."
           done()
 
         cy.get(":checkbox").clear()

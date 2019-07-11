@@ -3,15 +3,54 @@ import moment from 'moment'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
-import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserVersionFormatted } from '../lib/utils'
+import TimerDisplay from '../duration-timer/TimerDisplay'
+import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserNameFormatted, browserVersionFormatted, stripLeadingCyDirs, stripSharedDirsFromDir2 } from '../lib/utils'
+
+const RunDuration = ({ run }) => {
+  // Run was blocked due to exceeding limit
+  if (run.status === 'overLimit') {
+    return null
+  }
+
+  // Run has completed
+  if (run.totalDuration) {
+    if (run.parallelizationDisabled) {
+      return (
+        <Tooltip title="Parallelization was disabled for this run." placement="top" className="cy-tooltip">
+          <span className='env-duration'>
+            <i className='fa fa-exclamation-triangle orange'></i>
+            {' '}{durationFormatted(run.totalDuration)}
+          </span>
+        </Tooltip>
+      )
+    }
+
+    return (
+      <span className='env-duration'>
+        <i className='fa fa-hourglass-end'></i>
+        {' '}{durationFormatted(run.totalDuration)}
+      </span>
+    )
+  }
+
+  // Run is still going
+  if (run.createdAt) {
+    return (
+      <TimerDisplay startTime={run.createdAt} />
+    )
+  }
+
+  return null
+}
 
 export default class RunsListItem extends Component {
   render () {
     const run = this.props.run
+    const NEWLINE = '\n'
 
     return (
       <li onClick={this._goToRun}>
-        <div className={`row-column-wrapper ${run.status}`}>
+        <div className={`row-column-wrapper ${run.status} status-data`}>
           <div>
           </div>
         </div>
@@ -26,123 +65,109 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div className='td-top-padding'>
             <div>
-              {
-                run.commitBranch ?
-                  run.commitBranch :
-                  null
+              { run.commit && run.commit.branch ?
+                <span>
+                  {run.commit.branch}
+                  {this._displaySpec() ? ' / ' : null}
+                </span> :
+                null
               }
+              {this._displaySpec()}
             </div>
-            <div className='msg'>
-              {
-                run.commitAuthorEmail ?
-                  <img
-                    className='user-avatar'
-                    height='13'
-                    width='13'
-                    src={`${gravatarUrl(run.commitAuthorEmail)}`}
-                  /> :
-                  null
-              }
-              {
-                run.commitMessage ?
-                  <span className='commit-msg'>
-                    {' '}
-                    {run.commitMessage.split('\n')[0]}
-                  </span> :
-                  null
-              }
-            </div>
+            {
+              run.commit ?
+                <div className='msg'>
+                  {
+                    run.commit.authorEmail ?
+                      <img
+                        className='user-avatar'
+                        height='13'
+                        width='13'
+                        src={`${gravatarUrl(run.commit.authorEmail)}`}
+                      /> :
+                      null
+                  }
+                  {
+                    run.commit.message ?
+                      <span className='commit-msg'>
+                        {run.commit.message.split(NEWLINE)[0]}
+                      </span> :
+                      <div className='msg italic'>
+                        - No commit info found -
+                      </div>
+                  }
+                </div> :
+                <div className='msg italic'>
+                  - No commit info found -
+                </div>
+            }
+
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div>
             <i className='fa fa-clock-o'></i>{' '}
-            {moment(run.createdAt).fromNow()}
+            {moment(run.createdAt).fromNow() === '1 secs ago' ? '1 sec ago' : moment(run.createdAt).fromNow()}
           </div>
         </div>
         <div className='row-column-wrapper'>
-          <div>
+          <div className='td-padding'>
+            <RunDuration run={run} />
+          </div>
+        </div>
+        <div className='row-column-wrapper env-data'>
+          <div className='td-env-padding'>
+            {/* // do we have multiple OS's ? */}
             {
-              run.totalDuration ?
-                <span>
-                  <i className='fa fa-hourglass-end'></i>{' '}
-                  {durationFormatted(run.totalDuration)}
-                </span> :
+              this._instancesExist() ?
+                this._moreThanOneInstance() && this._osLength() > 1 ?
+                  <div>
+                    <i className='fa fa-fw fa-desktop'></i>{' '}
+                    {this._osLength()} OSs
+                  </div> :
+                  // or did we only actual run it on one OS
+                  <div>
+                    <i className={`fa fa-fw fa-${osIcon(this.props.run.instances[0].platform.osName)}`}></i>{' '}
+                    {this._osDisplay()}
+                  </div> :
+                null
+            }
+            {/* // do we have multiple browsers ? */}
+            {
+              this._instancesExist() ?
+                this._moreThanOneInstance() && this._browsersLength() > 1 ?
+                  <div className='env-msg'>
+                    <i className='fa fa-fw fa-globe'></i>{' '}
+                    {this._browsersLength()} browsers
+                  </div> :
+                  // or did we only actual run it on one browser
+                  <div className='env-msg'>
+                    <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
+                    {this._browserDisplay()}
+                  </div> :
                 null
             }
           </div>
         </div>
-        <div className='row-column-wrapper'>
-          <div>
-            {
-              // only display something if we have all of the instances back
-              this._allInstancesArePresent() ?
-              // do we have multiple OS's ?
-      this._moreThanOneInstance() && this._osLength() > 1 ?
-        <span>
-          <i className='fa fa-fw fa-desktop'></i>{' '}
-          {this._osLength()}
-        </span> :
-        // or did we only actual run it on one OS
-        <span>
-          <i className={`fa fa-fw fa-${(this._osIcon())}`}></i>{' '}
-          {this._osDisplay()}
-        </span> :
-                null
-            }
-          </div>
-        </div>
-        <div className='row-column-wrapper'>
-          <div>
-            {
-              // only display something if we have all of the instances back
-              this._allInstancesArePresent() ?
-                // do we have multiple browsers ?
-      this._moreThanOneInstance() && this._browsersLength() > 1 ?
-        <span>
-          <i className='fa fa-fw fa-globe'></i>{' '}
-          {this._browsersLength()}
-        </span> :
-        // or did we only actual run it on one browser
-        <span>
-          <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
-          {this._browserDisplay()}
-        </span> :
-                null
-            }
-          </div>
-        </div>
-        <div className='row-column-wrapper'>
+        <div className='row-column-wrapper passing-data'>
           {
             run.status !== 'running' ?
               <div className='result'>
-                <i className='fa fa-circle-o-notch'></i>{' '}
+                <i className='fa fa-check'></i>{' '}
                 <span>
-                  {run.totalPending ? run.totalPending : '-'}
+                  {run.totalPassed || '0'}
                 </span>
               </div> :
               null
           }
         </div>
-        <div className='row-column-wrapper'>
+        <div className='row-column-wrapper failure-data'>
           {
             run.status !== 'running' ?
               <div className='result'>
-                <i className='fa fa-check green'></i>{' '}
+                <i className='fa fa-times'></i>{' '}
                 <span>
-                  {run.totalPasses ? run.totalPasses : '-'}
-                </span>
-              </div> :
-              null
-          }
-        </div>
-        <div className='row-column-wrapper'>
-          {
-            run.status !== 'running' ?
-              <div className='result'>
-                <i className='fa fa-times red'></i>{' '}
-                <span>
-                  {run.totalFailures ? run.totalFailures : '-'}
+                  {run.totalFailed || '0'}
                 </span>
               </div> :
               null
@@ -152,26 +177,42 @@ export default class RunsListItem extends Component {
     )
   }
 
-  _allInstancesArePresent () {
-    if (this.props.run.instances) {
-      return this.props.run.expectedInstances === this.props.run.instances.length
-    }
-  }
-
   _moreThanOneInstance () {
     return (this.props.run.instances.length > 1)
   }
 
+  _instancesExist () {
+    return (!!this.props.run.instances.length)
+  }
+
+  _displaySpec () {
+    if (this.props.run.instances.length === 1) {
+      return (
+        this.props.run.instances[0].spec ?
+          <span>
+            {
+              this.props.run.instances[0].integrationFolder ?
+                stripSharedDirsFromDir2(this.props.run.instances[0].integrationFolder, this.props.run.instances[0].spec, this.props.run.instances[0].platform.osName) ?
+                  stripSharedDirsFromDir2(this.props.run.instances[0].integrationFolder, this.props.run.instances[0].spec, this.props.run.instances[0].platform.osName) :
+                  this.props.run.instances[0].spec :
+                stripLeadingCyDirs(this.props.run.instances[0].spec)
+            }
+          </span> :
+          null
+      )
+    }
+  }
+
   _getUniqBrowsers () {
-    if (!this.props.run.instances) return 0
+    if (!this.props.run.instances) return []
 
     return _
-      .chain(this.props.run.instances)
-      .map((instance) => {
-        return `${instance.browserName} + ${instance.browserVersion}`
-      })
-      .uniq()
-      .value()
+    .chain(this.props.run.instances)
+    .map((instance) => {
+      return `${_.get(instance, 'platform.browserName', '')} + ${_.get(instance, 'platform.browserVersion', '')}`
+    })
+    .uniq()
+    .value()
   }
 
   _browsersLength () {
@@ -179,31 +220,31 @@ export default class RunsListItem extends Component {
   }
 
   _browserIcon () {
-    if (!this._moreThanOneInstance() && this.props.run.instances.length) {
-      return (browserIcon(this.props.run.instances[0].browserName))
-    } else {
-      return 'globe'
-    }
+    return browserIcon(_.get(this.props.run, 'instances[0].platform.browserName', ''))
   }
 
   _osIcon () {
-    if (!this._moreThanOneInstance() && this.props.run.instances.length) {
-      return (osIcon(this.props.run.instances[0].osName))
-    } else {
-      return 'desktop'
-    }
+    if (!this.props.run.instances) return
+
+    return _
+    .chain(this.props.run.instances)
+    .map((instance) => {
+      return `${_.get(instance, 'platform.osName', '')} + ${_.get(instance, 'platform.osVersion', '')}`
+    })
+    .uniq()
+    .value()
   }
 
   _getUniqOs () {
     if (!this.props.run.instances) return
 
     return _
-      .chain(this.props.run.instances)
-      .map((instance) => {
-        return `${instance.osName} + ${instance.osVersionFormatted}`
-      })
-      .uniq()
-      .value()
+    .chain(this.props.run.instances)
+    .map((instance) => {
+      return `${_.get(instance, 'platform.osName', '')} + ${_.get(instance, 'platform.osVersion', '')}`
+    })
+    .uniq()
+    .value()
   }
 
   _osLength () {
@@ -213,9 +254,7 @@ export default class RunsListItem extends Component {
   _osDisplay = () => {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
-        <span>
-          {this.props.run.instances[0].osVersionFormatted}
-        </span>
+        `${_.get(this.props.run, 'instances[0].platform.osVersionFormatted', this.props.run.instances[0].osFormatted)}`
       )
     }
   }
@@ -223,14 +262,12 @@ export default class RunsListItem extends Component {
   _browserDisplay = () => {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
-        <span>
-          {browserVersionFormatted(this.props.run.instances[0].browserVersion)}
-        </span>
+        `${browserNameFormatted(_.get(this.props.run, 'instances[0].platform.browserName', ''))} ${browserVersionFormatted(_.get(this.props.run, 'instances[0].platform.browserVersion', ''))}`
       )
     }
   }
 
   _goToRun = () => {
-    this.props.goToRun(this.props.run.id)
+    this.props.goToRun(this.props.run.buildNumber)
   }
 }

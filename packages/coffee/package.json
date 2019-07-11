@@ -3,11 +3,13 @@
   "main": "index.js",
   "private": true,
   "dependencies": {
-    "coffee-script": "1.12.5"
+    "coffeescript": "1.12.7"
   },
   "files": [
     "register.js"
   ],
-  "scripts": {},
-  "devDependencies": {}
+  "scripts": {
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "clean-deps": "rm -rf node_modules"
+  }
 }

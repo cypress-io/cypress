@@ -2,45 +2,55 @@ import sinon from 'sinon'
 
 import events from './events'
 
-const runnerStub = () => ({
-  on: sinon.stub(),
-  emit: sinon.spy(),
-})
+const runnerStub = () => {
+  return {
+    on: sinon.stub(),
+    emit: sinon.spy(),
+  }
+}
 
-const appStateStub = () => ({
-  startRunning: sinon.spy(),
-  pause: sinon.spy(),
-  reset: sinon.spy(),
-  resume: sinon.spy(),
-  end: sinon.spy(),
-  temporarilySetAutoScrolling: sinon.spy(),
-  stop: sinon.spy(),
-})
+const appStateStub = () => {
+  return {
+    startRunning: sinon.spy(),
+    pause: sinon.spy(),
+    reset: sinon.spy(),
+    resume: sinon.spy(),
+    end: sinon.spy(),
+    temporarilySetAutoScrolling: sinon.spy(),
+    stop: sinon.spy(),
+  }
+}
 
-const runnablesStoreStub = () => ({
-  addLog: sinon.spy(),
-  reset: sinon.spy(),
-  runnableStarted: sinon.spy(),
-  runnableFinished: sinon.spy(),
-  setInitialScrollTop: sinon.stub(),
-  setRunnables: sinon.spy(),
-  testById: sinon.stub(),
-  updateLog: sinon.spy(),
-})
+const runnablesStoreStub = () => {
+  return {
+    addLog: sinon.spy(),
+    reset: sinon.spy(),
+    runnableStarted: sinon.spy(),
+    runnableFinished: sinon.spy(),
+    setInitialScrollTop: sinon.stub(),
+    setRunnables: sinon.spy(),
+    testById: sinon.stub(),
+    updateLog: sinon.spy(),
+  }
+}
 
-const scrollerStub = () => ({
-  getScrollTop: sinon.stub(),
-})
+const scrollerStub = () => {
+  return {
+    getScrollTop: sinon.stub(),
+  }
+}
 
-const statsStoreStub = () => ({
-  incrementCount: sinon.spy(),
-  pause: sinon.spy(),
-  reset: sinon.spy(),
-  resume: sinon.spy(),
-  start: sinon.spy(),
-  startRunning: sinon.spy(),
-  end: sinon.spy(),
-})
+const statsStoreStub = () => {
+  return {
+    incrementCount: sinon.spy(),
+    pause: sinon.spy(),
+    reset: sinon.spy(),
+    resume: sinon.spy(),
+    start: sinon.spy(),
+    startRunning: sinon.spy(),
+    end: sinon.spy(),
+  }
+}
 
 describe('events', () => {
   let appState
@@ -169,6 +179,7 @@ describe('events', () => {
 
     it('calls callback with scrollTop and autoScrollingEnabled on reporter:collect:run:state', () => {
       const callback = sinon.spy()
+
       appState.autoScrollingEnabled = false
       scroller.getScrollTop.returns(321)
       runner.on.withArgs('reporter:collect:run:state').callArgWith(1, callback)
@@ -227,14 +238,20 @@ describe('events', () => {
     })
 
     it('emits runner:console:log on show:error when it is a command error and there is a matching command', () => {
-      const test = { err: { isCommandErr: true }, commandMatchingErr: () => ({ id: 'matching command id' }) }
+      const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
+        return { id: 'matching command id' }
+      } }
+
       runnablesStore.testById.returns(test)
       events.emit('show:error', 'test id')
       expect(runner.emit).to.have.been.calledWith('runner:console:log', 'matching command id')
     })
 
     it('does not emit anything on show:error it is a command error but there not a matching command', () => {
-      const test = { err: { isCommandErr: true }, commandMatchingErr: () => null }
+      const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
+        return null
+      } }
+
       runnablesStore.testById.returns(test)
       events.emit('show:error', 'test id')
       expect(runner.emit).not.to.have.been.called
