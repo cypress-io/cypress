@@ -128,7 +128,7 @@ events = {
 }
 
 reporters = {
-  teamcity: "@cypress/mocha-teamcity-reporter"
+  teamcity: "mocha-teamcity-reporter"
   junit: "mocha-junit-reporter"
 }
 
