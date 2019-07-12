@@ -183,14 +183,19 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // {filename: ..., downloaded: true}
 const downloadFromUrl = ({ url, downloadDestination, progress }) => {
   return new Promise((resolve, reject) => {
-    debug('Downloading from', url)
-    debug('Saving file to', downloadDestination)
+    const proxy = getProxyUrl()
+
+    debug('Downloading package', {
+      url,
+      proxy,
+      downloadDestination,
+    })
 
     let redirectVersion
 
     const req = request({
       url,
-      proxy: getProxyUrl(),
+      proxy,
       followRedirect (response) {
         const version = response.headers['x-version']
 
