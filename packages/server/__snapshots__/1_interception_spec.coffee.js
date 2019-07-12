@@ -1,4 +1,4 @@
-exports['e2e interception spec character encodings does not mangle iso-8859-1 text 1'] = `
+exports['e2e interception spec character encodings does not mangle non-UTF-8 text 1'] = `
 
 ====================================================================================================
 
@@ -7,67 +7,55 @@ exports['e2e interception spec character encodings does not mangle iso-8859-1 te
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (iso-8859-1_spec.js)                                                       │
-  │ Searched:   cypress/integration/iso-8859-1_spec.js                                             │
+  │ Specs:      1 found (character_encoding_spec.js)                                               │
+  │ Searched:   cypress/integration/character_encoding_spec.js                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: iso-8859-1_spec.js...                                                           (1 of 1) 
+  Running: character_encoding_spec.js...                                                   (1 of 1) 
 
 
-  Characters ISO-8859-1 tests
+  character encoding tests
     without gzip
-      ✓ Validation 1
-      ✓ Validation 2
-      ✓ Validation 3
-      ✓ Validation 4
-      ✓ Validation 4
-      ✓ Validation 5
-      ✓ Validation 6
+      ✓ iso-8859-1 works
+      ✓ euc-kr works
+      ✓ shift-jis works
+      ✓ gb2312 works
     with gzip
-      ✓ Validation 1
-      ✓ Validation 2
-      ✓ Validation 3
-      ✓ Validation 4
-      ✓ Validation 4
-      ✓ Validation 5
-      ✓ Validation 6
+      ✓ iso-8859-1 works
+      ✓ euc-kr works
+      ✓ shift-jis works
+      ✓ gb2312 works
     without gzip (no content-type charset)
-      ✓ Validation 1
-      ✓ Validation 2
-      ✓ Validation 3
-      ✓ Validation 4
-      ✓ Validation 4
-      ✓ Validation 5
-      ✓ Validation 6
+      ✓ iso-8859-1 works
+      ✓ euc-kr works
+      ✓ shift-jis works
+      ✓ gb2312 works
     with gzip (no content-type charset)
-      ✓ Validation 1
-      ✓ Validation 2
-      ✓ Validation 3
-      ✓ Validation 4
-      ✓ Validation 4
-      ✓ Validation 5
-      ✓ Validation 6
+      ✓ iso-8859-1 works
+      ✓ euc-kr works
+      ✓ shift-jis works
+      ✓ gb2312 works
 
 
-  28 passing
+  16 passing
 
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        28                 │
-  │ Passing:      28                 │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        true               │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     iso-8859-1_spec.js │
-  └──────────────────────────────────┘
+  ┌──────────────────────────────────────────┐
+  │ Tests:        16                         │
+  │ Passing:      16                         │
+  │ Failing:      0                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  0                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     character_encoding_spec.js │
+  └──────────────────────────────────────────┘
 
 
   (Video)
@@ -83,9 +71,9 @@ exports['e2e interception spec character encodings does not mangle iso-8859-1 te
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ iso-8859-1_spec.js                        XX:XX       28       28        -        -        - │
+  │ ✔ character_encoding_spec.js                XX:XX       16       16        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       28       28        -        -        -  
+    All specs passed!                           XX:XX       16       16        -        -        -  
 
 
 `

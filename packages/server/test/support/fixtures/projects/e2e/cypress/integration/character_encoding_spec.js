@@ -41,19 +41,4 @@ describe('character encoding tests', () => {
       })
     })
   })
-
-  it('finds the content "type"', function () {
-    const id = '1234'
-
-    // cy.wait(30000 * Math.random());
-    cy.visit(`https://icchilisrv3.epfl.ch:7000/w948?login=${id}`)
-
-    cy.get('video', { timeout: 90000 })
-    cy
-    // .wait(10000)
-    .then(() => {
-      return cy.wrap(Cypress.$('video')[0].networkState).should('eq', 2)
-    })
-    cy.wait(180000)
-  })
 })
