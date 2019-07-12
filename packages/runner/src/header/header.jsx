@@ -88,6 +88,7 @@ export default class Header extends Component {
       this.props.state.updateWindowDimensions({
         headerHeight: $(this.refs.header).outerHeight(),
       })
+
       this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     }
   }

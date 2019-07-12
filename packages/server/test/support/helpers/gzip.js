@@ -1,9 +1,10 @@
-const fs   = require("fs")
-const zlib = require("zlib")
-const path = require("path")
+/* eslint-disable no-console */
+const fs = require('fs')
+const zlib = require('zlib')
+const path = require('path')
 
-const src  = path.join("test/support/fixtures/projects/e2e/static/FiraSans-Regular.woff")
-const dest = path.join("test/support/fixtures/projects/e2e/static/FiraSans-Regular.woff.gz")
+const src = path.join('test/support/fixtures/projects/e2e/static/FiraSans-Regular.woff')
+const dest = path.join('test/support/fixtures/projects/e2e/static/FiraSans-Regular.woff.gz')
 
 fs.readFile(src, (err, buf) => {
   zlib.gzip(buf, (err, zipped) => {

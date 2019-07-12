@@ -40,6 +40,7 @@ const spaceDelimitedSpecsMsg = (files) => {
     If you are trying to pass multiple spec filenames, separate them by commas instead:
       cypress run --spec spec1,spec2,spec3
   `)
+
   logger.log()
 }
 
@@ -73,8 +74,7 @@ const parseOpts = (opts) => {
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key', 'configFile',
     'browser', 'detached', 'headed', 'global', 'dev', 'force', 'exit',
-    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId'
-  )
+    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId')
 
   if (opts.exit) {
     opts = _.omit(opts, 'exit')

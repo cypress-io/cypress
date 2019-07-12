@@ -5,6 +5,7 @@ debug       = require('debug')('cypress:server:events')
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
+auth        = require("./auth")
 Windows     = require("./windows")
 api         = require("../api")
 open        = require("../util/open")
@@ -59,6 +60,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:project:error"
       onBus("project:error")
 
+    when "on:auth:message"
+      onBus("auth:message")
+
     when "on:project:warning"
       onBus("project:warning")
 
@@ -110,6 +114,14 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onBrowserClose: ->
           send({browserClosed: true})
       })
+      .catch(sendErr)
+
+    when "begin:auth"
+      onMessage = (msg) ->
+        bus.emit('auth:message', msg)
+
+      auth.start(onMessage)
+      .then(send)
       .catch(sendErr)
 
     when "window:open"

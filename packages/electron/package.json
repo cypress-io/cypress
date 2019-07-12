@@ -1,31 +1,23 @@
 {
   "name": "@packages/electron",
   "version": "0.0.0",
-  "electronVersion": "2.0.18",
   "private": true,
-  "main": "index.js",
-  "scripts": {
-    "postinstall": "echo '@packages/electron needs: npm run build'",
-    "prestart": "npm run check-deps-pre",
-    "start": "./bin/cypress-electron",
-    "pretest": "npm run check-deps-pre",
-    "test": "mocha --compilers coffee:@packages/coffee/register",
-    "prebuild": "npm run check-deps-pre",
-    "build": "node ./bin/cypress-electron --install",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean-deps": "rm -rf node_modules"
-  },
-  "bin": {
-    "cypress-electron": "./bin/cypress-electron"
-  },
   "files": [
     "dist",
     "lib"
   ],
-  "devDependencies": {
-    "chai": "3.5.0",
-    "mocha": "3.5.3"
+  "main": "index.js",
+  "scripts": {
+    "prebuild": "npm run check-deps-pre",
+    "build": "node ./bin/cypress-electron --install",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "clean-deps": "rm -rf node_modules",
+    "postinstall": "echo '@packages/electron needs: npm run build'",
+    "prestart": "npm run check-deps-pre",
+    "start": "./bin/cypress-electron",
+    "pretest": "npm run check-deps-pre",
+    "test": "mocha --compilers coffee:@packages/coffee/register"
   },
   "dependencies": {
     "@cypress/icons": "0.7.0",
@@ -33,7 +25,15 @@
     "debug": "4.1.1",
     "electron-packager": "13.1.1",
     "fs-extra": "8.1.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.13",
     "minimist": "1.2.0"
-  }
+  },
+  "devDependencies": {
+    "chai": "3.5.0",
+    "mocha": "3.5.3"
+  },
+  "bin": {
+    "cypress-electron": "./bin/cypress-electron"
+  },
+  "electronVersion": "2.0.18"
 }
