@@ -39,13 +39,14 @@ console.log(' binary:', binary)
 console.log(' platform:', platform)
 console.log(' arch:', arch)
 
-const ciName = getCIName() || 'unknown'
+const ciName = getCIName() || 'Unknown CI'
 const buildUrl = getCIBuildUrl()
-const buildInfo = buildUrl ? `The build is [here](${buildUrl})` : ''
+const ciBuildLink = buildUrl ? `[${ciName} has built](${buildUrl})` : `${ciName} has built`
 const instructionsAt =
   'https://on.cypress.io/installing-cypress#Install-pre-release-version'
 const preamble = stripIndent`
-  ${ciName} CI has built ${platform} ${arch} version of the Test Runner. ${buildInfo}
+  ${ciBuildLink} the \`${platform} ${arch}\` version of the Test Runner.
+
   You can install this pre-release platform-specific build using instructions at [${instructionsAt}](${instructionsAt}).
 
   You will need to use custom \`CYPRESS_INSTALL_BINARY\` url and install Cypress using an url instead of the version.

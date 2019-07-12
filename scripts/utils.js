@@ -101,7 +101,12 @@ const getCIBuildUrl = () => {
   if (process.env.APPVEYOR) {
     // https://www.appveyor.com/docs/environment-variables/
     // there is no single url, but we can form one
-    // TODO form AppVeyor build url
+    // looks like this
+    // https://ci.appveyor.com/project/cypress-io/cypress/builds/25882716/job/7iv75s2vjt5w4usf
+    return `${process.env.APPVEYOR_URL}/project/${
+      process.env.APPVEYOR_ACCOUNT_NAME}/${process.env.APPVEYOR_PROJECT_SLUG
+    }/builds/${process.env.APPVEYOR_BUILD_ID
+    }/job/${process.env.APPVEYOR_JOB_ID}`
   }
 }
 
