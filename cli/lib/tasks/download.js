@@ -111,7 +111,8 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
         debug(text)
 
         throw new Error(text)
-      })
+      }
+    )
   }
 
   if (expectedChecksum) {
@@ -211,6 +212,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
       // see https://github.com/cypress-io/cypress/pull/4092
       expectedSize = response.headers['x-amz-meta-size'] ||
         response.headers['content-length']
+
       expectedChecksum = response.headers['x-amz-meta-checksum']
 
       if (expectedChecksum) {
@@ -274,9 +276,11 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
  * @param [string] version Could be "3.3.0" or full URL
  * @param [string] downloadDestination Local filename to save as
  */
-const start = ({ version, downloadDestination, progress }) => {
+const start = (opts) => {
+  let { version, downloadDestination, progress } = opts
+
   if (!downloadDestination) {
-    la(is.unemptyString(downloadDestination), 'missing download dir', arguments)
+    la(is.unemptyString(downloadDestination), 'missing download dir', opts)
   }
 
   if (!progress) {

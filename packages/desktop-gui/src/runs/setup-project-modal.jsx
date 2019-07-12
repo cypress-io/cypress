@@ -408,6 +408,7 @@ class SetupProject extends Component {
       this.setState({
         isSubmitting: true,
       })
+
       this._setupProject()
     } else {
       this.setState({
@@ -426,6 +427,7 @@ class SetupProject extends Component {
       this.setState({
         isSubmitting: false,
       })
+
       this.props.onSetup(projectDetails)
 
       return null

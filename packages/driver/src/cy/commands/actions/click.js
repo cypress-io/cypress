@@ -302,4 +302,3 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     },
   })
 }
-

@@ -1,28 +1,27 @@
 {
   "name": "@packages/runner",
   "version": "0.0.0",
-  "main": "lib/runner.js",
   "private": true,
-  "scripts": {
-    "postinstall": "echo '@packages/runner needs: npm run build'",
-    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "node ./scripts/build-dev.js",
-    "prebuild-prod": "npm run check-deps-pre",
-    "build-prod": "node ./scripts/build-prod.js",
-    "prewatch": "npm run check-deps-pre",
-    "watch": "node ./scripts/watch.js",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean": "zunder clean",
-    "clean-deps": "rm -rf node_modules",
-    "pretest": "npm run check-deps-pre",
-    "test": "node ./scripts/test.js",
-    "lint": "bin-up eslint --fix scripts/*.js src/*.js* src/**/*.js*"
-  },
   "files": [
     "dist",
     "lib"
   ],
+  "main": "lib/runner.js",
+  "scripts": {
+    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
+    "build": "node ./scripts/build-dev.js",
+    "prebuild-prod": "npm run check-deps-pre",
+    "build-prod": "node ./scripts/build-prod.js",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "clean": "zunder clean",
+    "clean-deps": "rm -rf node_modules",
+    "postinstall": "echo '@packages/runner needs: npm run build'",
+    "pretest": "npm run check-deps-pre",
+    "test": "node ./scripts/test.js",
+    "prewatch": "npm run check-deps-pre",
+    "watch": "node ./scripts/watch.js"
+  },
   "devDependencies": {
     "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/react-tooltip": "0.5.0",

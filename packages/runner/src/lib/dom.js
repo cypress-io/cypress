@@ -92,6 +92,7 @@ function addElementBoxModelLayers ($el, body) {
           top: dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop,
           left: dimensions.offset.left + dimensions.borderLeft + dimensions.paddingLeft,
         }
+
         break
       default:
         obj = {

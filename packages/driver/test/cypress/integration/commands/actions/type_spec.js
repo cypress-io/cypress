@@ -2129,6 +2129,7 @@ describe('src/cy/commands/actions/type', () => {
                       '<div>foo</div>' +
                       '<div>bar</div>' +
                       '<div>baz</div>'
+
           //# select 'bar'
           const line = cy.$$('[contenteditable]:first div:nth-child(1)').get(0)
 
@@ -2223,6 +2224,7 @@ describe('src/cy/commands/actions/type', () => {
                       '<div>foo</div>' +
                       '<div>bar</div>' +
                       '<div>baz</div>'
+
           //# select 'foo'
           const line = cy.$$('[contenteditable]:first div:first').get(0)
 
@@ -2589,9 +2591,11 @@ describe('src/cy/commands/actions/type', () => {
           $button.on('mousedown', (e) => {
             mouseDownEvent = e
           })
+
           $button.on('mouseup', (e) => {
             mouseUpEvent = e
           })
+
           $button.on('click', (e) => {
             clickEvent = e
           })
@@ -2681,9 +2685,11 @@ describe('src/cy/commands/actions/type', () => {
           $button.on('mousedown', (e) => {
             mouseDownEvent = e
           })
+
           $button.on('mouseup', (e) => {
             mouseUpEvent = e
           })
+
           $button.on('click', (e) => {
             clickEvent = e
           })
@@ -3260,6 +3266,7 @@ describe('src/cy/commands/actions/type', () => {
 <div>foo</div><div>bar</div><div>baz</div> \
 </div>\
 '))
+
           const win = cy.state('window')
           const doc = window.document
 
@@ -4088,6 +4095,7 @@ describe('src/cy/commands/actions/type', () => {
             expect(table.columns).to.deep.eq([
               'typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers',
             ])
+
             expect(table.name).to.eq('Key Events Table')
             const expectedTable = {
               1: { typed: '<meta>', which: 91, keydown: true, modifiers: 'meta' },
