@@ -8,7 +8,7 @@ const fail = function (str) {
 
 describe('src/cy/commands/actions/click', () => {
   before(() => {
-    return cy
+    cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
       this.body = win.document.body.outerHTML
@@ -49,22 +49,22 @@ describe('src/cy/commands/actions/click', () => {
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#button').click()
+      cy.get('#button').click()
     })
 
     it('bubbles up native click event', (done) => {
       const click = () => {
         cy.state('window').removeEventListener('click', click)
 
-        return done()
+        done()
       }
 
       cy.state('window').addEventListener('click', click)
 
-      return cy.get('#button').click()
+      cy.get('#button').click()
     })
 
     it('sends native mousedown event', (done) => {
@@ -97,10 +97,10 @@ describe('src/cy/commands/actions/click', () => {
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#button').click()
+      cy.get('#button').click()
     })
 
     it('sends native mouseup event', (done) => {
@@ -132,10 +132,10 @@ describe('src/cy/commands/actions/click', () => {
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#button').click()
+      cy.get('#button').click()
     })
 
     it('sends mousedown, mouseup, click events in order', () => {
@@ -149,8 +149,8 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      return cy.get('#button').click().then(() => {
-        return expect(events).to.deep.eq(['mousedown', 'mouseup', 'click'])
+      cy.get('#button').click().then(() => {
+        expect(events).to.deep.eq(['mousedown', 'mouseup', 'click'])
       })
     })
 
@@ -202,7 +202,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      return it('should error with message about pointer-events and include inheritance', function () {
+      it('should error with message about pointer-events and include inheritance', function () {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
@@ -217,6 +217,7 @@ describe('src/cy/commands/actions/click', () => {
             'Inherited From',
             'Error',
           ])
+
           expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
 
           expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
@@ -242,10 +243,10 @@ describe('src/cy/commands/actions/click', () => {
         expect(win.pageXOffset).to.be.gt(0)
         expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#scrolledBtn').click()
+      cy.get('#scrolledBtn').click()
     })
 
     it('records correct clientY when el scrolled', (done) => {
@@ -259,10 +260,10 @@ describe('src/cy/commands/actions/click', () => {
         expect(win.pageYOffset).to.be.gt(0)
         expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#scrolledBtn').click()
+      cy.get('#scrolledBtn').click()
     })
 
     it('will send all events even mousedown is defaultPrevented', () => {
@@ -273,7 +274,7 @@ describe('src/cy/commands/actions/click', () => {
       $btn.get(0).addEventListener('mousedown', (e) => {
         e.preventDefault()
 
-        return expect(e.defaultPrevented).to.be.true
+        expect(e.defaultPrevented).to.be.true
       })
 
       _.each('mouseup click'.split(' '), (event) => {
@@ -282,24 +283,24 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      return cy.get('#button').click().then(() => {
-        return expect(events).to.deep.eq(['mouseup', 'click'])
+      cy.get('#button').click().then(() => {
+        expect(events).to.deep.eq(['mouseup', 'click'])
       })
     })
 
     it('sends a click event', (done) => {
       cy.$$('#button').click(() => {
-        return done()
+        done()
       })
 
-      return cy.get('#button').click()
+      cy.get('#button').click()
     })
 
     it('returns the original subject', () => {
       const button = cy.$$('#button')
 
-      return cy.get('#button').click().then(($button) => {
-        return expect($button).to.match(button)
+      cy.get('#button').click().then(($button) => {
+        expect($button).to.match(button)
       })
     })
 
@@ -307,10 +308,10 @@ describe('src/cy/commands/actions/click', () => {
       const $text = cy.$$(':text:first')
 
       $text.focus(() => {
-        return done()
+        done()
       })
 
-      return cy.get(':text:first').click()
+      cy.get(':text:first').click()
     })
 
     it('does not fire a focus, mouseup, or click event when element has been removed on mousedown', () => {
@@ -324,17 +325,20 @@ describe('src/cy/commands/actions/click', () => {
       $btn.on('focus', () => {
         return fail('should not have gotten focus')
       })
+
       $btn.on('focusin', () => {
         return fail('should not have gotten focusin')
       })
+
       $btn.on('mouseup', () => {
         return fail('should not have gotten mouseup')
       })
+
       $btn.on('click', () => {
         return fail('should not have gotten click')
       })
 
-      return cy.contains('button').click()
+      cy.contains('button').click()
     })
 
     it('does not fire a click when element has been removed on mouseup', () => {
@@ -349,13 +353,13 @@ describe('src/cy/commands/actions/click', () => {
         return fail('should not have gotten click')
       })
 
-      return cy.contains('button').click()
+      cy.contains('button').click()
     })
 
     it('silences errors on unfocusable elements', () => {
       cy.$$('div:first')
 
-      return cy.get('div:first').click({ force: true })
+      cy.get('div:first').click({ force: true })
     })
 
     it('causes first focused element to receive blur', () => {
@@ -365,29 +369,29 @@ describe('src/cy/commands/actions/click', () => {
         return blurred = true
       })
 
-      return cy
+      cy
       .get('input:first').focus()
       .get('input:text:last').click()
       .then(() => {
-        return expect(blurred).to.be.true
+        expect(blurred).to.be.true
       })
     })
 
     it('inserts artificial delay of 50ms', () => {
       cy.spy(Promise, 'delay')
 
-      return cy.get('#button').click().then(() => {
-        return expect(Promise.delay).to.be.calledWith(50)
+      cy.get('#button').click().then(() => {
+        expect(Promise.delay).to.be.calledWith(50)
       })
     })
 
     it('delays 50ms before resolving', () => {
       cy.$$('button:first').on('click', () => {
-        return cy.spy(Promise, 'delay')
+        cy.spy(Promise, 'delay')
       })
 
-      return cy.get('button:first').click({ multiple: true }).then(() => {
-        return expect(Promise.delay).to.be.calledWith(50, 'click')
+      cy.get('button:first').click({ multiple: true }).then(() => {
+        expect(Promise.delay).to.be.calledWith(50, 'click')
       })
     })
 
@@ -405,8 +409,8 @@ describe('src/cy/commands/actions/click', () => {
       expect(buttons.length).to.be.gt(1)
 
       //# make sure each button received its click event
-      return cy.get('button').invoke('slice', 0, 3).click({ multiple: true }).then(($buttons) => {
-        return expect($buttons.length).to.eq(clicks)
+      cy.get('button').invoke('slice', 0, 3).click({ multiple: true }).then(($buttons) => {
+        expect($buttons.length).to.eq(clicks)
       })
     })
 
@@ -415,7 +419,7 @@ describe('src/cy/commands/actions/click', () => {
 
       //# abort after the 3rd click
       const stop = _.after(3, () => {
-        return Cypress.stop()
+        Cypress.stop()
       })
 
       const clicked = cy.spy(() => {
@@ -441,12 +445,12 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(timeout.callCount).to.eq(0)
 
-          return done()
+          done()
         }
         , 100)
       })
 
-      return cy.get('#sequential-clicks a').click({ multiple: true })
+      cy.get('#sequential-clicks a').click({ multiple: true })
     })
 
     it('serially clicks a collection', () => {
@@ -466,8 +470,8 @@ describe('src/cy/commands/actions/click', () => {
       //# make sure we're clicking multiple anchors
       expect(anchors.length).to.be.gt(1)
 
-      return cy.get('#sequential-clicks a').click({ multiple: true }).then(($anchors) => {
-        return expect($anchors.length).to.eq(clicks)
+      cy.get('#sequential-clicks a').click({ multiple: true }).then(($anchors) => {
+        expect($anchors.length).to.eq(clicks)
       })
     })
 
@@ -476,25 +480,25 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.spy(cy, 'timeout')
 
-      return cy.get('#three-buttons button').click({ multiple: true }).then(() => {
+      cy.get('#three-buttons button').click({ multiple: true }).then(() => {
         const calls = cy.timeout.getCalls()
 
         const num = _.filter(calls, (call) => {
           return _.isEqual(call.args, [50, true, 'click'])
         })
 
-        return expect(num.length).to.eq(count)
+        expect(num.length).to.eq(count)
       })
     })
 
     //# this test needs to increase the height + width of the div
     //# when we implement scrollBy the delta of the left/top
     it('can click elements which are huge and the center is naturally below the fold', () => {
-      return cy.get('#massively-long-div').click()
+      cy.get('#massively-long-div').click()
     })
 
     it('can click a tr', () => {
-      return cy.get('#table tr:first').click()
+      cy.get('#table tr:first').click()
     })
 
     it('places cursor at the end of input', () => {
@@ -503,15 +507,15 @@ describe('src/cy/commands/actions/click', () => {
 
         expect(el.selectionStart).to.eql(6)
 
-        return expect(el.selectionEnd).to.eql(6)
+        expect(el.selectionEnd).to.eql(6)
       })
 
-      return cy.get('input:first').invoke('val', '').click().then(($el) => {
+      cy.get('input:first').invoke('val', '').click().then(($el) => {
         const el = $el.get(0)
 
         expect(el.selectionStart).to.eql(0)
 
-        return expect(el.selectionEnd).to.eql(0)
+        expect(el.selectionEnd).to.eql(0)
       })
     })
 
@@ -521,15 +525,15 @@ describe('src/cy/commands/actions/click', () => {
 
         expect(el.selectionStart).to.eql(11)
 
-        return expect(el.selectionEnd).to.eql(11)
+        expect(el.selectionEnd).to.eql(11)
       })
 
-      return cy.get('textarea:first').invoke('val', '').click().then(($el) => {
+      cy.get('textarea:first').invoke('val', '').click().then(($el) => {
         const el = $el.get(0)
 
         expect(el.selectionStart).to.eql(0)
 
-        return expect(el.selectionEnd).to.eql(0)
+        expect(el.selectionEnd).to.eql(0)
       })
     })
 
@@ -544,7 +548,7 @@ describe('src/cy/commands/actions/click', () => {
         expect(range.startOffset).to.eql(0)
         expect(range.endContainer.outerHTML).to.eql('<div><br></div>')
 
-        return expect(range.endOffset).to.eql(0)
+        expect(range.endOffset).to.eql(0)
       })
 
       cy.get('[contenteditable]:first')
@@ -556,7 +560,7 @@ describe('src/cy/commands/actions/click', () => {
         expect(range.startOffset).to.eql(3)
         expect(range.endContainer.nodeValue).to.eql('foo')
 
-        return expect(range.endOffset).to.eql(3)
+        expect(range.endOffset).to.eql(3)
       })
 
       cy.get('[contenteditable]:first')
@@ -568,10 +572,10 @@ describe('src/cy/commands/actions/click', () => {
         expect(range.startOffset).to.eql(3)
         expect(range.endContainer.nodeValue).to.eql('foo')
 
-        return expect(range.endOffset).to.eql(3)
+        expect(range.endOffset).to.eql(3)
       })
 
-      return cy.get('[contenteditable]:first')
+      cy.get('[contenteditable]:first')
       .invoke('html', '').click()
       .then(($el) => {
         const el = $el.get(0)
@@ -581,7 +585,7 @@ describe('src/cy/commands/actions/click', () => {
         expect(range.startOffset).to.eql(0)
         expect(range.endContainer).to.eql(el)
 
-        return expect(range.endOffset).to.eql(0)
+        expect(range.endOffset).to.eql(0)
       })
     })
 
@@ -595,9 +599,9 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('[data-cy=line]').click().first().click()
       cy.get('[data-cy=rect]').click().first().click()
 
-      return cy.get('[data-cy=circle]').click().first().click()
+      cy.get('[data-cy=circle]').click().first().click()
       .then(() => {
-        return expect(onClick.callCount).to.eq(6)
+        expect(onClick.callCount).to.eq(6)
       })
     })
 
@@ -613,19 +617,19 @@ describe('src/cy/commands/actions/click', () => {
       ctx.fillStyle = 'green'
       ctx.fillRect(10, 10, 100, 100)
 
-      return cy.get('#canvas').click().then(() => {
-        return expect(onClick).to.be.calledOnce
+      cy.get('#canvas').click().then(() => {
+        expect(onClick).to.be.calledOnce
       })
     })
 
     describe('actionability', () => {
 
       it('can click on inline elements that wrap lines', () => {
-        return cy.get('#overflow-link').find('.wrapped').click()
+        cy.get('#overflow-link').find('.wrapped').click()
       })
 
       it('can click elements which are hidden until scrolled within parent container', () => {
-        return cy.get('#overflow-auto-container').contains('quux').click()
+        cy.get('#overflow-auto-container').contains('quux').click()
       })
 
       it('does not scroll when being forced', () => {
@@ -635,10 +639,10 @@ describe('src/cy/commands/actions/click', () => {
           return scrolled.push(type)
         })
 
-        return cy
+        cy
         .get('button:last').click({ force: true })
         .then(() => {
-          return expect(scrolled).to.be.empty
+          expect(scrolled).to.be.empty
         })
       })
 
@@ -737,17 +741,17 @@ describe('src/cy/commands/actions/click', () => {
 
         //# make scrolling deterministic by ensuring we don't wait for coordsHistory
         //# to build up
-        return cy.get('[data-cy=button]').click({ waitForAnimations: false }).then(() => {
-          return expect(scrolled).to.deep.eq(['element'])
+        cy.get('[data-cy=button]').click({ waitForAnimations: false }).then(() => {
+          expect(scrolled).to.deep.eq(['element'])
         })
       })
 
       it('can force click on hidden elements', () => {
-        return cy.get('button:first').invoke('hide').click({ force: true })
+        cy.get('button:first').invoke('hide').click({ force: true })
       })
 
       it('can force click on disabled elements', () => {
-        return cy.get('input:first').invoke('prop', 'disabled', true).click({ force: true })
+        cy.get('input:first').invoke('prop', 'disabled', true).click({ force: true })
       })
 
       it('can forcibly click even when being covered by another element', () => {
@@ -771,11 +775,11 @@ describe('src/cy/commands/actions/click', () => {
           return clicked = true
         })
 
-        return cy.get('#button-covered-in-span').click({ force: true }).then(() => {
+        cy.get('#button-covered-in-span').click({ force: true }).then(() => {
           expect(scrolled).to.be.empty
           expect(retried).to.be.false
 
-          return expect(clicked).to.be.true
+          expect(clicked).to.be.true
         })
       })
 
@@ -805,7 +809,7 @@ describe('src/cy/commands/actions/click', () => {
           retried = true
         }))
 
-        return cy.get('#button-covered-in-span').click().then(() => {
+        cy.get('#button-covered-in-span').click().then(() => {
           expect(retried).to.be.true
 
           //# - element scrollIntoView
@@ -813,7 +817,7 @@ describe('src/cy/commands/actions/click', () => {
           //# - element scrollIntoView (retry covered)
           //# - element scrollIntoView (retry covered)
           //# - window
-          return expect(scrolled).to.deep.eq(['element', 'element', 'element', 'element'])
+          expect(scrolled).to.deep.eq(['element', 'element', 'element', 'element'])
         })
       })
 
@@ -840,8 +844,8 @@ describe('src/cy/commands/actions/click', () => {
         //# - element scrollIntoView
         //# - element scrollIntoView (retry animation coords)
         //# - window
-        return cy.get('#button-covered-in-nav').click().then(() => {
-          return expect(scrolled).to.deep.eq(['element', 'element', 'window'])
+        cy.get('#button-covered-in-nav').click().then(() => {
+          expect(scrolled).to.deep.eq(['element', 'element', 'window'])
         })
       })
 
@@ -878,8 +882,8 @@ describe('src/cy/commands/actions/click', () => {
         //# - element scrollIntoView (retry animation coords)
         //# - window (nav1)
         //# - window (nav2)
-        return cy.get('#button-covered-in-nav').click().then(() => {
-          return expect(scrolled).to.deep.eq(['element', 'element', 'window', 'window'])
+        cy.get('#button-covered-in-nav').click().then(() => {
+          expect(scrolled).to.deep.eq(['element', 'element', 'window', 'window'])
         })
       })
 
@@ -935,8 +939,8 @@ describe('src/cy/commands/actions/click', () => {
         //# - element scrollIntoView (retry animation coords)
         //# - window
         //# - container
-        return cy.get('#button-covered-in-nav').click().then(() => {
-          return expect(scrolled).to.deep.eq(['element', 'element', 'window', 'container'])
+        cy.get('#button-covered-in-nav').click().then(() => {
+          expect(scrolled).to.deep.eq(['element', 'element', 'window', 'container'])
         })
       })
 
@@ -950,8 +954,8 @@ describe('src/cy/commands/actions/click', () => {
           retried = true
         }))
 
-        return cy.get('#button').click().then(() => {
-          return expect(retried).to.be.true
+        cy.get('#button').click().then(() => {
+          expect(retried).to.be.true
         })
       })
 
@@ -970,10 +974,10 @@ describe('src/cy/commands/actions/click', () => {
           retried = true
         }))
 
-        return cy.get('#button').click().then(() => {
+        cy.get('#button').click().then(() => {
           expect(clicks).to.eq(1)
 
-          return expect(retried).to.be.true
+          expect(retried).to.be.true
         })
       })
 
@@ -988,13 +992,13 @@ describe('src/cy/commands/actions/click', () => {
         .throws(new Error('animating!'))
         .onThirdCall().returns()
 
-        return cy.get('button:first').click().then(() => {
+        cy.get('button:first').click().then(() => {
           //# - retry animation coords
           //# - retry animation
           //# - retry animation
           expect(retries).to.eq(3)
 
-          return expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
         })
       })
 
@@ -1002,16 +1006,16 @@ describe('src/cy/commands/actions/click', () => {
         cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
         Cypress.config('waitForAnimations', false)
 
-        return cy.get('button:first').click().then(() => {
-          return expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        cy.get('button:first').click().then(() => {
+          expect(cy.ensureElementIsNotAnimating).not.to.be.called
         })
       })
 
       it('does not throw when turning off waitForAnimations in options', () => {
         cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
 
-        return cy.get('button:first').click({ waitForAnimations: false }).then(() => {
-          return expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        cy.get('button:first').click({ waitForAnimations: false }).then(() => {
+          expect(cy.ensureElementIsNotAnimating).not.to.be.called
         })
       })
 
@@ -1022,16 +1026,16 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
-        return cy.get('button:first').click({ animationDistanceThreshold: 1000 }).then(() => {
+        cy.get('button:first').click({ animationDistanceThreshold: 1000 }).then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromWindow, fromWindow])
 
-          return expect(args[2]).to.eq(1000)
+          expect(args[2]).to.eq(1000)
         })
       })
 
-      return it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
+      it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
 
         const $btn = cy.$$('button:first')
@@ -1040,12 +1044,12 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
-        return cy.get('button:first').click().then(() => {
+        cy.get('button:first').click().then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromWindow, fromWindow])
 
-          return expect(args[2]).to.eq(animationDistanceThreshold)
+          expect(args[2]).to.eq(animationDistanceThreshold)
         })
       })
     })
@@ -1071,17 +1075,17 @@ describe('src/cy/commands/actions/click', () => {
           return false
         })
 
-        return cy.get('button:first').click().should('have.class', 'clicked').then(function () {
+        cy.get('button:first').click().should('have.class', 'clicked').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
           expect(lastLog.get('state')).to.eq('passed')
 
-          return expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('ended')).to.be.true
         })
       })
 
-      return it('eventually passes the assertion on multiple buttons', () => {
+      it('eventually passes the assertion on multiple buttons', () => {
         cy.$$('button').click(function () {
           _.delay(() => {
             return $(this).addClass('clicked')
@@ -1091,7 +1095,7 @@ describe('src/cy/commands/actions/click', () => {
           return false
         })
 
-        return cy
+        cy
         .get('button')
         .invoke('slice', 0, 2)
         .click({ multiple: true })
@@ -1105,13 +1109,13 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click()
+        cy.get('#button-covered-in-span').click()
       })
 
       it('can click topLeft', (done) => {
@@ -1120,13 +1124,13 @@ describe('src/cy/commands/actions/click', () => {
         const $span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         $span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('topLeft')
+        cy.get('#button-covered-in-span').click('topLeft')
       })
 
       it('can click top', (done) => {
@@ -1134,13 +1138,13 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 30, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('top')
+        cy.get('#button-covered-in-span').click('top')
       })
 
       it('can click topRight', (done) => {
@@ -1148,13 +1152,13 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('topRight')
+        cy.get('#button-covered-in-span').click('topRight')
       })
 
       it('can click left', (done) => {
@@ -1162,13 +1166,13 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top + 40, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('left')
+        cy.get('#button-covered-in-span').click('left')
       })
 
       it('can click center', (done) => {
@@ -1176,13 +1180,13 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 30, top: $btn.offset().top + 40, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('center')
+        cy.get('#button-covered-in-span').click('center')
       })
 
       it('can click right', (done) => {
@@ -1190,13 +1194,13 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top + 40, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('right')
+        cy.get('#button-covered-in-span').click('right')
       })
 
       it('can click bottomLeft', (done) => {
@@ -1204,13 +1208,13 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('bottomLeft')
+        cy.get('#button-covered-in-span').click('bottomLeft')
       })
 
       it('can click bottom', (done) => {
@@ -1218,13 +1222,13 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 30, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('bottom')
+        cy.get('#button-covered-in-span').click('bottom')
       })
 
       it('can click bottomRight', (done) => {
@@ -1232,25 +1236,25 @@ describe('src/cy/commands/actions/click', () => {
         const span = $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click('bottomRight')
+        cy.get('#button-covered-in-span').click('bottomRight')
       })
 
-      return it('can pass options along with position', (done) => {
+      it('can pass options along with position', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
 
         $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 80, top: $btn.offset().top + 80, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo(cy.$$('body'))
 
         $btn.on('click', () => {
-          return done()
+          done()
         })
 
-        return cy.get('#button-covered-in-span').click('bottomRight', { force: true })
+        cy.get('#button-covered-in-span').click('bottomRight', { force: true })
       })
     })
 
@@ -1266,25 +1270,25 @@ describe('src/cy/commands/actions/click', () => {
         .appendTo($btn)
 
         const clicked = _.after(2, () => {
-          return done()
+          done()
         })
 
         $span.on('click', clicked)
         $btn.on('click', clicked)
 
-        return cy.get('#button-covered-in-span').click(75, 78)
+        cy.get('#button-covered-in-span').click(75, 78)
       })
 
-      return it('can pass options along with x, y', (done) => {
+      it('can pass options along with x, y', (done) => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').css({ height: 100, width: 100 }).prependTo(cy.$$('body'))
 
         $('<span>span</span>').css({ position: 'absolute', left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo(cy.$$('body'))
 
         $btn.on('click', () => {
-          return done()
+          done()
         })
 
-        return cy.get('#button-covered-in-span').click(75, 78, { force: true })
+        cy.get('#button-covered-in-span').click(75, 78, { force: true })
       })
     })
 
@@ -1308,10 +1312,10 @@ describe('src/cy/commands/actions/click', () => {
             type: 'focus',
           })
 
-          return done()
+          done()
         })
 
-        return cy.get('input:first').click()
+        cy.get('input:first').click()
       })
 
       it('gives focusin after mousedown', (done) => {
@@ -1332,10 +1336,10 @@ describe('src/cy/commands/actions/click', () => {
             type: 'focusin',
           })
 
-          return done()
+          done()
         })
 
-        return cy.get('input:first').click()
+        cy.get('input:first').click()
       })
 
       it('gives all events in order', () => {
@@ -1349,8 +1353,8 @@ describe('src/cy/commands/actions/click', () => {
           })
         })
 
-        return cy.get('input:first').click().then(() => {
-          return expect(events).to.deep.eq(['mousedown', 'focus', 'focusin', 'mouseup', 'click'])
+        cy.get('input:first').click().then(() => {
+          expect(events).to.deep.eq(['mousedown', 'focus', 'focusin', 'mouseup', 'click'])
         })
       })
 
@@ -1358,17 +1362,17 @@ describe('src/cy/commands/actions/click', () => {
         const input = cy.$$('input:first')
 
         input.get(0).addEventListener('focus', () => {
-          return done('should not have recieved focused event')
+          done('should not have recieved focused event')
         })
 
         input.get(0).addEventListener('mousedown', (e) => {
           e.preventDefault()
 
-          return expect(e.defaultPrevented).to.be.true
+          expect(e.defaultPrevented).to.be.true
         })
 
-        return cy.get('input:first').click().then(() => {
-          return done()
+        cy.get('input:first').click().then(() => {
+          done()
         })
       })
 
@@ -1377,12 +1381,12 @@ describe('src/cy/commands/actions/click', () => {
 
         $('<span>span in button</span>').css({ padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).appendTo($btn)
 
-        return cy
+        cy
         .get('#button-covered-in-span').click()
         .focused().should('have.id', 'button-covered-in-span')
       })
 
-      return it('will not fire focus events when nothing can receive focus', () => {
+      it('will not fire focus events when nothing can receive focus', () => {
         const onFocus = cy.stub()
 
         const win = cy.state('window')
@@ -1393,10 +1397,10 @@ describe('src/cy/commands/actions/click', () => {
         $body.on('focus', onFocus)
         $div.on('focus', onFocus)
 
-        return cy
+        cy
         .get('#nested-find').click()
         .then(() => {
-          return expect(onFocus).not.to.be.called
+          expect(onFocus).not.to.be.called
         })
       })
     })
@@ -1438,10 +1442,10 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when not a dom subject', (done) => {
         cy.on('fail', () => {
-          return done()
+          done()
         })
 
-        return cy.click()
+        cy.click()
       })
 
       it('throws when attempting to click multiple elements', (done) => {
@@ -1450,10 +1454,10 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq(`cy.click() can only be called on a single element. Your subject contained ${num} elements. Pass { multiple: true } if you want to serially click each element.`)
 
-          return done()
+          done()
         })
 
-        return cy.get('button').click()
+        cy.get('button').click()
       })
 
       it('throws when subject is not in the document', (done) => {
@@ -1470,10 +1474,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(clicked).to.eq(1)
           expect(err.message).to.include('cy.click() failed because this element')
 
-          return done()
+          done()
         })
 
-        return cy.get(':checkbox:first').click().click()
+        cy.get(':checkbox:first').click().click()
       })
 
       it('logs once when not dom subject', function (done) {
@@ -1483,10 +1487,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.click()
+        cy.click()
       })
 
       it('throws when any member of the subject isnt visible', function (done) {
@@ -1501,10 +1505,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('cy.click() failed because this element is not visible')
 
-          return done()
+          done()
         })
 
-        return cy.get('#three-buttons button').click({ multiple: true })
+        cy.get('#three-buttons button').click({ multiple: true })
       })
 
       it('throws when subject is disabled', function (done) {
@@ -1515,10 +1519,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(this.logs.length).eq(2)
           expect(err.message).to.include('cy.click() failed because this element is disabled:\n')
 
-          return done()
+          done()
         })
 
-        return cy.get('#button').click()
+        cy.get('#button').click()
       })
 
       it('throws when a non-descendent element is covering subject', function (done) {
@@ -1550,10 +1554,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(console['Tried to Click']).to.eq($btn.get(0))
           expect(console['But its Covered By']).to.eq(span.get(0))
 
-          return done()
+          done()
         })
 
-        return cy.get('#button-covered-in-span').click()
+        cy.get('#button-covered-in-span').click()
       })
 
       it('throws when non-descendent element is covering with fixed position', function (done) {
@@ -1581,10 +1585,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(console['Tried to Click']).to.eq($btn.get(0))
           expect(console['But its Covered By']).to.eq(span.get(0))
 
-          return done()
+          done()
         })
 
-        return cy.get('#button-covered-in-span').click()
+        cy.get('#button-covered-in-span').click()
       })
 
       it('throws when element is fixed position and being covered', function (done) {
@@ -1620,10 +1624,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(console['Tried to Click']).to.be.undefined
           expect(console['But its Covered By']).to.be.undefined
 
-          return done()
+          done()
         })
 
-        return cy.get('#button-covered-in-span').click()
+        cy.get('#button-covered-in-span').click()
       })
 
       it('throws when element is hidden and theres no element specifically covering it', (done) => {
@@ -1637,10 +1641,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(err.message).to.include('cy.click() failed because the center of this element is hidden from view:')
           expect(err.message).to.include('<li>quux</li>')
 
-          return done()
+          done()
         })
 
-        return cy.get('#overflow-auto-container').contains('quux').click()
+        cy.get('#overflow-auto-container').contains('quux').click()
       })
 
       it('throws when attempting to click a <select> element', function (done) {
@@ -1648,10 +1652,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(this.logs.length).to.eq(2)
           expect(err.message).to.eq('cy.click() cannot be called on a <select> element. Use cy.select() command instead to change the value.')
 
-          return done()
+          done()
         })
 
-        return cy.get('select:first').click()
+        cy.get('select:first').click()
       })
 
       it('throws when provided invalid position', function (done) {
@@ -1659,10 +1663,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(this.logs.length).to.eq(2)
           expect(err.message).to.eq('Invalid position argument: \'foo\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').click('foo')
+        cy.get('button:first').click('foo')
       })
 
       it('throws when element animation exceeds timeout', (done) => {
@@ -1679,10 +1683,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(clicks).to.eq(0)
           expect(err.message).to.include('cy.click() could not be issued because this element is currently animating:\n')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').click()
+        cy.get('button:first').click()
       })
 
       it('eventually fails the assertion', function (done) {
@@ -1695,24 +1699,24 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').click().should('have.class', 'clicked')
+        cy.get('button:first').click().should('have.class', 'clicked')
       })
 
-      return it('does not log an additional log on failure', function (done) {
+      it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
           expect(this.logs.length).to.eq(3)
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').click().should('have.class', 'clicked')
+        cy.get('button:first').click().should('have.class', 'clicked')
       })
     })
 
-    return describe('.log', () => {
+    describe('.log', () => {
       beforeEach(function () {
         this.logs = []
 
@@ -1733,11 +1737,11 @@ describe('src/cy/commands/actions/click', () => {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('$el').get(0)).to.eq(button.get(0))
 
-            return done()
+            done()
           }
         })
 
-        return cy.get('button:first').click()
+        cy.get('button:first').click()
       })
 
       it('snapshots before clicking', function (done) {
@@ -1748,20 +1752,20 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
           expect(lastLog.get('snapshots')[0].body).to.be.an('object')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').click()
+        cy.get('button:first').click()
       })
 
       it('snapshots after clicking', () => {
-        return cy.get('button:first').click().then(function () {
+        cy.get('button:first').click().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(2)
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
 
-          return expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+          expect(lastLog.get('snapshots')[1].body).to.be.an('object')
         })
       })
 
@@ -1781,11 +1785,11 @@ describe('src/cy/commands/actions/click', () => {
           }
         })
 
-        return cy.get('button.clicks').click({ multiple: true }).then(($buttons) => {
+        cy.get('button.clicks').click({ multiple: true }).then(($buttons) => {
           expect($buttons.length).to.eq(2)
           expect(clicks.length).to.eq(2)
 
-          return expect(clicks[1].get('$el').get(0)).to.eq($buttons.last().get(0))
+          expect(clicks[1].get('$el').get(0)).to.eq($buttons.last().get(0))
         })
       })
 
@@ -1798,19 +1802,19 @@ describe('src/cy/commands/actions/click', () => {
           }
         })
 
-        return cy.get('button:first').click().then(() => {
-          return expect(logs.length).to.eq(1)
+        cy.get('button:first').click().then(() => {
+          expect(logs.length).to.eq(1)
         })
       })
 
       it('passes in coords', () => {
-        return cy.get('button').first().click().then(function ($btn) {
+        cy.get('button').first().click().then(function ($btn) {
           const { lastLog } = this
 
           $btn.blur() //# blur which removes focus styles which would change coords
           const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-          return expect(lastLog.get('coords')).to.deep.eq(fromWindow)
+          expect(lastLog.get('coords')).to.deep.eq(fromWindow)
         })
       })
 
@@ -1823,27 +1827,27 @@ describe('src/cy/commands/actions/click', () => {
           }
         })
 
-        return cy.get('#three-buttons button').click({ multiple: true }).then(() => {
+        cy.get('#three-buttons button').click({ multiple: true }).then(() => {
           return _.each(logs, (log) => {
             expect(log.get('state')).to.eq('passed')
 
-            return expect(log.get('ended')).to.be.true
+            expect(log.get('ended')).to.be.true
           })
         })
       })
 
       it('logs { multiple: true} options', () => {
-        return cy.get('span').invoke('slice', 0, 2).click({ multiple: true, timeout: 1000 }).then(function () {
+        cy.get('span').invoke('slice', 0, 2).click({ multiple: true, timeout: 1000 }).then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{multiple: true, timeout: 1000}')
 
-          return expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ multiple: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ multiple: true, timeout: 1000 })
         })
       })
 
       it('#consoleProps', () => {
-        return cy.get('button').first().click().then(function ($button) {
+        cy.get('button').first().click().then(function ($button) {
           const { lastLog } = this
 
           const console = lastLog.invoke('consoleProps')
@@ -1857,7 +1861,7 @@ describe('src/cy/commands/actions/click', () => {
           expect(console.Elements).to.eq(1)
           expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1) //# ensure we are within 1
 
-          return expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
+          expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
         })
       }) //# ensure we are within 1
 
@@ -1871,8 +1875,8 @@ describe('src/cy/commands/actions/click', () => {
         .css({ padding: 5, display: 'inline-block', backgroundColor: 'yellow' })
         .appendTo($btn)
 
-        return cy.get('#button-covered-in-span').click().then(function () {
-          return expect(this.lastLog.invoke('consoleProps')['Actual Element Clicked']).to.eq($span.get(0))
+        cy.get('#button-covered-in-span').click().then(function () {
+          expect(this.lastLog.invoke('consoleProps')['Actual Element Clicked']).to.eq($span.get(0))
         })
       })
 
@@ -1881,8 +1885,8 @@ describe('src/cy/commands/actions/click', () => {
           return false
         })
 
-        return cy.get('input:first').click().then(function () {
-          return expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
+        cy.get('input:first').click().then(function () {
+          expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
             {
               name: 'MouseDown',
               items: {
@@ -1913,8 +1917,8 @@ describe('src/cy/commands/actions/click', () => {
           return false
         })
 
-        return cy.get('input:first').click().then(function () {
-          return expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
+        cy.get('input:first').click().then(function () {
+          expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
             {
               name: 'MouseDown',
               items: {
@@ -1945,8 +1949,8 @@ describe('src/cy/commands/actions/click', () => {
           return false
         })
 
-        return cy.get('input:first').click().then(function () {
-          return expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
+        cy.get('input:first').click().then(function () {
+          expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
             {
               name: 'MouseDown',
               items: {
@@ -1977,7 +1981,7 @@ describe('src/cy/commands/actions/click', () => {
           return false
         })
 
-        return cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(function () {
+        cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(function () {
           expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
             {
               name: 'MouseDown',
@@ -2005,7 +2009,7 @@ describe('src/cy/commands/actions/click', () => {
             },
           ])
 
-          return cy.get('body').type('{ctrl}')
+          cy.get('body').type('{ctrl}')
         })
       }) //# clear modifiers
 
@@ -2017,8 +2021,8 @@ describe('src/cy/commands/actions/click', () => {
           return $(this).remove()
         })
 
-        return cy.contains('button').click().then(function () {
-          return expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
+        cy.contains('button').click().then(function () {
+          expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
             {
               name: 'MouseDown',
               items: {
@@ -2038,8 +2042,8 @@ describe('src/cy/commands/actions/click', () => {
           return $(this).remove()
         })
 
-        return cy.contains('button').click().then(function () {
-          return expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
+        cy.contains('button').click().then(function () {
+          expect(this.lastLog.invoke('consoleProps').groups()).to.deep.eq([
             {
               name: 'MouseDown',
               items: {
@@ -2070,37 +2074,37 @@ describe('src/cy/commands/actions/click', () => {
           return fail('should not have gotten click')
         })
 
-        return cy.contains('button').click()
+        cy.contains('button').click()
       })
 
-      return it('logs deltaOptions', () => {
-        return cy
+      it('logs deltaOptions', () => {
+        cy
         .get('button:first').click({ force: true, timeout: 1000 })
         .then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
-          return expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })
   })
 
-  return context('#dblclick', () => {
+  context('#dblclick', () => {
     it('sends a dblclick event', (done) => {
       cy.$$('#button').dblclick(() => {
-        return done()
+        done()
       })
 
-      return cy.get('#button').dblclick()
+      cy.get('#button').dblclick()
     })
 
     it('returns the original subject', () => {
       const $btn = cy.$$('#button')
 
-      return cy.get('#button').dblclick().then(($button) => {
-        return expect($button).to.match($btn)
+      cy.get('#button').dblclick().then(($button) => {
+        expect($button).to.match($btn)
       })
     })
 
@@ -2108,14 +2112,14 @@ describe('src/cy/commands/actions/click', () => {
       const $text = cy.$$(':text:first')
 
       $text.focus(() => {
-        return done()
+        done()
       })
 
-      return cy.get(':text:first').dblclick()
+      cy.get(':text:first').dblclick()
     })
 
     it('silences errors on unfocusable elements', () => {
-      return cy.get('div:first').dblclick()
+      cy.get('div:first').dblclick()
     })
 
     it('causes first focused element to receive blur', () => {
@@ -2125,19 +2129,19 @@ describe('src/cy/commands/actions/click', () => {
         return blurred = true
       })
 
-      return cy
+      cy
       .get('input:first').focus()
       .get('input:text:last').dblclick()
       .then(() => {
-        return expect(blurred).to.be.true
+        expect(blurred).to.be.true
       })
     })
 
     it('inserts artificial delay of 50ms', () => {
       cy.spy(Promise, 'delay')
 
-      return cy.get('#button').click().then(() => {
-        return expect(Promise.delay).to.be.calledWith(50)
+      cy.get('#button').click().then(() => {
+        expect(Promise.delay).to.be.calledWith(50)
       })
     })
 
@@ -2156,8 +2160,8 @@ describe('src/cy/commands/actions/click', () => {
       expect($buttons.length).to.be.gt(1)
 
       //# make sure each button received its dblclick event
-      return cy.get('button').invoke('slice', 0, 2).dblclick().then(($buttons) => {
-        return expect($buttons.length).to.eq(dblclicks)
+      cy.get('button').invoke('slice', 0, 2).dblclick().then(($buttons) => {
+        expect($buttons.length).to.eq(dblclicks)
       })
     })
 
@@ -2198,12 +2202,12 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(timeout.callCount).to.eq(0)
 
-          return done()
+          done()
         }
         , 200)
       })
 
-      return cy.get('#sequential-clicks a').dblclick()
+      cy.get('#sequential-clicks a').dblclick()
     })
 
     it('serially dblclicks a collection', () => {
@@ -2223,8 +2227,8 @@ describe('src/cy/commands/actions/click', () => {
       //# make sure we're dblclicking multiple anchors
       expect(anchors.length).to.be.gt(1)
 
-      return cy.get('#sequential-clicks a').dblclick().then(($anchors) => {
-        return expect($anchors.length).to.eq(dblclicks)
+      cy.get('#sequential-clicks a').dblclick().then(($anchors) => {
+        expect($anchors.length).to.eq(dblclicks)
       })
     })
 
@@ -2233,14 +2237,14 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.spy(cy, 'timeout')
 
-      return cy.get('#three-buttons button').dblclick().then(() => {
+      cy.get('#three-buttons button').dblclick().then(() => {
         const calls = cy.timeout.getCalls()
 
         const num = _.filter(calls, (call) => {
           return _.isEqual(call.args, [50, true, 'dblclick'])
         })
 
-        return expect(num.length).to.eq(count)
+        expect(num.length).to.eq(count)
       })
     })
 
@@ -2261,10 +2265,10 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when not a dom subject', (done) => {
         cy.on('fail', () => {
-          return done()
+          done()
         })
 
-        return cy.dblclick()
+        cy.dblclick()
       })
 
       it('throws when subject is not in the document', (done) => {
@@ -2281,10 +2285,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(dblclicked).to.eq(1)
           expect(err.message).to.include('cy.dblclick() failed because this element')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').dblclick().dblclick()
+        cy.get('button:first').dblclick().dblclick()
       })
 
       it('throws when any member of the subject isnt visible', (done) => {
@@ -2293,10 +2297,10 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.dblclick() failed because this element is not visible')
 
-          return done()
+          done()
         })
 
-        return cy.get('button').invoke('slice', 0, 3).dblclick()
+        cy.get('button').invoke('slice', 0, 3).dblclick()
       })
 
       it('logs once when not dom subject', function (done) {
@@ -2306,13 +2310,13 @@ describe('src/cy/commands/actions/click', () => {
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.dblclick()
+        cy.dblclick()
       })
 
-      return it('throws when any member of the subject isnt visible', function (done) {
+      it('throws when any member of the subject isnt visible', function (done) {
         cy.$$('#three-buttons button').show().last().hide()
 
         cy.on('fail', (err) => {
@@ -2322,14 +2326,14 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('cy.dblclick() failed because this element is not visible')
 
-          return done()
+          done()
         })
 
-        return cy.get('#three-buttons button').dblclick()
+        cy.get('#three-buttons button').dblclick()
       })
     })
 
-    return describe('.log', () => {
+    describe('.log', () => {
       beforeEach(function () {
         this.logs = []
 
@@ -2350,20 +2354,20 @@ describe('src/cy/commands/actions/click', () => {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('$el').get(0)).to.eq($button.get(0))
 
-            return done()
+            done()
           }
         })
 
-        return cy.get('button:first').dblclick()
+        cy.get('button:first').dblclick()
       })
 
       it('snapshots after clicking', () => {
-        return cy.get('button:first').dblclick().then(function () {
+        cy.get('button:first').dblclick().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
 
-          return expect(lastLog.get('snapshots')[0]).to.be.an('object')
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
         })
       })
 
@@ -2383,11 +2387,11 @@ describe('src/cy/commands/actions/click', () => {
           }
         })
 
-        return cy.get('button.dblclicks').dblclick().then(($buttons) => {
+        cy.get('button.dblclicks').dblclick().then(($buttons) => {
           expect($buttons.length).to.eq(2)
           expect(dblclicks.length).to.eq(2)
 
-          return expect(dblclicks[1].get('$el').get(0)).to.eq($buttons.last().get(0))
+          expect(dblclicks[1].get('$el').get(0)).to.eq($buttons.last().get(0))
         })
       })
 
@@ -2400,21 +2404,21 @@ describe('src/cy/commands/actions/click', () => {
           }
         })
 
-        return cy.get('button:first').dblclick().then(() => {
-          return expect(logs.length).to.eq(1)
+        cy.get('button:first').dblclick().then(() => {
+          expect(logs.length).to.eq(1)
         })
       })
 
-      return it('#consoleProps', function () {
+      it('#consoleProps', function () {
         cy.on('log:added', (attrs, log) => {
           this.log = log
 
         })
 
-        return cy.get('button').first().dblclick().then(function () {
+        cy.get('button').first().dblclick().then(function () {
           const { lastLog } = this
 
-          return expect(lastLog.invoke('consoleProps')).to.deep.eq({
+          expect(lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'dblclick',
             'Applied To': lastLog.get('$el').get(0),
             Elements: 1,

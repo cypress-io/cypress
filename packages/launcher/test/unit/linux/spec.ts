@@ -10,34 +10,41 @@ const goalBrowsers = [
     name: 'test-browser-name',
     versionRegex: /test-browser v(\S+)$/,
     profile: true,
-    binary: 'test-browser'
+    binary: 'test-browser',
   },
   {
     displayName: 'Foo Browser',
     name: 'foo-browser',
     versionRegex: /foo-browser v(\S+)$/,
     profile: true,
-    binary: ['foo-browser', 'foo-bar-browser']
-  }
+    binary: ['foo-browser', 'foo-bar-browser'],
+  },
 ]
 
 describe('linux browser detection', () => {
   beforeEach(function stubShell () {
     const stdout = sinon.stub(execa, 'stdout')
+
     stdout.withArgs('test-browser', ['--version'])
-      .resolves('test-browser v100.1.2.3')
+    .resolves('test-browser v100.1.2.3')
+
     stdout.withArgs('foo-browser', ['--version'])
-      .resolves('foo-browser v100.1.2.3')
+    .resolves('foo-browser v100.1.2.3')
+
     stdout.withArgs('foo-bar-browser', ['--version'])
-      .resolves('foo-browser v100.1.2.3')
+    .resolves('foo-browser v100.1.2.3')
+
     stdout.withArgs('/Applications/My Shiny New Browser.app', ['--version'])
-      .resolves('foo-browser v100.1.2.3')
+    .resolves('foo-browser v100.1.2.3')
+
     stdout.withArgs('/foo/bar/browser', ['--version'])
-      .resolves('foo-browser v9001.1.2.3')
+    .resolves('foo-browser v9001.1.2.3')
+
     stdout.withArgs('/not/a/browser', ['--version'])
-      .resolves('not a browser version string')
+    .resolves('not a browser version string')
+
     stdout.withArgs('/not/a/real/path', ['--version'])
-      .rejects()
+    .rejects()
   })
 
   afterEach(() => {
@@ -50,9 +57,10 @@ describe('linux browser detection', () => {
       expect(browser).to.deep.equal({
         name: 'test-browser-name',
         path: 'test-browser',
-        version: '100.1.2.3'
+        version: '100.1.2.3',
       })
     }
+
     return linuxHelper.detect(goal).then(checkBrowser)
   })
 
@@ -66,18 +74,18 @@ describe('linux browser detection', () => {
         name: 'test-browser-name',
         version: '100.1.2.3',
         path: 'test-browser',
-        majorVersion: '100'
+        majorVersion: '100',
       },
       {
         displayName: 'Foo Browser',
         name: 'foo-browser',
         version: '100.1.2.3',
         path: 'foo-browser',
-        majorVersion: '100'
-      }
+        majorVersion: '100',
+      },
     ]
 
-    return detect(goalBrowsers).then(browsers => {
+    return detect(goalBrowsers).then((browsers) => {
       log('Browsers: %o', browsers)
       log('Expected browsers: %o', expected)
       expect(browsers).to.deep.equal(expected)
@@ -90,8 +98,8 @@ describe('linux browser detection', () => {
         name: 'foo-browser',
         versionRegex: /v(\S+)$/,
         profile: true,
-        binary: ['foo-browser', 'foo-bar-browser']
-      }
+        binary: ['foo-browser', 'foo-bar-browser'],
+      },
     ]
 
     const expected = [
@@ -99,11 +107,11 @@ describe('linux browser detection', () => {
         name: 'foo-browser',
         version: '100.1.2.3',
         path: 'foo-browser',
-        majorVersion: '100'
-      }
+        majorVersion: '100',
+      },
     ]
 
-    return detect(goalBrowsers).then(browsers => {
+    return detect(goalBrowsers).then((browsers) => {
       log('Browsers: %o', browsers)
       log('Expected browsers: %o', expected)
       expect(browsers).to.deep.equal(expected)
@@ -113,15 +121,17 @@ describe('linux browser detection', () => {
   describe('detectByPath', () => {
     it('detects by path', () => {
       return detectByPath('/foo/bar/browser', goalBrowsers)
-      .then(browser => {
+      .then((browser) => {
         return expect(browser).to.deep.equal(
-          Object.assign({}, goalBrowsers.find(gb => gb.name === 'foo-browser'), {
+          Object.assign({}, goalBrowsers.find((gb) => {
+            return gb.name === 'foo-browser'
+          }), {
             displayName: 'Custom Foo Browser',
             info: 'Loaded from /foo/bar/browser',
             custom: true,
             version: '9001.1.2.3',
             majorVersion: '9001',
-            path: '/foo/bar/browser'
+            path: '/foo/bar/browser',
           })
         )
       })
@@ -129,36 +139,37 @@ describe('linux browser detection', () => {
 
     it('rejects when there was no matching versionRegex', () => {
       return detectByPath('/not/a/browser', goalBrowsers)
-      .then(browser => {
+      .then(() => {
         throw Error('Should not find a browser')
       })
-      .catch(err => {
+      .catch((err) => {
         expect(err.notDetectedAtPath).to.be.true
       })
     })
 
-
     it('rejects when there was an error executing the command', () => {
       return detectByPath('/not/a/real/path', goalBrowsers)
-      .then(browser => {
+      .then(() => {
         throw Error('Should not find a browser')
       })
-      .catch(err => {
+      .catch((err) => {
         expect(err.notDetectedAtPath).to.be.true
       })
     })
 
     it('works with spaces in the path', () => {
       return detectByPath('/Applications/My Shiny New Browser.app', goalBrowsers)
-      .then(browser => {
+      .then((browser) => {
         return expect(browser).to.deep.equal(
-          Object.assign({}, goalBrowsers.find(gb => gb.name === 'foo-browser'), {
+          Object.assign({}, goalBrowsers.find((gb) => {
+            return gb.name === 'foo-browser'
+          }), {
             displayName: 'Custom Foo Browser',
             info: 'Loaded from /Applications/My Shiny New Browser.app',
             custom: true,
             version: '100.1.2.3',
             majorVersion: '100',
-            path: '/Applications/My Shiny New Browser.app'
+            path: '/Applications/My Shiny New Browser.app',
           })
         )
       })

@@ -104,7 +104,7 @@ module.exports = {
       return memo
 
     }
-      , _.cloneDeep(obj))
+    , _.cloneDeep(obj))
   },
 
   id (projectRoot) {

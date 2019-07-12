@@ -1,36 +1,34 @@
 {
   "name": "cypress",
   "version": "0.0.0",
-  "main": "index.js",
   "private": true,
-  "bin": {
-    "cypress": "bin/cypress"
-  },
-  "engines": {
-    "node": ">=4.0.0"
-  },
+  "files": [
+    "bin",
+    "lib",
+    "index.js",
+    "types/**/*.d.ts"
+  ],
+  "main": "index.js",
   "scripts": {
+    "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
+    "build": "node ./scripts/build.js",
+    "check-deps": "node ../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "dtslint": "dtslint types",
     "postinstall": "node ./scripts/post-install.js",
+    "prerelease": "npm run build",
+    "release": "cd build && releaser --no-node --no-changelog",
+    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "pretest": "npm run check-deps-pre",
     "test": "npm run test-unit",
+    "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
+    "test-dependencies": "npm run check-deps && dependency-check . --no-dev",
     "pretest-unit": "npm run check-deps-pre",
     "test-unit": "npm run unit",
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run unit -- --watch",
-    "check-deps": "node ../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
-    "test-dependencies": "npm run check-deps && dependency-check . --no-dev",
-    "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
-    "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json",
-    "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
-    "dtslint": "dtslint types",
-    "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
-    "build": "node ./scripts/build.js",
-    "prerelease": "npm run build",
-    "release": "cd build && releaser --no-node --no-changelog",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
+    "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
-  "types": "types",
   "dependencies": {
     "@cypress/listr-verbose-renderer": "0.4.1",
     "@cypress/xvfb": "1.2.4",
@@ -95,10 +93,11 @@
     "snap-shot-it": "7.7.1",
     "spawn-mock": "1.0.0"
   },
-  "files": [
-    "bin",
-    "lib",
-    "index.js",
-    "types/**/*.d.ts"
-  ]
+  "bin": {
+    "cypress": "bin/cypress"
+  },
+  "types": "types",
+  "engines": {
+    "node": ">=4.0.0"
+  }
 }
