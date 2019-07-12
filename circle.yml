@@ -64,40 +64,40 @@ jobs:
       - run: npm run check-terminal
 
       # need to restore a separate cache for each package.json
-      - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-cli-deps
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-root-deps
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
-      - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-driver
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-example
-      - restore_cache:
-          key: v7-{{ arch }}-{{ .Branch }}-deps-electron
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-extension
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
-      - restore_cache:
-          key: v1-{{ arch }}-{{ .Branch }}-deps-network
-      - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-reporter
-      - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-runner
-      - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-server
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-socket
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-static
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-ts
+      # - restore_cache:
+      #     key: v8-{{ arch }}-{{ .Branch }}-cli-deps
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-root-deps
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-coffee
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
+      # - restore_cache:
+      #     key: v6-{{ arch }}-{{ .Branch }}-deps-driver
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-example
+      # - restore_cache:
+      #     key: v7-{{ arch }}-{{ .Branch }}-deps-electron
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-extension
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
+      # - restore_cache:
+      #     key: v1-{{ arch }}-{{ .Branch }}-deps-network
+      # - restore_cache:
+      #     key: v8-{{ arch }}-{{ .Branch }}-deps-reporter
+      # - restore_cache:
+      #     key: v8-{{ arch }}-{{ .Branch }}-deps-runner
+      # - restore_cache:
+      #     key: v8-{{ arch }}-{{ .Branch }}-deps-server
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-socket
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-static
+      # - restore_cache:
+      #     key: v5-{{ arch }}-{{ .Branch }}-deps-ts
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
@@ -189,7 +189,7 @@ jobs:
           paths:
             - packages/ts/node_modules
 
-      - run: npm run stop-only-all
+      - run: npm run stop-only
       ## now go build all of subpackages
       - run: npm run prebuild -- --serial
       - run: npm run build -- --serial
@@ -205,8 +205,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      ## this will catch .only's in js/coffee as well
-      - run: npm run lint-all
+      - run: npm run lint
+      - run: npm run all lint
 
   unit-tests:
     <<: *defaults
@@ -237,7 +237,7 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  lint-types:
+  lint-typescript:
     <<: *defaults
     parallelism: 1
     steps:
@@ -723,7 +723,7 @@ linux-workflow: &linux-workflow
         name: Linux lint
         requires:
           - build
-    - lint-types:
+    - lint-typescript:
         requires:
           - build
     # unit, integration and e2e tests
