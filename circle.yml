@@ -189,7 +189,7 @@ jobs:
           paths:
             - packages/ts/node_modules
 
-      - run: npm run stop-only
+      - run: npm run stop-only-all
       ## now go build all of subpackages
       - run: npm run prebuild -- --serial
       - run: npm run build -- --serial
@@ -205,8 +205,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: npm run lint
-      - run: npm run all lint
+      ## this will catch .only's in js/coffee as well
+      - run: npm run lint-all
 
   unit-tests:
     <<: *defaults
@@ -237,7 +237,7 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  lint-typescript:
+  lint-types:
     <<: *defaults
     parallelism: 1
     steps:
@@ -616,6 +616,12 @@ jobs:
           working_directory: /tmp/testing
           command: $(npm bin)/cypress verify
       - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm /tmp/urls/npm-package-url.json \
+              --binary /tmp/urls/binary-url.json
+      - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
@@ -717,7 +723,7 @@ linux-workflow: &linux-workflow
         name: Linux lint
         requires:
           - build
-    - lint-typescript:
+    - lint-types:
         requires:
           - build
     # unit, integration and e2e tests
@@ -790,7 +796,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -798,7 +803,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -806,7 +810,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build-npm-package
           - build-binary

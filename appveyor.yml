@@ -78,11 +78,9 @@ install:
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
+  # beware of echo-ing environment variables that may have batch syntax (e.g. commit messages)
   - node --version
   - npm --version
-  - echo Commit message
-  - echo %APPVEYOR_REPO_COMMIT_MESSAGE%
-  - echo body of commit message, if any
   - 7z
   - cd packages/launcher && node index.js && cd ../..
   # make sure mocha runs
