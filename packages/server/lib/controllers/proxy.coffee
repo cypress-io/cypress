@@ -16,7 +16,6 @@ conditional   = require("../util/conditional_stream")
 
 REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 NO_BODY_STATUS_CODES = [204, 304]
-HTTP_EQUIV_CHARSET_RE = /<\s*meta\s+http-equiv=['"]content-type['"][^>]*content\s*=\s*['"]text\/html;\s*charset=([^'"]+)/i
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -25,15 +24,9 @@ zlibOptions = {
   finishFlush: zlib.Z_SYNC_FLUSH
 }
 
-getCharsetFromHttpEquiv = (body) ->
-  try
-    return HTTP_EQUIV_CHARSET_RE.exec(body.toString().substring(0,1024))[1]
-  catch
-    return null
-
 ## https://github.com/cypress-io/cypress/issues/1543
 getNodeCharsetFromResponse = (headers, body) ->
-  httpCharset = (charset(headers, body) || getCharsetFromHttpEquiv(body) || '').toLowerCase()
+  httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
 
   debug("inferred charset from response %o", { httpCharset })
 
@@ -278,7 +271,7 @@ module.exports = {
     onResponse = (str, incomingRes) =>
       {headers, statusCode} = incomingRes
 
-      res.originalSetHeader = res.setHeader
+      originalSetHeader = res.setHeader
 
       ## express does all kinds of silly/nasty stuff to the content-type...
       ## but we don't want to change it at all!
@@ -286,7 +279,7 @@ module.exports = {
         if k == 'content-type'
           v = incomingRes.headers['content-type']
 
-        res.originalSetHeader(k, v)
+        originalSetHeader.call(res, k, v)
 
       wantsInjection ?= do ->
         return false if not resContentTypeIs(headers, "text/html")
