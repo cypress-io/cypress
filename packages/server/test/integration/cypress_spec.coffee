@@ -1394,7 +1394,7 @@ describe "lib/cypress", ->
   context "--run-from-cli", ->
     beforeEach ->
       sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      sinon.stub(headed, "ready").resolves()
+      sinon.stub(interactiveMode, "ready").resolves()
       argsUtil.startedFromCLI.restore()
 
     it "shows warning if Cypress has been started directly", ->
