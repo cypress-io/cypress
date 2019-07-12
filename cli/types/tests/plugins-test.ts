@@ -24,8 +24,8 @@ declare namespace Cypress {
      * using `Cypress.Commands.add('login', (username, password) => {...})`.
      */
     login(username: string, password: string): Chainable
-	}
-	interface Chainable {
+  }
+  interface Chainable {
     /**
      * Additional property added to the chained object,
      * returned by Cypress commands. This property will NOT
