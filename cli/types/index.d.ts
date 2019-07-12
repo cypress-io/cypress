@@ -4238,23 +4238,39 @@ declare namespace Cypress {
   type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 
-interface cy extends Chainable<undefined> {}
+  /**
+   * Public interface for the global "cy" object. If you want to add
+   * a custom property to this object, you should extend this interface.
+   * @see https://on.cypress.io/typescript#Types-for-custom-commands
+   *
+  ```
+  // in your TS file
+  declare namespace Cypress {
+    interface cy {
+      // declare additional properties,
+      // for example additional custom commands methods
+    }
+  }
+  ```
+   */
+  interface cy extends Chainable<undefined> {}
 }
 
 /**
  * Global variables `cy` added by Cypress with all API commands.
  * @see https://on.cypress.io/api
- * @example
+ *
 ```
 cy.get('button').click()
 cy.get('.result').contains('Expected text')
 ```
  */
 declare const cy: Cypress.cy
+
 /**
  * Global variable `Cypress` holds common utilities and constants.
  * @see https://on.cypress.io/api
- * @example
+ *
 ```
 Cypress.config("pageLoadTimeout") // => 60000
 Cypress.version // => "1.4.0"
