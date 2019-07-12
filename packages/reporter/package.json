@@ -2,30 +2,29 @@
   "name": "@packages/reporter",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "main": "lib/reporter.js",
   "browser": "src/main",
   "scripts": {
-    "postinstall": "echo '@packages/reporter needs: npm run build'",
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
     "build": "node ./scripts/build-dev.js",
     "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "node ./scripts/build-prod.js",
-    "prewatch": "npm run check-deps-pre",
-    "watch": "node ./scripts/watch.js",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "preclean": "npm run check-deps-pre",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
+    "cypress:open": "node ../../scripts/cypress open --project .",
+    "cypress:run": "node ../../scripts/cypress run --project .",
+    "postinstall": "echo '@packages/reporter needs: npm run build'",
     "pretest": "npm run check-deps-pre",
     "test": "node ./scripts/test.js",
-    "lint": "bin-up eslint --fix lib/*.js scripts/*.js src/*.js* src/**/*.js*",
-    "cypress:open": "node ../../scripts/cypress open --project .",
-    "cypress:run": "node ../../scripts/cypress run --project ."
+    "prewatch": "npm run check-deps-pre",
+    "watch": "node ./scripts/watch.js"
   },
-  "files": [
-    "dist"
-  ],
   "devDependencies": {
     "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/react-tooltip": "0.5.0",
@@ -38,7 +37,7 @@
     "enzyme-adapter-react-16": "1.12.1",
     "font-awesome": "4.7.0",
     "jsdom": "13.2.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.13",
     "markdown-it": "6.1.1",
     "mobx": "3.6.2",
     "mobx-react": "4.4.3",

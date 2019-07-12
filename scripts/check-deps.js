@@ -50,6 +50,7 @@ const logErrors = (errors) => {
   .forEach((error) => {
     console.log(error)
   })
+
   console.log()
 }
 

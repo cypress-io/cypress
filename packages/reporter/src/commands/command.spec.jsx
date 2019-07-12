@@ -193,6 +193,7 @@ describe('<Command />', () => {
           runnablesStore={runnablesStore}
         />
       )
+
       component.find('FlashOnClick').simulate('click')
     })
 

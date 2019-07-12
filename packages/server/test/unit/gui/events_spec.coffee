@@ -15,6 +15,7 @@ errors   = require("#{root}../lib/errors")
 browsers = require("#{root}../lib/browsers")
 openProject = require("#{root}../lib/open_project")
 open     = require("#{root}../lib/util/open")
+auth     = require("#{root}../lib/gui/auth")
 logs     = require("#{root}../lib/gui/logs")
 events   = require("#{root}../lib/gui/events")
 dialog   = require("#{root}../lib/gui/dialog")
@@ -94,17 +95,17 @@ describe "lib/gui/events", ->
           assert.sendErrCalledWith(err)
 
   context "user", ->
-    describe "log:in", ->
-      it "calls user.logIn and returns user", ->
-        sinon.stub(user, "logIn").withArgs("12345").resolves({foo: "bar"})
-        @handleEvent("log:in", "12345").then (assert) =>
+    describe "begin:auth", ->
+      it "calls auth.start and returns user", ->
+        sinon.stub(auth, "start").resolves({foo: "bar"})
+        @handleEvent("begin:auth").then (assert) =>
           assert.sendCalledWith({foo: "bar"})
 
       it "catches errors", ->
         err = new Error("foo")
-        sinon.stub(user, "logIn").rejects(err)
+        sinon.stub(auth, "start").rejects(err)
 
-        @handleEvent("log:in").then (assert) =>
+        @handleEvent("begin:auth").then (assert) =>
           assert.sendErrCalledWith(err)
 
     describe "log:out", ->
