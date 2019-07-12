@@ -1,27 +1,27 @@
 {
   "name": "@packages/desktop-gui",
   "version": "0.0.0",
-  "main": "lib/gui.js",
   "private": true,
-  "scripts": {
-    "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
-    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "webpack",
-    "prebuild-prod": "npm run check-deps-pre",
-    "build-prod": "cross-env NODE_ENV=production npm run build",
-    "prewatch": "npm run check-deps-pre",
-    "watch": "npm run build -- --watch --progress",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean-deps": "rm -rf node_modules",
-    "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
-    "cypress:open": "TZ=America/New_York node ../../scripts/cypress open --project .",
-    "cypress:run": "TZ=America/New_York node ../../scripts/cypress run --project ."
-  },
   "files": [
     "dist",
     "lib"
   ],
+  "main": "lib/gui.js",
+  "scripts": {
+    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
+    "build": "webpack",
+    "prebuild-prod": "npm run check-deps-pre",
+    "build-prod": "cross-env NODE_ENV=production npm run build",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "clean-deps": "rm -rf node_modules",
+    "cypress:open": "TZ=America/New_York node ../../scripts/cypress open --project .",
+    "cypress:run": "TZ=America/New_York node ../../scripts/cypress run --project .",
+    "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
+    "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
+    "prewatch": "npm run check-deps-pre",
+    "watch": "npm run build -- --watch --progress"
+  },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.32.1",

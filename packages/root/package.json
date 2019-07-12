@@ -1,6 +1,6 @@
 {
   "name": "@packages/root",
-  "main": "index.js",
   "version": "0.0.0",
+  "main": "index.js",
   "description": "dummy package pointing at the root package"
 }

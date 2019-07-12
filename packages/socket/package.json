@@ -2,21 +2,21 @@
   "name": "@packages/socket",
   "version": "0.0.0",
   "private": true,
-  "main": "index.js",
-  "scripts": {
-    "postinstall": "npx patch-package",
-    "pretest": "npm run check-deps-pre",
-    "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "pretest-watch": "npm run check-deps-pre",
-    "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch",
-    "clean-deps": "rm -rf node_modules",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript"
-  },
   "files": [
     "lib",
     "patches"
   ],
+  "main": "index.js",
+  "scripts": {
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "clean-deps": "rm -rf node_modules",
+    "postinstall": "npx patch-package",
+    "pretest": "npm run check-deps-pre",
+    "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "pretest-watch": "npm run check-deps-pre",
+    "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch"
+  },
   "dependencies": {
     "socket.io": "2.2.0",
     "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#8c61ca1475c741285f336d9ad5bc05cc561b1066",
