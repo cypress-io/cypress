@@ -16,6 +16,16 @@ const util = require('../util')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
 
+const getProxyUrl = () => {
+  return process.env.HTTPS_PROXY ||
+    process.env.https_proxy ||
+    process.env.npm_config_https_proxy ||
+    process.env.HTTP_PROXY ||
+    process.env.http_proxy ||
+    process.env.npm_config_proxy ||
+    null
+}
+
 const getRealOsArch = () => {
   // os.arch() returns the arch for which this node was compiled
   // we want the operating system's arch instead: x64 or x86
@@ -180,6 +190,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
 
     const req = request({
       url,
+      proxy: getProxyUrl(),
       followRedirect (response) {
         const version = response.headers['x-version']
 
@@ -306,4 +317,5 @@ const start = ({ version, downloadDestination, progress }) => {
 module.exports = {
   start,
   getUrl,
+  getProxyUrl,
 }
