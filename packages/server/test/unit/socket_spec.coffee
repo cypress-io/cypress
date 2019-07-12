@@ -251,11 +251,11 @@ describe "lib/socket", ->
 
             _.delay ->
               ## wait another 100ms and make sure
-              ## that it was cancelled and not continuously
+              ## that it was canceled and not continuously
               ## retried!
               ## if we remove Promise.config({cancellation: true})
               ## then this will fail. bluebird has changed its
-              ## cancellation logic before and so we want to use
+              ## cancelation logic before and so we want to use
               ## an integration test to ensure this works as expected
               expect(callCount).to.eq(iSC.callCount)
               done()

@@ -28,7 +28,7 @@
     "bin-up": "1.2.0",
     "chai": "3.5.0",
     "cross-env": "5.2.0",
-    "cypress-example-kitchensink": "1.5.4",
+    "cypress-example-kitchensink": "1.5.5",
     "gulp": "3.9.1",
     "gulp-clean": "0.4.0",
     "gulp-gh-pages-will": "0.5.5",

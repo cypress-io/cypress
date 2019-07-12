@@ -10,11 +10,11 @@
  */
 const random = require('randomstring')
 
-const id = () =>
+const id = (length = 5) =>
 //# return a random id
 {
   return random.generate({
-    length: 5,
+    length,
     capitalization: 'lowercase',
   })
 }

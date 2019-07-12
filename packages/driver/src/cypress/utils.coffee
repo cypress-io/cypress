@@ -122,6 +122,7 @@ module.exports = {
       err = @cypressErr(err)
 
     onFail = options.onFail
+    errProps = options.errProps
     ## assume onFail is a command if
     ## onFail is present and isnt a function
     if onFail and not _.isFunction(onFail)
@@ -133,6 +134,7 @@ module.exports = {
         command.error(err)
 
     err.onFail = onFail if onFail
+    if errProps then _.extend(err, errProps)
 
     throw err
 
@@ -143,6 +145,11 @@ module.exports = {
       err = @internalErr e
 
     @throwErr(err, options)
+
+  warnByPath: (errPath, options = {}) ->
+    err = @errMessageByPath errPath, options.args
+
+    @warning(err)
 
   internalErr: (err) ->
     err = new Error(err)

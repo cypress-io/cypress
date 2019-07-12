@@ -9,11 +9,8 @@ const fs = require('fs')
 function getNameAndBinary (args = process.argv) {
   const options = minimist(args)
 
-  la(is.unemptyString(options.npm),
-    'missing --npm option', options)
-
-  la(is.unemptyString(options.binary),
-    'missing --binary option', options)
+  la(is.unemptyString(options.npm), 'missing --npm option', options)
+  la(is.unemptyString(options.binary), 'missing --binary option', options)
 
   let npm = options.npm
 
@@ -58,7 +55,65 @@ function getJustVersion (npmNameOrUrl) {
   return npmNameOrUrl
 }
 
+const shorten = (s) => {
+  return s.substr(0, 7)
+}
+
+/**
+ * Grabs the full commit SHA and its short version from CI environment variables
+ */
+const getShortCommit = () => {
+  const sha =
+    process.env.APPVEYOR_REPO_COMMIT ||
+    process.env.CIRCLE_SHA1 ||
+    process.env.BUILDKITE_COMMIT
+
+  if (sha) {
+    return {
+      sha,
+      short: shorten(sha),
+    }
+  }
+}
+
+/**
+ * Returns CI name for know CIs
+ */
+const getCIName = () => {
+  if (process.env.CIRCLECI) {
+    return 'Circle'
+  }
+
+  if (process.env.APPVEYOR) {
+    return 'AppVeyor'
+  }
+}
+
+/**
+ * Returns the current CI build url
+ */
+const getCIBuildUrl = () => {
+  if (process.env.CIRCLECI) {
+    // https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
+    return process.env.CIRCLE_BUILD_URL
+  }
+
+  if (process.env.APPVEYOR) {
+    // https://www.appveyor.com/docs/environment-variables/
+    // there is no single url, but we can form one
+    // looks like this
+    // https://ci.appveyor.com/project/cypress-io/cypress/builds/25882716/job/7iv75s2vjt5w4usf
+    return `${process.env.APPVEYOR_URL}/project/${
+      process.env.APPVEYOR_ACCOUNT_NAME}/${process.env.APPVEYOR_PROJECT_SLUG
+    }/builds/${process.env.APPVEYOR_BUILD_ID
+    }/job/${process.env.APPVEYOR_JOB_ID}`
+  }
+}
+
 module.exports = {
   getNameAndBinary,
   getJustVersion,
+  getShortCommit,
+  getCIName,
+  getCIBuildUrl,
 }

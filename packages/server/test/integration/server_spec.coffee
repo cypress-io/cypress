@@ -240,8 +240,8 @@ describe "Server", ->
         .then (obj = {}) ->
           expectToEqDetails(obj, {
             isOkStatusCode: false
-            isHtml: false
-            contentType: undefined
+            isHtml: true
+            contentType: "text/html"
             url: "http://localhost:2000/does-not-exist"
             originalUrl: "/does-not-exist"
             filePath: Fixtures.projectPath("no-server/dev/does-not-exist")
@@ -320,7 +320,7 @@ describe "Server", ->
 
             Promise.delay(100)
             .then =>
-              ## the p1 should not have a current promise phase or reqStream until it's cancelled
+              ## the p1 should not have a current promise phase or reqStream until it's canceled
               expect(p1).not.to.have.property('currentPromisePhase')
               expect(p1).not.to.have.property('reqStream')
 
@@ -400,6 +400,44 @@ describe "Server", ->
             contentType: "application/json"
             url: "http://getbootstrap.com/user.json"
             originalUrl: "http://getbootstrap.com/user.json"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+
+      it "yields isHtml true for HTML-shaped responses", ->
+        nock("http://example.com")
+        .get("/")
+        .reply(200, "<html>foo</html>")
+
+        @server._onResolveUrl("http://example.com", {}, @automationRequest)
+        .then (obj = {}) ->
+          expectToEqDetails(obj, {
+            isOkStatusCode: true
+            isHtml: true
+            contentType: undefined
+            url: "http://example.com/"
+            originalUrl: "http://example.com/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+
+      it "yields isHtml false for non-HTML-shaped responses", ->
+        nock("http://example.com")
+        .get("/")
+        .reply(200, '{ foo: "bar" }')
+
+        @server._onResolveUrl("http://example.com", {}, @automationRequest)
+        .then (obj = {}) ->
+          expectToEqDetails(obj, {
+            isOkStatusCode: true
+            isHtml: false
+            contentType: undefined
+            url: "http://example.com/"
+            originalUrl: "http://example.com/"
             status: 200
             statusText: "OK"
             redirects: []

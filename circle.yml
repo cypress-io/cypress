@@ -278,11 +278,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: |
-            set +e # don't exit on non-0 status code - performance tests can be spurious
-            npm run all test-performance -- --package server
-            echo "exited with code: $?"
-            exit 0
+          command: npm run all test-performance -- --package server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -619,6 +615,12 @@ jobs:
           working_directory: /tmp/testing
           command: $(npm bin)/cypress verify
       - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm /tmp/urls/npm-package-url.json \
+              --binary /tmp/urls/binary-url.json
+      - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
@@ -793,7 +795,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -801,7 +802,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -809,7 +809,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build-npm-package
           - build-binary
@@ -858,6 +857,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - test-example-repos-on-mac-4526
         requires:
           - Mac build
 
@@ -870,6 +870,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - binary-metadata
+              - test-example-repos-on-mac-4526
         requires:
           - Mac build
 
@@ -894,6 +895,19 @@ mac-workflow: &mac-workflow
         requires:
           - Mac NPM package
           - Mac binary
+
+    - test-binary-and-npm-against-other-projects:
+        name: Test Mac binary against other projects
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+              - test-example-repos-on-mac-4526
+        requires:
+          - Mac NPM package
+          - Mac binary
+
 workflows:
   linux:
     <<: *linux-workflow

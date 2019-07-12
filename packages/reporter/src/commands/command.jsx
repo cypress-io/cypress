@@ -24,12 +24,16 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const shouldShowCount = (aliasesWithDuplicates, aliasName) => {
+const shouldShowCount = (aliasesWithDuplicates, aliasName, model) => {
+  if (model.aliasType !== 'route') {
+    return false
+  }
+
   return _.includes(aliasesWithDuplicates, aliasName)
 }
 
-const AliasReference = observer(({ model, aliasObj, aliasesWithDuplicates }) => {
-  if (shouldShowCount(aliasesWithDuplicates, aliasObj.name)) {
+const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }) => {
+  if (shouldShowCount(aliasesWithDuplicates, aliasObj.name, model)) {
     return (
       <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`}>
         <span>
@@ -64,7 +68,9 @@ const Aliases = observer(({ model, aliasesWithDuplicates }) => {
     <span>
       {_.map([].concat(model.alias), (alias) => (
         <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`}>
-          <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': (model.aliasType === 'route' && model.numDuplicates > 1) ? shouldShowCount(aliasesWithDuplicates, alias) : false })}>{alias}</span>
+          <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': shouldShowCount(aliasesWithDuplicates, alias, model) })}>
+            {alias}
+          </span>
         </Tooltip>
       ))}
     </span>

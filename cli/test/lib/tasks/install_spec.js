@@ -99,7 +99,49 @@ describe('/lib/tasks/install', function () {
         })
       })
 
-      it('can install local binary zip file without download', function () {
+      it('trims environment variable before installing', function () {
+        // note how the version has extra spaces around it on purpose
+        const filename = '/tmp/local/file.zip'
+        const version = ` ${filename}   `
+
+        process.env.CYPRESS_INSTALL_BINARY = version
+        // internally, the variable should be trimmed and just filename checked
+        sinon.stub(fs, 'pathExistsAsync').withArgs(filename).resolves(true)
+
+        const installDir = state.getVersionDir()
+
+        return install.start()
+        .then(() => {
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: filename,
+            installDir,
+          })
+        })
+      })
+
+      it('removes double quotes around the environment variable before installing', function () {
+        // note how the version has extra spaces around it on purpose
+        // and there are double quotes
+        const filename = '/tmp/local/file.zip'
+        const version = ` "${filename}"   `
+
+        process.env.CYPRESS_INSTALL_BINARY = version
+        // internally, the variable should be trimmed, double quotes removed
+        //  and just filename checked against the file system
+        sinon.stub(fs, 'pathExistsAsync').withArgs(filename).resolves(true)
+
+        const installDir = state.getVersionDir()
+
+        return install.start()
+        .then(() => {
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: filename,
+            installDir,
+          })
+        })
+      })
+
+      it('can install local binary zip file without download from absolute path', function () {
         const version = '/tmp/local/file.zip'
 
         process.env.CYPRESS_INSTALL_BINARY = version

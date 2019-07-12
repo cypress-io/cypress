@@ -1,5 +1,3 @@
-/* eslint-disable arrow-body-style */
-
 // NOT patched jquery
 import $ from 'jquery'
 import * as $jquery from './jquery'
@@ -374,12 +372,25 @@ const isBody = (el): el is HTMLBodyElement => {
   return getTagName(el) === 'body'
 }
 
+const isHTML = (el) => {
+  return getTagName(el) === 'html'
+}
+
+
 const isSvg = function (el): el is SVGElement {
   try {
     return 'ownerSVGElement' in el
   } catch (error) {
     return false
   }
+}
+
+const isOption = (el) => {
+  return getTagName(el) === 'option'
+}
+
+const isOptgroup = (el) => {
+  return getTagName(el) === 'optgroup'
 }
 
 // active element is the default if its null
@@ -492,6 +503,10 @@ const getAllParents = (el: HTMLElement) => {
 
 const isSelector = ($el: JQuery<HTMLElement>, selector) => {
   return $el.is(selector)
+}
+
+const isChild = ($el, $maybeChild) => {
+  return $el.children().index($maybeChild) >= 0
 }
 
 const isDisabled = ($el:JQuery) => {
@@ -639,6 +654,28 @@ const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
   ])
 }
 
+const isInputAllowingImplicitFormSubmission = function ($el) {
+  const type = (type) => {
+    return isType($el, type)
+  }
+
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+  return _.some([
+    type('text'),
+    type('search'),
+    type('url'),
+    type('tel'),
+    type('email'),
+    type('password'),
+    type('date'),
+    type('month'),
+    type('week'),
+    type('time'),
+    type('datetime-local'),
+    type('number'),
+  ])
+}
+
 const isScrollable = ($el) => {
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
@@ -704,6 +741,27 @@ const isDescendent = ($el1, $el2) => {
   return !!($el1.get(0) === $el2.get(0) || $el1.has($el2).length)
 }
 
+const findParent = (el, fn) => {
+
+  const recurse = (curEl, prevEl) => {
+    if (!curEl) {
+      return null
+    }
+
+    const retEl = fn(curEl, prevEl)
+
+    if (retEl) {
+      return retEl
+    }
+
+    const nextEl = curEl.parentElement
+
+    return recurse(nextEl, curEl)
+  }
+
+  return recurse(el.parentElement, el) || el
+}
+
 // in order to simulate actual user behavior we need to do the following:
 // 1. take our element and figure out its center coordinate
 // 2. check to figure out the element listed at those coordinates
@@ -727,10 +785,26 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
   return getFirstFocusableEl($el.parent())
 }
 
-const getFirstFixedOrStickyPositionParent = ($el) => {
-  // return null if we're at body/html
+const getFirstParentWithTagName = ($el, tagName) => {
+  // return null if we're at body/html/document
   // cuz that means nothing has fixed position
-  if (!$el || $el.is('body,html')) {
+  if (!$el[0] || !tagName || $el.is('body,html') || $document.isDocument($el)) {
+    return null
+  }
+
+  // if we are the matching element return ourselves
+  if (getTagName($el[0]) === tagName) {
+    return $el
+  }
+
+  // else recursively continue to walk up the parent node chain
+  return getFirstParentWithTagName($el.parent(), tagName)
+}
+
+const getFirstFixedOrStickyPositionParent = ($el) => {
+  // return null if we're at body/html/document
+  // cuz that means nothing has fixed position
+  if (!$el || $el.is('body,html') || $document.isDocument($el)) {
     return null
   }
 
@@ -945,16 +1019,21 @@ export {
   isAttachedEl,
   isDetachedEl,
   isAncestor,
+  isChild,
   isScrollable,
   isTextLike,
   isDescendent,
   isContentEditable,
   isSame,
+  isOption,
+  isOptgroup,
   isBody,
+  isHTML,
   isInput,
   isTextarea,
   isType,
   isFocused,
+  isInputAllowingImplicitFormSubmission,
   isNeedSingleValueChangeInputElement,
   canSetSelectionRangeElement,
   stringify,
@@ -962,6 +1041,7 @@ export {
   setNativeProp,
   callNativeMethod,
   tryCallNativeMethod,
+  findParent,
   getElements,
   getFromDocCoords,
   getFirstFocusableEl,
@@ -969,6 +1049,7 @@ export {
   getContainsSelector,
   getFirstDeepestElement,
   getFirstCommonAncestor,
+  getFirstParentWithTagName,
   getFirstFixedOrStickyPositionParent,
   getFirstStickyPositionParent,
   getFirstScrollableParent,
