@@ -119,7 +119,13 @@ module.exports = {
   start: (argv = []) ->
     debug("starting cypress with argv %o", argv)
 
-    options = require("./util/args").toObject(argv)
+    argsUtil = require("./util/args")
+
+    if @isCurrentlyRunningElectron() and not argsUtil.startedFromCLI(argv)
+      debug("Cypress started directly ⚠️")
+      require("./errors").warning("OPENED_CYPRESS_DIRECTLY")
+
+    options = argsUtil.toObject(argv)
 
     if options.runProject and not options.headed
       # scale the electron browser window

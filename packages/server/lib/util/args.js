@@ -24,7 +24,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource'.split(' ')
+const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource runFromCli'.split(' ')
 
 // returns true if the given string has double quote character "
 // only at the last position.
@@ -151,29 +151,36 @@ const sanitizeAndConvertNestedArgs = function (str) {
   .value()
 }
 
+const startedFromCLI = function (argv) {
+  return _.includes(argv, '--run-from-cli') || _.includes(argv, '--runFromCli=true')
+}
+
 module.exports = {
+  startedFromCLI,
+
   toObject (argv) {
     let c, envs, op, p, ro, spec
 
     debug('argv array: %o', argv)
 
     const alias = {
-      'app-path': 'appPath',
-      'exec-path': 'execPath',
       'api-key': 'apiKey',
-      'smoke-test': 'smokeTest',
+      'app-path': 'appPath',
+      'ci-build-id': 'ciBuildId',
+      'clear-logs': 'clearLogs',
+      'exec-path': 'execPath',
+      'exit-with-code': 'exitWithCode',
+      'inspect-brk': 'inspectBrk',
       'get-key': 'getKey',
       'new-key': 'generateKey',
-      'clear-logs': 'clearLogs',
-      'run-project': 'runProject',
-      'return-pkg': 'returnPkg',
-      'run-mode': 'isTextTerminal',
-      'ci-build-id': 'ciBuildId',
-      'exit-with-code': 'exitWithCode',
-      'reporter-options': 'reporterOptions',
       'output-path': 'outputPath',
-      'inspect-brk': 'inspectBrk',
       'proxy-source': 'proxySource',
+      'reporter-options': 'reporterOptions',
+      'return-pkg': 'returnPkg',
+      'run-from-cli': 'runFromCli',
+      'run-mode': 'isTextTerminal',
+      'run-project': 'runProject',
+      'smoke-test': 'smokeTest',
     }
 
     //# takes an array of args and converts

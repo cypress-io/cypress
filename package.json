@@ -15,7 +15,7 @@
     "cypress:verify": "node ./cli/bin/cypress verify --dev",
     "cypress:open:debug": "node ./scripts/debug.js cypress:open",
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
-    "dev": "node ./scripts/start.js",
+    "dev": "node ./scripts/start.js --run-from-cli",
     "dev-debug": "node ./scripts/debug.js dev",
     "watch": "npm run all watch",
     "test-debug-package": "node ./scripts/test-debug-package.js",

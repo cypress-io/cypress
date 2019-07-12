@@ -249,7 +249,10 @@ module.exports = {
     return options
 
   args: (options = {}) ->
-    args = ["--run-project=#{options.project}"]
+    args = [
+      "--run-from-cli", # hides a user warning to go through NPM module
+      "--run-project=#{options.project}"
+    ]
 
     if options.spec
       args.push("--spec=#{options.spec}")

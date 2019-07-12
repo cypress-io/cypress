@@ -15,6 +15,7 @@ stripAnsi  = require("strip-ansi")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
+argsUtil   = require("#{root}lib/util/args")
 fs         = require("#{root}lib/util/fs")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings   = require("#{root}lib/util/settings")
@@ -118,6 +119,7 @@ describe "lib/cypress", ->
     sinon.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
     sinon.stub(process, "exit")
     sinon.stub(Server.prototype, "reset")
+    sinon.stub(argsUntil, "startedFromCLI").returns(true)
     sinon.spy(errors, "log")
     sinon.spy(errors, "warning")
     sinon.spy(console, "log")
@@ -1387,6 +1389,29 @@ describe "lib/cypress", ->
         Events.handleEvent(options, bus, event, 123, "open:project", @todosPath)
       .then ->
         expect(event.sender.send.withArgs("response").firstCall.args[1].data).to.eql(warning)
+
+  context "--run-from-cli", ->
+    beforeEach ->
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(headed, "ready").resolves()
+      argsUtil.startedFromCLI.restore()
+
+    it "shows warning if Cypress has been started directly", ->
+      cypress.start().then ->
+        expect(errors.warning).to.be.calledWith("OPENED_CYPRESS_DIRECTLY")
+
+    it "does not show warning if finds --run-from-cli", ->
+      cypress.start(["--run-from-cli"]).then ->
+        expect(errors.warning).not.to.be.called
+
+    it "does not show warning if finds --runFromCli=true", ->
+      cypress.start(["--runFromCli=true"]).then ->
+        expect(errors.warning).not.to.be.called
+
+    it "does not show warning if finds util method tells it not to worry", ->
+      sinon.stub(argsUtil, "startedFromCLI").returns(true)
+      cypress.start().then ->
+        expect(errors.warning).not.to.be.called
 
   context "no args", ->
     beforeEach ->

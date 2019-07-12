@@ -691,6 +691,18 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    # TODO: once we have a doc on global vs local install, add link
+    # QUESTION: should we show different ways to run Cypress CLI depending on OS?
+    when "OPENED_CYPRESS_DIRECTLY"
+      """
+      It looks like you are running the Cypress binary directly.
+
+      This is not the recommended approach, and Cypress may not work correctly.
+
+      Please install the 'cypress' NPM package and follow the instructions here:
+      
+        https://on.cypress.io/installing-cypress
+      """
     when "DUPLICATE_TASK_KEY"
       """
       Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
