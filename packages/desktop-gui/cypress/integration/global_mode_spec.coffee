@@ -49,7 +49,7 @@ describe "Global Mode", ->
     .should("have.attr", "src", "./img/cypress-inverse.png")
     .then ($el) =>
       new Cypress.Promise (resolve, reject) ->
-        img = new Image
+        img = new Image()
         img.onerror = -> reject new Error "img failed to load src: #{img.src}"
         img.onload = resolve
         img.src = $el[0].src

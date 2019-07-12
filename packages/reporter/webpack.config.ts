@@ -9,17 +9,15 @@ const config: typeof commonConfig = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
-    devtoolModuleFilenameTemplate: 'cypress://[namespace]/[resource-path]'
+    devtoolModuleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
   },
 }
 
 config.plugins = [
   ...config.plugins!,
   new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, 'static/index.html')
+    template: path.resolve(__dirname, 'static/index.html'),
   }),
 ]
 
-
 export default config
-

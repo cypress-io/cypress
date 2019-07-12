@@ -13,7 +13,8 @@ const config: typeof commonConfig = {
 }
 
 config.plugins = [
-  ...config.plugins!,
+  // @ts-ignore
+  ...config.plugins,
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, './src/index.html'),
     env: process.env.NODE_ENV,
@@ -24,6 +25,5 @@ config.plugins = [
 config.resolve = {
   ...config.resolve,
 }
-
 
 export default config

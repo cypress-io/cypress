@@ -32,5 +32,4 @@ config.resolve = {
   },
 }
 
-
 export default config

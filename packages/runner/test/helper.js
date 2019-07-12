@@ -31,5 +31,6 @@ afterEach(() => {
   timers.forEach((clock) => {
     return clock.restore()
   })
+
   timers = []
 })

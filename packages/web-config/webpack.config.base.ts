@@ -10,8 +10,11 @@ const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
 const liveReloadEnabled = !args.includes('--no-livereload')
 const watchModeEnabled = args.includes('--watch') || args.includes('-w')
+
 // opt out of livereload with arg --no-livereload
+// eslint-disable-next-line no-console
 if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. use ${chalk.bold('--no-livereload')} to disable`))
+
 process.env.NODE_ENV = env
 
 const config: webpack.Configuration = {
@@ -21,7 +24,7 @@ const config: webpack.Configuration = {
     child_process: 'empty',
     net: 'empty',
     tls: 'empty',
-    module: 'empty'
+    module: 'empty',
   },
   resolve: {
     extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
@@ -63,7 +66,7 @@ const config: webpack.Configuration = {
             presets: [
               require.resolve('@babel/preset-env'),
               require.resolve('@babel/preset-react'),
-              require.resolve('@babel/preset-typescript')
+              require.resolve('@babel/preset-typescript'),
             ],
             babelrc: false,
           },
@@ -87,18 +90,19 @@ const config: webpack.Configuration = {
               plugins: [
                 require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
               ],
-            }
+            },
           },
           {
-            loader: require.resolve('resolve-url-loader')
+            loader: require.resolve('resolve-url-loader'),
           },
           {
             loader: require.resolve('sass-loader'),
             options: {
               sourceMap: true,
-              importer: function (...args) {
+              importer (...args) {
                 args[0] = args[0].replace(/\\/g, '/')
                 args[1] = args[1].replace(/\\/g, '/')
+
                 return sassGlobImporter.apply(this, args)
               },
             },
@@ -149,7 +153,7 @@ const config: webpack.Configuration = {
     new MiniCSSExtractWebpackPlugin(),
 
     // Enable source maps / eval maps
-    // 'EvalDevtoolModulePlugin' is used in development 
+    // 'EvalDevtoolModulePlugin' is used in development
     //    because it is fast and maps to filenames while showing compiled source
     // 'SourceMapDevToolPlugin' is used in production for the same reasons as 'eval', but it
     //    shows full source and does not cause crossorigin errors like 'eval' (in Chromium < 63)
@@ -162,15 +166,15 @@ const config: webpack.Configuration = {
     // }) :
 
     ...(env === 'production' ?
-       [] :
+      [] :
       // @ts-ignore
       [new webpack.EvalDevToolModulePlugin({
         moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-        fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
+        fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
       })]
     ),
 
-    ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, })] : []),
+    ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0 })] : []),
   ],
 
   cache: true,
@@ -180,4 +184,3 @@ const config: webpack.Configuration = {
 export default config
 
 export { HtmlWebpackPlugin }
-

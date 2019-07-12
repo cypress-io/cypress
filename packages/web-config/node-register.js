@@ -1,4 +1,3 @@
-
 require('@packages/coffee/register')
 
 require('@babel/register')({
@@ -23,4 +22,3 @@ require('@babel/register')({
   // sourceMaps: 'inline',
   // compact: true,
 })
-

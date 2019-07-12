@@ -67,6 +67,7 @@ const testPackageStaticAssets = async (options = {}) => {
     `)
 
     })
+
     opts.badStrings.forEach((str) => {
       const [passed, count, atLeast] = includesString(fileStr, str)
 

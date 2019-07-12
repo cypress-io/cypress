@@ -17,6 +17,7 @@ const { testPackageStaticAssets } = require('../../../binary/util/testStaticAsse
 global.beforeEach(() => {
   mockfs.restore()
 })
+
 const snapshot = (...args) => {
   mockfs.restore()
 
@@ -43,6 +44,7 @@ describe('packages', () => {
   })
 
 })
+
 describe('transformRequires', () => {
 
   it('can find and replace symlink requires', async () => {
@@ -197,7 +199,7 @@ describe('testStaticAssets', () => {
 
 /*
 // Example: Test real assets
-  it.only('can detect', async () => {
+  it('can detect', async () => {
     const buildDir = process.cwd()
 
     await expect(testPackageStaticAssets({
