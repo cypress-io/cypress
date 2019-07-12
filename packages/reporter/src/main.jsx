@@ -53,6 +53,7 @@ class Reporter extends Component {
       scroller,
       statsStore,
     })
+
     this.props.events.listen(runner)
   }
 

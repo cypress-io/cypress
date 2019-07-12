@@ -8,6 +8,7 @@
   ],
   "main": "src/index.js",
   "scripts": {
+    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
     "build": "cross-env NODE_ENV=production webpack",
     "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "npm run build",
@@ -15,7 +16,6 @@
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/runner needs: npm run build'",
-    "lint": "bin-up eslint --fix src/*.js* src/**/*.js*",
     "pretest": "npm run check-deps-pre",
     "test": "mocha src/**/*.spec.*",
     "test-watch": "npm run test -- --watch",

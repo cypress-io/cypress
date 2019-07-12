@@ -18,7 +18,6 @@
     "cypress:open": "TZ=America/New_York node ../../scripts/cypress open --project .",
     "cypress:run": "TZ=America/New_York node ../../scripts/cypress run --project .",
     "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
-    "lint": "$(bin-up eslint) --fix lib/*.js src/*.js* src/**/*.js*",
     "prewatch": "npm run check-deps-pre",
     "watch": "npm run build -- --watch --progress"
   },

@@ -3,6 +3,6 @@
     "sinon": true
   },
   "extends": [
-    "plugin:cypress-dev/tests"
+    "plugin:@cypress/dev/tests"
   ]
 }

@@ -34,19 +34,18 @@
     "install-filtered": "npm run all install -- --package $(node ./scripts/check-deps.js --list)",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "link": "node ./scripts/link-packages.js",
-    "lint": "npm run lint-js && npm run lint-coffee",
-    "lint-changed": "git diff --name-only | grep '\\.js$' | xargs npx eslint --fix",
-    "lint-coffee": "coffeelint scripts/**/*.coffee",
-    "lint-js": "eslint --fix scripts/*.js packages/ts/*.js cli/*.js cli/**/*.js",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.eslintrc .",
+    "lint-all": "npm run lint-coffee && npm run lint",
+    "lint-changed": "lint-changed",
+    "lint-changed-fix": "npm run lint-changed -- --fix",
+    "lint-coffee": "coffeelint scripts/**/*.coffee && npm run all lint-coffee && npm run stop-only-all",
+    "lint-fix": "npm run lint -- --fix",
     "move-binaries": "node ./scripts/binary.js move-binaries",
-    "precommit": "npm run warn-only && lint-staged",
-    "precommit-lint": "eslint --fix",
-    "prepush": "npm run stop-only",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "npm run check-deps-pre",
     "start": "node ./cli/bin/cypress open --dev --global",
-    "stop-only": "stop-only --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
-    "pretest": "npm run lint && npm run all lint && npm run test-scripts",
+    "stop-only": "stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
+    "stop-only-all": "npm run stop-only -- --folder packages",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "test-debug-package": "node ./scripts/test-debug-package.js",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
@@ -54,16 +53,23 @@
     "test-s3-api": "node -r ./packages/coffee/register -r ./packages/ts/register scripts/binary/s3-api-demo.ts",
     "test-scripts": "mocha -r packages/coffee/register -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-scripts-watch": "npm run test-scripts -- --watch --watch-extensions 'ts,js,coffee'",
-    "warn-only": "stop-only --warn --folder packages --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
     "watch": "npm run all watch"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.9",
     "@cypress/commit-message-install": "2.7.0",
     "@cypress/env-or-json-file": "2.0.0",
+    "@cypress/eslint-plugin-dev": "3.2.0",
+    "@cypress/eslint-plugin-json": "3.2.0",
     "@cypress/github-commit-status-check": "1.5.0",
     "@cypress/npm-run-all": "4.0.5",
     "@cypress/questions-remain": "1.0.1",
+    "@fellow/eslint-plugin-coffee": "0.4.13",
     "@types/bluebird": "3.5.21",
     "@types/chai": "3.5.2",
     "@types/debug": "4.1.4",
@@ -76,6 +82,8 @@
     "@types/ramda": "0.25.47",
     "@types/request-promise": "4.1.42",
     "@types/sinon-chai": "3.2.2",
+    "@typescript-eslint/eslint-plugin": "1.11.0",
+    "@typescript-eslint/parser": "1.11.0",
     "ansi-styles": "3.2.1",
     "arg": "4.1.0",
     "ascii-table": "0.0.9",
@@ -99,7 +107,6 @@
     "electron-builder": "20.39.0",
     "eslint": "5.16.0",
     "eslint-plugin-cypress": "2.2.1",
-    "eslint-plugin-cypress-dev": "2.1.0",
     "eslint-plugin-mocha": "5.3.0",
     "eslint-plugin-react": "7.12.4",
     "execa": "1.0.0",
@@ -116,7 +123,7 @@
     "gulp-typescript": "3.2.4",
     "hasha": "5.0.0",
     "human-interval": "0.1.6",
-    "husky": "2.3.0",
+    "husky": "2.4.1",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
     "js-codemod": "cpojer/js-codemod#29dafed",
@@ -182,8 +189,10 @@
     "testing"
   ],
   "lint-staged": {
-    "*.js": [
-      "npm run precommit-lint"
+    "*.{js,jsx,ts,tsx,coffee,json,eslintrc}": [
+      "npm run stop-only -- --folder",
+      "eslint --fix",
+      "git add"
     ]
   }
 }

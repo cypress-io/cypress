@@ -44,7 +44,7 @@ describe.skip "$Cypress.Commands API", ->
     beforeEach ->
       @commands.splice(0, 1, {name: "get", args: ["form:first"]})
       @commands.splice(1, 2, {name: "click", args: [{multiple: true}]})
-      @commands.splice(2, 3, {name: "then", args: [->]})
+      @commands.splice(2, 3, {name: "then", args: [->{}]})
       @commands.splice(3, 4, {name: "get", args: ["body", {timeout: 1000}]})
       @commands.splice(4, 5, {name: "should", args: ["have.prop", "class", "active"]})
 

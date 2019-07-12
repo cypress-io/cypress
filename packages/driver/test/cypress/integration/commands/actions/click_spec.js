@@ -217,6 +217,7 @@ describe('src/cy/commands/actions/click', () => {
             'Inherited From',
             'Error',
           ])
+
           expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
 
           expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
@@ -324,12 +325,15 @@ describe('src/cy/commands/actions/click', () => {
       $btn.on('focus', () => {
         return fail('should not have gotten focus')
       })
+
       $btn.on('focusin', () => {
         return fail('should not have gotten focusin')
       })
+
       $btn.on('mouseup', () => {
         return fail('should not have gotten mouseup')
       })
+
       $btn.on('click', () => {
         return fail('should not have gotten click')
       })
