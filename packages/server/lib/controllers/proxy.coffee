@@ -2,6 +2,7 @@ _             = require("lodash")
 zlib          = require("zlib")
 charset       = require("charset")
 concat        = require("concat-stream")
+iconv         = require("iconv-lite")
 Promise       = require("bluebird")
 accept        = require("http-accept")
 debug         = require("debug")("cypress:server:proxy")
@@ -36,14 +37,11 @@ getNodeCharsetFromResponse = (headers, body) ->
 
   debug("inferred charset from response %o", { httpCharset })
 
-  ## https://w3techs.com/technologies/overview/character_encoding/all - most common charsets
-  ## https://stackoverflow.com/questions/14551608/list-of-encodings-that-node-js-supports
-  ## ~97% of websites use utf-8 or latin1, the other 3% use encodings
-  ## not supported natively by Node. browsers also default to latin1 parsing
-  if httpCharset == "utf8" || httpCharset == "utf-8"
-    return "utf-8"
+  if iconv.encodingExists(httpCharset)
+    return httpCharset
 
-  "latin1"
+  ## browsers default to latin1
+  return "latin1"
 
 isGzipError = (err) ->
   Object.prototype.hasOwnProperty.call(zlib.constants, err.code)
@@ -199,9 +197,10 @@ module.exports = {
       ## bypass the stream buffer and pipe this back
       if wantsInjection
         rewrite = (body) ->
+          ## transparently decode their body to a node string and then re-encode
           nodeCharset = getNodeCharsetFromResponse(headers, body)
-          body = rewriter.html(body.toString(nodeCharset), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
-          Buffer.from(body, nodeCharset)
+          body = rewriter.html(iconv.decode(body, nodeCharset), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          iconv.encode(body, nodeCharset)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
@@ -298,7 +297,8 @@ module.exports = {
         ## on the response or its a request for any javascript script tag
         config.modifyObstructiveCode and (
           (wantsInjection is "full") or
-            resContentTypeIs(headers, "application/javascript")
+            resContentTypeIs(headers, "application/javascript") or
+            resContentTypeIs(headers, "application/x-javascript")
         )
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
