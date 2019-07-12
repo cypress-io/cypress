@@ -149,6 +149,7 @@ const openProject = (project) => {
       name: config.projectName,
       configFile: config.configFile,
     })
+
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)

@@ -34,6 +34,7 @@ describe('exec run', function () {
       const args = run.processRunOptions({
         configFile: false,
       })
+
       snapshot(args)
     })
 

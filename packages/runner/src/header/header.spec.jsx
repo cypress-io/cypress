@@ -17,7 +17,7 @@ const getState = (props) => _.extend({
 const propsWithState = (props) =>
   ({
     state: getState(props),
-    config: {}
+    config: {},
   })
 
 describe('<Header />', () => {
