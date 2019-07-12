@@ -48,6 +48,7 @@ function proxyModule (name, pathToMain, pathToBrowser, pathToTypes) {
       'path to browser module should be relative',
       pathToBrowser
     )
+
     pkg.browser = pathToBrowser
   }
 
@@ -57,6 +58,7 @@ function proxyModule (name, pathToMain, pathToBrowser, pathToTypes) {
       'path to types file should be relative',
       pathToTypes
     )
+
     pkg.types = pathToTypes
   }
 
@@ -107,6 +109,7 @@ function makeProxies () {
         destinationFolder,
         path.resolve(dirname, json.browser)
       )
+
       debug('relative path to browser', relativePathToBrowser)
     }
 
@@ -119,6 +122,7 @@ function makeProxies () {
         destinationFolder,
         path.resolve(dirname, json.types)
       )
+
       debug('relative path to types', relativePathTypes)
     }
 

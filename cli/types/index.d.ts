@@ -846,6 +846,8 @@ declare namespace Cypress {
      * @example
      *    cy.location('host') // Get the host of the location object
      *    cy.location('port') // Get the port of the location object
+     *    // Assert on the href of the location
+     *    cy.location('href').should('contain', '/tag/tutorials')
      */
     location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable<Location>
 
@@ -1276,6 +1278,9 @@ declare namespace Cypress {
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      *
      * @see https://on.cypress.io/should
+     * @example
+     *   // Assert on the href of the location
+     *   cy.location('href').should('contain', '/tag/tutorials/')
      */
     should: Chainer<Subject>
 
