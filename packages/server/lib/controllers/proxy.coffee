@@ -140,6 +140,13 @@ module.exports = {
       ## make sure the response includes string type
       contentType and contentType.includes(str)
 
+    resContentTypeIsJavaScript = (respHeaders) ->
+      _.some [
+        'application/javascript',
+        'application/x-javascript',
+        'text/javascript'
+      ].map(_.partial(resContentTypeIs, respHeaders))
+
     reqAcceptsHtml = ->
       ## don't inject if this is an XHR from jquery
       return if req.headers["x-requested-with"]
@@ -297,8 +304,7 @@ module.exports = {
         ## on the response or its a request for any javascript script tag
         config.modifyObstructiveCode and (
           (wantsInjection is "full") or
-            resContentTypeIs(headers, "application/javascript") or
-            resContentTypeIs(headers, "application/x-javascript")
+            resContentTypeIsJavaScript(headers)
         )
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
