@@ -124,6 +124,13 @@ cy.wrap('foobar').should('have.string', 'bar')
 
 cy.wrap('foobar').should('include', 'foo')
 
+cy.wrap('foo').should('contain.value')
+cy.wrap('foo').should('contain.text')
+cy.wrap('foo').should('contain.html')
+cy.wrap('foo').should('not.contain.value')
+cy.wrap('foo').should('not.contain.text')
+cy.wrap('foo').should('not.contain.html')
+
 cy.wrap([1, 2, 3]).should('include.members', [1, 2])
 ;
 () => {
@@ -329,6 +336,12 @@ cy.get('#result').should('be.selected')
 
 cy.get('#result').should('be.visible')
 
+cy.get('#result').should('be.focused')
+cy.get('#result').should('not.be.focused')
+
+cy.get('#result').should('have.focus')
+cy.get('#result').should('not.have.focus')
+
 cy.get('#result').should('be.contain', 'text')
 
 cy.get('#result').should('have.attr', 'role')
@@ -418,3 +431,9 @@ cy
   })
 
 cy.get('#result').should('have.text', 'John Doe')
+
+cy.writeFile('../file.path', '', 'utf-8')
+cy.writeFile('../file.path', '', {
+  flag: 'a+',
+  encoding: 'utf-8'
+})

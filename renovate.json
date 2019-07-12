@@ -12,22 +12,76 @@
   "rangeStrategy": "pin",
   "packageRules": [
     {
+      "packagePatterns": "^@cypress",
+      "groupName": "@cypress",
+      "schedule": "after 2am and before 4am"
+    },
+    {
       "packageNames": [
-        "node"
+        "bin-up",
+        "check-dependencies",
+        "check-more-types",
+        "console-table",
+        "execa-wrap",
+        "is-fork-pr",
+        "lazy-ass",
+        "make-empty-github-commit",
+        "mocha-banner",
+        "prefixed-list",
+        "rebuild-node-sass",
+        "snap-shot-it",
+        "terminal-banner",
+        "zunder"
       ],
+      "groupName": "team NPM packages",
+      "schedule": "after 2am and before 4am"
+    },
+    {
+      "packageNames": "node",
       "enabled": false
+    },
+    {
+      "packagePatterns": "^@types",
+      "groupName": "@types",
+      "schedule": "before 3am on Monday"
+    },
+    {
+      "packagePatterns": "^sinon",
+      "groupName": "sinon",
+      "schedule": "before 3am on Sunday"
+    },
+    {
+      "packagePatterns": "^gulp",
+      "groupName": "gulp",
+      "schedule": "before 3am on Monday"
+    },
+    {
+      "packagePatterns": "^eslint",
+      "groupName": "eslint",
+      "schedule": "before 3am on Monday"
+    },
+    {
+      "packageNames": [
+        "typescript",
+        "ts-node",
+        "tslint-config-standard"
+      ],
+      "groupName": "typescript"
     }
   ],
   "separateMultipleMajor": true,
-  "labels": ["type: dependencies", "renovate"],
+  "labels": [
+    "type: dependencies",
+    "renovate"
+  ],
   "commitMessage": "{{semanticPrefix}}Update {{depName}} to {{newVersion}} 🌟",
   "prTitle": "{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}} 🌟",
   "prHourlyLimit": 1,
-  "prConcurrentLimit": 30,
+  "prConcurrentLimit": 1,
   "updateNotScheduled": false,
   "timezone": "America/New_York",
   "schedule": [
-    "after 10pm and before 5am on every weekday",
-    "every weekend"
-  ]
+    "before 3am on the first day of the month"
+  ],
+  "masterIssue": true
 }

@@ -64,11 +64,28 @@ describe "lib/socket", ->
           agent: agent
           path: socketIoRoute
           transports: ["websocket"]
+          parser: socketIo.circularParser
         })
       return
 
     afterEach ->
       @client.disconnect()
+
+    ## https://github.com/cypress-io/cypress/issues/4346
+    it "can emit a circular object without crashing", (done) ->
+      foo = {
+        bar: {}
+      }
+
+      foo.bar.baz = foo
+
+      ## going to stub exec here just so we have something that we can
+      ## control the resolved value of
+      sinon.stub(exec, 'run').resolves(foo)
+
+      @client.emit "backend:request", "exec", "quuz", (res) ->
+        expect(res.response).to.deep.eq(foo)
+        done()
 
     context "on(automation:request)", ->
       describe "#onAutomation", ->
@@ -234,11 +251,11 @@ describe "lib/socket", ->
 
             _.delay ->
               ## wait another 100ms and make sure
-              ## that it was cancelled and not continuously
+              ## that it was canceled and not continuously
               ## retried!
               ## if we remove Promise.config({cancellation: true})
               ## then this will fail. bluebird has changed its
-              ## cancellation logic before and so we want to use
+              ## cancelation logic before and so we want to use
               ## an integration test to ensure this works as expected
               expect(callCount).to.eq(iSC.callCount)
               done()

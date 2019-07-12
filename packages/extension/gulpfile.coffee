@@ -9,11 +9,6 @@ Promise    = require("bluebird")
 coffeeify  = require("coffeeify")
 browserify = require("browserify")
 icons      = require("@cypress/icons")
-ext        = require("./")
-
-gulp.task "copy:socket:client", ->
-  gulp.src(require("../socket").getPathToClientSource())
-  .pipe(gulp.dest("dist"))
 
 gulp.task "clean", ->
   gulp.src("dist")
@@ -71,7 +66,6 @@ gulp.task "watch", ["build"], ->
 
 gulp.task "build", ->
   runSeq "clean", [
-    "copy:socket:client"
     "icons"
     "logos"
     "manifest"

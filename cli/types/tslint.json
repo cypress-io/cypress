@@ -21,7 +21,10 @@
     "no-unnecessary-generics": false,
     "export-just-namespace": false,
     "file-name-casing": false,
-    "jsdoc-format": false
+    "jsdoc-format": false,
+    // for now keep the Cypress NPM module API
+    // in its own file for simplicity
+    "no-single-declare-module": false
   },
   "linterOptions": {
     "exclude": [

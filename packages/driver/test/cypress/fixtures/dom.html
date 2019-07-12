@@ -134,6 +134,13 @@
 
       <button id="button">button</button>
 
+      <div id="diff-els-1">
+        <a href="">Sakura</a>
+        <a href="">Naruto</a>
+        <button>Sarada</button>
+        <button>Boruto</button>
+      </div>
+
       <form id="by-id">
         <input id="input" />
         <input id="name" />
@@ -224,9 +231,15 @@
           </div>
         </form>
 
-        <form id="no-buttons">
-          <input name="fname" />
-          <input name="lname" />
+        <form id="no-buttons-more-than-one-input-allowing-implicit-submission">
+          <input /> <!-- default is type='text' -->
+          <input /> <!-- default is type='text' -->
+        </form>
+
+        <!-- https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission -->
+        <form id="no-buttons-and-only-one-input-allowing-implicit-submission">
+          <input type="text" />
+          <input type="hidden" />
         </form>
 
         <form id="one-button-type-button">
@@ -248,9 +261,24 @@
           <button type="submit">submit me</button>
         </form>
 
+        <form id="multiple-inputs-and-reset-and-submit-buttons">
+          <input name="fname" />
+          <input name="lname" />
+          <button type="reset">reset</button>
+          <button type="submit">submit me</button>
+        </form>
+
         <form id="multiple-inputs-and-button-with-no-type">
           <input name="fname" />
           <input name="lname" />
+          <button>submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-other-type-buttons-and-button-with-no-type">
+          <input name="fname" />
+          <input name="lname" />
+          <button type='button'>button</button>
+          <button type='reset'>reset</button>
           <button>submit me</button>
         </form>
 
@@ -510,6 +538,14 @@
             </div>
           </div>
         </div>
+      </div>
+      <div>
+        iframe:<br>
+        <iframe id="iframe" src="/fixtures/generic.html"></iframe>
+      </div>
+      <div>
+        Cross domain iframe:<br>
+        <iframe id="iframe-cross-domain" src="http://localhost:3501/fixtures/generic.html"></iframe>
       </div>
     </div>
   </body>

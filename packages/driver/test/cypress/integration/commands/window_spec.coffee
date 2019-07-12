@@ -123,7 +123,7 @@ describe "src/cy/commands/window", ->
             expect(@logs[0].get("aliasType")).to.eq("primitive")
 
             expect(@logs[2].get("aliasType")).to.eq("primitive")
-            expect(@logs[2].get("referencesAlias")).to.eq("win")
+            expect(@logs[2].get("referencesAlias").name).to.eq("win")
 
       it "logs obj", ->
         cy.window().then ->
@@ -270,7 +270,7 @@ describe "src/cy/commands/window", ->
             expect(logs[0].get("aliasType")).to.eq("primitive")
 
             expect(logs[2].get("aliasType")).to.eq("primitive")
-            expect(logs[2].get("referencesAlias")).to.eq("doc")
+            expect(logs[2].get("referencesAlias").name).to.eq("doc")
 
       it "logs obj", ->
         cy.document().then ->

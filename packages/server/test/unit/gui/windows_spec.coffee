@@ -10,6 +10,8 @@ user          = require("#{root}../lib/user")
 Windows       = require("#{root}../lib/gui/windows")
 savedState    = require("#{root}../lib/saved_state")
 
+DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36"
+
 describe "lib/gui/windows", ->
   beforeEach ->
     Windows.reset()
@@ -21,6 +23,8 @@ describe "lib/gui/windows", ->
     @win.getPosition = sinon.stub().returns([3, 4])
     @win.webContents = new EE()
     @win.webContents.openDevTools = sinon.stub()
+    @win.webContents.setUserAgent = sinon.stub()
+    @win.webContents.getUserAgent = sinon.stub().returns(DEFAULT_USER_AGENT)
     @win.isDestroyed = sinon.stub().returns(false)
 
     sinon.stub(Windows, "_newBrowserWindow").returns(@win)
@@ -70,42 +74,6 @@ describe "lib/gui/windows", ->
         })
 
         expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
-
-    it "resolves with code on GITHUB_LOGIN for will-navigate", ->
-      options = {
-        type: "GITHUB_LOGIN"
-      }
-
-      url = "https://github.com/login"
-      url2 = "https://github.com?code=code123"
-
-      sinon.stub(user, "getLoginUrl").resolves(url)
-
-      sinon.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
-
-      Windows.open("/path/to/project", options)
-      .then (code) =>
-        expect(code).to.eq("code123")
-        expect(options.type).eq("GITHUB_LOGIN")
-        expect(@win.loadURL).to.be.calledWith(url)
-
-    it "resolves with code on GITHUB_LOGIN for did-get-redirect-request", ->
-      options = {
-        type: "GITHUB_LOGIN"
-      }
-
-      url = "https://github.com/login"
-      url2 = "https://github.com?code=code123"
-
-      sinon.stub(user, "getLoginUrl").resolves(url)
-
-      sinon.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
-
-      Windows.open("/path/to/project", options)
-      .then (code) =>
-        expect(code).to.eq("code123")
-        expect(options.type).eq("GITHUB_LOGIN")
-        expect(@win.loadURL).to.be.calledWith(url)
 
   context ".create", ->
     it "opens dev tools if saved state is open", ->
