@@ -16,6 +16,7 @@
     "check-deps-pre": "npm run check-deps -- --prescript",
     "dtslint": "dtslint types",
     "postinstall": "node ./scripts/post-install.js",
+    "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
@@ -27,7 +28,6 @@
     "test-unit": "npm run unit",
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run unit -- --watch",
-    "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "types": "npm run dtslint",
     "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
