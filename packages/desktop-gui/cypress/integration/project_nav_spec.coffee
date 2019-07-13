@@ -148,6 +148,14 @@ describe "Project Nav", ->
         it "displays stop browser button", ->
           cy.get(".close-browser").should("be.visible")
 
+        it "sends the required parameters to launch a browser", ->
+          browserArg = @ipc.launchBrowser.getCall(0).args[0].browser
+          expect(browserArg).to.have.keys([
+            "family", "name", "path", "version", "majorVersion", "displayName", "info", "isChosen", "custom", "warning"
+          ])
+          expect(browserArg.path).to.include('/')
+          expect(browserArg.family).to.equal('chrome')
+
         describe "stop browser", ->
           beforeEach ->
             cy.get(".close-browser").click()
@@ -209,10 +217,12 @@ describe "Project Nav", ->
     describe "only one browser available", ->
       beforeEach ->
         @oneBrowser = [{
-          "name": "electron"
-          "version": "50.0.2661.86"
-          "path": ""
-          "majorVersion": "50"
+            name: "electron",
+            family: "electron",
+            displayName: "Electron",
+            version: "50.0.2661.86",
+            path: "",
+            majorVersion: "50"
         }]
 
         @config.browsers = @oneBrowser
@@ -222,22 +232,72 @@ describe "Project Nav", ->
         cy.get(".browsers-list")
           .find(".dropdown-toggle").should("not.be.visible")
 
+    describe "browser has a warning attached", ->
+      beforeEach ->
+        @browsers = [{
+          "name": "chromium",
+          "displayName": "Chromium",
+          "family": "chrome",
+          "version": "49.0.2609.0",
+          "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
+          "majorVersion": "49",
+          "warning": "Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy"
+        }]
+
+        @config.browsers = @browsers
+        @openProject.resolve(@config)
+
+      it "shows warning icon with linkified tooltip", ->
+        cy.get(".browsers .fa-exclamation-triangle").trigger("mouseover")
+        cy.get(".cy-tooltip")
+          .should("contain", "Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see")
+          .get(".cy-tooltip a")
+          .click()
+          .then () ->
+            expect(@ipc.externalOpen).to.be.calledWith("https://on.cypress.io/bad-browser-policy")
+
+    describe "custom browser available", ->
+      beforeEach ->
+        @config.browsers.push({
+          name: "chromium",
+          family: "chrome",
+          custom: true,
+          displayName: "Custom Chromium",
+          version: "72.0.3626.96",
+          majorVersion: "72",
+          path: "/usr/bin/chromium-x",
+          info: "Loaded from /usr/bin/chromium-x"
+        })
+
+        @openProject.resolve(@config)
+
+      it "pre-selects the custom browser", ->
+        cy.get(".browsers-list>a").first()
+          .should("contain", "Custom Chromium")
+
+      it "pre-selects the custom browser if chosenBrowser saved locally", ->
+        localStorage.setItem("chosenBrowser", "electron")
+        cy.get(".browsers-list>a").first()
+          .should("contain", "Custom Chromium")
+        cy.wrap(localStorage.getItem("chosenBrowser")).should("equal", "electron")
+
     describe "browser with info", ->
       beforeEach ->
         @info = "The Electron browser is the version of Chrome that is bundled with Electron. Cypress uses this browser when running headlessly, so it may be useful for debugging issues that occur only in headless mode."
         @config.browsers = [{
-          "name": "electron"
-          "version": "50.0.2661.86"
-          "path": ""
-          "majorVersion": "50"
-          "info": @info
+            name: "electron",
+            family: "electron",
+            displayName: "Electron",
+            version: "50.0.2661.86",
+            path: "",
+            majorVersion: "50",
+            info: @info
         }]
 
         @openProject.resolve(@config)
 
       it "shows info icon with tooltip", ->
         cy.get(".browsers .fa-info-circle")
-          .then ($el) ->
-            $el[0].dispatchEvent(new Event("mouseover", {bubbles: true}))
+          .trigger("mouseover")
         cy.get(".cy-tooltip")
           .should("contain", @info)

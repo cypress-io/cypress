@@ -8,6 +8,7 @@ describe('issue #1854', () => {
 
       win.setTimeout('foo(true)', 100)
     })
+
     cy.window().its('bar').should('be.true')
   })
 })

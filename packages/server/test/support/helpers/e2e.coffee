@@ -33,19 +33,19 @@ Promise.config({
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
-stackTraceLinesRe = /(\s+)at\s(.+)/g
-browserNameVersionRe = /(Browser\:\s+)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
+stackTraceLinesRe = /^(\s+)at\s(.+)/gm
+browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
 replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, "$1at stack trace line")
 
-replaceBrowserName = (str, p1, p2, p3, p4, p5) ->
+replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
-  lengthOfExistingBrowserString = _.sum([p2.length, p3.length, _.get(p4, "length", 0), p5.length])
+  lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, "length", 0), whitespace.length])
 
   ## this ensures we add whitespace so the border is not shifted
-  p1 + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
+  key + customBrowserPath + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
 
 replaceDurationSeconds = (str, p1, p2, p3, p4) ->
   ## get the padding for the existing duration
@@ -53,10 +53,25 @@ replaceDurationSeconds = (str, p1, p2, p3, p4) ->
 
   p1 + _.padEnd("X seconds", lengthOfExistingDuration)
 
+replaceDurationFromReporter = (str, p1, p2, p3) ->
+  ## duration='1589'
+
+  p1 + _.padEnd("X", p2.length, "X") + p3
+
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
   ## full length of the duration so it doesn't shift content
   _.padStart("XX:XX", p1.length + p2.length)
+
+replaceUploadingResults = (orig, match..., offset, string) ->
+    results = match[1].split('\n').map((res) ->
+      res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)')
+    )
+    .sort()
+    .join('\n')
+    ret =  match[0] + results + match[3]
+
+    return ret
 
 normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
@@ -72,8 +87,10 @@ normalizeStdout = (str) ->
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
+  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) ## replace duration='1589'
   .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
+  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
   .replace("/\(\d{2,4}x\d{2,4}\)/g", "(YYYYxZZZZ)") ## screenshot dimensions
   .split("\n")
     .map(replaceStackTraceLines)
@@ -304,7 +321,7 @@ module.exports = {
 
     exit = (code) ->
       if (expected = options.expectedExitCode)?
-        expect(expected).to.eq(code, "expected exit code")
+        expect(code).to.eq(expected, "expected exit code")
 
       ## snapshot the stdout!
       if options.snapshot
@@ -315,16 +332,18 @@ module.exports = {
         ## if we have browser in the stdout make
         ## sure its legit
         if matches = browserNameVersionRe.exec(stdout)
-          [str, key, browserName, version, headless] = matches
+          [str, key, customBrowserPath, browserName, version, headless] = matches
 
-          if b = options.browser
-            expect(_.capitalize(b)).to.eq(browserName)
+          browser = options.browser
+
+          if browser and not customBrowserPath
+            expect(_.capitalize(browser)).to.eq(browserName)
 
           expect(parseFloat(version)).to.be.a.number
 
           ## if we are in headed mode or in a browser other
           ## than electron
-          if options.headed or (b and b isnt "electron")
+          if options.headed or (browser and browser isnt "electron")
             expect(headless).not.to.exist
           else
             expect(headless).to.include("(headless)")
@@ -343,14 +362,14 @@ module.exports = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
-          DEBUG_COLORS: "1"
-
           ## FYI: color will already be disabled
           ## because we are piping the child process
           COLUMNS: 100
           LINES: 24
         })
         .defaults({
+          DEBUG_COLORS: "1"
+
           ## prevent any Compression progress
           ## messages from showing up
           VIDEO_COMPRESSION_THROTTLE: 120000

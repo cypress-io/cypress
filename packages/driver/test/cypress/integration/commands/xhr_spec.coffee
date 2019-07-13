@@ -188,7 +188,7 @@ describe "src/cy/commands/xhr", ->
 
         cy
           .server()
-          .route({url: /timeout/}).as("getTimeout")
+          .route({url: /timeout/}).as("get.timeout")
           .window().then (win) ->
             xhr = new win.XMLHttpRequest
             xhr.open("GET", "/timeout?ms=100")
@@ -198,7 +198,7 @@ describe "src/cy/commands/xhr", ->
             xhr.onload = ->
               onloaded = true
             null
-          .wait("@getTimeout").then (xhr) ->
+          .wait("@get.timeout").then (xhr) ->
             expect(onloaded).to.be.true
             expect(onreadystatechanged).to.be.true
             expect(xhr.status).to.eq(200)
@@ -1315,6 +1315,37 @@ describe "src/cy/commands/xhr", ->
         .wait("@getFoo").then (xhr) ->
           expect(xhr.responseBody).to.eq "foo bar baz"
 
+    it "can stub requests with uncommon HTTP methods", ->
+      cy
+        .route("PROPFIND", "/foo", "foo bar baz").as("getFoo")
+        .window().then (win) ->
+          win.$.ajax({
+            url: "/foo"
+            method: "PROPFIND"
+          })
+          null
+        .wait("@getFoo").then (xhr) ->
+          expect(xhr.responseBody).to.eq "foo bar baz"
+
+    ## https://github.com/cypress-io/cypress/issues/2372
+    it "warns if a percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "/foo%25bar")
+      .then ->
+        expect(Cypress.utils.warning).to.be.calledWith """
+        A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.
+
+        Did you mean to pass "/foo%bar"?
+        """
+
+    it "does not warn if an invalid percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "http://example.com/%E0%A4%A")
+      .then ->
+        expect(Cypress.utils.warning).to.not.be.called
+
     it.skip "does not error when response is null but respond is false", ->
       cy.route
         url: /foo/
@@ -1442,9 +1473,9 @@ describe "src/cy/commands/xhr", ->
 
         cy.route(getUrl)
 
-      it "url must be one of get, put, post, delete, patch, head, options", (done) ->
+      it "fails when method is invalid", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was called with an invalid method: 'POSTS'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+          expect(err.message).to.include "cy.route() was called with an invalid method: 'POSTS'."
           done()
 
         cy.route("posts", "/foo", {})
@@ -1529,7 +1560,7 @@ describe "src/cy/commands/xhr", ->
 
         cy.on "command:retry", =>
           if cy.state("error")
-            done("should have cancelled and not retried after failing")
+            done("should have canceled and not retried after failing")
 
         cy.on "fail", (err) =>
           p = cy.state("promise")
@@ -1830,6 +1861,9 @@ describe "src/cy/commands/xhr", ->
   context "abort", ->
     xhrs = []
 
+    beforeEach ->
+      cy.visit("/fixtures/jquery.html")
+
     it "does not abort xhr's between tests", ->
       cy.window().then (win) ->
         _.times 2, ->
@@ -1858,12 +1892,39 @@ describe "src/cy/commands/xhr", ->
 
       cy.on "log:changed", (attrs, l) =>
         if attrs.name is "xhr"
-          log = l
+          if not log
+            log = l
 
       cy
       .window()
       .then (win) ->
         xhr = new win.XMLHttpRequest()
+        xhr.open("GET", "/timeout?ms=999")
+        xhr.send()
+        xhr.abort()
+
+        cy.wrap(null).should ->
+          expect(log.get("state")).to.eq("failed")
+          expect(log.invoke("renderProps")).to.deep.eq({
+            message: "GET (aborted) /timeout?ms=999",
+            indicator: 'aborted',
+          })
+          expect(xhr.aborted).to.be.true
+
+    ## https://github.com/cypress-io/cypress/issues/3008
+    it "aborts xhrs even when responseType  not '' or 'text'", ->
+      log = null
+
+      cy.on "log:changed", (attrs, l) =>
+        if attrs.name is "xhr"
+          if not log
+            log = l
+
+      cy
+      .window()
+      .then (win) ->
+        xhr = new win.XMLHttpRequest()
+        xhr.responseType = 'arraybuffer'
         xhr.open("GET", "/timeout?ms=1000")
         xhr.send()
         xhr.abort()
@@ -1878,7 +1939,8 @@ describe "src/cy/commands/xhr", ->
 
       cy.on "log:changed", (attrs, l) =>
         if attrs.name is "xhr"
-          log = l
+          if not log
+            log = l
 
       cy
       .window()
@@ -1892,27 +1954,33 @@ describe "src/cy/commands/xhr", ->
             resolve(xhr)
           xhr.send()
       .then (xhr) ->
-        ## ensure this is set to prevent accidental
-        ## race conditions down the road if something
-        ## goes wrong
-        expect(xhr.foo).to.eq("bar")
-        expect(xhr.aborted).not.to.be.true
-        expect(log.get("state")).to.eq("passed")
+        cy
+        .wrap(null)
+        .should ->
+          ## ensure this is set to prevent accidental
+          ## race conditions down the road if something
+          ## goes wrong
+          expect(xhr.foo).to.eq("bar")
+          expect(xhr.aborted).not.to.be.true
+          expect(log.get("state")).to.eq("passed")
 
   context "Cypress.on(window:unload)", ->
-    it "aborts all open XHR's", ->
+    it "cancels all open XHR's", ->
       xhrs = []
 
-      cy.window().then (win) ->
+      cy
+      .window()
+      .then (win) ->
         _.times 2, ->
           xhr = new win.XMLHttpRequest
-          xhr.open("GET", "/timeout?ms=100")
+          xhr.open("GET", "/timeout?ms=200")
           xhr.send()
 
           xhrs.push(xhr)
-      .reload().then ->
+      .reload()
+      .then ->
         _.each xhrs, (xhr) ->
-          expect(xhr.aborted).to.be.true
+          expect(xhr.canceled).to.be.true
 
   context "Cypress.on(window:before:load)", ->
     it "reapplies server + route automatically before window:load", ->

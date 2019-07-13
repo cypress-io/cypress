@@ -13,7 +13,6 @@ _test-output
 cypress.zip
 tmp/
 .nyc_output
-.vscode/settings.json
 
 # from extension
 Cached Theme.pak
@@ -25,6 +24,9 @@ packages/https-proxy/ca/
 # from desktop-gui
 packages/desktop-gui/src/jsconfig.json
 
+# from driver
+packages/driver/test/cypress/videos
+
 # from example
 packages/example/app
 packages/example/build
@@ -33,16 +35,32 @@ packages/example/cypress/videos
 packages/example/cypress/fixtures/profile.json
 packages/example/cypress/fixtures/users.json
 
+# from driver
+packages/driver/test/cypress/videos
+
 # from server
 packages/server/.cy
 packages/server/.projects
 packages/server/support
+packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
 
 # CLI tool
+cli/types/blob-util
+cli/types/bluebird
+cli/types/chai
+cli/types/chai-jquery
+cli/types/jquery
+cli/types/lodash
+cli/types/mocha
+cli/types/minimatch
+cli/types/sinon
+cli/types/sinon-chai
+# ignore CLI output build folder
 cli/build
 
 # Building app binary
 scripts/support
 package-lock.json
+yarn.lock
 binary-url.json

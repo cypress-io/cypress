@@ -1,10 +1,12 @@
 require('../../spec_helper')
 
+const _ = require('lodash')
 const cp = require('child_process')
 const os = require('os')
 const tty = require('tty')
 const path = require('path')
 const EE = require('events')
+const mockedEnv = require('mocked-env')
 
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -36,6 +38,7 @@ describe('lib/exec/spawn', function () {
         on: sinon.stub().returns(undefined),
       },
     }
+
     sinon.stub(process, 'stdin').value(new EE)
     sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
     sinon.stub(xvfb, 'start').resolves()
@@ -43,6 +46,30 @@ describe('lib/exec/spawn', function () {
     sinon.stub(xvfb, 'isNeeded').returns(false)
     sinon.stub(state, 'getBinaryDir').returns(defaultBinaryDir)
     sinon.stub(state, 'getPathToExecutable').withArgs(defaultBinaryDir).returns('/path/to/cypress')
+  })
+
+  context('.isGarbageLineWarning', () => {
+    it('returns true', () => {
+      const str = `
+        [46454:0702/140217.292422:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete
+        [46454:0702/140217.292466:ERROR:gles2_cmd_decoder.cc(17788)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+        [46454:0702/140217.292526:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glClear: framebuffer incomplete
+        [46454:0702/140217.292555:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete
+        [46454:0702/140217.292584:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glClear: framebuffer incomplete
+        [46454:0702/140217.292612:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete'
+      `
+
+      const lines = _
+      .chain(str)
+      .split('\n')
+      .invokeMap('trim')
+      .compact()
+      .value()
+
+      _.each(lines, (line) => {
+        expect(spawn.isGarbageLineWarning(line), `expected line to be garbage: ${line}`).to.be.true
+      })
+    })
   })
 
   context('.start', function () {
@@ -56,7 +83,8 @@ describe('lib/exec/spawn', function () {
           '--cwd',
           cwd,
         ], {
-          foo: 'bar',
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
         })
       })
     })
@@ -74,7 +102,8 @@ describe('lib/exec/spawn', function () {
           '--cwd',
           cwd,
         ], {
-          foo: 'bar',
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
         })
       })
     })
@@ -117,6 +146,42 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo')
       .then((code) => {
         expect(code).to.equal(10)
+      })
+    })
+
+    describe('Linux display', () => {
+      let restore
+
+      beforeEach(() => {
+        restore = mockedEnv({
+          DISPLAY: 'test-display',
+        })
+      })
+
+      afterEach(() => {
+        restore()
+      })
+
+      it('retries with xvfb if fails with display exit code', function () {
+        this.spawnedProcess.on.withArgs('close').onFirstCall().yieldsAsync(1)
+        this.spawnedProcess.on.withArgs('close').onSecondCall().yieldsAsync(0)
+
+        const buf1 = '[some noise here] Gtk: cannot open display: 987'
+
+        this.spawnedProcess.stderr.on
+        .withArgs('data')
+        .yields(buf1)
+
+        os.platform.returns('linux')
+
+        return spawn.start('--foo')
+        .then((code) => {
+          expect(xvfb.start).to.have.been.calledOnce
+          expect(xvfb.stop).to.have.been.calledOnce
+          expect(cp.spawn).to.have.been.calledTwice
+          // second code should be 0 after successfully running with Xvfb
+          expect(code).to.equal(0)
+        })
       })
     })
 

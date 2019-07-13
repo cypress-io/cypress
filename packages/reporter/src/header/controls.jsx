@@ -26,7 +26,7 @@ const Controls = observer(({ events, appState }) => {
       ))}
       {ifThen(appState.isPaused, (
         <Tooltip placement='bottom' title='Resume'>
-          <button className='play' onClick={emit('resume')}>
+          <button aria-label='Resume' className='play' onClick={emit('resume')}>
             <i className='fa fa-play'></i>
           </button>
         </Tooltip>
@@ -34,6 +34,7 @@ const Controls = observer(({ events, appState }) => {
       {ifThen(!appState.isPaused, (
         <Tooltip placement='bottom' title={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}>
           <button
+            aria-label={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
             className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
             onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
           >
@@ -44,21 +45,21 @@ const Controls = observer(({ events, appState }) => {
       ))}
       {ifThen(appState.isRunning && !appState.isPaused, (
         <Tooltip placement='bottom' title='Stop Running'>
-          <button className='stop' onClick={emit('stop')}>
+          <button aria-label='Stop' className='stop' onClick={emit('stop')}>
             <i className='fa fa-stop'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
         <Tooltip placement='bottom' title='Run all tests'>
-          <button className='restart' onClick={emit('restart')}>
+          <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
             <i className='fa fa-repeat'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(!!appState.nextCommandName, (
         <Tooltip placement='bottom' title={`Next: '${appState.nextCommandName}'`}>
-          <button className='next' onClick={emit('next')}>
+          <button aria-label={`Next: '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
             <i className='fa fa-step-forward'></i>
           </button>
         </Tooltip>

@@ -13,7 +13,8 @@
     "noUnusedParameters": false,
     "types": [],
     "noEmit": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true
   },
   "include": [
       "**/*.ts"

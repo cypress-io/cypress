@@ -40,6 +40,17 @@ namespace CypressEnvTests {
   })
 }
 
+namespace CypressIsCyTests {
+  Cypress.isCy(cy) // $ExpectType boolean
+  Cypress.isCy(undefined) // $ExpectType boolean
+
+  const chainer = cy.wrap("foo").then(function() {
+    if (Cypress.isCy(chainer)) {
+      chainer // $ExpectType Chainable<string>
+    }
+  })
+}
+
 namespace CypressCommandsTests {
   Cypress.Commands.add('newCommand', () => {
     return
@@ -76,6 +87,12 @@ namespace CypressLogsTest {
   log.get() // $ExpectType LogConfig
   log.get('name') // $ExpectType string
   log.get('$el') // $ExpectType JQuery<HTMLElement>
+}
+
+namespace CypressLocalStorageTest {
+  Cypress.LocalStorage.clear = function(keys) {
+    keys // $ExpectType string[] | undefined
+  }
 }
 
 cy.wrap({ foo: [1, 2, 3] })
@@ -202,6 +219,12 @@ cy.get('body').within({ log: false }, body => {
   body // $ExpectType JQuery<HTMLBodyElement>
 })
 
+cy.get('body').within(() => {
+  cy.get('body', { withinSubject: null }).then(body => {
+    body // $ExpectType JQuery<HTMLBodyElement>
+  })
+})
+
 cy
   .get('body')
   .then(() => {
@@ -255,3 +278,22 @@ cy.screenshot('example', {
   log: true,
   blackout: []
 })
+
+namespace CypressTriggerTests {
+  cy.get('something')
+    .trigger('click') // .trigger(eventName)
+    .trigger('click', 'center') // .trigger(eventName, position)
+    .trigger('click', { // .trigger(eventName, options)
+      arbitraryProperty: 0
+    })
+    .trigger('click', 0, 0) // .trigger(eventName, x, y)
+    .trigger('click', 'center', { // .trigger(eventName, position, options)
+      arbitraryProperty: 0
+    })
+    .trigger('click', 0, 0, { // .trigger(eventName, x, y, options)
+      arbitraryProperty: 0
+    })
+}
+
+const now = new Date(2019, 3, 2).getTime()
+cy.clock(now, ['Date'])

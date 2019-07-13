@@ -4,7 +4,7 @@ const path = require('path')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const mockfs = require('mock-fs')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 const stdout = require('../../support/stdout')
 
@@ -68,7 +68,7 @@ describe('/lib/tasks/install', function () {
           expect(download.start).not.to.be.called
 
           snapshot(
-            'skip installation',
+            'skip installation 1',
             normalize(this.stdout.toString())
           )
         })
@@ -93,13 +93,55 @@ describe('/lib/tasks/install', function () {
           })
 
           snapshot(
-            'specify version in env vars',
+            'specify version in env vars 1',
             normalize(this.stdout.toString())
           )
         })
       })
 
-      it('can install local binary zip file without download', function () {
+      it('trims environment variable before installing', function () {
+        // note how the version has extra spaces around it on purpose
+        const filename = '/tmp/local/file.zip'
+        const version = ` ${filename}   `
+
+        process.env.CYPRESS_INSTALL_BINARY = version
+        // internally, the variable should be trimmed and just filename checked
+        sinon.stub(fs, 'pathExistsAsync').withArgs(filename).resolves(true)
+
+        const installDir = state.getVersionDir()
+
+        return install.start()
+        .then(() => {
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: filename,
+            installDir,
+          })
+        })
+      })
+
+      it('removes double quotes around the environment variable before installing', function () {
+        // note how the version has extra spaces around it on purpose
+        // and there are double quotes
+        const filename = '/tmp/local/file.zip'
+        const version = ` "${filename}"   `
+
+        process.env.CYPRESS_INSTALL_BINARY = version
+        // internally, the variable should be trimmed, double quotes removed
+        //  and just filename checked against the file system
+        sinon.stub(fs, 'pathExistsAsync').withArgs(filename).resolves(true)
+
+        const installDir = state.getVersionDir()
+
+        return install.start()
+        .then(() => {
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: filename,
+            installDir,
+          })
+        })
+      })
+
+      it('can install local binary zip file without download from absolute path', function () {
         const version = '/tmp/local/file.zip'
 
         process.env.CYPRESS_INSTALL_BINARY = version
@@ -122,6 +164,7 @@ describe('/lib/tasks/install', function () {
         mockfs({
           [version]: 'asdf',
         })
+
         process.env.CYPRESS_INSTALL_BINARY = version
 
         const installDir = state.getVersionDir()
@@ -155,7 +198,7 @@ describe('/lib/tasks/install', function () {
           return install.start()
           .then(() => {
             return snapshot(
-              'version already installed - cypress install',
+              'version already installed - cypress install 1',
               normalize(this.stdout.toString())
             )
           })
@@ -168,7 +211,7 @@ describe('/lib/tasks/install', function () {
           return install.start()
           .then(() => {
             snapshot(
-              'version already installed - postInstall',
+              'version already installed - postInstall 1',
               normalize(this.stdout.toString())
             )
           })
@@ -192,7 +235,7 @@ describe('/lib/tasks/install', function () {
           })
 
           snapshot(
-            'continues installing on failure',
+            'continues installing on failure 1',
             normalize(this.stdout.toString())
           )
         })
@@ -221,7 +264,7 @@ describe('/lib/tasks/install', function () {
           )
 
           snapshot(
-            'installs without existing installation',
+            'installs without existing installation 1',
             normalize(this.stdout.toString())
           )
         })
@@ -244,7 +287,7 @@ describe('/lib/tasks/install', function () {
           })
 
           snapshot(
-            'installed version does not match needed version',
+            'installed version does not match needed version 1',
             normalize(this.stdout.toString())
           )
         })
@@ -268,7 +311,7 @@ describe('/lib/tasks/install', function () {
           })
 
           snapshot(
-            'forcing true always installs',
+            'forcing true always installs 1',
             normalize(this.stdout.toString())
           )
         })
@@ -293,7 +336,7 @@ describe('/lib/tasks/install', function () {
           })
 
           snapshot(
-            'warning installing as global',
+            'warning installing as global 1',
             normalize(this.stdout.toString())
           )
         })
@@ -310,7 +353,7 @@ describe('/lib/tasks/install', function () {
 
         it('uses verbose renderer', function () {
           snapshot(
-            'installing in ci',
+            'installing in ci 1',
             normalize(this.stdout.toString())
           )
         })
@@ -334,7 +377,7 @@ describe('/lib/tasks/install', function () {
             logger.error(err)
 
             snapshot(
-              'invalid cache directory',
+              'invalid cache directory 1',
               normalize(this.stdout.toString())
             )
           })
@@ -352,6 +395,7 @@ describe('/lib/tasks/install', function () {
             expect(download.start).to.not.be.called
           })
         })
+
         it('uses cache when mismatch version given URL ', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
@@ -362,6 +406,7 @@ describe('/lib/tasks/install', function () {
             expect(download.start).to.not.be.called
           })
         })
+
         it('uses cache when correct version installed given Zip', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
@@ -375,6 +420,7 @@ describe('/lib/tasks/install', function () {
             expect(unzip.start).to.not.be.called
           })
         })
+
         it('uses cache when mismatch version given Zip ', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
@@ -401,7 +447,7 @@ describe('/lib/tasks/install', function () {
             logger.error(err)
 
             snapshot(
-              'error for removed CYPRESS_BINARY_VERSION',
+              'error for removed CYPRESS_BINARY_VERSION 1',
               normalize(this.stdout.toString())
             )
           })
@@ -415,7 +461,7 @@ describe('/lib/tasks/install', function () {
       return install.start()
       .then(() => {
         return snapshot(
-          'silent install',
+          'silent install 1',
           normalize(this.stdout.toString() || '[no output]')
         )
       })

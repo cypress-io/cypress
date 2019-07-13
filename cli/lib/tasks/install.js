@@ -20,7 +20,7 @@ const alreadyInstalledMsg = () => {
   if (!util.isPostInstall()) {
     logger.info(stripIndent`    
       Skipping installation:
-  
+
         Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
     `)
   }
@@ -153,9 +153,12 @@ const start = (options = {}) => {
   // let this environment variable reset the binary version we need
   if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
 
-    const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY')
+    // because passed file paths are often double quoted
+    // and might have extra whitespace around, be robust and trim the string
+    const trimAndRemoveDoubleQuotes = true
+    const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY', trimAndRemoveDoubleQuotes)
 
-    debug('using environment variable CYPRESS_INSTALL_BINARY %s', envVarVersion)
+    debug('using environment variable CYPRESS_INSTALL_BINARY "%s"', envVarVersion)
 
     if (envVarVersion === '0') {
       debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
