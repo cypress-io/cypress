@@ -5,11 +5,10 @@ exports['e2e commands outside of test fails on cy commands 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (commands_outside_of_test_spec.coffee)                                 │
-  │ Searched:       cypress/integration/commands_outside_of_test_spec.coffee                       │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (commands_outside_of_test_spec.coffee)                                     │
+  │ Searched:   cypress/integration/commands_outside_of_test_spec.coffee                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -99,11 +98,10 @@ exports['e2e commands outside of test fails on failing assertions 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (assertions_failing_outside_of_test_spec.coffee)                       │
-  │ Searched:       cypress/integration/assertions_failing_outside_of_test_spec.coffee             │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (assertions_failing_outside_of_test_spec.coffee)                           │
+  │ Searched:   cypress/integration/assertions_failing_outside_of_test_spec.coffee                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -179,11 +177,10 @@ exports['e2e commands outside of test passes on passing assertions 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (assertions_passing_outside_of_test_spec.coffee)                       │
-  │ Searched:       cypress/integration/assertions_passing_outside_of_test_spec.coffee             │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (assertions_passing_outside_of_test_spec.coffee)                           │
+  │ Searched:   cypress/integration/assertions_passing_outside_of_test_spec.coffee                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

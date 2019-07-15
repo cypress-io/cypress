@@ -5,11 +5,10 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (browserify_babel_es2015_passing_spec.coffee)                          │
-  │ Searched:       cypress/integration/browserify_babel_es2015_passing_spec.coffee                │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (browserify_babel_es2015_passing_spec.coffee)                              │
+  │ Searched:   cypress/integration/browserify_babel_es2015_passing_spec.coffee                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -69,11 +68,10 @@ exports['e2e browserify, babel, es2015 fails 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (browserify_babel_es2015_failing_spec.js)                              │
-  │ Searched:       cypress/integration/browserify_babel_es2015_failing_spec.js                    │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (browserify_babel_es2015_failing_spec.js)                                  │
+  │ Searched:   cypress/integration/browserify_babel_es2015_failing_spec.js                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

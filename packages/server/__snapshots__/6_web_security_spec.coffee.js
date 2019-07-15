@@ -5,11 +5,10 @@ exports['e2e web security when enabled fails 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (web_security_spec.coffee)                                             │
-  │ Searched:       cypress/integration/web_security_spec.coffee                                   │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (web_security_spec.coffee)                                                 │
+  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -175,11 +174,10 @@ exports['e2e web security when disabled passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (web_security_spec.coffee)                                             │
-  │ Searched:       cypress/integration/web_security_spec.coffee                                   │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (web_security_spec.coffee)                                                 │
+  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

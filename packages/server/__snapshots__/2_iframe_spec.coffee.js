@@ -5,11 +5,10 @@ exports['e2e iframes passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (iframe_spec.coffee)                                                   │
-  │ Searched:       cypress/integration/iframe_spec.coffee                                         │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (iframe_spec.coffee)                                                       │
+  │ Searched:   cypress/integration/iframe_spec.coffee                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

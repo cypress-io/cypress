@@ -6,11 +6,10 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (multiple_task_registrations_spec.coffee)                              │
-  │ Searched:       cypress/integration/multiple_task_registrations_spec.coffee                    │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (multiple_task_registrations_spec.coffee)                                  │
+  │ Searched:   cypress/integration/multiple_task_registrations_spec.coffee                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -66,11 +65,10 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (task_spec.coffee)                                                     │
-  │ Searched:       cypress/integration/task_spec.coffee                                           │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (task_spec.coffee)                                                         │
+  │ Searched:   cypress/integration/task_spec.coffee                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

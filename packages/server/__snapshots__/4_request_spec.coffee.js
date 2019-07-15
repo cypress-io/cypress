@@ -5,11 +5,10 @@ exports['e2e requests passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (request_spec.coffee)                                                  │
-  │ Searched:       cypress/integration/request_spec.coffee                                        │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (request_spec.coffee)                                                      │
+  │ Searched:   cypress/integration/request_spec.coffee                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -78,11 +77,10 @@ exports['e2e requests fails when network immediately fails 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (request_http_network_error_failing_spec.coffee)                       │
-  │ Searched:       cypress/integration/request_http_network_error_failing_spec.coffee             │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (request_http_network_error_failing_spec.coffee)                           │
+  │ Searched:   cypress/integration/request_http_network_error_failing_spec.coffee                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -209,11 +207,10 @@ exports['e2e requests fails on status code 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (request_status_code_failing_spec.coffee)                              │
-  │ Searched:       cypress/integration/request_status_code_failing_spec.coffee                    │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (request_status_code_failing_spec.coffee)                                  │
+  │ Searched:   cypress/integration/request_status_code_failing_spec.coffee                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

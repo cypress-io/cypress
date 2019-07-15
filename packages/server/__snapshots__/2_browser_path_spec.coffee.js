@@ -5,11 +5,10 @@ exports['e2e launching browsers by path works with an installed browser path 1']
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        Custom FooBrowser 88                                                           │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (simple_spec.coffee)                                                   │
-  │ Searched:       cypress/integration/simple_spec.coffee                                         │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    Custom FooBrowser 88                                                               │
+  │ Specs:      1 found (simple_spec.coffee)                                                       │
+  │ Searched:   cypress/integration/simple_spec.coffee                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

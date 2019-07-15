@@ -5,11 +5,10 @@ exports['e2e plugins fails 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (app_spec.coffee)                                                      │
-  │ Searched:       cypress/integration/app_spec.coffee                                            │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Searched:   cypress/integration/app_spec.coffee                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -68,11 +67,10 @@ exports['e2e plugins passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (app_spec.coffee)                                                      │
-  │ Searched:       cypress/integration/app_spec.coffee                                            │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Searched:   cypress/integration/app_spec.coffee                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -129,11 +127,10 @@ exports['e2e plugins can modify config from plugins 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (app_spec.coffee)                                                      │
-  │ Searched:       cypress/integration/app_spec.coffee                                            │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Searched:   cypress/integration/app_spec.coffee                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -190,11 +187,10 @@ exports['e2e plugins works with user extensions 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (app_spec.coffee)                                                      │
-  │ Searched:       cypress/integration/app_spec.coffee                                            │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Searched:   cypress/integration/app_spec.coffee                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -250,11 +246,10 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (absolute_spec.coffee)                                                 │
-  │ Searched:       cypress/integration/absolute_spec.coffee                                       │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (absolute_spec.coffee)                                                     │
+  │ Searched:   cypress/integration/absolute_spec.coffee                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -310,11 +305,10 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (after_screenshot_spec.coffee)                                         │
-  │ Searched:       cypress/integration/after_screenshot_spec.coffee                               │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (after_screenshot_spec.coffee)                                             │
+  │ Searched:   cypress/integration/after_screenshot_spec.coffee                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

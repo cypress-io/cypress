@@ -5,11 +5,10 @@ exports['e2e uncaught errors failing1 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (uncaught_synchronous_before_tests_parsed.coffee)                      │
-  │ Searched:       cypress/integration/uncaught_synchronous_before_tests_parsed.coffee            │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (uncaught_synchronous_before_tests_parsed.coffee)                          │
+  │ Searched:   cypress/integration/uncaught_synchronous_before_tests_parsed.coffee                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -88,11 +87,10 @@ exports['e2e uncaught errors failing2 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (uncaught_synchronous_during_hook_spec.coffee)                         │
-  │ Searched:       cypress/integration/uncaught_synchronous_during_hook_spec.coffee               │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (uncaught_synchronous_during_hook_spec.coffee)                             │
+  │ Searched:   cypress/integration/uncaught_synchronous_during_hook_spec.coffee                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -172,11 +170,10 @@ exports['e2e uncaught errors failing3 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (uncaught_during_test_spec.coffee)                                     │
-  │ Searched:       cypress/integration/uncaught_during_test_spec.coffee                           │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (uncaught_during_test_spec.coffee)                                         │
+  │ Searched:   cypress/integration/uncaught_during_test_spec.coffee                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -250,11 +247,10 @@ exports['e2e uncaught errors failing4 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (uncaught_during_hook_spec.coffee)                                     │
-  │ Searched:       cypress/integration/uncaught_during_hook_spec.coffee                           │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (uncaught_during_hook_spec.coffee)                                         │
+  │ Searched:   cypress/integration/uncaught_during_hook_spec.coffee                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -333,11 +329,10 @@ exports['e2e uncaught errors failing5 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        1.2.3                                                                          │
-  │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
-  │ Specs:          1 found (caught_async_sync_test_spec.coffee)                                   │
-  │ Searched:       cypress/integration/caught_async_sync_test_spec.coffee                         │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (caught_async_sync_test_spec.coffee)                                       │
+  │ Searched:   cypress/integration/caught_async_sync_test_spec.coffee                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
