@@ -34,7 +34,7 @@
     "enzyme-adapter-react-16": "1.12.1",
     "font-awesome": "4.7.0",
     "jsdom": "13.2.0",
-    "lodash": "4.17.13",
+    "lodash": "4.17.14",
     "mobx": "4.12.0",
     "mobx-react": "5.4.4",
     "prop-types": "15.7.2",
