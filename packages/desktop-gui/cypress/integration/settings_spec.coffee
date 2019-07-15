@@ -49,8 +49,7 @@ describe "Settings", ->
       cy.contains("Configuration")
 
     it "highlight settings nav", ->
-      cy
-        .contains("a", "Settings").should("have.class", "active")
+      cy.contains("a", "Settings").should("have.class", "active")
 
     it "collapses panels by default", ->
       cy.contains("Your project's configuration is displayed").should("not.exist")
@@ -170,12 +169,11 @@ describe "Settings", ->
           cy.get(".login")
 
         it "re-loads and shows the record key when user logs in", ->
-          cy.stub(@ipc, "windowOpen").resolves("code-123")
-          cy.stub(@ipc, "logIn").resolves(@user)
+          cy.stub(@ipc, "beginAuth").resolves(@user)
           @ipc.getRecordKeys.onCall(1).resolves(@keys)
 
           cy.get(".empty-well button").click()
-          cy.contains("Log In with GitHub").click().should =>
+          cy.contains("Log In to Dashboard").click().should =>
             expect(@ipc.getRecordKeys).to.be.calledTwice
           cy.get(".settings-record-key")
             .contains("cypress run --record --key #{@keys[0].id}")

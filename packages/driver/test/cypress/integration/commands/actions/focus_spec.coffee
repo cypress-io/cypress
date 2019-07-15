@@ -192,7 +192,7 @@ describe "src/cy/commands/actions/focus", ->
 
         ## we can't end early here because our focus()
         ## command will still be in flight and the promise
-        ## chain will get cancelled before it gets attached
+        ## chain will get canceled before it gets attached
         ## (besides the code will continue to run and create
         ## side effects)
         cy.on "log:added", (attrs, log) ->
@@ -684,3 +684,7 @@ describe "src/cy/commands/actions/focus", ->
           done()
 
         cy.get(":text:first").focus().blur().should("have.class", "blured")
+
+      it "can handle window w/length > 1 as a subject", ->
+        cy.window().should('have.length', 2)
+        .focus()

@@ -53,6 +53,11 @@ replaceDurationSeconds = (str, p1, p2, p3, p4) ->
 
   p1 + _.padEnd("X seconds", lengthOfExistingDuration)
 
+replaceDurationFromReporter = (str, p1, p2, p3) ->
+  ## duration='1589'
+
+  p1 + _.padEnd("X", p2.length, "X") + p3
+
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
   ## full length of the duration so it doesn't shift content
@@ -82,6 +87,7 @@ normalizeStdout = (str) ->
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
+  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) ## replace duration='1589'
   .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
@@ -356,14 +362,14 @@ module.exports = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
-          DEBUG_COLORS: "1"
-
           ## FYI: color will already be disabled
           ## because we are piping the child process
           COLUMNS: 100
           LINES: 24
         })
         .defaults({
+          DEBUG_COLORS: "1"
+
           ## prevent any Compression progress
           ## messages from showing up
           VIDEO_COMPRESSION_THROTTLE: 120000

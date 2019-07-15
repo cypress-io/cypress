@@ -47,7 +47,9 @@ const override = () => {
   }
 
   if (process.env.FORCE_STDIN_TTY === '1') patchStream(patched, 'stdin')
+
   if (process.env.FORCE_STDOUT_TTY === '1') patchStream(patched, 'stdout')
+
   if (process.env.FORCE_STDERR_TTY === '1') patchStream(patched, 'stderr')
 
   return

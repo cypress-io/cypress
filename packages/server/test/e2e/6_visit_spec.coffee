@@ -1,5 +1,4 @@
 useragent = require("express-useragent")
-Fixtures  = require("../support/helpers/fixtures")
 e2e       = require("../support/helpers/e2e")
 
 onServer = (app) ->
@@ -149,4 +148,46 @@ describe "e2e visit", ->
         spec: "visit_http_timeout_failing_spec.coffee"
         snapshot: true
         expectedExitCode: 2
+      })
+
+  ## https://github.com/cypress-io/cypress/issues/4313
+  context "resolves visits quickly", ->
+    e2e.setup({
+      servers: {
+        port: 3434
+        onServer: (app) ->
+          app.get '/keepalive', (req, res) ->
+            res
+            .type('html').send('hi')
+
+          app.get '/close', (req, res) ->
+            res
+            .set('connection', 'close')
+            .type('html').send('hi')
+      }
+      settings: {
+        baseUrl: 'http://localhost:3434'
+      }
+    })
+
+    onStdout = (stdout) ->
+      stdout
+      .replace(/^\d+%\s+of visits to [^\s]+ finished in less than.*$/gm, 'histogram line')
+
+    it "in chrome (headed)", ->
+      e2e.exec(@, {
+        spec: "fast_visit_spec.coffee"
+        snapshot: true
+        expectedExitCode: 0
+        browser: 'chrome'
+        onStdout
+      })
+
+    it "in electron (headless)", ->
+      e2e.exec(@, {
+        spec: "fast_visit_spec.coffee"
+        snapshot: true
+        expectedExitCode: 0
+        browser: 'electron'
+        onStdout
       })

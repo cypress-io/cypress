@@ -154,6 +154,13 @@ describe "lib/util/ci_provider", ->
       sha: "bitbucketCommit"
       branch: "gitFoundBranch"
     })
+    expectsCommitDefaults({
+      sha: undefined
+      branch: ""
+    }, {
+      sha: "bitbucketCommit"
+      branch: "bitbucketBranch"
+    })
 
   it "buildkite", ->
     resetEnv = mockedEnv({
@@ -202,7 +209,14 @@ describe "lib/util/ci_provider", ->
     # in this test only interested in branch and sha for example
     expectsCommitDefaults({
       sha: null,
-      branch: null
+      branch: "gitFoundBranch"
+    }, {
+      sha: "buildKiteCommit",
+      branch: "gitFoundBranch"
+    })
+    expectsCommitDefaults({
+      sha: undefined,
+      branch: ""
     }, {
       sha: "buildKiteCommit",
       branch: "buildKiteBranch"
@@ -314,6 +328,19 @@ describe "lib/util/ci_provider", ->
       authorEmail: "ciCommitterEmail"
     })
 
+  it "concourse", ->
+    resetEnv = mockedEnv({
+      CONCOURSE_WORK_DIR: "/opt/concourse/worker"
+
+      BUILD_ID: "ciBuildId"
+    }, {clear: true})
+
+    expectsName("concourse")
+    expectsCiParams({
+      buildId: "ciBuildId"
+    })
+    expectsCommitParams(null)
+
   it "drone", ->
     resetEnv = mockedEnv({
       DRONE: "true"
@@ -404,6 +431,76 @@ describe "lib/util/ci_provider", ->
     }, {clear: true})
 
     expectsName("gitlab")
+  it "goCD", ->
+    resetEnv = mockedEnv({
+      GO_SERVER_URL: "https://127.0.0.1:8154/go",
+      GO_ENVIRONMENT_NAME: "Development",
+      GO_PIPELINE_NAME: "main",
+      GO_PIPELINE_COUNTER: "2345",
+      GO_PIPELINE_LABEL: "1.1.2345",
+      GO_STAGE_NAME: "dev",
+      GO_STAGE_COUNTER: "1",
+      GO_JOB_NAME: "linux-firefox",
+      GO_TRIGGER_USER: "changes",
+      GO_REVISION: "123",
+      GO_TO_REVISION: "123",
+      GO_FROM_REVISION: "121",
+      GO_MATERIAL_HAS_CHANGED: "true",
+    }, {clear: true})
+
+    expectsName("goCD")
+    expectsCiParams({
+      goServerUrl: "https://127.0.0.1:8154/go",
+      goEnvironmentName: "Development",
+      goPipelineName: "main",
+      goPipelineCounter: "2345",
+      goPipelineLabel: "1.1.2345",
+      goStageName: "dev",
+      goStageCounter: "1",
+      goJobName: "linux-firefox",
+      goTriggerUser: "changes",
+      goRevision: "123",
+      goToRevision: "123",
+      goFromRevision: "121",
+      goMaterialHasChanged: "true",
+    })
+    expectsCommitParams(null)
+
+  it "google cloud", ->
+    resetEnv = mockedEnv({
+      GCP_PROJECT: "123"
+
+      BUILD_ID: "buildId"
+
+      PROJECT_ID: "projectId"
+
+      COMMIT_SHA: "commitSha"
+      BRANCH_NAME: "branchName"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+    expectsCiParams({
+      buildId: "buildId"
+      projectId: "projectId"
+      commitSha: "commitSha"
+      branchName: "branchName"
+    })
+    expectsCommitParams({
+      sha: "commitSha"
+      branch: "branchName"
+    })
+
+    resetEnv = mockedEnv({
+      GCLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
+
+    resetEnv = mockedEnv({
+      GOOGLE_CLOUD_PROJECT: "123"
+    }, {clear: true})
+
+    expectsName("googleCloud")
 
   it "jenkins", ->
     resetEnv = mockedEnv({
@@ -459,19 +556,28 @@ describe "lib/util/ci_provider", ->
       SEMAPHORE_CURRENT_JOB: "semaphoreCurrentJob"
       SEMAPHORE_CURRENT_THREAD: "semaphoreCurrentThread"
       SEMAPHORE_EXECUTABLE_UUID: "semaphoreExecutableUuid"
+      SEMAPHORE_GIT_BRANCH: "show-semaphore-v2-266"
+      SEMAPHORE_GIT_DIR: "cypress-example-kitchensink"
+      SEMAPHORE_GIT_REF: "refs/heads/show-semaphore-v2-266"
+      SEMAPHORE_GIT_REF_TYPE: "branch"
+      SEMAPHORE_GIT_REPO_SLUG: "cypress-io/cypress-example-kitchensink"
+      SEMAPHORE_GIT_SHA: "83ce1df0f8be2767655bb805d20126ee441b71bf"
+      SEMAPHORE_GIT_URL: "git@github.com:cypress-io/cypress-example-kitchensink.git"
+      SEMAPHORE_JOB_ID: "5fb8dd98-3242-4a4e-a8ab-c4eca9db486c"
+      SEMAPHORE_JOB_NAME: "Cypress E2E 2"
       SEMAPHORE_JOB_COUNT: "semaphoreJobCount"
       SEMAPHORE_JOB_UUID: "semaphoreJobUuid"
+      SEMAPHORE_PIPELINE_ID: "a9219129-951e-4e2c-9354-45534b63fa8b"
       SEMAPHORE_PLATFORM: "semaphorePlatform"
       SEMAPHORE_PROJECT_DIR: "semaphoreProjectDir"
       SEMAPHORE_PROJECT_HASH_ID: "semaphoreProjectHashId"
-      SEMAPHORE_PROJECT_NAME: "semaphoreProjectName"
+      SEMAPHORE_PROJECT_ID: "b717c4cc-fa0e-46f8-8bbf-589ab49a1777"
+      SEMAPHORE_PROJECT_NAME: "cypress-example-kitchensink"
       SEMAPHORE_PROJECT_UUID: "semaphoreProjectUuid"
       SEMAPHORE_REPO_SLUG: "semaphoreRepoSlug"
       SEMAPHORE_TRIGGER_SOURCE: "semaphoreTriggerSource"
+      SEMAPHORE_WORKFLOW_ID: "67aecea7-e4e7-405e-a77c-165e1b37a128"
       PULL_REQUEST_NUMBER: "pullRequestNumber"
-
-      REVISION: "revision"
-      BRANCH_NAME: "branchName"
     }, {clear: true})
 
     expectsName("semaphore")
@@ -482,19 +588,32 @@ describe "lib/util/ci_provider", ->
       semaphoreCurrentJob: "semaphoreCurrentJob"
       semaphoreCurrentThread: "semaphoreCurrentThread"
       semaphoreExecutableUuid: "semaphoreExecutableUuid"
+      semaphoreGitBranch: "show-semaphore-v2-266"
+      semaphoreGitDir: "cypress-example-kitchensink"
+      semaphoreGitRef: "refs/heads/show-semaphore-v2-266"
+      semaphoreGitRefType: "branch"
+      semaphoreGitRepoSlug: "cypress-io/cypress-example-kitchensink"
+      semaphoreGitSha: "83ce1df0f8be2767655bb805d20126ee441b71bf"
+      semaphoreGitUrl: "git@github.com:cypress-io/cypress-example-kitchensink.git"
+      semaphoreJobId: "5fb8dd98-3242-4a4e-a8ab-c4eca9db486c"
+      semaphoreJobName: "Cypress E2E 2"
       semaphoreJobCount: "semaphoreJobCount"
       semaphoreJobUuid: "semaphoreJobUuid"
+      semaphorePipelineId: "a9219129-951e-4e2c-9354-45534b63fa8b"
       semaphorePlatform: "semaphorePlatform"
       semaphoreProjectDir: "semaphoreProjectDir"
       semaphoreProjectHashId: "semaphoreProjectHashId"
-      semaphoreProjectName: "semaphoreProjectName"
+      semaphoreProjectId: "b717c4cc-fa0e-46f8-8bbf-589ab49a1777"
+      semaphoreProjectName: "cypress-example-kitchensink"
       semaphoreProjectUuid: "semaphoreProjectUuid"
       semaphoreRepoSlug: "semaphoreRepoSlug"
       semaphoreTriggerSource: "semaphoreTriggerSource"
+      semaphoreWorkflowId: "67aecea7-e4e7-405e-a77c-165e1b37a128"
     })
     expectsCommitParams({
-      sha: "revision"
-      branch: "branchName"
+      sha: "83ce1df0f8be2767655bb805d20126ee441b71bf"
+      branch: "show-semaphore-v2-266"
+      remoteOrigin: "cypress-io/cypress-example-kitchensink"
     })
 
   it "shippable", ->
@@ -568,15 +687,6 @@ describe "lib/util/ci_provider", ->
       message: "commitMessage"
       authorName: "committer"
     })
-
-  it "snap", ->
-    resetEnv = mockedEnv({
-      SNAP_CI: "true"
-    }, {clear: true})
-
-    expectsName("snap")
-    expectsCiParams(null)
-    expectsCommitParams(null)
 
   it "teamcity", ->
     resetEnv = mockedEnv({

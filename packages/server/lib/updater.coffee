@@ -1,5 +1,4 @@
 _              = require("lodash")
-nmi            = require("node-machine-id")
 debug          = require("debug")("cypress:server:updater")
 semver         = require("semver")
 request        = require("request")
@@ -8,6 +7,7 @@ pkg            = require("@packages/root")
 agent          = require("@packages/network").agent
 cwd            = require("./cwd")
 konfig         = require("./konfig")
+{ machineId }  = require('./util/machine_id')
 
 ## backup the original cwd
 localCwd = cwd()
@@ -49,10 +49,8 @@ NwUpdater.prototype.checkNewVersion = (cb) ->
 
   ## return hashed value because we dont care nor want
   ## to know anything about you or your machine
-  nmi.machineId()
+  machineId()
   .then(sendReq)
-  .catch ->
-    sendReq(null)
 
 class Updater
   constructor: (callbacks) ->
