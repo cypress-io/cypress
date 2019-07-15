@@ -5,10 +5,11 @@ exports['e2e visit low response timeout passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_spec.coffee)                                                        │
-  │ Searched:   cypress/integration/visit_spec.coffee                                              │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (visit_spec.coffee)                                                    │
+  │ Searched:       cypress/integration/visit_spec.coffee                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -80,10 +81,11 @@ exports['e2e visit low response timeout fails when network connection immediatel
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_http_network_error_failing_spec.coffee)                             │
-  │ Searched:   cypress/integration/visit_http_network_error_failing_spec.coffee                   │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (visit_http_network_error_failing_spec.coffee)                         │
+  │ Searched:       cypress/integration/visit_http_network_error_failing_spec.coffee               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -189,10 +191,11 @@ exports['e2e visit low response timeout fails when server responds with 500 1'] 
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_http_500_response_failing_spec.coffee)                              │
-  │ Searched:   cypress/integration/visit_http_500_response_failing_spec.coffee                    │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (visit_http_500_response_failing_spec.coffee)                          │
+  │ Searched:       cypress/integration/visit_http_500_response_failing_spec.coffee                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -286,10 +289,11 @@ exports['e2e visit low response timeout fails when file server responds with 404
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_file_404_response_failing_spec.coffee)                              │
-  │ Searched:   cypress/integration/visit_file_404_response_failing_spec.coffee                    │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (visit_file_404_response_failing_spec.coffee)                          │
+  │ Searched:       cypress/integration/visit_file_404_response_failing_spec.coffee                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -383,10 +387,11 @@ exports['e2e visit low response timeout fails when content type isnt html 1'] = 
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_non_html_content_type_failing_spec.coffee)                          │
-  │ Searched:   cypress/integration/visit_non_html_content_type_failing_spec.coffee                │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (visit_non_html_content_type_failing_spec.coffee)                      │
+  │ Searched:       cypress/integration/visit_non_html_content_type_failing_spec.coffee            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -482,10 +487,11 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_http_timeout_failing_spec.coffee)                                   │
-  │ Searched:   cypress/integration/visit_http_timeout_failing_spec.coffee                         │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (visit_http_timeout_failing_spec.coffee)                               │
+  │ Searched:       cypress/integration/visit_http_timeout_failing_spec.coffee                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -607,10 +613,11 @@ exports['e2e visit low responseTimeout, normal pageLoadTimeout fails when respon
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_response_never_ends_failing_spec.js)                                │
-  │ Searched:   cypress/integration/visit_response_never_ends_failing_spec.js                      │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (visit_response_never_ends_failing_spec.js)                            │
+  │ Searched:       cypress/integration/visit_response_never_ends_failing_spec.js                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -827,10 +834,11 @@ exports['e2e visit resolves visits quickly in chrome (headed) 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
-  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (fast_visit_spec.coffee)                                               │
+  │ Searched:       cypress/integration/fast_visit_spec.coffee                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -919,10 +927,11 @@ exports['e2e visit resolves visits quickly in electron (headless) 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
-  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (fast_visit_spec.coffee)                                               │
+  │ Searched:       cypress/integration/fast_visit_spec.coffee                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

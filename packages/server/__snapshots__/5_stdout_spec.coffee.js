@@ -5,10 +5,11 @@ exports['e2e stdout displays errors from failures 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_failing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/stdout_failing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (stdout_failing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/stdout_failing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -144,10 +145,11 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_exit_early_failing_spec.coffee)                                    │
-  │ Searched:   cypress/integration/stdout_exit_early_failing_spec.coffee                          │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (stdout_exit_early_failing_spec.coffee)                                │
+  │ Searched:       cypress/integration/stdout_exit_early_failing_spec.coffee                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -215,10 +217,11 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/stdout_passing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (stdout_passing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/stdout_passing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -287,10 +290,11 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_spec.coffee)                                                       │
-  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_spec.coffee)                                                   │
+  │ Searched:       cypress/integration/simple_spec.coffee                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -346,10 +350,11 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_spec.coffee)                                                       │
-  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_spec.coffee)                                                   │
+  │ Searched:       cypress/integration/simple_spec.coffee                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

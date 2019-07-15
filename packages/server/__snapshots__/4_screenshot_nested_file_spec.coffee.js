@@ -5,10 +5,11 @@ exports['e2e screenshot in nested spec passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (nested-1/nested-2/screenshot_nested_file_spec.coffee)                     │
-  │ Searched:   cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.coffee           │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (nested-1/nested-2/screenshot_nested_file_spec.coffee)                 │
+  │ Searched:       cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.coffee       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -5,10 +5,11 @@ exports['e2e issue 674 fails 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (issue_674_spec.coffee)                                                    │
-  │ Searched:   cypress/integration/issue_674_spec.coffee                                          │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (issue_674_spec.coffee)                                                │
+  │ Searched:       cypress/integration/issue_674_spec.coffee                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

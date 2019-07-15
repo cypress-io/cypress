@@ -5,9 +5,10 @@ exports['e2e uncaught support file errors failing 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (spec.coffee)                                                              │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (spec.coffee)                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

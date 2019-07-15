@@ -5,10 +5,11 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_caught_error_failing_spec.coffee)                                    │
-  │ Searched:   cypress/integration/hook_caught_error_failing_spec.coffee                          │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (hook_caught_error_failing_spec.coffee)                                │
+  │ Searched:       cypress/integration/hook_caught_error_failing_spec.coffee                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -122,10 +123,11 @@ exports['e2e caught and uncaught hooks errors failing2 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_error_failing_spec.coffee)                                  │
-  │ Searched:   cypress/integration/hook_uncaught_error_failing_spec.coffee                        │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (hook_uncaught_error_failing_spec.coffee)                              │
+  │ Searched:       cypress/integration/hook_uncaught_error_failing_spec.coffee                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -211,10 +213,11 @@ exports['e2e caught and uncaught hooks errors failing3 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_root_error_failing_spec.coffee)                             │
-  │ Searched:   cypress/integration/hook_uncaught_root_error_failing_spec.coffee                   │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (hook_uncaught_root_error_failing_spec.coffee)                         │
+  │ Searched:       cypress/integration/hook_uncaught_root_error_failing_spec.coffee               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -292,10 +295,11 @@ exports['e2e caught and uncaught hooks errors failing4 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_error_events_failing_spec.coffee)                           │
-  │ Searched:   cypress/integration/hook_uncaught_error_events_failing_spec.coffee                 │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (hook_uncaught_error_events_failing_spec.coffee)                       │
+  │ Searched:       cypress/integration/hook_uncaught_error_events_failing_spec.coffee             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

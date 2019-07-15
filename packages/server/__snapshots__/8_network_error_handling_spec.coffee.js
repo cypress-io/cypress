@@ -24,10 +24,11 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (https_passthru_spec.js)                                                   │
-  │ Searched:   cypress/integration/https_passthru_spec.js                                         │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (https_passthru_spec.js)                                               │
+  │ Searched:       cypress/integration/https_passthru_spec.js                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -86,10 +87,11 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (https_passthru_spec.js)                                                   │
-  │ Searched:   cypress/integration/https_passthru_spec.js                                         │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (https_passthru_spec.js)                                               │
+  │ Searched:       cypress/integration/https_passthru_spec.js                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -148,10 +150,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (network_error_304_handling_spec.js)                                       │
-  │ Searched:   cypress/integration/network_error_304_handling_spec.js                             │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (network_error_304_handling_spec.js)                                   │
+  │ Searched:       cypress/integration/network_error_304_handling_spec.js                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -209,10 +212,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (network_error_304_handling_spec.js)                                       │
-  │ Searched:   cypress/integration/network_error_304_handling_spec.js                             │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (network_error_304_handling_spec.js)                                   │
+  │ Searched:       cypress/integration/network_error_304_handling_spec.js                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -270,10 +274,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (network_error_304_handling_spec.js)                                       │
-  │ Searched:   cypress/integration/network_error_304_handling_spec.js                             │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (network_error_304_handling_spec.js)                                   │
+  │ Searched:       cypress/integration/network_error_304_handling_spec.js                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -21,10 +21,11 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_passing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/simple_passing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -74,10 +75,11 @@ exports['e2e reporters supports local custom reporter 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_passing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/simple_passing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -129,10 +131,11 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_passing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/simple_passing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -196,10 +199,11 @@ exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom repor
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_failing_hook_spec.coffee)                                          │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.coffee                                │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_failing_hook_spec.coffee)                                      │
+  │ Searched:       cypress/integration/simple_failing_hook_spec.coffee                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -308,10 +312,11 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_passing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/simple_passing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -373,10 +378,11 @@ exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom repor
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_failing_hook_spec.coffee)                                          │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.coffee                                │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_failing_hook_spec.coffee)                                      │
+  │ Searched:       cypress/integration/simple_failing_hook_spec.coffee                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -483,10 +489,11 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_passing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/simple_passing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -548,10 +555,11 @@ exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom repor
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_failing_hook_spec.coffee)                                          │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.coffee                                │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_failing_hook_spec.coffee)                                      │
+  │ Searched:       cypress/integration/simple_failing_hook_spec.coffee                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -705,10 +713,11 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (simple_passing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/simple_passing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

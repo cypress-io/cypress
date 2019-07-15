@@ -5,10 +5,11 @@ exports['e2e screenshot element capture passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (screenshot_element_capture_spec.coffee)                                   │
-  │ Searched:   cypress/integration/screenshot_element_capture_spec.coffee                         │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (screenshot_element_capture_spec.coffee)                               │
+  │ Searched:       cypress/integration/screenshot_element_capture_spec.coffee                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

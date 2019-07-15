@@ -5,10 +5,11 @@ exports['e2e config passes 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_passing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (config_passing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/config_passing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -70,10 +71,11 @@ exports['e2e config fails 1'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_failing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_failing_spec.coffee                                     │
+  │ Cypress:        1.2.3                                                                          │
+  │ Browser:        FooBrowser 88                                                                  │
+  │ Node Version:   v0.0.0 (bundled with Cypress)                                                  │
+  │ Specs:          1 found (config_failing_spec.coffee)                                           │
+  │ Searched:       cypress/integration/config_failing_spec.coffee                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
