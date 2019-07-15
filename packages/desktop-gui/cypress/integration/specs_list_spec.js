@@ -77,6 +77,7 @@ describe('Specs List', function () {
         cy.contains('span', 'integration').siblings('ul').within(() => {
           cy.contains('examples')
         })
+
         cy.contains('span', 'support').siblings('ul').within(function () {
           cy.contains('commands.js')
           cy.contains('defaults.js')
@@ -88,8 +89,7 @@ describe('Specs List', function () {
           cy.contains('index.js')
         })
       })
-    }
-    )
+    })
 
     it('lists folders and files alphabetically', () => {
       cy.get('.folder-preview-onboarding').within(() => {
@@ -164,8 +164,7 @@ describe('Specs List', function () {
         it('has play icon', () => {
           cy.contains('.btn', 'Run all specs')
           .find('i').should('have.class', 'fa-play')
-        }
-        )
+        })
 
         it('triggers browser launch on click of button', () => {
           cy.contains('.btn', 'Run all specs').click()
@@ -392,8 +391,7 @@ describe('Specs List', function () {
         .should('not.have.class', 'active')
         .click()
         .should('have.class', 'active')
-      }
-      )
+      })
 
       it('maintains active selection if specs change', function () {
         cy.get('@firstSpec').click().then(() => {
@@ -448,6 +446,7 @@ describe('Specs List', function () {
 
         cy.get('.file').contains('a', 'app_spec.coffee').as('firstSpec')
         .click()
+
         cy.get('.file').contains('a', 'account_new_spec.coffee').as('secondSpec')
         .click()
       })
@@ -477,10 +476,12 @@ describe('Specs List', function () {
       .then(function () {
         this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
       })
+
       cy.get('@firstSpec').should('have.class', 'active')
       .then(function () {
         this.ipc.onSpecChanged.yield(null, 'integration/accounts/account_new_spec.coffee')
       })
+
       cy.get('@firstSpec').should('not.have.class', 'active')
 
       cy.contains('a', 'account_new_spec.coffee')

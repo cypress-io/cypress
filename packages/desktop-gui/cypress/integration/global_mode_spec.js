@@ -60,8 +60,7 @@ describe('Global Mode', function () {
     cy.contains('a', 'installing it via').click().then(function () {
       expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/installing-via-npm')
     })
-  }
-  )
+  })
 
   it('dismisses notice when close is clicked', function () {
     cy.get('.local-install-notice .close').click()
@@ -73,8 +72,7 @@ describe('Global Mode', function () {
     cy.get('.local-install-notice .close').click().then(() => {
       expect(localStorage['local-install-notice-dimissed']).to.equal('true')
     })
-  }
-  )
+  })
 
   it('does not show notice when dismissed state stored in local storage', function () {
     cy.get('.local-install-notice .close').click()
@@ -97,16 +95,15 @@ describe('Global Mode', function () {
       .should('have.class', 'is-dragging-over')
       .trigger('dragleave')
       .should('not.have.class', 'is-dragging-over')
-    }
-    )
+    })
 
     it('handles drops of non-files gracefully', function (done) {
       cy.window().then((win) => {
         win.onerror = (message) => {
           done(`Should not cause error but threw: ${message}`)
         }
-      }
-      )
+      })
+
       //# user could drag and drop a link or text, not a file
       this.dropEvent.dataTransfer.files = []
       cy.get('.project-drop').trigger('drop', this.dropEvent)

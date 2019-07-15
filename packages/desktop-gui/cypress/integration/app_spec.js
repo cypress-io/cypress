@@ -10,8 +10,7 @@ describe('App', function () {
 
       cy.stub(this.ipc, 'guiError')
     })
-  }
-  )
+  })
 
   context('window.onerror', function () {
     beforeEach(function () {

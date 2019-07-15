@@ -13,7 +13,6 @@ describe('fixtures match api object schemas: ', () => {
   it.skip('runs', () => {
     cy.fixture('runs').each(assertSchema('getRunResponse', '2.2.0', {
       substitutions: ['orgId'], omit: omitErrObjects,
-    })
-    )
+    }))
   })
 })

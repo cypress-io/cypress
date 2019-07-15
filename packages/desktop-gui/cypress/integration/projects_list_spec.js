@@ -170,6 +170,7 @@ describe('Projects List', function () {
           { id: 'id-a', path: '/project/a' },
           { id: 'id-b', path: '/project/b' },
         ]
+
         this.ipc.addProject.withArgs('/project/b').resolves({ id: 'id-b', path: '/project/b' })
         this.ipc.addProject.withArgs('/foo/bar').resolves({ id: 'id-bar', path: '/foo/bar' })
 
