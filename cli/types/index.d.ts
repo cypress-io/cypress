@@ -4314,8 +4314,12 @@ declare namespace Cypress {
   // in your TS file
   declare namespace Cypress {
     interface cy {
-      // declare additional properties,
-      // for example additional custom commands methods
+      // declare additional properties on "cy" object, like
+      // label: string
+    }
+    interface Chainable {
+      // declare additional custom commands as methods, like
+      // login(username: string, password: string)
     }
   }
   ```
