@@ -46,8 +46,8 @@ function findNodeVersionFromPath (path) {
     return Promise.resolve(null)
   }
 
-  return execa.command(`${path} -v`)
-  .then(({ stdout }) => {
+  return execa.stdout(path, ['-v'])
+  .then((stdout) => {
     debug('node -v returned %o', { stdout })
     const matches = NODE_VERSION_RE.exec(stdout)
 

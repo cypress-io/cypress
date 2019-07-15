@@ -786,6 +786,7 @@ module.exports = {
     }
 
     displayRunStarting({
+      config
       specs
       group
       runUrl

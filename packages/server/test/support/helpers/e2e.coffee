@@ -64,14 +64,17 @@ replaceDurationInTables = (str, p1, p2) ->
   _.padStart("XX:XX", p1.length + p2.length)
 
 replaceUploadingResults = (orig, match..., offset, string) ->
-    results = match[1].split('\n').map((res) ->
-      res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)')
-    )
-    .sort()
-    .join('\n')
-    ret =  match[0] + results + match[3]
+  results = match[1].split('\n').map((res) ->
+    res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)')
+  )
+  .sort()
+  .join('\n')
+  ret =  match[0] + results + match[3]
 
-    return ret
+  return ret
+
+replaceNodeVersion = (str, p1, p2, p3) ->
+  return p1 + '0.0.0 (/foo/bar/node)' + ' '.repeat(p3.length - 16)
 
 normalizeStdout = (str) ->
   ## remove all of the dynamic parts of stdout
@@ -85,7 +88,8 @@ normalizeStdout = (str) ->
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) ## durations in tables
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
+  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$11.2.3") ## replace Cypress: 2.1.0
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion) ## replace Node Version: 1.2.3 (bundled with Cypress)
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) ## replace duration='1589'
   .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
