@@ -493,6 +493,7 @@ const $Keyboard = {
         _.extend(event, {
           data: key,
         })
+
         break
       }
 
@@ -510,6 +511,7 @@ const $Keyboard = {
         location: 0,
         repeat: false,
       })
+
       this.mixinModifiers(event)
     }
 

@@ -20,7 +20,7 @@ type FamilyCache = {
   [host: string] : 4 | 6
 }
 
-export function buildConnectReqHead(hostname: string, port: string, proxy: url.Url) {
+export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
   const connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
 
   connectReq.push(`Host: ${hostname}:${port}`)
@@ -54,7 +54,7 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
   let connectOpts: any = {
     port: Number(port),
     host: opts.proxy.hostname,
-    useTls: isHttps
+    useTls: isHttps,
   }
 
   if (!opts.shouldRetry) {
@@ -78,6 +78,7 @@ export const isRequestHttps = (options: http.RequestOptions) => {
 export const isResponseStatusCode200 = (head: string) => {
   // read status code from proxy's response
   const matches = head.match(statusCodeRe)
+
   return _.get(matches, 1) === '200'
 }
 
@@ -88,6 +89,7 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
     // the _header has already been queued to be written to the socket
     const first = req.output[0]
     const endOfHeaders = first.indexOf(_.repeat(CRLF, 2)) + 4
+
     req.output[0] = req._header + first.substring(endOfHeaders)
   }
 }
@@ -103,6 +105,7 @@ const getFirstWorkingFamily = (
   // https://github.com/cypress-io/cypress/issues/112
 
   const isIP = net.isIP(host)
+
   if (isIP) {
     // isIP conveniently returns the family of the address
     return cb(isIP)
@@ -120,6 +123,7 @@ const getFirstWorkingFamily = (
   return getAddress(port, host)
   .then((firstWorkingAddress: net.Address) => {
     familyCache[host] = firstWorkingAddress.family
+
     return cb(firstWorkingAddress.family)
   })
   .catch(() => {
@@ -132,13 +136,13 @@ export class CombinedAgent {
   httpsAgent: HttpsAgent
   familyCache: FamilyCache = {}
 
-  constructor(httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
+  constructor (httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
     this.httpAgent = new HttpAgent(httpOpts)
     this.httpsAgent = new HttpsAgent(httpsOpts)
   }
 
   // called by Node.js whenever a new request is made internally
-  addRequest(req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
+  addRequest (req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
     // Legacy API: addRequest(req, host, port, localAddress)
     // https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
     if (typeof options === 'string') {
@@ -146,7 +150,7 @@ export class CombinedAgent {
       options = {
         host: options,
         port: port!,
-        localAddress
+        localAddress,
       }
     }
 
@@ -276,8 +280,10 @@ class HttpsAgent extends https.Agent {
     createProxySock({ proxy, shouldRetry: options.shouldRetry }, (originalErr?, proxySocket?, triggerRetry?) => {
       if (originalErr) {
         const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
+
         err[0] = originalErr
         err.upstreamProxyConnect = true
+
         return cb(err, undefined)
       }
 
@@ -300,6 +306,7 @@ class HttpsAgent extends https.Agent {
         if (!_.includes(buffer, _.repeat(CRLF, 2))) {
           // haven't received end of headers yet, keep buffering
           proxySocket.once('data', onData)
+
           return
         }
 
@@ -316,6 +323,7 @@ class HttpsAgent extends https.Agent {
           // https.Agent will upgrade and reuse this socket now
           options.socket = proxySocket
           options.servername = hostname
+
           return cb(undefined, super.createConnection(options, undefined))
         }
 

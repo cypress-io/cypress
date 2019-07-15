@@ -164,6 +164,7 @@ describe('/lib/tasks/install', function () {
         mockfs({
           [version]: 'asdf',
         })
+
         process.env.CYPRESS_INSTALL_BINARY = version
 
         const installDir = state.getVersionDir()
@@ -394,6 +395,7 @@ describe('/lib/tasks/install', function () {
             expect(download.start).to.not.be.called
           })
         })
+
         it('uses cache when mismatch version given URL ', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
@@ -404,6 +406,7 @@ describe('/lib/tasks/install', function () {
             expect(download.start).to.not.be.called
           })
         })
+
         it('uses cache when correct version installed given Zip', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
@@ -417,6 +420,7 @@ describe('/lib/tasks/install', function () {
             expect(unzip.start).to.not.be.called
           })
         })
+
         it('uses cache when mismatch version given Zip ', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 

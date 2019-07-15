@@ -13,7 +13,6 @@ _test-output
 cypress.zip
 tmp/
 .nyc_output
-.vscode/settings.json
 
 # from extension
 Cached Theme.pak

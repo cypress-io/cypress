@@ -79,6 +79,7 @@ if (result.stdout.includes('nodemon')) {
   console.error(
     'which means somehow we are including dev dependencies in the output bundle'
   )
+
   console.error('see https://github.com/cypress-io/cypress/issues/2896')
   process.exit(1)
 }
@@ -116,10 +117,12 @@ if (isPullRequest()) {
   shell.exec(
     `node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`
   )
+
   shell.cat('binary-url.json')
   shell.exec(
     'node scripts/add-install-comment.js --npm npm-package-url.json --binary binary-url.json'
   )
+
   shell.exec(
     'node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor'
   )

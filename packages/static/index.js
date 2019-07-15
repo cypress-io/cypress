@@ -1,1 +1,1 @@
-module.exports = require("./lib/static")
+module.exports = require('./lib/static')
