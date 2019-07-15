@@ -209,20 +209,18 @@
   margin: 1em;
 }
 
-.proxy-settings {
-  .proxy-table {
-    width: 100%;
+.proxy-table, .node-table {
+  width: 100%;
 
-    th:first-child {
-      width: 150px;
-    }
+  th:first-child {
+    width: 150px;
+  }
 
-    .no-bypass {
-      opacity: .8;
-    }
+  .no-bypass {
+    opacity: .8;
+  }
 
-    td, th {
-      padding: 3px;
-    }
+  td, th {
+    padding: 3px;
   }
 }

@@ -7,6 +7,7 @@ import Configuration from './configuration'
 import ProjectId from './project-id'
 import RecordKey from './record-key'
 import ProxySettings from './proxy-settings'
+import NodeVersion from './node-version'
 
 const Settings = observer(({ project, app }) => (
   <div className={cs('settings', {
@@ -23,6 +24,9 @@ const Settings = observer(({ project, app }) => (
         </Panel>
         <Panel header='Record Key' key='record-key' className='form-horizontal settings-record-key'>
           <RecordKey project={project} />
+        </Panel>
+        <Panel header='Node Version' key='node-version' className='form-horizontal settings-node'>
+          <NodeVersion project={project} />
         </Panel>
         <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
           <ProxySettings app={app} />

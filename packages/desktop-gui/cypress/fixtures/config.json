@@ -62,6 +62,8 @@
   "report": false,
   "reporter": "spec",
   "requestTimeout": 5000,
+  "resolvedNodePath": null,
+  "resolvedNodeVersion": "1.2.3",
   "hosts": {
     "*.foobar.com": "127.0.0.1"
   },
@@ -223,6 +225,10 @@
     "pageLoadTimeout": {
       "from": "default",
       "value": 30000
+    },
+    "pluginsFile": {
+      "from": "default",
+      "value": "cypress/plugins"
     },
     "port": {
       "from": "default",

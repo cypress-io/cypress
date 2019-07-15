@@ -4,7 +4,7 @@ const fixPath = require('fix-path')
 const Promise = require('bluebird')
 const which = require('which')
 
-const NODE_VERSION_RE = /^v(\d+\.\d+\.\d+)/gm
+const NODE_VERSION_RE = /^v(\d+\.\d+\.\d+)/m
 
 /*
  * Find the full path to a `node` binary on the current PATH.
@@ -15,7 +15,6 @@ const NODE_VERSION_RE = /^v(\d+\.\d+\.\d+)/gm
  *   installed globally, like 6 or 10 (NVM path comes later)
  *   So this function only fixes the path, if the Node cannot be found on first attempt
  */
-
 function findNodeInFullPath () {
   debug('finding Node with $PATH %s', process.env.PATH)
 
@@ -43,8 +42,13 @@ function findNodeInFullPath () {
 }
 
 function findNodeVersionFromPath (path) {
+  if (!path) {
+    return Promise.resolve(null)
+  }
+
   return execa(path, ['-v'])
   .then(({ stdout }) => {
+    debug('node -v returned %o', { stdout })
     const matches = NODE_VERSION_RE.exec(stdout)
 
     if (matches && matches.length === 2) {

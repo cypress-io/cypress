@@ -1,3 +1,5 @@
+{ _ } = Cypress
+
 describe "Settings", ->
   beforeEach ->
     cy.fixture("user").as("user")
@@ -223,6 +225,45 @@ describe "Settings", ->
 
       it "routes to specs page", ->
         cy.shouldBeOnProjectSpecs()
+
+  describe "when node version panel is opened", ->
+    beforeEach ->
+      @navigateWithConfig = (config) ->
+        @openProject.resolve(_.defaults(config, @config))
+        @projectStatuses[0].id = @config.projectId
+        @getProjectStatus.resolve(@projectStatuses[0])
+        @goToSettings()
+        cy.contains("Node Version").click()
+
+    it "with bundled node informs user we're using bundled node", ->
+      @navigateWithConfig({})
+
+      cy.get(".settings-node td.path")
+      .should("contain", "N/A (bundled with Cypress)")
+      cy.get(".settings-node td.version")
+      .should("contain", "v1.2.3")
+
+    it "with custom node displays path to custom node", ->
+      @navigateWithConfig({
+        resolvedNodePath: "/foo/bar/node",
+        resolvedNodeVersion: "4.5.6"
+      })
+
+      cy.get(".settings-node td.path")
+      .should("contain", "/foo/bar/node")
+      cy.get(".settings-node td.version")
+      .should("contain", "v4.5.6")
+
+    it "with custom node failed version check displays fallback message", ->
+      @navigateWithConfig({
+        resolvedNodePath: "/foo/bar/node",
+        resolvedNodeVersion: null
+      })
+
+      cy.get(".settings-node td.path")
+      .should("contain", "/foo/bar/node")
+      cy.get(".settings-node td.version")
+      .should("contain", "Unable to detect")
 
   context "on config changes", ->
     beforeEach ->
