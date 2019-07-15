@@ -301,7 +301,7 @@ module.exports = {
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
     .then(@setScaffoldPaths)
-    .then(@setNodeBinary)
+    .then(_.partialRight(@setNodeBinary, options.onWarning))
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)
@@ -361,7 +361,7 @@ module.exports = {
     .value()
 
   # instead of the built-in Node process, specify a path to 3rd party Node
-  setNodeBinary: Promise.method (obj) ->
+  setNodeBinary: Promise.method (obj, onWarning) ->
     if obj.nodeVersion != 'system'
       obj.resolvedNodeVersion = process.versions.node
       return obj
@@ -370,7 +370,8 @@ module.exports = {
     .then ({ path, version }) ->
       obj.resolvedNodePath = path
       obj.resolvedNodeVersion = version
-    .catch ->
+    .catch (err) ->
+      onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
       obj.resolvedNodeVersion = process.versions.node
     .return(obj)
 
