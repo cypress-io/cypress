@@ -43,71 +43,54 @@ module.exports = {
         stdio: "inherit"
       }
 
-      # if we need to find Node and use it to fork the child process
-      # find it asynchronously
-      decidedChildOptions = null
+      if config.resolvedNodePath
+        debug("launching using custom node version %o", _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
+        childOptions.execPath = config.resolvedNodePath
 
-      if config.nodeVersion is "system"
-        # instead of the built-in Node process, specify a path to 3rd party Node
-        # https://devdocs.io/node/child_process#child_process_child_process_fork_modulepath_args_options
-        debug("looking for system Node")
-        decidedChildOptions = util.findNode()
-        .then (resolvedNode) ->
-          if resolvedNode
-            debug("using found Node %s", resolvedNode)
-            childOptions.execPath = resolvedNode
-          else
-            util.logWarning("Could find system Node", "using bundled Node", process.version)
-      else
-        debug("using default bundled Node version %s", process.version)
-        decidedChildOptions = Promise.resolve()
+      debug("forking to run %s", childIndexFilename)
+      pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
+      ipc = util.wrapIpc(pluginsProcess)
 
-      return decidedChildOptions
-      .then () ->
-        debug("forking to run %s", childIndexFilename)
-        pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
-        ipc = util.wrapIpc(pluginsProcess)
+      handler(ipc) for handler in handlers
 
-        handler(ipc) for handler in handlers
+      ipc.send("load", config)
 
-        ipc.send("load", config)
+      ipc.on "loaded", (newCfg, registrations) ->
+        _.each registrations, (registration) ->
+          debug("register plugins process event", registration.event, "with id", registration.eventId)
 
-        ipc.on "loaded", (newCfg, registrations) ->
-          _.each registrations, (registration) ->
-            debug("register plugins process event", registration.event, "with id", registration.eventId)
+          register registration.event, (args...) ->
+            util.wrapParentPromise ipc, registration.eventId, (invocationId) ->
+              debug("call event", registration.event, "for invocation id", invocationId)
+              ids = {
+                eventId: registration.eventId
+                invocationId: invocationId
+              }
+              ipc.send("execute", registration.event, ids, args)
 
-            register registration.event, (args...) ->
-              util.wrapParentPromise ipc, registration.eventId, (invocationId) ->
-                debug("call event", registration.event, "for invocation id", invocationId)
-                ids = {
-                  eventId: registration.eventId
-                  invocationId: invocationId
-                }
-                ipc.send("execute", registration.event, ids, args)
+        debug("resolving with new config %o", newCfg)
+        resolve(newCfg)
 
-          debug("resolving with new config %o", newCfg)
-          resolve(newCfg)
+      ipc.on "load:error", (type, args...) ->
+        debug("load:error %s, rejecting", type)
+        reject(errors.get(type, args...))
 
-        ipc.on "load:error", (type, args...) ->
-          debug("load:error %s, rejecting", type)
-          reject(errors.get(type, args...))
+      killPluginsProcess = ->
+        pluginsProcess and pluginsProcess.kill()
+        pluginsProcess = null
 
-        killPluginsProcess = ->
-          pluginsProcess and pluginsProcess.kill()
-          pluginsProcess = null
+      handleError = (err) ->
+        debug("plugins process error:", err.stack)
+        killPluginsProcess()
+        err = errors.get("PLUGINS_ERROR", err.annotated or err.stack or err.message)
+        err.title = "Error running plugin"
+        options.onError(err)
 
-        handleError = (err) ->
-          debug("plugins process error:", err.stack)
-          killPluginsProcess()
-          err = errors.get("PLUGINS_ERROR", err.annotated or err.stack or err.message)
-          err.title = "Error running plugin"
-          options.onError(err)
+      pluginsProcess.on("error", handleError)
+      ipc.on("error", handleError)
 
-        pluginsProcess.on("error", handleError)
-        ipc.on("error", handleError)
-
-        ## see timers/parent.js line #93 for why this is necessary
-        process.on("exit", killPluginsProcess)
+      ## see timers/parent.js line #93 for why this is necessary
+      process.on("exit", killPluginsProcess)
 
   register: register
 

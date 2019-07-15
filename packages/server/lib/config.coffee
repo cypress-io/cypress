@@ -4,6 +4,7 @@ Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
+findSystemNode = require("./util/find_system_node")
 fs       = require("./util/fs")
 keys     = require("./util/keys")
 origin   = require("./util/origin")
@@ -69,8 +70,8 @@ configKeys = toWords """
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
-  waitForAnimations
-  nodeVersion
+  waitForAnimations               resolvedNodeVersion
+  nodeVersion                     resolvedNodePath
 """
 
 breakingConfigKeys = toWords """
@@ -300,6 +301,7 @@ module.exports = {
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
     .then(@setScaffoldPaths)
+    .then(@setNodeBinary)
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)
@@ -357,6 +359,20 @@ module.exports = {
         else
           source("default")
     .value()
+
+  # instead of the built-in Node process, specify a path to 3rd party Node
+  setNodeBinary: Promise.method (obj) ->
+    if obj.nodeVersion != 'system'
+      obj.resolvedNodeVersion = process.versions.node
+      return obj
+
+    findSystemNode.findNodePathAndVersion()
+    .then ({ path, version }) ->
+      obj.resolvedNodePath = path
+      obj.resolvedNodeVersion = version
+    .catch ->
+      obj.resolvedNodeVersion = process.versions.node
+    .return(obj)
 
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
