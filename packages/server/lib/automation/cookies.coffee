@@ -145,10 +145,10 @@ cookies = (cyNamespace, cookieNamespace) ->
     clearCookies: (data, automate) ->
       cookies = _.reject(normalizeCookies(data), isNamespaced)
 
-      debug("clear:cookies %o", data)
+      debug("clear:cookies %o", cookies)
 
       clear = (cookie) ->
-        automate("clear:cookie", { name: cookie.name })
+        automate("clear:cookie", { name: cookie.name, domain: cookie.domain })
         .then(normalizeCookieProps)
 
       Promise.map(cookies, clear)
