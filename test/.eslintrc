@@ -1,4 +1,7 @@
 {
+  "extends": [
+    "plugin:@cypress/dev/tests"
+  ],
   "env": {
     "jest": true
   }

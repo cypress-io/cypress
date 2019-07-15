@@ -5,13 +5,12 @@
     "lint": "eslint --ext .js,json,.eslintrc .",
     "lint-changed": "node ./scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
-    "lint-pre-commit": "node ./scripts/lint-pre-commit",
     "semantic-release": "semantic-release",
     "test": "jest"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-pre-commit --silent"
+      "pre-commit": "lint-staged"
     }
   },
   "dependencies": {
@@ -37,6 +36,7 @@
     "husky": "^2.7.0",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
+    "lint-staged": "^9.2.0",
     "mocha": "^6.1.4",
     "semantic-release": "^15.13.17",
     "sinon": "^7.3.2",
@@ -70,5 +70,11 @@
     "cypress",
     "eslint",
     "eslintplugin"
-  ]
+  ],
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,eslintrc}": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
 }

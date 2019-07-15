@@ -290,6 +290,7 @@ module.exports = {
         'mocha/handle-done-callback': 'error',
         'mocha/no-exclusive-tests': 'error',
         'mocha/no-global-tests': 'error',
+        '@cypress/dev/skip-comment': 'error',
       },
     },
 

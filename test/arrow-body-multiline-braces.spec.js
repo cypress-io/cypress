@@ -36,19 +36,22 @@ function execute (file, options = {}) {
   return results
 }
 
-it('lint multiline js', async () => {
-  const filename = './fixtures/multiline.js'
-  const result = execute(filename, {
-    fix: true,
+describe('arrow-body-multiline-braces', () => {
+
+  it('lint multiline js', async () => {
+    const filename = './fixtures/multiline.js'
+    const result = execute(filename, {
+      fix: true,
+    })
+
+    expect(result.output).toContain('{')
   })
 
-  expect(result.output).toContain('{')
-})
+  it('lint oneline js', async () => {
+    const filename = './fixtures/oneline.js'
+    const result = execute(filename, { fix: false })
 
-it('lint oneline js', async () => {
-  const filename = './fixtures/oneline.js'
-  const result = execute(filename, { fix: false })
-
-  expect(result.output).not.ok
-  expect(result).toHaveProperty('errorCount', 0)
+    expect(result.output).not.ok
+    expect(result).toHaveProperty('errorCount', 0)
+  })
 })

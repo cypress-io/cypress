@@ -3,7 +3,7 @@ const CLIEngine = require('eslint').CLIEngine
 const plugin = require('..')
 const _ = require('lodash')
 
-const ruleName = 'no-only'
+const ruleName = 'skip-comment'
 const pluginName = '__plugin__'
 
 function execute (file, options = {}) {
@@ -36,18 +36,32 @@ function execute (file, options = {}) {
   return results
 }
 
-describe('no-only', () => {
+describe('skip-comment', () => {
 
-  it('lint js with only', async () => {
-    const filename = './fixtures/with-only.js'
+  it('skip test with comment', async () => {
+    const filename = './fixtures/skip-comment-pass.js'
+    const result = execute(filename, {
+      fix: true,
+    })
+
+    expect(result.errorCount).toBe(0)
+  })
+
+  it('skip test without comment', async () => {
+    const filename = './fixtures/skip-comment-fail.js'
     const result = execute(filename, {
       fix: true,
     })
 
     expect(result.errorCount).toBe(3)
+    // console.log(result.messages[0].message)
+
     expect(result.messages[0].message).toContain('it')
+    expect(result.messages[0].message).toContain('NOTE:')
     expect(result.messages[1].message).toContain('describe')
+    expect(result.messages[1].message).toContain('NOTE:')
     expect(result.messages[2].message).toContain('context')
+    expect(result.messages[2].message).toContain('NOTE:')
 
     expect(result.output).not.toBeTruthy()
   })
