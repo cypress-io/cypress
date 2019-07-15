@@ -79,6 +79,10 @@ formatFooterSummary = (results) ->
     colorIf(results.totalSkipped, "blue"),
   ]
 
+formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }) ->
+  if resolvedNodePath
+    "v#{resolvedNodeVersion} (#{resolvedNodePath})"
+
 formatSpecSummary = (name, failures) ->
   [
     getSymbol(failures),
@@ -108,7 +112,7 @@ formatSpecs = (specs) ->
   .join("")
 
 displayRunStarting = (options = {}) ->
-  { specs, specPattern, browser, runUrl, parallel, group } = options
+  { config, specs, specPattern, browser, runUrl, parallel, group } = options
 
   console.log("")
 
@@ -122,8 +126,10 @@ displayRunStarting = (options = {}) ->
 
   console.log("")
 
+  colWidths = if config.resolvedNodePath then [16, 84] else [12, 88]
+
   table = terminal.table({
-    colWidths: [12, 88]
+    colWidths
     type: "outsideBorder"
   })
 
@@ -131,6 +137,7 @@ displayRunStarting = (options = {}) ->
   .chain([
     [gray("Cypress:"), pkg.version]
     [gray("Browser:"), formatBrowser(browser)]
+    [gray("Node Version:"), formatNodeVersion(config)]
     [gray("Specs:"), formatSpecs(specs)]
     [gray("Searched:"), formatSpecPattern(specPattern)]
     [gray("Params:"), formatRecordParams(runUrl, parallel, group)]
