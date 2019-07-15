@@ -13,7 +13,7 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "debug": "4.1.1",
-    "lodash": "4.17.13",
+    "lodash": "4.17.14",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
