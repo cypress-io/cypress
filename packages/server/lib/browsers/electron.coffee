@@ -87,11 +87,9 @@ module.exports = {
     if options.show
       menu.set({withDevTools: true})
 
-    Promise
-    .try =>
-      if options.show is false
-        @_attachDebugger(win.webContents)
-
+    Promise.try =>
+      @_attachDebugger(win.webContents)
+    .then =>
       if ua = options.userAgent
         @_setUserAgent(win.webContents, ua)
 
@@ -105,9 +103,29 @@ module.exports = {
       )
     .then ->
       win.loadURL(url)
+    .then =>
+      ## enabling can only happen once the window has loaded
+      @_enableDebugger(win.webContents)
     .return(win)
 
   _attachDebugger: (webContents) ->
+    ## this method doesn't like Promise.promisify because when there's
+    ## only one argument it can't be called with 2 arguments + the callback
+    webContents.debugger.sendCommandAsync = (message, data) ->
+      new Promise (resolve, reject) ->
+        debug("debugger: sendCommand(%s, %o)", message, data)
+        callback = (err, result) ->
+          if err
+            debug("debugger: sendCommand(%s, %o) error: %o", message, err)
+            reject(err)
+          else
+            resolve(result)
+
+        if data
+          webContents.debugger.sendCommand(message, data, callback)
+        else
+          webContents.debugger.sendCommand(message, callback)
+
     try
       webContents.debugger.attach()
       debug("debugger attached")
@@ -121,7 +139,12 @@ module.exports = {
       if method is "Console.messageAdded"
         debug("console message: %o", params.message)
 
-    webContents.debugger.sendCommand("Console.enable")
+  _enableDebugger: (webContents) ->
+    debug("debugger: enable Console and Network")
+    Promise.join(
+      webContents.debugger.sendCommandAsync("Console.enable"),
+      webContents.debugger.sendCommandAsync("Network.enable")
+    )
 
   _getPartition: (options) ->
     if options.isTextTerminal
@@ -148,7 +171,7 @@ module.exports = {
     new Promise (resolve) ->
       webContents.session.setProxy({
         proxyRules: proxyServer
-        ## this should really only be necessary when 
+        ## this should really only be necessary when
         ## running Chromium versions >= 72
         ## https://github.com/cypress-io/cypress/issues/1872
         proxyBypassRules: "<-loopback>"
@@ -201,19 +224,49 @@ module.exports = {
           tryToCall win, ->
             a[method](data)
 
+        invokeViaDebugger = (message, data) ->
+          tryToCall win, ->
+            win.webContents.debugger.sendCommandAsync(message, data)
+
+        normalizeGetCookieProps = (cookie) ->
+          cookie.expirationDate = cookie.expires ? -1
+          delete cookie.expires
+          return cookie
+
+        normalizeGetCookies = (cookies) ->
+          _.map(cookies, normalizeGetCookieProps)
+
+        normalizeSetCookieProps = (cookie) ->
+          cookie.name or= "" ## name can't be undefined/null
+          cookie.expiry = cookie.expirationDate
+          delete cookie.expirationDate
+          return cookie
+
+        getCookies = ->
+          invokeViaDebugger("Network.getAllCookies")
+          .then (result) ->
+            normalizeGetCookies(result.cookies)
+
+        getCookie = (data) ->
+          getCookies().then (cookies) ->
+            _.find(cookies, { name: data.name }) or null
+
         automation.use({
           onRequest: (message, data) ->
             switch message
               when "get:cookies"
-                invoke("getCookies", data)
+                getCookies()
               when "get:cookie"
-                invoke("getCookie", data)
+                getCookie(data)
               when "set:cookie"
-                invoke("setCookie", data)
+                data = normalizeSetCookieProps(data)
+                invokeViaDebugger("Network.setCookie", data).then ->
+                  getCookie(data)
               when "clear:cookies"
-                invoke("clearCookies", data)
+                invokeViaDebugger("Network.clearBrowserCookies").return(null)
               when "clear:cookie"
-                invoke("clearCookie", data)
+                data = normalizeSetCookieProps(data)
+                invokeViaDebugger("Network.deleteCookies", data).return(null)
               when "is:automation:client:connected"
                 invoke("isAutomationConnected", data)
               when "take:screenshot"

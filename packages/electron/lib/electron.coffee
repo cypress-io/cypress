@@ -77,8 +77,8 @@ module.exports = {
         argv.push("--enable-logging")
 
       cp.spawn(execPath, argv, {stdio: "inherit"})
-      .on "close", (code) ->
-        debug("electron closing with code", code)
+      .on "close", (code, errCode) ->
+        debug("electron closing with code: %s, error code: %s", code, errCode)
 
         if code
           debug("original command was")
