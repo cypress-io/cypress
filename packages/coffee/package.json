@@ -1,15 +1,15 @@
 {
   "name": "@packages/coffee",
-  "main": "index.js",
   "private": true,
-  "dependencies": {
-    "coffeescript": "1.12.7"
-  },
   "files": [
     "register.js"
   ],
+  "main": "index.js",
   "scripts": {
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "clean-deps": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "coffeescript": "1.12.7"
   }
 }

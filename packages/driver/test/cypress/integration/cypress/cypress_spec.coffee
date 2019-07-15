@@ -41,9 +41,25 @@ describe "driver/src/cypress/index", ->
       })
 
       @Cypress.backend("foo")
+      .then ->
+        throw new Error("should not reach")
       .catch (err) ->
         expect(err.backend).to.be.true
         expect(err.stack).not.to.include("From previous event")
+
+    ## https://github.com/cypress-io/cypress/issues/4346
+    it "can complete if a circular reference is sent", ->
+      foo = {
+        bar: {}
+      }
+
+      foo.bar.baz = foo
+
+      Cypress.backend("foo", foo)
+      .then ->
+        throw new Error("should not reach")
+      .catch (e) ->
+        expect(e.message).to.eq("You requested a backend event we cannot handle: foo")
 
   context ".isCy", ->
     it "returns true on cy, cy chainable", ->

@@ -170,3 +170,45 @@ describe "lib/util/cors", ->
       it "matches", ->
         @isTrue("http://192.168.5.10", @props)
         @isTrue("http://192.168.5.10:80", @props)
+
+  context ".urlMatchesOriginProtectionSpace", ->
+    isMatch = (urlStr, origin) ->
+      expect(urlStr, "the url: '#{urlStr}' did not match origin protection space: '#{origin}'").to.satisfy ->
+        cors.urlMatchesOriginProtectionSpace(urlStr, origin)
+
+    isNotMatch = (urlStr, origin) ->
+      expect(urlStr, "the url: '#{urlStr}' matched origin protection space: '#{origin}'")
+      .not.to.satisfy ->
+        cors.urlMatchesOriginProtectionSpace(urlStr, origin)
+
+    it "ports", ->
+      isMatch("http://example.com/", "http://example.com:80")
+      isMatch("http://example.com:80/", "http://example.com")
+      isMatch("http://example.com:80/", "http://example.com:80")
+      isMatch("https://example.com:443/", "https://example.com:443")
+      isMatch("https://example.com:443/", "https://example.com")
+      isMatch("https://example.com/", "https://example.com:443")
+
+      isNotMatch("https://example.com:1234/", "https://example.com")
+      isNotMatch("https://example.com:1234/", "https://example.com:443")
+
+    it "schemes", ->
+      isNotMatch("http://example.com/", "https://example.com")
+      isNotMatch("https://example.com/", "http://example.com")
+      isNotMatch("http://example.com/", "ftp://example.com")
+      isNotMatch("http://example.com/", "file://example.com")
+
+    it "does not factor in path or search", ->
+      isMatch("http://example.com/foo", "http://example.com")
+      isMatch("http://example.com/foo/bar", "http://example.com")
+      isMatch("http://example.com/?foo=bar", "http://example.com")
+      isMatch("http://example.com/foo?bar=baz", "http://example.com")
+
+    it "subdomains", ->
+      isMatch("http://example.com/", "http://example.com")
+      isMatch("http://www.example.com/", "http://www.example.com")
+      isMatch("http://foo.bar.example.com/", "http://foo.bar.example.com")
+
+      isNotMatch("http://www.example.com/", "http://example.com")
+      isNotMatch("http://foo.example.com/", "http://bar.example.com")
+      isNotMatch("http://foo.example.com/", "http://foo.bar.example.com")

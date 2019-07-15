@@ -21,7 +21,7 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
     debug('checking that baseUrl is available', {
       baseUrl: urlStr,
       delaysRemaining,
-      retryIntervals
+      retryIntervals,
     })
 
     return isListening(urlStr)

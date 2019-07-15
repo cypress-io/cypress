@@ -25,6 +25,7 @@ savedState  = require("./saved_state")
 Automation  = require("./automation")
 preprocessor = require("./plugins/preprocessor")
 fs          = require("./util/fs")
+keys        = require("./util/keys")
 settings    = require("./util/settings")
 specsUtil   = require("./util/specs")
 
@@ -184,7 +185,7 @@ class Project extends EE
 
   watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
-    if not cfg.pluginsFile
+    if not cfg.pluginsFile or options.isTextTerminal
       return Promise.resolve()
 
     fs.pathExists(cfg.pluginsFile)
@@ -206,7 +207,7 @@ class Project extends EE
 
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
-    ## watch anything
+    ## watch anything (like in run mode)
     return if not onSettingsChanged
 
     debug("watch settings files")
@@ -518,7 +519,8 @@ class Project extends EE
     debug("get project statuses for #{clientProjects.length} projects")
     user.ensureAuthToken()
     .then (authToken) ->
-      debug("got auth token #{authToken}")
+      debug("got auth token: %o", { authToken: keys.hide(authToken) })
+
       api.getProjects(authToken).then (projects = []) ->
         debug("got #{projects.length} projects")
         projectsIndex = _.keyBy(projects, "id")
@@ -548,7 +550,8 @@ class Project extends EE
       return Promise.resolve(Project._mergeState(clientProject, "VALID"))
 
     user.ensureAuthToken().then (authToken) ->
-      debug("got auth token #{authToken}")
+      debug("got auth token: %o", { authToken: keys.hide(authToken) })
+
       Project._getProject(clientProject, authToken)
 
   @remove = (path) ->

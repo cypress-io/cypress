@@ -168,7 +168,7 @@ const openProject = (project) => {
   })
 
   ipc.onProjectWarning((__, warning) => {
-    project.setWarning(warning)
+    project.addWarning(warning)
   })
 
   return ipc.openProject(project.path)

@@ -2,6 +2,7 @@ const path = require('path')
 
 function dist (...args) {
   const paths = [__dirname, '..', 'dist'].concat(args)
+
   return path.join(...paths)
 }
 

@@ -11,7 +11,12 @@ config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
 
-s3StaticHtmlUrl = "https://s3.amazonaws.com/static.cypress.io/cypress-project-internal-test-assets/index.html"
+s3StaticHtmlUrl = "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html"
+
+expectToEqDetails = (actual, expected) ->
+  actual = _.omit(actual, 'totalTime')
+
+  expect(actual).to.deep.eq(expected)
 
 describe "Server", ->
   beforeEach ->
@@ -116,7 +121,7 @@ describe "Server", ->
       it "can serve static assets", ->
         @server._onResolveUrl("/index.html", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -142,7 +147,7 @@ describe "Server", ->
       it "sends back the content type", ->
         @server._onResolveUrl("/assets/foo.json", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: false
             contentType: "application/json"
@@ -160,7 +165,7 @@ describe "Server", ->
 
         @server._onResolveUrl("/index.html", {}, @automationRequest)
         .then (obj = {}) =>
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -177,7 +182,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) =>
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -203,7 +208,7 @@ describe "Server", ->
       it "can follow static file redirects", ->
         @server._onResolveUrl("/sub", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -233,10 +238,10 @@ describe "Server", ->
       it "gracefully handles 404", ->
         @server._onResolveUrl("/does-not-exist", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: false
-            isHtml: false
-            contentType: undefined
+            isHtml: true
+            contentType: "text/html"
             url: "http://localhost:2000/does-not-exist"
             originalUrl: "/does-not-exist"
             filePath: Fixtures.projectPath("no-server/dev/does-not-exist")
@@ -256,7 +261,7 @@ describe "Server", ->
       it "handles urls with hashes", ->
         @server._onResolveUrl("/index.html#/foo/bar", {}, @automationRequest)
         .then (obj = {}) =>
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -315,14 +320,14 @@ describe "Server", ->
 
             Promise.delay(100)
             .then =>
-              ## the p1 should not have a current promise phase or reqStream until it's cancelled
+              ## the p1 should not have a current promise phase or reqStream until it's canceled
               expect(p1).not.to.have.property('currentPromisePhase')
               expect(p1).not.to.have.property('reqStream')
 
               ## fire the 2nd request now that the first one has had some time to reach out
               @server._onResolveUrl("http://localhost:#{@httpPort}/#{path}/100", {}, @automationRequest)
             .then (obj) =>
-              expect(obj).to.deep.eq({
+              expectToEqDetails(obj, {
                 isOkStatusCode: true
                 isHtml: true
                 contentType: "text/html"
@@ -360,7 +365,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://getbootstrap.com/", headers, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -389,12 +394,50 @@ describe "Server", ->
 
         @server._onResolveUrl("http://getbootstrap.com/user.json", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: false
             contentType: "application/json"
             url: "http://getbootstrap.com/user.json"
             originalUrl: "http://getbootstrap.com/user.json"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+
+      it "yields isHtml true for HTML-shaped responses", ->
+        nock("http://example.com")
+        .get("/")
+        .reply(200, "<html>foo</html>")
+
+        @server._onResolveUrl("http://example.com", {}, @automationRequest)
+        .then (obj = {}) ->
+          expectToEqDetails(obj, {
+            isOkStatusCode: true
+            isHtml: true
+            contentType: undefined
+            url: "http://example.com/"
+            originalUrl: "http://example.com/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+
+      it "yields isHtml false for non-HTML-shaped responses", ->
+        nock("http://example.com")
+        .get("/")
+        .reply(200, '{ foo: "bar" }')
+
+        @server._onResolveUrl("http://example.com", {}, @automationRequest)
+        .then (obj = {}) ->
+          expectToEqDetails(obj, {
+            isOkStatusCode: true
+            isHtml: false
+            contentType: undefined
+            url: "http://example.com/"
+            originalUrl: "http://example.com/"
             status: 200
             statusText: "OK"
             redirects: []
@@ -420,7 +463,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -477,7 +520,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
         .then (obj = {}) =>
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -496,7 +539,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
           .then (obj = {}) =>
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -544,7 +587,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
         .then (obj = {}) =>
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: false
             isHtml: false
             contentType: undefined
@@ -558,7 +601,7 @@ describe "Server", ->
 
           @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
           .then (obj = {}) =>
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -590,7 +633,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://mlb.com/", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: false
             isHtml: true
             contentType: "text/html"
@@ -618,7 +661,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://getbootstrap.com/#/foo", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -654,7 +697,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://google.com/foo", headers, @automationRequest, { failOnStatusCode: false })
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -704,7 +747,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://google.com/index", headers, @automationRequest, { auth })
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -755,7 +798,7 @@ describe "Server", ->
 
         @server._onResolveUrl("/index.html", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -774,7 +817,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("http://www.google.com/", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -806,7 +849,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -846,7 +889,7 @@ describe "Server", ->
 
         @server._onResolveUrl("http://www.google.com/", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -881,7 +924,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -913,7 +956,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("http://www.google.com/", {}, @automationRequest)
           .then (obj = {}) ->
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -951,7 +994,7 @@ describe "Server", ->
 
         @server._onResolveUrl("https://www.foobar.com:8443/", {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -986,7 +1029,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -1018,7 +1061,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("https://www.foobar.com:8443/", {}, @automationRequest)
           .then (obj = {}) ->
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -1056,7 +1099,7 @@ describe "Server", ->
 
         @server._onResolveUrl(s3StaticHtmlUrl, {}, @automationRequest)
         .then (obj = {}) ->
-          expect(obj).to.deep.eq({
+          expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
             contentType: "text/html"
@@ -1072,7 +1115,7 @@ describe "Server", ->
           #   console.log "ON REQUEST!!!!!!!!!!!!!!!!!!!!!!"
 
           #   nock("https://s3.amazonaws.com")
-          #   .get("/static.cypress.io/cypress-project-internal-test-assets/index.html")
+          #   .get("/internal-test-runner-assets.cypress.io/index.html")
           #   .reply 200, "<html><head></head><body>jsonplaceholder</body></html>", {
           #     "Content-Type": "text/html"
           #   }
@@ -1100,7 +1143,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -1132,7 +1175,7 @@ describe "Server", ->
         .then =>
           @server._onResolveUrl(s3StaticHtmlUrl, {}, @automationRequest)
           .then (obj = {}) ->
-            expect(obj).to.deep.eq({
+            expectToEqDetails(obj, {
               isOkStatusCode: true
               isHtml: true
               contentType: "text/html"
@@ -1146,7 +1189,7 @@ describe "Server", ->
           .then =>
             # @server.onNextRequest (req, res) ->
             #   nock("https://s3.amazonaws.com")
-            #   .get("/static.cypress.io/cypress-project-internal-test-assets/index.html")
+            #   .get("/internal-test-runner-assets.cypress.io/index.html")
             #   .reply 200, "<html><head></head><body>jsonplaceholder</body></html>", {
             #     "Content-Type": "text/html"
             #   }

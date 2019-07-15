@@ -1,6 +1,5 @@
 import Bluebird from 'bluebird'
 import chai from 'chai'
-import * as addDestroy from 'server-destroy-vvo'
 import http from 'http'
 import https from 'https'
 import net from 'net'
@@ -12,36 +11,37 @@ import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
 import Io from '@packages/socket'
 import {
-    buildConnectReqHead, createProxySock, isRequestHttps, isResponseStatusCode200,
-    regenerateRequestHead, CombinedAgent
+  buildConnectReqHead, createProxySock, isRequestHttps, isResponseStatusCode200,
+  regenerateRequestHead, CombinedAgent,
 } from '../../lib/agent'
 import { AsyncServer, Servers } from '../support/servers'
 
 const expect = chai.expect
+
 chai.use(sinonChai)
 
 const PROXY_PORT = 31000
 const HTTP_PORT = 31080
 const HTTPS_PORT = 31443
 
-describe('lib/agent', function() {
-  beforeEach(function() {
-    this.oldEnv = Object.assign({}, process.env)
+describe('lib/agent', function () {
+  beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   })
 
-  afterEach(function() {
-    process.env = this.oldEnv
+  afterEach(function () {
+    process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
     sinon.restore()
   })
 
-  context('CombinedAgent', function() {
-    before(function() {
+  context('CombinedAgent', function () {
+    before(function () {
       this.servers = new Servers()
+
       return this.servers.start(HTTP_PORT, HTTPS_PORT)
     })
 
-    after(function() {
+    after(function () {
       return this.servers.stop()
     })
 
@@ -67,11 +67,11 @@ describe('lib/agent', function() {
         name: 'with an HTTPS upstream requiring auth',
         proxyUrl: `https://foo:bar@localhost:${PROXY_PORT}`,
         httpsProxy: true,
-        proxyAuth: true
-      }
+        proxyAuth: true,
+      },
     ].slice().map((testCase) => {
-      context(testCase.name, function() {
-        beforeEach(function() {
+      context(testCase.name, function () {
+        beforeEach(function () {
           if (testCase.proxyUrl) {
             process.env.HTTP_PROXY = process.env.HTTPS_PROXY = testCase.proxyUrl
             process.env.NO_PROXY = ''
@@ -81,14 +81,14 @@ describe('lib/agent', function() {
 
           this.request = request.defaults({
             proxy: null,
-            agent: this.agent
+            agent: this.agent,
           })
 
           if (testCase.proxyUrl) {
             let options: any = {
               keepRequests: true,
               https: false,
-              auth: false
+              auth: false,
             }
 
             if (testCase.httpsProxy) {
@@ -98,60 +98,62 @@ describe('lib/agent', function() {
             if (testCase.proxyAuth) {
               options.auth = {
                 username: 'foo',
-                password: 'bar'
+                password: 'bar',
               }
             }
 
             this.debugProxy = new DebuggingProxy(options)
+
             return this.debugProxy.start(PROXY_PORT)
           }
         })
 
-        afterEach(function() {
+        afterEach(function () {
           if (testCase.proxyUrl) {
             this.debugProxy.stop()
           }
         })
 
-        it('HTTP pages can be loaded', function() {
+        it('HTTP pages can be loaded', function () {
           return this.request({
             url: `http://localhost:${HTTP_PORT}/get`,
-          }).then(body => {
+          }).then((body) => {
             expect(body).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
-                url: `http://localhost:${HTTP_PORT}/get`
+                url: `http://localhost:${HTTP_PORT}/get`,
               })
             }
           })
         })
 
-        it('HTTPS pages can be loaded', function() {
+        it('HTTPS pages can be loaded', function () {
           return this.request({
-            url: `https://localhost:${HTTPS_PORT}/get`
-          }).then(body => {
+            url: `https://localhost:${HTTPS_PORT}/get`,
+          }).then((body) => {
             expect(body).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
                 https: true,
-                url: `localhost:${HTTPS_PORT}`
+                url: `localhost:${HTTPS_PORT}`,
               })
             }
           })
         })
 
-        it('HTTP errors are catchable', function() {
+        it('HTTP errors are catchable', function () {
           return this.request({
             url: `http://localhost:${HTTP_PORT}/empty-response`,
           })
           .then(() => {
-            throw new Error("Shouldn't reach this")
+            throw new Error('Shouldn\'t reach this')
           })
-          .catch(err => {
+          .catch((err) => {
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
-                url: `http://localhost:${HTTP_PORT}/empty-response`
+                url: `http://localhost:${HTTP_PORT}/empty-response`,
               })
+
               expect(err.statusCode).to.eq(502)
             } else {
               expect(err.message).to.eq('Error: socket hang up')
@@ -159,26 +161,27 @@ describe('lib/agent', function() {
           })
         })
 
-        it('HTTPS errors are catchable', function() {
+        it('HTTPS errors are catchable', function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/empty-response`,
           })
           .then(() => {
-            throw new Error("Shouldn't reach this")
+            throw new Error('Shouldn\'t reach this')
           })
-          .catch(err => {
+          .catch((err) => {
             expect(err.message).to.eq('Error: socket hang up')
           })
         })
 
-        it('HTTP websocket connections can be established and used', function() {
+        it('HTTP websocket connections can be established and used', function () {
           return new Bluebird((resolve) => {
             Io.client(`http://localhost:${HTTP_PORT}`, {
               agent: this.agent,
-              transports: ['websocket']
+              transports: ['websocket'],
+              rejectUnauthorized: false,
             }).on('message', resolve)
           })
-          .then(msg => {
+          .then((msg) => {
             expect(msg).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0].ws).to.be.true
@@ -187,18 +190,19 @@ describe('lib/agent', function() {
           })
         })
 
-        it('HTTPS websocket connections can be established and used', function() {
+        it('HTTPS websocket connections can be established and used', function () {
           return new Bluebird((resolve) => {
             Io.client(`https://localhost:${HTTPS_PORT}`, {
               agent: this.agent,
-              transports: ['websocket']
+              transports: ['websocket'],
+              rejectUnauthorized: false,
             }).on('message', resolve)
           })
-          .then(msg => {
+          .then((msg) => {
             expect(msg).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
-                url: 'localhost:31443'
+                url: 'localhost:31443',
               })
             }
           })
@@ -206,9 +210,41 @@ describe('lib/agent', function() {
       })
     })
 
-    context('HttpsAgent', function() {
-      it("#createUpstreamProxyConnection calls to super for caching, TLS-ifying", function() {
-        const combinedAgent = new CombinedAgent()
+    context('HttpsAgent', function () {
+      beforeEach(function () {
+        this.agent = new CombinedAgent()
+
+        this.request = request.defaults({
+          agent: <any> this.agent,
+          proxy: null,
+        })
+      })
+
+      it('#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY', function () {
+        const spy = sinon.spy(this.agent.httpsAgent, 'createUpstreamProxyConnection')
+
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
+        process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
+
+        return this.request({
+          url: 'https://example.com/',
+        })
+        .then(() => {
+          expect(spy).to.not.be.called
+
+          return this.request({
+            url: 'https://example.org/',
+          })
+          .then(() => {
+            throw new Error('should not be able to connect')
+          })
+          .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0' }, () => {
+            expect(spy).to.be.calledOnce
+          })
+        })
+      })
+
+      it('#createUpstreamProxyConnection calls to super for caching, TLS-ifying', function () {
         const spy = sinon.spy(https.Agent.prototype, 'createConnection')
 
         const proxy = new DebuggingProxy()
@@ -219,26 +255,23 @@ describe('lib/agent', function() {
 
         return proxy.start(proxyPort)
         .then(() => {
-          return request({
+          return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
-            agent: <any>combinedAgent,
-            proxy: null
           })
         })
         .then(() => {
           const options = spy.getCall(0).args[0]
-          const session = combinedAgent.httpsAgent._sessionCache.map[options._agentKey]
+          const session = this.agent.httpsAgent._sessionCache.map[options._agentKey]
+
           expect(spy).to.be.calledOnce
-          expect(combinedAgent.httpsAgent._sessionCache.list).to.have.length(1)
+          expect(this.agent.httpsAgent._sessionCache.list).to.have.length(1)
           expect(session).to.not.be.undefined
 
           return proxy.stop()
         })
       })
 
-      it("#createUpstreamProxyConnection throws when connection is accepted then closed", function() {
-        const combinedAgent = new CombinedAgent()
-
+      it('#createUpstreamProxyConnection throws when connection is accepted then closed', function () {
         const proxy = Bluebird.promisifyAll(
           net.createServer((socket) => {
             socket.end()
@@ -252,10 +285,8 @@ describe('lib/agent', function() {
 
         return proxy.listenAsync(proxyPort)
         .then(() => {
-          return request({
+          return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
-            agent: <any>combinedAgent,
-            proxy: null
           })
         })
         .then(() => {
@@ -268,84 +299,125 @@ describe('lib/agent', function() {
         })
       })
     })
+
+    context('HttpAgent', function () {
+      beforeEach(function () {
+        this.agent = new CombinedAgent()
+
+        this.request = request.defaults({
+          agent: <any> this.agent,
+          proxy: null,
+        })
+      })
+
+      it('#addRequest does not go to proxy if domain in NO_PROXY', function () {
+        const spy = sinon.spy(this.agent.httpAgent, '_addProxiedRequest')
+
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
+        process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
+
+        return this.request({
+          url: 'http://example.com/',
+        })
+        .then(() => {
+          expect(spy).to.not.be.called
+
+          return this.request({
+            url: 'http://example.org/',
+          })
+          .then(() => {
+            throw new Error('should not be able to connect')
+          })
+          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0' }, () => {
+            expect(spy).to.be.calledOnce
+          })
+        })
+      })
+    })
   })
 
-  context(".buildConnectReqHead", function() {
-    it('builds the correct request', function() {
+  context('.buildConnectReqHead', function () {
+    it('builds the correct request', function () {
       const head = buildConnectReqHead('foo.bar', '1234', {})
+
       expect(head).to.eq([
         'CONNECT foo.bar:1234 HTTP/1.1',
         'Host: foo.bar:1234',
-        '', ''
+        '', '',
       ].join('\r\n'))
     })
 
-    it('can do Proxy-Authorization', function() {
+    it('can do Proxy-Authorization', function () {
       const head = buildConnectReqHead('foo.bar', '1234', {
-        auth: 'baz:quux'
+        auth: 'baz:quux',
       })
+
       expect(head).to.eq([
         'CONNECT foo.bar:1234 HTTP/1.1',
         'Host: foo.bar:1234',
         'Proxy-Authorization: basic YmF6OnF1dXg=',
-        '', ''
+        '', '',
       ].join('\r\n'))
     })
   })
 
-  context(".createProxySock", function() {
-    it("creates a `net` socket for an http url", function(done) {
+  context('.createProxySock', function () {
+    it('creates a `net` socket for an http url', function (done) {
       sinon.spy(net, 'connect')
       const proxy = url.parse('http://foo.bar:1234')
-      createProxySock({ proxy }, (err) => {
+
+      createProxySock({ proxy }, () => {
         expect(net.connect).to.be.calledWith({ host: 'foo.bar', port: 1234 })
         done()
       })
     })
 
-    it("creates a `tls` socket for an https url", function(done) {
+    it('creates a `tls` socket for an https url', function (done) {
       sinon.spy(tls, 'connect')
       const proxy = url.parse('https://foo.bar:1234')
-      createProxySock({ proxy }, (err) => {
+
+      createProxySock({ proxy }, () => {
         expect(tls.connect).to.be.calledWith({ host: 'foo.bar', port: 1234 })
         done()
       })
     })
 
-    it("throws on unsupported proxy protocol", function(done) {
+    it('throws on unsupported proxy protocol', function (done) {
       const proxy = url.parse('socksv5://foo.bar:1234')
+
       createProxySock({ proxy }, (err) => {
-        expect(err.message).to.eq("Unsupported proxy protocol: socksv5:")
+        expect(err.message).to.eq('Unsupported proxy protocol: socksv5:')
         done()
       })
     })
   })
 
-  context(".isRequestHttps", function() {
+  context('.isRequestHttps', function () {
     [
       {
         protocol: 'http',
         agent: http.globalAgent,
-        expect: false
+        expect: false,
       },
       {
         protocol: 'https',
         agent: https.globalAgent,
-        expect: true
-      }
+        expect: true,
+      },
     ].map((testCase) => {
       it(`detects correctly from ${testCase.protocol} requests`, () => {
         const spy = sinon.spy(testCase.agent, 'addRequest')
 
         return request({
           url: `${testCase.protocol}://foo.bar.baz.invalid`,
-          agent: testCase.agent
+          agent: testCase.agent,
         })
         .then(() => {
           throw new Error('Shouldn\'t succeed')
         })
-        .catch((e) => {
+        .catch(() => {
           const requestOptions = spy.getCall(0).args[1]
+
           expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
         })
       })
@@ -357,51 +429,59 @@ describe('lib/agent', function() {
           Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
             agent: <any>testCase.agent,
             transports: ['websocket'],
-            timeout: 1
+            timeout: 1,
+            rejectUnauthorized: false,
           })
           .on('message', reject)
           .on('connect_error', resolve)
         })
         .then(() => {
           const requestOptions = spy.getCall(0).args[1]
+
           expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
         })
       })
     })
   })
 
-  context(".isResponseStatusCode200", function() {
-    it("matches a 200 OK response correctly", function() {
-      const result = isResponseStatusCode200("HTTP/1.1 200 Connection established")
+  context('.isResponseStatusCode200', function () {
+    it('matches a 200 OK response correctly', function () {
+      const result = isResponseStatusCode200('HTTP/1.1 200 Connection established')
+
       expect(result).to.be.true
     })
 
-    it("matches a 500 error response correctly", function() {
-      const result = isResponseStatusCode200("HTTP/1.1 500 Internal Server Error")
+    it('matches a 500 error response correctly', function () {
+      const result = isResponseStatusCode200('HTTP/1.1 500 Internal Server Error')
+
       expect(result).to.be.false
     })
   })
 
-  context(".regenerateRequestHead", function() {
-    it("regenerates changed request head", () => {
+  context('.regenerateRequestHead', function () {
+    it('regenerates changed request head', () => {
       const spy = sinon.spy(http.globalAgent, 'createSocket')
+
       return request({
         url: 'http://foo.bar.baz.invalid',
-        agent: http.globalAgent
+        agent: http.globalAgent,
       })
       .then(() => {
         throw new Error('this should fail')
       })
       .catch(() => {
         const req = spy.getCall(0).args[0]
+
         expect(req._header).to.equal([
           'GET / HTTP/1.1',
           'host: foo.bar.baz.invalid',
           'Connection: close',
-          '', ''
+          '', '',
         ].join('\r\n'))
+
         // now change some stuff, regen, and expect it to work
         delete req._header
+        // @ts-ignore
         req.path = 'http://quuz.quux.invalid/abc?def=123'
         req.setHeader('Host', 'foo.fleem.invalid')
         req.setHeader('bing', 'bang')
@@ -411,7 +491,7 @@ describe('lib/agent', function() {
           'Host: foo.fleem.invalid',
           'bing: bang',
           'Connection: close',
-          '', ''
+          '', '',
         ].join('\r\n'))
       })
     })
