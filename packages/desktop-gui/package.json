@@ -31,6 +31,7 @@
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
+    "eslint-plugin-cypress-dev": "^3.0.2",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "font-awesome": "4.7.0",
     "gravatar": "1.8.0",
