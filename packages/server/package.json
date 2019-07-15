@@ -4,7 +4,6 @@
   "private": true,
   "files": [
     "config",
-    "timers",
     "lib"
   ],
   "main": "index.js",
