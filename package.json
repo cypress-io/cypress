@@ -158,7 +158,7 @@
   "author": "Brian Mann",
   "productName": "Cypress",
   "engines": {
-    "node": ">=8.9.3"
+    "node": "10.2.1"
   },
   "repository": {
     "type": "git",
