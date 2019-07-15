@@ -44,3 +44,24 @@ describe "e2e uncaught errors", ->
       snapshot: true
       expectedExitCode: 1
     })
+
+  it "failing7", ->
+    e2e.exec(@, {
+      spec: "uncaught_missing_suite_callback_empty_suite.js"
+      snapshot: true
+      expectedExitCode: 1
+    })
+
+  it "failing8", ->
+    e2e.exec(@, {
+      spec: "uncaught_missing_suite_callback_empty_suite.js"
+      snapshot: true
+      expectedExitCode: 1
+    })
+
+  it "failing9", ->
+    e2e.exec(@, {
+      spec: "uncaught_missing_suite_callback_type_error.js"
+      snapshot: true
+      expectedExitCode: 1
+    })

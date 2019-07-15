@@ -493,3 +493,234 @@ Suite 'foo' was defined but no callback was supplied. Supply a callback or expli
 
 
 `
+
+exports['e2e uncaught errors failing7 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (uncaught_missing_suite_callback_empty_suite.js)                           │
+  │ Searched:   cypress/integration/uncaught_missing_suite_callback_empty_suite.js                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: uncaught_missing_suite_callback_empty_suite.js...                               (1 of 1) 
+
+
+  1) An uncaught error was detected outside of a test
+
+  0 passing
+  1 failing
+
+  1)  An uncaught error was detected outside of a test:
+     Uncaught TypeError: Cannot read property 'call' of undefined
+
+This error originated from your test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+Suite 'testing2' was defined but no callback was supplied. Supply a callback or explicitly skip the suite.
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                              │
+  │ Passing:      0                                              │
+  │ Failing:      1                                              │
+  │ Pending:      0                                              │
+  │ Skipped:      0                                              │
+  │ Screenshots:  1                                              │
+  │ Video:        true                                           │
+  │ Duration:     X seconds                                      │
+  │ Spec Ran:     uncaught_missing_suite_callback_empty_suite.js │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_missing_suite_callback_empty_suite.js/An uncaught error was detected outside of a test (failed).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ uncaught_missing_suite_callback_empt…     XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['e2e uncaught errors failing8 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (uncaught_missing_suite_callback_empty_suite.js)                           │
+  │ Searched:   cypress/integration/uncaught_missing_suite_callback_empty_suite.js                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: uncaught_missing_suite_callback_empty_suite.js...                               (1 of 1) 
+
+
+  1) An uncaught error was detected outside of a test
+
+  0 passing
+  1 failing
+
+  1)  An uncaught error was detected outside of a test:
+     Uncaught TypeError: Cannot read property 'call' of undefined
+
+This error originated from your test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+Suite 'testing2' was defined but no callback was supplied. Supply a callback or explicitly skip the suite.
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                              │
+  │ Passing:      0                                              │
+  │ Failing:      1                                              │
+  │ Pending:      0                                              │
+  │ Skipped:      0                                              │
+  │ Screenshots:  1                                              │
+  │ Video:        true                                           │
+  │ Duration:     X seconds                                      │
+  │ Spec Ran:     uncaught_missing_suite_callback_empty_suite.js │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_missing_suite_callback_empty_suite.js/An uncaught error was detected outside of a test (failed).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ uncaught_missing_suite_callback_empt…     XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['e2e uncaught errors failing9 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (uncaught_missing_suite_callback_type_error.js)                            │
+  │ Searched:   cypress/integration/uncaught_missing_suite_callback_type_error.js                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: uncaught_missing_suite_callback_type_error.js...                                (1 of 1) 
+
+
+  1) An uncaught error was detected outside of a test
+
+  0 passing
+  1 failing
+
+  1)  An uncaught error was detected outside of a test:
+     Uncaught TypeError: fn.call is not a function
+
+This error originated from your test code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+Suite 'testing' was defined but no callback was supplied. Supply a callback or explicitly skip the suite.
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                             │
+  │ Passing:      0                                             │
+  │ Failing:      1                                             │
+  │ Pending:      0                                             │
+  │ Skipped:      0                                             │
+  │ Screenshots:  1                                             │
+  │ Video:        true                                          │
+  │ Duration:     X seconds                                     │
+  │ Spec Ran:     uncaught_missing_suite_callback_type_error.js │
+  └─────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_missing_suite_callback_type_error.js/An uncaught error was detected outside of a test (failed).png (1280x720)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ uncaught_missing_suite_callback_type…     XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+
+
+`
