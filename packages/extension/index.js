@@ -1,3 +1,3 @@
-require("@packages/coffee/register")
+require('@packages/coffee/register')
 
-module.exports = require("./lib/extension")
+module.exports = require('./lib/extension')
