@@ -1,7 +1,7 @@
 const fs = require('fs-extra')
 const pkg = require('./package.json')
 const gulp = require('gulp')
-const gulpClean = require('gulp-clean')
+const rimraf = require('rimraf')
 const source = require('vinyl-source-stream')
 const coffeeify = require('coffeeify')
 const browserify = require('browserify')
@@ -12,9 +12,8 @@ const copySocketClient = () => {
   .pipe(gulp.dest('dist'))
 }
 
-const clean = () => {
-  return gulp.src('dist')
-  .pipe(gulpClean())
+const clean = (done) => {
+  rimraf('dist', done)
 }
 
 const manifest = (done) => {

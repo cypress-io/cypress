@@ -40,7 +40,7 @@
     "eol": "0.9.1",
     "fs-extra": "8.1.0",
     "gulp": "4.0.2",
-    "gulp-clean": "0.4.0",
+    "rimraf": "2.6.3",
     "sinon": "1.17.7",
     "sinon-chai": "3.3.0",
     "vinyl-source-stream": "1.1.2"
