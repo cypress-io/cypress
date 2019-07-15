@@ -6,9 +6,10 @@ describe('Specs List', function () {
     cy.fixture('specs_windows').as('specsWindows')
 
     cy.visitIndex().then(function (win) {
-      let start
+      let start = win.App.start
 
-      ;({ start, ipc: this.ipc } = win.App) // don't remove this semicolon 😅
+      this.win = win
+      this.ipc = win.App.ipc
 
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)

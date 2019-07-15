@@ -9,9 +9,10 @@ describe('Project Mode', function () {
   context('Mac', function () {
     beforeEach(function () {
       cy.visitIndex().then((win) => {
-        let start
+        let start = win.App.start
 
-        ;({ start, ipc: this.ipc } = win.App) // don't remove this semicolon 😅
+        this.win = win
+        this.ipc = win.App.ipc
 
         this.config.projectName = 'my-kitchen-sink'
 

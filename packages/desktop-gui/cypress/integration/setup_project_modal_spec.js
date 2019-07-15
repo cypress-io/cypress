@@ -9,9 +9,10 @@ describe('Set Up Project', function () {
     cy.fixture('keys').as('keys')
 
     cy.visitIndex().then(function (win) {
-      let start
+      let start = win.App.start
 
-      ;({ start, ipc: this.ipc } = win.App) // don't remove this semicolon 😅
+      this.win = win
+      this.ipc = win.App.ipc
 
       this.config.projectName = 'my-kitchen-sink'
 
