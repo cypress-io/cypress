@@ -9,7 +9,6 @@ $utils = require("./utils")
 defaultGrepRe   = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
 betweenQuotesRe = /\"(.+?)\"/
-suiteMissingCallbackRe = /TypeError: Cannot read property 'call' of undefined/
 
 HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
 TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
@@ -639,17 +638,6 @@ create = (specWindow, mocha, Cypress, cy) ->
     ## uncaught exception to an existing runnable
     return true if not err
 
-    missingCB = ""
-
-    getMissingCallback = (suite) ->
-      return suite.suites.forEach((suite) ->
-        if suite.suites.length > 0
-          getMissingCallback(suite)
-        else if suite.tests.length is 0
-          ## Set the missing suite title if the suite has no tests or suites
-          missingCB = suite.title
-      )
-
     todoMsg = ->
       if not Cypress.config("isTextTerminal")
         "Check your console for the stack trace or click this message to see where it originated from."
@@ -663,15 +651,8 @@ create = (specWindow, mocha, Cypress, cy) ->
       .compact()
       .join("\n\n")
 
-    runner = Cypress.mocha.getRunner()
-    getMissingCallback(runner.suite)
-
-    if missingCB and suiteMissingCallbackRe.test(err)
-      message = $utils.errMessageByPath('uncaught.suite_without_callback', missingCB)
-      err = $utils.appendErrMsg(err, message)
-    else
-      ## else  do the same thing as mocha here
-      err = $utils.appendErrMsg(err, append())
+    ## else  do the same thing as mocha here
+    err = $utils.appendErrMsg(err, append())
 
     throwErr = ->
       throw err
