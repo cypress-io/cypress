@@ -83,5 +83,8 @@
   "schedule": [
     "before 3am on the first day of the month"
   ],
-  "masterIssue": true
+  "masterIssue": true,
+  "lockFileMaintenance": {
+    "enabled": true
+  }
 }

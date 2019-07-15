@@ -61,6 +61,6 @@ cli/build
 
 # Building app binary
 scripts/support
-package-lock.json
+**/e2e/package-lock.json
 yarn.lock
 binary-url.json
