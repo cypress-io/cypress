@@ -11,10 +11,6 @@ serializeError = (err) ->
 module.exports = {
   serializeError: serializeError
 
-  # convenient for confirming from tests that a warning has been printed to the console
-  logWarning: () ->
-    console.warn.apply(console, arguments)
-
   wrapIpc: (aProcess) ->
     emitter = new EE()
 
