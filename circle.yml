@@ -10,7 +10,7 @@ defaults: &defaults
   executor: <<parameters.executor>>
   environment:
     ## get version with npm ci
-    NPM_VERSION: "5.7.0"
+    NPM_VERSION: "6.0.0"
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
