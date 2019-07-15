@@ -19,10 +19,15 @@ const testStaticAssets = async (buildResourcePath) => {
         'webpack-livereload-plugin',
         // indicates eval source maps were included, which cause crossorigin errors
         '//# sourceURL=cypress://',
-        '//# sourceMappingURL=data:application/json;charset=utf-8;base64',
       ],
       goodStrings: [
         // indicates inline source maps were included
+      ],
+      testAssetStrings: [
+        [
+          (str) => !str.split('\n').slice(-1)[0].includes('//# sourceMappingURL'),
+          'sourcemaps were detected, ensure `web-config/webpack.base.config.ts` does not have sourcemaps enabled in production',
+        ],
       ],
       minLineCount: 5000,
     }),
@@ -51,6 +56,7 @@ const testPackageStaticAssets = async (options = {}) => {
     assetGlob: '',
     goodStrings: [],
     badStrings: [],
+    testAssetStrings: [],
     minLineCount: 0,
   })
 
@@ -65,7 +71,6 @@ const testPackageStaticAssets = async (options = {}) => {
       Error in ${path}: expected to find at least ${atLeast} strings of ${chalk.bold(str)}
       contained: ${count}
     `)
-
     })
 
     opts.badStrings.forEach((str) => {
@@ -75,6 +80,10 @@ const testPackageStaticAssets = async (options = {}) => {
         Error in ${path}: expected ${chalk.bold('not')} to find more than ${atLeast - 1} strings of ${chalk.bold(str)}
         contained: ${count}
       `)
+    })
+
+    opts.testAssetStrings.forEach(([testFn, errorMsg]) => {
+      la(testFn(fileStr), `Error in ${path}: ${errorMsg}`)
     })
 
     if (opts.minLineCount) {

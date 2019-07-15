@@ -160,10 +160,10 @@ const config: webpack.Configuration = {
     // files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
 
     // other sourcemap options:
-    // new webpack.SourceMapDevToolPlugin({
+    // [new webpack.SourceMapDevToolPlugin({
     //   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
     //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
-    // }) :
+    // })] :
 
     ...(env === 'production' ?
       [] :

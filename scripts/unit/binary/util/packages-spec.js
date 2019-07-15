@@ -195,6 +195,31 @@ describe('testStaticAssets', () => {
     })).to.rejected.with.eventually
     .property('message').contain('at least 10')
   })
+
+  it('can have custom testAssetString tests', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'test': {
+            'file.css': `
+              ${'-moz-user-touch: "none"\n'.repeat(5)}
+              foo-bar-baz\
+              `,
+          },
+        },
+      },
+    })
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/test/file.css`,
+      testAssetStrings: [
+        [(str) => !str.split('\n').slice(-1)[0].includes('foo-bar-baz'), 'expected not to end with foo-bar-baz'],
+      ],
+    })).to.rejected.with.eventually
+    .property('message').contain('foo-bar-baz')
+  })
 })
 
 /*
