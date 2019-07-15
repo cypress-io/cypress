@@ -46,8 +46,7 @@ describe('Project Nav', function () {
     it('displays \'Tests\' nav as active', () => {
       cy.get('.navbar-default').contains('a', 'Tests')
       .should('have.class', 'active')
-    }
-    )
+    })
 
     describe('when project loads', function () {
       beforeEach(() => {
@@ -70,8 +69,7 @@ describe('Project Nav', function () {
       it('highlights runs on click', () => {
         cy.get('@runsNav')
         .should('have.class', 'active')
-      }
-      )
+      })
 
       it('displays runs page', function () {
         cy.get('.runs-container li')
@@ -83,14 +81,12 @@ describe('Project Nav', function () {
       beforeEach(() => {
         cy.get('.navbar-default')
         .contains('a', 'Settings').as('settingsNav').click()
-      }
-      )
+      })
 
       it('highlights config on click', () => {
         cy.get('@settingsNav')
         .should('have.class', 'active')
-      }
-      )
+      })
 
       it('displays settings page', () => {
         cy.contains('Configuration')
@@ -204,8 +200,9 @@ describe('Project Nav', function () {
           const browserArg = this.ipc.launchBrowser.getCall(0).args[0].browser
 
           expect(browserArg).to.have.keys([
-            'family', 'name', 'path', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom',
+            'family', 'name', 'path', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning',
           ])
+
           expect(browserArg.path).to.include('/')
           expect(browserArg.family).to.equal('chrome')
         })
@@ -313,6 +310,35 @@ describe('Project Nav', function () {
       })
     })
 
+    describe('browser has a warning attached', function () {
+      beforeEach(function () {
+        this.browsers = [
+          {
+            'name': 'chromium',
+            'displayName': 'Chromium',
+            'family': 'chrome',
+            'version': '49.0.2609.0',
+            'path': '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+            'majorVersion': '49',
+            'warning': 'Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy',
+          },
+        ]
+
+        this.config.browsers = this.browsers
+
+        this.openProject.resolve(this.config)
+      })
+
+      it('shows warning icon with linkified tooltip', function () {
+        cy.get('.browsers .fa-exclamation-triangle').trigger('mouseover')
+
+        cy.get('.cy-tooltip').should('contain', 'Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see')
+        cy.get('.cy-tooltip a').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/bad-browser-policy')
+        })
+      })
+    })
+
     describe('custom browser available', function () {
       beforeEach(function () {
         this.config.browsers.push({
@@ -361,9 +387,7 @@ describe('Project Nav', function () {
 
       it('shows info icon with tooltip', function () {
         cy.get('.browsers .fa-info-circle')
-        .then(($el) => {
-          $el[0].dispatchEvent(new Event('mouseover', { bubbles: true }))
-        })
+        .trigger('mouseover')
 
         cy.get('.cy-tooltip')
         .should('contain', this.info)

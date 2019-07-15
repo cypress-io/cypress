@@ -33,7 +33,7 @@ describe('Runs List', function () {
       cy.stub(this.ipc, 'requestAccess')
       cy.stub(this.ipc, 'setupDashboardProject')
       cy.stub(this.ipc, 'externalOpen')
-      cy.stub(this.ipc, 'windowOpen').resolves()
+      cy.stub(this.ipc, 'beginAuth').resolves()
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -66,8 +66,7 @@ describe('Runs List', function () {
     it('highlights run nav', () => {
       cy.get('.navbar-default a')
       .contains('Runs').should('have.class', 'active')
-    }
-    )
+    })
   })
 
   context('api server connection', function () {
@@ -117,8 +116,7 @@ describe('Runs List', function () {
             cy.get('img').should('not.exist')
             cy.contains('No commit info found')
           })
-        }
-        )
+        })
 
         it('displays platform info', () => {
           cy.get('@runRow').within(function () {
@@ -127,16 +125,14 @@ describe('Runs List', function () {
             cy.get('.fa-apple')
             cy.get('.fa-chrome')
           })
-        }
-        )
+        })
 
         it('does not display browser when null', () => {
           cy.get('@firstRunRow').within(function () {
             cy.contains(this.runs[0].instances[0].platform.osVersionFormatted)
             cy.get('.fa-chrome').should('not.exist')
           })
-        }
-        )
+        })
 
         it('displays totals', function () {
           cy.get('@runRow').contains(this.runs[1].totalFailed)
@@ -154,6 +150,7 @@ describe('Runs List', function () {
           .then(() => {
             cy.tick(1000)
           })
+
           cy.get('@firstRunRow').contains('24:48')
           cy.get('.runs-container li').eq(3).contains('45:48')
         })
@@ -180,8 +177,7 @@ describe('Runs List', function () {
 
             cy.get('.cy-tooltip').contains('Parallelization was disabled for this run')
           })
-        }
-        )
+        })
       })
     })
 
@@ -236,10 +232,8 @@ describe('Runs List', function () {
           cy.contains('Learn more').click().then(function () {
             expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
           })
-        }
-        )
-      }
-      )
+        })
+      })
     })
   })
 
@@ -274,8 +268,7 @@ describe('Runs List', function () {
       .then(function () {
         expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs`)
       })
-    }
-    )
+    })
 
     it('displays run status icon', () => {
       cy.get('.runs-container li').first().find('> div')
@@ -347,10 +340,9 @@ describe('Runs List', function () {
         cy.get('.login h1').should('contain', 'Log in')
       })
 
-      it('clicking \'Log In with GitHub\' opens login', () => {
-        cy.contains('button', 'Log In with GitHub').click().then(function () {
-          expect(this.ipc.windowOpen).to.be.called
-          expect(this.ipc.windowOpen.lastCall.args[0].type).to.equal('GITHUB_LOGIN')
+      it('clicking Log In to Dashboard opens login', () => {
+        cy.contains('button', 'Log In to Dashboard').click().then(function () {
+          expect(this.ipc.beginAuth).to.be.called
         })
       })
     })
@@ -370,6 +362,7 @@ describe('Runs List', function () {
       }).then(() => {
         return this.getRuns.resolve(this.runs)
       })
+
       cy.get('.runs-container') //# wait for original runs to show
       cy.clock().then(() => {
         this.getRunsAgain = this.util.deferred()
@@ -405,8 +398,7 @@ describe('Runs List', function () {
       it('updates the runs', () => {
         cy.get('.runs-container li').first().find('> div')
         .should('have.class', 'passed')
-      }
-      )
+      })
 
       it('enables refresh button', () => {
         cy.get('.runs header button').should('not.be.disabled')
@@ -648,13 +640,11 @@ describe('Runs List', function () {
                 cy.get('.empty h4').should('contain', 'Log in')
               })
 
-              it('clicking \'Log In with GitHub\' opens login', () => {
-                cy.contains('button', 'Log In with GitHub').click().then(function () {
-                  expect(this.ipc.windowOpen).to.be.called
-                  expect(this.ipc.windowOpen.lastCall.args[0].type).to.equal('GITHUB_LOGIN')
+              it('clicking Log In to Dashboard opens login', () => {
+                cy.contains('button', 'Log In to Dashboard').click().then(function () {
+                  expect(this.ipc.beginAuth).to.be.called
                 })
-              }
-              )
+              })
             })
           })
         })
@@ -726,6 +716,7 @@ describe('Runs List', function () {
         cy.contains('.btn', 'Set up project').click()
         cy.get('.modal-body')
         .contains('.btn', 'Me').click()
+
         cy.get('.privacy-radio').find('input').last().check()
         cy.get('.modal-body')
         .contains('.btn', 'Set up project').click()
@@ -794,6 +785,7 @@ describe('Runs List', function () {
         cy.contains('.btn', 'Set up a new project').click()
         cy.get('.modal-body')
         .contains('.btn', 'Me').click()
+
         cy.get('.privacy-radio').find('input').last().check()
         cy.get('.modal-body')
         .contains('.btn', 'Set up project').click()
@@ -817,8 +809,7 @@ describe('Runs List', function () {
           cy.contains('You have no recorded runs')
         })
       })
-    }
-    )
+    })
 
     context('having previously set up CI', function () {
       beforeEach(function () {

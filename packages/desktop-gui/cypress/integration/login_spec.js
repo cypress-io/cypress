@@ -20,17 +20,19 @@ describe('Login', function () {
       cy.stub(this.ipc, 'clearGithubCookies')
       cy.stub(this.ipc, 'logOut').resolves()
 
+      cy.stub(this.ipc, 'onAuthMessage').callsFake((function (_this) {
+        return function (cb) {
+          return _this.onAuthMessageCb = cb
+        }
+      })(this))
+
       this.pingApiServer = this.util.deferred()
       cy.stub(this.ipc, 'pingApiServer').returns(this.pingApiServer.promise)
 
-      this.openWindow = this.util.deferred()
-      cy.stub(this.ipc, 'windowOpen').returns(this.openWindow.promise)
+      this.beginAuth = this.util.deferred()
 
-      this.login = this.util.deferred()
-      cy.stub(this.ipc, 'logIn').returns(this.login.promise)
-
+      cy.stub(this.ipc, 'beginAuth').returns(this.beginAuth.promise)
       start()
-
       cy.contains('Log In').click()
     })
   })
@@ -46,8 +48,8 @@ describe('Login', function () {
       this.pingApiServer.resolve()
     })
 
-    it('has Github Login button', () => {
-      cy.get('.login').contains('button', 'Log In with GitHub')
+    it('has dashboard login button', function () {
+      cy.get('.login').contains('button', 'Log In to Dashboard')
     })
 
     it('opens dashboard on clicking \'Cypress Dashboard\'', () => {
@@ -56,24 +58,14 @@ describe('Login', function () {
       })
     })
 
-    describe('click \'Log In with GitHub\'', function () {
-      beforeEach(() => {
-        cy.get('.login')
-        .contains('button', 'Log In with GitHub').as('loginBtn')
-        .click()
+    describe('click Log In to Dashboard', function () {
+      beforeEach(function () {
+        cy.get('.login').contains('button', 'Log In to Dashboard').as('loginBtn').click()
       })
 
-      it('triggers ipc \'window:open\' on click', () => {
+      it('triggers ipc \'begin:auth\' on click', function () {
         cy.then(function () {
-          expect(this.ipc.windowOpen).to.be.calledWithExactly({
-            position: 'center',
-            focus: true,
-            width: 1000,
-            height: 635,
-            preload: false,
-            title: 'Login',
-            type: 'GITHUB_LOGIN',
-          })
+          expect(this.ipc.beginAuth).to.be.calledOnce
         })
       })
 
@@ -81,134 +73,171 @@ describe('Login', function () {
         cy.get('@loginBtn').should('be.disabled')
       })
 
-      it('shows spinner with \'Logging In\'', () => {
-        cy.get('@loginBtn').invoke('text').should('contain', 'Logging in...')
+      it('shows spinner with Opening browser', () => {
+        cy.get('@loginBtn').invoke('text').should('contain', 'Opening browser...')
       })
 
-      context('on \'window:open\' ipc response', function () {
-        beforeEach(() => {
-          cy.get('@loginBtn').then(function () {
-            this.openWindow.resolve('code-123')
-          })
+      context('on begin:auth', function () {
+        beforeEach(function () {
+          cy.get('@loginBtn')
         })
 
-        it('triggers ipc \'log:in\'', function () {
-          cy.wrap(this.ipc.logIn).should('be.calledWith', 'code-123')
+        it('displays spinner with Opening browser... and disables button', function () {
+          cy.contains('Opening browser...').should('be.disabled')
         })
 
-        it('displays spinner with \'Logging in...\' and disables button', () => {
-          cy.contains('Logging in...').should('be.disabled')
-        })
-
-        describe('on ipc log:in success', function () {
+        describe('on ipc begin:auth success', function () {
           beforeEach(function () {
-            this.login.resolve(this.user)
+            this.beginAuth.resolve(this.user)
           })
 
           it('goes to previous view', () => {
             cy.shouldBeOnIntro()
           })
 
-          it('displays username in UI', () => {
+          it('displays username in UI', function () {
             cy.get('nav a').should(function ($a) {
               expect($a).to.contain(this.user.name)
             })
           })
 
-          it('closes modal', () => {
+          it('displays username in success dialog', () => {
+            cy.get('.modal').contains('Jane Lane')
+          })
+
+          it('can close modal by clicking Continue', () => {
+            cy.get('.modal .btn:contains(Continue)').click()
             cy.get('.modal').should('not.be.visible')
           })
 
-          context('log out', function () {
-            it('displays login button on logout', function () {
-              cy.get('nav a').contains('Jane').click()
-
-              cy.contains('Log Out').click()
-              cy.get('.nav').contains('Log In')
+          context('after clicking Continue', function () {
+            beforeEach(function () {
+              cy.get('.modal .btn:contains(Continue)').click()
             })
 
-            it('calls clear:github:cookies', function () {
-              cy.get('nav a').contains('Jane').click()
+            context('log out', function () {
+              it('displays login button on logout', () => {
+                cy.get('nav a').contains('Jane').click()
 
-              cy.contains('Log Out').click().then(function () {
-                expect(this.ipc.clearGithubCookies).to.be.called
+                cy.contains('Log Out').click()
+                cy.get('.nav').contains('Log In')
               })
-            })
 
-            it('calls log:out', function () {
-              cy.get('nav a').contains('Jane').click()
+              it('calls clear:github:cookies', function () {
+                cy.get('nav a').contains('Jane').click()
 
-              cy.contains('Log Out').click().then(function () {
-                expect(this.ipc.logOut).to.be.called
+                cy.contains('Log Out').click().then(function () {
+                  expect(this.ipc.clearGithubCookies).to.be.called
+                })
               })
-            })
 
-            it('has login button enabled when returning to login after logout', function () {
-              cy.get('nav a').contains('Jane').click()
-              cy.contains('Log Out').click()
-              cy.contains('Log In').click()
+              it('calls log:out', function () {
+                cy.get('nav a').contains('Jane').click()
 
-              cy.get('.login button').eq(1)
-              .should('not.be.disabled')
-              .invoke('text')
-              .should('include', 'Log In with GitHub')
+                cy.contains('Log Out').click().then(function () {
+                  expect(this.ipc.logOut).to.be.called
+                })
+              })
+
+              it('has login button enabled when returning to login after logout', function () {
+                cy.get('nav a').contains('Jane').click()
+                cy.contains('Log Out').click()
+                cy.contains('Log In').click()
+
+                cy.get('.login button').eq(1)
+                .should('not.be.disabled').invoke('text')
+                .should('include', 'Log In to Dashboard')
+              })
             })
           })
         })
 
-        describe('on ipc \'log:in\' error', function () {
+        describe('on ipc begin:auth error', function () {
           beforeEach(function () {
-            this.login.reject({ name: 'foo', message: 'There\'s an error' })
+            this.beginAuth.reject({
+              name: 'foo',
+              message: 'There\'s an error',
+            })
           })
 
           it('displays error in ui', () => {
-            cy.get('.alert-danger')
-            .should('be.visible')
+            cy.get('.alert-danger').should('be.visible')
             .contains('There\'s an error')
           })
 
           it('login button should be enabled', () => {
             cy.get('@loginBtn').should('not.be.disabled')
-          }
-          )
-        })
-      })
-
-      describe('when user closes window before logging in', function () {
-        beforeEach(function () {
-          this.openWindow.reject({ windowClosed: true, name: 'foo', message: 'There\'s an error' })
+          })
         })
 
-        it('no longer shows logging in spinner', function () {
-          cy.get('.login-content .alert').should('not.exist')
+        describe('on ipc on:auth:message', function () {
+          beforeEach(function () {
+            this.onAuthMessageCb(null, {
+              message: 'some warning here',
+              type: 'warning',
+            })
+          })
 
-          cy.contains('button', 'Log In with GitHub').should('not.be.disabled')
+          it('displays warning in ui', () => {
+            cy.get('.warning').should('be.visible')
+            .contains('some warning here')
+          })
+
+          it('login button should be disabled', () => {
+            cy.get('@loginBtn').should('be.disabled')
+          })
+
+          it('on AUTH_COULD_NOT_LAUNCH_BROWSER login button changes', function () {
+            this.onAuthMessageCb(null, {
+              name: 'AUTH_COULD_NOT_LAUNCH_BROWSER',
+              type: 'warning',
+              message: 'foo',
+            })
+
+            cy.get('.login-content .btn-login')
+            .should('be.disabled')
+            .should('have.text', ' Could not open browser.')
+          })
+
+          it('<pre> can be click-selected', function () {
+            this.onAuthMessageCb(null, {
+              message: 'foo\n```\nbar\n```',
+              type: 'warning',
+            })
+
+            cy.get('.login-content .message pre').click()
+            cy.document().then(function ($doc) {
+              const selection = $doc.getSelection().toString()
+
+              expect(selection).to.eq('bar')
+            })
+          })
         })
       })
     })
 
-    describe('Dashboard link in message', () => {
-      it('opens link to Dashboard Service on click', () => {
-        cy.contains('a', 'Cypress Dashboard Service').click().then(function () {
+    describe('Dashboard link in message', function () {
+      it('opens link to Dashboard Service on click', function () {
+        cy.contains('a', 'Cypress Dashboard Service')
+        .click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
         })
-      }
-      )
-    }
-    )
+      })
+    })
 
     describe('terms and privacy message', () => {
       it('opens links to terms and privacy on click', function () {
-        cy.contains('a', 'Terms of Use').click().then(function () {
+        cy.contains('a', 'Terms of Use')
+        .click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/terms-of-use')
         })
 
-        cy.contains('a', 'Privacy Policy').click().then(function () {
+        cy.contains('a', 'Privacy Policy')
+        .click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/privacy-policy')
         })
       })
-    }
-    )
+    })
   })
 
   describe('when not connected to api server', function () {
@@ -222,7 +251,7 @@ describe('Login', function () {
       })
     })
 
-    it('shows \'cannot connect to api server\' message', function () {
+    it('shows cannot connect to api server message', function () {
       cy.contains('Cannot connect to API server')
       cy.contains('http://api.server')
 
@@ -238,8 +267,7 @@ describe('Login', function () {
         cy.get('.loader').then(function () {
           expect(this.ipc.pingApiServer).to.be.calledTwice
         })
-      }
-      )
+      })
 
       it('shows new error on failure', function () {
         this.pingApiServerAgain.reject({
@@ -256,7 +284,7 @@ describe('Login', function () {
       it('shows login on success', function () {
         this.pingApiServerAgain.resolve()
 
-        cy.get('.login').contains('button', 'Log In with GitHub')
+        cy.get('.login').contains('button', 'Log In to Dashboard')
       })
     })
 
@@ -265,10 +293,8 @@ describe('Login', function () {
         cy.contains('Learn more').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
         })
-      }
-      )
-    }
-    )
+      })
+    })
 
     describe('closing login', function () {
       beforeEach(() => {
@@ -279,7 +305,7 @@ describe('Login', function () {
         this.pingApiServerAgain.resolve()
         cy.contains('Log In').click()
 
-        cy.get('.login').contains('button', 'Log In with GitHub')
+        cy.get('.login').contains('button', 'Log In to Dashboard')
       })
     })
   })

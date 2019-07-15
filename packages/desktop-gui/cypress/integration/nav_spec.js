@@ -26,15 +26,13 @@ describe('Navigation', function () {
     cy.get('nav').find('.fa-graduation-cap').click().then(function () {
       expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io')
     })
-  }
-  )
+  })
 
   it('displays and opens link to support on click', () => {
     cy.get('nav').find('.fa-question-circle').click().then(function () {
       expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/support')
     })
-  }
-  )
+  })
 
   it('shows loading spinner where user or \'Log in\' will be', () => {
     cy.get('.main-nav li:last .fa-spinner')
@@ -52,7 +50,7 @@ describe('Navigation', function () {
     it('displays login modal when clicking login button', function () {
       cy.contains('Log In').click()
 
-      cy.contains('.btn', 'Log In with GitHub')
+      cy.contains('.btn', 'Log In to Dashboard')
     })
   })
 

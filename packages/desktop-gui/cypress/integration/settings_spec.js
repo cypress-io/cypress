@@ -86,8 +86,7 @@ describe('Settings', function () {
           cy.contains('5').should('have.class', 'default')
           cy.contains(',').should('have.class', 'comma')
         })
-      }
-      )
+      })
 
       it('displays \'true\' values', () => {
         cy.get('.line').contains('true')
@@ -100,10 +99,10 @@ describe('Settings', function () {
       it('displays \'object\' values for env and hosts', () => {
         cy.get('.nested-obj').eq(0)
         .contains('fixturesFolder')
+
         cy.get('.nested-obj').eq(1)
         .contains('*.foobar.com')
-      }
-      )
+      })
 
       it('displays \'array\' values for blacklistHosts', () => {
         cy.get('.nested-arr')
@@ -118,15 +117,13 @@ describe('Settings', function () {
 
           expect($lines).to.contain('hotjar.com')
         })
-      }
-      )
+      })
 
       it('opens help link on click', () => {
         cy.get('.settings-config .learn-more').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/guides/configuration')
         })
-      }
-      )
+      })
     })
 
     describe('when project id panel is opened', function () {
@@ -152,8 +149,7 @@ describe('Settings', function () {
         cy.get('.settings-record-key').contains('Learn More').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-record-key')
         })
-      }
-      )
+      })
 
       it('loads the project\'s record key', function () {
         expect(this.ipc.getRecordKeys).to.be.called
@@ -178,8 +174,7 @@ describe('Settings', function () {
           cy.get('.settings-record-key').contains('You can change').click().then(function () {
             expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`)
           })
-        }
-        )
+        })
       })
 
       describe('when there are no keys', function () {
@@ -215,12 +210,12 @@ describe('Settings', function () {
         })
 
         it('re-loads and shows the record key when user logs in', function () {
-          cy.stub(this.ipc, 'windowOpen').resolves('code-123')
-          cy.stub(this.ipc, 'logIn').resolves(this.user)
+          cy.stub(this.ipc, 'beginAuth').resolves(this.user)
+
           this.ipc.getRecordKeys.onCall(1).resolves(this.keys)
 
           cy.get('.empty-well button').click()
-          cy.contains('Log In with GitHub').click().should(() => {
+          cy.contains('Log In to Dashboard').click().should(() => {
             expect(this.ipc.getRecordKeys).to.be.calledTwice
           })
 
@@ -243,8 +238,7 @@ describe('Settings', function () {
         cy.get('.settings-proxy .learn-more').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/proxy-configuration')
         })
-      }
-      )
+      })
 
       it('with Windows proxy settings indicates proxy and the source', function () {
         cy.setAppStore({
@@ -253,6 +247,7 @@ describe('Settings', function () {
           proxyServer: 'http://foo-bar.baz',
           proxyBypassList: 'a,b,c,d',
         })
+
         cy.get('.settings-proxy').should('contain', 'from Windows system settings')
         cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
 
@@ -265,6 +260,7 @@ describe('Settings', function () {
           proxyServer: 'http://foo-bar.baz',
           proxyBypassList: 'a,b,c,d',
         })
+
         cy.get('.settings-proxy').should('contain', 'from environment variables')
         cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
 

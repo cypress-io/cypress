@@ -107,7 +107,7 @@ describe('WarningMessage', function () {
     })
   })
 
-  it('doesn\'t try to open non-links', function () {
+  it('does not try to open non-links', function () {
     const nonlinkWarningObj = {
       type: 'NOT_GOOD_BUT_NOT_TOO_BAD',
       name: 'Fairly serious warning',
@@ -119,9 +119,54 @@ describe('WarningMessage', function () {
     })
 
     cy.contains('.alert-warning strong', 'not here')
-    .click()
-    .then(function () {
+    .click().then(function () {
       expect(this.ipc.externalOpen).not.to.be.called
+    })
+  })
+
+  context('with multiple warnings', function () {
+    beforeEach(function () {
+      this.warningObj2 = {
+        type: 'GOOD_BUT_NOT_TOO_GOOD',
+        name: 'Fairly good warning',
+        message: 'Other message',
+      }
+    })
+
+    it('shows multiple warnings', function () {
+      cy.shouldBeOnProjectSpecs().then(function () {
+        this.ipc.onProjectWarning['yield'](null, this.warningObj)
+        this.ipc.onProjectWarning['yield'](null, this.warningObj2)
+      })
+
+      cy.get('.alert-warning')
+      .should('have.length', 2)
+      .should('be.visible')
+      .first().should('contain', 'Some warning')
+
+      cy.get('.alert-warning').its('1')
+      .should('contain', 'Other message')
+    })
+
+    it('can dismiss the warnings', function () {
+      cy.shouldBeOnProjectSpecs().then(function () {
+        this.ipc.onProjectWarning['yield'](null, this.warningObj)
+        this.ipc.onProjectWarning['yield'](null, this.warningObj2)
+      })
+
+      cy.get('.alert-warning')
+      .should('contain', 'Some warning')
+      .should('contain', 'Other message')
+
+      cy.get('.alert-warning button').first().click()
+      cy.get('.alert-warning')
+      .should('not.contain', 'Some warning')
+      .should('contain', 'Other message')
+
+      cy.get('.alert-warning button').click()
+      cy.get('.alert-warning')
+      .should('not.contain', 'Some warning')
+      .should('not.contain', 'Other message')
     })
   })
 })

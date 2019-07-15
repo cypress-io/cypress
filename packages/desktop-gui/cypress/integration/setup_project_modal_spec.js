@@ -91,8 +91,7 @@ describe('Set Up Project', function () {
           .find('a').click().then(function () {
             expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
           })
-        }
-        )
+        })
       })
 
       describe('selecting me as owner', function () {
@@ -108,8 +107,7 @@ describe('Set Up Project', function () {
           .find('a').click().then(function () {
             expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-project-access')
           })
-        }
-        )
+        })
 
         it('displays public & private radios with no preselects', () => {
           cy.get('.privacy-radio').should('be.visible')
@@ -155,6 +153,7 @@ describe('Set Up Project', function () {
           cy.get('select').select('Acme Developers')
           cy.get('.privacy-radio')
           .find('input').first().check()
+
           cy.get('.btn').contains('Me').click()
           cy.get('.privacy-radio').find('input').should('not.be.checked')
           cy.get('.btn').contains('An Organization').click()
@@ -180,8 +179,7 @@ describe('Set Up Project', function () {
           cy.contains('Create organization').click().then(function () {
             expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
           })
-        }
-        )
+        })
       })
 
       context('without only default org', function () {
@@ -191,6 +189,7 @@ describe('Set Up Project', function () {
             'name': 'Jane Lane',
             'default': true,
           }])
+
           cy.get('.btn').contains('Set up project').click()
 
           cy.get('.modal-content')
@@ -241,6 +240,7 @@ describe('Set Up Project', function () {
             'name': 'Ivory Developers',
             'default': false,
           })
+
           this.getOrgsAgain = this.ipc.getOrgs.onCall(2).resolves(this.orgs)
 
           cy.tick(11000)
@@ -257,6 +257,7 @@ describe('Set Up Project', function () {
         cy.contains('.btn', 'Set up project').click()
         cy.get('.modal-body')
         .contains('.btn', 'Me').click()
+
         cy.get('.privacy-radio').find('input').last().check()
 
         cy.get('.modal-body')
@@ -292,6 +293,7 @@ describe('Set Up Project', function () {
       it('sends project name, org id, and public flag to ipc event', function () {
         cy.get('.modal-body')
         .contains('.btn', 'An Organization').click()
+
         cy.get('#projectName').clear().type('New Project')
         cy.get('select').select('Acme Developers')
         cy.get('.privacy-radio').find('input').first().check()
@@ -311,6 +313,7 @@ describe('Set Up Project', function () {
         beforeEach(function () {
           cy.get('.modal-body')
           .contains('.btn', 'An Organization').click()
+
           cy.get('select').select('Acme Developers')
           cy.get('.privacy-radio').find('input').first().check()
 
@@ -331,6 +334,7 @@ describe('Set Up Project', function () {
         beforeEach(function () {
           cy.get('.modal-body')
           .contains('.btn', 'Me').click()
+
           cy.get('.privacy-radio').find('input').last().check()
 
           cy.get('.modal-body')
@@ -350,6 +354,7 @@ describe('Set Up Project', function () {
         beforeEach(function () {
           cy.get('.modal-body')
           .contains('.btn', 'Me').click()
+
           cy.get('.privacy-radio').find('input').first().check()
 
           cy.get('.modal-body')
@@ -388,6 +393,7 @@ describe('Set Up Project', function () {
         cy.contains('.btn', 'Set up project').click()
         cy.get('.modal-body')
         .contains('.btn', 'Me').click()
+
         cy.get('.privacy-radio').find('input').last().check()
 
         cy.get('.modal-body')
@@ -437,15 +443,13 @@ describe('Set Up Project', function () {
     })
 
     it('shows login', () => {
-      cy.get('.modal').contains('Log In with GitHub')
+      cy.get('.modal').contains('Log In to Dashboard')
     })
 
     describe('when login succeeds', function () {
       beforeEach(function () {
-        cy.stub(this.ipc, 'windowOpen').resolves()
-        cy.stub(this.ipc, 'logIn').resolves(this.user)
-
-        cy.contains('button', 'Log In with GitHub').click()
+        cy.stub(this.ipc, 'beginAuth').resolves(this.user)
+        cy.contains('button', 'Log In to Dashboard').click()
       })
 
       it('shows setup', () => {
