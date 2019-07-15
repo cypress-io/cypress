@@ -35,53 +35,32 @@ describe "lib/plugins/index", ->
         expect(cp.fork.lastCall.args[0]).to.contain("plugins/child/index.js")
         expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
 
-    it "uses default Node", ->
+    it "uses system Node when available", ->
       @ipc.on.withArgs("loaded").yields([])
-      config = {
-        pluginsFile: "cypress-plugin"
-      }
       systemNode = "/my/path/to/system/node"
-      sinon.stub(util, "findNode").resolves(systemNode)
-      plugins.init(config)
-      .then ->
-        expect(util.findNode).to.not.be.called
-        # when forking, we use current process
-        options = {
-          stdio: "inherit"
-        }
-        expect(cp.fork.lastCall.args[2]).to.eql(options)
-
-    it "finds system Node", ->
-      @ipc.on.withArgs("loaded").yields([])
       config = {
         pluginsFile: "cypress-plugin",
         nodeVersion: "system"
+        resolvedNodeVersion: "v1.2.3"
+        resolvedNodePath: systemNode
       }
-      systemNode = "/my/path/to/system/node"
-      sinon.stub(util, "findNode").resolves(systemNode)
       plugins.init(config)
       .then ->
-        expect(util.findNode).to.be.called
         options = {
           stdio: "inherit",
           execPath: systemNode
         }
         expect(cp.fork.lastCall.args[2]).to.eql(options)
 
-    it "finds default Node when cannot find system Node", ->
+    it "uses bundled Node when cannot find system Node", ->
       @ipc.on.withArgs("loaded").yields([])
       config = {
         pluginsFile: "cypress-plugin",
         nodeVersion: "system"
+        resolvedNodeVersion: "v1.2.3"
       }
-      # could not find system Node
-      sinon.stub(util, "findNode").resolves(null)
-      sinon.stub(util, "logWarning")
       plugins.init(config)
       .then ->
-        expect(util.findNode).to.be.called
-        expect(util.logWarning).to.be.calledWith("Could find system Node")
-        # uses process to fork
         options = {
           stdio: "inherit"
         }
