@@ -5,6 +5,7 @@ const Promise = require('bluebird')
 const net = require('net')
 const la = require('lazy-ass')
 const is = require('check-more-types')
+const pluralize = require('pluralize')
 const debug = require('debug')('cypress:server:protocol')
 
 function connectAsync (opts) {
@@ -15,6 +16,7 @@ function connectAsync (opts) {
       socket.removeListener('error', reject)
       resolve(socket)
     })
+
     socket.once('error', function (err) {
       socket.removeListener('connection', resolve)
       reject(err)
@@ -44,16 +46,16 @@ const getWsTargetFor = (port, title) => {
     return CRI.List()
   })
   .then((targets) => {
-    debug('CRI list %o', targets)
+    debug('CRI list has %s %o', pluralize('targets', targets.length, true), targets)
     // activate the first available id
 
     // find the first target page that's a real tab
-    // and not the dev tools
-    const target = _.find(targets, (t) => {
-      // return t.type === 'page' && t.url.startsWith('http')
-      // return t.type === 'page' && t.title === title
-      return t.type === 'page' && t.url === 'chrome://newtab/'
-    })
+    // and not the dev tools or background page.
+    // typically there are two targets found like
+    // { title: 'Cypress', type: 'background_page', url: 'chrome-extension://...', ... }
+    // { title: 'New Tab', type: 'page', url: 'chrome://newtab/', ...}
+    const newTabTargetFields = { type: 'page', url: 'chrome://newtab/' }
+    const target = _.find(targets, newTabTargetFields)
 
     la(target, 'could not find CRI target')
     debug('found CRI target %o', target)

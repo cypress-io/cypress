@@ -239,7 +239,7 @@ module.exports = {
           global.wsUrl = wsUrl
 
           # SECOND use RPI to initialize connection to the browser
-          CRI({
+          client = CRI({
             target: wsUrl,
             local: true
           })
@@ -251,7 +251,6 @@ module.exports = {
 
           # THIRD send visit command to load the actual page
           console.log('navigating to page %s', url)
-
           # client.send('Page.navigate', { url })
           # equivalent
           { Page } = client
