@@ -97,6 +97,35 @@ module.exports = {
         ]
       }
       {
+        label: "View"
+        submenu: [
+          {
+            label: 'Reload'
+            accelerator: 'CmdOrCtrl+R'
+            click: (item, focusedWindow) =>
+              focusedWindow.reload() if focusedWindow
+          },
+          {
+            type: "separator"
+          }
+          {
+            label: "Actual Size"
+            accelerator: "CmdOrCtrl+0"
+            role: "resetzoom"
+          },
+          {
+            label: "Zoom In"
+            accelerator: "CmdOrCtrl+Plus"
+            role: "zoomin"
+          },
+          {
+            label: "Zoom Out"
+            accelerator: "CmdOrCtrl+-"
+            role: "zoomout"
+          }
+        ]
+      }
+      {
         label: "Window"
         role: "window"
         submenu: [
@@ -187,12 +216,6 @@ module.exports = {
         {
           label: "Developer Tools"
           submenu: [
-            {
-              label: 'Reload'
-              accelerator: 'CmdOrCtrl+R'
-              click: (item, focusedWindow) =>
-                focusedWindow.reload() if focusedWindow
-            }
             {
               label: 'Toggle Developer Tools'
               accelerator: do ->

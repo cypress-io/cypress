@@ -164,6 +164,37 @@ describe "gui/menu", ->
         }
       ])
 
+  context "View", ->
+    it "contains minimize", ->
+      menu.set()
+
+      expect(getMenuItem("View").submenu).to.eql([
+        {
+            label: "Reload"
+            accelerator: "CmdOrCtrl+R"
+            click: (item, focusedWindow) =>
+              focusedWindow.reload() if focusedWindow
+          },
+          {
+            type: "separator"
+          }
+          {
+            label: "Actual Size"
+            accelerator: "CmdOrCtrl+0"
+            role: "resetzoom"
+          },
+          {
+            label: "Zoom In"
+            accelerator: "CmdOrCtrl++"
+            role: "zoomin"
+          },
+          {
+            label: "Zoom Out"
+            accelerator: "CmdOrCtrl+-"
+            role: "zoomout"
+          }
+      ])
+
   context "Window", ->
     it "contains minimize", ->
       menu.set()
