@@ -57,8 +57,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- after each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- before each hook (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- after each hook (failed).png (XXXXxYYYY)
 
 
   (Video)
