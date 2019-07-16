@@ -161,7 +161,7 @@ describe('Global Mode', function () {
     })
 
     it('displays Back button', () => {
-      cy.get('.left-nav a').invoke('text').should('include', 'Back')
+      cy.get('.main-nav .nav:first-child a').invoke('text').should('include', 'Back')
     })
 
     it('sets title to project name', () => {

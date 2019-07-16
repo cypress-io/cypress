@@ -38,7 +38,7 @@ describe('Project Mode', function () {
     })
 
     it('shows project name in nav', function () {
-      cy.get('.left-nav')
+      cy.get('.main-nav .nav:first-child div')
       .should('contain', this.config.projectName)
       .and('not.contain', 'foo')
     })
@@ -73,7 +73,7 @@ describe('Project Mode', function () {
     })
 
     it('shows project name in nav', function () {
-      cy.get('.left-nav')
+      cy.get('.main-nav .nav:first-child div')
       .should('contain', this.config.projectName)
       .and('not.contain', 'foo')
     })
