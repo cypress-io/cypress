@@ -2,10 +2,6 @@
   "name": "@packages/electron",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "dist",
-    "lib"
-  ],
   "main": "index.js",
   "scripts": {
     "prebuild": "npm run check-deps-pre",
@@ -32,6 +28,10 @@
     "chai": "3.5.0",
     "mocha": "3.5.3"
   },
+  "files": [
+    "dist",
+    "lib"
+  ],
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
   },

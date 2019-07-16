@@ -2,12 +2,6 @@
   "name": "@packages/extension",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "app",
-    "dist",
-    "lib",
-    "theme"
-  ],
   "main": "index.js",
   "scripts": {
     "prebuild": "npm run check-deps-pre",
@@ -46,5 +40,11 @@
     "sinon": "1.17.7",
     "sinon-chai": "3.3.0",
     "vinyl-source-stream": "1.1.2"
-  }
+  },
+  "files": [
+    "app",
+    "dist",
+    "lib",
+    "theme"
+  ]
 }

@@ -2,9 +2,6 @@
   "name": "@packages/launcher",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "lib"
-  ],
   "main": "index.js",
   "scripts": {
     "build": "bin-up tsc --project .",
@@ -37,5 +34,8 @@
     "sinon": "2.4.1",
     "sinon-chai": "3.3.0"
   },
+  "files": [
+    "lib"
+  ],
   "types": "../ts/index.d.ts"
 }

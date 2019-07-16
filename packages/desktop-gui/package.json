@@ -2,10 +2,6 @@
   "name": "@packages/desktop-gui",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "dist",
-    "lib"
-  ],
   "main": "lib/gui.js",
   "scripts": {
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
@@ -25,7 +21,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/icons": "0.7.0",
-    "@cypress/json-schemas": "5.32.1",
+    "@cypress/json-schemas": "5.32.2",
     "@cypress/react-tooltip": "0.5.0",
     "bin-up": "1.2.0",
     "bluebird": "3.5.3",
@@ -51,5 +47,9 @@
     "react-loader": "2.4.5",
     "rebuild-node-sass": "1.1.0",
     "zunder": "6.4.1"
-  }
+  },
+  "files": [
+    "dist",
+    "lib"
+  ]
 }

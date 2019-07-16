@@ -2,9 +2,6 @@
   "name": "@packages/reporter",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "dist"
-  ],
   "main": "lib/reporter.js",
   "browser": "src/main",
   "scripts": {
@@ -48,5 +45,8 @@
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
     "zunder": "6.4.1"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
