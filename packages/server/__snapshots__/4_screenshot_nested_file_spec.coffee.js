@@ -39,7 +39,7 @@ exports['e2e screenshot in nested spec passes 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.coffee/nests the file based on spec path.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.coffee/nests the file based on spec path.png (1280x720)
 
 
   (Video)

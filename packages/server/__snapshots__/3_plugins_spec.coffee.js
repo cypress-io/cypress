@@ -350,8 +350,8 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   (Screenshots)
 
   - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (2x2)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (XXXXxYYYY)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (XXXXxYYYY)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (1280x720)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (1280x720)
   - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (1x1)
 
 
