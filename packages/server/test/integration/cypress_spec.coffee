@@ -38,6 +38,7 @@ Watchers   = require("#{root}lib/watchers")
 browsers   = require("#{root}lib/browsers")
 videoCapture = require("#{root}lib/video_capture")
 browserUtils = require("#{root}lib/browsers/utils")
+chromeBrowser = require("#{root}lib/browsers/chrome")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
 system        = require("#{root}lib/util/system")
@@ -785,6 +786,15 @@ describe "lib/cypress", ->
 
       context "before:browser:launch", ->
         it "chrome", ->
+          # during testing, do not try to connect to the remote interface or
+          # use the Chrome remote interface client
+          sinon.stub(chromeBrowser, "_connectToChromeRemoteInterface").resolves()
+          # the "returns(resolves)" stub is due to curried method
+          # it accepts URL to visit and then waits for actual CRI client reference
+          # and only then navigates to that URL
+          visitPage = sinon.stub().resolves()
+          sinon.stub(chromeBrowser, "_navigateUsingCRI").returns(visitPage)
+
           cypress.start([
             "--run-project=#{@pluginBrowser}"
             "--browser=chrome"
@@ -796,13 +806,15 @@ describe "lib/cypress", ->
 
             browserArgs = args[2]
 
-            expect(browserArgs).to.have.length(7)
+            expect(browserArgs).to.have.length(8)
 
             expect(browserArgs.slice(0, 4)).to.deep.eq([
               "chrome", "foo", "bar", "baz"
             ])
 
             @expectExitWith(0)
+
+            expect(visitPage).to.have.been.calledOnce
 
         it "electron", ->
           write = sinon.stub()

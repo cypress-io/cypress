@@ -6,6 +6,7 @@ path      = require("path")
 Promise   = require("bluebird")
 CRI       = require('chrome-remote-interface')
 la        = require('lazy-ass')
+check     = require('check-more-types')
 extension = require("@packages/extension")
 debug     = require("debug")("cypress:server:browsers")
 plugins   = require("../plugins")
@@ -138,7 +139,7 @@ _connectToChromeRemoteInterface = ->
     debug("received wsUrl %s for port %d", wsUrl, CHROME_REMOTE_INTERFACE_PORT)
     global.wsUrl = wsUrl
 
-    # SECOND use RPI to initialize connection to the browser
+    # use the websocket connection to create Chrome remote interface client
     client = CRI({
       target: wsUrl,
       local: true
@@ -146,15 +147,31 @@ _connectToChromeRemoteInterface = ->
     # ? should we keep the CRI client reference around
     global.criClient = client
 
+# a utility function that navigates to the given URL
+# once Chrome remote interface client is passed to it.
+_navigateUsingCRI = (url) ->
+  la(check.url(url), "missing url to navigate to", url)
+
+  (client) ->
+    la(client, "could not get CRI client")
+    debug("received CRI client")
+    debug('navigating to page %s', url)
+    client.Page.navigate({ url })
+
 module.exports = {
-  # by adding functions as methods here
-  # we can easyly stub them from our unit tests
+  #
+  # tip:
+  #   by adding utility functions that start with "_"
+  #   as methods here we can easily stub them from our unit tests
+  #
 
   _normalizeArgExtensions
 
   _removeRootExtension
 
   _connectToChromeRemoteInterface
+
+  _navigateUsingCRI
 
   _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
@@ -254,12 +271,9 @@ module.exports = {
         utils.launch(browser, null, args)
 
       .tap =>
+        # SECOND connect to the Chrome remote interface
+        # and when the connection is ready
+        # navigate to the actual url
         @_connectToChromeRemoteInterface()
-        .then (client) ->
-          la(client, "could not get CRI client")
-          debug("received CRI client")
-
-          # THIRD send the visit command to load the actual page
-          debug('navigating to page %s', url)
-          client.Page.navigate({ url })
+        .then @_navigateUsingCRI(url)
 }
