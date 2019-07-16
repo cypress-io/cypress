@@ -146,8 +146,6 @@ const config: webpack.Configuration = {
     removeEmptyChunks: true,
   },
 
-  bail: true,
-
   plugins: [
     new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
     new MiniCSSExtractWebpackPlugin(),
