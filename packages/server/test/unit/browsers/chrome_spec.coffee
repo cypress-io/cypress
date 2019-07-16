@@ -12,14 +12,27 @@ describe "lib/browsers/chrome", ->
   context "#open", ->
     beforeEach ->
       @args = []
+      # mock CRI client during testing
+      @criClient = {
+        Page: {
+          navigate: sinon.stub().resolves()
+        }
+      }
 
       sinon.stub(chrome, "_getArgs").returns(@args)
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
+      sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(@criClient)
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
       sinon.stub(utils, "launch")
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
+
+    # NOTE: confirm CRI client behavior before merging PR 4628
+    it.skip "calls CRI Page.visit", ->
+      chrome.open("chrome", "http://", {}, {})
+      .then =>
+        # check if @criClient.Page.navigate has been called
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
@@ -34,7 +47,9 @@ describe "lib/browsers/chrome", ->
 
       chrome.open("chrome", "http://", {}, {})
       .then =>
-        expect(utils.launch).to.be.calledWith("chrome", "http://", @args)
+        # to initialize remote interface client and prepare for true tests
+        # we load the browser with blank page first
+        expect(utils.launch).to.be.calledWith("chrome", null, @args)
 
     it "normalizes --load-extension if provided in plugin", ->
       plugins.has.returns(true)
@@ -55,7 +70,8 @@ describe "lib/browsers/chrome", ->
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache"
+          "--disk-cache-dir=/profile/dir/CypressCache",
+          "--remote-debugging-port=9222"
         ])
 
     it "normalizes multiple extensions from plugins", ->
@@ -77,7 +93,8 @@ describe "lib/browsers/chrome", ->
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache"
+          "--disk-cache-dir=/profile/dir/CypressCache",
+          "--remote-debugging-port=9222"
         ])
 
     it "cleans up an unclean browser profile exit status", ->

@@ -29,6 +29,7 @@ function connectAsync (opts) {
  * @param {number} port Port number to connect to
  */
 const getWsTargetFor = (port) => {
+  debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
   return promiseRetry(

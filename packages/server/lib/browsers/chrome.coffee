@@ -129,10 +129,32 @@ _disableRestorePagesPrompt = (userDir) ->
         fs.writeJson(prefsPath, preferences)
   .catch ->
 
+# After the browser has been opened, we can connect to
+# its remote interface via a websocket.
+_connectToChromeRemoteInterface = ->
+  # at first the tab will be blank "new tab"
+  protocol.getWsTargetFor(CHROME_REMOTE_INTERFACE_PORT)
+  .then (wsUrl) ->
+    debug("received wsUrl %s for port %d", wsUrl, CHROME_REMOTE_INTERFACE_PORT)
+    global.wsUrl = wsUrl
+
+    # SECOND use RPI to initialize connection to the browser
+    client = CRI({
+      target: wsUrl,
+      local: true
+    })
+    # ? should we keep the CRI client reference around
+    global.criClient = client
+
 module.exports = {
+  # by adding functions as methods here
+  # we can easyly stub them from our unit tests
+
   _normalizeArgExtensions
 
   _removeRootExtension
+
+  _connectToChromeRemoteInterface
 
   _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
@@ -231,20 +253,8 @@ module.exports = {
         # we will load the actual page
         utils.launch(browser, null, args)
 
-      .tap ->
-        # at first the tab will be blank "new tab"
-        protocol.getWsTargetFor(CHROME_REMOTE_INTERFACE_PORT)
-        .then (wsUrl) ->
-          debug("received wsUrl %s for port %d", wsUrl, CHROME_REMOTE_INTERFACE_PORT)
-          global.wsUrl = wsUrl
-
-          # SECOND use RPI to initialize connection to the browser
-          client = CRI({
-            target: wsUrl,
-            local: true
-          })
-          # ? should we keep the CRI client reference around
-          global.criClient = client
+      .tap =>
+        @_connectToChromeRemoteInterface()
         .then (client) ->
           la(client, "could not get CRI client")
           debug("received CRI client")
