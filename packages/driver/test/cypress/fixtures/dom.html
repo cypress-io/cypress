@@ -322,6 +322,14 @@
         <input id="search-with-value" type="search" value="query" />
         <input id="url-with-value" type="url" value="cool.biz" />
 
+        <!-- All values are valid readonly -->
+        <input id="readonly-attr" readonly />
+        <textarea id="readonly-readonly" readonly="readonly"></textarea>
+        <input id="readonly-empty-str" readonly="" />
+        
+        <!-- Although not strictly part of spec, Chrome respects any string -->
+        <input id="readonly-str" type="text" readonly="abc" />
+
         <div contenteditable="true"></div>
         <textarea></textarea>
         <input id="bad-type" type="asdf" />

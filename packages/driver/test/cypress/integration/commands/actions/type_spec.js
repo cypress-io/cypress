@@ -4192,6 +4192,54 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type('a').type('b')
       })
 
+      it('throws when readonly attr', (done) => {
+        cy.get('#readonly-attr').type('foo')
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('cy.type() cannot type into an element with a \'readonly\' attribute.')
+          expect(err.message).to.include('The element typed into was:')
+          expect(err.message).to.include('<input id="readonly-attr" readonly="">')
+
+          done()
+        })
+      })
+
+      it('throws when readonly empty string', (done) => {
+        cy.get('#readonly-empty-str').type('foo')
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('cy.type() cannot type into an element with a \'readonly\' attribute.')
+          expect(err.message).to.include('The element typed into was:')
+          expect(err.message).to.include('<input id="readonly-attr" readonly="">')
+
+          done()
+        })
+      })
+
+      it('throws when readonly with readonly string', (done) => {
+        cy.get('#readonly-readonly').type('foo')
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('cy.type() cannot type into an element with a \'readonly\' attribute.')
+          expect(err.message).to.include('The element typed into was:')
+          expect(err.message).to.include('<input id="readonly-attr" readonly="">')
+
+          done()
+        })
+      })
+
+      it('throws when readonly string', (done) => {
+        cy.get('#readonly-str').type('foo')
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('cy.type() cannot type into an element with a \'readonly\' attribute.')
+          expect(err.message).to.include('The element typed into was:')
+          expect(err.message).to.include('<input id="readonly-attr" readonly="">')
+
+          done()
+        })
+      })
+
       it('throws when not textarea or text-like', (done) => {
         cy.get('form').type('foo')
 
