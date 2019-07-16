@@ -199,6 +199,14 @@
       "type": "string",
       "default": null,
       "description": "A 6 character string use to identify this project in the Cypress Dashboard. See https://on.cypress.io/dashboard-service#Identification"
+    },
+    "nodeVersion": {
+      "enum": [
+        "system",
+        "bundled"
+      ],
+      "default": "bundled",
+      "description": "If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
     }
   }
 }
