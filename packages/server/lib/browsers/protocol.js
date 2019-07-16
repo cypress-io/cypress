@@ -27,11 +27,9 @@ function connectAsync (opts) {
 /**
  * Waits for the port to respond with connection to Chrome Remote Interface
  * @param {number} port Port number to connect to
- * @param {string} title Expected page title
  */
-const getWsTargetFor = (port, title) => {
+const getWsTargetFor = (port) => {
   la(is.port(port), 'expected port number', port)
-  la(is.unemptyString(title), 'invalid page title', title)
 
   return promiseRetry(
     (retry) => {

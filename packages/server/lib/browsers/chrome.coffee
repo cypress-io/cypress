@@ -233,7 +233,7 @@ module.exports = {
 
       .tap ->
         # at first the tab will be blank "new tab"
-        protocol.getWsTargetFor(CHROME_REMOTE_INTERFACE_PORT, 'New Tab')
+        protocol.getWsTargetFor(CHROME_REMOTE_INTERFACE_PORT)
         .then (wsUrl) ->
           debug("received wsUrl %s for port %d", wsUrl, CHROME_REMOTE_INTERFACE_PORT)
           global.wsUrl = wsUrl
@@ -249,10 +249,7 @@ module.exports = {
           la(client, "could not get CRI client")
           debug("received CRI client")
 
-          # THIRD send visit command to load the actual page
-          console.log('navigating to page %s', url)
-          # client.send('Page.navigate', { url })
-          # equivalent
-          { Page } = client
-          Page.navigate({ url })
+          # THIRD send the visit command to load the actual page
+          debug('navigating to page %s', url)
+          client.Page.navigate({ url })
 }
