@@ -2,10 +2,6 @@
   "name": "@packages/runner",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "dist",
-    "lib"
-  ],
   "main": "src/index.js",
   "scripts": {
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
@@ -35,7 +31,7 @@
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.12.1",
     "font-awesome": "4.7.0",
-    "jsdom": "13.2.0",
+    "jsdom": "14.1.0",
     "lodash": "4.17.14",
     "mobx": "5.11.0",
     "mobx-react": "5.4.4",
@@ -49,5 +45,9 @@
     "sinon-chai": "3.3.0",
     "webpack": "4.35.3",
     "webpack-cli": "3.3.2"
-  }
+  },
+  "files": [
+    "dist",
+    "lib"
+  ]
 }

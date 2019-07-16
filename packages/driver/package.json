@@ -2,9 +2,6 @@
   "name": "@packages/driver",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "lib"
-  ],
   "scripts": {
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
@@ -42,7 +39,7 @@
     "jquery": "2.2.4",
     "jquery.scrollto": "2.1.2",
     "js-cookie": "2.2.0",
-    "jsdom": "13.2.0",
+    "jsdom": "14.1.0",
     "lodash": "4.17.14",
     "lolex": "4.1.0",
     "md5": "2.2.1",
@@ -64,5 +61,8 @@
     "vanilla-text-mask": "5.1.1",
     "wait-on": "3.2.0",
     "zone.js": "0.9.0"
-  }
+  },
+  "files": [
+    "lib"
+  ]
 }

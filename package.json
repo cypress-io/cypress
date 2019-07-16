@@ -1,6 +1,7 @@
 {
   "name": "cypress",
   "version": "3.4.0",
+  "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
     "all": "node ./scripts/run.js",
@@ -64,8 +65,8 @@
     "@cypress/bumpercar": "2.0.9",
     "@cypress/commit-message-install": "2.7.0",
     "@cypress/env-or-json-file": "2.0.0",
-    "@cypress/eslint-plugin-dev": "3.2.0",
-    "@cypress/eslint-plugin-json": "3.2.0",
+    "@cypress/eslint-plugin-dev": "3.3.0",
+    "@cypress/eslint-plugin-json": "3.2.1",
     "@cypress/github-commit-status-check": "1.5.0",
     "@cypress/npm-run-all": "4.0.5",
     "@cypress/questions-remain": "1.0.1",
@@ -158,18 +159,17 @@
     "typescript": "3.4.5",
     "vinyl-paths": "2.1.0"
   },
-  "description": "Cypress.io end to end testing tool",
-  "homepage": "https://github.com/cypress-io/cypress",
-  "license": "MIT",
-  "author": "Brian Mann",
-  "productName": "Cypress",
   "engines": {
     "node": ">=8.9.3"
   },
+  "productName": "Cypress",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
+  "homepage": "https://github.com/cypress-io/cypress",
+  "author": "Brian Mann",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },

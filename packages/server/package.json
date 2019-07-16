@@ -2,10 +2,6 @@
   "name": "@packages/server",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "config",
-    "lib"
-  ],
   "main": "index.js",
   "scripts": {
     "build-js": "tsc",
@@ -151,7 +147,7 @@
     "@babel/preset-react": "7.0.0",
     "@babel/runtime": "7.4.4",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/json-schemas": "5.32.1",
+    "@cypress/json-schemas": "5.32.2",
     "@cypress/sinon-chai": "1.1.0",
     "babel-plugin-add-module-exports": "1.0.2",
     "babelify": "10.0.0",
@@ -193,5 +189,9 @@
     "xvfb": "cypress-io/node-xvfb#22e3783c31d81ebe64d8c0df491ea00cdc74726a",
     "xvfb-maybe": "cypress-io/xvfb-maybe#c4a810c42d603949cd63b8cf245f6c239331d370"
   },
+  "files": [
+    "config",
+    "lib"
+  ],
   "productName": "Cypress"
 }

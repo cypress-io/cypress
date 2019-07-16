@@ -2,10 +2,6 @@
   "name": "@packages/socket",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "lib",
-    "patches"
-  ],
   "main": "index.js",
   "scripts": {
     "check-deps": "node ../../scripts/check-deps.js --verbose",
@@ -27,5 +23,9 @@
     "chai": "3.5.0",
     "cross-env": "5.2.0",
     "patch-package": "6.1.2"
-  }
+  },
+  "files": [
+    "lib",
+    "patches"
+  ]
 }
