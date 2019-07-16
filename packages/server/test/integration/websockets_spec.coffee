@@ -19,6 +19,8 @@ wsPort  = 20000
 wssPort = 8443
 
 describe "Web Sockets", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     Fixtures.scaffold()
 
