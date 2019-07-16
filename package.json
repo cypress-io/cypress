@@ -1,6 +1,7 @@
 {
   "name": "cypress",
   "version": "3.4.0",
+  "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
     "all": "node ./scripts/run.js",
@@ -152,18 +153,17 @@
     "typescript": "3.4.5",
     "vinyl-paths": "2.1.0"
   },
-  "description": "Cypress.io end to end testing tool",
-  "homepage": "https://github.com/cypress-io/cypress",
-  "license": "MIT",
-  "author": "Brian Mann",
-  "productName": "Cypress",
   "engines": {
     "node": ">=8.9.3"
   },
+  "productName": "Cypress",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
+  "homepage": "https://github.com/cypress-io/cypress",
+  "author": "Brian Mann",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },

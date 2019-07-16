@@ -2,10 +2,6 @@
   "name": "@packages/static",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "dist",
-    "lib"
-  ],
   "main": "index.js",
   "scripts": {
     "prebuild": "npm run check-deps-pre",
@@ -20,5 +16,9 @@
   "devDependencies": {
     "@cypress/icons": "0.7.0",
     "gulp": "3.9.1"
-  }
+  },
+  "files": [
+    "dist",
+    "lib"
+  ]
 }
