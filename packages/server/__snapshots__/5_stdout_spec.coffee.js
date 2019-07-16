@@ -112,9 +112,9 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- fails (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- failing hook -- is failing -- before each hook (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- passing hook -- is failing (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- failing hook -- is failing -- before each hook (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- passing hook -- is failing (failed).png (XXXXxYYYY)
 
 
   (Video)

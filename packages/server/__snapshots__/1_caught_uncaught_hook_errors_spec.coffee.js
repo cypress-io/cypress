@@ -90,9 +90,9 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s1a -- t2a -- before each hook (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s3a -- t8a -- before all hook (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s4a -- t10a -- before all hook (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s1a -- t2a -- before each hook (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s3a -- t8a -- before all hook (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s4a -- t10a -- before all hook (failed).png (XXXXxYYYY)
 
 
   (Video)
@@ -181,7 +181,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_failing_spec.coffee/s1b -- t2b -- before each hook (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_failing_spec.coffee/s1b -- t2b -- before each hook (failed).png (XXXXxYYYY)
 
 
   (Video)
@@ -262,7 +262,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_root_error_failing_spec.coffee/t1c -- before each hook (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_root_error_failing_spec.coffee/t1c -- before each hook (failed).png (XXXXxYYYY)
 
 
   (Video)
@@ -349,7 +349,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_events_failing_spec.coffee/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_events_failing_spec.coffee/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook (failed).png (XXXXxYYYY)
 
 
   (Video)

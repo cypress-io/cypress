@@ -105,8 +105,8 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands and return a different value (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands in custom command and returning differnet value (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands and return a different value (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands in custom command and returning differnet value (failed).png (XXXXxYYYY)
 
 
   (Video)

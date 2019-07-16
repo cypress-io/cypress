@@ -120,11 +120,11 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t1 (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t2 (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t4 (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t5 (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cross origin script errors -- explains where script errored (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t1 (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t2 (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t4 (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t5 (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cross origin script errors -- explains where script errored (failed).png (XXXXxYYYY)
 
 
   (Video)

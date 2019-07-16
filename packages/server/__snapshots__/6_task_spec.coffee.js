@@ -166,8 +166,8 @@ https://on.cypress.io/api/task
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.coffee/throws when task returns undefined (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.coffee/includes stack trace in error (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.coffee/throws when task returns undefined (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.coffee/includes stack trace in error (failed).png (XXXXxYYYY)
 
 
   (Video)
