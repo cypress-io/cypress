@@ -1,4 +1,4 @@
-const commentTokens = ['NOTE:', 'TODO:']
+const defaultCommentTokens = ['NOTE:', 'TODO:', 'FIXME:']
 
 module.exports = {
   meta: {
@@ -11,20 +11,39 @@ module.exports = {
       noOnly: `\
 Found a {{test-scope}}.skip(⋯) without an explanation.
 Add a comment above the '{{test-scope}}' starting with one of:
-${commentTokens.join('  ')}
+{{commentTokens}}
 
 e.g.
-// TODO: <reason test was skipped>
+// {{exampleCommentToken}} <reason test was skipped>
 {{test-scope}}.skip(⋯)
 
 `,
     },
 
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          commentTokens: {
+            type: 'array',
+            default: defaultCommentTokens,
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
     // uncomment to enable autoFix
     // fixable: 'code',
+
   },
 
   create (context) {
+
+    let commentTokens = defaultCommentTokens
+
+    if (context.options.length) {
+      commentTokens = typeof context.options[0].commentTokens === 'object' ? context.options[0].commentTokens : commentTokens
+    }
 
     const sourceCode = context.getSourceCode()
 
@@ -51,6 +70,8 @@ e.g.
               messageId: 'noOnly',
               data: {
                 'test-scope': callee.object.name,
+                commentTokens: commentTokens.join('  '),
+                exampleCommentToken: commentTokens[0],
               },
               // uncomment to enable autoFix
               // fix(fixer) {

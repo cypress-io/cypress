@@ -67,4 +67,29 @@ describe('skip-comment', () => {
     expect(result.output).not.toBeTruthy()
   })
 
+  describe('config', () => {
+    it('skip test without comment', async () => {
+      const filename = './fixtures/skip-comment-config.js'
+      const result = execute(filename, {
+        fix: true,
+        rules: {
+          [`${pluginName}/${ruleName}`]: [
+            'error', {
+              commentTokens: ['FOOBAR:'],
+            },
+          ],
+        },
+      })
+
+      expect(result.errorCount).toBe(1)
+      // console.log(result.messages[0].message)
+
+      expect(result.messages[0].message).toContain('it')
+      expect(result.messages[0].message).toContain('FOOBAR:')
+
+      expect(result.output).not.toBeTruthy()
+    })
+
+  })
+
 })
