@@ -19,6 +19,8 @@ expectToEqDetails = (actual, expected) ->
   expect(actual).to.deep.eq(expected)
 
 describe "Server", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     sinon.stub(Server.prototype, "reset")
 
