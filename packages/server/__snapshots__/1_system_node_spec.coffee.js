@@ -18,7 +18,7 @@ exports['e2e system node uses system node when launching plugins file 1'] = `
   Running: spec.js...                                                                      (1 of 1) 
 
 
-  ✓ 
+  ✓ has expected resolvedNodePath and resolvedNodeVersion
 
   1 passing
 
