@@ -58,6 +58,7 @@ describe('skip-comment', () => {
 
     expect(result.messages[0].message).toContain('it')
     expect(result.messages[0].message).toContain('NOTE:')
+    expect(result.messages[0].message).toContain('TODO:')
     expect(result.messages[1].message).toContain('describe')
     expect(result.messages[1].message).toContain('NOTE:')
     expect(result.messages[2].message).toContain('context')

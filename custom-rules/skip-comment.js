@@ -1,3 +1,5 @@
+const commentTokens = ['NOTE:', 'TODO:']
+
 module.exports = {
   meta: {
     type: 'problem',
@@ -7,11 +9,13 @@ module.exports = {
     },
     messages: {
       noOnly: `\
-Found a {{test-scope}}.skip(...) without an explanation.
-Add a comment above the '{{test-scope}}' e.g.
+Found a {{test-scope}}.skip(⋯) without an explanation.
+Add a comment above the '{{test-scope}}' starting with one of:
+${commentTokens.join('  ')}
 
-// NOTE: <reason test was skipped>
-{{test-scope}}.skip(...)
+e.g.
+// TODO: <reason test was skipped>
+{{test-scope}}.skip(⋯)
 
 `,
     },
@@ -31,7 +35,9 @@ Add a comment above the '{{test-scope}}' e.g.
 
         const commentBefore = sourceCode.getCommentsBefore(node)
 
-        const hasExplain = commentBefore && commentBefore.map((v) => v.value.trim().startsWith('NOTE:')).filter(Boolean)[0]
+        const hasExplain = commentBefore && commentBefore.map(
+          (v) => commentTokens.map((commentToken) => v.value.trim().startsWith(commentToken)).filter(Boolean)[0]
+        ).filter(Boolean)[0]
 
         if (hasExplain) {
           return
