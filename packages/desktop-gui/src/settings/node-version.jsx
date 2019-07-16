@@ -20,10 +20,20 @@ const renderLearnMore = () => {
 const NodeVersion = observer(({ project }) => {
   const { resolvedConfig, resolvedNodeVersion, resolvedNodePath } = project
 
+  function formatPluginsFile () {
+    const pluginsFile = _.get(resolvedConfig, 'pluginsFile.value')
+
+    if (pluginsFile) {
+      return <code>{pluginsFile}</code>
+    }
+
+    return 'currently disabled'
+  }
+
   return (
     <div className="node-version">
       {renderLearnMore()}
-      <p>This Node version will be used to execute your plugins file (<code>{_.get(resolvedConfig, 'pluginsFile.value')}</code>):</p>
+      <p>This Node version will be used to execute your plugins file ({formatPluginsFile()}):</p>
       <table className="node-table">
         <tbody>
           <tr>
