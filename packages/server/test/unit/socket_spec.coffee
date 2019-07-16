@@ -71,6 +71,26 @@ describe "lib/socket", ->
     afterEach ->
       @client.disconnect()
 
+    it "quickly emits and receives huuuge circular objects", (done) ->
+      buildHugeObject = (i) ->
+        if i == 0 then return {}
+        {
+          a: buildHugeObject(i - 1)
+          b: buildHugeObject(i - 1)
+        }
+
+      obj = buildHugeObject(14)
+      obj.a.b.a.b.a.a.a.b = obj.a
+      obj.a.a.a.a.a.b.a.b.a.b = obj
+
+      start = Date.now()
+      sinon.stub(exec, 'run').resolves(obj)
+
+      @client.emit "backend:request", "exec", obj, (res) ->
+        expect(res.response).to.deep.eq(obj)
+        console.log("took #{Date.now()-start}ms")
+        done()
+
     ## https://github.com/cypress-io/cypress/issues/4346
     it "can emit a circular object without crashing", (done) ->
       foo = {
