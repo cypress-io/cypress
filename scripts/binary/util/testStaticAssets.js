@@ -42,9 +42,7 @@ const testStaticAssets = async (buildResourcePath) => {
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/index.html`,
       goodStrings: [
-        // we're not setting NODE_ENV to production for some reason
-        // TODO: probably change this by using the build-prod script
-        'window.env = \'development\'',
+        `window.env = 'production'`,
       ],
     }),
   ])
