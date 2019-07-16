@@ -4,9 +4,9 @@ const { Keyboard } = Cypress
 const { Promise } = Cypress
 const $selection = require('../../../../../src/dom/selection')
 
-//# trim new lines at the end of innerText
-//# due to changing browser versions implementing
-//# this differently
+// trim new lines at the end of innerText
+// due to changing browser versions implementing
+// this differently
 const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
@@ -20,19 +20,19 @@ describe('src/cy/commands/actions/type', () => {
 
       const el = cy.$$('[contenteditable]:first').get(0)
 
-      //# by default... the last new line by itself
-      //# will only ever count as a single new line...
-      //# but new lines above it will count as 2 new lines...
-      //# so by adding "3" new lines, the last counts as 1
-      //# and the first 2 count as 2...
+      // by default... the last new line by itself
+      // will only ever count as a single new line...
+      // but new lines above it will count as 2 new lines...
+      // so by adding "3" new lines, the last counts as 1
+      // and the first 2 count as 2...
       el.innerHTML = '<div><br></div>'.repeat(3)
 
-      //# browsers changed their implementation
-      //# of the number of newlines that <div><br></div>
-      //# create. newer versions of chrome set 2 new lines
-      //# per set - whereas older ones create only 1 new line.
-      //# so we grab the current sets for the assertion later
-      //# so this test is browser version agnostic
+      // browsers changed their implementation
+      // of the number of newlines that <div><br></div>
+      // create. newer versions of chrome set 2 new lines
+      // per set - whereas older ones create only 1 new line.
+      // so we grab the current sets for the assertion later
+      // so this test is browser version agnostic
       const newLines = el.innerText
 
       this.multiplierNumNewLines = (newLines.length - 1) / 2
@@ -59,8 +59,8 @@ describe('src/cy/commands/actions/type', () => {
 
       input.val('')
 
-      //# make sure we are starting from a
-      //# clean state
+      // make sure we are starting from a
+      // clean state
       expect(input).to.have.value('')
 
       cy.get('input:text:first').type('foo').then(($input) => {
@@ -269,9 +269,9 @@ describe('src/cy/commands/actions/type', () => {
         .onThirdCall().returns()
 
         cy.get(':text:first').type('foo').then(() => {
-          //# - retry animation coords
-          //# - retry animation
-          //# - retry animation
+          // - retry animation coords
+          // - retry animation
+          // - retry animation
           expect(retries).to.eq(3)
 
           expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
@@ -534,11 +534,11 @@ describe('src/cy/commands/actions/type', () => {
             altKey: false,
             bubbles: true,
             cancelable: true,
-            charCode: 0, //# deprecated
+            charCode: 0, // deprecated
             ctrlKey: false,
             detail: 0,
             key: 'a',
-            keyCode: 65, //# deprecated but fired by chrome always uppercase in the ASCII table
+            keyCode: 65, // deprecated but fired by chrome always uppercase in the ASCII table
             layerX: 0,
             layerY: 0,
             location: 0,
@@ -549,7 +549,7 @@ describe('src/cy/commands/actions/type', () => {
             shiftKey: false,
             type: 'keydown',
             view: cy.state('window'),
-            which: 65, //# deprecated but fired by chrome
+            which: 65, // deprecated but fired by chrome
           })
 
           done()
@@ -568,11 +568,11 @@ describe('src/cy/commands/actions/type', () => {
             altKey: false,
             bubbles: true,
             cancelable: true,
-            charCode: 97, //# deprecated
+            charCode: 97, // deprecated
             ctrlKey: false,
             detail: 0,
             key: 'a',
-            keyCode: 97, //# deprecated
+            keyCode: 97, // deprecated
             layerX: 0,
             layerY: 0,
             location: 0,
@@ -583,7 +583,7 @@ describe('src/cy/commands/actions/type', () => {
             shiftKey: false,
             type: 'keypress',
             view: cy.state('window'),
-            which: 97, //# deprecated
+            which: 97, // deprecated
           })
 
           done()
@@ -602,11 +602,11 @@ describe('src/cy/commands/actions/type', () => {
             altKey: false,
             bubbles: true,
             cancelable: true,
-            charCode: 0, //# deprecated
+            charCode: 0, // deprecated
             ctrlKey: false,
             detail: 0,
             key: 'a',
-            keyCode: 65, //# deprecated but fired by chrome always uppercase in the ASCII table
+            keyCode: 65, // deprecated but fired by chrome always uppercase in the ASCII table
             layerX: 0,
             layerY: 0,
             location: 0,
@@ -617,7 +617,7 @@ describe('src/cy/commands/actions/type', () => {
             shiftKey: false,
             type: 'keyup',
             view: cy.state('window'),
-            which: 65, //# deprecated but fired by chrome
+            which: 65, // deprecated but fired by chrome
           })
 
           done()
@@ -968,7 +968,7 @@ describe('src/cy/commands/actions/type', () => {
           return $(this).get(0).setSelectionRange(0, 0)
         })
 
-        //# no change event should be fired
+        // no change event should be fired
         cy.get('#input-without-value').type('56').then(($input) => {
           expect($input).to.have.value('123456')
         })
@@ -984,7 +984,7 @@ describe('src/cy/commands/actions/type', () => {
 
           const val = $input.val()
 
-          //# setting value updates cursor to the end of input
+          // setting value updates cursor to the end of input
           return $input.val(`${val + key}-`)
         })
 
@@ -1446,11 +1446,11 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('can type into an iframe with designmode = \'on\'', () => {
-          //# append a new iframe to the body
+          // append a new iframe to the body
           cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
           .appendTo(cy.$$('body'))
 
-          //# wait for iframe to load
+          // wait for iframe to load
           let loaded = false
 
           cy.get('#generic-iframe')
@@ -1463,7 +1463,7 @@ describe('src/cy/commands/actions/type', () => {
             expect(loaded).to.eq(true)
           })
 
-          //# type text into iframe
+          // type text into iframe
           cy.get('#generic-iframe')
           .then(($iframe) => {
             $iframe[0].contentDocument.designMode = 'on'
@@ -1483,7 +1483,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      //# TODO: fix this with 4.0 updates
+      // NOTE: fix this with 4.0 updates
       describe.skip('element reference loss', () => {
         it('follows the focus of the cursor', () => {
           let charCount = 0
@@ -1621,7 +1621,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('can backspace a selection range of characters', () => {
-          //# select the 'ar' characters
+          // select the 'ar' characters
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
             return $input.get(0).setSelectionRange(1, 3)
@@ -1679,7 +1679,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('can delete a selection range of characters', () => {
-          //# select the 'ar' characters
+          // select the 'ar' characters
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
             return $input.get(0).setSelectionRange(1, 3)
@@ -1719,7 +1719,7 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          //# select the 'a' characters
+          // select the 'a' characters
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
             return $input.get(0).setSelectionRange(0, 1)
@@ -1765,7 +1765,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('sets the cursor to the left bounds', () => {
-          //# select the 'a' character
+          // select the 'a' character
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
             return $input.get(0).setSelectionRange(1, 2)
@@ -1775,7 +1775,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('sets the cursor to the very beginning', () => {
-          //# select the 'a' character
+          // select the 'a' character
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
             return $input.get(0).setSelectionRange(0, 1)
@@ -1839,7 +1839,7 @@ describe('src/cy/commands/actions/type', () => {
 
       context('{rightarrow}', () => {
         it('can move the cursor from the beginning to beginning + 1', () => {
-          //# select the beginning
+          // select the beginning
           cy.get(':text:first').invoke('val', 'bar').focus().then(($input) => {
             return $input.get(0).setSelectionRange(0, 0)
           }).get(':text:first').type('{rightarrow}n').then(($input) => {
@@ -1854,7 +1854,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('sets the cursor to the rights bounds', () => {
-          //# select the 'a' character
+          // select the 'a' character
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
             return $input.get(0).setSelectionRange(1, 2)
@@ -2130,7 +2130,7 @@ describe('src/cy/commands/actions/type', () => {
                       '<div>bar</div>' +
                       '<div>baz</div>'
 
-          //# select 'bar'
+          // select 'bar'
           const line = cy.$$('[contenteditable]:first div:nth-child(1)').get(0)
 
           cy.document().then((doc) => {
@@ -2225,7 +2225,7 @@ describe('src/cy/commands/actions/type', () => {
                       '<div>bar</div>' +
                       '<div>baz</div>'
 
-          //# select 'foo'
+          // select 'foo'
           const line = cy.$$('[contenteditable]:first div:first').get(0)
 
           cy.document().then((doc) => {
@@ -2712,8 +2712,8 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('resets modifiers before next test', () => {
-          //# this test will fail if you comment out
-          //# $Keyboard.resetModifiers
+          // this test will fail if you comment out
+          // $Keyboard.resetModifiers
 
           const $input = cy.$$('input:text:first')
           const events = []
@@ -3104,7 +3104,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      //# [contenteditable] does not fire ANY change events ever.
+      // [contenteditable] does not fire ANY change events ever.
       it('does not fire at ALL for [contenteditable]', () => {
         let changed = 0
 
@@ -3233,7 +3233,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      //# https://github.com/cypress-io/cypress/issues/3001
+      // https://github.com/cypress-io/cypress/issues/3001
       describe('skip actionability if already focused', () => {
         it('inside input', () => {
           cy.$$('body').append(Cypress.$('\
@@ -3344,11 +3344,11 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      //#make sure caret is correct
-      //# type left left
-      //# make sure caret correct
-      //# text is fboo
-      //# fix input-mask issue
+      //make sure caret is correct
+      // type left left
+      // make sure caret correct
+      // text is fboo
+      // fix input-mask issue
 
       it('leaves caret at the end of input', () => {
         cy.get(':text:first').type('foobar')
@@ -3377,7 +3377,7 @@ describe('src/cy/commands/actions/type', () => {
         '<div>end</div>'
 
         cy.get('[contenteditable]:first')
-        //# move cursor to beginning of div
+        // move cursor to beginning of div
         .type('{selectall}{leftarrow}')
         .type(`${'{rightarrow}'.repeat(14)}[_I_]`).then(($el) => {
           expect(trimInnerText($el)).to.eql('start\nmiddle\ne[_I_]nd')
@@ -3426,7 +3426,7 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       it('enter and \\n should act the same for [contenteditable]', () => {
-        //# non breaking white space
+        // non breaking white space
         const cleanseText = (text) => {
           return text.split('\u00a0').join(' ')
         }
@@ -3435,8 +3435,8 @@ describe('src/cy/commands/actions/type', () => {
           expect(cleanseText(trimInnerText($el))).to.eql(innerText)
         }
 
-        //# NOTE: this may only pass in Chrome since the whitespace may be different in other browsers
-        //#  even if actual and expected appear the same.
+        // NOTE: this may only pass in Chrome since the whitespace may be different in other browsers
+        //  even if actual and expected appear the same.
         const expected = '{\n  foo:   1\n  bar:   2\n  baz:   3\n}'
 
         cy.get('[contenteditable]:first')
@@ -4239,7 +4239,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.$$('input:text:first').prop('disabled', true)
 
         cy.on('fail', (err) => {
-          //# get + type logs
+          // get + type logs
           expect(this.logs.length).eq(2)
           expect(err.message).to.include('cy.type() failed because this element is disabled:\n')
 
@@ -4393,7 +4393,7 @@ describe('src/cy/commands/actions/type', () => {
       it('throws when type is canceled by preventingDefault mousedown')
 
       it('throws when element animation exceeds timeout', (done) => {
-        //# force the animation calculation to think we moving at a huge distance ;-)
+        // force the animation calculation to think we moving at a huge distance ;-)
         cy.stub(Cypress.utils, 'getDistanceBetween').returns(100000)
 
         let keydowns = 0
@@ -4630,7 +4630,7 @@ describe('src/cy/commands/actions/type', () => {
 
       textarea.val('foo bar')
 
-      //# make sure it really has that value first
+      // make sure it really has that value first
       expect(textarea).to.have.value('foo bar')
 
       cy.get('#comments').clear().then(($textarea) => {
@@ -4883,7 +4883,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.$$('input:text:first').prop('disabled', true)
 
         cy.on('fail', (err) => {
-          //# get + type logs
+          // get + type logs
           expect(this.logs.length).eq(2)
           expect(err.message).to.include('cy.clear() failed because this element is disabled:\n')
 
