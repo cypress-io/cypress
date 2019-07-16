@@ -42,8 +42,24 @@ runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js", "--skip-packages", 
 runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js", "--skip-packages", "cli"])
 
 # builds all the packages except for cli
-runAllBuild = _.partial(npmRun,
-  ["run", "all", "build", "--", "--serial", "--skip-packages", "cli"])
+runAllBuild = (args...) ->
+  getPackagesWithScript('build')
+  .then (pkgNameArr) ->
+    pkgs = pkgNameArr.join(' ')
+    npmRun(
+      ["run", "all", "build-prod", "--", "--serial", "--packages", pkgs, "--skip-packages", "cli"]
+      args...
+    )
+
+## @returns string[] with names of packages, e.g. ['runner', 'driver', 'server']
+getPackagesWithScript = (scriptName) ->
+  Promise.resolve(glob('./packages/*/package.json'))
+  .map (pkgPath) ->
+    fs.readJsonAsync(pkgPath)
+    .then (json) ->
+      if json.scripts.build
+        return path.basename(path.dirname(pkgPath))
+  .filter(Boolean)
 
 copyAllToDist = (distDir) ->
   copyRelativePathToDist = (relative) ->
@@ -214,6 +230,8 @@ module.exports = {
   runAllCleanJs
 
   forceNpmInstall
+  
+  getPackagesWithScript
 }
 
 if not module.parent

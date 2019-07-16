@@ -43,6 +43,32 @@ describe('packages', () => {
     snapshot(files)
   })
 
+  it('can find packages with script', async () => {
+    mockfs(
+      {
+        'packages': {
+          'foo': {
+            'package.json': JSON.stringify({
+              scripts: {
+                build: 'somefoo',
+              },
+            }),
+          },
+          'bar': {
+            'package.json': JSON.stringify({
+              scripts: {
+                start: 'somefoo',
+              },
+            }),
+          },
+        },
+      }
+    )
+
+    const res = await packages.getPackagesWithScript('build')
+
+    expect(res).deep.eq(['foo'])
+  })
 })
 
 describe('transformRequires', () => {

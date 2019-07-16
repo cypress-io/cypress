@@ -9,6 +9,7 @@
   "scripts": {
     "build": "bin-up tsc --project .",
     "build-js": "bin-up tsc --project .",
+    "build-prod": "npm run build",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "preclean": "npm run check-deps-pre",

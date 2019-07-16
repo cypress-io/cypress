@@ -13,6 +13,7 @@
     "test-e2e": "cypress run",
     "prebuild": "npm run check-deps-pre",
     "build": "node ./bin/build.js && gulp build",
+    "build-prod": "npm run build",
     "predeploy": "npm run build",
     "deploy": "gulp deploy"
   },

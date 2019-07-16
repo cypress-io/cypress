@@ -9,9 +9,9 @@
   "main": "src/index.js",
   "scripts": {
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "cross-env NODE_ENV=production webpack",
+    "build": "webpack",
     "prebuild-prod": "npm run check-deps-pre",
-    "build-prod": "npm run build",
+    "build-prod": "cross-env NODE_ENV=production npm run build",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
