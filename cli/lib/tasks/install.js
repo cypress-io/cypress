@@ -18,9 +18,9 @@ const { throwFormErrorText, errors } = require('../errors')
 
 const alreadyInstalledMsg = () => {
   if (!util.isPostInstall()) {
-    logger.log(stripIndent`    
+    logger.log(stripIndent`
       Skipping installation:
-  
+
         Pass the ${chalk.yellow('--force')} option if you'd like to reinstall anyway.
     `)
   }
@@ -153,15 +153,20 @@ const start = (options = {}) => {
   // let this environment variable reset the binary version we need
   if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
 
-    const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY')
+    // because passed file paths are often double quoted
+    // and might have extra whitespace around, be robust and trim the string
+    const trimAndRemoveDoubleQuotes = true
+    const envVarVersion = util.getEnv('CYPRESS_INSTALL_BINARY', trimAndRemoveDoubleQuotes)
 
-    debug('using environment variable CYPRESS_INSTALL_BINARY %s', envVarVersion)
+    debug('using environment variable CYPRESS_INSTALL_BINARY "%s"', envVarVersion)
 
     if (envVarVersion === '0') {
       debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
       logger.log(
         stripIndent`
-        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`)
+        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`
+      )
+
       logger.log()
 
       return Promise.resolve()
@@ -184,7 +189,9 @@ const start = (options = {}) => {
         ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
 
               Previous installs of Cypress may not be found.
-      `)
+      `
+    )
+
     logger.log()
   }
 
@@ -217,6 +224,7 @@ const start = (options = {}) => {
     logger.log(stripIndent`
       Cypress ${chalk.green(binaryVersion)} is installed in ${chalk.cyan(installDir)}
       `)
+
     logger.log()
 
     if (options.force) {
@@ -254,6 +262,7 @@ const start = (options = {}) => {
             These versions may not work properly together.
         `)
       )
+
       logger.log()
     }
 

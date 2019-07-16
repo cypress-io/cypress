@@ -147,6 +147,7 @@
     font-size: 1em;
     position: relative;
     left: -15px;
+    max-width: calc(100% - 85px);
 
     .arrow {
       @extend .#{$fa-css-prefix};
