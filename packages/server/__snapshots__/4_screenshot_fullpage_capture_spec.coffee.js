@@ -39,17 +39,17 @@ exports['e2e screenshot fullPage capture passes 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-original.png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare.png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (1).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (2).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (3).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (4).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (5).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (6).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (7).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (8).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (9).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-original.png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare.png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (1).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (2).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (3).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (4).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (5).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (6).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (7).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (8).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPage-compare (9).png (YYYYxZZZZ)
 
 
   (Video)

@@ -60,7 +60,7 @@ exports['e2e issue 173 failing 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_173_spec.coffee/fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/issue_173_spec.coffee/fails (failed).png (YYYYxZZZZ)
 
 
   (Video)

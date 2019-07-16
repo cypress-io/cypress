@@ -100,7 +100,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -147,7 +147,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -201,7 +201,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -307,7 +307,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
 ====================================================================================================
@@ -378,7 +378,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
 ====================================================================================================
@@ -449,7 +449,7 @@ exports['e2e record api interaction errors update instance does not update insta
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -530,7 +530,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -651,7 +651,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -726,7 +726,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Video)
@@ -829,7 +829,7 @@ This error will not alter the exit code.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
 ====================================================================================================
@@ -895,7 +895,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -1023,7 +1023,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -1084,7 +1084,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -1206,7 +1206,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
 ====================================================================================================
@@ -1314,7 +1314,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -1409,7 +1409,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -1487,7 +1487,7 @@ This error will not alter the exit code.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
 ====================================================================================================
@@ -1609,7 +1609,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -1689,7 +1689,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -1769,7 +1769,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -1849,7 +1849,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -1929,7 +1929,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -2009,7 +2009,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)
@@ -2093,7 +2093,7 @@ Details:
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (YYYYxZZZZ)
 
 
   (Uploading Results)

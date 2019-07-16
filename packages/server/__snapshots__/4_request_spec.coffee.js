@@ -177,7 +177,7 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/request_http_network_error_failing_spec.coffee/when network connection cannot be established -- fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/request_http_network_error_failing_spec.coffee/when network connection cannot be established -- fails (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -301,7 +301,7 @@ Body: Service Unavailable
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/request_status_code_failing_spec.coffee/when status code isnt 2xx or 3xx -- fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/request_status_code_failing_spec.coffee/when status code isnt 2xx or 3xx -- fails (failed).png (YYYYxZZZZ)
 
 
   (Video)

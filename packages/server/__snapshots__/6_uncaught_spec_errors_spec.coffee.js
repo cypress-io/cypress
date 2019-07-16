@@ -57,7 +57,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee/An uncaught error was detected outside of a test (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -140,7 +140,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An uncaught error was detected outside of a test (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -217,7 +217,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -299,7 +299,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does not run -- before all hook (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does not run -- before all hook (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -391,10 +391,10 @@ exports['e2e uncaught errors failing5 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz fails (failed).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar fails (failed).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux fails (failed).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2 fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz fails (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar fails (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux fails (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2 fails (failed).png (YYYYxZZZZ)
 
 
   (Video)

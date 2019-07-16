@@ -159,7 +159,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_network_error_failing_spec.coffee/when network connection cannot be established -- fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_network_error_failing_spec.coffee/when network connection cannot be established -- fails (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -256,7 +256,7 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_500_response_failing_spec.coffee/when server response is 500 -- fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_500_response_failing_spec.coffee/when server response is 500 -- fails (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -353,7 +353,7 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_file_404_response_failing_spec.coffee/when file server response is 404 -- fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_file_404_response_failing_spec.coffee/when file server response is 404 -- fails (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -452,7 +452,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_non_html_content_type_failing_spec.coffee/when content type is plaintext -- fails (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_non_html_content_type_failing_spec.coffee/when content type is plaintext -- fails (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -576,8 +576,8 @@ When this 'load' event occurs, Cypress will continue running commands.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds pageLoadTimeout (failed).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds timeout option (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds pageLoadTimeout (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds timeout option (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -795,9 +795,9 @@ Error: ESOCKETTIMEDOUT
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors on the initial visit (failed).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors when not initially visiting (failed).png (XXXXxYYYY)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- fails after reducing the responseTimeout option (failed).png (XXXXxYYYY)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors on the initial visit (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors when not initially visiting (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- fails after reducing the responseTimeout option (failed).png (YYYYxZZZZ)
 
 
   (Video)
