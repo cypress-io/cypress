@@ -2,9 +2,6 @@
   "name": "@packages/ts",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "register.js"
-  ],
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
@@ -15,5 +12,8 @@
   },
   "devDependencies": {
     "ts-node": "4.1.0"
-  }
+  },
+  "files": [
+    "register.js"
+  ]
 }

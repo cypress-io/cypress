@@ -2,10 +2,6 @@
   "name": "@packages/runner",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "dist",
-    "lib"
-  ],
   "main": "lib/runner.js",
   "scripts": {
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
@@ -45,5 +41,9 @@
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
     "zunder": "6.4.1"
-  }
+  },
+  "files": [
+    "dist",
+    "lib"
+  ]
 }

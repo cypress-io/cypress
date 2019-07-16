@@ -2,10 +2,6 @@
   "name": "@packages/desktop-gui",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "dist",
-    "lib"
-  ],
   "main": "lib/gui.js",
   "scripts": {
     "prebuild": "npm run check-deps-pre && rebuild-node-sass",
@@ -51,5 +47,9 @@
     "react-loader": "2.4.5",
     "rebuild-node-sass": "1.1.0",
     "zunder": "6.4.1"
-  }
+  },
+  "files": [
+    "dist",
+    "lib"
+  ]
 }

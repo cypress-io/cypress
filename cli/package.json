@@ -2,12 +2,6 @@
   "name": "cypress",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "bin",
-    "lib",
-    "index.js",
-    "types/**/*.d.ts"
-  ],
   "main": "index.js",
   "scripts": {
     "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
@@ -95,11 +89,17 @@
     "snap-shot-it": "7.8.0",
     "spawn-mock": "1.0.0"
   },
+  "files": [
+    "bin",
+    "lib",
+    "index.js",
+    "types/**/*.d.ts"
+  ],
   "bin": {
     "cypress": "bin/cypress"
   },
-  "types": "types",
   "engines": {
     "node": ">=4.0.0"
-  }
+  },
+  "types": "types"
 }
