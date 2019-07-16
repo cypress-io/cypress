@@ -267,7 +267,10 @@ verify = (cy, $el, options, callbacks) ->
         $elAtCoords = ensureElIsNotCovered(cy, win, $el, coords.fromViewport, options, _log, onScroll)
 
       ## pass our final object into onReady
-      return onReady($elAtCoords ? $el, coords)
+      finalEl = $elAtCoords ? $el
+      finalCoords = getCoordinatesForEl(cy, $el, options)
+      
+      return onReady(finalEl, finalCoords)
 
     ## we cannot enforce async promises here because if our
     ## element passes every single check, we MUST fire the event

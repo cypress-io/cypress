@@ -13,6 +13,8 @@ $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
+$Mouse = require("../cy/mouse")
+$Keyboard = require("../cy/keyboard")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -80,6 +82,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  keyboard = $Keyboard.create(state)
+  mouse = $Mouse.create(state, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -647,6 +651,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     needsFocus: focused.needsFocus
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
+
+    internal: {
+      mouse: mouse
+      keyboard: keyboard
+    }
 
     ## timer sync methods
     pauseTimers: timers.pauseTimers

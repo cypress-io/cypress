@@ -1,21 +1,20 @@
 const _ = require('lodash')
+const $ = require('jquery')
 const Promise = require('bluebird')
-
-const $Mouse = require('../../../cypress/mouse')
-
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
-const $elements = require('../../../dom/elements')
-const $selection = require('../../../dom/selection')
 const $actionability = require('../../actionability')
 
 module.exports = (Commands, Cypress, cy, state, config) => {
+  const mouse = cy.internal.mouse
+
   return Commands.addAll({ prevSubject: 'element' }, {
     click (subject, positionOrX, y, options = {}) {
-    //# TODO handle pointer-events: none
-    //# http://caniuse.com/#feat=pointer-events
+      //# TODO handle pointer-events: none
+      //# http://caniuse.com/#feat=pointer-events
 
-      let position; let x;
+      let position
+      let x
 
       ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
 
@@ -37,20 +36,16 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       //# and we did not pass the multiple flag
       if ((options.multiple === false) && (options.$el.length > 1)) {
         $utils.throwErrByPath('click.multiple_elements', {
-          args: { num: options.$el.length },
+          args: { cmd: 'click', num: options.$el.length },
         })
       }
-
-      state('window')
 
       const click = (el) => {
         let deltaOptions
         const $el = $dom.wrap(el)
 
-        const domEvents = {}
-
         if (options.log) {
-        //# figure out the options which actually change the behavior of clicks
+          //# figure out the options which actually change the behavior of clicks
           deltaOptions = $utils.filterOutOptions(options)
 
           options._log = Cypress.log({
@@ -62,24 +57,18 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         }
 
         if (options.errorOnSelect && $el.is('select')) {
-          $utils.throwErrByPath('click.on_select_element', { onFail: options._log })
+          $utils.throwErrByPath('click.on_select_element', { args: { cmd: 'click' }, onFail: options._log })
         }
 
-        const afterMouseDown = function ($elToClick, coords) {
-        //# we need to use both of these
+        //# we want to add this delay delta to our
+        //# runnables timeout so we prevent it from
+        //# timing out from multiple clicks
+        cy.timeout($actionability.delay, true, 'click')
+
+        const createLog = (domEvents, fromWindowCoords) => {
           let consoleObj
-          const { fromWindow, fromViewport } = coords
 
-          //# handle mouse events removing DOM elements
-          //# https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
-
-          if ($dom.isAttached($elToClick)) {
-            domEvents.mouseUp = $Mouse.mouseUp($elToClick, fromViewport)
-          }
-
-          if ($dom.isAttached($elToClick)) {
-            domEvents.click = $Mouse.click($elToClick, fromViewport)
-          }
+          const elClicked = domEvents.moveEvents.el
 
           if (options._log) {
             consoleObj = options._log.invoke('consoleProps')
@@ -87,39 +76,28 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           const consoleProps = function () {
             consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
-              'Applied To': $dom.getElements($el),
-              'Elements': $el.length,
-              'Coords': _.pick(fromWindow, 'x', 'y'), //# always absolute
+              'Applied To': $dom.getElements(options.$el),
+              'Elements': options.$el.length,
+              'Coords': _.pick(fromWindowCoords, 'x', 'y'), //# always absolute
               'Options': deltaOptions,
             })
 
-            if ($el.get(0) !== $elToClick.get(0)) {
-            //# only do this if $elToClick isnt $el
-              consoleObj['Actual Element Clicked'] = $dom.getElements($elToClick)
+            if (options.$el.get(0) !== elClicked) {
+              //# only do this if $elToClick isnt $el
+              consoleObj['Actual Element Clicked'] = $dom.getElements($(elClicked))
             }
 
-            consoleObj.groups = function () {
-              const groups = [{
-                name: 'MouseDown',
-                items: _.pick(domEvents.mouseDown, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-              }]
-
-              if (domEvents.mouseUp) {
-                groups.push({
-                  name: 'MouseUp',
-                  items: _.pick(domEvents.mouseUp, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                })
-              }
-
-              if (domEvents.click) {
-                groups.push({
-                  name: 'Click',
-                  items: _.pick(domEvents.click, 'preventedDefault', 'stoppedPropagation', 'modifiers'),
-                })
-              }
-
-              return groups
-            }
+            consoleObj.table = _.extend((consoleObj.table || {}), {
+              1: () => {
+                return formatMoveEventsTable(domEvents.moveEvents.events)
+              },
+              2: () => {
+                return {
+                  name: 'Mouse Click Events',
+                  data: formatMouseEvents(domEvents.clickEvents),
+                }
+              },
+            })
 
             return consoleObj
           }
@@ -127,11 +105,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           return Promise
           .delay($actionability.delay, 'click')
           .then(() => {
-          //# display the red dot at these coords
+            //# display the red dot at these coords
             if (options._log) {
-            //# because we snapshot and output a command per click
-            //# we need to manually snapshot + end them
-              options._log.set({ coords: fromWindow, consoleProps })
+              //# because we snapshot and output a command per click
+              //# we need to manually snapshot + end them
+              options._log.set({ coords: fromWindowCoords, consoleProps })
             }
 
             //# we need to split this up because we want the coordinates
@@ -144,11 +122,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           }).return(null)
         }
 
-        //# we want to add this delay delta to our
-        //# runnables timeout so we prevent it from
-        //# timing out from multiple clicks
-        cy.timeout($actionability.delay, true, 'click')
-
         //# must use callbacks here instead of .then()
         //# because we're issuing the clicks synchonrously
         //# once we establish the coordinates and the element
@@ -158,56 +131,22 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             return Cypress.action('cy:scrolled', $el, type)
           },
 
-          onReady ($elToClick, coords) {
-          //# record the previously focused element before
-          //# issuing the mousedown because browsers may
-          //# automatically shift the focus to the element
-          //# without firing the focus event
-            const $previouslyFocused = cy.getFocused()
+          onReady: ($elToClick, coords) => {
 
-            el = $elToClick.get(0)
+            const { fromWindow, fromViewport } = coords
 
-            domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
+            const forceEl = options.force && $elToClick.get(0)
 
-            //# if mousedown was canceled then or caused
-            //# our element to be removed from the DOM
-            //# just resolve after mouse down and dont
-            //# send a focus event
-            if (domEvents.mouseDown.preventedDefault || !$dom.isAttached($elToClick)) {
-              return afterMouseDown($elToClick, coords)
-            }
+            const moveEvents = mouse.mouseMove(fromViewport, forceEl)
 
-            if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
-              if (!$elements.isNeedSingleValueChangeInputElement(el)) {
-                $selection.moveSelectionToEnd(el)
-              }
-            }
+            const clickEvents = mouse.mouseClick(fromViewport, forceEl)
 
-            //# retrieve the first focusable $el in our parent chain
-            const $elToFocus = $elements.getFirstFocusableEl($elToClick)
-
-            if (cy.needsFocus($elToFocus, $previouslyFocused)) {
-              if ($dom.isWindow($elToFocus)) {
-                // if the first focusable element from the click
-                // is the window, then we can skip the focus event
-                // since the user has clicked a non-focusable element
-                const $focused = cy.getFocused()
-
-                if ($focused) {
-                  cy.fireBlur($focused.get(0))
-                }
-              } else {
-                // the user clicked inside a focusable element
-                cy.fireFocus($elToFocus.get(0))
-              }
-            }
-
-            return afterMouseDown($elToClick, coords)
+            return createLog({ moveEvents, clickEvents }, fromWindow)
 
           },
         })
         .catch((err) => {
-        //# snapshot only on click failure
+          //# snapshot only on click failure
           err.onFail = function () {
             if (options._log) {
               return options._log.snapshot()
@@ -239,66 +178,407 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
     //# update dblclick to use the click
     //# logic and just swap out the event details?
-    dblclick (subject, options = {}) {
-      _.defaults(options,
-        { log: true })
+    dblclick (subject, positionOrX, y, options = {}) {
 
-      const dblclicks = []
+      let position
+      let x
+
+      ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
+
+      _.defaults(options, {
+        $el: subject,
+        log: true,
+        verify: true,
+        force: false,
+        // TODO: 4.0 make this false by default
+        multiple: true,
+        position,
+        x,
+        y,
+        errorOnSelect: true,
+        waitForAnimations: config('waitForAnimations'),
+        animationDistanceThreshold: config('animationDistanceThreshold'),
+      })
+
+      //# throw if we're trying to click multiple elements
+      //# and we did not pass the multiple flag
+      if ((options.multiple === false) && (options.$el.length > 1)) {
+        $utils.throwErrByPath('click.multiple_elements', {
+          args: { cmd: 'dblclick', num: options.$el.length },
+        })
+      }
 
       const dblclick = (el) => {
-        let log
+        let deltaOptions
         const $el = $dom.wrap(el)
+
+        if (options.log) {
+          //# figure out the options which actually change the behavior of clicks
+          deltaOptions = $utils.filterOutOptions(options)
+
+          options._log = Cypress.log({
+            message: deltaOptions,
+            $el,
+          })
+
+          options._log.snapshot('before', { next: 'after' })
+        }
+
+        if (options.errorOnSelect && $el.is('select')) {
+          $utils.throwErrByPath('click.on_select_element', { args: { cmd: 'dblclick' }, onFail: options._log })
+        }
 
         //# we want to add this delay delta to our
         //# runnables timeout so we prevent it from
         //# timing out from multiple clicks
         cy.timeout($actionability.delay, true, 'dblclick')
 
-        if (options.log) {
-          log = Cypress.log({
-            $el,
-            consoleProps () {
-              return {
-                'Applied To': $dom.getElements($el),
-                'Elements': $el.length,
-              }
-            },
-          })
+        const createLog = (domEvents, fromWindowCoords) => {
+          let consoleObj
+
+          const elClicked = domEvents.moveEvents.el
+
+          if (options._log) {
+            consoleObj = options._log.invoke('consoleProps')
+          }
+
+          const consoleProps = function () {
+            consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
+              'Applied To': $dom.getElements(options.$el),
+              'Elements': options.$el.length,
+              'Coords': _.pick(fromWindowCoords, 'x', 'y'), //# always absolute
+              'Options': deltaOptions,
+            })
+
+            if (options.$el.get(0) !== elClicked) {
+              //# only do this if $elToClick isnt $el
+              consoleObj['Actual Element Clicked'] = $dom.getElements(elClicked)
+            }
+
+            consoleObj.table = _.extend((consoleObj.table || {}), {
+              1: () => {
+                return formatMoveEventsTable(domEvents.moveEvents.events)
+              },
+              2: () => {
+                return {
+                  name: 'Mouse Click Events',
+                  data: _.concat(
+                    formatMouseEvents(domEvents.clickEvents[0], formatMouseEvents),
+                    formatMouseEvents(domEvents.clickEvents[1], formatMouseEvents)
+                  ),
+                }
+              },
+              3: () => {
+                return {
+                  name: 'Mouse Dblclick Event',
+                  data: formatMouseEvents({ dblclickProps: domEvents.dblclickProps }),
+                }
+              },
+            })
+
+            return consoleObj
+          }
+
+          return Promise
+          .delay($actionability.delay, 'dblclick')
+          .then(() => {
+            //# display the red dot at these coords
+            if (options._log) {
+              //# because we snapshot and output a command per click
+              //# we need to manually snapshot + end them
+              options._log.set({ coords: fromWindowCoords, consoleProps })
+            }
+
+            //# we need to split this up because we want the coordinates
+            //# to mutate our passed in options._log but we dont necessary
+            //# want to snapshot and end our command if we're a different
+            //# action like (cy.type) and we're borrowing the click action
+            if (options._log && options.log) {
+              return options._log.snapshot().end()
+            }
+          }).return(null)
         }
 
-        cy.ensureVisibility($el, log)
+        //# must use callbacks here instead of .then()
+        //# because we're issuing the clicks synchonrously
+        //# once we establish the coordinates and the element
+        //# passes all of the internal checks
+        return $actionability.verify(cy, $el, options, {
+          onScroll ($el, type) {
+            return Cypress.action('cy:scrolled', $el, type)
+          },
 
-        const p = cy.now('focus', $el, { $el, error: false, verify: false, log: false }).then(() => {
-          const event = new MouseEvent('dblclick', {
-            bubbles: true,
-            cancelable: true,
-          })
+          onReady: ($elToClick, coords) => {
 
-          el.dispatchEvent(event)
+            const { fromWindow, fromViewport } = coords
+            const forceEl = options.force && $elToClick.get(0)
+            const moveEvents = mouse.mouseMove(fromViewport, forceEl)
+            const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromViewport, forceEl)
 
-          // $el.cySimulate("dblclick")
+            return createLog({
+              moveEvents,
+              clickEvents: [clickEvents1, clickEvents2],
+              dblclickProps,
+            }, fromWindow)
+          },
+        })
+        .catch((err) => {
+          //# snapshot only on click failure
+          err.onFail = function () {
+            if (options._log) {
+              return options._log.snapshot()
+            }
+          }
 
-          // log.snapshot() if log
-
-          //# need to return null here to prevent
-          //# chaining thenable promises
-          return null
-        }).delay($actionability.delay, 'dblclick')
-
-        dblclicks.push(p)
-
-        return p
+          //# if we give up on waiting for actionability then
+          //# lets throw this error and log the command
+          return $utils.throwErr(err, { onFail: options._log })
+        })
       }
 
-      //# create a new promise and chain off of it using reduce to insert
-      //# the artificial delays.  we have to set this as cancelable for it
-      //# to propogate since this is an "inner" promise
-
-      //# return our original subject when our promise resolves
       return Promise
-      .resolve(subject.toArray())
-      .each(dblclick)
-      .return(subject)
+      .each(options.$el.toArray(), dblclick)
+      .then(() => {
+        let verifyAssertions
+
+        if (options.verify === false) {
+          return options.$el
+        }
+
+        return (verifyAssertions = () => {
+          return cy.verifyUpcomingAssertions(options.$el, options, {
+            onRetry: verifyAssertions,
+          })
+        })()
+      })
     },
+
+    rightclick (subject, positionOrX, y, options = {}) {
+
+      let position
+      let x
+
+      ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
+
+      _.defaults(options, {
+        $el: subject,
+        log: true,
+        verify: true,
+        force: false,
+        multiple: false,
+        position,
+        x,
+        y,
+        errorOnSelect: true,
+        waitForAnimations: config('waitForAnimations'),
+        animationDistanceThreshold: config('animationDistanceThreshold'),
+      })
+
+      //# throw if we're trying to click multiple elements
+      //# and we did not pass the multiple flag
+      if ((options.multiple === false) && (options.$el.length > 1)) {
+        $utils.throwErrByPath('click.multiple_elements', {
+          args: { cmd: 'rightclick', num: options.$el.length },
+        })
+      }
+
+      const rightclick = (el) => {
+        let deltaOptions
+        const $el = $dom.wrap(el)
+
+        if (options.log) {
+          //# figure out the options which actually change the behavior of clicks
+          deltaOptions = $utils.filterOutOptions(options)
+
+          options._log = Cypress.log({
+            message: deltaOptions,
+            $el,
+          })
+
+          options._log.snapshot('before', { next: 'after' })
+        }
+
+        if (options.errorOnSelect && $el.is('select')) {
+          $utils.throwErrByPath('click.on_select_element', { args: { cmd: 'rightclick' }, onFail: options._log })
+        }
+
+        //# we want to add this delay delta to our
+        //# runnables timeout so we prevent it from
+        //# timing out from multiple clicks
+        cy.timeout($actionability.delay, true, 'rightclick')
+
+        const createLog = (domEvents, fromWindowCoords) => {
+          let consoleObj
+
+          const elClicked = domEvents.moveEvents.el
+
+          if (options._log) {
+            consoleObj = options._log.invoke('consoleProps')
+          }
+
+          const consoleProps = function () {
+            consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
+              'Applied To': $dom.getElements(options.$el),
+              'Elements': options.$el.length,
+              'Coords': _.pick(fromWindowCoords, 'x', 'y'), //# always absolute
+              'Options': deltaOptions,
+            })
+
+            if (options.$el.get(0) !== elClicked) {
+              //# only do this if $elToClick isnt $el
+              consoleObj['Actual Element Clicked'] = $dom.getElements(elClicked)
+            }
+
+            consoleObj.table = _.extend((consoleObj.table || {}), {
+              1: () => {
+                return formatMoveEventsTable(domEvents.moveEvents.events)
+              },
+              2: () => {
+                return {
+                  name: 'Mouse Click Events',
+                  data: formatMouseEvents(domEvents.clickEvents, formatMouseEvents),
+                }
+              },
+              3: () => {
+                return {
+                  name: 'Contextmenu Event',
+                  data: formatMouseEvents(domEvents.contextmenuEvent),
+                }
+              },
+            })
+
+            return consoleObj
+          }
+
+          return Promise
+          .delay($actionability.delay, 'rightclick')
+          .then(() => {
+            //# display the red dot at these coords
+            if (options._log) {
+              //# because we snapshot and output a command per click
+              //# we need to manually snapshot + end them
+              options._log.set({ coords: fromWindowCoords, consoleProps })
+            }
+
+            //# we need to split this up because we want the coordinates
+            //# to mutate our passed in options._log but we dont necessary
+            //# want to snapshot and end our command if we're a different
+            //# action like (cy.type) and we're borrowing the click action
+            if (options._log && options.log) {
+              return options._log.snapshot().end()
+            }
+          }).return(null)
+        }
+
+        //# must use callbacks here instead of .then()
+        //# because we're issuing the clicks synchonrously
+        //# once we establish the coordinates and the element
+        //# passes all of the internal checks
+        return $actionability.verify(cy, $el, options, {
+          onScroll ($el, type) {
+            return Cypress.action('cy:scrolled', $el, type)
+          },
+
+          onReady: ($elToClick, coords) => {
+
+            const { fromWindow, fromViewport } = coords
+            const forceEl = options.force && $elToClick.get(0)
+            const moveEvents = mouse.mouseMove(fromViewport, forceEl)
+            const { clickEvents, contextmenuEvent } = mouse.rightclick(fromViewport, forceEl)
+
+            return createLog({
+              moveEvents,
+              clickEvents,
+              contextmenuEvent,
+            }, fromWindow)
+          },
+        })
+        .catch((err) => {
+          //# snapshot only on click failure
+          err.onFail = function () {
+            if (options._log) {
+              return options._log.snapshot()
+            }
+          }
+
+          //# if we give up on waiting for actionability then
+          //# lets throw this error and log the command
+          return $utils.throwErr(err, { onFail: options._log })
+        })
+      }
+
+      return Promise
+      .each(options.$el.toArray(), rightclick)
+      .then(() => {
+        let verifyAssertions
+
+        if (options.verify === false) {
+          return options.$el
+        }
+
+        return (verifyAssertions = () => {
+          return cy.verifyUpcomingAssertions(options.$el, options, {
+            onRetry: verifyAssertions,
+          })
+        })()
+      })
+    },
+  })
+}
+
+const formatMoveEventsTable = (events) => {
+
+  return {
+    name: `Mouse Move Events${events ? '' : ' (skipped)'}`,
+    data: _.map(events, (obj) => {
+      const key = _.keys(obj)[0]
+      const val = obj[_.keys(obj)[0]]
+
+      if (val.skipped) {
+        const reason = val.skipped
+
+        return {
+          'Event Name': key,
+          'Target Element': reason,
+          'Prevented Default?': null,
+          'Stopped Propagation?': null,
+          // 'Modifiers': null,
+        }
+      }
+
+      return {
+        'Event Name': key,
+        'Target Element': val.el,
+        'Prevented Default?': val.preventedDefault,
+        'Stopped Propagation?': val.stoppedPropagation,
+        // 'Modifiers': val.modifiers ? val.modifiers : null,
+      }
+    }),
+  }
+}
+
+const formatMouseEvents = (events) => {
+  return _.map(events, (val, key) => {
+
+    if (val.skipped) {
+
+      const reason = val.skipped
+
+      return {
+        'Event Name': key.slice(0, -5),
+        'Target Element': reason,
+        'Prevented Default?': null,
+        'Stopped Propagation?': null,
+        'Modifiers': null,
+      }
+    }
+
+    return {
+      'Event Name': key.slice(0, -5),
+      'Target Element': val.el,
+      'Prevented Default?': val.preventedDefault,
+      'Stopped Propagation?': val.stoppedPropagation,
+      'Modifiers': val.modifiers ? val.modifiers : null,
+    }
   })
 }

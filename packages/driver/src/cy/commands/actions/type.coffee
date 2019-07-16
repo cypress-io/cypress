@@ -5,7 +5,6 @@ moment = require("moment")
 $dom = require("../../../dom")
 $elements = require("../../../dom/elements")
 $selection = require("../../../dom/selection")
-$Keyboard = require("../../../cypress/keyboard")
 $utils = require("../../../cypress/utils")
 $actionability = require("../../actionability")
 
@@ -17,8 +16,7 @@ weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
 timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 module.exports = (Commands, Cypress, cy, state, config) ->
-  Cypress.on "test:before:run", ->
-    $Keyboard.resetModifiers(state("document"), state("window"))
+  keyboard = cy.internal.keyboard
 
   Commands.addAll({ prevSubject: "element" }, {
     type: (subject, chars, options = {}) ->
@@ -46,8 +44,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         getRow = (id, key, which) ->
           table[id] or do ->
             table[id] = (obj = {})
-            modifiers = $Keyboard.activeModifiers()
-            obj.modifiers = modifiers.join(", ") if modifiers.length
+            modifiers = keyboard.modifiersToString(keyboard.getActiveModifiers(state))
+            if modifiers
+              obj.modifiers = modifiers
             if key
               obj.typed = key
               obj.which = which if which
@@ -71,11 +70,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             "Typed":      chars
             "Applied To": $dom.getElements(options.$el)
             "Options":    deltaOptions
-            "table": ->
-              {
-                name: "Key Events Table"
-                data: getTableData()
-                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"]
+            "table": {
+              ## mouse events tables will take up slots 1 and 2 if they're present
+              ## this preserves the order of the tables
+              3: ->
+                {
+                  name: "Keyboard Events"
+                  data: getTableData()
+                  columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"]
+                }
               }
             }
           }
@@ -249,7 +252,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         isContentEditable = $elements.isContentEditable(options.$el.get(0))
         isTextarea = $elements.isTextarea(options.$el.get(0))
 
-        $Keyboard.type({
+        keyboard.type({
           $el:                          options.$el
           chars:                        options.chars
           delay:                        options.delay
