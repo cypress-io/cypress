@@ -131,7 +131,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaught error was detected outside of a test (failed).png (1850x981)
+  - /foo/bar/.projects/e2e/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
 ====================================================================================================
@@ -210,7 +210,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/An uncaught error was detected outside of a test (failed).png (1850x981)
+  - /foo/bar/.projects/e2e/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
 ====================================================================================================

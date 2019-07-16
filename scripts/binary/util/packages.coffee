@@ -57,7 +57,7 @@ getPackagesWithScript = (scriptName) ->
   .map (pkgPath) ->
     fs.readJsonAsync(pkgPath)
     .then (json) ->
-      if json.scripts.build
+      if json.scripts?.build
         return path.basename(path.dirname(pkgPath))
   .filter(Boolean)
 

@@ -61,6 +61,11 @@ describe('packages', () => {
               },
             }),
           },
+          'baz': {
+            'package.json': JSON.stringify({
+              main: 'somefoo',
+            }),
+          },
         },
       }
     )
