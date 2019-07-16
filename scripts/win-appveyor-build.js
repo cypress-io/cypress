@@ -26,8 +26,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  // TODO: remove 'webpack-runner'
-  return branch === 'develop' || shouldForceBinaryBuild || branch === 'webpack-runner'
+  return branch === 'develop' || shouldForceBinaryBuild
 }
 
 const isForkedPullRequest = () => {
