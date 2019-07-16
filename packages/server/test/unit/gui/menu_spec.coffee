@@ -169,15 +169,6 @@ describe "gui/menu", ->
       menu.set()
 
       expect(getMenuItem("View").submenu).to.eql([
-        {
-            label: "Reload"
-            accelerator: "CmdOrCtrl+R"
-            click: (item, focusedWindow) =>
-              focusedWindow.reload() if focusedWindow
-          },
-          {
-            type: "separator"
-          }
           {
             label: "Actual Size"
             accelerator: "CmdOrCtrl+0"

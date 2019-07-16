@@ -100,15 +100,6 @@ module.exports = {
         label: "View"
         submenu: [
           {
-            label: 'Reload'
-            accelerator: 'CmdOrCtrl+R'
-            click: (item, focusedWindow) =>
-              focusedWindow.reload() if focusedWindow
-          },
-          {
-            type: "separator"
-          }
-          {
             label: "Actual Size"
             accelerator: "CmdOrCtrl+0"
             role: "resetzoom"
@@ -216,6 +207,12 @@ module.exports = {
         {
           label: "Developer Tools"
           submenu: [
+            {
+              label: 'Reload'
+              accelerator: 'CmdOrCtrl+R'
+              click: (item, focusedWindow) =>
+                focusedWindow.reload() if focusedWindow
+            },
             {
               label: 'Toggle Developer Tools'
               accelerator: do ->
