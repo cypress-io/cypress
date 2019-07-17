@@ -101,6 +101,8 @@ commands:
           packageName: static
       - save-cache:
           packageName: ts
+      - save-cache:
+          packageName: web-config
 
   restore-cache:
     description: |
@@ -173,6 +175,9 @@ commands:
       - restore-cache:
           packageName: ts
           packagePath: packages/ts/package.json
+      - restore-cache:
+          packageName: web-config
+          packagePath: packages/web-config/package.json
 
 jobs:
   ## code checkout and NPM installs
