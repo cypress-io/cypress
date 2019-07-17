@@ -55,6 +55,18 @@ cd packages/driver
 npm start
 ```
 
+For working with a single spec file, use `testFiles` configuration option. For example, to only show the `e2e/focus_blur_spec.js` spec file when Cypress is opened use (path is relative to `test/cypress/integration` folder)
+
+```bash
+npm run cypress:open -- --config testFiles=e2e/focus_blur_spec.js
+```
+
+Or to run that single spec headlessly
+
+```bash
+npm run cypress:run -- --config testFiles=e2e/focus_blur_spec.js
+```
+
 ## Debugging
 
 In the browser
