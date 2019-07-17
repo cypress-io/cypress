@@ -15,27 +15,26 @@ import Dropdown from '../dropdown/dropdown'
 export default class Nav extends Component {
   render () {
     return (
-      <nav className='main-nav navbar navbar-inverse navbar-fixed-top'>
-        <div className='container-fluid'>
-          <ul className='nav navbar-nav'>
-            <li className='left-nav'>
-              {this._leftNav()}
-            </li>
-          </ul>
-          <ul className='nav navbar-nav navbar-right'>
-            <li>
-              <a onClick={this._openSupport} href='#'>
-                <i className='fa fa-question-circle'></i> Support
-              </a>
-            </li>
-            <li>
-              <a onClick={this._openDocs} href='#'>
-                <i className='fa fa-graduation-cap'></i> Docs
-              </a>
-            </li>
-            {this._userStateButton()}
-          </ul>
-        </div>
+      <nav className='main-nav navbar navbar-inverse'>
+        <ul className='nav'>
+          <li>
+            {this._leftNav()}
+          </li>
+        </ul>
+        <div className='spacer' />
+        <ul className='nav'>
+          <li>
+            <a onClick={this._openSupport} href='#'>
+              <i className='fa fa-question-circle'></i> Support
+            </a>
+          </li>
+          <li>
+            <a onClick={this._openDocs} href='#'>
+              <i className='fa fa-graduation-cap'></i> Docs
+            </a>
+          </li>
+          {this._userStateButton()}
+        </ul>
       </nav>
     )
   }
