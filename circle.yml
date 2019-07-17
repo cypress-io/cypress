@@ -218,15 +218,15 @@ jobs:
       - run: npm run link
 
       ## now install all of the sub packages node_modules
-      - run: npm run all install -- --serial
+      - run: npm run all install
       - run: npm run all prune
 
       - save-caches
 
       - run: npm run stop-only-all
       ## now go build all of subpackages
-      - run: npm run prebuild -- --serial
-      - run: npm run build -- --serial
+      - run: npm run prebuild
+      - run: npm run build
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
