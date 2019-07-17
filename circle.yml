@@ -37,6 +37,8 @@ executors:
       PLATFORM: mac
 
 commands:
+  # for caching node modules use project environment variable
+  # like CACHE_VERSION=15
   save-cache:
     description: |
       Shorter command to save node_modules for a package
@@ -48,7 +50,7 @@ commands:
     steps:
       - run:
           name: ".bin folder for << parameters.packageName >>"
-          command: ls "packages/<< parameters.packageName >>/.bin" || true
+          command: ls "packages/<< parameters.packageName >>/node_modules/.bin" || true
       - save_cache:
           name: Saving cache for << parameters.packageName >>
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
