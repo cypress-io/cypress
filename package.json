@@ -136,7 +136,6 @@
     "mocha-banner": "1.1.2",
     "mocha-junit-reporter": "1.23.0",
     "mocha-multi-reporters": "1.1.7",
-    "obfuscator": "0.5.4",
     "parse-github-repo-url": "1.4.1",
     "plist": "2.1.0",
     "pluralize": "8.0.0",
