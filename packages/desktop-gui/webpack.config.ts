@@ -12,6 +12,7 @@ const config: typeof commonConfig = {
   },
 }
 
+// @ts-ignore
 config.plugins = [
   // @ts-ignore
   ...config.plugins,

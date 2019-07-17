@@ -16,6 +16,12 @@ const transformRequires = async function (buildResourcePath) {
 
   debug({ globPattern })
 
+  let replaceCount = 0
+
+  // Statically transform all requires of @packages/* to direct relative paths
+  // e.g. @packages/server/lib -> ../../../server/lib
+  // This prevents us having to ship symlinks in the final binary, because some OS's (Windows)
+  // do not have relative symlinks/junctions or bad symlink support
   await globAsync(globPattern, { ignore: ['**/node_modules/**', '**/packages/**/dist/**'] })
   .map(async (item) => {
     debug('glob found:', item)
@@ -45,6 +51,7 @@ const transformRequires = async function (buildResourcePath) {
 
       debug(replaceString)
 
+      replaceCount++
       shouldWriteFile = true
 
       return replaceString
@@ -58,6 +65,7 @@ const transformRequires = async function (buildResourcePath) {
     }
 
   })
+  .return(replaceCount)
 }
 
 module.exports = { transformRequires }

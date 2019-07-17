@@ -12,8 +12,10 @@ const config: typeof commonConfig = {
   },
 }
 
+// @ts-ignore
 config.plugins = [
-  ...config.plugins!,
+  // @ts-ignore
+  ...config.plugins,
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, './static/index.html'),
     inject: false,

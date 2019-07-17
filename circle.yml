@@ -217,7 +217,6 @@ jobs:
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
       # Install sub packages dependencies and build all sub packages via postinstall script
-      - run: rm -rf node_modules/@packages
       - run: npm install
       - run:
           name: Top level packages

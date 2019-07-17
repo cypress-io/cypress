@@ -5,10 +5,11 @@ import sassGlobImporter = require('node-sass-globbing')
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
+import path from 'path'
 import chalk from 'chalk'
 
 // Ensures node-sass/vendor has built node-sass binary.
-execa.sync('rebuild-node-sass', { cwd: __dirname, stdio: 'inherit' })
+execa.sync('rebuild-node-sass', { cwd: path.join(__dirname, './node_modules/.bin'), stdio: 'inherit' })
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)

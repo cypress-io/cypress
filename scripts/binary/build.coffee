@@ -131,6 +131,8 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#transformSymlinkRequires")
 
     transformRequires(distDir())
+    .then (replaceCount) ->
+      la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
 
 
   npmInstallPackages = ->
