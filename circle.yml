@@ -38,6 +38,9 @@ executors:
 
 commands:
   save-cache:
+    description: |
+      Shorter command to save node_modules for a package
+      Warning! Only works with "packages/<name>/node_modules"
     parameters:
       packageName:
         description: Name of the package to save, for example "server" or "desktop-gui"
@@ -47,6 +50,19 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
           paths:
             - packages/<< parameters.packageName >>/node_modules
+
+  restore-cache:
+    description: |
+      Shorter command to restore node_modules for a package.
+      Since it does not list paths to restore, can restore any cache,
+      as long the key is the same as the saved one.
+    parameters:
+      packageName:
+        description: Name of the package to restore, for example "server" or "desktop-gui"
+        type: string
+    steps:
+      - restore_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
 
 jobs:
   ## code checkout and NPM installs
@@ -76,40 +92,40 @@ jobs:
       - run: npm run check-terminal
 
       # need to restore a separate cache for each package.json
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-cli-deps
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-root-deps
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-coffee
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-desktop-gui
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-driver
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-example
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-electron
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-extension
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-https-proxy
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-launcher
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-network
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-reporter
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-runner
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-server
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-socket
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-static
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-ts
+      - restore-cache:
+          packageName: cli
+      - restore-cache:
+          packageName: root
+      - restore-cache:
+          packageName: coffee
+      - restore-cache:
+          packageName: desktop-gui
+      - restore-cache:
+          packageName: driver
+      - restore-cache:
+          packageName: example
+      - restore-cache:
+          packageName: electron
+      - restore-cache:
+          packageName: extension
+      - restore-cache:
+          packageName: https-proxy
+      - restore-cache:
+          packageName: launcher
+      - restore-cache:
+          packageName: network
+      - restore-cache:
+          packageName: reporter
+      - restore-cache:
+          packageName: runner
+      - restore-cache:
+          packageName: server
+      - restore-cache:
+          packageName: socket
+      - restore-cache:
+          packageName: static
+      - restore-cache:
+          packageName: ts
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
@@ -132,11 +148,11 @@ jobs:
       # save each node_modules folder per package
       # TODO switch to "save-cache" when it allows custom paths
       - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-cli-{{ checksum "cli/package.json" }}
           paths:
             - cli/node_modules
       - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
           paths:
             - node_modules
       - save-cache:
