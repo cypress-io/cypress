@@ -1,5 +1,6 @@
 {
   "globals": {
+    "root": true,
     "sinon": true
   },
   "extends": [

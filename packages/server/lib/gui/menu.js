@@ -1,17 +1,6 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const os = require('os')
-const { Menu } = require('electron')
-const { shell } = require('electron')
+const { Menu, shell } = require('electron')
 
 const appData = require('../util/app_data')
 const open = require('../util/open')
@@ -195,7 +184,7 @@ module.exports = {
             label: 'Quit',
             accelerator: 'Command+Q',
             //role: "quit" ## must upgrade to latest electron
-            click: (item, focusedWindow) => {
+            click: () => {
               return process.exit(0)
             },
           },
@@ -219,7 +208,7 @@ module.exports = {
             },
             {
               label: 'Toggle Developer Tools',
-              accelerator: (function () {
+              accelerator: (() => {
                 if (os.platform() === 'darwin') {
                   return 'Alt+Command+I'
                 }

@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../spec_helper')
 
 const _ = require('lodash')
@@ -17,11 +7,17 @@ const appData = require(`${root}../lib/util/app_data`)
 const open = require(`${root}../lib/util/open`)
 const menu = require(`${root}../lib/gui/menu`)
 
-const getMenuItem = (label) => _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })
+const getMenuItem = (label) => {
+  return _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })
+}
 
-const getSubMenuItem = (menu, label) => _.find(menu.submenu, { label })
+const getSubMenuItem = (menu, label) => {
+  return _.find(menu.submenu, { label })
+}
 
-const getLabels = (menu) => _(menu).map('label').compact().value()
+const getLabels = (menu) => {
+  return _(menu).map('label').compact().value()
+}
 
 describe('gui/menu', function () {
   beforeEach(() => {
@@ -148,7 +144,9 @@ describe('gui/menu', function () {
     it('is noop when Log Out is clicked with no callback', () => {
       menu.set()
 
-      return expect(() => getSubMenuItem(getMenuItem('File'), 'Log Out').click()).not.to.throw()
+      return expect(() => {
+        return getSubMenuItem(getMenuItem('File'), 'Log Out').click()
+      }).not.to.throw()
     })
 
     return it('binds Close Window to shortcut', () => {
@@ -305,7 +303,9 @@ describe('gui/menu', function () {
       })
 
       it('is noop if no focused window when Reload is clicked', function () {
-        return expect(() => this.devSubmenu[0].click()).not.to.throw()
+        return expect(() => {
+          return this.devSubmenu[0].click()
+        }).not.to.throw()
       })
 
       it('sets shortcut for Toggle Developer Tools when macOS', function () {
@@ -328,7 +328,9 @@ describe('gui/menu', function () {
       })
 
       return it('is noop if no focused window when Toggle Developer Tools is clicked', function () {
-        return expect(() => this.devSubmenu[1].click()).not.to.throw()
+        return expect(() => {
+          return this.devSubmenu[1].click()
+        }).not.to.throw()
       })
     })
   })
