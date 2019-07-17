@@ -1506,6 +1506,17 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('specialChars', () => {
+
+      context('charSequences: false', () => {
+        it('types special character sequences literally', (done) => {
+          cy.get(':text:first').invoke('val', 'foo').type('{{}{backspace}', {charSequences: false}).then(($input) => {
+            expect($input).to.have.value('foo{{}{backspace}')
+
+            done()
+          })
+        })
+      })
+
       context('{{}', () => {
         it('sets which and keyCode to 219', (done) => {
           cy.$$(':text:first').on('keydown', (e) => {
