@@ -176,6 +176,10 @@ commands:
       - restore-cache:
           packageName: ts
           packagePath: packages/ts/package.json
+      - run:
+          name: Showing launcher .bin folders
+          command: ls -la node_modules/.bin || true
+          working_directory: packages/launcher
 
 jobs:
   ## code checkout and NPM installs
