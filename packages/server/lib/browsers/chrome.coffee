@@ -156,7 +156,11 @@ _navigateUsingCRI = (url) ->
     la(client, "could not get CRI client")
     debug("received CRI client")
     debug('navigating to page %s', url)
-    client.Page.navigate({ url })
+    # when opening the blank page and trying to navigate
+    # the focus gets lost. Restore it first
+    client.Page.bringToFront()
+    .then ->
+      client.Page.navigate({ url })
 
 module.exports = {
   #
@@ -269,6 +273,7 @@ module.exports = {
         # start video recording and then
         # we will load the actual page
         utils.launch(browser, null, args)
+        # utils.launch(browser, url, args)
 
       .tap =>
         # SECOND connect to the Chrome remote interface

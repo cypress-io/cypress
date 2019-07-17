@@ -67,6 +67,18 @@ Or to run that single spec headlessly
 npm run cypress:run -- --config testFiles=e2e/focus_blur_spec.js
 ```
 
+Alternative: use `--spec`, but pass the path from the current folder, for example
+
+```bash
+npm run cypress:run -- --spec test/cypress/integration/issues/1939_1940_2190_spec.js --browser chrome
+```
+
+If you want to run tests in Chrome and keep it open after the spec finishes, you can do
+
+```bash
+npm run cypress:run -- --config testFiles=e2e/focus_blur_spec.js --browser chrome --no-exit
+```
+
 ## Debugging
 
 In the browser
