@@ -46,6 +46,9 @@ commands:
         description: Name of the package to save, for example "server" or "desktop-gui"
         type: string
     steps:
+      - run:
+          name: ".bin folder for << parameters.packageName >>"
+          command: ls "packages/<< parameters.packageName >>/.bin" || true
       - save_cache:
           name: Saving cache for << parameters.packageName >>
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
