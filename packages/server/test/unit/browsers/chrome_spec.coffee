@@ -15,6 +15,7 @@ describe "lib/browsers/chrome", ->
       # mock CRI client during testing
       @criClient = {
         Page: {
+          bringToFront: sinon.stub().resolves()
           navigate: sinon.stub().resolves()
         }
       }
@@ -28,11 +29,11 @@ describe "lib/browsers/chrome", ->
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
 
-    # NOTE: confirm CRI client behavior before merging PR 4628
-    it.skip "calls CRI Page.visit", ->
+    it "focuses on the page and calls CRI Page.visit", ->
       chrome.open("chrome", "http://", {}, {})
       .then =>
-        # check if @criClient.Page.navigate has been called
+        expect(@criClient.Page.bringToFront).to.have.been.calledOnce
+        expect(@criClient.Page.navigate).to.have.been.calledOnce
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
