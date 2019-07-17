@@ -40,20 +40,6 @@ executors:
       PLATFORM: mac
 
 commands:
-  print-bins:
-    description: |
-      To better debug package installs and linking
-      need to make sure node_modules/.bin are restored correctly.
-    steps:
-      - run:
-          name: Showing launcher .bin folder
-          command: ls -la node_modules/.bin || true
-          working_directory: packages/launcher
-      - run:
-          name: Showing desktop-gui .bin folder
-          command: ls -la node_modules/.bin || true
-          working_directory: packages/desktop-gui
-
   # for caching node modules use project environment variable
   # like CACHE_VERSION=15
   save-cache:
@@ -65,9 +51,6 @@ commands:
         description: Name of the package to save, for example "server" or "desktop-gui"
         type: string
     steps:
-      - run:
-          name: ".bin folder for << parameters.packageName >>"
-          command: ls "packages/<< parameters.packageName >>/node_modules/.bin" || true
       - save_cache:
           name: Saving cache for << parameters.packageName >>
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
@@ -193,7 +176,6 @@ commands:
       - restore-cache:
           packageName: ts
           packagePath: packages/ts/package.json
-      - print-bins
 
 jobs:
   ## code checkout and NPM installs
@@ -242,7 +224,6 @@ jobs:
       - run: npm run all install -- --serial
       - run: npm run all prune
 
-      - print-bins
       - save-caches
 
       - run: npm run stop-only-all
