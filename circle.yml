@@ -47,6 +47,7 @@ commands:
         type: string
     steps:
       - save_cache:
+          name: Saving cache for << parameters.packageName >>
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
           paths:
             - packages/<< parameters.packageName >>/node_modules
