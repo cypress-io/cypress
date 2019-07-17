@@ -4,7 +4,7 @@
   "private": true,
   "main": "src/index.js",
   "scripts": {
-    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
+    "prebuild": "npm run check-deps-pre",
     "build": "webpack",
     "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "cross-env NODE_ENV=production npm run build",
@@ -40,7 +40,6 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-input-autosize": "2.2.1",
-    "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
     "webpack": "4.35.3",
