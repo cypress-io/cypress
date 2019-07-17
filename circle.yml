@@ -60,9 +60,13 @@ commands:
       packageName:
         description: Name of the package to restore, for example "server" or "desktop-gui"
         type: string
+      packagePath:
+        description: Path to package.json file
+        type: string
+        default: packages/<< parameters.packageName >>/package.json
     steps:
       - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "<< parameters.packagePath >>" }}
 
 jobs:
   ## code checkout and NPM installs
@@ -92,11 +96,12 @@ jobs:
       - run: npm run check-terminal
 
       # need to restore a separate cache for each package.json
-      # TODO switch to "restore-cache" command when it can accept path to package.json file
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-cli-{{ checksum "cli/package.json" }}
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
+      - restore-cache:
+          packageName: cli
+          packagePath: cli/package.json
+      - restore-cache:
+          packageName: root
+          packagePath: package.json
       - restore-cache:
           packageName: coffee
       - restore-cache:
