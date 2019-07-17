@@ -177,9 +177,13 @@ commands:
           packageName: ts
           packagePath: packages/ts/package.json
       - run:
-          name: Showing launcher .bin folders
+          name: Showing launcher .bin folder
           command: ls -la node_modules/.bin || true
           working_directory: packages/launcher
+      - run:
+          name: Showing desktop-gui .bin folder
+          command: ls -la node_modules/.bin || true
+          working_directory: packages/desktop-gui
 
 jobs:
   ## code checkout and NPM installs
