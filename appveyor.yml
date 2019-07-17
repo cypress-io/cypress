@@ -70,7 +70,8 @@ install:
   # everything from "postinstall" script as commands
   - npm run link
   # install every package one by one
-  - npm run all install -- --serial || npm run all install -- --serial
+  # try to do several attempts, because on AppVeyor random install errors happen
+  - npm run all install -- --serial || npm run all install -- --serial || npm run all install -- --serial
   # - npm prune
   # - npm run all prune -- --serial
   - npm run all build -- --serial
