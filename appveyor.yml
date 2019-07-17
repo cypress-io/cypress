@@ -64,7 +64,7 @@ install:
   # clean cache to prevent install permission issues
   - npm cache clean --force
   # install root modules only
-  - npm install
+  - npm install || npm install || npm install
   - .\node_modules\.bin\print-arch
 
 # Post-install test scripts.
