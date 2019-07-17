@@ -92,10 +92,11 @@ jobs:
       - run: npm run check-terminal
 
       # need to restore a separate cache for each package.json
-      - restore-cache:
-          packageName: cli
-      - restore-cache:
-          packageName: root
+      # TODO switch to "restore-cache" command when it can accept path to package.json file
+      - restore_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-cli-{{ checksum "cli/package.json" }}
+      - restore_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
       - restore-cache:
           packageName: coffee
       - restore-cache:
