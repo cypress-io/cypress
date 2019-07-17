@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         force: false
         delay: 10
         release: true
-        charSequences: true
+        disableSpecialCharSequences: false
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
       })
@@ -243,12 +243,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         isTextarea = $elements.isTextarea(options.$el.get(0))
 
         $Keyboard.type({
-          $el:            options.$el
-          chars:          options.chars
-          delay:          options.delay
-          release:        options.release
-          charSequences:  options.charSequences
-          window:         win
+          $el:                          options.$el
+          chars:                        options.chars
+          delay:                        options.delay
+          release:                      options.release
+          disableSpecialCharSequences:  options.disableSpecialCharSequences
+          window:                       win
 
           updateValue: (el, key) ->
             ## in these cases, the value must only be set after all

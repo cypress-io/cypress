@@ -338,7 +338,7 @@ const $Keyboard = {
   type (options = {}) {
     _.defaults(options, {
       delay: 10,
-      charSequences: true,
+      disableSpecialCharSequences: false,
       onEvent () {},
       onBeforeEvent () {},
       onBeforeType () {},
@@ -352,7 +352,7 @@ const $Keyboard = {
 
     let keys = options.chars
 
-    if (options.charSequences) {
+    if (!options.disableSpecialCharSequences) {
       keys = options.chars.split(charsBetweenCurlyBracesRe).map((chars) => {
         if (charsBetweenCurlyBracesRe.test(chars)) {
           //# allow special chars and modifiers to be case-insensitive

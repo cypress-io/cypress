@@ -1507,9 +1507,10 @@ describe('src/cy/commands/actions/type', () => {
 
     describe('specialChars', () => {
 
-      context('charSequences: false', () => {
+      context('disableSpecialCharSequences: true', () => {
         it('types special character sequences literally', (done) => {
-          cy.get(':text:first').invoke('val', 'foo').type('{{}{backspace}', { charSequences: false }).then(($input) => {
+          cy.get(':text:first').invoke('val', 'foo')
+          .type('{{}{backspace}', { disableSpecialCharSequences: true }).then(($input) => {
             expect($input).to.have.value('foo{{}{backspace}')
 
             done()
