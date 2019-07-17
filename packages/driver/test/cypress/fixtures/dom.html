@@ -292,11 +292,11 @@
         <form>
           <!-- All values are valid readonly -->
           <input id="readonly-attr" readonly />
-          <textarea id="readonly-readonly" readonly="readonly"></textarea>
+          <input id="readonly-readonly" readonly="readonly" />
           <input id="readonly-empty-str" readonly="" />
 
           <!-- Although not strictly part of spec, Chrome respects any string -->
-          <input id="readonly-str" type="text" readonly="abc" />
+          <input id="readonly-str" readonly="abc" />
         </form>
       </div>
 
