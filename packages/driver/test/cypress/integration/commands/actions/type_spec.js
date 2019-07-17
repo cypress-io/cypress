@@ -115,9 +115,8 @@ describe('src/cy/commands/actions/type', () => {
         blurred = true
       })
 
-      cy
-      .get('input:text:first').type('foo')
-      .get('input:text:last').type('bar')
+      cy.get('input:text:first').type('foo')
+      cy.get('input:text:last').type('bar')
       .then(() => {
         expect(blurred).to.be.true
       })
@@ -456,9 +455,8 @@ describe('src/cy/commands/actions/type', () => {
           blur = true
         })
 
-        cy
-        .get('#tabindex').type('f')
-        .get('input:first').focus().then(() => {
+        cy.get('#tabindex').type('f')
+        cy.get('input:first').focus().then(() => {
           expect(blur).to.be.true
         })
       })
@@ -480,8 +478,7 @@ describe('src/cy/commands/actions/type', () => {
           return keyups.push(e)
         })
 
-        cy
-        .get('#tabindex').type('f{leftarrow}{rightarrow}{enter}')
+        cy.get('#tabindex').type('f{leftarrow}{rightarrow}{enter}')
         .then(() => {
           expect(keydowns).to.have.length(4)
           expect(keypresses).to.have.length(2)
@@ -495,8 +492,7 @@ describe('src/cy/commands/actions/type', () => {
       it('adds delay to delta for each key sequence', () => {
         cy.spy(cy, 'timeout')
 
-        cy
-        .get(':text:first')
+        cy.get(':text:first')
         .type('foo{enter}bar{leftarrow}', { delay: 5 })
         .then(() => {
           expect(cy.timeout).to.be.calledWith(5 * 8, true, 'type')
