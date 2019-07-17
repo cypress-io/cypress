@@ -113,6 +113,7 @@ commands:
         type: string
     steps:
       - restore_cache:
+          name: Restoring cache for << parameters.packageName >>
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "<< parameters.packagePath >>" }}
 
   restore-caches:
