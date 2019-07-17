@@ -1509,7 +1509,7 @@ describe('src/cy/commands/actions/type', () => {
 
       context('charSequences: false', () => {
         it('types special character sequences literally', (done) => {
-          cy.get(':text:first').invoke('val', 'foo').type('{{}{backspace}', {charSequences: false}).then(($input) => {
+          cy.get(':text:first').invoke('val', 'foo').type('{{}{backspace}', { charSequences: false }).then(($input) => {
             expect($input).to.have.value('foo{{}{backspace}')
 
             done()

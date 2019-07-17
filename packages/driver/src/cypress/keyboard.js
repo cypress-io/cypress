@@ -352,12 +352,13 @@ const $Keyboard = {
 
     let keys = options.chars
 
-    if(options.charSequences)  {
+    if (options.charSequences) {
       keys = options.chars.split(charsBetweenCurlyBracesRe).map((chars) => {
         if (charsBetweenCurlyBracesRe.test(chars)) {
           //# allow special chars and modifiers to be case-insensitive
           return chars.toLowerCase()
         }
+
         return chars
       })
     }
