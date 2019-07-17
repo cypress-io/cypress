@@ -33,7 +33,7 @@
     "cachedir": "1.3.0",
     "chalk": "2.4.2",
     "check-more-types": "2.24.0",
-    "commander": "2.15.1",
+    "commander": "2.20.0",
     "common-tags": "1.8.0",
     "debug": "3.2.6",
     "execa": "0.10.0",
