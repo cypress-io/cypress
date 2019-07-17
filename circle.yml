@@ -9,10 +9,6 @@ defaults: &defaults
       default: cy-doc
   executor: <<parameters.executor>>
   environment:
-    ## invalidate all node modules at once from all packes
-    ## by incrementing this single environment variable
-    CACHE_VERSION: "14"
-
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
@@ -39,6 +35,18 @@ executors:
       xcode: "10.1.0"
     environment:
       PLATFORM: mac
+
+commands:
+  save-cache:
+    parameters:
+      packageName:
+        description: Name of the package to save, for example "server" or "desktop-gui"
+        type: string
+    steps:
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
+          paths:
+            - packages/<< parameters.packageName >>/node_modules
 
 jobs:
   ## code checkout and NPM installs
@@ -122,6 +130,7 @@ jobs:
       - run: npm run all prune
 
       # save each node_modules folder per package
+      # TODO switch to "save-cache" when it allows custom paths
       - save_cache:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
           paths:
@@ -130,68 +139,41 @@ jobs:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
           paths:
             - node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
-          paths:
-            - packages/coffee/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
-          paths:
-            - packages/desktop-gui/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
-          paths:
-            - packages/driver/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
-          paths:
-            - packages/example/node_modules
+      - save-cache:
+          packageName: coffee
+      - save-cache:
+          packageName: desktop-gui
+      - save-cache:
+          packageName: driver
+      - save-cache:
+          packageName: example
+      # TODO switch to "save-cache" custom command when it allows passing list of paths
       - save_cache:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
           paths:
             - packages/electron/node_modules
             - ~/.cache/electron
             - ~/.electron
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
-          paths:
-            - packages/extension/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
-          paths:
-            - packages/https-proxy/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
-          paths:
-            - packages/launcher/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
-          paths:
-            - packages/network/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
-          paths:
-            - packages/reporter/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
-          paths:
-            - packages/runner/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
-          paths:
-            - packages/server/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
-          paths:
-            - packages/socket/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
-          paths:
-            - packages/static/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
-          paths:
-            - packages/ts/node_modules
+      - save-cache:
+          packageName: extension
+      - save-cache:
+          packageName: https-proxy
+      - save-cache:
+          packageName: launcher
+      - save-cache:
+          packageName: network
+      - save-cache:
+          packageName: reporter
+      - save-cache:
+          packageName: runner
+      - save-cache:
+          packageName: server
+      - save-cache:
+          packageName: socket
+      - save-cache:
+          packageName: static
+      - save-cache:
+          packageName: ts
 
       - run: npm run stop-only-all
       ## now go build all of subpackages
