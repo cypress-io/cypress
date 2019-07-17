@@ -51,6 +51,54 @@ commands:
           paths:
             - packages/<< parameters.packageName >>/node_modules
 
+  save-caches:
+    description: save each node_modules folder per package
+    steps:
+      # TODO switch to "save-cache" when it allows custom paths
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-cli-{{ checksum "cli/package.json" }}
+          paths:
+            - cli/node_modules
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - save-cache:
+          packageName: coffee
+      - save-cache:
+          packageName: desktop-gui
+      - save-cache:
+          packageName: driver
+      - save-cache:
+          packageName: example
+      # TODO switch to "save-cache" custom command when it allows passing list of paths
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
+          paths:
+            - packages/electron/node_modules
+            - ~/.cache/electron
+            - ~/.electron
+      - save-cache:
+          packageName: extension
+      - save-cache:
+          packageName: https-proxy
+      - save-cache:
+          packageName: launcher
+      - save-cache:
+          packageName: network
+      - save-cache:
+          packageName: reporter
+      - save-cache:
+          packageName: runner
+      - save-cache:
+          packageName: server
+      - save-cache:
+          packageName: socket
+      - save-cache:
+          packageName: static
+      - save-cache:
+          packageName: ts
+
   restore-cache:
     description: |
       Shorter command to restore node_modules for a package.
@@ -67,34 +115,9 @@ commands:
       - restore_cache:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "<< parameters.packagePath >>" }}
 
-jobs:
-  ## code checkout and NPM installs
-  build:
-    <<: *defaults
+  restore-caches:
+    description: need to restore a separate cache for each package.json
     steps:
-      - checkout
-      - run:
-          name: Print working folder
-          command: echo $PWD
-      - run:
-          name: print global NPM cache path
-          command: echo $(npm -g bin)
-      - run:
-          name: print Node version
-          command: node -v
-      - run:
-          name: print NPM version
-          command: npm -v
-      - run: npm run check-node-version
-
-      ## make sure the TERM is set to 'xterm' in node (Linux only)
-      ## else colors (and tests) will fail
-      ## See the following information
-      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
-      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run: npm run check-terminal
-
-      # need to restore a separate cache for each package.json
       - restore-cache:
           packageName: cli
           packagePath: cli/package.json
@@ -147,6 +170,35 @@ jobs:
           packageName: ts
           packagePath: packages/ts/package.json
 
+jobs:
+  ## code checkout and NPM installs
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Print working folder
+          command: echo $PWD
+      - run:
+          name: print global NPM cache path
+          command: echo $(npm -g bin)
+      - run:
+          name: print Node version
+          command: node -v
+      - run:
+          name: print NPM version
+          command: npm -v
+      - run: npm run check-node-version
+
+      ## make sure the TERM is set to 'xterm' in node (Linux only)
+      ## else colors (and tests) will fail
+      ## See the following information
+      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+      - run: npm run check-terminal
+
+      - restore-caches
+
       # show what is already cached globally
       - run: ls $(npm -g bin)
       - run: ls $(npm -g bin)/../lib/node_modules
@@ -165,51 +217,7 @@ jobs:
       - run: npm run all install -- --serial
       - run: npm run all prune
 
-      # save each node_modules folder per package
-      # TODO switch to "save-cache" when it allows custom paths
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-cli-{{ checksum "cli/package.json" }}
-          paths:
-            - cli/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
-          paths:
-            - node_modules
-      - save-cache:
-          packageName: coffee
-      - save-cache:
-          packageName: desktop-gui
-      - save-cache:
-          packageName: driver
-      - save-cache:
-          packageName: example
-      # TODO switch to "save-cache" custom command when it allows passing list of paths
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
-          paths:
-            - packages/electron/node_modules
-            - ~/.cache/electron
-            - ~/.electron
-      - save-cache:
-          packageName: extension
-      - save-cache:
-          packageName: https-proxy
-      - save-cache:
-          packageName: launcher
-      - save-cache:
-          packageName: network
-      - save-cache:
-          packageName: reporter
-      - save-cache:
-          packageName: runner
-      - save-cache:
-          packageName: server
-      - save-cache:
-          packageName: socket
-      - save-cache:
-          packageName: static
-      - save-cache:
-          packageName: ts
+      - save-caches
 
       - run: npm run stop-only-all
       ## now go build all of subpackages
