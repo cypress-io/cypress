@@ -9,6 +9,9 @@ defaults: &defaults
       default: cy-doc
   executor: <<parameters.executor>>
   environment:
+    ## terminal for better logging
+    TERM: xterm
+
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
