@@ -206,32 +206,26 @@ jobs:
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
       - run: npm run check-terminal
 
+      - run: npm run stop-only-all
+
       - restore-caches
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
       - run: ls $(npm -g bin)/../lib/node_modules
 
-      # only installs the root dependencies, without going into packages
-      # via postinstall script
-      - run: npm install --ignore-scripts
+      # Install the root packages
+      # Link sup packages in ./node_modules/@packages/*
+      # Install sub packages dependencies and build all sub packages via postinstall script
+      - run: npm install
       - run:
           name: Top level packages
           command: npm ls --depth=0 || true
 
-      ## symlink all of our sub packages in node_modules
-      - run: npm run link
-
-      ## now install all of the sub packages node_modules
-      - run: npm run all install
+      # Prune so we do not save removed dependencies to cache
       - run: npm run all prune
 
       - save-caches
-
-      - run: npm run stop-only-all
-      ## now go build all of subpackages
-      - run: npm run prebuild
-      - run: npm run build
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
