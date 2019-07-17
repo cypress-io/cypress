@@ -64,8 +64,16 @@ install:
   # clean cache to prevent install permission issues
   - npm cache clean --force
   # install root modules only
-  - npm install || npm install || npm install
+  - npm install --ignore-scripts
   - .\node_modules\.bin\print-arch
+  # because we skipped scripts, we need to do
+  # everything from "postinstall" script as commands
+  - npm run link
+  # install every package one by one
+  - npm run all install -- --serial || npm run all install -- --serial
+  # - npm prune
+  # - npm run all prune -- --serial
+  - npm run all build -- --serial
 
 # Post-install test scripts.
 test_script:
