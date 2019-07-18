@@ -26,4 +26,5 @@
       "autoFix": false
     },
   ],
+  "eslint.enable": true,
 }

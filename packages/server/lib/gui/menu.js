@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const os = require('os')
-const { Menu, shell } = require('electron')
+const { Menu } = require('electron')
+const { shell } = require('electron')
 
 const appData = require('../util/app_data')
 const open = require('../util/open')
@@ -13,8 +14,8 @@ module.exports = {
       withDevTools: false,
     })
 
-    //# this set by modes/interactive.coffee and needs to be preserved if the menu
-    //# is set again by launcher.coffee when the Electron browser is run
+    // this set by modes/interactive.coffee and needs to be preserved if the menu
+    // is set again by launcher.coffee when the Electron browser is run
     if (options.onLogOutClicked) {
       ({ onLogOutClicked } = options)
     }
@@ -96,6 +97,26 @@ module.exports = {
             label: 'Select All',
             accelerator: 'CmdOrCtrl+A',
             role: 'selectall',
+          },
+        ],
+      },
+      {
+        label: 'View',
+        submenu: [
+          {
+            label: 'Actual Size',
+            accelerator: 'CmdOrCtrl+0',
+            role: 'resetzoom',
+          },
+          {
+            label: 'Zoom In',
+            accelerator: 'CmdOrCtrl+Plus',
+            role: 'zoomin',
+          },
+          {
+            label: 'Zoom Out',
+            accelerator: 'CmdOrCtrl+-',
+            role: 'zoomout',
           },
         ],
       },
