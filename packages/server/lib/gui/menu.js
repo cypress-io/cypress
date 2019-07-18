@@ -27,7 +27,7 @@ module.exports = {
           {
             label: 'Changelog',
             click () {
-              shell.openExternal('https://on.cypress.io/changelog')
+              return shell.openExternal('https://on.cypress.io/changelog')
             },
           },
           {
@@ -36,7 +36,7 @@ module.exports = {
           {
             label: 'Manage Account',
             click () {
-              shell.openExternal('https://on.cypress.io/dashboard')
+              return shell.openExternal('https://on.cypress.io/dashboard')
             },
           },
           {
@@ -49,7 +49,7 @@ module.exports = {
           {
             label: 'View App Data',
             click () {
-              open.opn(appData.path())
+              return open.opn(appData.path())
             },
           },
           {
@@ -138,25 +138,25 @@ module.exports = {
           {
             label: 'Support',
             click () {
-              shell.openExternal('https://on.cypress.io/support')
+              return shell.openExternal('https://on.cypress.io/support')
             },
           },
           {
             label: 'Documentation',
             click () {
-              shell.openExternal('https://on.cypress.io')
+              return shell.openExternal('https://on.cypress.io')
             },
           },
           {
             label: 'Download Chromium',
             click () {
-              shell.openExternal('https://on.cypress.io/chromium-downloads')
+              return shell.openExternal('https://on.cypress.io/chromium-downloads')
             },
           },
           {
             label: 'Report an Issue',
             click () {
-              shell.openExternal('https://on.cypress.io/new-issue')
+              return shell.openExternal('https://on.cypress.io/new-issue')
             },
           },
         ],
@@ -205,9 +205,8 @@ module.exports = {
             label: 'Quit',
             accelerator: 'Command+Q',
             //role: "quit" ## must upgrade to latest electron
-            // eslint-disable-next-line no-unused-vars
-            click: (item, focusedWindow) => {
-              process.exit(0)
+            click: () => {
+              return process.exit(0)
             },
           },
         ],
@@ -224,7 +223,7 @@ module.exports = {
               accelerator: 'CmdOrCtrl+R',
               click: (item, focusedWindow) => {
                 if (focusedWindow) {
-                  focusedWindow.reload()
+                  return focusedWindow.reload()
                 }
               },
             },
@@ -236,10 +235,11 @@ module.exports = {
                 }
 
                 return 'Ctrl+Shift+I'
+
               })(),
               click: (item, focusedWindow) => {
                 if (focusedWindow) {
-                  focusedWindow.toggleDevTools()
+                  return focusedWindow.toggleDevTools()
                 }
               },
             },
