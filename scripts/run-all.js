@@ -65,7 +65,7 @@ const rejectDirsByPackage = (dirs, rejected) => {
 
 const filterDirsByCmd = (dirs, cmd) => {
   switch (cmd) {
-    case 'install': case 'i': case 'prune':
+    case 'install': case 'i': case 'ci': case 'prune':
       return dirs
     default:
       return dirs.filter((dir) => {
@@ -97,6 +97,7 @@ const mapTasks = (cmd, packages) => {
   switch (command) {
     case 'install':
     case 'i':
+    case 'ci':
     case 'test':
     case 't':
     case 'prune':
