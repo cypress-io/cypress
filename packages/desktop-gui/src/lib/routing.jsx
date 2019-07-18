@@ -39,7 +39,7 @@ const routes = {
   }),
 }
 
-export default {
+export {
   Link,
   routes,
 }

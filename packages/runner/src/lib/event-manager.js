@@ -2,7 +2,8 @@ import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
-import { client, circularParser } from '@packages/socket'
+
+import { client, circularParser } from '@packages/socket/lib/browser'
 
 import automation from './automation'
 import logger from './logger'
