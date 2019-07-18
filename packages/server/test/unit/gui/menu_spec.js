@@ -7,7 +7,7 @@ const appData = require(`${root}../lib/util/app_data`)
 const open = require(`${root}../lib/util/open`)
 const menu = require(`${root}../lib/gui/menu`)
 
-const getMenuItem = (label) => {
+const getMenuItem = function (label) {
   return _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })
 }
 
@@ -286,7 +286,7 @@ describe('gui/menu', function () {
         this.devSubmenu = getMenuItem('Developer Tools').submenu
       })
 
-      it('exists and contains reload, toggle', () => {
+      it('exists and contains reload, toggle', function () {
         const labels = getLabels(this.devSubmenu)
 
         expect(labels).to.eql([
@@ -295,22 +295,22 @@ describe('gui/menu', function () {
         ])
       })
 
-      it('sets shortcut for Reload', () => {
+      it('sets shortcut for Reload', function () {
         expect(this.devSubmenu[0].accelerator).to.equal('CmdOrCtrl+R')
       })
 
-      it('reloads focused window when Reload is clicked', () => {
+      it('reloads focused window when Reload is clicked', function () {
         const reload = sinon.stub()
 
         this.devSubmenu[0].click(null, { reload })
         expect(reload).to.be.called
       })
 
-      it('is noop if no focused window when Reload is clicked', () => {
+      it('is noop if no focused window when Reload is clicked', function () {
         expect(() => this.devSubmenu[0].click()).not.to.throw()
       })
 
-      it('sets shortcut for Toggle Developer Tools when macOS', () => {
+      it('sets shortcut for Toggle Developer Tools when macOS', function () {
         expect(this.devSubmenu[1].accelerator).to.equal('Alt+Command+I')
       })
 
@@ -320,14 +320,14 @@ describe('gui/menu', function () {
         expect(getMenuItem('Developer Tools').submenu[1].accelerator).to.equal('Ctrl+Shift+I')
       })
 
-      it('toggles dev tools on focused window when Toggle Developer Tools is clicked', () => {
+      it('toggles dev tools on focused window when Toggle Developer Tools is clicked', function () {
         const toggleDevTools = sinon.stub()
 
         this.devSubmenu[1].click(null, { toggleDevTools })
         expect(toggleDevTools).to.be.called
       })
 
-      it('is noop if no focused window when Toggle Developer Tools is clicked', () => {
+      it('is noop if no focused window when Toggle Developer Tools is clicked', function () {
         expect(() => this.devSubmenu[1].click()).not.to.throw()
       })
     })
