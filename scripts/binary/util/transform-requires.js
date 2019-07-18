@@ -65,7 +65,8 @@ const transformRequires = async function (buildResourcePath) {
     }
 
   })
-  .return(replaceCount)
+
+  return replaceCount
 }
 
 module.exports = { transformRequires }

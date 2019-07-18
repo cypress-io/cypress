@@ -99,7 +99,8 @@ describe('transformRequires', () => {
       },
     })
 
-    await transformRequires(buildRoot)
+    // should return number of transformed requires
+    await expect(transformRequires(buildRoot)).to.eventually.eq(2)
 
     // console.log(getFs())
 
