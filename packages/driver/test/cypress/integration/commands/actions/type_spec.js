@@ -2998,7 +2998,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get(':text:first').invoke('val', 'foo').clear().type('o').click().then(($el) => {
           expect(changed).to.eq(0)
 
-          $el
+          return $el
         }).blur()
         .then(() => {
           expect(changed).to.eq(1)
