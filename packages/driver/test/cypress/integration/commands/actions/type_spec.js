@@ -1,6 +1,6 @@
+/* eslint prefer-arrow-callback: "error", arrow-body-style: ["error", "always"] */
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
-const { Keyboard } = Cypress
 const { Promise } = Cypress
 const $selection = require('../../../../../src/dom/selection')
 
@@ -4088,17 +4088,17 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('has a table of keys', () => {
-          cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}').then(function () {
-            const table = this.lastLog.invoke('consoleProps').table()
+          cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
+          .then(function () {
+            const table = this.lastLog.invoke('consoleProps').table[3]()
 
             // eslint-disable-next-line
             console.table(table.data, table.columns)
-
             expect(table.columns).to.deep.eq([
               'typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers',
             ])
 
-            expect(table.name).to.eq('Key Events Table')
+            expect(table.name).to.eq('Keyboard Events')
             const expectedTable = {
               1: { typed: '<meta>', which: 91, keydown: true, modifiers: 'meta' },
               2: { typed: '<alt>', which: 18, keydown: true, modifiers: 'alt, meta' },
@@ -4112,9 +4112,7 @@ describe('src/cy/commands/actions/type', () => {
               10: { typed: '{enter}', which: 13, keydown: true, keypress: true, keyup: true, modifiers: 'alt, meta' },
             }
 
-            return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => {
-              expect(table.data[i]).to.deep.eq(expectedTable[i])
-            })
+            expect(table.data).to.deep.eq(expectedTable)
           })
         })
 
@@ -4125,7 +4123,7 @@ describe('src/cy/commands/actions/type', () => {
 
         it('has no modifiers when there are none activated', () => {
           cy.get(':text:first').type('f').then(function () {
-            const table = this.lastLog.invoke('consoleProps').table()
+            const table = this.lastLog.invoke('consoleProps').table[3]()
 
             expect(table.data).to.deep.eq({
               1: { typed: 'f', which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true },
@@ -4139,7 +4137,7 @@ describe('src/cy/commands/actions/type', () => {
           })
 
           cy.get(':text:first').type('f').then(function () {
-            const table = this.lastLog.invoke('consoleProps').table()
+            const table = this.lastLog.invoke('consoleProps').table[3]()
 
             // eslint-disable-next-line
             console.table(table.data, table.columns)
@@ -4316,7 +4314,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
 
-          const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(', ')
+          const allChars = _.keys(cy.internal.keyboard.specialChars).concat(_.keys(cy.internal.keyboard.modifierChars)).join(', ')
 
           expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}`)
 
@@ -5019,29 +5017,7 @@ describe('src/cy/commands/actions/type', () => {
         const logs = []
 
         cy.on('log:added', (attrs, log) => {
-          if (log.get('name') === 'clear') {
-            logs.push(log)
-          }
-        })
-
-        cy.get('input').invoke('slice', 0, 2).clear().then(() => {
-          _.each(logs, (log) => {
-            expect(log.get('state')).to.eq('passed')
-
-            expect(log.get('ended')).to.be.true
-          })
-        })
-      })
-
-      it('snapshots after clicking', () => {
-        cy.get('input:first').clear().then(function ($input) {
-          const { lastLog } = this
-
-          expect(lastLog.get('snapshots').length).to.eq(1)
-
-          expect(lastLog.get('snapshots')[0]).to.be.an('object')
-        })
-      })
+          ifa
 
       it('logs deltaOptions', () => {
         cy.get('input:first').clear({ force: true, timeout: 1000 }).then(function () {
