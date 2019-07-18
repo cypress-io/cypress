@@ -5,5 +5,12 @@
   "extends": [
     "plugin:@cypress/dev/general"
   ],
-  "rules": {}
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "none"
+      }
+    ]
+  }
 }
