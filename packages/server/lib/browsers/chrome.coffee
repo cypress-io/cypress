@@ -144,6 +144,18 @@ _connectToChromeRemoteInterface = ->
       local: true
     })
 
+_maybeRecordVideo = (options) ->
+  (client) ->
+    if options.screencastFrame
+      debug('starting screencast')
+      debug('screencast meta info %o', client.Page.ScreencastFrameMetadata)
+
+      client.Page.screencastFrame(options.screencastFrame)
+      client.Page.startScreencast({
+        format: 'jpeg'
+      })
+    client
+
 # a utility function that navigates to the given URL
 # once Chrome remote interface client is passed to it.
 _navigateUsingCRI = (url) ->
@@ -156,6 +168,14 @@ _navigateUsingCRI = (url) ->
     # when opening the blank page and trying to navigate
     # the focus gets lost. Restore it first
     client.Page.bringToFront()
+    # .then ->
+    #   debug('starting screencast')
+    #   debug('screencast meta info %o', client.Page.ScreencastFrameMetadata)
+      # client.Page.screencastFrame (e) ->
+      #   debug('received screencastFrame %d %o', e.sessionId, e.metadata)
+      # client.Page.startScreencast({
+      #   format: 'jpeg'
+      # })
     .then ->
       client.Page.navigate({ url })
 
@@ -171,6 +191,8 @@ module.exports = {
   _removeRootExtension
 
   _connectToChromeRemoteInterface
+
+  _maybeRecordVideo
 
   _navigateUsingCRI
 
@@ -277,5 +299,6 @@ module.exports = {
         # and when the connection is ready
         # navigate to the actual url
         @_connectToChromeRemoteInterface()
+        .then @_maybeRecordVideo(options)
         .then @_navigateUsingCRI(url)
 }

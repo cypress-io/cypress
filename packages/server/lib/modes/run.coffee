@@ -575,6 +575,14 @@ module.exports = {
     browserOpts = switch browser.name
       when "electron"
         @getElectronProps(browser.isHeaded, project, write)
+      when "chrome"
+        if write
+          {
+            screencastFrame: (e) ->
+              # https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
+              debug('received screencastFrame %d %o', e.sessionId, e.metadata)
+              write(new Buffer(e.data, 'base64'))
+          }
       else
         {}
 
@@ -841,7 +849,8 @@ module.exports = {
 
     ## if we've been told to record and we're not spawning a headed browser
     browserCanBeRecorded = (browser) ->
-      browser.name is "electron" and isHeadless
+      true
+      # browser.name is "electron" and isHeadless
 
     if video
       if browserCanBeRecorded(browser)
