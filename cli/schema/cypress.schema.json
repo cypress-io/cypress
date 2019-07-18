@@ -206,7 +206,7 @@
         "bundled"
       ],
       "default": "bundled",
-      "description": "If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
+      "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
     }
   }
 }
