@@ -395,4 +395,15 @@ describe('Project Nav', function () {
       })
     })
   })
+
+  context('issue #869 - nav responsiveness', function () {
+    beforeEach(function () {
+      this.openProject.resolve(this.config)
+    })
+
+    it('main nav does not block project nav when long project name pushes it to multiple lines', () => {
+      cy.viewport(400, 400)
+      cy.get('.project-nav').should('be.visible')
+    })
+  })
 })

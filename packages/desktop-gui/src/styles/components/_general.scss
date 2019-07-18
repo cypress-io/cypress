@@ -1,9 +1,11 @@
 #app {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: auto;
   position: fixed;
   width: 100%;
-  height: 100%;
-  background-color: #fff;
-  overflow: auto;
 }
 
 .content-wrapper {
@@ -12,6 +14,7 @@
 
 .helper-docs-append {
   margin-top: 10px;
+
   a {
     cursor: pointer;
   }
