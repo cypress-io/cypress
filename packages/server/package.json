@@ -190,7 +190,6 @@
   },
   "files": [
     "config",
-    "timers",
     "lib"
   ],
   "productName": "Cypress"

@@ -59,7 +59,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   isStopped = -> stopped
 
   onFinishAssertions = ->
-    assertions.finishAssertions.apply(null, arguments)
+    assertions.finishAssertions.apply(window, arguments)
 
   warnMixingPromisesAndCommands = ->
     title = state("runnable").fullTitle()

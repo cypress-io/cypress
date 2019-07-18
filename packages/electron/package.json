@@ -6,6 +6,7 @@
   "scripts": {
     "prebuild": "npm run check-deps-pre",
     "build": "node ./bin/cypress-electron --install",
+    "build-prod": "npm run build",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
