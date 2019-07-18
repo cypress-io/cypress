@@ -33,7 +33,9 @@ const NodeVersion = observer(({ project }) => {
   return (
     <div className="node-version">
       {renderLearnMore()}
-      <p>This Node version will be used to execute your plugins file ({formatPluginsFile()}):</p>
+      <p className="text-muted">
+        The Node.js version is used to execute code in your plugins file, {formatPluginsFile()}.
+      </p>
       <table className="node-table">
         <tbody>
           <tr>
@@ -41,7 +43,7 @@ const NodeVersion = observer(({ project }) => {
               Node Version:
             </th>
             <td className="version">
-              v{resolvedNodeVersion} {!resolvedNodePath && '(bundled with Cypress)'}
+              v{resolvedNodeVersion} {!resolvedNodePath && <span className='text-muted'>(bundled with Cypress)</span>}
             </td>
           </tr>
           {resolvedNodePath && <tr>
