@@ -32,6 +32,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         force: false
         delay: 10
         release: true
+        disableSpecialCharSequences: false
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
       })
@@ -88,9 +89,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       isMonth     = $dom.isType(options.$el, "month")
       isWeek      = $dom.isType(options.$el, "week")
       hasTabIndex = $dom.isSelector(options.$el, "[tabindex]")
+      isReadonly  = options.$el.is('[readonly]')
 
       ## TODO: tabindex can't be -1
-      ## TODO: can't be readonly
 
       isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
 
@@ -105,6 +106,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $utils.throwErrByPath("type.multiple_elements", {
           onFail: options._log
           args: { num }
+        })
+
+      if (isReadonly)
+        node = $dom.stringify(options.$el)
+        $utils.throwErrByPath("type.readonly", {
+          onFail: options._log
+          args: { node }
         })
 
       if not (_.isString(chars) or _.isFinite(chars))
@@ -179,7 +187,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## and there are no buttons or input[submits] in the form
             implicitSubmissionInputs = form.find("input").filter (__, input) ->
               $input = $dom.wrap(input)
-              
+
               $elements.isInputAllowingImplicitFormSubmission($input)
 
             implicitSubmissionInputs.length > 1 and submits.length is 0
@@ -242,11 +250,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         isTextarea = $elements.isTextarea(options.$el.get(0))
 
         $Keyboard.type({
-          $el:     options.$el
-          chars:   options.chars
-          delay:   options.delay
-          release: options.release
-          window:  win
+          $el:                          options.$el
+          chars:                        options.chars
+          delay:                        options.delay
+          release:                      options.release
+          disableSpecialCharSequences:  options.disableSpecialCharSequences
+          window:                       win
 
           updateValue: (el, key) ->
             ## in these cases, the value must only be set after all

@@ -288,6 +288,16 @@
           <button>submit me</button>
           <input type="submit" value ="submit me2" />
         </form>
+
+        <form>
+          <!-- All values are valid readonly -->
+          <input id="readonly-attr" readonly />
+          <input id="readonly-readonly" readonly="readonly" />
+          <input id="readonly-empty-str" readonly="" />
+
+          <!-- Although not strictly part of spec, Chrome respects any string -->
+          <input id="readonly-str" readonly="abc" />
+        </form>
       </div>
 
       <div id="input-types">
