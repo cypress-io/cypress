@@ -137,15 +137,12 @@ _connectToChromeRemoteInterface = ->
   protocol.getWsTargetFor(CHROME_REMOTE_INTERFACE_PORT)
   .then (wsUrl) ->
     debug("received wsUrl %s for port %d", wsUrl, CHROME_REMOTE_INTERFACE_PORT)
-    global.wsUrl = wsUrl
-
+    # TODO decide later how and where to keep the wsUrl and the CRI client
     # use the websocket connection to create Chrome remote interface client
     client = CRI({
       target: wsUrl,
       local: true
     })
-    # ? should we keep the CRI client reference around
-    global.criClient = client
 
 # a utility function that navigates to the given URL
 # once Chrome remote interface client is passed to it.
