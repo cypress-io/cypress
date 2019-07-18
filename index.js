@@ -113,7 +113,7 @@ const baseRules = {
   'no-unneeded-ternary': 'error',
   'no-unreachable': 'error',
   'no-unused-labels': 'error',
-  'no-unused-vars': 'error',
+  'no-unused-vars': ['error', { args: 'none' }],
   'no-useless-concat': 'error',
   'no-useless-constructor': 'error',
   'no-var': 'error',
