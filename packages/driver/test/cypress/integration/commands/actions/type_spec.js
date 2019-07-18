@@ -3429,7 +3429,7 @@ describe('src/cy/commands/actions/type', () => {
       it('enter and \\n should act the same for [contenteditable]', () => {
         // non breaking white space
         const cleanseText = (text) => {
-          text.split('\u00a0').join(' ')
+          return text.split('\u00a0').join(' ')
         }
 
         const expectMatchInnerText = ($el, innerText) => {
