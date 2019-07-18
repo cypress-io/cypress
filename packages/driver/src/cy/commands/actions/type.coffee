@@ -291,7 +291,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               return false
 
           onEvent: (id, key, column, which, value) ->
-            updateTable.apply(null, arguments) if updateTable
+            updateTable.apply(window, arguments) if updateTable
 
           ## fires only when the 'value'
           ## of input/text/contenteditable

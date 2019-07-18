@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
-  "browser": "./lib/browser.js",
   "scripts": {
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",

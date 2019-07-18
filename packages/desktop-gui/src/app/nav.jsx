@@ -59,7 +59,7 @@ export default class Nav extends Component {
     // global mode, on intro page
     return (
       <div className='logo'>
-        <img src='img/cypress-inverse.png' />
+        <img src={require('@cypress/icons/dist/logo/cypress-inverse.png')} />
       </div>
     )
   }
@@ -115,7 +115,7 @@ export default class Nav extends Component {
     return (
       <span>
         <i className='fa fa-sign-out'></i>{' '}
-          Log Out
+        Log Out
       </span>
     )
 
