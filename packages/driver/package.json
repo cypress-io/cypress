@@ -2,20 +2,15 @@
   "name": "@packages/driver",
   "version": "0.0.0",
   "private": true,
-  "main": "index.js",
-  "browser": "src/main",
   "scripts": {
-    "prestart": "npm run check-deps-pre",
-    "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee",
-    "cypress:open": "node ../../scripts/cypress open --project ./test",
-    "cypress:run": "node ../../scripts/cypress run --project ./test",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean-deps": "rm -rf node_modules"
+    "clean-deps": "rm -rf node_modules",
+    "cypress:open": "node ../../scripts/cypress open --project ./test",
+    "cypress:run": "node ../../scripts/cypress run --project ./test",
+    "prestart": "npm run check-deps-pre",
+    "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee"
   },
-  "files": [
-    "lib"
-  ],
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/sinon-chai": "1.1.0",
@@ -44,8 +39,8 @@
     "jquery": "3.0.0",
     "jquery.scrollto": "2.1.2",
     "js-cookie": "2.2.0",
-    "jsdom": "13.2.0",
-    "lodash": "4.17.13",
+    "jsdom": "14.1.0",
+    "lodash": "4.17.14",
     "lolex": "4.1.0",
     "md5": "2.2.1",
     "method-override": "3.0.0",
@@ -64,7 +59,10 @@
     "underscore.string": "3.3.5",
     "url-parse": "1.4.7",
     "vanilla-text-mask": "5.1.1",
-    "wait-on": "3.2.0",
+    "wait-on": "3.3.0",
     "zone.js": "0.9.0"
-  }
+  },
+  "files": [
+    "lib"
+  ]
 }

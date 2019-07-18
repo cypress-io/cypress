@@ -280,13 +280,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         subject = null
 
       switch
+        ## .contains(filter, text)
         when _.isRegExp(text)
           text = text
           filter = filter
+        ## .contains(text, options)
         when _.isObject(text)
           options = text
           text = filter
           filter = ""
+        ## .contains(text)
         when _.isUndefined(text)
           text = filter
           filter = ""

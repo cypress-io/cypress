@@ -118,7 +118,8 @@ const writeBinaryVerifiedAsync = (verified, binaryDir) => {
     return fs.outputJsonAsync(
       getBinaryStatePath(binaryDir),
       _.extend(contents, { verified }),
-      { spaces: 2 })
+      { spaces: 2 }
+    )
   })
 }
 

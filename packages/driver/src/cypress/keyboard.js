@@ -338,6 +338,7 @@ const $Keyboard = {
   type (options = {}) {
     _.defaults(options, {
       delay: 10,
+      disableSpecialCharSequences: false,
       onEvent () {},
       onBeforeEvent () {},
       onBeforeType () {},
@@ -349,15 +350,18 @@ const $Keyboard = {
 
     const el = options.$el.get(0)
 
-    const keys = options.chars.split(charsBetweenCurlyBracesRe).map((chars) => {
-      if (charsBetweenCurlyBracesRe.test(chars)) {
-        //# allow special chars and modifiers to be case-insensitive
-        return chars.toLowerCase()
-      }
+    let keys = options.chars
 
-      return chars
+    if (!options.disableSpecialCharSequences) {
+      keys = options.chars.split(charsBetweenCurlyBracesRe).map((chars) => {
+        if (charsBetweenCurlyBracesRe.test(chars)) {
+          //# allow special chars and modifiers to be case-insensitive
+          return chars.toLowerCase()
+        }
 
-    })
+        return chars
+      })
+    }
 
     options.onBeforeType(this.countNumIndividualKeyStrokes(keys))
 
@@ -493,6 +497,7 @@ const $Keyboard = {
         _.extend(event, {
           data: key,
         })
+
         break
       }
 
@@ -510,6 +515,7 @@ const $Keyboard = {
         location: 0,
         repeat: false,
       })
+
       this.mixinModifiers(event)
     }
 
