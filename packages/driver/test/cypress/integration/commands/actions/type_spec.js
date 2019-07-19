@@ -5018,12 +5018,12 @@ describe('src/cy/commands/actions/type', () => {
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'clear') {
-            return logs.push(log)
+            logs.push(log)
           }
         })
 
         cy.get('input').invoke('slice', 0, 2).clear().then(() => {
-          return _.each(logs, (log) => {
+          _.each(logs, (log) => {
             expect(log.get('state')).to.eq('passed')
 
             expect(log.get('ended')).to.be.true
@@ -5032,7 +5032,7 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       it('snapshots after clicking', () => {
-        cy.get('input:first').clear().then(function () {
+        cy.get('input:first').clear().then(function ($input) {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
