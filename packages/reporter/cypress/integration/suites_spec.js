@@ -6,7 +6,7 @@ describe('controls', function () {
 
     this.runner = new EventEmitter()
 
-    cy.visit('cypress/support/index.html').then((win) => {
+    cy.visit('/dist').then((win) => {
       win.render({
         runner: this.runner,
         specPath: '/foo/bar',
