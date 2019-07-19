@@ -575,13 +575,16 @@ const create = (state) => {
         const isNumberInputType = $elements.isInput(el) && $elements.isType(el, 'number')
 
         if (isNumberInputType) {
-          const { selectionStart } = el
+          const { start: selectionStart, end: selectionEnd } = $selection.getSelectionBounds(el)
+
+          const selectionLength = selectionEnd - selectionStart
           const valueLength = $elements.getNativeProp(el, 'value').length
-          const isDigitsInText = isStartingDigitRe.test(options.chars)
-          const isValidCharacter = (key === '.') || ((key === '-') && valueLength)
+          const isFirstSymbol = !valueLength || (selectionLength === valueLength)
+          const isStartingDigit = isStartingDigitRe.test(options.chars)
+          const isValidCharacter = (key === '.') || ((key === '-') && !isFirstSymbol)
           const { prevChar } = options
 
-          if (!isDigit && (isDigitsInText || !isValidCharacter || (selectionStart !== 0))) {
+          if (!isDigit && (isStartingDigit || !isValidCharacter || !isFirstSymbol)) {
             options.prevChar = key
 
             return
@@ -589,7 +592,7 @@ const create = (state) => {
 
           // only type '.' and '-' if it is the first symbol and there already is a value, or if
           // '.' or '-' are appended to a digit. If not, value cannot be set.
-          if (isDigit && ((prevChar === '.') || ((prevChar === '-') && !valueLength))) {
+          if (isDigit && ((prevChar === '.') || ((prevChar === '-') && isFirstSymbol))) {
             options.prevChar = key
             key = prevChar + key
           }
