@@ -188,7 +188,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       cy.get('#button').click().then(() => {
-        expect(events).to.deep.eq(['mousedown', 'mouseup', 'click'])
+        expect(events).to.deep.eq(['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
       })
     })
 

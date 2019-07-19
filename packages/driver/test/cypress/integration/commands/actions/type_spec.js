@@ -3429,7 +3429,7 @@ describe('src/cy/commands/actions/type', () => {
       it('enter and \\n should act the same for [contenteditable]', () => {
         // non breaking white space
         const cleanseText = (text) => {
-          text.split('\u00a0').join(' ')
+          return text.split('\u00a0').join(' ')
         }
 
         const expectMatchInnerText = ($el, innerText) => {
@@ -5017,7 +5017,29 @@ describe('src/cy/commands/actions/type', () => {
         const logs = []
 
         cy.on('log:added', (attrs, log) => {
-          ifa
+          if (log.get('name') === 'clear') {
+            return logs.push(log)
+          }
+        })
+
+        cy.get('input').invoke('slice', 0, 2).clear().then(() => {
+          return _.each(logs, (log) => {
+            expect(log.get('state')).to.eq('passed')
+
+            expect(log.get('ended')).to.be.true
+          })
+        })
+      })
+
+      it('snapshots after clicking', () => {
+        cy.get('input:first').clear().then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('snapshots').length).to.eq(1)
+
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
 
       it('logs deltaOptions', () => {
         cy.get('input:first').clear({ force: true, timeout: 1000 }).then(function () {
