@@ -24,7 +24,7 @@ const NodeVersion = observer(({ project }) => {
     const pluginsFile = _.get(resolvedConfig, 'pluginsFile.value')
 
     if (pluginsFile) {
-      return <code>{pluginsFile}</code>
+      return <span>, <code>{pluginsFile}</code></span>
     }
 
     return null
