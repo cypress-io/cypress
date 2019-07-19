@@ -1145,6 +1145,14 @@ describe('src/cy/commands/actions/type', () => {
           .should('have.value', '-123.12')
         })
 
+        it('can type negative numbers with currently active selection', () => {
+          cy.get('#number-without-value')
+          .type('999')
+          .type('{selectall}')
+          .type('-123.12')
+          .should('have.value', '-123.12')
+        })
+
         it('type=number blurs consistently', () => {
           let blurred = 0
 

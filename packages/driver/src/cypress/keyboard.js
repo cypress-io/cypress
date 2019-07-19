@@ -3,6 +3,8 @@ const Promise = require('bluebird')
 const $elements = require('../dom/elements')
 const $selection = require('../dom/selection')
 const $Cypress = require('../cypress')
+// eslint-disable-next-line no-unused-vars
+const debug = require('debug')('cypress:driver:keyboard')
 
 const isSingleDigitRe = /^\d$/
 const isStartingDigitRe = /^\d/
@@ -563,6 +565,9 @@ const $Keyboard = {
       const isNumberInputType = $elements.isInput(el) && $elements.isType(el, 'number')
 
       if (isNumberInputType) {
+        const selectionBounds = $selection.getSelectionBounds(el)
+        // debug('selectionbounds:', selectionBounds)
+        const selectionLength = selectionBounds.end - selectionBounds.start
         const { selectionStart } = el
         const valueLength = $elements.getNativeProp(el, 'value').length
         const isDigitsInText = isStartingDigitRe.test(options.chars)
@@ -575,9 +580,11 @@ const $Keyboard = {
           return
         }
 
+        const isFirstSymbol = !valueLength || (selectionLength === valueLength)
+
         //# only type '.' and '-' if it is the first symbol and there already is a value, or if
         //# '.' or '-' are appended to a digit. If not, value cannot be set.
-        if (isDigit && ((prevChar === '.') || ((prevChar === '-') && !valueLength))) {
+        if (isDigit && ((prevChar === '.') || ((prevChar === '-') && isFirstSymbol))) {
           options.prevChar = key
           key = prevChar + key
         }
