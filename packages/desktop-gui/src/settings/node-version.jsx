@@ -34,7 +34,7 @@ const NodeVersion = observer(({ project }) => {
     <div className="node-version">
       {renderLearnMore()}
       <p className="text-muted">
-        The Node.js version is used to execute code in your plugins file, {formatPluginsFile()}.
+        Used to build files found in the <pre>cypress</pre> folder and execute code in the plugins file, {formatPluginsFile()}. To access features or modules only available in your system Node version, set <pre>nodeVersion: 'system'</pre> in your configuration.
       </p>
       <table className="node-table">
         <tbody>
