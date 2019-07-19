@@ -24,17 +24,15 @@ const NodeVersion = observer(({ project }) => {
     const pluginsFile = _.get(resolvedConfig, 'pluginsFile.value')
 
     if (pluginsFile) {
-      return <code>{pluginsFile}</code>
+      return <span>, <code>{pluginsFile}</code></span>
     }
-
-    return 'currently disabled'
   }
 
   return (
     <div className="node-version">
       {renderLearnMore()}
       <p className="text-muted">
-        The Node.js version is used to execute code in your plugins file, {formatPluginsFile()}.
+        The Node.js version is used to execute code in your plugins file{formatPluginsFile()}.
       </p>
       <table className="node-table">
         <tbody>

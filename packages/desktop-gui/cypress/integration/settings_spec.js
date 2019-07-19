@@ -320,32 +320,32 @@ describe('Settings', function () {
 
   describe('when node version panel is opened', function () {
     beforeEach(function () {
-      return this.navigateWithConfig = function (config) {
+      this.navigateWithConfig = function (config) {
         this.openProject.resolve(_.defaults(config, this.config))
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
         this.goToSettings()
 
-        return cy.contains('Node Version').click()
+        cy.contains('Node Version').click()
       }
     })
 
     it('with bundled node informs user we\'re using bundled node', function () {
       this.navigateWithConfig({})
-      cy.get('.settings-node td.path').should('not.exist')
 
-      return cy.get('.settings-node td.version').should('contain', 'v1.2.3 (bundled with Cypress)')
+      cy.get('.settings-node td.path').should('not.exist')
+      cy.get('.settings-node td.version').should('contain', 'v1.2.3 (bundled with Cypress)')
     })
 
-    return it('with custom node displays path to custom node', function () {
+    it('with custom node displays path to custom node', function () {
       this.navigateWithConfig({
         resolvedNodePath: '/foo/bar/node',
         resolvedNodeVersion: '4.5.6',
       })
 
+      cy.get('.settings-node').should('contain.html', 'The Node.js version is used to execute code in your plugins file<span>, <code>cypress/plugins</code></span>.')
       cy.get('.settings-node td.path').should('contain', '/foo/bar/node')
-
-      return cy.get('.settings-node td.version').should('contain', 'v4.5.6')
+      cy.get('.settings-node td.version').should('contain', 'v4.5.6')
     })
   })
 
