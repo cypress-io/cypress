@@ -1204,6 +1204,14 @@ describe('src/cy/commands/actions/type', () => {
           .then(() => expect(sentInput).not.called)
         })
 
+        it('can type negative numbers with currently active selection', () => {
+          cy.get('#number-without-value')
+          .type('999')
+          .type('{selectall}')
+          .type('-123.12')
+          .should('have.value', '-123.12')
+        })
+
         it('type=number blurs consistently', () => {
           let blurred = 0
 
@@ -1360,7 +1368,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('overwrites existing value input by invoking val', () => {
-          cy.get('[type="datetime-local"]').invoke('val', '2016-01-01').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+          cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
         })
       })
 
@@ -1573,7 +1581,7 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       // TODO: fix this with 4.0 updates
-      describe.skip('element reference loss', () => {
+      describe('element reference loss', () => {
         it('follows the focus of the cursor', () => {
           let charCount = 0
 
