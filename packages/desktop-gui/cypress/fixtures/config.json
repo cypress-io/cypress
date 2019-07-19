@@ -228,7 +228,7 @@
     },
     "pluginsFile": {
       "from": "default",
-      "value": "cypress/plugins"
+      "value": "cypress/plugins/index.js"
     },
     "port": {
       "from": "default",

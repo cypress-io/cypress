@@ -34,7 +34,7 @@ const NodeVersion = observer(({ project }) => {
     <div className="node-version">
       {renderLearnMore()}
       <p className="text-muted">
-        Used to build files found in the <pre>cypress</pre> folder and execute code in the plugins file, {formatPluginsFile()}. To access features or modules only available in your system Node version, set <pre>nodeVersion: 'system'</pre> in your configuration.
+        Used to build files found in the <code>cypress</code> folder and execute code in the plugins in {formatPluginsFile()}. To access features or modules only available in your system Node version, set <code>"nodeVersion": "system"</code> in your configuration. Otherwise, everything will use the bundled Node version that comes with Cypress.
       </p>
       <table className="node-table">
         <tbody>
