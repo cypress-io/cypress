@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 
+const execa = require('execa')
 const fse = require('fs-extra')
 const path = require('path')
 const globber = require('glob')
@@ -9,6 +10,21 @@ const fs = Promise.promisifyAll(fse)
 const glob = Promise.promisify(globber)
 
 const pathToPackages = path.join(__dirname, '..', 'node_modules', '@packages')
+
+function symlink(target, from) {
+  if (process.platform === 'win32') {
+    // https://github.com/cypress-io/cypress/issues/4777
+    target = path.resolve(target.slice(6))
+    return execa('CMD', ['/C', 'MKLINK', '/D', '/J', from, target])
+    .then((res) => {
+      if (!res.stdout.includes('Junction created')) {
+        throw new Error(`Failed creating symlink from ${from} to ${target}: stdout: ${res.stdout} stderr: ${res.stderr}`)
+      }
+    })
+  }
+
+  return fs.symlink(target, from)
+}
 
 function deleteOutputFolder () {
 
@@ -43,7 +59,7 @@ function makeLinks () {
 
       console.log(destinationLink, '->', relativePathToDest)
 
-      return fs.symlink(relativePathToDest, destinationLink)
+      return symlink(relativePathToDest, destinationLink)
     })
   })
 }
