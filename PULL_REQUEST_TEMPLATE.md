@@ -5,7 +5,7 @@ Read our contribution guidelines here: https://github.com/cypress-io/cypress/blo
 
 - Closes <!-- Add issue number here, for example "Closes #1234" -->
 
-# Pre-merge Tasks
+### Pre-merge Tasks
 
 <!-- 
 The following tasks must be completed before a PR can be merged.
