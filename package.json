@@ -151,7 +151,7 @@
     "proxyquire": "2.1.0",
     "ramda": "0.24.1",
     "shelljs": "0.8.3",
-    "shx": "^0.3.2",
+    "shx": "0.3.2",
     "sinon": "7.3.2",
     "snap-shot-it": "7.8.0",
     "stop-only": "3.0.1",
