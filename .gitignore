@@ -65,5 +65,5 @@ package-lock.json
 yarn.lock
 binary-url.json
 
-# Decaffeinate
+# Allows us to dynamically create eslint rules that override the default for Decaffeinate scripts
 .eslintrc.js
