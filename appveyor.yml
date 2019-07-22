@@ -64,6 +64,7 @@ install:
   # clean cache to prevent install permission issues
   - npm cache clean --force
   # install root modules only, and retry automatically if install fails
+  - npm run preinstall
   - npm install --ignore-scripts || npm install --ignore-scripts || npm install --ignore-scripts
   - .\node_modules\.bin\print-arch
   # because we skipped scripts, we need to do
