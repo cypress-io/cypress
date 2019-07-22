@@ -17,7 +17,7 @@
     "bluebird": "^3.5.5",
     "chalk": "^2.4.2",
     "eslint-rule-composer": "^0.3.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.15",
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
