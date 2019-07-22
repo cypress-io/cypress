@@ -31,7 +31,7 @@
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
-    "preinstall": "shx rm -rf node_modules/@packages",
+    "preinstall": "npx shx rm -rf node_modules/@packages",
     "postinstall": "echo 'root postinstall' && npm run link && npm run all install && npm run build",
     "install-filtered": "npm run all install -- --package $(node ./scripts/check-deps.js --list)",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
