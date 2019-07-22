@@ -4,6 +4,7 @@ const fse = require('fs-extra')
 const path = require('path')
 const globber = require('glob')
 const Promise = require('bluebird')
+const os = require('os')
 
 const fs = Promise.promisifyAll(fse)
 const glob = Promise.promisify(globber)
@@ -42,6 +43,10 @@ function makeLinks () {
       const relativePathToDest = path.relative(path.dirname(destinationLink), dirname)
 
       console.log(destinationLink, '->', relativePathToDest)
+
+      if (os.platform === 'win32') {
+        return fs.symlink(relativePathToDest, destinationLink, 'junction')
+      }
 
       return fs.symlink(relativePathToDest, destinationLink)
     })
