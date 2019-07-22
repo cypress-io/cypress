@@ -64,3 +64,6 @@ scripts/support
 package-lock.json
 yarn.lock
 binary-url.json
+
+# Decaffeinate
+.eslintrc.js
