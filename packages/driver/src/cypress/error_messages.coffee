@@ -907,7 +907,7 @@ module.exports = {
     invalid: """
       Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}
 
-      If you want to skip parsing special character sequences and type the text exactly as written, use {parseSpecialCharSequences: true}
+      If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: true}
 
       https://on.cypress.io/type
     """

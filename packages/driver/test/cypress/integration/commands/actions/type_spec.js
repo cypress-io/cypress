@@ -4342,7 +4342,7 @@ describe('src/cy/commands/actions/type', () => {
 
           expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
 
-If you want to skip parsing special character sequences and type the text exactly as written, use {parseSpecialCharSequences: true}
+If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: true}
 
 https://on.cypress.io/type`)
 
