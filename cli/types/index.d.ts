@@ -573,8 +573,10 @@ declare namespace Cypress {
      *    cy.contains(/^b\w+/)
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
+     *    // tries to find the given text for up to 1 second
+     *    cy.contains('my text to find', {timeout: 1000})
      */
-    contains(content: string | number | RegExp): Chainable<Subject>
+    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
     /**
      * Get the child DOM element that contains given text.
      *
@@ -2240,6 +2242,13 @@ declare namespace Cypress {
      * @default 10
      */
     delay: number
+    /**
+     * Disable typing special characters for strings surrounded by `{}`,
+     * such as `{esc}`, and type the literal characters instead
+     *
+     * @default false
+     */
+    disableSpecialCharSequences: boolean
     /**
      * Forces the action, disables waiting for actionability
      *

@@ -2,12 +2,6 @@
   "name": "cypress",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "bin",
-    "lib",
-    "index.js",
-    "types/**/*.d.ts"
-  ],
   "main": "index.js",
   "scripts": {
     "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
@@ -52,7 +46,7 @@
     "is-installed-globally": "0.1.0",
     "lazy-ass": "1.6.0",
     "listr": "0.12.0",
-    "lodash": "4.17.14",
+    "lodash": "4.17.15",
     "log-symbols": "2.2.0",
     "minimist": "1.2.0",
     "moment": "2.24.0",
@@ -95,11 +89,17 @@
     "snap-shot-it": "7.8.0",
     "spawn-mock": "1.0.0"
   },
+  "files": [
+    "bin",
+    "lib",
+    "index.js",
+    "types/**/*.d.ts"
+  ],
   "bin": {
     "cypress": "bin/cypress"
   },
-  "types": "types",
   "engines": {
     "node": ">=4.0.0"
-  }
+  },
+  "types": "types"
 }
