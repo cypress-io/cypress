@@ -23,6 +23,7 @@ module.exports = {
     fs.readFileAsync(src, "utf8")
     .then (str) ->
       str
+      .replace("HOST_PATH_REPLACED = false", "HOST_PATH_REPLACED = true")
       .replace("CHANGE_ME_HOST", host)
       .replace("CHANGE_ME_PATH", path)
 
