@@ -260,6 +260,28 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
+      it('waits until element is no longer readonly', () => {
+        const $txt = cy.$$(':text:first').prop('readonly', true)
+
+        let retried = false
+        let clicks = 0
+
+        $txt.on('click', () => {
+          clicks += 1
+        })
+
+        cy.on('command:retry', _.after(3, () => {
+          $txt.removeProp('readonly')
+          retried = true
+        }))
+
+        cy.get(':text:first').type('foo').then(() => {
+          expect(clicks).to.eq(1)
+
+          expect(retried).to.be.true
+        })
+      })
+
       it('waits until element stops animating', () => {
         let retries = 0
 
