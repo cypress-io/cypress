@@ -111,24 +111,24 @@ module.exports = {
   _attachDebugger: (webContents) ->
     ## this method doesn't like Promise.promisify because when there's
     ## only one argument it can't be called with 2 arguments + the callback
-    webContents.debugger.sendCommandAsync = (message, data) ->
+    webContents.debugger.sendCommandAsync = (message, data = {}) ->
       new Promise (resolve, reject) ->
         debug("debugger: sendCommand(%s, %o)", message, data)
         callback = (err, result) ->
-          if err
-            debug("debugger: sendCommand(%s, %o) error: %o", message, err)
+          debug("debugger: received response %o", { message, err, result })
+          if not _.isEmpty(err)
             reject(err)
           else
             resolve(result)
 
-        if data
-          webContents.debugger.sendCommand(message, data, callback)
-        else
-          webContents.debugger.sendCommand(message, callback)
+        webContents.debugger.sendCommand(message, data, callback)
 
     try
       webContents.debugger.attach()
       debug("debugger attached")
+      webContents.debugger.sendCommandAsync('Schema.getDomains')
+      .then ({domains}) ->
+        debug("supported CDP domains: %o", domains)
     catch err
       debug("debugger attached failed %o", { err })
 
@@ -266,6 +266,7 @@ module.exports = {
                 invokeViaDebugger("Network.clearBrowserCookies").return(null)
               when "clear:cookie"
                 data = normalizeSetCookieProps(data)
+                delete data.expiry
                 invokeViaDebugger("Network.deleteCookies", data).return(null)
               when "is:automation:client:connected"
                 invoke("isAutomationConnected", data)
