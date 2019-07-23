@@ -903,7 +903,12 @@ module.exports = {
 
   type:
     empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."
-    invalid: "Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}"
+    readonly: "#{cmd('type')} cannot type into an element with a 'readonly' attribute. The element typed into was: {{node}}"
+    invalid: """
+      Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}
+
+      If you want to skip parsing special character sequences and type the text exactly as written, use {parseSpecialCharSequences: true}
+    """
     invalid_date: "Typing into a date input with #{cmd('type')} requires a valid date with the format 'yyyy-MM-dd'. You passed: {{chars}}"
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"

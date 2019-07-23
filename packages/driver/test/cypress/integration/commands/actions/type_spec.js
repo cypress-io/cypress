@@ -1528,6 +1528,18 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('specialChars', () => {
+
+      context('parseSpecialCharSequences: true', () => {
+        it('types special character sequences literally', (done) => {
+          cy.get(':text:first').invoke('val', 'foo')
+          .type('{{}{backspace}', { parseSpecialCharSequences: true }).then(($input) => {
+            expect($input).to.have.value('foo{{}{backspace}')
+
+            done()
+          })
+        })
+      })
+
       context('{{}', () => {
         it('sets which and keyCode to 219', (done) => {
           cy.$$(':text:first').on('keydown', (e) => {
@@ -4328,7 +4340,9 @@ describe('src/cy/commands/actions/type', () => {
 
           const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(', ')
 
-          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}`)
+          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
+
+If you want to skip parsing special character sequences and type the text exactly as written, use {parseSpecialCharSequences: true}`)
 
           done()
         })
