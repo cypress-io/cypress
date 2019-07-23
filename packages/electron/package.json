@@ -36,5 +36,5 @@
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
   },
-  "electronVersion": "3.1.8"
+  "electronVersion": "5.0.7"
 }
