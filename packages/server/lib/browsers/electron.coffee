@@ -115,7 +115,7 @@ module.exports = {
       new Promise (resolve, reject) ->
         debug("debugger: sendCommand(%s, %o)", message, data)
         callback = (err, result) ->
-          debug("debugger: received response %o", { message, err, result })
+          debug("debugger: received response for %s: err: %o result: %o", message, err, result)
           if not _.isEmpty(err)
             reject(err)
           else
@@ -230,6 +230,8 @@ module.exports = {
 
         normalizeGetCookieProps = (cookie) ->
           cookie.expirationDate = cookie.expires ? -1
+          if _.isUndefined(cookie.hostOnly) ## TODO: do the right thing here instead
+            cookie.hostOnly = true
           delete cookie.expires
           return cookie
 
@@ -238,7 +240,7 @@ module.exports = {
 
         normalizeSetCookieProps = (cookie) ->
           cookie.name or= "" ## name can't be undefined/null
-          cookie.expiry = cookie.expirationDate
+          cookie.expires = cookie.expirationDate
           delete cookie.expirationDate
           return cookie
 
