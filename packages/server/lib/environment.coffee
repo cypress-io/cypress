@@ -34,6 +34,7 @@ try
 
   if os.platform() is "linux"
     app.disableHardwareAcceleration()
+    app.commandLine.appendSwitch("no-sandbox")
 
 ## instead of setting NODE_ENV we will
 ## use our own separate CYPRESS_ENV so
