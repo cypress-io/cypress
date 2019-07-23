@@ -2,12 +2,6 @@
   "name": "cypress",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "bin",
-    "lib",
-    "index.js",
-    "types/**/*.d.ts"
-  ],
   "main": "index.js",
   "scripts": {
     "prebuild": "npm run test-dependencies && node ./scripts/start-build.js",
@@ -16,6 +10,7 @@
     "check-deps-pre": "npm run check-deps -- --prescript",
     "dtslint": "dtslint types",
     "postinstall": "node ./scripts/post-install.js",
+    "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
@@ -27,6 +22,7 @@
     "test-unit": "npm run unit",
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run unit -- --watch",
+    "types": "npm run dtslint",
     "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
@@ -50,7 +46,7 @@
     "is-installed-globally": "0.1.0",
     "lazy-ass": "1.6.0",
     "listr": "0.12.0",
-    "lodash": "4.17.13",
+    "lodash": "4.17.14",
     "log-symbols": "2.2.0",
     "minimist": "1.2.0",
     "moment": "2.24.0",
@@ -90,14 +86,20 @@
     "proxyquire": "2.1.0",
     "shelljs": "0.8.3",
     "sinon": "7.2.2",
-    "snap-shot-it": "7.7.1",
+    "snap-shot-it": "7.8.0",
     "spawn-mock": "1.0.0"
   },
+  "files": [
+    "bin",
+    "lib",
+    "index.js",
+    "types/**/*.d.ts"
+  ],
   "bin": {
     "cypress": "bin/cypress"
   },
-  "types": "types",
   "engines": {
     "node": ">=4.0.0"
-  }
+  },
+  "types": "types"
 }

@@ -22,7 +22,7 @@ const propsWithState = (props) =>
 
 describe('<Header />', () => {
   beforeEach(() => {
-    driver.$ = () => ({ outerHeight: () => 42 })
+    driver.$.returns({ outerHeight: () => 42 })
   })
 
   it('has showing-selector-playground class if selector playground is open', () => {

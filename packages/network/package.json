@@ -2,18 +2,16 @@
   "name": "@packages/network",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "lib"
-  ],
   "main": "index.js",
   "scripts": {
     "build-js": "bin-up tsc --project .",
+    "clean-deps": "rm -rf node_modules",
     "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
     "bluebird": "3.5.3",
     "debug": "4.1.1",
-    "lodash": "4.17.13",
+    "lodash": "4.17.14",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
@@ -25,5 +23,8 @@
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0"
   },
+  "files": [
+    "lib"
+  ],
   "types": "./lib/index.ts"
 }
