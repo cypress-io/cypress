@@ -1,11 +1,11 @@
 exports['lib/plugins/child/run_plugins sends error message if pluginsFile is missing 1'] = `
 Error: Cannot find module '/does/not/exist.coffee'
 Require stack:
-- /home/flotwig/Projects/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js
-- /home/flotwig/Projects/cypress/cypress/packages/server/test/unit/plugins/child/run_plugins_spec.coffee
-- /home/flotwig/Projects/cypress/cypress/packages/server/node_modules/mocha/lib/mocha.js
-- /home/flotwig/Projects/cypress/cypress/packages/server/node_modules/mocha/index.js
-- /home/flotwig/Projects/cypress/cypress/packages/server/node_modules/mocha/bin/_mocha
+- lib/plugins/child/run_plugins.js
+- test/unit/plugins/child/run_plugins_spec.coffee
+- node_modules/mocha/lib/mocha.js
+- node_modules/mocha/index.js
+- node_modules/mocha/bin/_mocha
     at Function.Module._resolveFilename <path>loader.js
     at Module._load <path>loader.js
     at Function.hookedLoader [as _load] <path>mockery.js
