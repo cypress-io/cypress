@@ -225,6 +225,15 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
     """
+    readonly: """
+      #{cmd('{{cmd}}')} failed because this element is readonly:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+    """
 
   each:
     invalid_argument: "#{cmd('each')} must be passed a callback function."
@@ -894,7 +903,6 @@ module.exports = {
 
   type:
     empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."
-    readonly: "#{cmd('type')} cannot type into an element with a 'readonly' attribute. The element typed into was: {{node}}"
     invalid: "Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}"
     invalid_date: "Typing into a date input with #{cmd('type')} requires a valid date with the format 'yyyy-MM-dd'. You passed: {{chars}}"
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
