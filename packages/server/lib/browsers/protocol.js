@@ -10,14 +10,17 @@ const debug = require('debug')('cypress:server:protocol')
 
 function connectAsync (opts) {
   return new Promise(function (resolve, reject) {
+    debug('connectAsync with options %o', opts)
     let socket = net.connect(opts)
 
     socket.once('connect', function () {
       socket.removeListener('error', reject)
+      debug('successfully connected with options %o', opts)
       resolve(socket)
     })
 
     socket.once('error', function (err) {
+      debug('error connecting with options %o', opts, err)
       socket.removeListener('connection', resolve)
       reject(err)
     })
@@ -42,10 +45,18 @@ const getWsTargetFor = (port) => {
     debug('retry connecting to debugging port %d', port)
   })
   .then(() => {
-    return CRI.List()
+    debug('CRI.List on port %d', port)
+
+    // what happens if the next call throws an error?
+    // it seems to leave the browser instance open
+    return CRI.List({ port })
   })
   .then((targets) => {
-    debug('CRI list has %s %o', pluralize('targets', targets.length, true), targets)
+    debug(
+      'CRI list has %s %o',
+      pluralize('targets', targets.length, true),
+      targets
+    )
     // activate the first available id
 
     // find the first target page that's a real tab

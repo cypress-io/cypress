@@ -28,12 +28,15 @@ describe "lib/browsers/chrome", ->
       sinon.stub(utils, "launch")
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
+      # port for Chrome remote interface communication
+      sinon.stub(utils, "getPort").resolves(50505)
 
     it "focuses on the page and calls CRI Page.visit", ->
       chrome.open("chrome", "http://", {}, {})
       .then =>
         expect(@criClient.Page.bringToFront).to.have.been.calledOnce
         expect(@criClient.Page.navigate).to.have.been.calledOnce
+        expect(utils.getPort).to.have.been.calledOnce # to get remote interface port
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
@@ -72,7 +75,7 @@ describe "lib/browsers/chrome", ->
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache",
-          "--remote-debugging-port=9222"
+          "--remote-debugging-port=50505"
         ])
 
     it "normalizes multiple extensions from plugins", ->
@@ -95,7 +98,7 @@ describe "lib/browsers/chrome", ->
           "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache",
-          "--remote-debugging-port=9222"
+          "--remote-debugging-port=50505"
         ])
 
     it "cleans up an unclean browser profile exit status", ->
