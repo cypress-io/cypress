@@ -32,18 +32,11 @@ function makeLinks () {
       const basename = path.basename(dirname)
 
       const destinationLink = path.join(pathToPackages, basename)
-      // const registerPath = path.join(destinationFolder, 'register.js')
-      // const fullMain = path.resolve(dirname, json.main)
-
-      // debug('full name', fullMain)
-      // const relativePathToMain = path.relative(destinationFolder, fullMain)
-
-      // debug('relative path to main', relativePathToMain)
       const relativePathToDest = path.relative(path.dirname(destinationLink), dirname)
 
       console.log(destinationLink, '->', relativePathToDest)
 
-      return fs.symlink(relativePathToDest, destinationLink)
+      return fs.symlink(relativePathToDest, destinationLink, 'junction')
     })
   })
 }
