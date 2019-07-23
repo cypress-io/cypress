@@ -246,6 +246,18 @@ namespace CypressOnTests {
   })
 }
 
+namespace CypressOnCeTests {
+  Cypress.once('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+
+  cy.once('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+}
+
 namespace CypressOffTests {
   Cypress.off('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
