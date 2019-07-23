@@ -1,10 +1,16 @@
 exports['lib/plugins/child/run_plugins sends error message if pluginsFile is missing 1'] = `
 Error: Cannot find module '/does/not/exist.coffee'
-    at Function.Module._resolveFilename <path>module.js
-    at Module._load <path>module.js
+Require stack:
+- /home/flotwig/Projects/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js
+- /home/flotwig/Projects/cypress/cypress/packages/server/test/unit/plugins/child/run_plugins_spec.coffee
+- /home/flotwig/Projects/cypress/cypress/packages/server/node_modules/mocha/lib/mocha.js
+- /home/flotwig/Projects/cypress/cypress/packages/server/node_modules/mocha/index.js
+- /home/flotwig/Projects/cypress/cypress/packages/server/node_modules/mocha/bin/_mocha
+    at Function.Module._resolveFilename <path>loader.js
+    at Module._load <path>loader.js
     at Function.hookedLoader [as _load] <path>mockery.js
-    at Module.require <path>module.js
-    at require <path>module.js
+    at Module.require <path>loader.js
+    at require <path>helpers.js
     at module.exports <path>run_plugins.js
     at Context.<anonymous> <path>run_plugins_spec.coffee
     at callFn <path>runnable.js
@@ -19,10 +25,8 @@ Error: Cannot find module '/does/not/exist.coffee'
     at callFn <path>runnable.js
     at Hook.Runnable.run <path>runnable.js
     at next <path>runner.js
-    at Immediate.<anonymous> <path>runner.js
-    at runCallback <path>timers.js
-    at tryOnImmediate <path>timers.js
-    at processImmediate [as _immediateCallback] <path>timers.js
+    at Immediate._onImmediate <path>runner.js
+    at processImmediate <path>timers.js
 
 `
 
@@ -30,14 +34,13 @@ exports['lib/plugins/child/run_plugins sends error message if requiring pluginsF
 Error: error thrown by pluginsFile
     at Object.<anonymous> <path>throws_error.coffee
     at Object.<anonymous> <path>throws_error.coffee
-    at Module._compile <path>module.js
+    at Module._compile <path>loader.js
     at Object.loadFile <path>register.js
     at Module.load <path>register.js
-    at tryModuleLoad <path>module.js
-    at Module._load <path>module.js
+    at Module._load <path>loader.js
     at Function.hookedLoader [as _load] <path>mockery.js
-    at Module.require <path>module.js
-    at require <path>module.js
+    at Module.require <path>loader.js
+    at require <path>helpers.js
     at module.exports <path>run_plugins.js
     at Context.<anonymous> <path>run_plugins_spec.coffee
     at callFn <path>runnable.js
@@ -52,10 +55,8 @@ Error: error thrown by pluginsFile
     at callFn <path>runnable.js
     at Hook.Runnable.run <path>runnable.js
     at next <path>runner.js
-    at Immediate.<anonymous> <path>runner.js
-    at runCallback <path>timers.js
-    at tryOnImmediate <path>timers.js
-    at processImmediate [as _immediateCallback] <path>timers.js
+    at Immediate._onImmediate <path>runner.js
+    at processImmediate <path>timers.js
 
 `
 
