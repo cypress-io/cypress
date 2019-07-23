@@ -246,7 +246,7 @@ namespace CypressOnTests {
   })
 }
 
-namespace CypressOnCeTests {
+namespace CypressOnceTests {
   Cypress.once('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
     runnable // $ExpectType IRunnable
