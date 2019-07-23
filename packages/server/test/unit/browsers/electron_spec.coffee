@@ -34,6 +34,9 @@ describe "lib/browsers/electron", ->
             remove: sinon.stub()
           }
         }
+        "debugger": {
+          sendCommandAsync: sinon.stub().resolves()
+        }
       }
     })
 
