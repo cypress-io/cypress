@@ -908,6 +908,8 @@ module.exports = {
       Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}
 
       If you want to skip parsing special character sequences and type the text exactly as written, use {parseSpecialCharSequences: true}
+
+      https://on.cypress.io/type
     """
     invalid_date: "Typing into a date input with #{cmd('type')} requires a valid date with the format 'yyyy-MM-dd'. You passed: {{chars}}"
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
