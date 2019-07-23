@@ -18,7 +18,6 @@ protocol  = require("./protocol")
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
 CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
-CHROME_REMOTE_INTERFACE_PORT = 9222
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -132,11 +131,14 @@ _disableRestorePagesPrompt = (userDir) ->
 
 # After the browser has been opened, we can connect to
 # its remote interface via a websocket.
-_connectToChromeRemoteInterface = ->
+_connectToChromeRemoteInterface = (port) ->
+  la(check.userPort(port), "expected port number to connect CRI to", port)
+
+  debug("connecting to Chrome remote interface at random port %d", port)
   # at first the tab will be blank "new tab"
-  protocol.getWsTargetFor(CHROME_REMOTE_INTERFACE_PORT)
+  protocol.getWsTargetFor(port)
   .then (wsUrl) ->
-    debug("received wsUrl %s for port %d", wsUrl, CHROME_REMOTE_INTERFACE_PORT)
+    debug("received wsUrl %s for port %d", wsUrl, port)
     # TODO decide later how and where to keep the wsUrl and the CRI client
     # use the websocket connection to create Chrome remote interface client
     client = CRI({
@@ -238,9 +240,11 @@ module.exports = {
         ## before launching the browser every time
         utils.ensureCleanCache(browser, isTextTerminal),
 
-        pluginsBeforeBrowserLaunch(options.browser, args)
+        pluginsBeforeBrowserLaunch(options.browser, args),
+
+        utils.getPort()
       ])
-    .spread (cacheDir, args) =>
+    .spread (cacheDir, args, port) =>
       Promise.all([
         @_writeExtension(
           browser,
@@ -260,8 +264,8 @@ module.exports = {
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
-        ## TODO: make remote debugging port dynamic
-        args.push("--remote-debugging-port=#{CHROME_REMOTE_INTERFACE_PORT}")
+        debug("get random port %d for remote debugging", port)
+        args.push("--remote-debugging-port=#{port}")
 
         debug("launch in chrome: %s, %s", url, args)
 
@@ -276,6 +280,6 @@ module.exports = {
         # SECOND connect to the Chrome remote interface
         # and when the connection is ready
         # navigate to the actual url
-        @_connectToChromeRemoteInterface()
+        @_connectToChromeRemoteInterface(port)
         .then @_navigateUsingCRI(url)
 }
