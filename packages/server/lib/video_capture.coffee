@@ -7,10 +7,12 @@ Promise    = require("bluebird")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
 fs         = require("./util/fs")
 
+debug("using ffmpeg from %s", ffmpegPath)
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 module.exports = {
   copy: (src, dest) ->
+    debug("copying from %s to %s", src, dest)
     fs
     .copyAsync(src, dest, {overwrite: true})
     .catch {code: "ENOENT"}, ->
@@ -77,13 +79,13 @@ module.exports = {
       debug("capture started %o", { command })
 
       started.resolve(new Date)
-    
+
     .on "codecData", (data) ->
       debug("capture codec data: %o", data)
-    
+
     .on "stderr", (stderr) ->
       debug("capture stderr log %o", { message: stderr })
-      
+
     .on "error", (err, stdout, stderr) ->
       debug("capture errored: %o", { error: err.message, stdout, stderr })
 
@@ -114,6 +116,8 @@ module.exports = {
     total = null
 
     new Promise (resolve, reject) ->
+      debug("processing video from %s to %s video compression %o",
+        name, cname, videoCompression)
       cmd = ffmpeg()
       .input(name)
       .videoCodec("libx264")
@@ -123,33 +127,33 @@ module.exports = {
       ])
       .on "start", (command) ->
         debug("compression started %o", { command })
-        
+
       .on "codecData", (data) ->
         debug("compression codec data: %o", data)
-        
+
         total = utils.timemarkToSeconds(data.duration)
-      
+
       .on "stderr", (stderr) ->
         debug("compression stderr log %o", { message: stderr })
-      
+
       .on "progress", (progress) ->
         ## bail if we dont have total yet
         return if not total
-        
+
         debug("compression progress: %o", progress)
 
         progressed = utils.timemarkToSeconds(progress.timemark)
 
         onProgress(progressed / total)
-      
+
       .on "error", (err, stdout, stderr) ->
         debug("compression errored: %o", { error: err.message, stdout, stderr })
-        
+
         reject(err)
-      
+
       .on "end", ->
         debug("compression ended")
-        
+
         ## we are done progressing
         onProgress(1)
 

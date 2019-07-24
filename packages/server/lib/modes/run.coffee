@@ -4,6 +4,9 @@ path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
 debug      = require("debug")("cypress:server:run")
+# because this file also interacts with video recording
+# some debug logs should have ":video" namespace
+debugVideo = require("debug")("cypress:server:video")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
 
@@ -428,8 +431,8 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
-  getElectronProps: (isHeaded, project, write) ->
-    obj = {
+  getElectronProps: (isHeaded, project, writeVideoFrame) ->
+    electronProps = {
       width:  1280
       height: 720
       show:   isHeaded
@@ -446,12 +449,12 @@ module.exports = {
         options.show = false
     }
 
-    if write
-      obj.recordFrameRate = 20
-      obj.onPaint = (event, dirty, image) ->
-        write(image.toJPEG(100))
+    if writeVideoFrame
+      electronProps.recordFrameRate = 20
+      electronProps.onPaint = (event, dirty, image) ->
+        writeVideoFrame(image.toJPEG(100))
 
-    obj
+    electronProps
 
   displayResults: (obj = {}, estimated) ->
     results = collectTestResults(obj, estimated)
@@ -681,6 +684,15 @@ module.exports = {
     { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
 
     @listenForProjectEnd(project, exit)
+    .tap ->
+      return unless end
+      # we are recording video of the test run
+      # and there still might be frames sent by the browser
+      # in order to avoid chopping off the end of the video
+      # delay closing the browser by N ms
+      DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+      debugVideo('delaying closing the browser by %dms to let video finish', DELAY_TO_LET_VIDEO_FINISH_MS)
+      Promise.delay(DELAY_TO_LET_VIDEO_FINISH_MS)
     .then (obj) =>
       _.defaults(obj, {
         error: null
@@ -691,6 +703,7 @@ module.exports = {
         reporterStats: null
       })
 
+      # TODO rename "end" to something meaningful, like "videoCaptureEnd"
       if end
         obj.video = name
 
