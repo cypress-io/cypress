@@ -371,7 +371,6 @@ describe "lib/modes/run", ->
       sinon.stub(runMode, "postProcessRecording").resolves()
       sinon.spy(runMode,  "displayResults")
       sinon.spy(runMode,  "displayScreenshots")
-      sinon.stub(runMode, "_delayToLetVideoFinish").resolves()
 
       process.nextTick =>
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
