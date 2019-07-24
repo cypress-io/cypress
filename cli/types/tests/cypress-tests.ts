@@ -191,7 +191,7 @@ cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
     })
   })
 
-  cy.get('something').should('have.length', 1)
+cy.get('something').should('have.length', 1)
 
 cy.stub().withArgs('').log(false).as('foo')
 
@@ -241,6 +241,18 @@ namespace CypressOnTests {
   })
 
   cy.on('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+}
+
+namespace CypressOnceTests {
+  Cypress.once('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+
+  cy.once('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
     runnable // $ExpectType IRunnable
   })
@@ -297,3 +309,11 @@ namespace CypressTriggerTests {
 
 const now = new Date(2019, 3, 2).getTime()
 cy.clock(now, ['Date'])
+
+namespace CypressContainsTests {
+  cy.contains('#app')
+  cy.contains('my text to find')
+  cy.contains('#app', 'my text to find')
+  cy.contains('#app', 'my text to find', {log: false, timeout: 100})
+  cy.contains('my text to find', {log: false, timeout: 100})
+}

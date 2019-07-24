@@ -331,6 +331,12 @@ declare namespace Cypress {
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
+    once: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
     off: Actions
   }
 
@@ -573,8 +579,10 @@ declare namespace Cypress {
      *    cy.contains(/^b\w+/)
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
+     *    // tries to find the given text for up to 1 second
+     *    cy.contains('my text to find', {timeout: 1000})
      */
-    contains(content: string | number | RegExp): Chainable<Subject>
+    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
     /**
      * Get the child DOM element that contains given text.
      *
@@ -931,6 +939,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     on: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    once: Actions
 
     /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
@@ -2240,6 +2254,13 @@ declare namespace Cypress {
      * @default 10
      */
     delay: number
+    /**
+     * Disable typing special characters for strings surrounded by `{}`,
+     * such as `{esc}`, and type the literal characters instead
+     *
+     * @default false
+     */
+    disableSpecialCharSequences: boolean
     /**
      * Forces the action, disables waiting for actionability
      *
@@ -4304,22 +4325,44 @@ declare namespace Cypress {
   // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
+  /**
+   * Public interface for the global "cy" object. If you want to add
+   * a custom property to this object, you should extend this interface.
+   * @see https://on.cypress.io/typescript#Types-for-custom-commands
+   *
+  ```
+  // in your TS file
+  declare namespace Cypress {
+    interface cy {
+      // declare additional properties on "cy" object, like
+      // label: string
+    }
+    interface Chainable {
+      // declare additional custom commands as methods, like
+      // login(username: string, password: string)
+    }
+  }
+  ```
+   */
+  interface cy extends Chainable<undefined> {}
 }
 
 /**
  * Global variables `cy` added by Cypress with all API commands.
  * @see https://on.cypress.io/api
- * @example
+ *
 ```
 cy.get('button').click()
 cy.get('.result').contains('Expected text')
 ```
  */
-declare const cy: Cypress.Chainable<undefined>
+declare const cy: Cypress.cy
+
 /**
  * Global variable `Cypress` holds common utilities and constants.
  * @see https://on.cypress.io/api
- * @example
+ *
 ```
 Cypress.config("pageLoadTimeout") // => 60000
 Cypress.version // => "1.4.0"
