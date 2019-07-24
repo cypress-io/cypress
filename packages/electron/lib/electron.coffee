@@ -1,5 +1,6 @@
 fs       = require("fs-extra")
 cp       = require("child_process")
+os       = require("os")
 path     = require("path")
 debug    = require("debug")("cypress:electron")
 Promise  = require("bluebird")
@@ -58,6 +59,9 @@ module.exports = {
       fs.ensureSymlinkAsync(appPath, dest, symlinkType)
     .then ->
       execPath = paths.getPathToExec()
+
+      if os.platform() == "linux"
+        argv.unshift("--no-sandbox")
 
       ## we have an active debugger session
       if inspector.url()
