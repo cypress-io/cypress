@@ -415,7 +415,7 @@ create = (options = {}) ->
             return if isCalled
             isCalled = true
             try
-              return fn.apply(null, arguments)
+              return fn.apply(window, arguments)
             finally
               isCalled = false
 

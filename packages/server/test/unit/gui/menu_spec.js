@@ -7,7 +7,7 @@ const appData = require(`${root}../lib/util/app_data`)
 const open = require(`${root}../lib/util/open`)
 const menu = require(`${root}../lib/gui/menu`)
 
-const getMenuItem = (label) => {
+const getMenuItem = function (label) {
   return _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })
 }
 
@@ -32,17 +32,16 @@ describe('gui/menu', function () {
     menu.set()
 
     expect(electron.Menu.buildFromTemplate).to.be.called
-
-    return expect(electron.Menu.setApplicationMenu).to.be.calledWith('menu')
+    expect(electron.Menu.setApplicationMenu).to.be.calledWith('menu')
   })
 
-  context('Cypress', () => {
-    describe('on macOS', () => {
+  context('Cypress', function () {
+    describe('on macOS', function () {
       it('contains about, services, hide, hide others, show all, quit', () => {
         menu.set()
         const labels = getLabels(getMenuItem('Cypress').submenu)
 
-        return expect(labels).to.eql([
+        expect(labels).to.eql([
           'About Cypress',
           'Services',
           'Hide Cypress',
@@ -63,35 +62,32 @@ describe('gui/menu', function () {
         expect(getSubMenuItem(cyMenu, 'Hide Others').role).to.equal('hideothers')
         expect(getSubMenuItem(cyMenu, 'Hide Others').accelerator).to.equal('Command+Shift+H')
         expect(getSubMenuItem(cyMenu, 'Show All').role).to.equal('unhide')
-
-        return expect(getSubMenuItem(cyMenu, 'Quit').accelerator).to.equal('Command+Q')
+        expect(getSubMenuItem(cyMenu, 'Quit').accelerator).to.equal('Command+Q')
       })
 
-      return it('exits process when Quit is clicked', () => {
+      it('exits process when Quit is clicked', () => {
         sinon.stub(process, 'exit')
         menu.set()
         getSubMenuItem(getMenuItem('Cypress'), 'Quit').click()
-
-        return expect(process.exit).to.be.calledWith(0)
+        expect(process.exit).to.be.calledWith(0)
       })
     })
 
-    return describe('other OS', () => {
-      return it('does not exist', () => {
+    describe('other OS', () => {
+      it('does not exist', () => {
         os.platform.returns('linux')
         menu.set()
-
-        return expect(getMenuItem('Cypress')).to.be.undefined
+        expect(getMenuItem('Cypress')).to.be.undefined
       })
     })
   })
 
-  context('File', () => {
+  context('File', function () {
     it('contains changelog, logout, close window', () => {
       menu.set()
       const labels = getLabels(getMenuItem('File').submenu)
 
-      return expect(labels).to.eql([
+      expect(labels).to.eql([
         'Changelog',
         'Manage Account',
         'Log Out',
@@ -103,23 +99,20 @@ describe('gui/menu', function () {
     it('opens changelog when Changelog is clicked', () => {
       menu.set()
       getSubMenuItem(getMenuItem('File'), 'Changelog').click()
-
-      return expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/changelog')
+      expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/changelog')
     })
 
     it('opens dashboard when Manage Account is clicked', () => {
       menu.set()
       getSubMenuItem(getMenuItem('File'), 'Manage Account').click()
-
-      return expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/dashboard')
+      expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/dashboard')
     })
 
     it('opens app data directory when View App Data is clicked', () => {
       sinon.stub(open, 'opn')
       menu.set()
       getSubMenuItem(getMenuItem('File'), 'View App Data').click()
-
-      return expect(open.opn).to.be.calledWith(appData.path())
+      expect(open.opn).to.be.calledWith(appData.path())
     })
 
     it('calls logout callback when Log Out is clicked', () => {
@@ -127,8 +120,7 @@ describe('gui/menu', function () {
 
       menu.set({ onLogOutClicked })
       getSubMenuItem(getMenuItem('File'), 'Log Out').click()
-
-      return expect(onLogOutClicked).to.be.called
+      expect(onLogOutClicked).to.be.called
     })
 
     it('calls original logout callback when menu is reset without new callback', () => {
@@ -137,22 +129,17 @@ describe('gui/menu', function () {
       menu.set({ onLogOutClicked })
       menu.set()
       getSubMenuItem(getMenuItem('File'), 'Log Out').click()
-
-      return expect(onLogOutClicked).to.be.called
+      expect(onLogOutClicked).to.be.called
     })
 
     it('is noop when Log Out is clicked with no callback', () => {
       menu.set()
-
-      return expect(() => {
-        return getSubMenuItem(getMenuItem('File'), 'Log Out').click()
-      }).not.to.throw()
+      expect(() => getSubMenuItem(getMenuItem('File'), 'Log Out').click()).not.to.throw()
     })
 
-    return it('binds Close Window to shortcut', () => {
+    it('binds Close Window to shortcut', () => {
       menu.set()
-
-      return expect(getSubMenuItem(getMenuItem('File'), 'Close Window')).to.eql({
+      expect(getSubMenuItem(getMenuItem('File'), 'Close Window')).to.eql({
         label: 'Close Window',
         accelerator: 'CmdOrCtrl+W',
         role: 'close',
@@ -161,10 +148,10 @@ describe('gui/menu', function () {
   })
 
   context('Edit', () => {
-    return it('contains undo, redo, cut, copy, paste, selectall', () => {
+    it('contains undo, redo, cut, copy, paste, selectall', () => {
       menu.set()
 
-      return expect(getMenuItem('Edit').submenu).to.eql([
+      expect(getMenuItem('Edit').submenu).to.eql([
         {
           label: 'Undo',
           accelerator: 'CmdOrCtrl+Z',
@@ -202,11 +189,35 @@ describe('gui/menu', function () {
     })
   })
 
-  context('Window', () => {
-    return it('contains minimize', () => {
+  context('View', () => {
+    it('contains zoom actions', () => {
       menu.set()
 
-      return expect(getMenuItem('Window')).to.eql({
+      expect(getMenuItem('View').submenu).to.eql([
+        {
+          label: 'Actual Size',
+          accelerator: 'CmdOrCtrl+0',
+          role: 'resetzoom',
+        },
+        {
+          label: 'Zoom In',
+          accelerator: 'CmdOrCtrl+Plus',
+          role: 'zoomin',
+        },
+        {
+          label: 'Zoom Out',
+          accelerator: 'CmdOrCtrl+-',
+          role: 'zoomout',
+        },
+      ])
+    })
+  })
+
+  context('Window', () => {
+    it('contains minimize', () => {
+      menu.set()
+
+      expect(getMenuItem('Window')).to.eql({
         label: 'Window',
         role: 'window',
         submenu: [
@@ -225,7 +236,7 @@ describe('gui/menu', function () {
       menu.set()
       const labels = getLabels(getMenuItem('Help').submenu)
 
-      return expect(labels).to.eql([
+      expect(labels).to.eql([
         'Support',
         'Documentation',
         'Download Chromium',
@@ -236,46 +247,40 @@ describe('gui/menu', function () {
     it('opens chat when Support is clicked', () => {
       menu.set()
       getMenuItem('Help').submenu[0].click()
-
-      return expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/support')
+      expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/support')
     })
 
     it('opens docs when Documentation is clicked', () => {
       menu.set()
       getMenuItem('Help').submenu[1].click()
-
-      return expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io')
+      expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io')
     })
 
     it('opens chromium downloads when Download Chromium is clicked', () => {
       menu.set()
       getMenuItem('Help').submenu[2].click()
-
-      return expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/chromium-downloads')
+      expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/chromium-downloads')
     })
 
-    return it('opens new issue when Report an Issue is clicked', () => {
+    it('opens new issue when Report an Issue is clicked', () => {
       menu.set()
       getMenuItem('Help').submenu[3].click()
-
-      return expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/new-issue')
+      expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/new-issue')
     })
   })
 
-  return context('Developer Tools', function () {
+  context('Developer Tools', () => {
     it('does not exist by default', () => {
       menu.set()
-
-      return expect(getMenuItem('Developer Tools')).to.be.undefined
+      expect(getMenuItem('Developer Tools')).to.be.undefined
     })
 
     it('does not exist by when withDevTools is false', () => {
       menu.set({ withDevTools: false })
-
-      return expect(getMenuItem('Developer Tools')).to.be.undefined
+      expect(getMenuItem('Developer Tools')).to.be.undefined
     })
 
-    return describe('when withDevTools is true', function () {
+    describe('when withDevTools is true', () => {
       beforeEach(function () {
         menu.set({ withDevTools: true })
         this.devSubmenu = getMenuItem('Developer Tools').submenu
@@ -284,53 +289,46 @@ describe('gui/menu', function () {
       it('exists and contains reload, toggle', function () {
         const labels = getLabels(this.devSubmenu)
 
-        return expect(labels).to.eql([
+        expect(labels).to.eql([
           'Reload',
           'Toggle Developer Tools',
         ])
       })
 
       it('sets shortcut for Reload', function () {
-        return expect(this.devSubmenu[0].accelerator).to.equal('CmdOrCtrl+R')
+        expect(this.devSubmenu[0].accelerator).to.equal('CmdOrCtrl+R')
       })
 
       it('reloads focused window when Reload is clicked', function () {
         const reload = sinon.stub()
 
         this.devSubmenu[0].click(null, { reload })
-
-        return expect(reload).to.be.called
+        expect(reload).to.be.called
       })
 
       it('is noop if no focused window when Reload is clicked', function () {
-        return expect(() => {
-          return this.devSubmenu[0].click()
-        }).not.to.throw()
+        expect(() => this.devSubmenu[0].click()).not.to.throw()
       })
 
       it('sets shortcut for Toggle Developer Tools when macOS', function () {
-        return expect(this.devSubmenu[1].accelerator).to.equal('Alt+Command+I')
+        expect(this.devSubmenu[1].accelerator).to.equal('Alt+Command+I')
       })
 
       it('sets shortcut for Toggle Developer Tools when not macOS', () => {
         os.platform.returns('linux')
         menu.set({ withDevTools: true })
-
-        return expect(getMenuItem('Developer Tools').submenu[1].accelerator).to.equal('Ctrl+Shift+I')
+        expect(getMenuItem('Developer Tools').submenu[1].accelerator).to.equal('Ctrl+Shift+I')
       })
 
       it('toggles dev tools on focused window when Toggle Developer Tools is clicked', function () {
         const toggleDevTools = sinon.stub()
 
         this.devSubmenu[1].click(null, { toggleDevTools })
-
-        return expect(toggleDevTools).to.be.called
+        expect(toggleDevTools).to.be.called
       })
 
-      return it('is noop if no focused window when Toggle Developer Tools is clicked', function () {
-        return expect(() => {
-          return this.devSubmenu[1].click()
-        }).not.to.throw()
+      it('is noop if no focused window when Toggle Developer Tools is clicked', function () {
+        expect(() => this.devSubmenu[1].click()).not.to.throw()
       })
     })
   })

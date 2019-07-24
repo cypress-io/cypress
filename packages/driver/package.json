@@ -2,8 +2,6 @@
   "name": "@packages/driver",
   "version": "0.0.0",
   "private": true,
-  "main": "index.js",
-  "browser": "src/main",
   "scripts": {
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
@@ -42,7 +40,7 @@
     "jquery.scrollto": "2.1.2",
     "js-cookie": "2.2.0",
     "jsdom": "14.1.0",
-    "lodash": "4.17.14",
+    "lodash": "4.17.15",
     "lolex": "4.1.0",
     "md5": "2.2.1",
     "method-override": "3.0.0",

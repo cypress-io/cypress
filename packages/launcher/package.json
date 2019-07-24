@@ -6,6 +6,7 @@
   "scripts": {
     "build": "bin-up tsc --project .",
     "build-js": "bin-up tsc --project .",
+    "build-prod": "npm run build",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "preclean": "npm run check-deps-pre",
@@ -22,7 +23,7 @@
     "debug": "4.1.1",
     "execa": "1.0.0",
     "fs-extra": "8.1.0",
-    "lodash": "4.17.14",
+    "lodash": "4.17.15",
     "plist": "2.1.0",
     "ramda": "0.24.1"
   },

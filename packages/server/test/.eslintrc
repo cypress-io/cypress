@@ -1,7 +1,12 @@
 {
   "globals": {
-    "root": true,
-    "sinon": true
+    "expect": "readonly",
+    "mockery": "readonly",
+    "nock": "readonly",
+    "proxyquire": "readonly",
+    "root": "readonly",
+    "sinon": "readonly",
+    "supertest": "readonly"
   },
   "extends": [
     "plugin:@cypress/dev/tests"

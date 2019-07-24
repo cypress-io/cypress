@@ -290,7 +290,7 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
         testAfterRun(test, Cypress)
 
         ## and now invoke next(err)
-        originalFn.apply(null, arguments)
+        originalFn.apply(window, arguments)
 
     switch name
       when "afterEach"
