@@ -4,7 +4,6 @@ _         = require("lodash")
 os        = require("os")
 path      = require("path")
 Promise   = require("bluebird")
-CRI       = require('chrome-remote-interface')
 la        = require('lazy-ass')
 check     = require('check-more-types')
 extension = require("@packages/extension")
@@ -14,6 +13,7 @@ fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 protocol  = require("./protocol")
+{initCriClient} = require("./cri-client")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
@@ -139,21 +139,14 @@ _connectToChromeRemoteInterface = (port) ->
   protocol.getWsTargetFor(port)
   .then (wsUrl) ->
     debug("received wsUrl %s for port %d", wsUrl, port)
-    # TODO decide later how and where to keep the wsUrl and the CRI client
-    # use the websocket connection to create Chrome remote interface client
-    client = CRI({
-      target: wsUrl,
-      local: true
-    })
+    initCriClient(wsUrl)
 
 _maybeRecordVideo = (options) ->
   (client) ->
     if options.screencastFrame
       debug('starting screencast')
-      debug('screencast meta info %o', client.Page.ScreencastFrameMetadata)
-
       client.Page.screencastFrame(options.screencastFrame)
-      client.Page.startScreencast({
+      client.send('Page.startScreencast', {
         format: 'jpeg'
       })
     client
@@ -169,9 +162,9 @@ _navigateUsingCRI = (url) ->
     debug('navigating to page %s', url)
     # when opening the blank page and trying to navigate
     # the focus gets lost. Restore it and then navigate.
-    client.Page.bringToFront()
+    client.send("Page.bringToFront")
     .then ->
-      client.Page.navigate({ url })
+      client.send("Page.navigate", { url })
 
 module.exports = {
   #

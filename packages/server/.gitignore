@@ -1,3 +1,4 @@
+lib/browsers/cri-client.js
 lib/util/ensure-url.js
 lib/util/proxy.js
 .http-mitm-proxy
