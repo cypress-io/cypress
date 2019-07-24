@@ -119,7 +119,7 @@
     "request-promise": "4.2.4",
     "return-deep-diff": "0.3.0",
     "sanitize-filename": "1.6.1",
-    "semver": "6.0.0",
+    "semver": "6.3.0",
     "send": "0.17.0",
     "server-destroy": "1.0.1",
     "shell-env": "3.0.0",
