@@ -319,7 +319,7 @@ describe "lib/util/args", ->
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyServer).to.eq "http://foo-bar.baz:123"
-      expect(options.proxyBypassList).to.eq "a,b,c"
+      expect(options.proxyBypassList).to.eq "a,b,c,127.0.0.1,::1,localhost"
       expect(process.env.HTTPS_PROXY).to.eq process.env.HTTP_PROXY
 
     it "loads from Windows registry if not defined", ->
@@ -333,7 +333,7 @@ describe "lib/util/args", ->
       expect(options.proxyServer).to.eq "http://quux.quuz"
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyServer).to.eq process.env.HTTPS_PROXY
-      expect(options.proxyBypassList).to.eq "d,e,f"
+      expect(options.proxyBypassList).to.eq "d,e,f,127.0.0.1,::1,localhost"
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
     ['', 'false', '0'].forEach (override) ->
@@ -348,7 +348,7 @@ describe "lib/util/args", ->
         expect(options.proxyBypassList).to.be.undefined
         expect(process.env.HTTP_PROXY).to.be.undefined
         expect(process.env.HTTPS_PROXY).to.be.undefined
-        expect(process.env.NO_PROXY).to.eq "localhost"
+        expect(process.env.NO_PROXY).to.eq "127.0.0.1,::1,localhost"
 
     it "doesn't mess with env vars if Windows registry doesn't have proxy", ->
       sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns()
@@ -359,23 +359,41 @@ describe "lib/util/args", ->
       expect(options.proxyBypassList).to.be.undefined
       expect(process.env.HTTP_PROXY).to.be.undefined
       expect(process.env.HTTPS_PROXY).to.be.undefined
-      expect(process.env.NO_PROXY).to.eq "localhost"
+      expect(process.env.NO_PROXY).to.eq "127.0.0.1,::1,localhost"
 
     it "sets a default NO_PROXY", ->
       process.env.HTTP_PROXY = "http://foo-bar.baz:123"
       options = @setup()
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq "localhost"
+      expect(options.proxyBypassList).to.eq "127.0.0.1,::1,localhost"
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
-    it "doesn't set a default NO_PROXY if NO_PROXY = ''", ->
+    it "does not add localhost to NO_PROXY if NO_PROXY contains <-loopback>", ->
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
+      process.env.NO_PROXY = "a,b,c,<-loopback>,d"
+      options = @setup()
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyBypassList).to.eq "a,b,c,<-loopback>,d"
+      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
+    it "sets a default localhost NO_PROXY if NO_PROXY = ''", ->
       process.env.HTTP_PROXY = "http://foo-bar.baz:123"
       process.env.NO_PROXY = ""
       options = @setup()
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq ""
+      expect(options.proxyBypassList).to.eq "127.0.0.1,::1,localhost"
+      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
+    it "does not set a default localhost NO_PROXY if NO_PROXY = '<-loopback>'", ->
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
+      process.env.NO_PROXY = "<-loopback>"
+      options = @setup()
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyBypassList).to.eq "<-loopback>"
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
 
     it "copies lowercase proxy vars to uppercase", ->
@@ -390,7 +408,7 @@ describe "lib/util/args", ->
 
       expect(process.env.HTTP_PROXY).to.eq "http://foo-bar.baz:123"
       expect(process.env.HTTPS_PROXY).to.eq "https://foo-bar.baz:123"
-      expect(process.env.NO_PROXY).to.eq "http://no-proxy.holla"
+      expect(process.env.NO_PROXY).to.eq "http://no-proxy.holla,127.0.0.1,::1,localhost"
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
@@ -403,7 +421,7 @@ describe "lib/util/args", ->
 
       expect(process.env.HTTP_PROXY).to.eq "http://foo-bar.baz:123"
       expect(process.env.HTTPS_PROXY).to.eq "http://foo-bar.baz:123"
-      expect(process.env.NO_PROXY).to.eq "localhost"
+      expect(process.env.NO_PROXY).to.eq "127.0.0.1,::1,localhost"
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
@@ -416,7 +434,7 @@ describe "lib/util/args", ->
 
       expect(process.env.HTTP_PROXY).to.be.undefined
       expect(process.env.HTTPS_PROXY).to.be.undefined
-      expect(process.env.NO_PROXY).to.eq "localhost"
+      expect(process.env.NO_PROXY).to.eq "127.0.0.1,::1,localhost"
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyBypassList).to.be.undefined
