@@ -168,16 +168,8 @@ _navigateUsingCRI = (url) ->
     debug("received CRI client")
     debug('navigating to page %s', url)
     # when opening the blank page and trying to navigate
-    # the focus gets lost. Restore it first
+    # the focus gets lost. Restore it and then navigate.
     client.Page.bringToFront()
-    # .then ->
-    #   debug('starting screencast')
-    #   debug('screencast meta info %o', client.Page.ScreencastFrameMetadata)
-      # client.Page.screencastFrame (e) ->
-      #   debug('received screencastFrame %d %o', e.sessionId, e.metadata)
-      # client.Page.startScreencast({
-      #   format: 'jpeg'
-      # })
     .then ->
       client.Page.navigate({ url })
 
@@ -296,7 +288,6 @@ module.exports = {
         # start video recording and then
         # we will load the actual page
         utils.launch(browser, null, args)
-        # utils.launch(browser, url, args)
 
       .tap =>
         # SECOND connect to the Chrome remote interface

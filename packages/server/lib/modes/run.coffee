@@ -3,6 +3,9 @@ pkg        = require("@packages/root")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
+# because this file also interacts with video recording
+# some debug logs should have ":video" namespace
+debugVideo = require("debug")("cypress:server:video")
 debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
@@ -428,6 +431,25 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
+  getChromeProps: (isHeaded, project, writeVideoFrame) ->
+    chromeProps = {}
+
+    # for observing difference in wallclock and frame timestamps
+    # UTC time in seconds
+    # start = new Date() / 1000
+    if isHeaded && writeVideoFrame
+      chromeProps.screencastFrame = (e) ->
+        # https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
+        # now = new Date() / 1000
+        # clockElapsed = now - start
+        # videoTimestampElapsed = e.metadata.timestamp - start
+        # debugVideo('%d frame %d received screencastFrame', clockElapsed, videoTimestampElapsed)
+        # now if only there was a way to pass the exact frame timestamp
+        # from e.metadata.timestamp to FFMPEG stream to generate better video!
+        writeVideoFrame(new Buffer(e.data, 'base64'))
+
+    chromeProps
+
   getElectronProps: (isHeaded, project, write) ->
     obj = {
       width:  1280
@@ -576,13 +598,7 @@ module.exports = {
       when "electron"
         @getElectronProps(browser.isHeaded, project, write)
       when "chrome"
-        if write
-          {
-            screencastFrame: (e) ->
-              # https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
-              debug('received screencastFrame %d %o', e.sessionId, e.metadata)
-              write(new Buffer(e.data, 'base64'))
-          }
+        @getChromeProps(browser.isHeaded, project, write)
       else
         {}
 
@@ -689,6 +705,11 @@ module.exports = {
     { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
 
     @listenForProjectEnd(project, exit)
+    .tap ->
+      # HACK wait for video to finish
+      # better implementation in https://github.com/cypress-io/cypress/pull/4804
+      return unless end
+      Promise.delay(1000)
     .then (obj) =>
       _.defaults(obj, {
         error: null
@@ -847,10 +868,11 @@ module.exports = {
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
 
-    ## if we've been told to record and we're not spawning a headed browser
+    # video can be recorded only for specific browser modes
     browserCanBeRecorded = (browser) ->
-      true
-      # browser.name is "electron" and isHeadless
+      if browser.name is "electron" and isHeadless then return true
+      if browser.name is "chrome" and not isHeadless then return true
+      false
 
     if video
       if browserCanBeRecorded(browser)
