@@ -28,15 +28,14 @@ fastVisitSpec = (url) ->
       "#{p}%\t of visits to #{url} finished in less than #{percentile(p)}ms"
     .join("\n")
 
-    cy.task 'console:log', message
+    cy
+    .task('console:log', message)
+    .then ->
+      expect(percentile(80)).to.be.lte(100)
 
-    expect(percentile(90)).to.be.lte(100)
+      expect(percentile(95)).to.be.lte(250)
 
-    expect(percentile(100)).to.be.lte(250)
-
-    return undefined
-
-context "on localhost 100% of visits are faster than 250ms, 90% are faster than 100ms", ->
+context "on localhost 95% of visits are faster than 250ms, 80% are faster than 100ms", ->
   it "with connection: close", ->
     fastVisitSpec '/close'
 

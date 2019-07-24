@@ -11,14 +11,14 @@ export interface AsyncServer {
   listenAsync: (port) => Promise<void>
 }
 
-function addDestroy(server: http.Server | https.Server) {
+function addDestroy (server: http.Server | https.Server) {
   let connections = []
 
-  function trackConn(conn) {
+  function trackConn (conn) {
     connections.push(conn)
 
     conn.on('close', () => {
-      connections = connections.filter(connection => connection !== conn)
+      connections = connections.filter((connection) => connection !== conn)
     })
   }
 
@@ -26,15 +26,15 @@ function addDestroy(server: http.Server | https.Server) {
   server.on('secureConnection', trackConn)
 
   // @ts-ignore Property 'destroy' does not exist on type 'Server'.
-  server.destroy = function(cb) {
+  server.destroy = function (cb) {
     server.close(cb)
-    connections.map(connection => connection.destroy())
+    connections.map((connection) => connection.destroy())
   }
 
   return server
 }
 
-function createExpressApp() {
+function createExpressApp () {
   const app: express.Application = express()
 
   app.get('/get', (req, res) => {
@@ -49,12 +49,12 @@ function createExpressApp() {
   return app
 }
 
-function getLocalhostCertKeys() {
+function getLocalhostCertKeys () {
   return CA.create()
-  .then(ca => ca.generateServerCertificateKeys('localhost'))
+  .then((ca) => ca.generateServerCertificateKeys('localhost'))
 }
 
-function onWsConnection(socket) {
+function onWsConnection (socket) {
   socket.send('It worked!')
 }
 
@@ -65,7 +65,7 @@ export class Servers {
   wsServer: any
   wssServer: any
 
-  start(httpPort: number, httpsPort: number) {
+  start (httpPort: number, httpsPort: number) {
     return Promise.join(
       createExpressApp(),
       getLocalhostCertKeys(),
@@ -74,15 +74,17 @@ export class Servers {
       this.httpServer = Promise.promisifyAll(
         addDestroy(http.createServer(app))
       ) as http.Server & AsyncServer
+
       this.wsServer = Io.server(this.httpServer)
 
       this.https = { cert, key }
       this.httpsServer = Promise.promisifyAll(
         addDestroy(https.createServer(this.https, <http.RequestListener>app))
       ) as https.Server & AsyncServer
+
       this.wssServer = Io.server(this.httpsServer)
 
-      ;[this.wsServer, this.wssServer].map(ws => {
+      ;[this.wsServer, this.wssServer].map((ws) => {
         ws.on('connection', onWsConnection)
       })
 
@@ -95,7 +97,7 @@ export class Servers {
     })
   }
 
-  stop() {
+  stop () {
     return Promise.join(
       this.httpServer.destroyAsync(),
       this.httpsServer.destroyAsync()

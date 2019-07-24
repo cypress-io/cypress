@@ -1,16 +1,18 @@
 _             = require("lodash")
 zlib          = require("zlib")
+charset       = require("charset")
 concat        = require("concat-stream")
+iconv         = require("iconv-lite")
 Promise       = require("bluebird")
 accept        = require("http-accept")
 debug         = require("debug")("cypress:server:proxy")
 cwd           = require("../cwd")
 cors          = require("../util/cors")
-passthruStream = require("../util/passthru_stream").passthruStream
 buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
 conditional   = require("../util/conditional_stream")
+{ passthruStream } = require("../util/passthru_stream")
 
 REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 NO_BODY_STATUS_CODES = [204, 304]
@@ -21,6 +23,18 @@ zlibOptions = {
   flush: zlib.Z_SYNC_FLUSH
   finishFlush: zlib.Z_SYNC_FLUSH
 }
+
+## https://github.com/cypress-io/cypress/issues/1543
+getNodeCharsetFromResponse = (headers, body) ->
+  httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
+
+  debug("inferred charset from response %o", { httpCharset })
+
+  if iconv.encodingExists(httpCharset)
+    return httpCharset
+
+  ## browsers default to latin1
+  return "latin1"
 
 isGzipError = (err) ->
   Object.prototype.hasOwnProperty.call(zlib.constants, err.code)
@@ -49,6 +63,13 @@ setCookie = (res, key, val, domainName) ->
     options.expires = new Date(0)
 
   res.cookie(key, val, options)
+
+reqNeedsBasicAuthHeaders = (req, remoteState) ->
+  { auth, origin } = remoteState
+
+  auth &&
+    not req.headers["authorization"] &&
+      cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 
 module.exports = {
   handle: (req, res, config, getRemoteState, request, nodeProxy) ->
@@ -101,9 +122,6 @@ module.exports = {
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-    ## prepends req.url with remoteState.origin
-    remoteUrl = req.proxiedUrl
-
     isInitial = req.cookies["__cypress.initial"] is "true"
 
     wantsInjection = null
@@ -114,6 +132,13 @@ module.exports = {
 
       ## make sure the response includes string type
       contentType and contentType.includes(str)
+
+    resContentTypeIsJavaScript = (respHeaders) ->
+      _.some [
+        'application/javascript',
+        'application/x-javascript',
+        'text/javascript'
+      ].map(_.partial(resContentTypeIs, respHeaders))
 
     reqAcceptsHtml = ->
       ## don't inject if this is an XHR from jquery
@@ -131,9 +156,9 @@ module.exports = {
     resMatchesOriginPolicy = (respHeaders) ->
       switch remoteState.strategy
         when "http"
-          cors.urlMatchesOriginPolicyProps(remoteUrl, remoteState.props)
+          cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
         when "file"
-          remoteUrl.startsWith(remoteState.origin)
+          req.proxiedUrl.startsWith(remoteState.origin)
 
     setCookies = (value) ->
       ## dont modify any cookies if we're trying to clear
@@ -157,7 +182,7 @@ module.exports = {
       isGzipped = encoding and encoding.includes("gzip")
 
       debug("received response for %o", {
-        url: remoteUrl
+        url: req.proxiedUrl
         headers,
         statusCode,
         isGzipped
@@ -172,7 +197,10 @@ module.exports = {
       ## bypass the stream buffer and pipe this back
       if wantsInjection
         rewrite = (body) ->
-          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          ## transparently decode their body to a node string and then re-encode
+          nodeCharset = getNodeCharsetFromResponse(headers, body)
+          body = rewriter.html(iconv.decode(body, nodeCharset), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          iconv.encode(body, nodeCharset)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
@@ -206,7 +234,7 @@ module.exports = {
             gzipError = isGzipError(err)
 
             debug("failed to proxy response %o", {
-              url: remoteUrl
+              url: req.proxiedUrl
               headers
               statusCode
               isGzipped
@@ -243,6 +271,16 @@ module.exports = {
     onResponse = (str, incomingRes) =>
       {headers, statusCode} = incomingRes
 
+      originalSetHeader = res.setHeader
+
+      ## express does all kinds of silly/nasty stuff to the content-type...
+      ## but we don't want to change it at all!
+      res.setHeader = (k, v) ->
+        if k == 'content-type'
+          v = incomingRes.headers['content-type']
+
+        originalSetHeader.call(res, k, v)
+
       wantsInjection ?= do ->
         return false if not resContentTypeIs(headers, "text/html")
 
@@ -259,7 +297,7 @@ module.exports = {
         ## on the response or its a request for any javascript script tag
         config.modifyObstructiveCode and (
           (wantsInjection is "full") or
-            resContentTypeIs(headers, "application/javascript")
+            resContentTypeIsJavaScript(headers)
         )
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
@@ -290,7 +328,7 @@ module.exports = {
 
       setBody(str, statusCode, headers)
 
-    if obj = buffers.take(remoteUrl)
+    if obj = buffers.take(req.proxiedUrl)
       wantsInjection = "full"
 
       onResponse(obj.stream, obj.response)
@@ -316,14 +354,18 @@ module.exports = {
       if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
         opts.url = req.proxiedUrl.replace(remoteState.origin, remoteState.fileServer)
       else
-        opts.url = remoteUrl
+        opts.url = req.proxiedUrl
 
-      ## if we have auth headers and this request matches our origin policy
-      if (a = remoteState.auth) and resMatchesOriginPolicy()
-        ## and no existing Authentication headers
-        if not req.headers["authorization"]
-          base64 = Buffer.from(a.username + ":" + a.password).toString("base64")
-          req.headers["authorization"] = "Basic #{base64}"
+      ## if we have auth headers and this request matches our origin
+      ## protection space and the user has not supplied auth headers
+      if reqNeedsBasicAuthHeaders(req, remoteState)
+        { auth } = remoteState
+
+        base64 = Buffer
+        .from(auth.username + ":" + auth.password)
+        .toString("base64")
+
+        req.headers["authorization"] = "Basic #{base64}"
 
       rq = request.create(opts)
 

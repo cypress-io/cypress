@@ -1,24 +1,25 @@
 {
   "name": "@packages/static",
   "version": "0.0.0",
-  "main": "index.js",
   "private": true,
+  "main": "index.js",
   "scripts": {
-    "postinstall": "echo '@packages/static needs: npm run build'",
-    "clean-deps": "rm -rf node_modules",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
     "prebuild": "npm run check-deps-pre",
     "build": "gulp build",
+    "build-prod": "npm run build",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "clean-deps": "rm -rf node_modules",
+    "postinstall": "echo '@packages/static needs: npm run build'",
     "pretest": "npm run check-deps-pre",
     "test": "echo 'Nothing to test yet'"
+  },
+  "devDependencies": {
+    "@cypress/icons": "0.7.0",
+    "gulp": "3.9.1"
   },
   "files": [
     "dist",
     "lib"
-  ],
-  "devDependencies": {
-    "@cypress/icons": "0.7.0",
-    "gulp": "3.9.1"
-  }
+  ]
 }

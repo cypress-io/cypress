@@ -1,16 +1,17 @@
 .footer {
-  height: $footer-height;
   background-color: #252831;
-  position: fixed;
-  width: 100%;
   border-top: 1px solid #0E0F10;
-  z-index: 10;
-  bottom: 0;
+  box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.30);
+  color: #eee;
+  flex-grow: 0;
+  flex-shrink: 0;
   font-size: 11px;
   letter-spacing: 0.5px;
-  line-height: 18px;
-  color: #eee;
-  box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.30);
+  padding: 2px 5px;
+
+  p {
+    margin: 0;
+  }
 
   a {
     color: #eee;

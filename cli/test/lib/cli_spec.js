@@ -79,6 +79,7 @@ describe('cli', () => {
     beforeEach(() => {
       sinon.stub(state, 'getBinaryDir').returns(binaryDir)
     })
+
     it('reports package version', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
       sinon
@@ -325,6 +326,7 @@ describe('cli', () => {
       done()
     })
   })
+
   context('cypress verify', () => {
     it('verify calls verify.start with force: true', () => {
       sinon.stub(verify, 'start').resolves()

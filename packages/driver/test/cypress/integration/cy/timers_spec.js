@@ -281,7 +281,7 @@ describe('driver/src/cy/timers', () => {
 
         expect(win.bar).to.eq('bar')
       })
-      .log('cancelling the timeout after timers are paused still cancels')
+      .log('canceling the timeout after timers are paused still cancels')
       .then(() => {
         win.bar = null
 
