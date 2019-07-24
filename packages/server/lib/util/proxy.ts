@@ -39,7 +39,7 @@ const normalizeEnvironmentProxy = () => {
     process.env.NO_PROXY = ''
   }
 
-  const noProxyParts = _.compact(process.env.NO_PROXY.split(','))
+  const noProxyParts = _.compact((process.env.NO_PROXY || '').split(','))
 
   if (!noProxyParts.includes('<-loopback>')) {
     debug('<-loopback> not found, adding localhost to NO_PROXY')

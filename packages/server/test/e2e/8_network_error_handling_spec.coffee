@@ -423,7 +423,7 @@ describe "e2e network error handling", ->
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
-        process.env.NO_PROXY = "localhost:13373" ## proxy everything except for the irrelevant test
+        process.env.NO_PROXY = "<-loopback>,localhost:13373" ## proxy everything except for the irrelevant test
 
         e2e.exec(@, {
           spec: "https_passthru_spec.js"
