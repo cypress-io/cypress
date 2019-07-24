@@ -1529,10 +1529,10 @@ describe('src/cy/commands/actions/type', () => {
 
     describe('specialChars', () => {
 
-      context('parseSpecialCharSequences: true', () => {
+      context('parseSpecialCharSequences: false', () => {
         it('types special character sequences literally', (done) => {
           cy.get(':text:first').invoke('val', 'foo')
-          .type('{{}{backspace}', { parseSpecialCharSequences: true }).then(($input) => {
+          .type('{{}{backspace}', { parseSpecialCharSequences: false }).then(($input) => {
             expect($input).to.have.value('foo{{}{backspace}')
 
             done()
@@ -4342,7 +4342,7 @@ describe('src/cy/commands/actions/type', () => {
 
           expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
 
-If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: true}
+If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
 
 https://on.cypress.io/type`)
 

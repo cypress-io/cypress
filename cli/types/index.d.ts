@@ -2255,10 +2255,10 @@ declare namespace Cypress {
      */
     delay: number
     /**
-     * Disable typing special characters for strings surrounded by `{}`,
-     * such as `{esc}`, and type the literal characters instead
+     * Parse special characters for strings surrounded by `{}`, 
+     * such as `{esc}`. Set to `false` to type the literal characters instead
      *
-     * @default false
+     * @default true
      */
     parseSpecialCharSequences: boolean
     /**
