@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         force: false
         delay: 10
         release: true
-        disableSpecialCharSequences: false
+        parseSpecialCharSequences: true
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
       })
@@ -246,7 +246,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           chars:                        options.chars
           delay:                        options.delay
           release:                      options.release
-          disableSpecialCharSequences:  options.disableSpecialCharSequences
+          parseSpecialCharSequences:    options.parseSpecialCharSequences
           window:                       win
 
           updateValue: (el, key) ->
