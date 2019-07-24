@@ -680,19 +680,28 @@ module.exports = {
       ## is the one that matches our id!
       project.on("socket:connected", fn)
 
-  waitForTestsToFinishRunning: (options = {}) ->
-    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
-
-    @listenForProjectEnd(project, exit)
-    .tap ->
-      return unless end
-      # we are recording video of the test run
+  _delayToLetVideoFinish: ->
+    # we are recording video of the test run
       # and there still might be frames sent by the browser
       # in order to avoid chopping off the end of the video
       # delay closing the browser by N ms
       DELAY_TO_LET_VIDEO_FINISH_MS = 1000
       debugVideo('delaying closing the browser by %dms to let video finish', DELAY_TO_LET_VIDEO_FINISH_MS)
       Promise.delay(DELAY_TO_LET_VIDEO_FINISH_MS)
+
+  waitForTestsToFinishRunning: (options = {}) ->
+    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
+
+    @listenForProjectEnd(project, exit)
+    .tap =>
+      # ? is this the best way to determine if we are recording a video?
+      # TODO rename "end" to something meaningful, like "videoCaptureEnd"
+      return unless end
+      # we are recording video of the test run
+      # and there still might be frames sent by the browser
+      # in order to avoid chopping off the end of the video
+      # delay closing the browser by N ms
+      @_delayToLetVideoFinish()
     .then (obj) =>
       _.defaults(obj, {
         error: null

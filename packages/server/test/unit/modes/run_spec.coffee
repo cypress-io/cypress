@@ -288,6 +288,7 @@ describe "lib/modes/run", ->
   context ".waitForTestsToFinishRunning", ->
     beforeEach ->
       sinon.stub(@projectInstance, "getConfig").resolves({})
+      sinon.stub(runMode, "_delayToLetVideoFinish").resolves()
 
     it "end event resolves with obj, displays stats, displays screenshots, sets video timestamps", ->
       started = new Date
@@ -331,6 +332,8 @@ describe "lib/modes/run", ->
         }
       })
       .then (obj) ->
+        # since video was recording, there was a delay to let video finish
+        expect(runMode._delayToLetVideoFinish).to.be.calledOnce
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(results)
@@ -368,6 +371,7 @@ describe "lib/modes/run", ->
       sinon.stub(runMode, "postProcessRecording").resolves()
       sinon.spy(runMode,  "displayResults")
       sinon.spy(runMode,  "displayScreenshots")
+      sinon.stub(runMode, "_delayToLetVideoFinish").resolves()
 
       process.nextTick =>
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
@@ -389,6 +393,8 @@ describe "lib/modes/run", ->
         }
       })
       .then (obj) ->
+        # since video was recording, there was a delay to let video finish
+        expect(runMode._delayToLetVideoFinish).to.be.calledOnce
         expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(obj)
