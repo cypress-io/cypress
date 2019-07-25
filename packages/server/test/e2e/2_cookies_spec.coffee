@@ -82,7 +82,7 @@ describe "e2e cookies", ->
 
   it "passes", ->
     e2e.exec(@, {
-      spec: "cookies_spec.coffee"
+      spec: "cookies_spec.js"
       snapshot: true
       expectedExitCode: 0
     })
