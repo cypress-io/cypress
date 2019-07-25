@@ -20,21 +20,13 @@ const renderLearnMore = () => {
 const NodeVersion = observer(({ project }) => {
   const { resolvedConfig, resolvedNodeVersion, resolvedNodePath } = project
 
+  const usesSystemNodeVersion = !!resolvedNodePath
+
   function formatPluginsFile () {
     const pluginsFile = _.get(resolvedConfig, 'pluginsFile.value')
 
     if (pluginsFile) {
-      return <span>, <code>{pluginsFile}</code></span>
-    }
-
-    return null
-  }
-
-  function formatSupportFile () {
-    const supportFile = _.get(resolvedConfig, 'supportFile.value')
-
-    if (supportFile) {
-      return <code>{supportFile}</code>
+      return <span><code>{pluginsFile}</code></span>
     }
 
     return null
@@ -49,15 +41,27 @@ const NodeVersion = observer(({ project }) => {
   return (
     <div className="node-version">
       {renderLearnMore()}
-      <p>
-        <strong>Node Version v{resolvedNodeVersion}</strong> {!resolvedNodePath && <span className='text-muted'>(bundled with Cypress)</span>} {resolvedNodePath ? <span> at <code>{resolvedNodePath}</code></span> : ''} is used to:
+      <div>
+        This project is using{' '}
+        <strong>Node v{resolvedNodeVersion}</strong>
+        {
+          usesSystemNodeVersion ?
+            <span> at <code> {resolvedNodePath}</code>, which is your system Node version. </span> :
+            ', which comes bundled with Cypress.'
+        }
+        {' '}This Node version is used to:
         <ul>
           <li>Build files in the {formatIntegrationFolder()} folder.</li>
-          <li>Build files in the {formatSupportFile() ? formatSupportFile() : 'support'} folder.</li>
+          <li>Build files in the <code>cypress/support</code> folder.</li>
           <li>Execute code in the {formatPluginsFile() ? formatPluginsFile() : 'plugins'} file.</li>
         </ul>
-        To access features or modules only available in your system Node version, set <code>"nodeVersion": "system"</code> in your configuration. Otherwise, everything will use the bundled Node version that comes with Cypress.
-      </p>
+        To change this project to use
+        {
+          usesSystemNodeVersion ?
+            ' the Node version bundled with Cypress' :
+            ' your system Node version'
+        }, set <code>nodeVersion</code> to <code>{usesSystemNodeVersion ? 'bundled' : 'system'}</code> in your configuration.
+      </div>
     </div>
   )
 })

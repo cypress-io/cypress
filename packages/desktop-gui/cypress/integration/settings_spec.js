@@ -319,6 +319,10 @@ describe('Settings', function () {
   })
 
   describe('when node version panel is opened', function () {
+    const bundledNodeVersion = '1.2.3'
+    const systemNodePath = '/foo/bar/node'
+    const systemNodeVersion = '4.5.6'
+
     beforeEach(function () {
       this.navigateWithConfig = function (config) {
         this.openProject.resolve(_.defaults(config, this.config))
@@ -333,19 +337,23 @@ describe('Settings', function () {
     it('with bundled node informs user we\'re using bundled node', function () {
       this.navigateWithConfig({})
 
-      cy.get('.settings-node td.path').should('not.exist')
-      cy.get('.settings-node td.version').should('contain', 'v1.2.3 (bundled with Cypress)')
+      cy.get('.node-version')
+      .should('contain', `v${bundledNodeVersion}`)
+      .should('contain', 'bundled with Cypress')
+      .should('not.contain', systemNodePath)
+      .should('not.contain', systemNodeVersion)
     })
 
     it('with custom node displays path to custom node', function () {
       this.navigateWithConfig({
-        resolvedNodePath: '/foo/bar/node',
-        resolvedNodeVersion: '4.5.6',
+        resolvedNodePath: systemNodePath,
+        resolvedNodeVersion: systemNodeVersion,
       })
 
-      cy.get('.settings-node').should('contain.html', 'The Node.js version is used to execute code in your plugins file<span>, <code>cypress/plugins</code></span>.')
-      cy.get('.settings-node td.path').should('contain', '/foo/bar/node')
-      cy.get('.settings-node td.version').should('contain', 'v4.5.6')
+      cy.get('.node-version')
+      .should('contain', systemNodePath)
+      .should('contain', `v${systemNodeVersion}`)
+      .should('not.contain', bundledNodeVersion)
     })
   })
 
