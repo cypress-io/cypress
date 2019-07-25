@@ -105,7 +105,7 @@
     "common-tags": "1.8.0",
     "console.table": "0.10.0",
     "debug": "4.1.1",
-    "decaffeinate": "5.1.12",
+    "decaffeinate": "6.0.1",
     "del": "3.0.0",
     "electron-builder": "20.39.0",
     "eslint": "5.16.0",
