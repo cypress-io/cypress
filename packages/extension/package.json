@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
-    "lodash": "4.17.14"
+    "lodash": "4.17.15"
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
