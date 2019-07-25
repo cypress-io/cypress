@@ -142,7 +142,6 @@
     "mocha-junit-reporter": "1.23.1",
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "4.9.0",
-    "obfuscator": "0.5.4",
     "parse-github-repo-url": "1.4.1",
     "plist": "2.1.0",
     "pluralize": "8.0.0",
