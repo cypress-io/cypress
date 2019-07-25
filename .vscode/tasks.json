@@ -12,7 +12,7 @@
     {
       "label": "decaffeinate-bulk multiple files",
       "type": "shell",
-      "command": "npm run decaffeinate-bulk -- convert --file ${file} ${file}",
+      "command": "npm run decaffeinate-bulk -- convert --file ${file} --file ${file}",
       "problemMatcher": []
     },
     {
