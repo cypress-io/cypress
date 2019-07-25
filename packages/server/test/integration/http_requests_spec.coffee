@@ -124,7 +124,7 @@ describe "Routes", ->
 
               @srv = @server.getHttpServer()
 
-              @session = session({app: @srv})
+              @session = session(@srv)
 
               @proxy = "http://localhost:" + port
           ])
