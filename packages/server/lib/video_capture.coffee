@@ -1,6 +1,8 @@
 _          = require("lodash")
 utils      = require("fluent-ffmpeg/lib/utils")
 debug      = require("debug")("cypress:server:video")
+# extra verbose logs for logging individual frames
+debugFrames = require("debug")("cypress:server:video:frames")
 ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
 Promise    = require("bluebird")
@@ -59,13 +61,16 @@ module.exports = {
       ## we have written at least 1 byte
       written = true
 
+      debugFrames("video frame")
       if wantsWrite
         if not wantsWrite = pt.write(data)
+          debugFrames("video stream wants to drain")
           pt.once "drain", ->
+            debugFrames("video stream drained")
             wantsWrite = true
       else
         skipped += 1
-        # console.log("skipping frame. total is", skipped)
+        debugFrames("skipping frame. total is %d", skipped)
 
     cmd = ffmpeg({
       source: pt
