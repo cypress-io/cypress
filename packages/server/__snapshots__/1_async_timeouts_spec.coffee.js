@@ -7,14 +7,14 @@ exports['e2e async timeouts failing1 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (async_timeouts_spec.coffee)                                               │
-  │ Searched:   cypress/integration/async_timeouts_spec.coffee                                     │
+  │ Specs:      1 found (async_timeouts_spec.XX)                                               │
+  │ Searched:   cypress/integration/async_timeouts_spec.XX                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: async_timeouts_spec.coffee...                                                   (1 of 1) 
+  Running: async_timeouts_spec.XX...                                                   (1 of 1) 
 
 
   async
@@ -42,13 +42,13 @@ exports['e2e async timeouts failing1 1'] = `
   │ Screenshots:  1                          │
   │ Video:        true                       │
   │ Duration:     X seconds                  │
-  │ Spec Ran:     async_timeouts_spec.coffee │
+  │ Spec Ran:     async_timeouts_spec.XX │
   └──────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/async_timeouts_spec.coffee/async -- bar fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/async_timeouts_spec.XX/async -- bar fails (failed).png (1280x720)
 
 
   (Video)
@@ -64,7 +64,7 @@ exports['e2e async timeouts failing1 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ async_timeouts_spec.coffee                XX:XX        1        -        1        -        - │
+  │ ✖ async_timeouts_spec.XX                XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 

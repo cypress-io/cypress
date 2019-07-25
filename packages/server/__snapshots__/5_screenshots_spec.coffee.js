@@ -7,14 +7,14 @@ exports['e2e screenshots passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (screenshots_spec.coffee)                                                  │
-  │ Searched:   cypress/integration/screenshots_spec.coffee                                        │
+  │ Specs:      1 found (screenshots_spec.XX)                                                  │
+  │ Searched:   cypress/integration/screenshots_spec.XX                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: screenshots_spec.coffee...                                                      (1 of 1) 
+  Running: screenshots_spec.XX...                                                      (1 of 1) 
 
 
   taking screenshots
@@ -91,37 +91,37 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   │ Screenshots:  25                      │
   │ Video:        true                    │
   │ Duration:     X seconds               │
-  │ Spec Ran:     screenshots_spec.coffee │
+  │ Spec Ran:     screenshots_spec.XX │
   └───────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/black.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/red.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/foo/bar/baz.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- generates pngs on failure (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/color-check.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/crop-check.png (600x400)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/fullPage.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/fullPage-same.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/pathological.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/element.png (400x300)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- retries each screenshot for up to  XX:XX.png (200x1300)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (1).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (2).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure.png (1000x660)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/app-clip.png (100x50)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/runner-clip.png (120x60)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/fullPage-clip.png (140x70)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/element-clip.png (160x80)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png (1000x660)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/black.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/red.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/foo/bar/baz.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- generates pngs on failure (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/color-check.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/crop-check.png (600x400)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/fullPage.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/fullPage-same.png (600x500)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/pathological.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/element.png (400x300)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- retries each screenshot for up to  XX:XX.png (200x1300)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- ensures unique paths for non-named screenshots.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- ensures unique paths for non-named screenshots (1).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- ensures unique paths for non-named screenshots (2).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/app-clip.png (100x50)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/runner-clip.png (120x60)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/fullPage-clip.png (140x70)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/element-clip.png (160x80)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png (1000x660)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.XX/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png (1000x660)
 
 
   (Video)
@@ -137,7 +137,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                   XX:XX       22       17        4        1        - │
+  │ ✖ screenshots_spec.XX                   XX:XX       22       17        4        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX       22       17        4        1        -  
 

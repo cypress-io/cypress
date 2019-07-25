@@ -7,14 +7,14 @@ exports['e2e config passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_passing_spec.coffee                                     │
+  │ Specs:      1 found (config_passing_spec.XX)                                               │
+  │ Searched:   cypress/integration/config_passing_spec.XX                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: config_passing_spec.coffee...                                                   (1 of 1) 
+  Running: config_passing_spec.XX...                                                   (1 of 1) 
 
 
   Cypress static methods + props
@@ -39,7 +39,7 @@ exports['e2e config passes 1'] = `
   │ Screenshots:  0                          │
   │ Video:        true                       │
   │ Duration:     X seconds                  │
-  │ Spec Ran:     config_passing_spec.coffee │
+  │ Spec Ran:     config_passing_spec.XX │
   └──────────────────────────────────────────┘
 
 
@@ -56,7 +56,7 @@ exports['e2e config passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ config_passing_spec.coffee                XX:XX        5        5        -        -        - │
+  │ ✔ config_passing_spec.XX                XX:XX        5        5        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        5        5        -        -        -  
 
@@ -72,14 +72,14 @@ exports['e2e config fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_failing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_failing_spec.coffee                                     │
+  │ Specs:      1 found (config_failing_spec.XX)                                               │
+  │ Searched:   cypress/integration/config_failing_spec.XX                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: config_failing_spec.coffee...                                                   (1 of 1) 
+  Running: config_failing_spec.XX...                                                   (1 of 1) 
 
 
   config
@@ -120,13 +120,13 @@ exports['e2e config fails 1'] = `
   │ Screenshots:  1                          │
   │ Video:        true                       │
   │ Duration:     X seconds                  │
-  │ Spec Ran:     config_failing_spec.coffee │
+  │ Spec Ran:     config_failing_spec.XX │
   └──────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/config_failing_spec.coffee/config -- times out looking for a missing element (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/config_failing_spec.XX/config -- times out looking for a missing element (failed).png (1280x720)
 
 
   (Video)
@@ -142,7 +142,7 @@ exports['e2e config fails 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ config_failing_spec.coffee                XX:XX        1        -        1        -        - │
+  │ ✖ config_failing_spec.XX                XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 

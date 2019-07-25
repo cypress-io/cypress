@@ -7,22 +7,22 @@ exports['e2e plugins fails when spec does not exist 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/integration/spec.js                                                        │
+  │ Specs:      1 found (spec.XX)                                                                  │
+  │ Searched:   cypress/integration/spec.XX                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: spec.js...                                                                      (1 of 1) 
+  Running: spec.XX...                                                                      (1 of 1) 
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/spec.js
+  cypress/integration/spec.XX
 
 The error was:
 
-Error: ENOENT: no such file or directory, stat '/does/not/exist.js'
+Error: ENOENT: no such file or directory, stat '/does/not/exist.XX'
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -42,7 +42,7 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0         │
   │ Video:        true      │
   │ Duration:     X seconds │
-  │ Spec Ran:     spec.js   │
+  │ Spec Ran:     spec.XX   │
   └─────────────────────────┘
 
 
@@ -59,7 +59,7 @@ Fix the error in your code and re-run your tests.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ spec.js                                   XX:XX        -        -        1        -        - │
+  │ ✖ spec.XX                                   XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 

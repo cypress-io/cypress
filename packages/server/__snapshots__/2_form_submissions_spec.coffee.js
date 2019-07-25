@@ -143,14 +143,14 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (form_submission_failing_spec.coffee)                                      │
-  │ Searched:   cypress/integration/form_submission_failing_spec.coffee                            │
+  │ Specs:      1 found (form_submission_failing_spec.XX)                                      │
+  │ Searched:   cypress/integration/form_submission_failing_spec.XX                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_failing_spec.coffee...                                          (1 of 1) 
+  Running: form_submission_failing_spec.XX...                                          (1 of 1) 
 
 
   form submission fails
@@ -192,13 +192,13 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
   │ Screenshots:  1                                   │
   │ Video:        true                                │
   │ Duration:     X seconds                           │
-  │ Spec Ran:     form_submission_failing_spec.coffee │
+  │ Spec Ran:     form_submission_failing_spec.XX │
   └───────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/form_submission_failing_spec.coffee/form submission fails -- fails without an explicit wait when an element is immediately found (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/form_submission_failing_spec.XX/form submission fails -- fails without an explicit wait when an element is immediately found (failed).png (1280x720)
 
 
   (Video)
@@ -214,7 +214,7 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ form_submission_failing_spec.coffee       XX:XX        1        -        1        -        - │
+  │ ✖ form_submission_failing_spec.XX       XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
@@ -230,14 +230,14 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (form_submission_passing_spec.coffee)                                      │
-  │ Searched:   cypress/integration/form_submission_passing_spec.coffee                            │
+  │ Specs:      1 found (form_submission_passing_spec.XX)                                      │
+  │ Searched:   cypress/integration/form_submission_passing_spec.XX                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_passing_spec.coffee...                                          (1 of 1) 
+  Running: form_submission_passing_spec.XX...                                          (1 of 1) 
 
 
   form submissions
@@ -259,7 +259,7 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
   │ Screenshots:  0                                   │
   │ Video:        true                                │
   │ Duration:     X seconds                           │
-  │ Spec Ran:     form_submission_passing_spec.coffee │
+  │ Spec Ran:     form_submission_passing_spec.XX │
   └───────────────────────────────────────────────────┘
 
 
@@ -276,7 +276,7 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ form_submission_passing_spec.coffee       XX:XX        2        2        -        -        - │
+  │ ✔ form_submission_passing_spec.XX       XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 

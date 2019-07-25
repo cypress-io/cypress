@@ -7,14 +7,14 @@ exports['e2e cookies passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cookies_spec.coffee)                                                      │
-  │ Searched:   cypress/integration/cookies_spec.coffee                                            │
+  │ Specs:      1 found (cookies_spec.XX)                                                          │
+  │ Searched:   cypress/integration/cookies_spec.XX                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: cookies_spec.coffee...                                                          (1 of 1) 
+  Running: cookies_spec.XX...                                                              (1 of 1) 
 
 
   cookies
@@ -36,17 +36,17 @@ exports['e2e cookies passes 1'] = `
 
   (Results)
 
-  ┌───────────────────────────────────┐
-  │ Tests:        9                   │
-  │ Passing:      9                   │
-  │ Failing:      0                   │
-  │ Pending:      0                   │
-  │ Skipped:      0                   │
-  │ Screenshots:  0                   │
-  │ Video:        true                │
-  │ Duration:     X seconds           │
-  │ Spec Ran:     cookies_spec.coffee │
-  └───────────────────────────────────┘
+  ┌───────────────────────────────┐
+  │ Tests:        9               │
+  │ Passing:      9               │
+  │ Failing:      0               │
+  │ Pending:      0               │
+  │ Skipped:      0               │
+  │ Screenshots:  0               │
+  │ Video:        true            │
+  │ Duration:     X seconds       │
+  │ Spec Ran:     cookies_spec.XX │
+  └───────────────────────────────┘
 
 
   (Video)
@@ -62,7 +62,7 @@ exports['e2e cookies passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ cookies_spec.coffee                       XX:XX        9        9        -        -        - │
+  │ ✔ cookies_spec.XX                           XX:XX        9        9        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        9        9        -        -        -  
 

@@ -7,14 +7,14 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_caught_error_failing_spec.coffee)                                    │
-  │ Searched:   cypress/integration/hook_caught_error_failing_spec.coffee                          │
+  │ Specs:      1 found (hook_caught_error_failing_spec.XX)                                    │
+  │ Searched:   cypress/integration/hook_caught_error_failing_spec.XX                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: hook_caught_error_failing_spec.coffee...                                        (1 of 1) 
+  Running: hook_caught_error_failing_spec.XX...                                        (1 of 1) 
 
 
   ✓ t1a
@@ -84,15 +84,15 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   │ Screenshots:  3                                     │
   │ Video:        true                                  │
   │ Duration:     X seconds                             │
-  │ Spec Ran:     hook_caught_error_failing_spec.coffee │
+  │ Spec Ran:     hook_caught_error_failing_spec.XX │
   └─────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s1a -- t2a -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s3a -- t8a -- before all hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s4a -- t10a -- before all hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.XX/s1a -- t2a -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.XX/s3a -- t8a -- before all hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.XX/s4a -- t10a -- before all hook (failed).png (1280x720)
 
 
   (Video)
@@ -108,7 +108,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_caught_error_failing_spec.coffee     XX:XX       11        5        3        -        3 │
+  │ ✖ hook_caught_error_failing_spec.XX     XX:XX       11        5        3        -        3 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX       11        5        3        -        3  
 
@@ -124,14 +124,14 @@ exports['e2e caught and uncaught hooks errors failing2 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_error_failing_spec.coffee)                                  │
-  │ Searched:   cypress/integration/hook_uncaught_error_failing_spec.coffee                        │
+  │ Specs:      1 found (hook_uncaught_error_failing_spec.XX)                                  │
+  │ Searched:   cypress/integration/hook_uncaught_error_failing_spec.XX                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: hook_uncaught_error_failing_spec.coffee...                                      (1 of 1) 
+  Running: hook_uncaught_error_failing_spec.XX...                                      (1 of 1) 
 
 
   ✓ t1b
@@ -175,13 +175,13 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   │ Screenshots:  1                                       │
   │ Video:        true                                    │
   │ Duration:     X seconds                               │
-  │ Spec Ran:     hook_uncaught_error_failing_spec.coffee │
+  │ Spec Ran:     hook_uncaught_error_failing_spec.XX │
   └───────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_failing_spec.coffee/s1b -- t2b -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_failing_spec.XX/s1b -- t2b -- before each hook (failed).png (1280x720)
 
 
   (Video)
@@ -213,14 +213,14 @@ exports['e2e caught and uncaught hooks errors failing3 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_root_error_failing_spec.coffee)                             │
-  │ Searched:   cypress/integration/hook_uncaught_root_error_failing_spec.coffee                   │
+  │ Specs:      1 found (hook_uncaught_root_error_failing_spec.XX)                             │
+  │ Searched:   cypress/integration/hook_uncaught_root_error_failing_spec.XX                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: hook_uncaught_root_error_failing_spec.coffee...                                 (1 of 1) 
+  Running: hook_uncaught_root_error_failing_spec.XX...                                 (1 of 1) 
 
 
   1) "before each" hook for "t1c"
@@ -256,13 +256,13 @@ Because this error occurred during a 'before each' hook we are skipping all of t
   │ Screenshots:  1                                            │
   │ Video:        true                                         │
   │ Duration:     X seconds                                    │
-  │ Spec Ran:     hook_uncaught_root_error_failing_spec.coffee │
+  │ Spec Ran:     hook_uncaught_root_error_failing_spec.XX │
   └────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_root_error_failing_spec.coffee/t1c -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_root_error_failing_spec.XX/t1c -- before each hook (failed).png (1280x720)
 
 
   (Video)
@@ -294,14 +294,14 @@ exports['e2e caught and uncaught hooks errors failing4 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (hook_uncaught_error_events_failing_spec.coffee)                           │
-  │ Searched:   cypress/integration/hook_uncaught_error_events_failing_spec.coffee                 │
+  │ Specs:      1 found (hook_uncaught_error_events_failing_spec.XX)                           │
+  │ Searched:   cypress/integration/hook_uncaught_error_events_failing_spec.XX                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: hook_uncaught_error_events_failing_spec.coffee...                               (1 of 1) 
+  Running: hook_uncaught_error_events_failing_spec.XX...                               (1 of 1) 
 
 
   uncaught hook error should continue to fire all mocha events
@@ -343,13 +343,13 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   │ Screenshots:  1                                              │
   │ Video:        true                                           │
   │ Duration:     X seconds                                      │
-  │ Spec Ran:     hook_uncaught_error_events_failing_spec.coffee │
+  │ Spec Ran:     hook_uncaught_error_events_failing_spec.XX │
   └──────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_events_failing_spec.coffee/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_events_failing_spec.XX/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook (failed).png (1280x720)
 
 
   (Video)

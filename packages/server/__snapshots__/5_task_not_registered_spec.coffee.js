@@ -7,14 +7,14 @@ exports['e2e task fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (task_not_registered_spec.coffee)                                          │
-  │ Searched:   cypress/integration/task_not_registered_spec.coffee                                │
+  │ Specs:      1 found (task_not_registered_spec.XX)                                          │
+  │ Searched:   cypress/integration/task_not_registered_spec.XX                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: task_not_registered_spec.coffee...                                              (1 of 1) 
+  Running: task_not_registered_spec.XX...                                              (1 of 1) 
 
 
   1) fails because the 'task' event is not registered in plugins file
@@ -28,7 +28,7 @@ exports['e2e task fails 1'] = `
 The 'task' event has not been registered in the plugins file. You must register it before using cy.task()
 
 Fix this in your plugins file here:
-/foo/bar/.projects/task-not-registered/cypress/plugins/index.js
+/foo/bar/.projects/task-not-registered/cypress/plugins/index.XX
 
 https://on.cypress.io/api/task
       at stack trace line
@@ -59,13 +59,13 @@ https://on.cypress.io/api/task
   │ Screenshots:  1                               │
   │ Video:        true                            │
   │ Duration:     X seconds                       │
-  │ Spec Ran:     task_not_registered_spec.coffee │
+  │ Spec Ran:     task_not_registered_spec.XX │
   └───────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/task-not-registered/cypress/screenshots/task_not_registered_spec.coffee/fails because the 'task' event is not registered in plugins file (failed).png (1280x720)
+  - /foo/bar/.projects/task-not-registered/cypress/screenshots/task_not_registered_spec.XX/fails because the 'task' event is not registered in plugins file (failed).png (1280x720)
 
 
   (Video)
@@ -81,7 +81,7 @@ https://on.cypress.io/api/task
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ task_not_registered_spec.coffee           XX:XX        1        -        1        -        - │
+  │ ✖ task_not_registered_spec.XX           XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 

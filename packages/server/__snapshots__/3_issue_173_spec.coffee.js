@@ -7,14 +7,14 @@ exports['e2e issue 173 failing 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (issue_173_spec.coffee)                                                    │
-  │ Searched:   cypress/integration/issue_173_spec.coffee                                          │
+  │ Specs:      1 found (issue_173_spec.XX)                                                    │
+  │ Searched:   cypress/integration/issue_173_spec.XX                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: issue_173_spec.coffee...                                                        (1 of 1) 
+  Running: issue_173_spec.XX...                                                        (1 of 1) 
 
 
   1) fails
@@ -54,13 +54,13 @@ exports['e2e issue 173 failing 1'] = `
   │ Screenshots:  1                     │
   │ Video:        true                  │
   │ Duration:     X seconds             │
-  │ Spec Ran:     issue_173_spec.coffee │
+  │ Spec Ran:     issue_173_spec.XX │
   └─────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_173_spec.coffee/fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/issue_173_spec.XX/fails (failed).png (1280x720)
 
 
   (Video)
@@ -76,7 +76,7 @@ exports['e2e issue 173 failing 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ issue_173_spec.coffee                     XX:XX        2        1        1        -        - │
+  │ ✖ issue_173_spec.XX                     XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        2        1        1        -        -  
 

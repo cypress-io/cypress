@@ -7,14 +7,14 @@ exports['e2e issue 674 fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (issue_674_spec.coffee)                                                    │
-  │ Searched:   cypress/integration/issue_674_spec.coffee                                          │
+  │ Specs:      1 found (issue_674_spec.XX)                                                    │
+  │ Searched:   cypress/integration/issue_674_spec.XX                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: issue_674_spec.coffee...                                                        (1 of 1) 
+  Running: issue_674_spec.XX...                                                        (1 of 1) 
 
 
   issue 674
@@ -51,14 +51,14 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   │ Screenshots:  2                     │
   │ Video:        true                  │
   │ Duration:     X seconds             │
-  │ Spec Ran:     issue_674_spec.coffee │
+  │ Spec Ran:     issue_674_spec.XX │
   └─────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- after each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.XX/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- before each hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.XX/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- after each hook (failed).png (1280x720)
 
 
   (Video)
@@ -74,7 +74,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ issue_674_spec.coffee                     XX:XX        1        -        1        -        - │
+  │ ✖ issue_674_spec.XX                     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 

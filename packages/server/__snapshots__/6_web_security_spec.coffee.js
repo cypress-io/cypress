@@ -7,14 +7,14 @@ exports['e2e web security when enabled fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security_spec.coffee)                                                 │
-  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
+  │ Specs:      1 found (web_security_spec.XX)                                                 │
+  │ Searched:   cypress/integration/web_security_spec.XX                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: web_security_spec.coffee...                                                     (1 of 1) 
+  Running: web_security_spec.XX...                                                     (1 of 1) 
 
 
   web security
@@ -46,7 +46,7 @@ Cypress does not allow you to change superdomains within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
+Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.XXon' file.
 
 https://on.cypress.io/cross-origin-violation
 
@@ -78,7 +78,7 @@ Cypress does not allow you to change superdomains within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
+Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.XXon' file.
 
 https://on.cypress.io/cross-origin-violation
 
@@ -110,7 +110,7 @@ Cypress does not allow you to change superdomains within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
+Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.XXon' file.
 
 https://on.cypress.io/cross-origin-violation
 
@@ -136,15 +136,15 @@ https://on.cypress.io/cross-origin-violation
   │ Screenshots:  3                        │
   │ Video:        true                     │
   │ Duration:     X seconds                │
-  │ Spec Ran:     web_security_spec.coffee │
+  │ Spec Ran:     web_security_spec.XX │
   └────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.coffee/web security -- fails when clicking a to another origin (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.coffee/web security -- fails when submitted a form and being redirected to another origin (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.coffee/web security -- fails when using a javascript redirect to another origin (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.XX/web security -- fails when clicking a to another origin (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.XX/web security -- fails when submitted a form and being redirected to another origin (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.XX/web security -- fails when using a javascript redirect to another origin (failed).png (1280x720)
 
 
   (Video)
@@ -160,7 +160,7 @@ https://on.cypress.io/cross-origin-violation
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ web_security_spec.coffee                  XX:XX        3        -        3        -        - │
+  │ ✖ web_security_spec.XX                  XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
 
@@ -176,14 +176,14 @@ exports['e2e web security when disabled passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security_spec.coffee)                                                 │
-  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
+  │ Specs:      1 found (web_security_spec.XX)                                                 │
+  │ Searched:   cypress/integration/web_security_spec.XX                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: web_security_spec.coffee...                                                     (1 of 1) 
+  Running: web_security_spec.XX...                                                     (1 of 1) 
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -212,7 +212,7 @@ A video will not be recorded when using this browser.
   │ Screenshots:  0                        │
   │ Video:        false                    │
   │ Duration:     X seconds                │
-  │ Spec Ran:     web_security_spec.coffee │
+  │ Spec Ran:     web_security_spec.XX │
   └────────────────────────────────────────┘
 
 
@@ -223,7 +223,7 @@ A video will not be recorded when using this browser.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ web_security_spec.coffee                  XX:XX        3        3        -        -        - │
+  │ ✔ web_security_spec.XX                  XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        3        3        -        -        -  
 

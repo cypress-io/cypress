@@ -7,14 +7,14 @@ exports['e2e page_loading passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (page_loading_spec.coffee)                                                 │
-  │ Searched:   cypress/integration/page_loading_spec.coffee                                       │
+  │ Specs:      1 found (page_loading_spec.XX)                                                 │
+  │ Searched:   cypress/integration/page_loading_spec.XX                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: page_loading_spec.coffee...                                                     (1 of 1) 
+  Running: page_loading_spec.XX...                                                     (1 of 1) 
 
 
   page_loading
@@ -37,7 +37,7 @@ exports['e2e page_loading passes 1'] = `
   │ Screenshots:  0                        │
   │ Video:        true                     │
   │ Duration:     X seconds                │
-  │ Spec Ran:     page_loading_spec.coffee │
+  │ Spec Ran:     page_loading_spec.XX │
   └────────────────────────────────────────┘
 
 
@@ -54,7 +54,7 @@ exports['e2e page_loading passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ page_loading_spec.coffee                  XX:XX        2        2        -        -        - │
+  │ ✔ page_loading_spec.XX                  XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 

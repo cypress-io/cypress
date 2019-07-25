@@ -7,14 +7,14 @@ exports['e2e promises failing1 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (promises_spec.coffee)                                                     │
-  │ Searched:   cypress/integration/promises_spec.coffee                                           │
+  │ Specs:      1 found (promises_spec.XX)                                                     │
+  │ Searched:   cypress/integration/promises_spec.XX                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: promises_spec.coffee...                                                         (1 of 1) 
+  Running: promises_spec.XX...                                                         (1 of 1) 
 
 
   1) catches regular promise errors
@@ -46,14 +46,14 @@ exports['e2e promises failing1 1'] = `
   │ Screenshots:  2                    │
   │ Video:        true                 │
   │ Duration:     X seconds            │
-  │ Spec Ran:     promises_spec.coffee │
+  │ Spec Ran:     promises_spec.XX │
   └────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/promises_spec.coffee/catches regular promise errors (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/promises_spec.coffee/catches promise errors and calls done with err even when async (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/promises_spec.XX/catches regular promise errors (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/promises_spec.XX/catches promise errors and calls done with err even when async (failed).png (1280x720)
 
 
   (Video)
@@ -69,7 +69,7 @@ exports['e2e promises failing1 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ promises_spec.coffee                      XX:XX        2        -        2        -        - │
+  │ ✖ promises_spec.XX                      XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 

@@ -7,14 +7,14 @@ exports['e2e screenshot element capture passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (screenshot_element_capture_spec.coffee)                                   │
-  │ Searched:   cypress/integration/screenshot_element_capture_spec.coffee                         │
+  │ Specs:      1 found (screenshot_element_capture_spec.XX)                                   │
+  │ Searched:   cypress/integration/screenshot_element_capture_spec.XX                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: screenshot_element_capture_spec.coffee...                                       (1 of 1) 
+  Running: screenshot_element_capture_spec.XX...                                       (1 of 1) 
 
 
   ✓ takes consistent element captures
@@ -33,23 +33,23 @@ exports['e2e screenshot element capture passes 1'] = `
   │ Screenshots:  11                                     │
   │ Video:        true                                   │
   │ Duration:     X seconds                              │
-  │ Spec Ran:     screenshot_element_capture_spec.coffee │
+  │ Spec Ran:     screenshot_element_capture_spec.XX │
   └──────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-original.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (1).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (2).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (3).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (4).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (5).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (6).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (7).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (8).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (9).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-original.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare.png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (1).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (2).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (3).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (4).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (5).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (6).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (7).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (8).png (560x302)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.XX/element-compare (9).png (560x302)
 
 
   (Video)

@@ -7,14 +7,14 @@ exports['e2e screenshot in nested spec passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (nested-1/nested-2/screenshot_nested_file_spec.coffee)                     │
-  │ Searched:   cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.coffee           │
+  │ Specs:      1 found (nested-1/nested-2/screenshot_nested_file_spec.XX)                     │
+  │ Searched:   cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.XX           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: nested-1/nested-2/screenshot_nested_file_spec.coffee...                         (1 of 1) 
+  Running: nested-1/nested-2/screenshot_nested_file_spec.XX...                         (1 of 1) 
 
 
   ✓ nests the file based on spec path
@@ -33,13 +33,13 @@ exports['e2e screenshot in nested spec passes 1'] = `
   │ Screenshots:  1                                                    │
   │ Video:        true                                                 │
   │ Duration:     X seconds                                            │
-  │ Spec Ran:     nested-1/nested-2/screenshot_nested_file_spec.coffee │
+  │ Spec Ran:     nested-1/nested-2/screenshot_nested_file_spec.XX │
   └────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.coffee/nests the file based on spec path.png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.XX/nests the file based on spec path.png (1280x720)
 
 
   (Video)

@@ -7,14 +7,14 @@ exports['e2e blacklist passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (blacklist_hosts_spec.coffee)                                              │
-  │ Searched:   cypress/integration/blacklist_hosts_spec.coffee                                    │
+  │ Specs:      1 found (blacklist_hosts_spec.XX)                                              │
+  │ Searched:   cypress/integration/blacklist_hosts_spec.XX                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: blacklist_hosts_spec.coffee...                                                  (1 of 1) 
+  Running: blacklist_hosts_spec.XX...                                                  (1 of 1) 
 
 
   blacklist
@@ -35,7 +35,7 @@ exports['e2e blacklist passes 1'] = `
   │ Screenshots:  0                           │
   │ Video:        true                        │
   │ Duration:     X seconds                   │
-  │ Spec Ran:     blacklist_hosts_spec.coffee │
+  │ Spec Ran:     blacklist_hosts_spec.XX │
   └───────────────────────────────────────────┘
 
 
@@ -52,7 +52,7 @@ exports['e2e blacklist passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ blacklist_hosts_spec.coffee               XX:XX        1        1        -        -        - │
+  │ ✔ blacklist_hosts_spec.XX               XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 

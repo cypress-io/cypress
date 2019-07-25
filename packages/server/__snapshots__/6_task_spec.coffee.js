@@ -8,14 +8,14 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (multiple_task_registrations_spec.coffee)                                  │
-  │ Searched:   cypress/integration/multiple_task_registrations_spec.coffee                        │
+  │ Specs:      1 found (multiple_task_registrations_spec.XX)                                  │
+  │ Searched:   cypress/integration/multiple_task_registrations_spec.XX                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: multiple_task_registrations_spec.coffee...                                      (1 of 1) 
+  Running: multiple_task_registrations_spec.XX...                                      (1 of 1) 
 
 
   ✓ merges task events
@@ -34,7 +34,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   │ Screenshots:  0                                       │
   │ Video:        true                                    │
   │ Duration:     X seconds                               │
-  │ Spec Ran:     multiple_task_registrations_spec.coffee │
+  │ Spec Ran:     multiple_task_registrations_spec.XX │
   └───────────────────────────────────────────────────────┘
 
 
@@ -67,14 +67,14 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (task_spec.coffee)                                                         │
-  │ Searched:   cypress/integration/task_spec.coffee                                               │
+  │ Specs:      1 found (task_spec.XX)                                                         │
+  │ Searched:   cypress/integration/task_spec.XX                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: task_spec.coffee...                                                             (1 of 1) 
+  Running: task_spec.XX...                                                             (1 of 1) 
 
 
   1) throws when task returns undefined
@@ -93,7 +93,7 @@ The task handler was:
 returns:undefined() {}
 
 Fix this in your plugins file here:
-/foo/bar/.projects/e2e/cypress/plugins/index.js
+/foo/bar/.projects/e2e/cypress/plugins/index.XX
 
 https://on.cypress.io/api/task
       at stack trace line
@@ -160,14 +160,14 @@ https://on.cypress.io/api/task
   │ Screenshots:  2                │
   │ Video:        true             │
   │ Duration:     X seconds        │
-  │ Spec Ran:     task_spec.coffee │
+  │ Spec Ran:     task_spec.XX │
   └────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.coffee/throws when task returns undefined (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.coffee/includes stack trace in error (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.XX/throws when task returns undefined (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.XX/includes stack trace in error (failed).png (1280x720)
 
 
   (Video)
@@ -183,7 +183,7 @@ https://on.cypress.io/api/task
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ task_spec.coffee                          XX:XX        2        -        2        -        - │
+  │ ✖ task_spec.XX                          XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 

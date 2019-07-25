@@ -7,14 +7,14 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (character_encoding_spec.js)                                               │
-  │ Searched:   cypress/integration/character_encoding_spec.js                                     │
+  │ Specs:      1 found (character_encoding_spec.XX)                                               │
+  │ Searched:   cypress/integration/character_encoding_spec.XX                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: character_encoding_spec.js...                                                   (1 of 1) 
+  Running: character_encoding_spec.XX...                                                   (1 of 1) 
 
 
   character encoding tests
@@ -54,7 +54,7 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
   │ Screenshots:  0                          │
   │ Video:        true                       │
   │ Duration:     X seconds                  │
-  │ Spec Ran:     character_encoding_spec.js │
+  │ Spec Ran:     character_encoding_spec.XX │
   └──────────────────────────────────────────┘
 
 
@@ -71,7 +71,7 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ character_encoding_spec.js                XX:XX       16       16        -        -        - │
+  │ ✔ character_encoding_spec.XX                XX:XX       16       16        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX       16       16        -        -        -  
 

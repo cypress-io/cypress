@@ -7,14 +7,14 @@ exports['e2e subdomain passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (subdomain_spec.coffee)                                                    │
-  │ Searched:   cypress/integration/subdomain_spec.coffee                                          │
+  │ Specs:      1 found (subdomain_spec.XX)                                                    │
+  │ Searched:   cypress/integration/subdomain_spec.XX                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: subdomain_spec.coffee...                                                        (1 of 1) 
+  Running: subdomain_spec.XX...                                                        (1 of 1) 
 
 
   subdomains
@@ -44,7 +44,7 @@ exports['e2e subdomain passes 1'] = `
   │ Screenshots:  0                     │
   │ Video:        true                  │
   │ Duration:     X seconds             │
-  │ Spec Ran:     subdomain_spec.coffee │
+  │ Spec Ran:     subdomain_spec.XX │
   └─────────────────────────────────────┘
 
 
@@ -61,7 +61,7 @@ exports['e2e subdomain passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ subdomain_spec.coffee                     XX:XX        9        7        -        2        - │
+  │ ✔ subdomain_spec.XX                     XX:XX        9        7        -        2        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        9        7        -        2        -  
 

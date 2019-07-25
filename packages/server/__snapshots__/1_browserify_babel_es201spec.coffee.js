@@ -7,14 +7,14 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (browserify_babel_es2015_passing_spec.coffee)                              │
-  │ Searched:   cypress/integration/browserify_babel_es2015_passing_spec.coffee                    │
+  │ Specs:      1 found (browserify_babel_es2015_passing_spec.XX)                              │
+  │ Searched:   cypress/integration/browserify_babel_es2015_passing_spec.XX                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: browserify_babel_es2015_passing_spec.coffee...                                  (1 of 1) 
+  Running: browserify_babel_es2015_passing_spec.XX...                                  (1 of 1) 
 
 
   imports work
@@ -37,7 +37,7 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
   │ Screenshots:  0                                           │
   │ Video:        true                                        │
   │ Duration:     X seconds                                   │
-  │ Spec Ran:     browserify_babel_es2015_passing_spec.coffee │
+  │ Spec Ran:     browserify_babel_es2015_passing_spec.XX │
   └───────────────────────────────────────────────────────────┘
 
 
@@ -70,26 +70,26 @@ exports['e2e browserify, babel, es2015 fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (browserify_babel_es2015_failing_spec.js)                                  │
-  │ Searched:   cypress/integration/browserify_babel_es2015_failing_spec.js                        │
+  │ Specs:      1 found (browserify_babel_es2015_failing_spec.XX)                                  │
+  │ Searched:   cypress/integration/browserify_babel_es2015_failing_spec.XX                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: browserify_babel_es2015_failing_spec.js...                                      (1 of 1) 
+  Running: browserify_babel_es2015_failing_spec.XX...                                      (1 of 1) 
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/e2e/cypress/integration/browserify_babel_es2015_failing_spec.js
+  /foo/bar/.projects/e2e/cypress/integration/browserify_babel_es2015_failing_spec.XX
 
 The error was:
 
-SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
+SyntaxError: /foo/bar/.projects/e2e/lib/fail.XX: Unexpected token (2:0)
 
   1 | export default {
 > 2 | 
-    | ^ while parsing file: /foo/bar/.projects/e2e/lib/fail.js
+    | ^ while parsing file: /foo/bar/.projects/e2e/lib/fail.XX
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -109,7 +109,7 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                                       │
   │ Video:        true                                    │
   │ Duration:     X seconds                               │
-  │ Spec Ran:     browserify_babel_es2015_failing_spec.js │
+  │ Spec Ran:     browserify_babel_es2015_failing_spec.XX │
   └───────────────────────────────────────────────────────┘
 
 

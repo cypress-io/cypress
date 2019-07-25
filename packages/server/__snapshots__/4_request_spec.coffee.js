@@ -7,14 +7,14 @@ exports['e2e requests passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_spec.coffee)                                                      │
-  │ Searched:   cypress/integration/request_spec.coffee                                            │
+  │ Specs:      1 found (request_spec.XX)                                                      │
+  │ Searched:   cypress/integration/request_spec.XX                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_spec.coffee...                                                          (1 of 1) 
+  Running: request_spec.XX...                                                          (1 of 1) 
 
 
   redirects + requests
@@ -46,7 +46,7 @@ exports['e2e requests passes 1'] = `
   │ Screenshots:  0                   │
   │ Video:        true                │
   │ Duration:     X seconds           │
-  │ Spec Ran:     request_spec.coffee │
+  │ Spec Ran:     request_spec.XX │
   └───────────────────────────────────┘
 
 
@@ -63,7 +63,7 @@ exports['e2e requests passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ request_spec.coffee                       XX:XX       12       12        -        -        - │
+  │ ✔ request_spec.XX                       XX:XX       12       12        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX       12       12        -        -        -  
 
@@ -79,14 +79,14 @@ exports['e2e requests fails when network immediately fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_http_network_error_failing_spec.coffee)                           │
-  │ Searched:   cypress/integration/request_http_network_error_failing_spec.coffee                 │
+  │ Specs:      1 found (request_http_network_error_failing_spec.XX)                           │
+  │ Searched:   cypress/integration/request_http_network_error_failing_spec.XX                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_http_network_error_failing_spec.coffee...                               (1 of 1) 
+  Running: request_http_network_error_failing_spec.XX...                               (1 of 1) 
 
 
   when network connection cannot be established
@@ -171,13 +171,13 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
   │ Screenshots:  1                                              │
   │ Video:        true                                           │
   │ Duration:     X seconds                                      │
-  │ Spec Ran:     request_http_network_error_failing_spec.coffee │
+  │ Spec Ran:     request_http_network_error_failing_spec.XX │
   └──────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/request_http_network_error_failing_spec.coffee/when network connection cannot be established -- fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/request_http_network_error_failing_spec.XX/when network connection cannot be established -- fails (failed).png (1280x720)
 
 
   (Video)
@@ -209,14 +209,14 @@ exports['e2e requests fails on status code 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_status_code_failing_spec.coffee)                                  │
-  │ Searched:   cypress/integration/request_status_code_failing_spec.coffee                        │
+  │ Specs:      1 found (request_status_code_failing_spec.XX)                                  │
+  │ Searched:   cypress/integration/request_status_code_failing_spec.XX                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_status_code_failing_spec.coffee...                                      (1 of 1) 
+  Running: request_status_code_failing_spec.XX...                                      (1 of 1) 
 
 
   when status code isnt 2xx or 3xx
@@ -295,13 +295,13 @@ Body: Service Unavailable
   │ Screenshots:  1                                       │
   │ Video:        true                                    │
   │ Duration:     X seconds                               │
-  │ Spec Ran:     request_status_code_failing_spec.coffee │
+  │ Spec Ran:     request_status_code_failing_spec.XX │
   └───────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/request_status_code_failing_spec.coffee/when status code isnt 2xx or 3xx -- fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/request_status_code_failing_spec.XX/when status code isnt 2xx or 3xx -- fails (failed).png (1280x720)
 
 
   (Video)

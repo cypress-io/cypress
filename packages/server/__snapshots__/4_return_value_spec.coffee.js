@@ -7,14 +7,14 @@ exports['e2e return value failing1 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (return_value_spec.coffee)                                                 │
-  │ Searched:   cypress/integration/return_value_spec.coffee                                       │
+  │ Specs:      1 found (return_value_spec.XX)                                                 │
+  │ Searched:   cypress/integration/return_value_spec.XX                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: return_value_spec.coffee...                                                     (1 of 1) 
+  Running: return_value_spec.XX...                                                     (1 of 1) 
 
 
   1) errors when invoking commands and return a different value
@@ -99,14 +99,14 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
   │ Screenshots:  2                        │
   │ Video:        true                     │
   │ Duration:     X seconds                │
-  │ Spec Ran:     return_value_spec.coffee │
+  │ Spec Ran:     return_value_spec.XX │
   └────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands and return a different value (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands in custom command and returning differnet value (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.XX/errors when invoking commands and return a different value (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.XX/errors when invoking commands in custom command and returning differnet value (failed).png (1280x720)
 
 
   (Video)
@@ -122,7 +122,7 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ return_value_spec.coffee                  XX:XX        2        -        2        -        - │
+  │ ✖ return_value_spec.XX                  XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 

@@ -7,14 +7,14 @@ exports['e2e commands outside of test passes on passing assertions 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (assertions_passing_outside_of_test_spec.coffee)                           │
-  │ Searched:   cypress/integration/assertions_passing_outside_of_test_spec.coffee                 │
+  │ Specs:      1 found (assertions_passing_outside_of_test_spec.XX)                           │
+  │ Searched:   cypress/integration/assertions_passing_outside_of_test_spec.XX                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: assertions_passing_outside_of_test_spec.coffee...                               (1 of 1) 
+  Running: assertions_passing_outside_of_test_spec.XX...                               (1 of 1) 
 
 
   0 passing
@@ -31,7 +31,7 @@ exports['e2e commands outside of test passes on passing assertions 1'] = `
   │ Screenshots:  0                                              │
   │ Video:        true                                           │
   │ Duration:     X seconds                                      │
-  │ Spec Ran:     assertions_passing_outside_of_test_spec.coffee │
+  │ Spec Ran:     assertions_passing_outside_of_test_spec.XX │
   └──────────────────────────────────────────────────────────────┘
 
 
@@ -64,14 +64,14 @@ exports['e2e commands outside of test [chrome] fails on cy commands 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (commands_outside_of_test_spec.coffee)                                     │
-  │ Searched:   cypress/integration/commands_outside_of_test_spec.coffee                           │
+  │ Specs:      1 found (commands_outside_of_test_spec.XX)                                     │
+  │ Searched:   cypress/integration/commands_outside_of_test_spec.XX                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: commands_outside_of_test_spec.coffee...                                         (1 of 1) 
+  Running: commands_outside_of_test_spec.XX...                                         (1 of 1) 
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -125,13 +125,13 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                                    │
   │ Video:        false                                │
   │ Duration:     X seconds                            │
-  │ Spec Ran:     commands_outside_of_test_spec.coffee │
+  │ Spec Ran:     commands_outside_of_test_spec.XX │
   └────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/commands_outside_of_test_spec.XX/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
 ====================================================================================================
@@ -141,7 +141,7 @@ We dynamically generated a new test to display this failure.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ commands_outside_of_test_spec.coffee      XX:XX        1        -        1        -        - │
+  │ ✖ commands_outside_of_test_spec.XX      XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
@@ -157,14 +157,14 @@ exports['e2e commands outside of test [chrome] fails on failing assertions 1'] =
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (assertions_failing_outside_of_test_spec.coffee)                           │
-  │ Searched:   cypress/integration/assertions_failing_outside_of_test_spec.coffee                 │
+  │ Specs:      1 found (assertions_failing_outside_of_test_spec.XX)                           │
+  │ Searched:   cypress/integration/assertions_failing_outside_of_test_spec.XX                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: assertions_failing_outside_of_test_spec.coffee...                               (1 of 1) 
+  Running: assertions_failing_outside_of_test_spec.XX...                               (1 of 1) 
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -204,13 +204,13 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                                              │
   │ Video:        false                                          │
   │ Duration:     X seconds                                      │
-  │ Spec Ran:     assertions_failing_outside_of_test_spec.coffee │
+  │ Spec Ran:     assertions_failing_outside_of_test_spec.XX │
   └──────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/assertions_failing_outside_of_test_spec.XX/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
 ====================================================================================================

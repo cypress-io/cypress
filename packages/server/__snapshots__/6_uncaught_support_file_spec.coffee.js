@@ -7,13 +7,13 @@ exports['e2e uncaught support file errors failing 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (spec.coffee)                                                              │
+  │ Specs:      1 found (spec.XX)                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: spec.coffee...                                                                  (1 of 1) 
+  Running: spec.XX...                                                                  (1 of 1) 
 
 
   1) An uncaught error was detected outside of a test
@@ -50,13 +50,13 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1           │
   │ Video:        true        │
   │ Duration:     X seconds   │
-  │ Spec Ran:     spec.coffee │
+  │ Spec Ran:     spec.XX │
   └───────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/uncaught-support-file/cypress/screenshots/spec.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  - /foo/bar/.projects/uncaught-support-file/cypress/screenshots/spec.XX/An uncaught error was detected outside of a test (failed).png (1280x720)
 
 
   (Video)
@@ -72,7 +72,7 @@ We dynamically generated a new test to display this failure.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ spec.coffee                               XX:XX        1        -        1        -        - │
+  │ ✖ spec.XX                               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 

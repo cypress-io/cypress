@@ -7,14 +7,14 @@ exports['e2e images passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (images_spec.coffee)                                                       │
-  │ Searched:   cypress/integration/images_spec.coffee                                             │
+  │ Specs:      1 found (images_spec.XX)                                                       │
+  │ Searched:   cypress/integration/images_spec.XX                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: images_spec.coffee...                                                           (1 of 1) 
+  Running: images_spec.XX...                                                           (1 of 1) 
 
 
   images
@@ -36,7 +36,7 @@ exports['e2e images passes 1'] = `
   │ Screenshots:  0                  │
   │ Video:        true               │
   │ Duration:     X seconds          │
-  │ Spec Ran:     images_spec.coffee │
+  │ Spec Ran:     images_spec.XX │
   └──────────────────────────────────┘
 
 
@@ -53,7 +53,7 @@ exports['e2e images passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ images_spec.coffee                        XX:XX        2        2        -        -        - │
+  │ ✔ images_spec.XX                        XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 

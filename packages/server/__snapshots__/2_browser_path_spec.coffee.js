@@ -7,14 +7,14 @@ exports['e2e launching browsers by path works with an installed browser path 1']
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    Custom FooBrowser 88                                                               │
-  │ Specs:      1 found (simple_spec.coffee)                                                       │
-  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  │ Specs:      1 found (simple_spec.XX)                                                       │
+  │ Searched:   cypress/integration/simple_spec.XX                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_spec.coffee...                                                           (1 of 1) 
+  Running: simple_spec.XX...                                                           (1 of 1) 
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -39,7 +39,7 @@ A video will not be recorded when using this browser.
   │ Screenshots:  0                  │
   │ Video:        false              │
   │ Duration:     X seconds          │
-  │ Spec Ran:     simple_spec.coffee │
+  │ Spec Ran:     simple_spec.XX │
   └──────────────────────────────────┘
 
 
@@ -50,7 +50,7 @@ A video will not be recorded when using this browser.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
+  │ ✔ simple_spec.XX                        XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 

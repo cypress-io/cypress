@@ -7,14 +7,14 @@ exports['e2e js error handling fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (js_error_handling_failing_spec.coffee)                                    │
-  │ Searched:   cypress/integration/js_error_handling_failing_spec.coffee                          │
+  │ Specs:      1 found (js_error_handling_failing_spec.XX)                                    │
+  │ Searched:   cypress/integration/js_error_handling_failing_spec.XX                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: js_error_handling_failing_spec.coffee...                                        (1 of 1) 
+  Running: js_error_handling_failing_spec.XX...                                        (1 of 1) 
 
 
   s1
@@ -114,17 +114,17 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Screenshots:  5                                     │
   │ Video:        true                                  │
   │ Duration:     X seconds                             │
-  │ Spec Ran:     js_error_handling_failing_spec.coffee │
+  │ Spec Ran:     js_error_handling_failing_spec.XX │
   └─────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t1 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t2 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t4 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t5 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cross origin script errors -- explains where script errored (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.XX/s1 -- without an afterEach hook -- t1 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.XX/s1 -- without an afterEach hook -- t2 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.XX/s1 -- with an afterEach hook -- t4 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.XX/s1 -- with an afterEach hook -- t5 (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.XX/s1 -- cross origin script errors -- explains where script errored (failed).png (1280x720)
 
 
   (Video)
@@ -140,7 +140,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ js_error_handling_failing_spec.coffee     XX:XX        8        3        5        -        - │
+  │ ✖ js_error_handling_failing_spec.XX     XX:XX        8        3        5        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        8        3        5        -        -  
 

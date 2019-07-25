@@ -7,14 +7,14 @@ exports['e2e visit low response timeout passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_spec.coffee)                                                        │
-  │ Searched:   cypress/integration/visit_spec.coffee                                              │
+  │ Specs:      1 found (visit_spec.XX)                                                        │
+  │ Searched:   cypress/integration/visit_spec.XX                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_spec.coffee...                                                            (1 of 1) 
+  Running: visit_spec.XX...                                                            (1 of 1) 
 
 
   visits
@@ -49,7 +49,7 @@ exports['e2e visit low response timeout passes 1'] = `
   │ Screenshots:  0                 │
   │ Video:        true              │
   │ Duration:     X seconds         │
-  │ Spec Ran:     visit_spec.coffee │
+  │ Spec Ran:     visit_spec.XX │
   └─────────────────────────────────┘
 
 
@@ -66,7 +66,7 @@ exports['e2e visit low response timeout passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ visit_spec.coffee                         XX:XX       11       11        -        -        - │
+  │ ✔ visit_spec.XX                         XX:XX       11       11        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX       11       11        -        -        -  
 
@@ -82,14 +82,14 @@ exports['e2e visit low response timeout fails when network connection immediatel
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_http_network_error_failing_spec.coffee)                             │
-  │ Searched:   cypress/integration/visit_http_network_error_failing_spec.coffee                   │
+  │ Specs:      1 found (visit_http_network_error_failing_spec.XX)                             │
+  │ Searched:   cypress/integration/visit_http_network_error_failing_spec.XX                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_http_network_error_failing_spec.coffee...                                 (1 of 1) 
+  Running: visit_http_network_error_failing_spec.XX...                                 (1 of 1) 
 
 
   when network connection cannot be established
@@ -153,13 +153,13 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   │ Screenshots:  1                                            │
   │ Video:        true                                         │
   │ Duration:     X seconds                                    │
-  │ Spec Ran:     visit_http_network_error_failing_spec.coffee │
+  │ Spec Ran:     visit_http_network_error_failing_spec.XX │
   └────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_network_error_failing_spec.coffee/when network connection cannot be established -- fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_network_error_failing_spec.XX/when network connection cannot be established -- fails (failed).png (1280x720)
 
 
   (Video)
@@ -191,14 +191,14 @@ exports['e2e visit low response timeout fails when server responds with 500 1'] 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_http_500_response_failing_spec.coffee)                              │
-  │ Searched:   cypress/integration/visit_http_500_response_failing_spec.coffee                    │
+  │ Specs:      1 found (visit_http_500_response_failing_spec.XX)                              │
+  │ Searched:   cypress/integration/visit_http_500_response_failing_spec.XX                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_http_500_response_failing_spec.coffee...                                  (1 of 1) 
+  Running: visit_http_500_response_failing_spec.XX...                                  (1 of 1) 
 
 
   when server response is 500
@@ -250,13 +250,13 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   │ Screenshots:  1                                           │
   │ Video:        true                                        │
   │ Duration:     X seconds                                   │
-  │ Spec Ran:     visit_http_500_response_failing_spec.coffee │
+  │ Spec Ran:     visit_http_500_response_failing_spec.XX │
   └───────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_500_response_failing_spec.coffee/when server response is 500 -- fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_500_response_failing_spec.XX/when server response is 500 -- fails (failed).png (1280x720)
 
 
   (Video)
@@ -288,14 +288,14 @@ exports['e2e visit low response timeout fails when file server responds with 404
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_file_404_response_failing_spec.coffee)                              │
-  │ Searched:   cypress/integration/visit_file_404_response_failing_spec.coffee                    │
+  │ Specs:      1 found (visit_file_404_response_failing_spec.XX)                              │
+  │ Searched:   cypress/integration/visit_file_404_response_failing_spec.XX                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1) 
+  Running: visit_file_404_response_failing_spec.XX...                                  (1 of 1) 
 
 
   when file server response is 404
@@ -347,13 +347,13 @@ The internal Cypress web server responded with:
   │ Screenshots:  1                                           │
   │ Video:        true                                        │
   │ Duration:     X seconds                                   │
-  │ Spec Ran:     visit_file_404_response_failing_spec.coffee │
+  │ Spec Ran:     visit_file_404_response_failing_spec.XX │
   └───────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_file_404_response_failing_spec.coffee/when file server response is 404 -- fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_file_404_response_failing_spec.XX/when file server response is 404 -- fails (failed).png (1280x720)
 
 
   (Video)
@@ -385,14 +385,14 @@ exports['e2e visit low response timeout fails when content type isnt html 1'] = 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_non_html_content_type_failing_spec.coffee)                          │
-  │ Searched:   cypress/integration/visit_non_html_content_type_failing_spec.coffee                │
+  │ Specs:      1 found (visit_non_html_content_type_failing_spec.XX)                          │
+  │ Searched:   cypress/integration/visit_non_html_content_type_failing_spec.XX                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1) 
+  Running: visit_non_html_content_type_failing_spec.XX...                              (1 of 1) 
 
 
   when content type is plain/text
@@ -446,13 +446,13 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   │ Screenshots:  1                                               │
   │ Video:        true                                            │
   │ Duration:     X seconds                                       │
-  │ Spec Ran:     visit_non_html_content_type_failing_spec.coffee │
+  │ Spec Ran:     visit_non_html_content_type_failing_spec.XX │
   └───────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_non_html_content_type_failing_spec.coffee/when content type is plaintext -- fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_non_html_content_type_failing_spec.XX/when content type is plaintext -- fails (failed).png (1280x720)
 
 
   (Video)
@@ -484,14 +484,14 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_http_timeout_failing_spec.coffee)                                   │
-  │ Searched:   cypress/integration/visit_http_timeout_failing_spec.coffee                         │
+  │ Specs:      1 found (visit_http_timeout_failing_spec.XX)                                   │
+  │ Searched:   cypress/integration/visit_http_timeout_failing_spec.XX                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1) 
+  Running: visit_http_timeout_failing_spec.XX...                                       (1 of 1) 
 
 
   when visit times out
@@ -507,7 +507,7 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
 
 Your page did not fire its 'load' event within '1000ms'.
 
-You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+You can try increasing the 'pageLoadTimeout' value in 'cypress.XXon' to wait longer.
 
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
@@ -534,7 +534,7 @@ When this 'load' event occurs, Cypress will continue running commands.
 
 Your page did not fire its 'load' event within '500ms'.
 
-You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+You can try increasing the 'pageLoadTimeout' value in 'cypress.XXon' to wait longer.
 
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
@@ -570,14 +570,14 @@ When this 'load' event occurs, Cypress will continue running commands.
   │ Screenshots:  2                                      │
   │ Video:        true                                   │
   │ Duration:     X seconds                              │
-  │ Spec Ran:     visit_http_timeout_failing_spec.coffee │
+  │ Spec Ran:     visit_http_timeout_failing_spec.XX │
   └──────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds pageLoadTimeout (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds timeout option (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.XX/when visit times out -- fails timeout exceeds pageLoadTimeout (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.XX/when visit times out -- fails timeout exceeds timeout option (failed).png (1280x720)
 
 
   (Video)
@@ -609,14 +609,14 @@ exports['e2e visit low responseTimeout, normal pageLoadTimeout fails when respon
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_response_never_ends_failing_spec.js)                                │
-  │ Searched:   cypress/integration/visit_response_never_ends_failing_spec.js                      │
+  │ Specs:      1 found (visit_response_never_ends_failing_spec.XX)                                │
+  │ Searched:   cypress/integration/visit_response_never_ends_failing_spec.XX                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_response_never_ends_failing_spec.js...                                    (1 of 1) 
+  Running: visit_response_never_ends_failing_spec.XX...                                    (1 of 1) 
 
 
   response timeouts result in an error
@@ -789,15 +789,15 @@ Error: ESOCKETTIMEDOUT
   │ Screenshots:  3                                         │
   │ Video:        true                                      │
   │ Duration:     X seconds                                 │
-  │ Spec Ran:     visit_response_never_ends_failing_spec.js │
+  │ Spec Ran:     visit_response_never_ends_failing_spec.XX │
   └─────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors on the initial visit (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors when not initially visiting (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- fails after reducing the responseTimeout option (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.XX/response timeouts result in an error -- handles no response errors on the initial visit (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.XX/response timeouts result in an error -- handles no response errors when not initially visiting (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.XX/response timeouts result in an error -- fails after reducing the responseTimeout option (failed).png (1280x720)
 
 
   (Video)
@@ -921,14 +921,14 @@ exports['e2e visit resolves visits quickly in electron (headless) 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
-  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
+  │ Specs:      1 found (fast_visit_spec.XX)                                                   │
+  │ Searched:   cypress/integration/fast_visit_spec.XX                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+  Running: fast_visit_spec.XX...                                                       (1 of 1) 
 
 
   on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
@@ -980,7 +980,7 @@ histogram line
   │ Screenshots:  0                      │
   │ Video:        true                   │
   │ Duration:     X seconds              │
-  │ Spec Ran:     fast_visit_spec.coffee │
+  │ Spec Ran:     fast_visit_spec.XX │
   └──────────────────────────────────────┘
 
 
@@ -997,7 +997,7 @@ histogram line
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
+  │ ✔ fast_visit_spec.XX                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 

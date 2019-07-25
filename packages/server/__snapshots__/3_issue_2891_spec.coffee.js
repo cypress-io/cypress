@@ -7,14 +7,14 @@ exports['e2e issue 2891 passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (default_layout_spec.js)                                                   │
-  │ Searched:   cypress/integration/default_layout_spec.js                                         │
+  │ Specs:      1 found (default_layout_spec.XX)                                                   │
+  │ Searched:   cypress/integration/default_layout_spec.XX                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: default_layout_spec.js...                                                       (1 of 1) 
+  Running: default_layout_spec.XX...                                                       (1 of 1) 
 
 
   ✓ works
@@ -33,7 +33,7 @@ exports['e2e issue 2891 passes 1'] = `
   │ Screenshots:  0                      │
   │ Video:        true                   │
   │ Duration:     X seconds              │
-  │ Spec Ran:     default_layout_spec.js │
+  │ Spec Ran:     default_layout_spec.XX │
   └──────────────────────────────────────┘
 
 
@@ -50,7 +50,7 @@ exports['e2e issue 2891 passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ default_layout_spec.js                    XX:XX        1        1        -        -        - │
+  │ ✔ default_layout_spec.XX                    XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 

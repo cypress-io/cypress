@@ -7,14 +7,14 @@ exports['e2e server sent events passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (server_sent_events_spec.coffee)                                           │
-  │ Searched:   cypress/integration/server_sent_events_spec.coffee                                 │
+  │ Specs:      1 found (server_sent_events_spec.XX)                                           │
+  │ Searched:   cypress/integration/server_sent_events_spec.XX                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: server_sent_events_spec.coffee...                                               (1 of 1) 
+  Running: server_sent_events_spec.XX...                                               (1 of 1) 
 
 
   server sent events
@@ -36,7 +36,7 @@ exports['e2e server sent events passes 1'] = `
   │ Screenshots:  0                              │
   │ Video:        true                           │
   │ Duration:     X seconds                      │
-  │ Spec Ran:     server_sent_events_spec.coffee │
+  │ Spec Ran:     server_sent_events_spec.XX │
   └──────────────────────────────────────────────┘
 
 
@@ -53,7 +53,7 @@ exports['e2e server sent events passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ server_sent_events_spec.coffee            XX:XX        2        2        -        -        - │
+  │ ✔ server_sent_events_spec.XX            XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 

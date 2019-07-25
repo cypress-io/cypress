@@ -7,14 +7,14 @@ exports['e2e plugins fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.XX)                                                          │
+  │ Searched:   cypress/integration/app_spec.XX                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running: app_spec.XX...                                                              (1 of 1) 
 
 The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
@@ -36,7 +36,7 @@ Error: Async error from plugins file
   │ Screenshots:  0               │
   │ Video:        true            │
   │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
+  │ Spec Ran:     app_spec.XX │
   └───────────────────────────────┘
 
 
@@ -53,7 +53,7 @@ Error: Async error from plugins file
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
+  │ ✖ app_spec.XX                           XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 
@@ -69,14 +69,14 @@ exports['e2e plugins passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.XX)                                                          │
+  │ Searched:   cypress/integration/app_spec.XX                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running: app_spec.XX...                                                              (1 of 1) 
 
 
   ✓ is another spec
@@ -96,7 +96,7 @@ exports['e2e plugins passes 1'] = `
   │ Screenshots:  0               │
   │ Video:        true            │
   │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
+  │ Spec Ran:     app_spec.XX │
   └───────────────────────────────┘
 
 
@@ -113,7 +113,7 @@ exports['e2e plugins passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                           XX:XX        2        2        -        -        - │
+  │ ✔ app_spec.XX                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 
@@ -129,14 +129,14 @@ exports['e2e plugins can modify config from plugins 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.XX)                                                          │
+  │ Searched:   cypress/integration/app_spec.XX                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running: app_spec.XX...                                                              (1 of 1) 
 
 
   ✓ overrides config
@@ -156,7 +156,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
   │ Screenshots:  0               │
   │ Video:        true            │
   │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
+  │ Spec Ran:     app_spec.XX │
   └───────────────────────────────┘
 
 
@@ -173,7 +173,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                           XX:XX        2        2        -        -        - │
+  │ ✔ app_spec.XX                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 
@@ -189,14 +189,14 @@ exports['e2e plugins works with user extensions 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.XX)                                                          │
+  │ Searched:   cypress/integration/app_spec.XX                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running: app_spec.XX...                                                              (1 of 1) 
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -221,7 +221,7 @@ A video will not be recorded when using this browser.
   │ Screenshots:  0               │
   │ Video:        false           │
   │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
+  │ Spec Ran:     app_spec.XX │
   └───────────────────────────────┘
 
 
@@ -232,7 +232,7 @@ A video will not be recorded when using this browser.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                           XX:XX        1        1        -        -        - │
+  │ ✔ app_spec.XX                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
@@ -248,14 +248,14 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (absolute_spec.coffee)                                                     │
-  │ Searched:   cypress/integration/absolute_spec.coffee                                           │
+  │ Specs:      1 found (absolute_spec.XX)                                                     │
+  │ Searched:   cypress/integration/absolute_spec.XX                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: absolute_spec.coffee...                                                         (1 of 1) 
+  Running: absolute_spec.XX...                                                         (1 of 1) 
 
 
   ✓ uses the plugins file
@@ -274,7 +274,7 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   │ Screenshots:  0                    │
   │ Video:        true                 │
   │ Duration:     X seconds            │
-  │ Spec Ran:     absolute_spec.coffee │
+  │ Spec Ran:     absolute_spec.XX │
   └────────────────────────────────────┘
 
 
@@ -291,7 +291,7 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ absolute_spec.coffee                      XX:XX        1        1        -        -        - │
+  │ ✔ absolute_spec.XX                      XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 
@@ -307,14 +307,14 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (after_screenshot_spec.coffee)                                             │
-  │ Searched:   cypress/integration/after_screenshot_spec.coffee                                   │
+  │ Specs:      1 found (after_screenshot_spec.XX)                                             │
+  │ Searched:   cypress/integration/after_screenshot_spec.XX                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: after_screenshot_spec.coffee...                                                 (1 of 1) 
+  Running: after_screenshot_spec.XX...                                                 (1 of 1) 
 
 
   ✓ cy.screenshot() - replacement
@@ -343,15 +343,15 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   │ Screenshots:  4                            │
   │ Video:        true                         │
   │ Duration:     X seconds                    │
-  │ Spec Ran:     after_screenshot_spec.coffee │
+  │ Spec Ran:     after_screenshot_spec.XX │
   └────────────────────────────────────────────┘
 
 
   (Screenshots)
 
   - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (2x2)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (1280x720)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (1280x720)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.XX/ignored-values.png (1280x720)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.XX/invalid-return.png (1280x720)
   - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (1x1)
 
 
@@ -368,7 +368,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ after_screenshot_spec.coffee              XX:XX        4        3        1        -        - │
+  │ ✖ after_screenshot_spec.XX              XX:XX        4        3        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        4        3        1        -        -  
 

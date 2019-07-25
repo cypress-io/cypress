@@ -7,13 +7,13 @@ exports['e2e new project passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Specs:      1 found (app_spec.XX)                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running: app_spec.XX...                                                              (1 of 1) 
 
 
   ✓ is true
@@ -32,7 +32,7 @@ exports['e2e new project passes 1'] = `
   │ Screenshots:  0               │
   │ Video:        true            │
   │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
+  │ Spec Ran:     app_spec.XX │
   └───────────────────────────────┘
 
 
@@ -49,7 +49,7 @@ exports['e2e new project passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                           XX:XX        1        1        -        -        - │
+  │ ✔ app_spec.XX                           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        1        1        -        -        -  
 

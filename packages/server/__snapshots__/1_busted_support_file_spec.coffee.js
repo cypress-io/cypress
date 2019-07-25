@@ -7,17 +7,17 @@ exports['e2e busted support file passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Specs:      1 found (app_spec.XX)                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running: app_spec.XX...                                                              (1 of 1) 
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/busted-support-file/cypress/support/index.js
+  /foo/bar/.projects/busted-support-file/cypress/support/index.XX
 
 The error was:
 
@@ -41,7 +41,7 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0               │
   │ Video:        true            │
   │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
+  │ Spec Ran:     app_spec.XX │
   └───────────────────────────────┘
 
 
@@ -58,7 +58,7 @@ Fix the error in your code and re-run your tests.
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
+  │ ✖ app_spec.XX                           XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
 

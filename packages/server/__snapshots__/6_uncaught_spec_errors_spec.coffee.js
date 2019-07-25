@@ -7,14 +7,14 @@ exports['e2e uncaught errors failing1 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (uncaught_synchronous_before_tests_parsed.coffee)                          │
-  │ Searched:   cypress/integration/uncaught_synchronous_before_tests_parsed.coffee                │
+  │ Specs:      1 found (uncaught_synchronous_before_tests_parsed.XX)                          │
+  │ Searched:   cypress/integration/uncaught_synchronous_before_tests_parsed.XX                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_synchronous_before_tests_parsed.coffee...                              (1 of 1) 
+  Running: uncaught_synchronous_before_tests_parsed.XX...                              (1 of 1) 
 
 
   1) An uncaught error was detected outside of a test
@@ -51,13 +51,13 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                                               │
   │ Video:        true                                            │
   │ Duration:     X seconds                                       │
-  │ Spec Ran:     uncaught_synchronous_before_tests_parsed.coffee │
+  │ Spec Ran:     uncaught_synchronous_before_tests_parsed.XX │
   └───────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed.XX/An uncaught error was detected outside of a test (failed).png (1280x720)
 
 
   (Video)
@@ -89,14 +89,14 @@ exports['e2e uncaught errors failing2 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (uncaught_synchronous_during_hook_spec.coffee)                             │
-  │ Searched:   cypress/integration/uncaught_synchronous_during_hook_spec.coffee                   │
+  │ Specs:      1 found (uncaught_synchronous_during_hook_spec.XX)                             │
+  │ Searched:   cypress/integration/uncaught_synchronous_during_hook_spec.XX                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_synchronous_during_hook_spec.coffee...                                 (1 of 1) 
+  Running: uncaught_synchronous_during_hook_spec.XX...                                 (1 of 1) 
 
 
   1) An uncaught error was detected outside of a test
@@ -134,13 +134,13 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                                            │
   │ Video:        true                                         │
   │ Duration:     X seconds                                    │
-  │ Spec Ran:     uncaught_synchronous_during_hook_spec.coffee │
+  │ Spec Ran:     uncaught_synchronous_during_hook_spec.XX │
   └────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec.XX/An uncaught error was detected outside of a test (failed).png (1280x720)
 
 
   (Video)
@@ -172,14 +172,14 @@ exports['e2e uncaught errors failing3 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (uncaught_during_test_spec.coffee)                                         │
-  │ Searched:   cypress/integration/uncaught_during_test_spec.coffee                               │
+  │ Specs:      1 found (uncaught_during_test_spec.XX)                                         │
+  │ Searched:   cypress/integration/uncaught_during_test_spec.XX                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_during_test_spec.coffee...                                             (1 of 1) 
+  Running: uncaught_during_test_spec.XX...                                             (1 of 1) 
 
 
   foo
@@ -211,13 +211,13 @@ When Cypress detects uncaught errors originating from your test code it will aut
   │ Screenshots:  1                                │
   │ Video:        true                             │
   │ Duration:     X seconds                        │
-  │ Spec Ran:     uncaught_during_test_spec.coffee │
+  │ Spec Ran:     uncaught_during_test_spec.XX │
   └────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec.XX/foo -- bar (failed).png (1280x720)
 
 
   (Video)
@@ -233,7 +233,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_during_test_spec.coffee          XX:XX        1        -        1        -        - │
+  │ ✖ uncaught_during_test_spec.XX          XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
 
@@ -249,14 +249,14 @@ exports['e2e uncaught errors failing4 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (uncaught_during_hook_spec.coffee)                                         │
-  │ Searched:   cypress/integration/uncaught_during_hook_spec.coffee                               │
+  │ Specs:      1 found (uncaught_during_hook_spec.XX)                                         │
+  │ Searched:   cypress/integration/uncaught_during_hook_spec.XX                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_during_hook_spec.coffee...                                             (1 of 1) 
+  Running: uncaught_during_hook_spec.XX...                                             (1 of 1) 
 
 
   foo
@@ -293,13 +293,13 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   │ Screenshots:  1                                │
   │ Video:        true                             │
   │ Duration:     X seconds                        │
-  │ Spec Ran:     uncaught_during_hook_spec.coffee │
+  │ Spec Ran:     uncaught_during_hook_spec.XX │
   └────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does not run -- before all hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec.XX/foo -- does not run -- before all hook (failed).png (1280x720)
 
 
   (Video)
@@ -315,7 +315,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_during_hook_spec.coffee          XX:XX        2        1        1        -        - │
+  │ ✖ uncaught_during_hook_spec.XX          XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        2        1        1        -        -  
 
@@ -331,14 +331,14 @@ exports['e2e uncaught errors failing5 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (caught_async_sync_test_spec.coffee)                                       │
-  │ Searched:   cypress/integration/caught_async_sync_test_spec.coffee                             │
+  │ Specs:      1 found (caught_async_sync_test_spec.XX)                                       │
+  │ Searched:   cypress/integration/caught_async_sync_test_spec.XX                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: caught_async_sync_test_spec.coffee...                                           (1 of 1) 
+  Running: caught_async_sync_test_spec.XX...                                           (1 of 1) 
 
 
   foo
@@ -385,16 +385,16 @@ exports['e2e uncaught errors failing5 1'] = `
   │ Screenshots:  4                                  │
   │ Video:        true                               │
   │ Duration:     X seconds                          │
-  │ Spec Ran:     caught_async_sync_test_spec.coffee │
+  │ Spec Ran:     caught_async_sync_test_spec.XX │
   └──────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2 fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.XX/foo -- baz fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.XX/foo -- bar fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.XX/foo -- quux fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.XX/foo -- quux2 fails (failed).png (1280x720)
 
 
   (Video)
@@ -410,7 +410,7 @@ exports['e2e uncaught errors failing5 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ caught_async_sync_test_spec.coffee        XX:XX        8        4        4        -        - │
+  │ ✖ caught_async_sync_test_spec.XX        XX:XX        8        4        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        8        4        4        -        -  
 
