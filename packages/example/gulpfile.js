@@ -22,12 +22,12 @@ gulp.task('cname', function () {
 })
 
 gulp.task('gitignore', function () {
-  return gulp.src('.gitignore')
+  return gulp.src('.gitignore', { allowEmpty: true })
   .pipe(gulp.dest('build'))
 })
 
 gulp.task('clean', function () {
-  return gulp.src('./build')
+  return gulp.src('./build', { allowEmpty: true })
   .pipe(clean())
 })
 
