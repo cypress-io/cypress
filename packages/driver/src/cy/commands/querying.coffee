@@ -373,7 +373,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         cy.now("get", selector, getOpts).then ($el) ->
           if $el and $el.length
-            elArray = [].slice.call($el)
+            elArray = $el.get()
             subjectContainingMatch = getOpts.withinSubject.filter($el.parents())
             if (subjectContainingMatch.length)
               elArray.unshift(subjectContainingMatch[0])

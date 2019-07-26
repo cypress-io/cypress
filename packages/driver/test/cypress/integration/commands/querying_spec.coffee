@@ -1218,11 +1218,11 @@ describe "src/cy/commands/querying", ->
         expect($span.get(0)).to.eq span.get(0)
 
     it "GET is scoped to the current subject", ->
-      span = cy.$$("#click-me a")
+      link = cy.$$("#click-me a")
 
-      cy.get("#click-me a").contains("click").then ($span) ->
-        expect($span.length).to.eq(1)
-        expect($span.get(0)).to.eq span.get(0)
+      cy.get("#click-me a").contains("click").then ($link) ->
+        expect($link.length).to.eq(1)
+        expect($link.get(0)).to.eq link.get(0)
 
     it "can find input type=submits by value", ->
       cy.contains("input contains submit").then ($el) ->
@@ -1282,7 +1282,6 @@ describe "src/cy/commands/querying", ->
 
     it "can pick chained element as priority element", ->
       $btn = cy.$$('button:contains(click button)')
-      console.log($btn)
       cy.get('button').contains('click button').then ($el) ->
         expect($el[0]).eq($btn[0])
 
