@@ -55,7 +55,7 @@ e.g.
         const commentBefore = sourceCode.getCommentsBefore(node)
 
         const hasExplain = commentBefore && commentBefore.map(
-          (v) => commentTokens.map((commentToken) => v.value.trim().startsWith(commentToken)).filter(Boolean)[0]
+          (v) => commentTokens.concat(commentTokens.map((v) => `# ${v}`)).map((commentToken) => v.value.trim().startsWith(commentToken)).filter(Boolean)[0]
         ).filter(Boolean)[0]
 
         if (hasExplain) {
