@@ -32,7 +32,7 @@
     "cypress-example-kitchensink": "1.5.6",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
-    "gulp-gh-pages-will": "0.5.5",
+    "gulp-gh-pages": "0.5.4",
     "gulp-rev-all": "2.0.2",
     "mocha": "2.5.3",
     "shelljs": "0.8.3"
