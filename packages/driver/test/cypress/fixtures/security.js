@@ -7,6 +7,9 @@
     document.body.appendChild(div)
   }
 
+  const topFoo = "foo"
+  const parentFoo = "foo"
+
   if (top != self) run()
   if (top!=self) run()
   if (top.location != self.location) run()
