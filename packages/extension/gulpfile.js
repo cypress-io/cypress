@@ -13,12 +13,12 @@ const browserify = require('browserify')
 const icons = require('@cypress/icons')
 
 gulp.task('clean', () => {
-  gulp.src('dist')
+  return gulp.src('dist', { allowEmpty: true })
   .pipe(clean())
 })
 
 gulp.task('manifest', (done) => {
-  gulp.src('app/manifest.json')
+  return gulp.src('app/manifest.json')
   .pipe(gulp.dest('dist'))
   .on('end', () => {
     return fs.readJson('dist/manifest.json', (err, json) => {
@@ -30,7 +30,7 @@ gulp.task('manifest', (done) => {
 })
 
 gulp.task('backup', () => {
-  gulp.src('dist/background.js')
+  return gulp.src('dist/background.js')
   .pipe(rename('background_src.js'))
   .pipe(gulp.dest('dist'))
 })
@@ -46,17 +46,17 @@ gulp.task('background', () => {
 })
 
 gulp.task('html', () => {
-  gulp.src('app/**/*.html')
+  return gulp.src('app/**/*.html')
   .pipe(gulp.dest('dist'))
 })
 
 gulp.task('css', () => {
-  gulp.src('app/**/*.css')
+  return gulp.src('app/**/*.css')
   .pipe(gulp.dest('dist'))
 })
 
 gulp.task('icons', () => {
-  gulp.src([
+  return gulp.src([
     icons.getPathToIcon('icon_16x16.png'),
     icons.getPathToIcon('icon_19x19.png'),
     icons.getPathToIcon('icon_38x38.png'),
@@ -67,15 +67,10 @@ gulp.task('icons', () => {
 })
 
 gulp.task('logos', () => {
-  gulp.src([
+  return gulp.src([
     icons.getPathToLogo('cypress-bw.png'),
   ])
   .pipe(gulp.dest('dist/logos'))
-})
-
-gulp.task('watch', gulp.series('build'), (done) => {
-  gulp.watch('app/**/*', gulp.series('build'))
-  done()
 })
 
 gulp.task('build', gulp.series('clean', gulp.parallel(
@@ -86,3 +81,8 @@ gulp.task('build', gulp.series('clean', gulp.parallel(
   'html',
   'css',
 )))
+
+gulp.task('watch', gulp.series('build'), (done) => {
+  gulp.watch('app/**/*', gulp.series('build'))
+  done()
+})

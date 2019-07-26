@@ -37,7 +37,7 @@
     "gulp-rename": "1.4.0",
     "sinon": "1.17.7",
     "sinon-chai": "3.3.0",
-    "vinyl-source-stream": "1.1.2"
+    "vinyl-source-stream": "2.0.0"
   },
   "files": [
     "app",
