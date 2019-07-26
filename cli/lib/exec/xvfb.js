@@ -8,6 +8,7 @@ const { throwFormErrorText, errors } = require('../errors')
 const util = require('../util')
 
 const xvfb = Promise.promisifyAll(new Xvfb({
+  displayNum: util.getEnv('CYPRESS_xvfbPort'),
   timeout: 5000, // milliseconds
   onStderrData (data) {
     if (debugXvfb.enabled) {
