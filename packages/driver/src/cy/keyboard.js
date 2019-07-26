@@ -84,36 +84,6 @@ const initialModifiers = {
   shift: false,
 }
 
-const modifierChars = {
-  '{alt}': 'alt',
-  '{option}': 'alt',
-
-  '{ctrl}': 'ctrl',
-  '{control}': 'ctrl',
-
-  '{meta}': 'meta',
-  '{command}': 'meta',
-  '{cmd}': 'meta',
-
-  '{shift}': 'shift',
-}
-
-const getKeyCode = (key) => {
-  const code = key.charCodeAt(0)
-
-  return charCodeMap[code] != null ? charCodeMap[code] : code
-}
-
-const getAsciiCode = (key) => {
-  const code = key.charCodeAt(0)
-
-  return code
-}
-
-const isModifier = (chars) => {
-  return _.has(modifierChars, chars)
-}
-
 const toModifiersEventOptions = (modifiers) => {
   return {
     altKey: modifiers.alt,
@@ -130,9 +100,7 @@ const fromModifierEventOptions = (eventOptions) => {
     meta: eventOptions.metaKey,
     shift: eventOptions.shiftKey,
 
-  }, (x) => {
-    return !!x
-  })
+  }, (x) => !!x)
 }
 
 const getActiveModifiers = (state) => {
@@ -353,7 +321,7 @@ const create = function (state) {
         options.input = false
         options.setKey = '{end}'
 
-        return this.ensureKey(el, null, options, function () {
+        return this.ensureKey(el, null, options, () => {
           return $selection.moveCursorToLineEnd(el)
         })
       },
@@ -385,28 +353,38 @@ const create = function (state) {
       },
     },
 
-    isSpecialChar (chars) {
-      return _.has(kb.specialChars, chars)
+    modifierChars: {
+      '{alt}': 'alt',
+      '{option}': 'alt',
+
+      '{ctrl}': 'ctrl',
+      '{control}': 'ctrl',
+
+      '{meta}': 'meta',
+      '{command}': 'meta',
+      '{cmd}': 'meta',
+
+      '{shift}': 'shift',
     },
 
     type (options = {}) {
       _.defaults(options, {
         delay: 10,
-        disableSpecialCharSequences: false,
-        onEvent () { },
-        onBeforeEvent () { },
-        onBeforeType () { },
-        onValueChange () { },
-        onEnterPressed () { },
-        onNoMatchingSpecialChars () { },
-        onBeforeSpecialCharAction () { },
+        parseSpecialCharSequences: true,
+        onEvent () {},
+        onBeforeEvent () {},
+        onBeforeType () {},
+        onValueChange () {},
+        onEnterPressed () {},
+        onNoMatchingSpecialChars () {},
+        onBeforeSpecialCharAction () {},
       })
 
       const el = options.$el.get(0)
 
       let keys = options.chars
 
-      if (!options.disableSpecialCharSequences) {
+      if (options.parseSpecialCharSequences) {
         keys = options.chars.split(charsBetweenCurlyBracesRe).map((chars) => {
           if (charsBetweenCurlyBracesRe.test(chars)) {
           // allow special chars and modifiers to be case-insensitive
@@ -439,7 +417,7 @@ const create = function (state) {
           //# modifiers don't count as keystrokes
         }
 
-        if (isModifier(chars)) {
+        if (kb.isModifier(chars)) {
           return memo
         }
 
@@ -459,7 +437,7 @@ const create = function (state) {
           .resolve(kb.handleSpecialChars(el, chars, options))
           .delay(options.delay)
 
-        case !isModifier(chars):
+        case !kb.isModifier(chars):
           return Promise
           .resolve(kb.handleModifier(el, chars, options))
           .delay(options.delay)
@@ -468,21 +446,34 @@ const create = function (state) {
 
           //# between curly braces, but not a valid special
           //# char or modifier
-          const allChars = _.keys(kb.specialChars).concat(_.keys(modifierChars)).join(', ')
+          const allChars = _.keys(kb.specialChars).concat(_.keys(kb.modifierChars)).join(', ')
 
           return Promise
           .resolve(options.onNoMatchingSpecialChars(chars, allChars))
           .delay(options.delay)
         }
 
-        default:
+        default: {
           return Promise
           .each(chars.split(''), (char) => {
             return Promise
             .resolve(kb.typeKey(el, char, options))
             .delay(options.delay)
           })
+        }
       }
+    },
+
+    getKeyCode (key) {
+      const code = key.charCodeAt(0)
+
+      return charCodeMap[code] != null ? charCodeMap[code] : code
+    },
+
+    getAsciiCode (key) {
+      const code = key.charCodeAt(0)
+
+      return code
     },
 
     simulateKey (el, eventType, key, options) {
@@ -508,17 +499,16 @@ const create = function (state) {
       })
 
       switch (eventType) {
-        case 'keydown': case 'keyup':
-          keyCode = options.charCode != null ? options.charCode : getKeyCode(key.toUpperCase())
+        case 'keydown': case 'keyup': {
+          keyCode = options.charCode != null ? options.charCode : kb.getKeyCode(key.toUpperCase())
 
           charCode = 0
-          // keyCode = keyCode
           which = keyCode
           break
-
+        }
         case 'keypress': {
 
-          const asciiCode = options.charCode != null ? options.charCode : getAsciiCode(key)
+          const asciiCode = options.charCode != null ? options.charCode : kb.getAsciiCode(key)
 
           charCode = asciiCode
           keyCode = asciiCode
@@ -526,7 +516,7 @@ const create = function (state) {
           break
         }
 
-        case 'textInput':
+        case 'textInput': {
           charCode = 0
           keyCode = 0
           which = 0
@@ -537,13 +527,15 @@ const create = function (state) {
           })
 
           break
+        }
 
-        case 'input':
+        case 'input': {
           keys = false
           otherKeys = false
           break
-        default:
-          break
+        }
+
+        default: null
       }
 
       if (otherKeys) {
@@ -682,14 +674,21 @@ const create = function (state) {
       return kb.simulateKey(el, 'keyup', key, options)
     },
 
+    isSpecialChar (chars) {
+      return _.has(kb.specialChars, chars)
+    },
+
     handleSpecialChars (el, chars, options) {
       options.key = chars
 
       return kb.specialChars[chars].call(this, el, options)
     },
+    isModifier (chars) {
+      return _.has(kb.modifierChars, chars)
+    },
 
     handleModifier (el, chars, options) {
-      const modifier = modifierChars[chars]
+      const modifier = kb.modifierChars[chars]
 
       //# do nothing if already activated
       if (getActiveModifiers(state)[modifier]) {
@@ -736,7 +735,6 @@ const create = function (state) {
     toModifiersEventOptions,
     modifiersToString,
     getActiveModifiers,
-    modifierChars,
   }
 
   return kb
@@ -746,7 +744,6 @@ module.exports = {
   create,
   toModifiersEventOptions,
   getActiveModifiers,
-  modifierChars,
   modifiersToString,
   fromModifierEventOptions,
 }

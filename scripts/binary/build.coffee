@@ -9,7 +9,6 @@ chalk = require("chalk")
 Promise = require("bluebird")
 gulpDebug = require("gulp-debug")
 gulpCoffee = require("gulp-coffee")
-gulpTypeScript = require("gulp-typescript")
 pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
@@ -195,7 +194,7 @@ buildCypressApp = (platform, version, options = {}) ->
 
         ## except those in node_modules
         "!" + distDir("**", "node_modules", "**", "*.coffee")
-      ])
+      ], { sourcemaps: true })
       .pipe vinylPaths(del)
       .pipe(gulpDebug())
       .pipe gulpCoffee({

@@ -30,7 +30,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         force: false
         delay: 10
         release: true
-        disableSpecialCharSequences: false
+        parseSpecialCharSequences: true
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
       })
@@ -92,7 +92,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       isMonth     = $dom.isType(options.$el, "month")
       isWeek      = $dom.isType(options.$el, "week")
       hasTabIndex = $dom.isSelector(options.$el, "[tabindex]")
-      isReadonly  = options.$el.is('[readonly]')
 
       ## TODO: tabindex can't be -1
 
@@ -109,13 +108,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $utils.throwErrByPath("type.multiple_elements", {
           onFail: options._log
           args: { num }
-        })
-
-      if (isReadonly)
-        node = $dom.stringify(options.$el)
-        $utils.throwErrByPath("type.readonly", {
-          onFail: options._log
-          args: { node }
         })
 
       if not (_.isString(chars) or _.isFinite(chars))
@@ -257,7 +249,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           chars:                        options.chars
           delay:                        options.delay
           release:                      options.release
-          disableSpecialCharSequences:  options.disableSpecialCharSequences
+          parseSpecialCharSequences:    options.parseSpecialCharSequences
           window:                       win
 
           updateValue: (el, key) ->

@@ -331,6 +331,12 @@ declare namespace Cypress {
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
+    once: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
     off: Actions
   }
 
@@ -933,6 +939,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     on: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    once: Actions
 
     /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
@@ -2243,12 +2255,12 @@ declare namespace Cypress {
      */
     delay: number
     /**
-     * Disable typing special characters for strings surrounded by `{}`,
-     * such as `{esc}`, and type the literal characters instead
+     * Parse special characters for strings surrounded by `{}`,
+     * such as `{esc}`. Set to `false` to type the literal characters instead
      *
-     * @default false
+     * @default true
      */
-    disableSpecialCharSequences: boolean
+    parseSpecialCharSequences: boolean
     /**
      * Forces the action, disables waiting for actionability
      *
