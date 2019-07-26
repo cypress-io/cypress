@@ -194,7 +194,7 @@ buildCypressApp = (platform, version, options = {}) ->
 
         ## except those in node_modules
         "!" + distDir("**", "node_modules", "**", "*.coffee")
-      ])
+      ], { sourcemaps: true })
       .pipe vinylPaths(del)
       .pipe(gulpDebug())
       .pipe gulpCoffee({
