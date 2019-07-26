@@ -12,12 +12,10 @@ const trimInnerText = ($el) => {
 }
 
 describe('src/cy/commands/actions/type', () => {
-  before(() => {
+  beforeEach(function () {
     cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
-      this.body = win.document.body.outerHTML
-
       const el = cy.$$('[contenteditable]:first').get(0)
 
       // by default... the last new line by itself
@@ -41,12 +39,6 @@ describe('src/cy/commands/actions/type', () => {
       // the last new line
       this.multiplierNumNewLines = (newLines.length - 1) / 2
     })
-  })
-
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
   })
 
   context('#type', () => {
