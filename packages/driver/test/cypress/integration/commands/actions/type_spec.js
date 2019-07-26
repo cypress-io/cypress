@@ -12,7 +12,7 @@ const trimInnerText = ($el) => {
 }
 
 describe('src/cy/commands/actions/type', () => {
-  beforeEach(function () {
+  before(() => {
     cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
@@ -39,6 +39,10 @@ describe('src/cy/commands/actions/type', () => {
       // the last new line
       this.multiplierNumNewLines = (newLines.length - 1) / 2
     })
+  })
+
+  beforeEach(() => {
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#type', () => {
