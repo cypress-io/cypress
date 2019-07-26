@@ -27,21 +27,9 @@ const focusEvents = ['focus', 'focusin']
 const allMouseEvents = [...mouseClickEvents, ...mouseHoverEvents, ...focusEvents]
 
 describe('src/cy/commands/actions/click', () => {
-  before(() => {
+  beforeEach(() => {
     cy
     .visit('/fixtures/dom.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
-    // scroll back to top of page before every test
-    // since this is a side-effect
-    doc.documentElement.scrollTop = 0
   })
 
   context('#click', () => {
