@@ -50,9 +50,9 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
         ctx._obj = ctx._obj.selector
 
       ## apply the assertion
-      ctx.assert(bool, args...)
+      ret = ctx.assert(bool, args...)
       ctx._obj = orig
-      return
+      return ret
     catch err
       ## send it up with the obj and whether it was negated
       callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
