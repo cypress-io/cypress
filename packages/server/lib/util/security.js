@@ -1,9 +1,5 @@
 // Tests located in packages/server/test/unit/security_spec
 
-/* eslint-disable
-    no-unused-vars,
-*/
-const stream = require('stream')
 const pumpify = require('pumpify')
 const replacestream = require('replacestream')
 
