@@ -79,8 +79,8 @@ describe "src/cy/commands/assertions", ->
       obj = {requestJSON: {teamIds: [2]}}
       cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
-    ## TODO: make cy.then retry
-    ## https://github.com/cypress-io/cypress/issues/627
+    # TODO: make cy.then retry
+    # https://github.com/cypress-io/cypress/issues/627
     it.skip "outer assertions retry on cy.then", ->
       obj = {foo: "bar"}
 
@@ -668,6 +668,10 @@ describe "src/cy/commands/assertions", ->
           cy.$$("body").prepend $("<input value='' />")
           cy.get("input").eq(0).then ($input) ->
             expect($input).to.have.attr('value', '')
+
+        it "can chain off of chai-jquery assertions", ->
+          $el = cy.$$('ul#list')
+          expect($el).to.be.visible.and.have.id('list')
 
         describe "without selector", ->
           it "exists", (done) ->
