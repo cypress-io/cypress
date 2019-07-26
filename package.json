@@ -123,7 +123,6 @@
     "gulp-coffee": "3.0.3",
     "gulp-debug": "4.0.0",
     "gulp-rename": "1.4.0",
-    "gulp-typescript": "5.0.1",
     "hasha": "5.0.0",
     "human-interval": "0.1.6",
     "husky": "2.4.1",
