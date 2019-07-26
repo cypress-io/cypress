@@ -43,7 +43,6 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
     try
       # ## reset obj to wrapped
-      orig = ctx._obj
       ctx._obj = wrap(ctx)
 
       if ctx._obj.length is 0
@@ -51,7 +50,6 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
 
       ## apply the assertion
       ctx.assert(bool, args...)
-      ctx._obj = orig
     catch err
       ## send it up with the obj and whether it was negated
       callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
