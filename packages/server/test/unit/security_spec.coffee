@@ -16,6 +16,12 @@ original = """
     parent1
     grandparent
     grandparents
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
 
     <div style="left: 1500px; top: 0px;"></div>
     <div style="left: 1500px; top : 0px;"></div>
@@ -41,7 +47,6 @@ original = """
       if (top.location!=self.location&&(top.location.href=self.location.href)) run()
       if (top.location != self.location) run()
       if (top.location != location) run()
-      if (topFoo.window != topFoo) run()
       if (self.location != top.location) run()
       if (parent.frames.length > 0) run()
       if (window != top) run()
@@ -55,7 +60,6 @@ original = """
       if (parent && parent != window) run()
       if (parent && parent != self) run()
       if (parent && window != parent) run()
-      if (parent && window != parentFoo) run()
       if (parent && self != parent) run()
       if (parent && parent.frames && parent.frames.length > 0) run()
       if ((self.parent && !(self.parent === self)) && (self.parent.frames.length != 0)) run()
@@ -77,6 +81,12 @@ expected = """
     parent1
     grandparent
     grandparents
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
 
     <div style="left: 1500px; top: 0px;"></div>
     <div style="left: 1500px; top : 0px;"></div>
@@ -102,7 +112,6 @@ expected = """
       if (self.location!=self.location&&(self.location.href=self.location.href)) run()
       if (self.location != self.location) run()
       if (self.location != location) run()
-      if (topFoo.window != topFoo) run()
       if (self.location != self.location) run()
       if (self.frames.length > 0) run()
       if (window != self) run()
@@ -116,7 +125,6 @@ expected = """
       if (parent && self != window) run()
       if (parent && self != self) run()
       if (parent && window != self) run()
-      if (parent && window != parentFoo) run()
       if (parent && self != self) run()
       if (parent && self.frames && self.frames.length > 0) run()
       if ((self.parent && !(self.self === self)) && (self.self.frames.length != 0)) run()
