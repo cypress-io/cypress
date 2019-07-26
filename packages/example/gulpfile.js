@@ -1,5 +1,5 @@
 let gulp = require('gulp')
-let ghPages = require('gulp-gh-pages-will')
+let ghPages = require('gulp-gh-pages')
 let clean = require('gulp-clean')
 let RevAll = require('gulp-rev-all')
 
