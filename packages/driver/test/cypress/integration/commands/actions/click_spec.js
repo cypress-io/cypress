@@ -28,8 +28,7 @@ const allMouseEvents = [...mouseClickEvents, ...mouseHoverEvents, ...focusEvents
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
-    cy
-    .visit('/fixtures/dom.html')
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#click', () => {

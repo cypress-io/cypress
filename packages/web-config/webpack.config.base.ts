@@ -179,7 +179,9 @@ const config: webpack.Configuration = {
 
     ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost' })] : []),
   ],
+
   cache: true,
+
 }
 
 export default config
