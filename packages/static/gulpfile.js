@@ -6,4 +6,4 @@ gulp.task('favicon', () => {
   .pipe(gulp.dest('./dist'))
 })
 
-gulp.task('build', ['favicon'])
+gulp.task('build', gulp.parallel('favicon'))
