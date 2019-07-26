@@ -241,7 +241,7 @@ verify = (cy, $el, options, callbacks) ->
         ## ensure its visible
         cy.ensureVisibility($el, _log)
 
-        ## ensure its 'receivable'
+        ## ensure its 'receivable' (not disabled, readonly)
         cy.ensureReceivability($el, _log)
 
       ## now go get all the coords for this element
