@@ -18,6 +18,7 @@ module.exports = (on) => {
       }).join('\n\n')
 
       fs.outputFileSync(filePath, longText)
+
       return null
     },
   })

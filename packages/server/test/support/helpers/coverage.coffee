@@ -20,7 +20,7 @@ coffeeCoverage.register({
 
 ## using hack found here to prevent problems with
 ## coffee-coverage being replaced by modules which
-## use coffee-script/register
+## use coffeescript/register
 ## https://github.com/abresas/register-coffee-coverage/blob/master/index.js
 loader = require.extensions[".coffee"]
 

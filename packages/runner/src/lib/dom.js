@@ -92,6 +92,7 @@ function addElementBoxModelLayers ($el, body) {
           top: dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop,
           left: dimensions.offset.left + dimensions.borderLeft + dimensions.paddingLeft,
         }
+
         break
       default:
         obj = {
@@ -307,7 +308,7 @@ function getElementDimensions ($el) {
   return dimensions
 }
 
-function getAttr (el, attr) {
+function getNumAttrValue (el, attr) {
   // nuke anything thats not a number or a negative symbol
   const num = _.toNumber(el.css(attr).replace(/[^0-9\.-]+/, ''))
 
@@ -319,15 +320,15 @@ function getAttr (el, attr) {
 }
 
 function getPadding (el, dir) {
-  return getAttr(el, `padding-${dir}`)
+  return getNumAttrValue(el, `padding-${dir}`)
 }
 
 function getBorder (el, dir) {
-  return getAttr(el, `border-${dir}-width`)
+  return getNumAttrValue(el, `border-${dir}-width`)
 }
 
 function getMargin (el, dir) {
-  return getAttr(el, `margin-${dir}`)
+  return getNumAttrValue(el, `margin-${dir}`)
 }
 
 function getTotalFor (directions, dimensions) {

@@ -260,6 +260,7 @@ const start = (options = {}) => {
 
       This overrides the default Cypress binary path used.
     `)
+
     logger.log()
 
     return util.isExecutableAsync(envBinaryPath)

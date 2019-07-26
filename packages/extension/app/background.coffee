@@ -2,6 +2,7 @@ map     = require("lodash/map")
 pick    = require("lodash/pick")
 once    = require("lodash/once")
 Promise = require("bluebird")
+{ client, circularParser } = require("@packages/socket/lib/browser")
 
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
@@ -12,19 +13,14 @@ firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
 
-connect = (host, path, io) ->
-  io ?= global.io
-
-  ## bail if io isnt defined
-  return if not io
-
+connect = (host, path) ->
   listenToCookieChanges = once ->
     chrome.cookies.onChanged.addListener (info) ->
       if info.cause isnt "overwrite"
-        client.emit("automation:push:request", "change:cookie", info)
+        ws.emit("automation:push:request", "change:cookie", info)
 
   fail = (id, err) ->
-    client.emit("automation:response", id, {
+    ws.emit("automation:response", id, {
       __error: err.message
       __stack: err.stack
       __name:  err.name
@@ -32,18 +28,20 @@ connect = (host, path, io) ->
 
   invoke = (method, id, args...) ->
     respond = (data) ->
-      client.emit("automation:response", id, {response: data})
+      ws.emit("automation:response", id, {response: data})
 
     Promise.try ->
       automation[method].apply(automation, args.concat(respond))
     .catch (err) ->
       fail(id, err)
 
-  ## cannot use required socket here due
-  ## to bug in socket io client with browserify
-  client = io.connect(host, {path: path, transports: ["websocket"]})
+  ws = client.connect(host, {
+    path: path,
+    transports: ["websocket"]
+    parser: circularParser
+  })
 
-  client.on "automation:request", (id, msg, data) ->
+  ws.on "automation:request", (id, msg, data) ->
     switch msg
       when "get:cookies"
         invoke("getCookies", id, data)
@@ -64,18 +62,18 @@ connect = (host, path, io) ->
       else
         fail(id, {message: "No handler registered for: '#{msg}'"})
 
-  client.on "connect", ->
+  ws.on "connect", ->
     listenToCookieChanges()
 
-    client.emit("automation:client:connected")
+    ws.emit("automation:client:connected")
 
-  return client
+  return ws
 
 ## initially connect
-connect(HOST, PATH, global.io)
+connect(HOST, PATH)
 
 automation = {
-  connect: connect
+  connect
 
   getUrl: (cookie = {}) ->
     prefix = if cookie.secure then "https://" else "http://"

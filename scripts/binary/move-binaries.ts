@@ -1,11 +1,11 @@
 import { s3helpers } from './s3-api'
-const debug = require("debug")("cypress:binary")
+const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
 import is from 'check-more-types'
 // using "arg" module for parsing CLI arguments
 // because it plays really nicely with TypeScript
 import arg from 'arg'
-import {prop, sortBy, last, equals} from 'ramda'
+import { prop, sortBy, last, equals } from 'ramda'
 import pluralize from 'pluralize'
 
 // inquirer-confirm is missing type definition
@@ -17,9 +17,9 @@ import confirm from 'inquirer-confirm'
 import uploadUtils from './util/upload'
 
 // @ts-ignore
-import {getUploadDirForPlatform} from './upload-unique-binary'
+import { getUploadDirForPlatform } from './upload-unique-binary'
 // @ts-ignore
-import {zipName, getFullUploadName} from './upload'
+import { zipName, getFullUploadName } from './upload'
 
 /**
  * 40 character full sha commit string
@@ -33,16 +33,16 @@ type semver = string
 /**
  * Platform plus architecture string like "darwin-x64"
  */
-type platformArch = "darwin-x64" | "linux-x64"| "win32-ia32" | "win32-x64"
+type platformArch = 'darwin-x64' | 'linux-x64'| 'win32-ia32' | 'win32-x64'
 
 interface ReleaseInformation {
-  commit: commit,
+  commit: commit
   version: semver
 }
 
 interface CommitAndBuild {
-  commit: commit,
-  build: number,
+  commit: commit
+  build: number
   s3path: string
 }
 
@@ -59,19 +59,23 @@ interface Desktop {
 export const parseBuildPath = (s3path: string): CommitAndBuild | null => {
   const shaAndBuild = /([0-9a-f]{40})-(\d+)\/?$/i
   const found = s3path.match(shaAndBuild)
+
   if (!found) {
     return null
   }
+
   const [, commit, build] = found
+
   return {
     commit,
     build: parseInt(build),
-    s3path
+    s3path,
   }
 }
 
 export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
-  const matching = s3paths.filter(s => s.includes(commit))
+  const matching = s3paths.filter((s) => s.includes(commit))
+
   if (!matching.length) {
     // could not find path with commit SHA
     return null
@@ -84,6 +88,7 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
   // each path includes commit SHA and build number, let's pick the last build
   const parsedBuilds = matching.map(parseBuildPath)
   const sortedBuilds = sortBy(prop('build'))(parsedBuilds)
+
   return prop('s3path', last(sortedBuilds))
 }
 
@@ -97,7 +102,7 @@ export const prompts = {
       question: 'Would you like to proceed? This will overwrite existing files',
       default: false,
     })
-  }
+  },
 }
 
 /**
@@ -113,10 +118,11 @@ export const moveBinaries = async (args = []) => {
     '--platformArch': String,
     // aliases
     '--sha': '--commit',
-    '-v': '--version'
+    '-v': '--version',
   }, {
-    argv: args.slice(2)
+    argv: args.slice(2),
   })
+
   debug('moveBinaries with options %o', options)
 
   // @ts-ignore
@@ -126,7 +132,7 @@ export const moveBinaries = async (args = []) => {
 
   const releaseOptions: ReleaseInformation = {
     commit: options['--commit'],
-    version: options['--version']
+    version: options['--version'],
   }
 
   const aws = uploadUtils.getS3Credentials()
@@ -136,12 +142,15 @@ export const moveBinaries = async (args = []) => {
   const lastBuilds: Desktop[] = []
 
   let platforms: platformArch[] = uploadUtils.getValidPlatformArchs()
+
   if (options['--platformArch']) {
     const onlyPlatform = options['--platformArch']
+
     console.log('only moving single platform %s', onlyPlatform)
     la(uploadUtils.isValidPlatformArch(onlyPlatform), 'invalid platform-arch', onlyPlatform)
     platforms = platforms.filter(equals(onlyPlatform))
   }
+
   la(platforms.length, 'no platforms to move', platforms)
 
   for (const platformArch of platforms) {
@@ -149,8 +158,9 @@ export const moveBinaries = async (args = []) => {
       'invalid platform arch', platformArch)
 
     const uploadDir = getUploadDirForPlatform({
-      version: releaseOptions.version
+      version: releaseOptions.version,
     }, platformArch)
+
     console.log('finding binary for %s in %s', platformArch, uploadDir)
 
     const list: string[] = await s3helpers.listS3Objects(uploadDir, aws.bucket, s3)
@@ -161,9 +171,11 @@ export const moveBinaries = async (args = []) => {
     }
 
     const lastBuildPath = findBuildByCommit(releaseOptions.commit, list)
+
     if (!lastBuildPath) {
       throw new Error(`Cannot find build with commit ${releaseOptions.commit} for platform ${platformArch}`)
     }
+
     console.log('found %s for commit %s on platform %s',
       lastBuildPath,
       releaseOptions.commit, platformArch)
@@ -174,18 +186,20 @@ export const moveBinaries = async (args = []) => {
 
     lastBuilds.push({
       platformArch,
-      s3zipPath
+      s3zipPath,
     })
   }
 
   console.log('Copying %s for commit %s',
     pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
+
   console.log(lastBuilds.map(prop('s3zipPath')).join('\n'))
 
   try {
     await prompts.shouldCopy()
   } catch (e) {
-    console.log('Copying has been cancelled')
+    console.log('Copying has been canceled')
+
     return
   }
 
@@ -199,9 +213,10 @@ export const moveBinaries = async (args = []) => {
       folder: aws.folder,
       version: releaseOptions.version,
       platformArch: lastBuild.platformArch,
-      name: zipName
+      name: zipName,
     }
     const destinationPath = getFullUploadName(options)
+
     console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
 
     await s3helpers.copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket,
@@ -209,10 +224,10 @@ export const moveBinaries = async (args = []) => {
 
     testRunners.push({
       platformArch: lastBuild.platformArch,
-      s3zipPath: destinationPath
+      s3zipPath: destinationPath,
     })
   }
 
   // return all available information
-  return {lastBuilds, testRunners}
+  return { lastBuilds, testRunners }
 }
