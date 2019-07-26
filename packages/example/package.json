@@ -35,7 +35,6 @@
     "gulp-gh-pages-will": "0.5.5",
     "gulp-rev-all": "2.0.2",
     "mocha": "2.5.3",
-    "run-sequence": "1.2.2",
     "shelljs": "0.8.3"
   }
 }

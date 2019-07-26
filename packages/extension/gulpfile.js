@@ -2,27 +2,18 @@
     @cypress/dev/no-return-before,
     no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const fs = require('fs-extra')
 const pkg = require('./package.json')
 const gulp = require('gulp')
 const clean = require('gulp-clean')
 const rename = require('gulp-rename')
-const runSeq = require('run-sequence')
 const source = require('vinyl-source-stream')
-const Promise = require('bluebird')
 const coffeeify = require('coffeeify')
 const browserify = require('browserify')
 const icons = require('@cypress/icons')
 
 gulp.task('clean', () => {
-  return gulp.src('dist')
+  gulp.src('dist')
   .pipe(clean())
 })
 
@@ -36,12 +27,10 @@ gulp.task('manifest', (done) => {
       return fs.writeJson('dist/manifest.json', json, { spaces: 2 }, done)
     })
   })
-
-  return null
 })
 
 gulp.task('backup', () => {
-  return gulp.src('dist/background.js')
+  gulp.src('dist/background.js')
   .pipe(rename('background_src.js'))
   .pipe(gulp.dest('dist'))
 })
@@ -57,17 +46,17 @@ gulp.task('background', () => {
 })
 
 gulp.task('html', () => {
-  return gulp.src('app/**/*.html')
+  gulp.src('app/**/*.html')
   .pipe(gulp.dest('dist'))
 })
 
 gulp.task('css', () => {
-  return gulp.src('app/**/*.css')
+  gulp.src('app/**/*.css')
   .pipe(gulp.dest('dist'))
 })
 
 gulp.task('icons', () => {
-  return gulp.src([
+  gulp.src([
     icons.getPathToIcon('icon_16x16.png'),
     icons.getPathToIcon('icon_19x19.png'),
     icons.getPathToIcon('icon_38x38.png'),
@@ -78,23 +67,22 @@ gulp.task('icons', () => {
 })
 
 gulp.task('logos', () => {
-  return gulp.src([
+  gulp.src([
     icons.getPathToLogo('cypress-bw.png'),
   ])
   .pipe(gulp.dest('dist/logos'))
 })
 
-gulp.task('watch', ['build'], () => {
-  return gulp.watch('app/**/*', ['build'])
+gulp.task('watch', gulp.series('build'), (done) => {
+  gulp.watch('app/**/*', gulp.series('build'))
+  done()
 })
 
-gulp.task('build', () => {
-  return runSeq('clean', [
-    'icons',
-    'logos',
-    'manifest',
-    'background',
-    'html',
-    'css',
-  ])
-})
+gulp.task('build', gulp.series('clean', gulp.parallel(
+  'icons',
+  'logos',
+  'manifest',
+  'background',
+  'html',
+  'css',
+)))
