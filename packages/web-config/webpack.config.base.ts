@@ -169,14 +169,17 @@ const config: webpack.Configuration = {
     // })] :
 
     ...(env === 'production' ?
-      [] :
-      // @ts-ignore
-      [new webpack.EvalDevToolModulePlugin({
-        moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-        fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
-      })]
+      [
+        new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') }),
+      ] :
+      [
+        // @ts-ignore
+        new webpack.EvalDevToolModulePlugin({
+          moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+          fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
+        }),
+      ]
     ),
-
     ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost' })] : []),
   ],
 

@@ -17,11 +17,14 @@ const testStaticAssets = async (buildResourcePath) => {
       badStrings: [
         // should only exist during development
         'webpack-livereload-plugin',
-        // indicates eval source maps were included, which cause crossorigin errors
+        // indicates eval source maps were included, which cause cross-origin errors
         '//# sourceURL=cypress://',
+        // make sure webpack is not run with NODE_ENV=development
+        'react.development.js',
       ],
       goodStrings: [
-        // indicates inline source maps were included
+        // make sure webpack is run with NODE_ENV=production
+        'react.production.min.js',
       ],
       testAssetStrings: [
         [
@@ -42,7 +45,9 @@ const testStaticAssets = async (buildResourcePath) => {
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/index.html`,
       goodStrings: [
+        // make sure webpack is run with NODE_ENV=production
         `window.env = 'production'`,
+        'react.production.min.js',
       ],
     }),
   ])
