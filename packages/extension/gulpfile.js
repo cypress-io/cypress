@@ -2,32 +2,23 @@
     @cypress/dev/no-return-before,
     no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const fs = require('fs-extra')
 const pkg = require('./package.json')
 const gulp = require('gulp')
 const clean = require('gulp-clean')
 const rename = require('gulp-rename')
-const runSeq = require('run-sequence')
 const source = require('vinyl-source-stream')
-const Promise = require('bluebird')
 const coffeeify = require('coffeeify')
 const browserify = require('browserify')
 const icons = require('@cypress/icons')
 
 gulp.task('clean', () => {
-  return gulp.src('dist')
+  return gulp.src('dist', { allowEmpty: true })
   .pipe(clean())
 })
 
 gulp.task('manifest', (done) => {
-  gulp.src('app/manifest.json')
+  return gulp.src('app/manifest.json')
   .pipe(gulp.dest('dist'))
   .on('end', () => {
     return fs.readJson('dist/manifest.json', (err, json) => {
@@ -36,8 +27,6 @@ gulp.task('manifest', (done) => {
       return fs.writeJson('dist/manifest.json', json, { spaces: 2 }, done)
     })
   })
-
-  return null
 })
 
 gulp.task('backup', () => {
@@ -84,17 +73,16 @@ gulp.task('logos', () => {
   .pipe(gulp.dest('dist/logos'))
 })
 
-gulp.task('watch', ['build'], () => {
-  return gulp.watch('app/**/*', ['build'])
-})
+gulp.task('build', gulp.series('clean', gulp.parallel(
+  'icons',
+  'logos',
+  'manifest',
+  'background',
+  'html',
+  'css',
+)))
 
-gulp.task('build', () => {
-  return runSeq('clean', [
-    'icons',
-    'logos',
-    'manifest',
-    'background',
-    'html',
-    'css',
-  ])
+gulp.task('watch', gulp.series('build'), (done) => {
+  gulp.watch('app/**/*', gulp.series('build'))
+  done()
 })

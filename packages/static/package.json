@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
-    "gulp": "3.9.1"
+    "gulp": "4.0.2"
   },
   "files": [
     "dist",
