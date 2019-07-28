@@ -7,8 +7,4 @@ declare namespace Chai {
     text(text: string): Assertion
     value(text: string): Assertion
   }
-
-  interface Match {
-      (selector: string): Assertion
-  }
 }
