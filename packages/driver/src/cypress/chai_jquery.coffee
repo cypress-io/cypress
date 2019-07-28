@@ -58,7 +58,7 @@ $chaiJquery = (chai, chaiUtils, callbacks = {}) ->
       callbacks.onError(err, method, ctx._obj, flag(ctx, "negate"))
 
   assertPartial = (ctx, method, actual, expected, message, notMessage, args...) ->
-    if ctx.__flags.contains
+    if ctx.__flags.contains or ctx.__flags.includes
       return assert(
         ctx
         method

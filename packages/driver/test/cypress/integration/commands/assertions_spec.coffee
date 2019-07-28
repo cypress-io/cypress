@@ -1025,6 +1025,7 @@ describe "src/cy/commands/assertions", ->
 
       it "partial match", ->
         expect(@$div).to.contain.html('button')
+        expect(@$div).to.include.html('button')
         expect(@$div).to.not.contain.html('span')
         cy.get('button').should('contain.html', 'button')
 
@@ -1062,6 +1063,7 @@ describe "src/cy/commands/assertions", ->
       it "partial match", ->
         expect(@$div).to.have.text('foo')
         expect(@$div).to.contain.text('o')
+        expect(@$div).to.include.text('o')
         cy.get('div').should('contain.text', 'iv').should('contain.text', 'd')
         cy.get('div').should('not.contain.text', 'fizzbuzz').should('contain.text', 'Nest')
 
@@ -1125,16 +1127,20 @@ describe "src/cy/commands/assertions", ->
       it "partial match", ->
         expect(@$input).to.contain.value('oo')
         expect(@$input).to.not.contain.value('oof')
+        ## make sure "includes" is an alias of "include"
+        expect(@$input).to.includes.value('oo')
         cy.get('input')
           .invoke('val','foobar')
           .should('contain.value', 'bar')
           .should('contain.value', 'foo')
+          .should('include.value', 'foo')
         cy.wrap(null).then ->
           cy.$$('<input value="foo1">').prependTo(cy.$$('body'))
           cy.$$('<input value="foo2">').prependTo(cy.$$('body'))
         cy.get('input').should ($els) ->
           expect($els).to.have.value('foo2')
           expect($els).to.contain.value('foo')
+          expect($els).to.include.value('foo')
         .should('contain.value', 'oo2')
 
     context "descendants", ->
