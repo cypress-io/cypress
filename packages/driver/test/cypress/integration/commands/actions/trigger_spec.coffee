@@ -112,6 +112,20 @@ describe "src/cy/commands/actions/trigger", ->
 
       cy.get("#scrolledBtn").trigger("mouseover")
 
+    it "records correct pageX and pageY el scrolled", (done) ->
+      $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
+
+      win = cy.state("window")
+
+      $btn.on "mouseover", (e) =>
+        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
+        expect(e.pageX).to.be.closeTo(win.pageXOffset + e.clientX, 1)
+        expect(e.pageY).to.be.closeTo(win.pageYOffset + e.clientY, 1)
+        done()
+
+      cy.get("#scrolledBtn").trigger("mouseover")
+
     it "does not change the subject", ->
       $input = cy.$$("input:first")
 
@@ -788,3 +802,5 @@ describe "src/cy/commands/actions/trigger", ->
           expect(eventOptions.clientY).to.be.be.a("number")
           expect(eventOptions.pageX).to.be.be.a("number")
           expect(eventOptions.pageY).to.be.be.a("number")
+          expect(eventOptions.screenX).to.be.be.a("number").and.eq(eventOptions.clientX)
+          expect(eventOptions.screenY).to.be.be.a("number").and.eq(eventOptions.clientY)
