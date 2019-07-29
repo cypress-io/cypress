@@ -45,7 +45,6 @@ isGzipError = (err) ->
 responseMustHaveEmptyBody = (method, statusCode) ->
   _.some([
     _.includes(NO_BODY_STATUS_CODES, statusCode),
-    _.inRange(statusCode, 100, 200),
     _.invoke(method, 'toLowerCase') == 'head',
   ])
 

@@ -3119,7 +3119,7 @@ describe "Routes", ->
       afterEach ->
         @httpSrv.close()
 
-      [204, 304, 101, 102, 103].forEach (status) ->
+      [204, 304].forEach (status) ->
         it "passes through a #{status} response immediately", ->
           @rp({
             url: "http://localhost:#{@port}/?status=#{status}"
