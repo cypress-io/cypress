@@ -4,7 +4,7 @@ _          = require("lodash")
 http       = require("http")
 socket     = require("@packages/socket")
 Promise    = require("bluebird")
-background = require("../../app/background")()
+background = require("../../app/background")
 
 PORT = 12345
 

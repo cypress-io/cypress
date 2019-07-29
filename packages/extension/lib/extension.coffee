@@ -1,7 +1,7 @@
 fs         = require("fs")
 path       = require("path")
 Promise    = require("bluebird")
-background = require("../app/background")()
+background = require("../app/background")
 
 fs = Promise.promisifyAll(fs)
 

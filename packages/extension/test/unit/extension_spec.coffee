@@ -6,9 +6,8 @@ EE        = require("events")
 eol       = require("eol")
 path      = require("path")
 Promise   = require("bluebird")
-{ client } = require("@packages/socket/lib/browser")
+client    = require("../../app/client")
 extension = require("../../index")
-Background = require("../../app/background")
 
 cwd = process.cwd()
 fs = Promise.promisifyAll(fs)
@@ -18,17 +17,17 @@ describe "Extension", ->
   context ".connect", ->
     it "does not automatically connect outside of extension", ->
       sinon.stub(global, "chrome").value(undefined)
-      sinon.stub(client, "connect").returns(new EE)
+      sinon.stub(client.socketIoClient, "connect").returns(new EE)
       
-      Background()
+      client.connect()
       
-      expect(client.connect).not.to.be.called
+      expect(client.socketIoClient.connect).not.to.be.called
 
       sinon.stub(global, "chrome").value({})
 
-      Background()
+      client.connect()
       
-      expect(client.connect).to.be.called
+      expect(client.socketIoClient.connect).to.be.called
   
   context ".getCookieUrl", ->
     it "returns cookie url", ->
