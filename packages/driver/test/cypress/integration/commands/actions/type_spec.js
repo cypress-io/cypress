@@ -16,8 +16,6 @@ describe('src/cy/commands/actions/type', () => {
     cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
-      this.body = win.document.body.outerHTML
-
       const el = cy.$$('[contenteditable]:first').get(0)
 
       // by default... the last new line by itself
@@ -43,10 +41,8 @@ describe('src/cy/commands/actions/type', () => {
     })
   })
 
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+  beforeEach(() => {
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#type', () => {
@@ -1529,10 +1525,10 @@ describe('src/cy/commands/actions/type', () => {
 
     describe('specialChars', () => {
 
-      context('disableSpecialCharSequences: true', () => {
+      context('parseSpecialCharSequences: false', () => {
         it('types special character sequences literally', (done) => {
           cy.get(':text:first').invoke('val', 'foo')
-          .type('{{}{backspace}', { disableSpecialCharSequences: true }).then(($input) => {
+          .type('{{}{backspace}', { parseSpecialCharSequences: false }).then(($input) => {
             expect($input).to.have.value('foo{{}{backspace}')
 
             done()
@@ -4340,7 +4336,11 @@ describe('src/cy/commands/actions/type', () => {
 
           const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(', ')
 
-          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}`)
+          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
+
+If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
+
+https://on.cypress.io/type`)
 
           done()
         })
