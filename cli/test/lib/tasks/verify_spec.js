@@ -65,6 +65,10 @@ context('lib/tasks/verify', () => {
     Stdout.restore()
   })
 
+  it('has verify task timeout', () => {
+    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.be.gt(10000)
+  })
+
   it('logs error and exits when no version of Cypress is installed', () => {
 
     return verify
