@@ -77,7 +77,7 @@
     "@types/chai": "4.1.7",
     "@types/debug": "4.1.4",
     "@types/execa": "0.7.2",
-    "@types/fs-extra": "5.1.0",
+    "@types/fs-extra": "7.0.0",
     "@types/glob": "7.1.1",
     "@types/lodash": "4.14.122",
     "@types/mocha": "5.2.7",
