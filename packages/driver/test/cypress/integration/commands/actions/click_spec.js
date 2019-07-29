@@ -7,18 +7,8 @@ const fail = function (str) {
 }
 
 describe('src/cy/commands/actions/click', () => {
-  before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then(function (win) {
-      this.body = win.document.body.outerHTML
-    })
-  })
-
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    return $(doc.body).empty().html(this.body)
+  beforeEach(() => {
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#click', () => {
@@ -73,7 +63,7 @@ describe('src/cy/commands/actions/click', () => {
       const win = cy.state('window')
 
       $btn.get(0).addEventListener('mousedown', (e) => {
-        //# calculate after scrolling
+        // calculate after scrolling
         const { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         const obj = _.pick(e, 'bubbles', 'cancelable', 'view', 'button', 'buttons', 'which', 'relatedTarget', 'altKey', 'ctrlKey', 'shiftKey', 'metaKey', 'detail', 'type')
@@ -318,7 +308,7 @@ describe('src/cy/commands/actions/click', () => {
       const $btn = cy.$$('button:first')
 
       $btn.on('mousedown', function () {
-        //# synchronously remove this button
+        // synchronously remove this button
         return $(this).remove()
       })
 
@@ -345,7 +335,7 @@ describe('src/cy/commands/actions/click', () => {
       const $btn = cy.$$('button:first')
 
       $btn.on('mouseup', function () {
-        //# synchronously remove this button
+        // synchronously remove this button
         return $(this).remove()
       })
 
@@ -405,10 +395,10 @@ describe('src/cy/commands/actions/click', () => {
         return false
       })
 
-      //# make sure we have more than 1 button
+      // make sure we have more than 1 button
       expect(buttons.length).to.be.gt(1)
 
-      //# make sure each button received its click event
+      // make sure each button received its click event
       cy.get('button').invoke('slice', 0, 3).click({ multiple: true }).then(($buttons) => {
         expect($buttons.length).to.eq(clicks)
       })
@@ -417,7 +407,7 @@ describe('src/cy/commands/actions/click', () => {
     it('can cancel multiple clicks', (done) => {
       cy.stub(Cypress.runner, 'stop')
 
-      //# abort after the 3rd click
+      // abort after the 3rd click
       const stop = _.after(3, () => {
         Cypress.stop()
       })
@@ -430,17 +420,17 @@ describe('src/cy/commands/actions/click', () => {
 
       $anchors.on('click', clicked)
 
-      //# make sure we have at least 5 anchor links
+      // make sure we have at least 5 anchor links
       expect($anchors.length).to.be.gte(5)
 
       cy.on('stop', () => {
-        //# timeout will get called synchronously
-        //# again during a click if the click function
-        //# is called
+        // timeout will get called synchronously
+        // again during a click if the click function
+        // is called
         const timeout = cy.spy(cy.timeout)
 
         return _.delay(() => {
-          //# and we should have stopped clicking after 3
+          // and we should have stopped clicking after 3
           expect(clicked.callCount).to.eq(3)
 
           expect(timeout.callCount).to.eq(0)
@@ -456,8 +446,8 @@ describe('src/cy/commands/actions/click', () => {
     it('serially clicks a collection', () => {
       let clicks = 0
 
-      //# create a throttled click function
-      //# which proves we are clicking serially
+      // create a throttled click function
+      // which proves we are clicking serially
       const throttled = _.throttle(() => {
         return clicks += 1
       }
@@ -467,7 +457,7 @@ describe('src/cy/commands/actions/click', () => {
 
       anchors.click(throttled)
 
-      //# make sure we're clicking multiple anchors
+      // make sure we're clicking multiple anchors
       expect(anchors.length).to.be.gt(1)
 
       cy.get('#sequential-clicks a').click({ multiple: true }).then(($anchors) => {
@@ -491,8 +481,8 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    //# this test needs to increase the height + width of the div
-    //# when we implement scrollBy the delta of the left/top
+    // this test needs to increase the height + width of the div
+    // when we implement scrollBy the delta of the left/top
     it('can click elements which are huge and the center is naturally below the fold', () => {
       cy.get('#massively-long-div').click()
     })
@@ -739,8 +729,8 @@ describe('src/cy/commands/actions/click', () => {
           width: '100%',
         }).appendTo($content)
 
-        //# make scrolling deterministic by ensuring we don't wait for coordsHistory
-        //# to build up
+        // make scrolling deterministic by ensuring we don't wait for coordsHistory
+        // to build up
         cy.get('[data-cy=button]').click({ waitForAnimations: false }).then(() => {
           expect(scrolled).to.deep.eq(['element'])
         })
@@ -812,11 +802,11 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#button-covered-in-span').click().then(() => {
           expect(retried).to.be.true
 
-          //# - element scrollIntoView
-          //# - element scrollIntoView (retry animation coords)
-          //# - element scrollIntoView (retry covered)
-          //# - element scrollIntoView (retry covered)
-          //# - window
+          // - element scrollIntoView
+          // - element scrollIntoView (retry animation coords)
+          // - element scrollIntoView (retry covered)
+          // - element scrollIntoView (retry covered)
+          // - window
           expect(scrolled).to.deep.eq(['element', 'element', 'element', 'element'])
         })
       })
@@ -841,9 +831,9 @@ describe('src/cy/commands/actions/click', () => {
           return scrolled.push(type)
         })
 
-        //# - element scrollIntoView
-        //# - element scrollIntoView (retry animation coords)
-        //# - window
+        // - element scrollIntoView
+        // - element scrollIntoView (retry animation coords)
+        // - window
         cy.get('#button-covered-in-nav').click().then(() => {
           expect(scrolled).to.deep.eq(['element', 'element', 'window'])
         })
@@ -878,10 +868,10 @@ describe('src/cy/commands/actions/click', () => {
           return scrolled.push(type)
         })
 
-        //# - element scrollIntoView
-        //# - element scrollIntoView (retry animation coords)
-        //# - window (nav1)
-        //# - window (nav2)
+        // - element scrollIntoView
+        // - element scrollIntoView (retry animation coords)
+        // - window (nav1)
+        // - window (nav2)
         cy.get('#button-covered-in-nav').click().then(() => {
           expect(scrolled).to.deep.eq(['element', 'element', 'window', 'window'])
         })
@@ -892,11 +882,11 @@ describe('src/cy/commands/actions/click', () => {
 
         const $body = cy.$$('body')
 
-        //# we must remove all of our children to
-        //# prevent the window from scrolling
+        // we must remove all of our children to
+        // prevent the window from scrolling
         $body.children().remove()
 
-        //# this tests that our container properly scrolls!
+        // this tests that our container properly scrolls!
         const $container = $('<div></div>')
         .attr('id', 'scrollable-container')
         .css({
@@ -935,10 +925,10 @@ describe('src/cy/commands/actions/click', () => {
           return scrolled.push(type)
         })
 
-        //# - element scrollIntoView
-        //# - element scrollIntoView (retry animation coords)
-        //# - window
-        //# - container
+        // - element scrollIntoView
+        // - element scrollIntoView (retry animation coords)
+        // - window
+        // - container
         cy.get('#button-covered-in-nav').click().then(() => {
           expect(scrolled).to.deep.eq(['element', 'element', 'window', 'container'])
         })
@@ -993,9 +983,9 @@ describe('src/cy/commands/actions/click', () => {
         .onThirdCall().returns()
 
         cy.get('button:first').click().then(() => {
-          //# - retry animation coords
-          //# - retry animation
-          //# - retry animation
+          // - retry animation coords
+          // - retry animation
+          // - retry animation
           expect(retries).to.eq(3)
 
           expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
@@ -1303,7 +1293,7 @@ describe('src/cy/commands/actions/click', () => {
             bubbles: false,
             cancelable: false,
             view: cy.state('window'),
-            //# chrome no longer fires pageX and pageY
+            // chrome no longer fires pageX and pageY
             // pageX: 0
             // pageY: 0
             which: 0,
@@ -1515,7 +1505,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.$$('#button').prop('disabled', true)
 
         cy.on('fail', (err) => {
-          //# get + click logs
+          // get + click logs
           expect(this.logs.length).eq(2)
           expect(err.message).to.include('cy.click() failed because this element is disabled:\n')
 
@@ -1532,11 +1522,11 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          //# get + click logs
+          // get + click logs
           expect(this.logs.length).eq(2)
           expect(lastLog.get('error')).to.eq(err)
 
-          //# there should still be 2 snapshots on error (before + after)
+          // there should still be 2 snapshots on error (before + after)
           expect(lastLog.get('snapshots').length).to.eq(2)
           expect(lastLog.get('snapshots')[0]).to.be.an('object')
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
@@ -1567,11 +1557,11 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          //# get + click logs
+          // get + click logs
           expect(this.logs.length).eq(2)
           expect(lastLog.get('error')).to.eq(err)
 
-          //# there should still be 2 snapshots on error (before + after)
+          // there should still be 2 snapshots on error (before + after)
           expect(lastLog.get('snapshots').length).to.eq(2)
           expect(lastLog.get('snapshots')[0]).to.be.an('object')
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
@@ -1604,11 +1594,11 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          //# get + click logs
+          // get + click logs
           expect(this.logs.length).eq(2)
           expect(lastLog.get('error')).to.eq(err)
 
-          //# there should still be 2 snapshots on error (before + after)
+          // there should still be 2 snapshots on error (before + after)
           expect(lastLog.get('snapshots').length).to.eq(2)
           expect(lastLog.get('snapshots')[0]).to.be.an('object')
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
@@ -1631,9 +1621,9 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('throws when element is hidden and theres no element specifically covering it', (done) => {
-        //# i cant come up with a way to easily make getElementAtCoordinates
-        //# return null so we are just forcing it to return null to simulate
-        //# the element being "hidden" so to speak but still displacing space
+        // i cant come up with a way to easily make getElementAtCoordinates
+        // return null so we are just forcing it to return null to simulate
+        // the element being "hidden" so to speak but still displacing space
 
         cy.stub(Cypress.dom, 'getElementAtPointFromViewport').returns(null)
 
@@ -1670,7 +1660,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('throws when element animation exceeds timeout', (done) => {
-        //# force the animation calculation to think we moving at a huge distance ;-)
+        // force the animation calculation to think we moving at a huge distance ;-)
         cy.stub(Cypress.utils, 'getDistanceBetween').returns(100000)
 
         let clicks = 0
@@ -1772,7 +1762,7 @@ describe('src/cy/commands/actions/click', () => {
       it('returns only the $el for the element of the subject that was clicked', () => {
         const clicks = []
 
-        //# append two buttons
+        // append two buttons
         const button = () => {
           return $('<button class=\'clicks\'>click</button>')
         }
@@ -1811,7 +1801,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('button').first().click().then(function ($btn) {
           const { lastLog } = this
 
-          $btn.blur() //# blur which removes focus styles which would change coords
+          $btn.blur() // blur which removes focus styles which would change coords
           const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
           expect(lastLog.get('coords')).to.deep.eq(fromWindow)
@@ -1854,16 +1844,16 @@ describe('src/cy/commands/actions/click', () => {
           const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
           const logCoords = lastLog.get('coords')
 
-          expect(logCoords.x).to.be.closeTo(fromWindow.x, 1) //# ensure we are within 1
-          expect(logCoords.y).to.be.closeTo(fromWindow.y, 1) //# ensure we are within 1
+          expect(logCoords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
+          expect(logCoords.y).to.be.closeTo(fromWindow.y, 1) // ensure we are within 1
           expect(console.Command).to.eq('click')
           expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
           expect(console.Elements).to.eq(1)
-          expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1) //# ensure we are within 1
+          expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
 
           expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
         })
-      }) //# ensure we are within 1
+      }) // ensure we are within 1
 
       it('#consoleProps actual element clicked', () => {
         const $btn = $('<button>', {
@@ -2011,13 +2001,13 @@ describe('src/cy/commands/actions/click', () => {
 
           cy.get('body').type('{ctrl}')
         })
-      }) //# clear modifiers
+      }) // clear modifiers
 
       it('#consoleProps when no mouseup or click', () => {
         const $btn = cy.$$('button:first')
 
         $btn.on('mousedown', function () {
-          //# synchronously remove this button
+          // synchronously remove this button
           return $(this).remove()
         })
 
@@ -2038,7 +2028,7 @@ describe('src/cy/commands/actions/click', () => {
         const $btn = cy.$$('button:first')
 
         $btn.on('mouseup', function () {
-          //# synchronously remove this button
+          // synchronously remove this button
           return $(this).remove()
         })
 
@@ -2066,7 +2056,7 @@ describe('src/cy/commands/actions/click', () => {
         const $btn = cy.$$('button:first')
 
         $btn.on('mouseup', function () {
-          //# synchronously remove this button
+          // synchronously remove this button
           return $(this).remove()
         })
 
@@ -2156,16 +2146,16 @@ describe('src/cy/commands/actions/click', () => {
         return false
       })
 
-      //# make sure we have more than 1 button
+      // make sure we have more than 1 button
       expect($buttons.length).to.be.gt(1)
 
-      //# make sure each button received its dblclick event
+      // make sure each button received its dblclick event
       cy.get('button').invoke('slice', 0, 2).dblclick().then(($buttons) => {
         expect($buttons.length).to.eq(dblclicks)
       })
     })
 
-    //# TODO: fix this once we implement aborting / restoring / reset
+    // NOTE: fix this once we implement aborting / restoring / reset
     it.skip('can cancel multiple dblclicks', function (done) {
       let dblclicks = 0
 
@@ -2173,7 +2163,7 @@ describe('src/cy/commands/actions/click', () => {
         return this.Cypress.abort()
       })
 
-      //# abort after the 3rd dblclick
+      // abort after the 3rd dblclick
       const dblclicked = _.after(3, spy)
 
       const anchors = cy.$$('#sequential-clicks a')
@@ -2184,20 +2174,20 @@ describe('src/cy/commands/actions/click', () => {
         return dblclicked()
       })
 
-      //# make sure we have at least 5 anchor links
+      // make sure we have at least 5 anchor links
       expect(anchors.length).to.be.gte(5)
 
       cy.on('cancel', () => {
-        //# timeout will get called synchronously
-        //# again during a click if the click function
-        //# is called
+        // timeout will get called synchronously
+        // again during a click if the click function
+        // is called
         const timeout = this.sandbox.spy(cy, '_timeout')
 
         return _.delay(() => {
-          //# abort should only have been called once
+          // abort should only have been called once
           expect(spy.callCount).to.eq(1)
 
-          //# and we should have stopped dblclicking after 3
+          // and we should have stopped dblclicking after 3
           expect(dblclicks).to.eq(3)
 
           expect(timeout.callCount).to.eq(0)
@@ -2213,8 +2203,8 @@ describe('src/cy/commands/actions/click', () => {
     it('serially dblclicks a collection', () => {
       let dblclicks = 0
 
-      //# create a throttled dblclick function
-      //# which proves we are dblclicking serially
+      // create a throttled dblclick function
+      // which proves we are dblclicking serially
       const throttled = _.throttle(() => {
         return dblclicks += 1
       }
@@ -2224,7 +2214,7 @@ describe('src/cy/commands/actions/click', () => {
 
       anchors.dblclick(throttled)
 
-      //# make sure we're dblclicking multiple anchors
+      // make sure we're dblclicking multiple anchors
       expect(anchors.length).to.be.gt(1)
 
       cy.get('#sequential-clicks a').dblclick().then(($anchors) => {
@@ -2374,7 +2364,7 @@ describe('src/cy/commands/actions/click', () => {
       it('returns only the $el for the element of the subject that was dblclicked', () => {
         const dblclicks = []
 
-        //# append two buttons
+        // append two buttons
         const $button = () => {
           return $('<button class=\'dblclicks\'>dblclick</button')
         }

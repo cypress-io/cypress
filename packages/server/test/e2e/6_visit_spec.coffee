@@ -1,5 +1,4 @@
 useragent = require("express-useragent")
-Fixtures  = require("../support/helpers/fixtures")
 e2e       = require("../support/helpers/e2e")
 
 onServer = (app) ->

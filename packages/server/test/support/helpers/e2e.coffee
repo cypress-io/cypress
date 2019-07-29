@@ -64,19 +64,19 @@ replaceDurationInTables = (str, p1, p2) ->
   _.padStart("XX:XX", p1.length + p2.length)
 
 replaceUploadingResults = (orig, match..., offset, string) ->
-    results = match[1].split('\n').map((res) ->
-      res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)')
-    )
-    .sort()
-    .join('\n')
-    ret =  match[0] + results + match[3]
+  results = match[1].split('\n').map((res) ->
+    res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)')
+  )
+  .sort()
+  .join('\n')
+  ret =  match[0] + results + match[3]
 
-    return ret
+  return ret
 
-normalizeStdout = (str) ->
+normalizeStdout = (str, options = {}) ->
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
-  str
+  str = str
   .split(pathUpToProjectName)
     .join("/foo/bar/.projects")
   .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
@@ -91,8 +91,11 @@ normalizeStdout = (str) ->
   .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
-  .replace("/\(\d{2,4}x\d{2,4}\)/g", "(YYYYxZZZZ)") ## screenshot dimensions
-  .split("\n")
+
+  if options.browser isnt undefined and options.browser isnt 'electron'
+    str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") ## screenshot dimensions
+
+  return str.split("\n")
     .map(replaceStackTraceLines)
     .join("\n")
 
@@ -351,7 +354,7 @@ module.exports = {
           else
             expect(headless).to.include("(headless)")
 
-        str = normalizeStdout(stdout)
+        str = normalizeStdout(stdout, options)
         snapshot(str)
 
       return {

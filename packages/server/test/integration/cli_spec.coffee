@@ -5,7 +5,6 @@ R   = require("ramda")
 cp  = require("child_process")
 pr  = require("../support/helpers/process")
 pkg = require("../../package.json")
-root = require("@packages/root")
 execa = require("execa")
 semver = require("semver")
 

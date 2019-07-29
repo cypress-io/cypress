@@ -3,7 +3,6 @@ strip   = require("strip-ansi")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
-pluralize = require("pluralize")
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
@@ -26,7 +25,7 @@ displayFlags = (obj, mapper) ->
   .value()
 
 displayRetriesRemaining = (tries) ->
-  times = pluralize('time', tries)
+  times = if tries is 1 then 'time' else 'times'
 
   lastTryNewLine = if tries is 1 then "\n" else ""
 
@@ -136,7 +135,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We encountered an unexpected error talking to our servers.
 
-      We will retry #{arg1.tries} more #{pluralize('time', arg1.tries)} in #{arg1.delay}...
+      We will retry #{arg1.tries} more #{if arg1.tries is 1 then 'time' else 'times'} in #{arg1.delay}...
 
       The server's response was:
 
