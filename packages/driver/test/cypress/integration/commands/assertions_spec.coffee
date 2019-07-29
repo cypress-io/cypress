@@ -863,6 +863,9 @@ describe "src/cy/commands/assertions", ->
     beforeEach ->
       @logs = []
 
+      @clearLogs = =>
+        @logs = []
+
       cy.on "log:added", (attrs, log) =>
         @logs.push(log)
 
@@ -984,10 +987,9 @@ describe "src/cy/commands/assertions", ->
         @$div = $("<div><button>button</button></div>")
         @$div.html = -> throw new Error("html called")
 
-      it "html, not html", ->
+      it "html, not html, contain html", ->
         expect(@$div).to.have.html("<button>button</button>") ## 1
         expect(@$div).not.to.have.html("foo") ## 2
-
         expect(@logs.length).to.eq(2)
 
         l1 = @logs[0]
@@ -1001,13 +1003,32 @@ describe "src/cy/commands/assertions", ->
           "expected **<div>** not to have HTML **foo**"
         )
 
+        @clearLogs()
+        expect(@$div).to.contain.html("<button>")
+        expect(@logs[0].get('message')).to.eq(
+          "expected **<div>** to contain HTML **<button>**"
+        )
+
+        @clearLogs()
+        expect(@$div).to.not.contain.html("foo") ## 4
+        expect(@logs[0].get('message')).to.eq(
+          "expected **<div>** not to contain HTML **foo**"
+        )
+
+        @clearLogs()
         try
           expect(@$div).to.have.html("<span>span</span>")
         catch err
-          l6 = @logs[5]
-
-          expect(l6.get("message")).to.eq(
+          expect(@logs[0].get("message")).to.eq(
             "expected **<div>** to have HTML **<span>span</span>**, but the HTML was **<button>button</button>**"
+          )
+
+        @clearLogs()
+        try
+          expect(@$div).to.contain.html("<span>span</span>")
+        catch err
+          expect(@logs[0].get("message")).to.eq(
+            "expected **<div>** to contain HTML **<span>span</span>**, but the HTML was **<button>button</button>**"
           )
 
       it "throws when obj is not DOM", (done) ->
@@ -1034,7 +1055,7 @@ describe "src/cy/commands/assertions", ->
         @$div = $("<div>foo</div>")
         @$div.text = -> throw new Error("text called")
 
-      it "text, not text", ->
+      it "text, not text, contain text", ->
         expect(@$div).to.have.text("foo") ## 1
         expect(@$div).not.to.have.text("bar") ## 2
 
@@ -1051,13 +1072,32 @@ describe "src/cy/commands/assertions", ->
           "expected **<div>** not to have text **bar**"
         )
 
+        @clearLogs()
+        expect(@$div).to.contain.text("f")
+        expect(@logs[0].get("message")).to.eq(
+          "expected **<div>** to contain text **f**"
+        )
+
+        @clearLogs()
+        expect(@$div).to.not.contain.text("foob")
+        expect(@logs[0].get("message")).to.eq(
+          "expected **<div>** not to contain text **foob**"
+        )
+
+        @clearLogs()
         try
           expect(@$div).to.have.text("bar")
         catch err
-          l6 = @logs[5]
-
-          expect(l6.get("message")).to.eq(
+          expect(@logs[0].get("message")).to.eq(
             "expected **<div>** to have text **bar**, but the text was **foo**"
+          )
+
+        @clearLogs()
+        try
+          expect(@$div).to.contain.text("bar")
+        catch err
+          expect(@logs[0].get("message")).to.eq(
+            "expected **<div>** to contain text **bar**, but the text was **foo**"
           )
 
       it "partial match", ->
@@ -1085,7 +1125,7 @@ describe "src/cy/commands/assertions", ->
         @$input = $("<input value='foo' />")
         @$input.val = -> throw new Error("val called")
 
-      it "value, not value", ->
+      it "value, not value, contain value", ->
         expect(@$input).to.have.value("foo") ## 1
         expect(@$input).not.to.have.value("bar") ## 2
 
@@ -1102,13 +1142,32 @@ describe "src/cy/commands/assertions", ->
           "expected **<input>** not to have value **bar**"
         )
 
+        @clearLogs()
+        expect(@$input).to.contain.value("foo")
+        expect(@logs[0].get("message")).to.eq(
+          "expected **<input>** to contain value **foo**"
+        )
+        
+        @clearLogs()
+        expect(@$input).not.to.contain.value("bar")
+        expect(@logs[0].get("message")).to.eq(
+          "expected **<input>** not to contain value **bar**"
+        )
+
+        @clearLogs()
         try
           expect(@$input).to.have.value("bar")
         catch err
-          l6 = @logs[5]
-
-          expect(l6.get("message")).to.eq(
+          expect(@logs[0].get("message")).to.eq(
             "expected **<input>** to have value **bar**, but the value was **foo**"
+          )
+
+        @clearLogs()
+        try
+          expect(@$input).to.contain.value("bar")
+        catch err
+          expect(@logs[0].get("message")).to.eq(
+            "expected **<input>** to contain value **bar**, but the value was **foo**"
           )
 
       it "throws when obj is not DOM", (done) ->
