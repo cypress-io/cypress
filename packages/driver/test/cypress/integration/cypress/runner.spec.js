@@ -175,9 +175,11 @@ const createCypress = (mochaTests, opts = {}) => {
             name: 'Runner Fail',
             message: `${args[1]}`,
             state: 'failed',
-            consoleProps: () => ({
-              Error: args[1],
-            }),
+            consoleProps: () => {
+              return {
+                Error: args[1],
+              }
+            },
           })
         })
 
@@ -378,6 +380,7 @@ describe('src/cypress/runner', () => {
 
                       return false
                     })
+
                     console.log('added handler')
                     expect(false).ok
                     throw new Error('error in test')
@@ -542,6 +545,7 @@ describe('src/cypress/runner', () => {
             snapshotEvents(snapshots.FAIL_WITH_ONLY)
           })
         })
+
         it('pass with [only]', () => {
           createCypress({
             suites: {
@@ -605,6 +609,7 @@ describe('src/cypress/runner', () => {
             .closest('.attempt-item')
             .contains('AssertionError')
             .click()
+
             cy.get('@console_log').should('be.calledWithMatch', 'Command')
 
           })
@@ -710,6 +715,7 @@ describe('src/cypress/runner', () => {
           })
 
         })
+
         it('can retry from [afterEach]', () => {
           createCypress({
             hooks: [{ type: 'afterEach', fail: 1 }],
@@ -829,6 +835,7 @@ describe('src/cypress/runner', () => {
             })
 
           })
+
           it('throws when set via this.retries in test', () => {
             createCypress({
               suites: {
@@ -844,6 +851,7 @@ describe('src/cypress/runner', () => {
               cy.get('.test-error').should('contain', 'numTestRetries')
             })
           })
+
           it('throws when set via this.retries in hook', () => {
             createCypress({
               suites: {
@@ -851,6 +859,7 @@ describe('src/cypress/runner', () => {
                   beforeEach(function () {
                     this.retries(0)
                   })
+
                   it('foo', () => {})
                 },
               },
@@ -860,6 +869,7 @@ describe('src/cypress/runner', () => {
               cy.get('.test-error').should('contain', 'numTestRetries')
             })
           })
+
           it('throws when set via this.retries in suite', () => {
             createCypress({
               suites: {
@@ -880,6 +890,7 @@ describe('src/cypress/runner', () => {
       })
 
     })
+
     describe('save/reload state', () => {
 
       describe('serialize / load from state', () => {
@@ -1004,6 +1015,7 @@ describe('src/cypress/runner', () => {
               expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - retries')
             })
           })
+
           it('load state', () => {
             loadStateFromSnapshot(cypressConfig, 'serialize state - retries')
             createCypress(...cypressConfig)
@@ -1232,6 +1244,7 @@ describe('src/cypress/runner', () => {
               { 1: { testAttemptIndex: 1 } },
               { 1: { testAttemptIndex: 1 } },
             ])
+
             expect(onAfterScreenshotListener.args[0][0]).matchDeep({ testAttemptIndex: 0 })
             expect(onAfterScreenshotListener.args[3][0]).matchDeep({ testAttemptIndex: 1 })
           })
@@ -1239,6 +1252,7 @@ describe('src/cypress/runner', () => {
       })
 
     })
+
     describe('mocha events', () => {
 
       it('simple single test', () => {
@@ -1248,12 +1262,14 @@ describe('src/cypress/runner', () => {
           snapshotEvents(snapshots.SIMPLE_SINGLE_TEST)
         })
       })
+
       it('simple three tests', () => {
         createCypress(threeTestsWithHooks)
         .then(() => {
           snapshotEvents(snapshots.THREE_TESTS_WITH_HOOKS)
         })
       })
+
       it('three tests with retry', () => {
         createCypress(threeTestsWithRetry, { config: {
           numTestRetries: 2,
@@ -1318,12 +1334,14 @@ const cleanseRunStateMap = {
 //   })
 // }
 
-const shouldHaveTestResults = (passed, failed) => (exitCode) => {
-  expect(exitCode, 'resolve with failure count').eq(exitCode)
-  passed = passed || '--'
-  failed = failed || '--'
-  cy.get('header .passed .num').should('have.text', `${passed}`)
-  cy.get('header .failed .num').should('have.text', `${failed}`)
+const shouldHaveTestResults = (passed, failed) => {
+  return (exitCode) => {
+    expect(exitCode, 'resolve with failure count').eq(exitCode)
+    passed = passed || '--'
+    failed = failed || '--'
+    cy.get('header .passed .num').should('have.text', `${passed}`)
+    cy.get('header .failed .num').should('have.text', `${failed}`)
+  }
 }
 
 const spyOn = (obj, prop, fn) => {

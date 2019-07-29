@@ -8,7 +8,6 @@
   "env": {
     "cypress/globals": true
   },
-
   "rules": {
     "arrow-body-style": "off"
   }

@@ -113,6 +113,7 @@ describe('reporter retries', () => {
       'reporterStats.start': match.date,
       'reporterStats.duration': match.number,
     }, `${name} reporter results`)
+
     expect(stdoutStub.toString())
 
     expect(stdoutStub.toString())
@@ -226,6 +227,7 @@ describe('reporter retries', () => {
 
     snapshot('fail in [afterEach]')
   })
+
   it('fail [beforeEach]', () => {
     createReporter(getSnapshot(EventSnapshots.FAIL_IN_BEFOREEACH))
 

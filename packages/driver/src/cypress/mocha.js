@@ -288,7 +288,7 @@ const patchRunnableResetTimeout = () => {
       runnable.callback(new Error(errMessage))
       runnable.timedOut = true
     }
-      , ms)
+    , ms)
   }
 }
 

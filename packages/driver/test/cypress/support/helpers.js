@@ -157,6 +157,8 @@ module.exports = {
   generateMochaTestsForWin,
 }
 
-const evalFn = (win, fn) => function () {
-  return win.eval(`(${fn.toString()})`).call(this)
+const evalFn = (win, fn) => {
+  return function () {
+    return win.eval(`(${fn.toString()})`).call(this)
+  }
 }

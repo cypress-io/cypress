@@ -24,9 +24,12 @@ const getSnapshot = (opts) => {
   })
 
   try {
-    snapshotCore.core(_.extend({},
-      opts,
-    ))
+    snapshotCore.core(
+      _.extend(
+        {},
+        opts,
+      )
+    )
   } catch (e) {
     null
   }
@@ -52,4 +55,3 @@ module.exports = {
   saveSnapshot,
   getSnapshot,
 }
-

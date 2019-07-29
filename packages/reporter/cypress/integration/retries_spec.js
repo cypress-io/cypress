@@ -154,22 +154,27 @@ describe('retries', function () {
       id: 'r4',
       title: 'will fail',
     })
+
     this.data.singleTestThreeAttempts.push({
       id: 'r5',
       title: 'pending',
       state: 'pending',
     })
+
     this.start(this.data.singleTestThreeAttempts)
 
     assertStats('--', '--', '--').then(() => {
       this.finish()
     })
+
     assertStats('1', '--', '--').then(() => {
       this.finish({ id: 'r4', state: 'failed' })
     })
+
     assertStats('1', '1', '--').then(() => {
       this.finish({ id: 'r5', state: 'pending' })
     })
+
     assertStats('1', '1', '1')
   })
 
@@ -239,6 +244,7 @@ describe('retries', function () {
       name: 'CypressError',
       message: 'it just totally failed for some reason',
     }
+
     this.start(this.data.singleTestThreeAttempts)
     this.finish()
 
@@ -251,6 +257,7 @@ describe('retries', function () {
       id: 'r4',
       title: 'test 2',
     })
+
     this.start(this.data.singleTestFailedAttempt)
     this.data.attempt.state = 'active'
     this.addAttempt(this.data.attempt)
@@ -293,6 +300,7 @@ describe('retries', function () {
       id: 'r4',
       title: 'test 2',
     })
+
     this.start(this.data.singleTestFailedAttempt)
     this.data.attempt.state = 'active'
     this.addAttempt(this.data.attempt)
@@ -310,6 +318,7 @@ describe('retries', function () {
       }, stub)
 
     })
+
     cy.contains('visit').should('be.visible')
     .then(() => {
       expect(stub).calledOnce
@@ -322,6 +331,7 @@ describe('retries', function () {
       id: 'r4',
       title: 'test 2',
     })
+
     this.start(this.data.singleTestFailedAttempt)
     this.data.attempt.state = 'active'
     this.addAttempt(this.data.attempt)
@@ -343,6 +353,7 @@ describe('retries', function () {
       id: 'r4',
       title: 'test 2',
     })
+
     this.start(this.data.singleTestFailedAttempt)
     this.data.attempt.state = 'active'
     this.addAttempt(this.data.attempt)

@@ -4,8 +4,8 @@ const stripAnsi = require('strip-ansi')
 const debug = require('debug')('utils')
 const chalk = require('chalk')
 
-const spyStdout = (obj, props) =>
-  spyOn(obj, props, () => stdout.capture(), (ret) => {
+const spyStdout = (obj, props) => {
+  return spyOn(obj, props, () => stdout.capture(), (ret) => {
     if (ret && ret.isPending) {
       return ret.tap(() => {
         stdout.restore()
@@ -16,6 +16,7 @@ const spyStdout = (obj, props) =>
 
     return
   })
+}
 
 const stdout = {
   capture () {

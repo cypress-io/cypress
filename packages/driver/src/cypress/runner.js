@@ -400,6 +400,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
           _runner._onTestAfterRun.map((fn) => {
             return fn()
           })
+
           _runner._onTestAfterRun = []
 
         }
@@ -576,6 +577,7 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
       _.each(RUNNABLE_LOGS, (type) => {
         return _.each(i[type], onLogsById)
       })
+
       _.extend(runnable, i)
 
     }
@@ -691,15 +693,13 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     return Cypress.action('runner:start', {
       start: new Date(),
     })
-  }
-  )
+  })
 
   _runner.on('end', () => {
     return Cypress.action('runner:end', {
       end: new Date(),
     })
-  }
-  )
+  })
 
   _runner.on('suite', (suite) => {
     if (_emissions.started[suite.id]) {
@@ -1011,6 +1011,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
             fnDuration: fnDurationEnd - fnDurationStart,
             afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
           })
+
           break
 
         case 'test':
@@ -1025,6 +1026,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
             fnDuration: fnDurationEnd - fnDurationStart,
             afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
           })
+
           break
         default: break
       }
@@ -1530,6 +1532,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
               return r[logs]
             })
           })
+
           _.each((attrs) => {
             //# we know our attrs have been cleaned
             //# now, so lets store that
