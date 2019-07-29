@@ -12,7 +12,7 @@
     "codecov": "codecov",
     "predev": "npm run check-deps-pre",
     "dev": "node index.js",
-    "lint": "bin-up coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
+    "lint-coffee": "bin-up coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
     "prerepl": "npm run check-deps-pre",
     "repl": "node repl.js",
     "prestart": "npm run check-deps-pre",

@@ -368,7 +368,7 @@ describe "lib/modes/run", ->
           }
         })
 
-        expect(setVideoTimestamp).calledWithMatch(started, results.tests)
+        expect(setVideoTimestamp).calledWithMatch(startedVideoCapture, results.tests)
 
 
     it "exitEarlyWithErr event resolves with no tests, and error", ->
