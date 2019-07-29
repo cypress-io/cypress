@@ -149,7 +149,7 @@ describe "lib/modes/run", ->
         spec
         browser
         project: @projectInstance
-        write: "write"
+        writeVideoFrame: "write"
         screenshots: screenshots
       })
 
@@ -189,30 +189,30 @@ describe "lib/modes/run", ->
       sinon.stub(videoCapture, "process").resolves()
 
     it "calls video process with name, cname and videoCompression", ->
-      end = -> Promise.resolve()
+      endVideoCapture = -> Promise.resolve()
 
-      runMode.postProcessRecording(end, "foo", "foo-compress", 32, true)
+      runMode.postProcessRecording(endVideoCapture, "foo", "foo-compress", 32, true)
       .then ->
         expect(videoCapture.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process when videoCompression is false", ->
-      end = -> Promise.resolve()
+      endVideoCapture = -> Promise.resolve()
 
-      runMode.postProcessRecording(end, "foo", "foo-compress", false, true)
+      runMode.postProcessRecording(endVideoCapture, "foo", "foo-compress", false, true)
       .then ->
         expect(videoCapture.process).not.to.be.called
 
     it "calls video process if we have been told to upload videos", ->
-      end = -> Promise.resolve()
+      endVideoCapture = -> Promise.resolve()
 
-      runMode.postProcessRecording(end, "foo", "foo-compress", 32, true)
+      runMode.postProcessRecording(endVideoCapture, "foo", "foo-compress", 32, true)
       .then ->
         expect(videoCapture.process).to.be.calledWith("foo", "foo-compress", 32)
 
     it "does not call video process if there are no failing tests and we have set not to upload video on passing", ->
-      end = -> Promise.resolve()
+      endVideoCapture = -> Promise.resolve()
 
-      runMode.postProcessRecording(end, "foo", "foo-compress", 32, false)
+      runMode.postProcessRecording(endVideoCapture, "foo", "foo-compress", 32, false)
       .then ->
         expect(videoCapture.process).not.to.be.called
 
@@ -288,13 +288,13 @@ describe "lib/modes/run", ->
   context ".waitForTestsToFinishRunning", ->
     beforeEach ->
       sinon.stub(@projectInstance, "getConfig").resolves({})
-      sinon.stub(runMode, "_delayToLetVideoFinish").resolves()
+      sinon.spy(runMode, "getVideoRecordingDelay")
 
     it "end event resolves with obj, displays stats, displays screenshots, sets video timestamps", ->
-      started = new Date
+      startedVideoCapture = new Date
       screenshots = [{}, {}, {}]
       cfg = {}
-      end = ->
+      endVideoCapture = ->
       results = {
         tests: [4,5,6]
         stats: {
@@ -307,34 +307,36 @@ describe "lib/modes/run", ->
       }
 
       sinon.stub(Reporter, "setVideoTimestamp")
-      .withArgs(started, results.tests)
+      .withArgs(startedVideoCapture, results.tests)
       .returns([1,2,3])
 
       sinon.stub(runMode, "postProcessRecording").resolves()
       sinon.spy(runMode,  "displayResults")
       sinon.spy(runMode,  "displayScreenshots")
+      sinon.spy(Promise.prototype, "delay")
 
       process.nextTick =>
         @projectInstance.emit("end", results)
 
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,
-        name: "foo.mp4"
-        cname: "foo-compressed.mp4"
+        videoName: "foo.mp4"
+        compressedVideoName: "foo-compressed.mp4"
         videoCompression: 32
         videoUploadOnPasses: true
         gui: false
         screenshots
-        started
-        end
+        startedVideoCapture
+        endVideoCapture
         spec: {
           path: "cypress/integration/spec.js"
         }
       })
       .then (obj) ->
-        # since video was recording, there was a delay to let video finish
-        expect(runMode._delayToLetVideoFinish).to.be.calledOnce
-        expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
+        ## since video was recording, there was a delay to let video finish
+        expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
+        expect(Promise.prototype.delay).to.be.calledWith(1000)
+        expect(runMode.postProcessRecording).to.be.calledWith(endVideoCapture, "foo.mp4", "foo-compressed.mp4", 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(results)
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
@@ -360,17 +362,18 @@ describe "lib/modes/run", ->
         })
 
     it "exitEarlyWithErr event resolves with no tests, and error", ->
-      clock = sinon.useFakeTimers()
+      sinon.useFakeTimers({ shouldAdvanceTime: true })
 
       err = new Error("foo")
-      started = new Date
+      startedVideoCapture = new Date
       wallClock = new Date()
       screenshots = [{}, {}, {}]
-      end = ->
+      endVideoCapture = ->
 
       sinon.stub(runMode, "postProcessRecording").resolves()
       sinon.spy(runMode,  "displayResults")
       sinon.spy(runMode,  "displayScreenshots")
+      sinon.spy(Promise.prototype, "delay")
 
       process.nextTick =>
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
@@ -379,22 +382,23 @@ describe "lib/modes/run", ->
 
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,
-        name: "foo.mp4"
-        cname: "foo-compressed.mp4"
+        videoName: "foo.mp4"
+        compressedVideoName: "foo-compressed.mp4"
         videoCompression: 32
         videoUploadOnPasses: true
         gui: false
         screenshots
-        started
-        end
+        startedVideoCapture
+        endVideoCapture
         spec: {
           path: "cypress/integration/spec.js"
         }
       })
       .then (obj) ->
-        # since video was recording, there was a delay to let video finish
-        expect(runMode._delayToLetVideoFinish).to.be.calledOnce
-        expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, true)
+        ## since video was recording, there was a delay to let video finish
+        expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
+        expect(Promise.prototype.delay).to.be.calledWith(1000)
+        expect(runMode.postProcessRecording).to.be.calledWith(endVideoCapture, "foo.mp4", "foo-compressed.mp4", 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(obj)
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
@@ -433,21 +437,30 @@ describe "lib/modes/run", ->
 
       sinon.spy(runMode, "postProcessRecording")
       sinon.spy(videoCapture, "process")
-      end = sinon.stub().resolves()
+      endVideoCapture = sinon.stub().resolves()
 
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,
-        name: "foo.mp4"
-        cname: "foo-compressed.mp4"
+        videoName: "foo.mp4"
+        compressedVideoName: "foo-compressed.mp4"
         videoCompression: 32
         videoUploadOnPasses: false
         gui: false
-        end
+        endVideoCapture
       })
       .then (obj) ->
-        expect(runMode.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32, false)
+        expect(runMode.postProcessRecording).to.be.calledWith(endVideoCapture, "foo.mp4", "foo-compressed.mp4", 32, false)
 
         expect(videoCapture.process).not.to.be.called
+
+    it "does not delay when not capturing a video", ->
+      sinon.stub(runMode, "listenForProjectEnd").resolves({})
+
+      runMode.waitForTestsToFinishRunning({
+        startedVideoCapture: null
+      })
+      .then ->
+        expect(runMode.getVideoRecordingDelay).to.have.returned(0)
 
   context ".listenForProjectEnd", ->
     it "resolves with end event + argument", ->
@@ -524,7 +537,7 @@ describe "lib/modes/run", ->
       .then =>
         expect(videoCapture.start).to.be.calledWith("videos/foo_spec.js.mp4")
         expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
-          cname: "videos/foo_spec.js-compressed.mp4"
+          compressedVideoName: "videos/foo_spec.js-compressed.mp4"
         })
 
   context ".run", ->
