@@ -47,7 +47,7 @@ describe "Extension", ->
     beforeEach ->
       @src = path.join(cwd, "test", "helpers", "background.js")
 
-      @sandbox.stub(extension, "getPathToExtension")
+      sinon.stub(extension, "getPathToExtension")
       .withArgs("background.js").returns(@src)
 
     it "rewrites the background.js source", ->
@@ -98,4 +98,3 @@ describe "Extension", ->
         exec(cmd)
         .then (stdout) ->
           expect(stdout).to.eq("caljajdfkjjjdehjdoimjkkakekklcck")
-
