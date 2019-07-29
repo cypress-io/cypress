@@ -252,7 +252,11 @@ module.exports = {
     return options
 
   args: (options = {}) ->
-    args = ["--run-project=#{options.project}"]
+    args = [
+      ## hides a user warning to go through NPM module
+      "--cwd=#{process.cwd()}",
+      "--run-project=#{options.project}"
+    ]
 
     if options.spec
       args.push("--spec=#{options.spec}")
