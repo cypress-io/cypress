@@ -805,8 +805,8 @@ describe "lib/cypress", ->
             @expectExitWith(0)
 
         it "electron", ->
-          write = sinon.stub()
-          videoCapture.start.returns({ write })
+          writeVideoFrame = sinon.stub()
+          videoCapture.start.returns({ writeVideoFrame })
 
           cypress.start([
             "--run-project=#{@pluginBrowser}"
