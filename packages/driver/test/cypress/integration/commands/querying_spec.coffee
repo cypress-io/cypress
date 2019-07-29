@@ -3,16 +3,8 @@ _ = Cypress._
 Promise = Cypress.Promise
 
 describe "src/cy/commands/querying", ->
-  before ->
-    cy
-      .visit("/fixtures/dom.html")
-      .then (win) ->
-        @body = win.document.body.outerHTML
-
   beforeEach ->
-    doc = cy.state("document")
-
-    $(doc.body).empty().html(@body)
+    cy.visit("/fixtures/dom.html")
 
   context "#focused", ->
     it "returns the activeElement", ->
@@ -442,7 +434,8 @@ describe "src/cy/commands/querying", ->
       cy.get("#list").then ($list) ->
         expect($list.get(0)).to.eq list.get(0)
 
-    it.skip "FLAKY retries finding elements until something is found", ->
+    # NOTE: FLAKY in CI, need to investigate further
+    it.skip "retries finding elements until something is found", ->
       missingEl = $("<div />", id: "missing-el")
 
       ## wait until we're ALMOST about to time out before
@@ -1373,6 +1366,8 @@ describe "src/cy/commands/querying", ->
       it "returns invisible element when parent chain is visible", ->
         cy.get("#form-header-region").contains("Back").should("not.be.visible")
 
+    # NOTE: not sure why this is skipped... last edit was 3 years ago...
+    # @bkucera maybe take a look at this
     describe.skip "handles whitespace", ->
       it "finds el with new lines", ->
         btn = $("""

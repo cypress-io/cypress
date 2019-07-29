@@ -22,7 +22,7 @@ initialEnv = _.clone(process.env)
 describe "lib/modes/record", ->
   ## QUESTION: why are these tests here when
   ## this is a module... ?
-  context "getCommitFromGitOrCi", ->
+  context ".getCommitFromGitOrCi", ->
     gitCommit = {
       branch: null
     }
@@ -372,7 +372,8 @@ describe "lib/modes/record", ->
       sinon.stub(api, "retryWithBackoff").yields().resolves()
 
       recordMode.createRun(@options)
-      expect(api.retryWithBackoff).to.be.called
+      .then ->
+        expect(api.retryWithBackoff).to.be.called
 
     it "logs on retry", ->
       sinon.stub(api, "retryWithBackoff").yields().resolves()

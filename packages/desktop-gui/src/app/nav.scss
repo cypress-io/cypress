@@ -22,7 +22,7 @@
 
 .navbar-default {
   background-color:#ececec;
-  box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.20);
+  box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
   border-color: #c8c8c8;
 
   .nav {
@@ -92,7 +92,7 @@
 }
 
 .navbar-inverse {
-  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.20);
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.20);
   background-color: #252831;
 
   .logo {
@@ -105,7 +105,7 @@
 
     span {
       position: absolute;
-      top: 0px;
+      top: 0;
       right: 7px;
       color: #969aa3;
       font-size: 12px;
@@ -151,6 +151,11 @@
   .canary > i { color: #e4b721; }
   .chromium > i { color: #829ac3; }
   .electron > i { color: #777; }
+
+  .dropdown-menu {
+    left: auto;
+    right: 0;
+  }
 }
 
 .nav .browser-info {
