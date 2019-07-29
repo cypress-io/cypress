@@ -4,9 +4,6 @@ once    = require("lodash/once")
 Promise = require("bluebird")
 client  = require("./client")
 
-HOST = "CHANGE_ME_HOST"
-PATH = "CHANGE_ME_PATH"
-
 httpRe = /^http/
 
 firstOrNull = (cookies) ->
@@ -36,10 +33,6 @@ connect = (host, path) ->
       fail(id, err)
 
   ws = client.connect(host, path)
-
-  ## no client, bail
-  if not ws
-    return
 
   ws.on "automation:request", (id, msg, data) ->
     switch msg
@@ -193,7 +186,4 @@ automation = {
     .then(fn)
 }
 
-## initially attempt to connect
-connect(HOST, PATH)
-  
 module.exports = automation
