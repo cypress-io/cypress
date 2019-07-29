@@ -330,7 +330,7 @@ describe('Settings', function () {
         this.getProjectStatus.resolve(this.projectStatuses[0])
         this.goToSettings()
 
-        cy.contains('Node Version').click()
+        cy.contains('Node.js Version').click()
       }
     })
 

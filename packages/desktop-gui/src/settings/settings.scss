@@ -9,8 +9,15 @@
     display: block;
   }
 
-  .node-version ul {
-    margin-top: 10px;
+  .node-version {
+    .well {
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+
+    ul {
+      margin-top: 10px;
+    }
   }
 
   .learn-more {
@@ -211,6 +218,10 @@
 .loading-record-key {
   color: #999;
   margin: 1em;
+}
+
+.node-version-text {
+  margin-top: 15px;
 }
 
 .proxy-table, .node-table {

@@ -25,7 +25,7 @@ const Settings = observer(({ project, app }) => (
         <Panel header='Record Key' key='record-key' className='form-horizontal settings-record-key'>
           <RecordKey project={project} />
         </Panel>
-        <Panel header='Node Version' key='node-version' className='form-horizontal settings-node'>
+        <Panel header='Node.js Version (8.9.4)' key='node-version' className='form-horizontal settings-node'>
           <NodeVersion project={project} />
         </Panel>
         <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>

@@ -42,25 +42,58 @@ const NodeVersion = observer(({ project }) => {
     <div className="node-version">
       {renderLearnMore()}
       <div>
-        This project is using{' '}
+        {
+          usesSystemNodeVersion ?
+            <div>
+              <table className="node-table">
+                <tbody>
+                  <tr>
+                    <th>System Version</th>
+                    <td>
+                      <code>
+                        {resolvedNodeVersion}
+                      </code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      Node.js Path
+                    </th>
+                    <td>
+                      <code>{resolvedNodePath}</code>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p className="text-muted node-version-text"><strong>Note:</strong> This version of Node.js was detected on your <code>system</code>.</p>
+            </div> :
+            <div>
+              <span><strong>Note:</strong> This version of Node.js is bundled with Cypress.</span>
+              To use
+              {
+                usesSystemNodeVersion ?
+                  ' the Node.js version bundled with Cypress' :
+                  ' your system Node.js version'
+              }, set <a href="#" onClick={openHelp}><code>nodeVersion</code></a> to <code>{usesSystemNodeVersion ? 'bundled' : 'system'}</code> in your configuration.
+            </div>
+        }{' '}
+
+        {/* This project is using{' '}
         <strong>Node v{resolvedNodeVersion}</strong>
         {
           usesSystemNodeVersion ?
-            <span> at <code> {resolvedNodePath}</code>, which is your system Node version. </span> :
-            ', which comes bundled with Cypress.'
+            <span> at <code> {resolvedNodePath}</code>, which is your <code>system</code> Node version. </span> :
+            <span>, which is the <code>bundled</code> Node version with Cypress.</span>
         }
-        {' '}This Node version is used to:
-        <ul>
-          <li>Build files in the {formatIntegrationFolder()} folder.</li>
-          <li>Build files in the <code>cypress/support</code> folder.</li>
-          <li>Execute code in the {formatPluginsFile() ? formatPluginsFile() : 'plugins'} file.</li>
-        </ul>
-        To change this project to use
-        {
-          usesSystemNodeVersion ?
-            ' the Node version bundled with Cypress' :
-            ' your system Node version'
-        }, set <code>nodeVersion</code> to <code>{usesSystemNodeVersion ? 'bundled' : 'system'}</code> in your configuration.
+        {' '} */}
+        <div className='well text-muted'>
+          This Node.js version is used to:
+          <ul>
+            <li>Build files in the {formatIntegrationFolder()} folder.</li>
+            <li>Build files in the <code>cypress/support</code> folder.</li>
+            <li>Execute code in the {formatPluginsFile() ? formatPluginsFile() : 'plugins'} file.</li>
+          </ul>
+        </div>
       </div>
     </div>
   )
