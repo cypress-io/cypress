@@ -97,6 +97,16 @@ describe "lib/errors", ->
       .then ->
         expect(console.log).not.to.be.calledWith(err.stack)
         expect(logger.createException).not.to.be.called
+    
+    it "swallows creating exception errors", ->
+      sinon.stub(logger, "createException").rejects(new Error)
+      sinon.stub(process.env, "CYPRESS_ENV").value("production")
+
+      err = errors.get("NOT_LOGGED_IN")
+
+      errors.logException(err)
+      .then (ret) ->
+        expect(ret).to.be.undefined
 
   context ".clone", ->
     it "converts err.message from ansi to html with span classes", ->

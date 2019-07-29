@@ -35,8 +35,8 @@ exitErr = (err) ->
   ## and exit with 1
   debug('exiting with err', err)
 
-  require("./errors").logException err, ->
-    exit(1)
+  require("./errors").logException(err)
+  .then -> exit(1)
 
 module.exports = {
   isCurrentlyRunningElectron: ->
@@ -127,9 +127,7 @@ module.exports = {
   start: (argv = []) ->
     debug("starting cypress with argv %o", argv)
 
-    argsUtil = require("./util/args")
-
-    options = argsUtil.toObject(argv)
+    options = require("./util/args").toObject(argv)
 
     if options.runProject and not options.headed
       # scale the electron browser window

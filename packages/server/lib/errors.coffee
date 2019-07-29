@@ -888,7 +888,7 @@ log = (err, color = "red") ->
 
   return err
   
-logException = (err, cb = ->) ->
+logException = Promise.method (err) ->
   ## TODO: remove context here
   if @log(err) and isProduction()
     ## log this exception since 
@@ -896,10 +896,6 @@ logException = (err, cb = ->) ->
     return require("./logger")
     .createException(err)
     .catch(->)
-    .finally(cb)
-
-  ## else just cb() immediately 
-  return Promise.try(cb)
   
 module.exports = {
   get,
