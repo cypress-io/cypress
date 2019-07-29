@@ -7,55 +7,96 @@ logger = require("#{root}lib/logger")
 
 describe "lib/errors", ->
   beforeEach ->
-    @env = process.env.CYPRESS_ENV
-    @log = sinon.stub(console, "log")
-
-  afterEach ->
-    process.env.CYPRESS_ENV = @env
-
+    sinon.spy(console, "log")
+  
   context ".log", ->
     it "uses red by default", ->
       err = errors.get("NOT_LOGGED_IN")
-      errors.log(err).then =>
-        red = style.red
+      
+      ret = errors.log(err)
 
-        expect(@log).to.be.calledWithMatch(red.open)
-        expect(@log).to.be.calledWithMatch(red.close)
+      expect(ret).to.be.undefined
+
+      red = style.red
+
+      expect(console.log).to.be.calledWithMatch(red.open)
+      expect(console.log).to.be.calledWithMatch(red.close)
 
     it "can change the color", ->
       err = errors.get("NOT_LOGGED_IN")
-      errors.log(err, "yellow").then =>
-        yellow = style.yellow
+      
+      ret = errors.log(err, "yellow")
 
-        expect(@log).to.be.calledWithMatch(yellow.open)
-        expect(@log).to.be.calledWithMatch(yellow.close)
+      expect(ret).to.be.undefined
+
+      yellow = style.yellow
+
+      expect(console.log).to.be.calledWithMatch(yellow.open)
+      expect(console.log).to.be.calledWithMatch(yellow.close)
 
     it "logs err.message", ->
       err = errors.get("NO_PROJECT_ID", "foo/bar/baz")
-      errors.log(err).then =>
-        expect(@log).to.be.calledWithMatch("foo/bar/baz")
+      
+      ret = errors.log(err)
+
+      expect(ret).to.be.undefined
+      
+      expect(console.log).to.be.calledWithMatch("foo/bar/baz")
 
     it "logs err.details", ->
       err = errors.get("PLUGINS_FUNCTION_ERROR", "foo/bar/baz", "details huh")
-      errors.log(err).then =>
-        expect(@log).to.be.calledWithMatch("foo/bar/baz")
-        expect(@log).to.be.calledWithMatch("\n", "details huh")
+      
+      ret = errors.log(err)
+      
+      expect(ret).to.be.undefined
+      
+      expect(console.log).to.be.calledWithMatch("foo/bar/baz")
+      expect(console.log).to.be.calledWithMatch("\n", "details huh")
 
     it "logs err.stack in development", ->
       process.env.CYPRESS_ENV = "development"
 
-      foo = new Error("foo")
-      errors.log(foo).then =>
-        expect(@log).to.be.calledWith(chalk.red(foo.stack))
+      err = new Error("foo")
+      
+      ret = errors.log(err)
 
-    it "calls logger.createException", ->
+      expect(ret).to.eq(err)
+      
+      expect(console.log).to.be.calledWith(chalk.red(err.stack))
+
+  context ".logException", ->
+    it "calls logger.createException with unknown error", ->
       sinon.stub(logger, "createException").resolves()
+      sinon.stub(process.env, "CYPRESS_ENV").value("production")
 
-      process.env.CYPRESS_ENV = "production"
+      err = new Error("foo")
 
-      foo = new Error("foo")
-      errors.log(foo).then =>
-        expect(logger.createException).to.be.calledWith(foo)
+      errors.logException(err)
+      .then ->
+        expect(console.log).to.be.calledWith(chalk.red(err.stack))
+        expect(logger.createException).to.be.calledWith(err)
+
+    it "does not call logger.createException when known error", ->
+      sinon.stub(logger, "createException").resolves()
+      sinon.stub(process.env, "CYPRESS_ENV").value("production")
+
+      err = errors.get("NOT_LOGGED_IN")
+
+      errors.logException(err)
+      .then ->
+        expect(console.log).not.to.be.calledWith(err.stack)
+        expect(logger.createException).not.to.be.called
+
+    it "does not call logger.createException when not in production env", ->
+      sinon.stub(logger, "createException").resolves()
+      sinon.stub(process.env, "CYPRESS_ENV").value("development")
+
+      err = new Error("foo")
+
+      errors.logException(err)
+      .then ->
+        expect(console.log).not.to.be.calledWith(err.stack)
+        expect(logger.createException).not.to.be.called
 
   context ".clone", ->
     it "converts err.message from ansi to html with span classes", ->
