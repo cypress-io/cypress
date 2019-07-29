@@ -127,8 +127,8 @@ module.exports = {
       webContents.debugger.attach()
       debug("debugger attached")
       webContents.debugger.sendCommandAsync('Schema.getDomains')
-      .then ({domains}) ->
-        debug("supported CDP domains: %o", domains)
+      .then (res = {}) ->
+        debug("supported CDP domains: %o", res.domains)
     catch err
       debug("debugger attached failed %o", { err })
 
