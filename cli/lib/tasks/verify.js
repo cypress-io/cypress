@@ -14,6 +14,8 @@ const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
 const state = require('./state')
 
+const VERIFY_TEST_RUNNER_TIMEOUT_MS = 30000
+
 const checkExecutable = (binaryDir) => {
   const executable = state.getPathToExecutable(binaryDir)
 
@@ -90,6 +92,7 @@ const runSmokeTest = (binaryDir, options) => {
     debug('running smoke test')
     debug('using Cypress executable %s', executable)
     debug('smoke test command:', smokeTestCommand)
+    debug('smoke test timeout %d ms', options.smokeTestTimeout)
 
     const env = _.extend({}, process.env, {
       ELECTRON_ENABLE_LOGGING: true,
@@ -242,7 +245,7 @@ const start = (options = {}) => {
     dev: false,
     force: false,
     welcomeMessage: true,
-    smokeTestTimeout: 10000,
+    smokeTestTimeout: VERIFY_TEST_RUNNER_TIMEOUT_MS,
   })
 
   if (options.dev) {
@@ -260,6 +263,7 @@ const start = (options = {}) => {
 
       This overrides the default Cypress binary path used.
     `)
+
     logger.log()
 
     return util.isExecutableAsync(envBinaryPath)
@@ -345,4 +349,5 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
+  VERIFY_TEST_RUNNER_TIMEOUT_MS,
 }

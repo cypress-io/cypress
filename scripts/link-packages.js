@@ -4,152 +4,46 @@ const fse = require('fs-extra')
 const path = require('path')
 const globber = require('glob')
 const Promise = require('bluebird')
-const la = require('lazy-ass')
-const is = require('check-more-types')
-const debug = require('debug')('cypress:link')
-const _ = require('lodash')
-
-const isRelative = (s) => {
-  return !path.isAbsolute(s)
-}
 
 const fs = Promise.promisifyAll(fse)
 const glob = Promise.promisify(globber)
 
-const pathToPackages = path.join('node_modules', '@packages')
+const pathToPackages = path.join(__dirname, '..', 'node_modules', '@packages')
 
 function deleteOutputFolder () {
-  const wildcard = `${pathToPackages}/*`
 
-  console.log('deleting all', wildcard)
+  console.log('deleting ', pathToPackages)
 
-  return glob(wildcard)
-  .map((filename) => {
-    return fs.unlinkAsync(filename)
-  })
-  .catch(_.noop)
+  return fs.remove(pathToPackages)
 }
 
-function proxyModule (name, pathToMain, pathToBrowser, pathToTypes) {
-  la(is.unemptyString(name), 'missing name')
-  la(is.unemptyString(pathToMain), 'missing path to main', pathToMain)
-  la(isRelative(pathToMain), 'path to main should be relative', pathToMain)
-
-  const pkg = {
-    name,
-    version: '0.0.0',
-    description: `fake proxy module ${name}`,
-    main: pathToMain,
-  }
-
-  if (pathToBrowser) {
-    la(
-      isRelative(pathToBrowser),
-      'path to browser module should be relative',
-      pathToBrowser
-    )
-    pkg.browser = pathToBrowser
-  }
-
-  if (pathToTypes) {
-    la(
-      isRelative(pathToTypes),
-      'path to types file should be relative',
-      pathToTypes
-    )
-    pkg.types = pathToTypes
-  }
-
-  return pkg
-}
-
-function proxyRegister (name) {
-  return `module.exports = require('../../../packages/${name}/register')`
-}
-
-function needsRegister (name) {
-  return name === '@packages/coffee' || name === '@packages/ts'
-}
-
-function makeProxies () {
-  return glob('./packages/*/package.json')
-  .map((filename) => {
-    return fs.readJsonAsync(filename).then((json) => {
-      return { filename, json }
+function makeLinks () {
+  return fs.ensureDir(pathToPackages)
+  .then(() => {
+    return glob('./packages/*/package.json')
+    .map((filename) => {
+      return fs.readJsonAsync(filename)
+      .then((json) => {
+        return { filename, json }
+      })
     })
-  })
-  .map(({ filename, json }) => {
-    if (!json.main) {
-      throw new Error(`Package ${json.name} is missing main`)
-    }
+    .map(({ filename }) => {
+      const dirname = path.dirname(filename)
+      const basename = path.basename(dirname)
 
-    const dirname = path.dirname(filename)
-    const bareName = json.name.split('/')[1]
+      const destinationLink = path.join(pathToPackages, basename)
+      const relativePathToDest = path.relative(path.dirname(destinationLink), dirname)
 
-    debug(json.name, 'bare name', bareName, 'main', json.main)
-    const destinationFolder = path.join(pathToPackages, bareName)
-    const destPackageFilename = path.join(destinationFolder, 'package.json')
-    const registerPath = path.join(destinationFolder, 'register.js')
-    const fullMain = path.resolve(dirname, json.main)
+      console.log(destinationLink, '->', relativePathToDest)
 
-    debug('full name', fullMain)
-    const relativePathToMain = path.relative(destinationFolder, fullMain)
-
-    debug('relative path to main', relativePathToMain)
-
-    // for browserify, some packages use "browser" field
-    // need to pass it as well
-    let relativePathToBrowser
-
-    if (is.unemptyString(json.browser)) {
-      debug('package has browser field %s', json.browser)
-      relativePathToBrowser = path.relative(
-        destinationFolder,
-        path.resolve(dirname, json.browser)
-      )
-      debug('relative path to browser', relativePathToBrowser)
-    }
-
-    // if the package has types field, compute new path to it
-    let relativePathTypes
-
-    if (is.unemptyString(json.types)) {
-      debug('package has types field %s', json.types)
-      relativePathTypes = path.relative(
-        destinationFolder,
-        path.resolve(dirname, json.types)
-      )
-      debug('relative path to types', relativePathTypes)
-    }
-
-    const proxy = proxyModule(
-      json.name,
-      relativePathToMain,
-      relativePathToBrowser,
-      relativePathTypes
-    )
-
-    console.log(path.dirname(destPackageFilename), '->', relativePathToMain)
-
-    return fs
-    .outputJsonAsync(destPackageFilename, proxy, { spaces: 2 })
-    .then(() => {
-      if (needsRegister(json.name)) {
-        console.log('adding register file', registerPath)
-
-        return fs.outputFileAsync(
-          registerPath,
-          proxyRegister(bareName),
-          'utf8'
-        )
-      }
+      return fs.symlink(relativePathToDest, destinationLink, 'junction')
     })
   })
 }
 
 function linkPackages () {
   return deleteOutputFolder()
-  .then(makeProxies)
+  .then(makeLinks)
   .then(() => {
     console.log('✅  require("@packages/<name>") should work now!')
   })

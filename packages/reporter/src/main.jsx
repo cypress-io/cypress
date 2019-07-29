@@ -53,6 +53,7 @@ class Reporter extends Component {
       scroller,
       statsStore,
     })
+
     this.props.events.listen(runner)
   }
 
@@ -84,4 +85,4 @@ if (window.Cypress) {
   }
 }
 
-export default { Reporter }
+export { Reporter }

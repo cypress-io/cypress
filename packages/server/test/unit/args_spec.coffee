@@ -222,6 +222,7 @@ describe "lib/util/args", ->
         cwd
         _: []
         getKey: true
+        invokedFromCli: false
         config: @config
         spec: @specs
       })
@@ -250,6 +251,7 @@ describe "lib/util/args", ->
         cwd
         _: []
         getKey: true
+        invokedFromCli: true
         config: @config
         spec: @specs
       })
@@ -276,6 +278,7 @@ describe "lib/util/args", ->
         config: {}
         appPath: "/Applications/Cypress.app"
         execPath: "/Applications/Cypress.app"
+        invokedFromCli: false
         updating: true
       })
 
@@ -299,6 +302,7 @@ describe "lib/util/args", ->
         config: {}
         appPath: "a"
         execPath: "e"
+        invokedFromCli: false
         updating: true
       })
 
@@ -394,3 +398,29 @@ describe "lib/util/args", ->
       expect(options.proxySource).to.be.undefined
       expect(options.proxyServer).to.eq process.env.HTTP_PROXY
       expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
+    it "can use npm_config_proxy", ->
+      process.env.npm_config_proxy = "http://foo-bar.baz:123"
+      expect(process.env.HTTP_PROXY).to.be.undefined
+
+      options = @setup()
+
+      expect(process.env.HTTP_PROXY).to.eq "http://foo-bar.baz:123"
+      expect(process.env.HTTPS_PROXY).to.eq "http://foo-bar.baz:123"
+      expect(process.env.NO_PROXY).to.eq "localhost"
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+
+    it "can override npm_config_proxy with falsy HTTP_PROXY", ->
+      process.env.npm_config_proxy = "http://foo-bar.baz:123"
+      process.env.HTTP_PROXY = ""
+
+      options = @setup()
+
+      expect(process.env.HTTP_PROXY).to.be.undefined
+      expect(process.env.HTTPS_PROXY).to.be.undefined
+      expect(process.env.NO_PROXY).to.eq "localhost"
+      expect(options.proxySource).to.be.undefined
+      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
+      expect(options.proxyBypassList).to.be.undefined

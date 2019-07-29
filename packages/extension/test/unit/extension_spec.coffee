@@ -2,12 +2,13 @@ require("../spec_helper")
 
 exec      = require("child_process").exec
 fs        = require("fs-extra")
+EE        = require("events")
+eol       = require("eol")
 path      = require("path")
 Promise   = require("bluebird")
-eol       = require("eol")
 extension = require("../../index")
-cwd       = process.cwd()
 
+cwd = process.cwd()
 fs = Promise.promisifyAll(fs)
 exec = Promise.promisify(exec)
 
@@ -47,7 +48,7 @@ describe "Extension", ->
     beforeEach ->
       @src = path.join(cwd, "test", "helpers", "background.js")
 
-      @sandbox.stub(extension, "getPathToExtension")
+      sinon.stub(extension, "getPathToExtension")
       .withArgs("background.js").returns(@src)
 
     it "rewrites the background.js source", ->
@@ -98,4 +99,3 @@ describe "Extension", ->
         exec(cmd)
         .then (stdout) ->
           expect(stdout).to.eq("caljajdfkjjjdehjdoimjkkakekklcck")
-

@@ -35,7 +35,7 @@ const getDirs = () => {
     return dirs.concat(nonPackageDirs)
   })
   .map((dir) => {
-    return path.join(process.cwd(), dir).replace(/\/$/, '')
+    return path.join(process.cwd(), dir).replace(/(\/|\\)$/, '')
   })
 }
 

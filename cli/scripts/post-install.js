@@ -27,6 +27,7 @@ shell.sed(
   '<reference path="../chai/index.d.ts" />',
   join('types', 'chai-jquery', 'index.d.ts')
 )
+
 shell.sed(
   '-i',
   '<reference types="jquery" />',
@@ -42,6 +43,7 @@ shell.sed(
   '<reference path="../chai/index.d.ts" />',
   sinonChaiFilename
 )
+
 // also use relative import via path for sinon-chai
 // there is reference comment line we need to fix to be relative
 shell.sed(
@@ -50,5 +52,6 @@ shell.sed(
   '<reference path="../sinon/index.d.ts" />',
   sinonChaiFilename
 )
+
 // and an import sinon line to be changed to relative path
 shell.sed('-i', 'from \'sinon\';', 'from \'../sinon\';', sinonChaiFilename)

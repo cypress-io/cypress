@@ -363,8 +363,7 @@ const _moveCursorUpOrDown = function (el, up) {
     return $elements.callNativeMethod(selection, 'modify',
       'move',
       up ? 'backward' : 'forward',
-      'line'
-    )
+      'line')
   }
 }
 

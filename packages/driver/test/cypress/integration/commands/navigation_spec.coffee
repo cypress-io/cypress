@@ -303,7 +303,7 @@ describe "src/cy/commands/navigation", ->
 
         return null
 
-      _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
+      _.each [null, undefined, NaN, Infinity, {}, [], ->{}], (val) =>
         it "throws on: '#{val}'", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq("cy.go() accepts only a string or number argument")

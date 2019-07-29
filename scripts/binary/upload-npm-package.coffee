@@ -6,7 +6,7 @@ fs = require("fs")
 path = require("path")
 awspublish = require('gulp-awspublish')
 rename = require('gulp-rename')
-debug = require('gulp-debug')
+gulpDebug = require('gulp-debug')
 gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
@@ -53,7 +53,7 @@ uploadFile = (options) ->
       la(check.unemptyString(p.basename), "missing basename")
       la(check.unemptyString(p.dirname), "missing dirname")
       p
-    .pipe debug()
+    .pipe gulpDebug()
     .pipe publisher.publish(headers)
     .pipe awspublish.reporter()
     .on "error", reject

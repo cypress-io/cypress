@@ -27,6 +27,8 @@ humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
 chromePolicyCheck = require("../util/chrome_policy_check")
 
+DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+
 color = (val, c) ->
   chalk[c](val)
 
@@ -406,6 +408,70 @@ trashAssets = (config = {}) ->
     ## dont make trashing assets fail the build
     errors.warning("CANNOT_TRASH_ASSETS", err.stack)
 
+## if we've been told to record and we're not spawning a headed browser
+browserCanBeRecorded = (browser) ->
+  browser.name is "electron" and browser.isHeadless
+    
+createVideoRecording = (videoName) ->
+  outputDir = path.dirname(videoName)
+
+  fs
+  .ensureDirAsync(outputDir)
+  .then ->
+    videoCapture
+    .start(videoName, {
+      onError: (err) ->
+        ## catch video recording failures and log them out
+        ## but don't let this affect the run at all
+        errors.warning("VIDEO_RECORDING_FAILED", err.stack)
+    })
+
+getVideoRecordingDelay = (startedVideoCapture) ->
+  if startedVideoCapture
+    return DELAY_TO_LET_VIDEO_FINISH_MS
+
+  return 0
+    
+maybeStartVideoRecording = Promise.method (options = {}) ->
+  { spec, browser, video, videosFolder } = options
+
+  ## bail if we've been told not to capture
+  ## a video recording
+  if not video
+    return
+  
+  ## handle if this browser cannot actually
+  ## be recorded
+  if not browserCanBeRecorded(browser)
+    console.log("")
+
+    if browser.name is "electron" and browser.isHeaded
+      errors.warning("CANNOT_RECORD_VIDEO_HEADED")
+    else
+      errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name)
+
+    return
+
+  ## make sure we have a videsFolder
+  if not videosFolder
+    throw new Error("Missing videoFolder for recording")
+
+  videoPath = (suffix) ->
+    path.join(videosFolder, spec.name + suffix)
+
+  videoName  = videoPath(".mp4")
+  compressedVideoName = videoPath("-compressed.mp4")
+
+  @createVideoRecording(videoName)
+  .then (props = {}) ->
+    return {
+      videoName,
+      compressedVideoName,
+      endVideoCapture: props.endVideoCapture,
+      writeVideoFrame: props.writeVideoFrame,
+      startedVideoCapture: props.startedVideoCapture,
+    }
+    
 module.exports = {
   collectTestResults
 
@@ -415,21 +481,14 @@ module.exports = {
 
   openProjectCreate
 
-  createRecording: (name) ->
-    outputDir = path.dirname(name)
+  createVideoRecording
+  
+  getVideoRecordingDelay
 
-    fs
-    .ensureDirAsync(outputDir)
-    .then ->
-      videoCapture.start(name, {
-        onError: (err) ->
-          ## catch video recording failures and log them out
-          ## but don't let this affect the run at all
-          errors.warning("VIDEO_RECORDING_FAILED", err.stack)
-      })
+  maybeStartVideoRecording
 
-  getElectronProps: (isHeaded, project, write) ->
-    obj = {
+  getElectronProps: (isHeaded, project, writeVideoFrame) ->
+    electronProps = {
       width:  1280
       height: 720
       show:   isHeaded
@@ -446,12 +505,12 @@ module.exports = {
         options.show = false
     }
 
-    if write
-      obj.recordFrameRate = 20
-      obj.onPaint = (event, dirty, image) ->
-        write(image.toJPEG(100))
+    if writeVideoFrame
+      electronProps.recordFrameRate = 20
+      electronProps.onPaint = (event, dirty, image) ->
+        writeVideoFrame(image.toJPEG(100))
 
-    obj
+    electronProps
 
   displayResults: (obj = {}, estimated) ->
     results = collectTestResults(obj, estimated)
@@ -570,11 +629,11 @@ module.exports = {
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   launchBrowser: (options = {}) ->
-    { browser, spec, write, project, screenshots, projectRoot } = options
+    { browser, spec, writeVideoFrame, project, screenshots, projectRoot } = options
 
     browserOpts = switch browser.name
       when "electron"
-        @getElectronProps(browser.isHeaded, project, write)
+        @getElectronProps(browser.isHeaded, project, writeVideoFrame)
       else
         {}
 
@@ -678,9 +737,16 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
+    { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
+
+    ## https://github.com/cypress-io/cypress/issues/2370
+    ## delay 1 second if we're recording a video to give
+    ## the browser padding to render the final frames
+    ## to avoid chopping off the end of the video
+    delay = @getVideoRecordingDelay(startedVideoCapture)
 
     @listenForProjectEnd(project, exit)
+    .delay(delay)
     .then (obj) =>
       _.defaults(obj, {
         error: null
@@ -691,8 +757,8 @@ module.exports = {
         reporterStats: null
       })
 
-      if end
-        obj.video = name
+      if startedVideoCapture
+        obj.video = videoName
 
       if screenshots
         obj.screenshots = screenshots
@@ -714,13 +780,13 @@ module.exports = {
       hasFailingTests = _.get(stats, 'failures') > 0
 
       ## if we have a video recording
-      if started and tests and tests.length
+      if startedVideoCapture and tests and tests.length
         ## always set the video timestamp on tests
-        obj.tests = Reporter.setVideoTimestamp(started, tests)
+        obj.tests = Reporter.setVideoTimestamp(startedVideoCapture, tests)
 
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures and have started the video
-      suv = Boolean(videoUploadOnPasses is true or (started and hasFailingTests))
+      suv = Boolean(videoUploadOnPasses is true or (startedVideoCapture and hasFailingTests))
 
       obj.shouldUploadVideo = suv
 
@@ -731,8 +797,8 @@ module.exports = {
       ## electron bug in windows
       openProject.closeBrowser()
       .then =>
-        if end
-          @postProcessRecording(end, name, cname, videoCompression, suv)
+        if endVideoCapture
+          @postProcessRecording(endVideoCapture, videoName, compressedVideoName, videoCompression, suv)
           .then(finish)
           ## TODO: add a catch here
         else
@@ -821,9 +887,9 @@ module.exports = {
       .return(results)
 
   runSpec: (spec = {}, options = {}, estimated) ->
-    { project, browser, video, videosFolder } = options
+    { project, browser } = options
 
-    { isHeadless, isHeaded } = browser
+    { isHeadless } = browser
 
     debug("about to run spec %o", {
       spec
@@ -839,62 +905,39 @@ module.exports = {
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
 
-    ## if we've been told to record and we're not spawning a headed browser
-    browserCanBeRecorded = (browser) ->
-      browser.name is "electron" and isHeadless
+    @maybeStartVideoRecording({
+      spec,
+      browser,
+      video: options.video,
+      videosFolder: options.videosFolder,
+    })
+    .then (videoRecordProps = {}) =>
+      Promise.props({
+        results: @waitForTestsToFinishRunning({
+          spec
+          project
+          estimated
+          screenshots
+          videoName:            videoRecordProps.videoName 
+          compressedVideoName:  videoRecordProps.compressedVideoName
+          endVideoCapture:      videoRecordProps.endVideoCapture
+          startedVideoCapture:  videoRecordProps.startedVideoCapture
+          exit:                 options.exit
+          videoCompression:     options.videoCompression
+          videoUploadOnPasses:  options.videoUploadOnPasses
+        }),
 
-    if video
-      if browserCanBeRecorded(browser)
-        if not videosFolder
-          throw new Error("Missing videoFolder for recording")
-
-        name  = path.join(videosFolder, spec.name + ".mp4")
-        cname = path.join(videosFolder, spec.name + "-compressed.mp4")
-
-        recording = @createRecording(name)
-      else
-        console.log("")
-
-        if browser.name is "electron" and isHeaded
-          errors.warning("CANNOT_RECORD_VIDEO_HEADED")
-        else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name)
-
-    Promise.resolve(recording)
-    .then (props = {}) =>
-      ## extract the started + ended promises from recording
-      {start, end, write} = props
-
-      ## make sure we start the recording first
-      ## before doing anything
-      Promise.resolve(start)
-      .then (started) =>
-        Promise.props({
-          results: @waitForTestsToFinishRunning({
-            end
-            name
-            spec
-            cname
-            started
-            project
-            estimated
-            screenshots
-            exit:                 options.exit
-            videoCompression:     options.videoCompression
-            videoUploadOnPasses:  options.videoUploadOnPasses
-          }),
-
-          connection: @waitForBrowserToConnect({
-            spec
-            write
-            project
-            browser
-            screenshots
-            socketId:    options.socketId
-            webSecurity: options.webSecurity
-            projectRoot: options.projectRoot
-          })
+        connection: @waitForBrowserToConnect({
+          spec
+          project
+          browser
+          screenshots
+          writeVideoFrame: videoRecordProps.writeVideoFrame
+          socketId:    options.socketId
+          webSecurity: options.webSecurity
+          projectRoot: options.projectRoot
         })
+      })
 
   findSpecs: (config, specPattern) ->
     specsUtil.find(config, specPattern)

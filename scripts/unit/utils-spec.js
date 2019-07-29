@@ -25,18 +25,21 @@ describe('getJustVersion', () => {
   it('extracts version from url', () => {
     const url = 'https://foo.com/npm/0.20.3/develop-sha-13992/cypress.tgz'
     const version = getJustVersion(url)
+
     snapshot({ url, version })
   })
 
   it('extracts version with dev from url', () => {
     const url = 'https://foo.com/npm/0.20.3-dev/develop-sha-13992/cypress.tgz'
     const version = getJustVersion(url)
+
     snapshot({ url, version })
   })
 
   it('for anything else returns the input', () => {
     const url = 'babababa'
     const version = getJustVersion(url)
+
     snapshot({ url, version })
   })
 })
