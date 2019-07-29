@@ -1,14 +1,21 @@
 {
   "globals": {
-    "lib": true,
-    "sinon": true
+    "lib": false,
+    "sinon": false,
+    "mockery": "readonly",
+    "nock": "readonly",
+    "proxyquire": "readonly",
+    "root": "readonly",
+    "supertest": "readonly"
   },
   "extends": [
-    "plugin:cypress-dev/tests"
-	],
-	"rules": {
+    "plugin:@cypress/dev/tests"
+  ],
+  "rules": {
     "prefer-rest-params": "off",
     "arrow-body-style": "off"
   },
-  "parserOptions": {"sourceType": "module"}
+  "parserOptions": {
+    "sourceType": "module"
+  }
 }

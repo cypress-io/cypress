@@ -115,7 +115,11 @@ describe "Web Sockets", ->
 
     it "proxies https messages through http", (done) ->
       ## force node into legit proxy mode like a browser
-      agent = new httpsAgent("http://localhost:#{cyPort}")
+      agent = new httpsAgent({
+        host: "localhost"
+        port: cyPort
+        rejectUnauthorized: false
+      })
 
       @server._onDomainSet("https://localhost:#{wssPort}")
 
@@ -145,7 +149,11 @@ describe "Web Sockets", ->
       evilDns.add("ws.foobar.com", "127.0.0.1")
 
       ## force node into legit proxy mode like a browser
-      agent = new httpsAgent("http://localhost:#{cyPort}")
+      agent = new httpsAgent({
+        host: "localhost"
+        port: cyPort
+        rejectUnauthorized: false
+      })
 
       @server._onDomainSet("https://foobar.com:#{wssPort}")
 

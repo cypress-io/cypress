@@ -3,46 +3,39 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
-  "types": "../ts/index.d.ts",
-  "files": [
-    "lib"
-  ],
   "scripts": {
-    "pretest": "npm run check-deps-pre && npm run lint",
-    "test": "npm run unit",
-    "unit": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean-deps": "rm -rf node_modules",
-    "preclean": "npm run check-deps-pre",
-    "clean": "node scripts/clean.js || true",
-    "clean-js": "npm run clean",
-    "lint": "npm run format-ts && npm run lint-ts && npm run lint-js",
-    "lint-js": "bin-up eslint --fix *.js",
-    "lint-ts": "tslint --project . --fix --format stylish lib/*.ts lib/**/*.ts",
-    "format-ts": "prettier --no-semi --single-quote --write lib/*.ts lib/**/*.ts",
     "build": "bin-up tsc --project .",
     "build-js": "bin-up tsc --project .",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";"
-  },
-  "devDependencies": {
-    "bin-up": "1.2.0",
-    "chai": "3.5.0",
-    "prettier": "1.17.0",
-    "shelljs": "0.8.3",
-    "sinon": "2.4.1",
-    "sinon-chai": "3.3.0",
-    "tslint": "5.16.0",
-    "tslint-config-standard": "8.0.1"
+    "build-prod": "npm run build",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
+    "preclean": "npm run check-deps-pre",
+    "clean": "node scripts/clean.js || true",
+    "clean-deps": "rm -rf node_modules",
+    "clean-js": "npm run clean",
+    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "pretest": "npm run check-deps-pre",
+    "test": "npm run unit",
+    "unit": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
     "bluebird": "3.5.3",
     "debug": "4.1.1",
     "execa": "1.0.0",
     "fs-extra": "8.1.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.15",
     "plist": "2.1.0",
-    "pluralize": "8.0.0",
     "ramda": "0.24.1"
-  }
+  },
+  "devDependencies": {
+    "bin-up": "1.2.0",
+    "chai": "3.5.0",
+    "shelljs": "0.8.3",
+    "sinon": "2.4.1",
+    "sinon-chai": "3.3.0"
+  },
+  "files": [
+    "lib"
+  ],
+  "types": "../ts/index.d.ts"
 }

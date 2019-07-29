@@ -24,7 +24,7 @@ describe "aliases", ->
 
       @runner = new EventEmitter()
 
-      cy.visit("cypress/support/index.html").then (win) =>
+      cy.visit("dist").then (win) =>
         win.render({
           runner: @runner
           specPath: "/foo/bar"

@@ -2,16 +2,15 @@ _ = require("lodash")
 
 $utils = require("../../cypress/utils")
 
-
 module.exports = (Commands, Cypress, cy, state, config) ->
   command = (ctx, name, args...) ->
-    if not ctx[name]
-      cmds = _.keys(cy.getChainer().prototype).join(", ")
-      $utils.throwErrByPath("miscellaneous.invalid_command", {
-        args: { name, cmds }
-      })
+  if not ctx[name]
+    cmds = _.keys($Chainer.prototype).join(", ")
+    $utils.throwErrByPath("miscellaneous.invalid_command", {
+      args: { name, cmds }
+    })
 
-    ctx[name].apply(null, args)
+  ctx[name].apply(window, args)
 
   Commands.addChainer({
     command: (chainer, args) ->
@@ -22,5 +21,5 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     command: (args...) ->
       args.unshift(cy)
 
-      command.apply(null, args)
+      command.apply(window, args)
   })

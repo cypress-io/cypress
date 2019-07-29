@@ -107,3 +107,12 @@ describe "e2e reporters", ->
               expect(json.stats.failures).to.eq(3)
               expect(json.stats.skipped).to.eq(1)
               expect(json.stats.other).to.eq(0)
+
+  it "supports teamcity reporter and reporter options", ->
+    e2e.exec(@, {
+      spec: "simple_passing_spec.coffee"
+      expectedExitCode: 0
+      snapshot: true
+      reporter: "teamcity"
+      reporterOptions: "topLevelSuite=top suite,flowId=12345,useStdError='true',useStdError='true',recordHookFailures='true',actualVsExpected='true'"
+    })

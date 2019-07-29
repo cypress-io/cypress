@@ -60,7 +60,7 @@ describe('<Test />', () => {
     })
 
     it('renders the contents if open', () => {
-      const component = shallow(<Test model={createModel({ isOpen: 'failed' })} />)
+      const component = shallow(<Test model={createModel({ isOpen: true })} />)
 
       expect(component.find('.runnable-instruments')).to.exist
     })

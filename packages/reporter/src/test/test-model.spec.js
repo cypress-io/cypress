@@ -23,6 +23,7 @@ describe('Test model', () => {
 
       expect(test.isOpen).eq(true)
     })
+
     it('is open when long running', () => {
       const test = new Test({})
 
@@ -30,11 +31,13 @@ describe('Test model', () => {
 
       expect(test.isOpen).eq(true)
     })
+
     it('is open when is the single test', () => {
       const test = new Test({}, null, { hasSingleTest: true })
 
       expect(test.isOpen).eq(true)
     })
+
     it('can be toggled from closed to open', () => {
       const test = new Test({})
 
@@ -42,6 +45,7 @@ describe('Test model', () => {
 
       expect(test.isOpen).eq(true)
     })
+
     it('can be toggled from open to closed', () => {
       const test = new Test({ state: 'failed' })
 
@@ -64,6 +68,12 @@ describe('Test model', () => {
       const test = new Test({})
 
       test.attempts = [{ isLongRunning: false }, { isLongRunning: false }]
+    })
+  })
+
+  context('#start', () => {
+    it('sets the test as active', () => {
+      const test = new Test({})
 
       expect(test.isLongRunning).to.be.false
     })

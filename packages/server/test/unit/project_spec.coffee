@@ -197,6 +197,20 @@ describe "lib/project", ->
         pluginsOnError(err)
         expect(onError).to.be.calledWith(err)
 
+    ## TODO: watch cypress.json
+    it.skip "watches cypress.json", ->
+      @server.open().bind(@).then ->
+        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
+
+    ## TODO: pass watchers to Socket.startListening
+    it.skip "passes watchers to Socket.startListening", ->
+      options = {}
+
+      @server.open(options).then ->
+        startListening = Socket::startListening
+        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
+        expect(startListening.getCall(0).args[1]).to.eq(options)
+
     it "updates config.state when saved state changes", ->
       sinon.spy(@project, "saveState")
 
@@ -210,18 +224,6 @@ describe "lib/project", ->
       .then (config) =>
         expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
         expect(config.state).to.eql({ autoScrollingEnabled: false })
-
-    it.skip "watches cypress.json", ->
-      @server.open().bind(@).then ->
-        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
-
-    it.skip "passes watchers to Socket.startListening", ->
-      options = {}
-
-      @server.open(options).then ->
-        startListening = Socket::startListening
-        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
-        expect(startListening.getCall(0).args[1]).to.eq(options)
 
   context "#close", ->
     beforeEach ->
@@ -311,7 +313,7 @@ describe "lib/project", ->
       expect(@watch).to.be.calledWith("/path/to/cypress.env.json")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: ->done()})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]

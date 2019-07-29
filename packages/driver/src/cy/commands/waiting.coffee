@@ -62,7 +62,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       args = arguments
 
       cy.retry ->
-        checkForXhr.apply(null, args)
+        checkForXhr.apply(window, args)
       , options
 
     waitForXhr = (str, options) ->
@@ -173,13 +173,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       try
         switch
           when _.isFinite(msOrFnOrAlias)
-            waitNumber.apply(null, args)
+            waitNumber.apply(window, args)
           when _.isFunction(msOrFnOrAlias)
             waitFunction()
           when _.isString(msOrFnOrAlias)
-            waitString.apply(null, args)
+            waitString.apply(window, args)
           when _.isArray(msOrFnOrAlias) and not _.isEmpty(msOrFnOrAlias)
-            waitString.apply(null, args)
+            waitString.apply(window, args)
           else
             ## figure out why this error failed
             arg = switch

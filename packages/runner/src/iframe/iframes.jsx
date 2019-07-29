@@ -84,6 +84,7 @@ export default class Iframes extends Component {
         />
       ),
     })
+
     this.iframeModel.listen()
     this._run(this.props.config)
   }

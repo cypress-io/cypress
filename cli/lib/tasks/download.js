@@ -16,6 +16,16 @@ const util = require('../util')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
 
+const getProxyUrl = () => {
+  return process.env.HTTPS_PROXY ||
+    process.env.https_proxy ||
+    process.env.npm_config_https_proxy ||
+    process.env.HTTP_PROXY ||
+    process.env.http_proxy ||
+    process.env.npm_config_proxy ||
+    null
+}
+
 const getRealOsArch = () => {
   // os.arch() returns the arch for which this node was compiled
   // we want the operating system's arch instead: x64 or x86
@@ -111,7 +121,8 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
         debug(text)
 
         throw new Error(text)
-      })
+      }
+    )
   }
 
   if (expectedChecksum) {
@@ -173,13 +184,19 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // {filename: ..., downloaded: true}
 const downloadFromUrl = ({ url, downloadDestination, progress }) => {
   return new Promise((resolve, reject) => {
-    debug('Downloading from', url)
-    debug('Saving file to', downloadDestination)
+    const proxy = getProxyUrl()
+
+    debug('Downloading package', {
+      url,
+      proxy,
+      downloadDestination,
+    })
 
     let redirectVersion
 
     const req = request({
       url,
+      proxy,
       followRedirect (response) {
         const version = response.headers['x-version']
 
@@ -211,6 +228,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
       // see https://github.com/cypress-io/cypress/pull/4092
       expectedSize = response.headers['x-amz-meta-size'] ||
         response.headers['content-length']
+
       expectedChecksum = response.headers['x-amz-meta-checksum']
 
       if (expectedChecksum) {
@@ -274,9 +292,11 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
  * @param [string] version Could be "3.3.0" or full URL
  * @param [string] downloadDestination Local filename to save as
  */
-const start = ({ version, downloadDestination, progress }) => {
+const start = (opts) => {
+  let { version, downloadDestination, progress } = opts
+
   if (!downloadDestination) {
-    la(is.unemptyString(downloadDestination), 'missing download dir', arguments)
+    la(is.unemptyString(downloadDestination), 'missing download dir', opts)
   }
 
   if (!progress) {
@@ -306,4 +326,5 @@ const start = ({ version, downloadDestination, progress }) => {
 module.exports = {
   start,
   getUrl,
+  getProxyUrl,
 }

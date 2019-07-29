@@ -40,14 +40,14 @@ class Project extends Component {
     if (this.props.project.error) return <ErrorMessage error={this.props.project.error} onTryAgain={this._reopenProject}/>
 
     return (
-      <div>
+      <>
         <ProjectNav project={this.props.project}/>
         <div className='project-content'>
           {this._renderWarnings()}
           {this._currentView()}
         </div>
         <OnBoarding project={this.props.project}/>
-      </div>
+      </>
     )
   }
 
@@ -72,8 +72,7 @@ class Project extends Component {
     const { warnings } = this.props.project
 
     return warnings.map((warning, i) =>
-      (<WarningMessage key={i} warning={warning} onClearWarning={() => this._removeWarning(warning)}/>)
-    )
+      (<WarningMessage key={i} warning={warning} onClearWarning={() => this._removeWarning(warning)}/>))
   }
 
   _removeWarning = (warning) => {

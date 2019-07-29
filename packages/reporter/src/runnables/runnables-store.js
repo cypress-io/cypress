@@ -159,6 +159,7 @@ class RunnablesStore {
     _.each(defaults, (value, key) => {
       this[key] = value
     })
+
     this.runnables = []
     this._tests = {}
     this._runnablesQueue = []
