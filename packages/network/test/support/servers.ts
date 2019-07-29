@@ -3,6 +3,7 @@ import { CA } from '@packages/https-proxy'
 import http from 'http'
 import https from 'https'
 import Io from '@packages/socket'
+import net from 'net'
 import Promise from 'bluebird'
 
 export interface AsyncServer {
@@ -11,7 +12,7 @@ export interface AsyncServer {
   listenAsync: (port) => Promise<void>
 }
 
-function addDestroy (server: http.Server | https.Server) {
+export function addDestroy (server: net.Server) {
   let connections = []
 
   function trackConn (conn) {
