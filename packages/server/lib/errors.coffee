@@ -846,6 +846,8 @@ get = (type, arg1, arg2) ->
 warning = (type, arg1, arg2) ->
   err = get(type, arg1, arg2)
   log(err, "magenta")
+  
+  return null
 
 throwErr = (type, arg1, arg2) ->
   throw get(type, arg1, arg2)
