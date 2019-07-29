@@ -29,7 +29,7 @@ $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
-  cy: "getStyles".split(" ")
+  cy: "detachDom getStyles".split(" ")
 }
 
 jqueryProxyFn = ->
@@ -160,11 +160,12 @@ class $Cypress
   ## or parsed. we have not received any custom commands
   ## at this point
   onSpecWindow: (specWindow) ->
-    logFn = =>
-      @log.apply(@, arguments)
+    logFn = (args...) =>
+      @log.apply(@, args)
 
     ## create cy and expose globally
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
+    @isCy = @cy.isCy
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
@@ -393,6 +394,9 @@ class $Cypress
 
       when "app:window:unload"
         @emit("window:unload", args[0])
+
+      when "app:css:modified"
+        @emit("css:modified", args[0])
 
       when "spec:script:error"
         @emit("script:error", args...)

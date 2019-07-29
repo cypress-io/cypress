@@ -3,12 +3,12 @@ const os = require('os')
 const md5 = require('md5')
 const path = require('path')
 const debug = require('debug')('cypress:server:file')
-const Queue = require('p-queue')
 const Promise = require('bluebird')
 const lockFile = Promise.promisifyAll(require('lockfile'))
 const fs = require('./fs')
 const env = require('./env')
 const exit = require('./exit')
+const { default: pQueue } = require('p-queue')
 
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
@@ -24,7 +24,7 @@ class File {
     this._lockFileDir = path.join(os.tmpdir(), 'cypress')
     this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
 
-    this._queue = new Queue({ concurrency: 1 })
+    this._queue = new pQueue({ concurrency: 1 })
 
     this._cache = {}
     this._lastRead = 0

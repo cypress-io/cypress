@@ -145,7 +145,7 @@ describe('<SelectorPlayground />', () => {
       expect(component.find(Tooltip).at(2)).to.have.prop('title', 'Copied!')
     })
 
-    it('sets tooltip text to "Oop, unable to copy" when it fails', () => {
+    it('sets tooltip text to "Oops, unable to copy" when it fails', () => {
       document.execCommand.returns(false)
       const component = mount(<SelectorPlayground model={model} />)
 
@@ -153,7 +153,7 @@ describe('<SelectorPlayground />', () => {
       expect(component.find(Tooltip).at(2)).to.have.prop('title', 'Oops, unable to copy')
     })
 
-    it('sets tooltip text to "Oop, unable to copy" when it throws an error', () => {
+    it('sets tooltip text to "Oops, unable to copy" when it throws an error', () => {
       document.execCommand.throws()
       const component = mount(<SelectorPlayground model={model} />)
 
@@ -163,9 +163,10 @@ describe('<SelectorPlayground />', () => {
 
     it('resets tooltip text when mousing out of button', () => {
       const component = mount(<SelectorPlayground model={model} />)
+      const randomEl = document.createElement('div')
 
       component.find('.copy-to-clipboard').simulate('click')
-      component.find('.copy-to-clipboard').simulate('mouseout', { relatedTarget: { parentNode: {} } })
+      component.find('.copy-to-clipboard').simulate('mouseout', { relatedTarget: randomEl })
       expect(component.find(Tooltip).at(2)).to.have.prop('title', 'Copy to clipboard')
     })
   })
@@ -200,9 +201,10 @@ describe('<SelectorPlayground />', () => {
 
     it('resets tooltip text when mousing out of button', () => {
       const component = mount(<SelectorPlayground model={model} />)
+      const randomEl = document.createElement('div')
 
       component.find('.print-to-console').simulate('click')
-      component.find('.print-to-console').simulate('mouseout', { relatedTarget: { parentNode: {} } })
+      component.find('.print-to-console').simulate('mouseout', { relatedTarget: randomEl })
       expect(component.find(Tooltip).at(3)).to.have.prop('title', 'Print to console')
     })
   })

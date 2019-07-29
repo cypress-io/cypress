@@ -147,6 +147,7 @@
     font-size: 1em;
     position: relative;
     left: -15px;
+    max-width: calc(100% - 85px);
 
     .arrow {
       @extend .#{$fa-css-prefix};
@@ -206,4 +207,22 @@
 .loading-record-key {
   color: #999;
   margin: 1em;
+}
+
+.proxy-settings {
+  .proxy-table {
+    width: 100%;
+
+    th:first-child {
+      width: 150px;
+    }
+
+    .no-bypass {
+      opacity: .8;
+    }
+
+    td, th {
+      padding: 3px;
+    }
+  }
 }

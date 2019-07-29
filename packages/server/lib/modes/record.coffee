@@ -13,6 +13,7 @@ errors     = require("../errors")
 capture    = require("../capture")
 upload     = require("../upload")
 env        = require("../util/env")
+keys       = require("../util/keys")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 ciProvider = require("../util/ci_provider")
@@ -231,9 +232,9 @@ getCommitFromGitOrCi = (git) ->
     defaultBranch: null
   })
 
-usedMessage = (limit) ->
+usedTestsMessage = (limit, phrase) ->
   if _.isFinite(limit)
-    "The limit is #{chalk.blue(limit)} private test recordings."
+    "The limit is #{chalk.blue(limit)} #{phrase} recordings."
   else
     ""
 
@@ -258,7 +259,7 @@ createRun = (options = {}) ->
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
   if not recordKey
-    ## are we a forked PR and are we NOT running our own internal
+    ## are we a forked pull request (forked PR) and are we NOT running our own internal
     ## e2e tests? currently some e2e tests fail when a user submits
     ## a PR because this logic triggers unintended here
     if isForkPr.isForkPr() and not runningInternalTests()
@@ -307,7 +308,13 @@ createRun = (options = {}) ->
       switch warning.code
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-            usedMessage: usedMessage(warning.limit)
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
+        when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "test")
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
@@ -318,13 +325,23 @@ createRun = (options = {}) ->
           })
         when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-            usedMessage: usedMessage(warning.limit)
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            link: billingLink(warning.orgId)
+          })
+        when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "test")
             link: billingLink(warning.orgId)
           })
         when "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
           errors.warning("PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED", {
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
+          })
+        else
+          errors.warning("DASHBOARD_UNKNOWN_CREATE_RUN_WARNING", {
+            message: warning.message,
+            props: _.omit(warning, 'message')
           })
 
   .catch (err) ->
@@ -334,7 +351,7 @@ createRun = (options = {}) ->
 
     switch err.statusCode
       when 401
-        recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+        recordKey = keys.hide(recordKey)
         errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
       when 402
         { code, payload } = err.error
@@ -345,7 +362,12 @@ createRun = (options = {}) ->
         switch code
           when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
             errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-              usedMessage: usedMessage(limit)
+              usedTestsMessage: usedTestsMessage(limit, "private test")
+              link: billingLink(orgId)
+            })
+          when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_TESTS", {
+              usedTestsMessage: usedTestsMessage(limit, "test")
               link: billingLink(orgId)
             })
           when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"

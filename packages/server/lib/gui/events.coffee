@@ -5,6 +5,7 @@ debug       = require('debug')('cypress:server:events')
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
+auth        = require("./auth")
 Windows     = require("./windows")
 api         = require("../api")
 open        = require("../util/open")
@@ -13,7 +14,9 @@ errors      = require("../errors")
 Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
-connect     = require("../util/connect")
+ensureUrl   = require("../util/ensure-url")
+chromePolicyCheck = require("../util/chrome_policy_check")
+browsers    = require("../browsers")
 konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
@@ -57,6 +60,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:project:error"
       onBus("project:error")
 
+    when "on:auth:message"
+      onBus("auth:message")
+
     when "on:project:warning"
       onBus("project:warning")
 
@@ -81,7 +87,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "get:current:user"
-      user.get()
+      user.getSafely()
       .then(send)
       .catch(sendErr)
 
@@ -108,6 +114,14 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onBrowserClose: ->
           send({browserClosed: true})
       })
+      .catch(sendErr)
+
+    when "begin:auth"
+      onMessage = (msg) ->
+        bus.emit('auth:message', msg)
+
+      auth.start(onMessage)
+      .then(send)
       .catch(sendErr)
 
     when "window:open"
@@ -199,13 +213,22 @@ handleEvent = (options, bus, event, id, type, arg) ->
       onWarning = (warning) ->
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
-      openProject.create(arg, options, {
-        onFocusTests: onFocusTests
-        onSpecChanged: onSpecChanged
-        onSettingsChanged: onSettingsChanged
-        onError: onError
-        onWarning: onWarning
-      })
+      browsers.getAllBrowsersWith(options.browser)
+      .then (browsers = []) ->
+        options.config = _.assign(options.config, { browsers })
+      .then ->
+        chromePolicyCheck.run (err) ->
+          options.config.browsers.forEach (browser) ->
+            if browser.family == 'chrome'
+              browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
+
+        openProject.create(arg, options, {
+          onFocusTests: onFocusTests
+          onSpecChanged: onSpecChanged
+          onSettingsChanged: onSettingsChanged
+          onError: onError
+          onWarning: onWarning
+        })
       .call("getConfig")
       .then(send)
       .catch(sendErr)
@@ -266,7 +289,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "ping:api:server"
       apiUrl = konfig("api_url")
-      connect.ensureUrl(apiUrl)
+      ensureUrl.isListening(apiUrl)
       .then(send)
       .catch (err) ->
         ## if it's an aggegrate error, just send the first one

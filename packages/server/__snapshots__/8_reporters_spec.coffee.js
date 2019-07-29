@@ -10,7 +10,7 @@ The error we received was:
 
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 
-Learn more at stack trace line
+Learn more at https://on.cypress.io/reporters
 
 `
 
@@ -694,6 +694,65 @@ Error: this reporter threw an error
     at stack trace line
     at stack trace line
 
-Learn more at stack trace line
+Learn more at https://on.cypress.io/reporters
+
+`
+
+exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
+  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: simple_passing_spec.coffee...                                                   (1 of 1) 
+##teamcity[testSuiteStarted name='top suite' flowId='12345']
+##teamcity[testSuiteStarted name='simple passing spec' flowId='12345']
+##teamcity[testStarted name='passes' captureStandardOutput='true' flowId='12345']
+##teamcity[testFinished name='passes' duration='XXXX' flowId='12345']
+##teamcity[testSuiteFinished name='simple passing spec' duration='XXXX' flowId='12345']
+##teamcity[testSuiteFinished name='top suite' duration='XXXX' flowId='12345']
+
+  (Results)
+
+  ┌──────────────────────────────────────────┐
+  │ Tests:        1                          │
+  │ Passing:      1                          │
+  │ Failing:      0                          │
+  │ Pending:      0                          │
+  │ Skipped:      0                          │
+  │ Screenshots:  0                          │
+  │ Video:        true                       │
+  │ Duration:     X seconds                  │
+  │ Spec Ran:     simple_passing_spec.coffee │
+  └──────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        1        1        -        -        -  
+
 
 `

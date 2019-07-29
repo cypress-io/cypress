@@ -408,7 +408,7 @@ describe "lib/screenshots", ->
             multipart: false
             pixelRatio: 2
             path: path.normalize(result.path)
-            size: 284
+            size: 272
             name: "foo bar\\baz/my-screenshot"
             specName: "foo.spec.js"
             testFailure: false
@@ -502,6 +502,28 @@ describe "lib/screenshots", ->
         expect(p).to.eq(
           "path/to/screenshots/examples$/user/list.js/bar -- baz -- 語言 (failed).png"
         )
+
+    _.each [Infinity, 0 / 0, [], {}, 1, false], (value) ->
+      it "doesn't err and stringifies non-string test title: #{value}", ->
+        screenshots.getPath({
+          specName: "examples$/user/list.js"
+          titles: ["bar*", "語言", value]
+          takenPaths: ["a"]
+          testFailure: true
+        }, "png", "path/to/screenshots")
+        .then (p) ->
+          expect(p).to.eq("path/to/screenshots/examples$/user/list.js/bar -- 語言 -- #{value} (failed).png")
+
+    _.each [null, undefined], (value) ->
+      it "doesn't err and removes null/undefined test title: #{value}", ->
+        screenshots.getPath({
+          specName: "examples$/user/list.js"
+          titles: ["bar*", "語言", value]
+          takenPaths: ["a"]
+          testFailure: true
+        }, "png", "path/to/screenshots")
+        .then (p) ->
+          expect(p).to.eq("path/to/screenshots/examples$/user/list.js/bar -- 語言 --  (failed).png")
 
   context ".afterScreenshot", ->
     beforeEach ->

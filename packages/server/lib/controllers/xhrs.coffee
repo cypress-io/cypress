@@ -1,6 +1,5 @@
 _           = require("lodash")
 mime        = require("mime")
-str         = require("string-to-stream")
 Promise     = require("bluebird")
 fixture     = require("../fixture")
 
@@ -78,13 +77,6 @@ module.exports = {
     fixture.get(config.fixturesFolder, filePath, options)
     .then (bytes) ->
       {data: bytes, encoding: encoding}
-
-  getStream: (resp) ->
-    if fixturesRe.test(resp)
-      @_get(resp).then (contents) ->
-        str(contents)
-    else
-      str(resp)
 
   getResponse: (resp, config) ->
     if fixturesRe.test(resp)

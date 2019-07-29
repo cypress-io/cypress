@@ -6,7 +6,13 @@
     {
       "label": "decaffeinate-bulk file",
       "type": "shell",
-      "command": "npm run decaffeinate-bulk -- --file ${file} convert",
+      "command": "npm run decaffeinate-bulk -- convert --file ${file}",
+      "problemMatcher": []
+    },
+    {
+      "label": "decaffeinate-bulk multiple files",
+      "type": "shell",
+      "command": "npm run decaffeinate-bulk -- convert --file ${file} ${file}",
       "problemMatcher": []
     },
     {
@@ -14,16 +20,6 @@
       "type": "shell",
       "command": "npm run decaffeinate-bulk -- --dir ${fileDirname} convert",
       "problemMatcher": []
-    },
-    {
-      "label": "decaffeinate",
-      "type": "shell",
-      "command": "npm run decaffeinate -- ${file}"
-    },
-    {
-      "label": "jscodeshift",
-      "type": "shell",
-      "command": "npm run jscodeshift -- ${file}"
     }
   ]
 }

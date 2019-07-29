@@ -3,18 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
-  "files": [
-    "register.js"
-  ],
   "scripts": {
-    "test": "node test",
-    "clean-deps": "rm -rf node_modules"
-  },
-  "devDependencies": {
-    "ts-node": "3.3.0",
-    "typescript": "2.9.2"
+    "clean-deps": "rm -rf node_modules",
+    "test": "node test"
   },
   "dependencies": {
-    "debug": "2.6.9"
-  }
+    "debug": "4.1.1"
+  },
+  "devDependencies": {
+    "ts-node": "5.0.1"
+  },
+  "files": [
+    "register.js"
+  ]
 }

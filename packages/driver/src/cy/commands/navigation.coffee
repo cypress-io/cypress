@@ -1,4 +1,5 @@
 _ = require("lodash")
+whatIsCircular = require("@cypress/what-is-circular")
 moment = require("moment")
 UrlParse = require("url-parse")
 Promise = require("bluebird")
@@ -12,6 +13,13 @@ previousDomainVisited = null
 hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
+
+REQUEST_URL_OPTS = "auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers"
+.split(" ")
+
+VISIT_OPTS = "url log onBeforeLoad onLoad timeout requestTimeout"
+.split(" ")
+.concat(REQUEST_URL_OPTS)
 
 reset = (test = {}) ->
   knownCommandCausedInstability = false
@@ -27,6 +35,11 @@ reset = (test = {}) ->
   currentlyVisitingAboutBlank = false
 
   id = test.id
+
+VALID_VISIT_METHODS = ['GET', 'POST']
+
+isValidVisitMethod = (method) ->
+  _.includes(VALID_VISIT_METHODS, method)
 
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
@@ -233,6 +246,20 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
     catch err
       reject(err)
 
+normalizeTimeoutOptions = (options) ->
+  ## there are really two timeout values - pageLoadTimeout
+  ## and the underlying responseTimeout. for the purposes
+  ## of resolving resolving the url, we only care about
+  ## responseTimeout - since pageLoadTimeout is a driver
+  ## and browser concern. therefore we normalize the options
+  ## object and send 'responseTimeout' as options.timeout
+  ## for the backend.
+  _
+  .chain(options)
+  .pick(REQUEST_URL_OPTS)
+  .extend({ timeout: options.responseTimeout })
+  .value()
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
@@ -260,7 +287,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, "failOnStatusCode", "auth")
+      normalizeTimeoutOptions(options)
     )
     .then (resp = {}) ->
       switch
@@ -456,22 +483,57 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           $utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
+      if options.url and url
+        $utils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: options.url, url: url }})
+
+      if _.isObject(url) and _.isEqual(options, {})
+        ## options specified as only argument
+        options = url
+        url = options.url
+
       if not _.isString(url)
         $utils.throwErrByPath("visit.invalid_1st_arg")
+
+      consoleProps = {}
+
+      if not _.isEmpty(options)
+        consoleProps["Options"] = _.pick(options, VISIT_OPTS)
 
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
+        retryOnNetworkFailure: true
+        retryOnStatusCodeFailure: false
+        method: 'GET'
+        body: null
+        headers: {}
         log: true
+        responseTimeout: config('responseTimeout')
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
       })
 
-      consoleProps = {}
+      if options.retryOnStatusCodeFailure and not options.failOnStatusCode
+        $utils.throwErrByPath("visit.status_code_flags_invalid")
+
+      if not isValidVisitMethod(options.method)
+        $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
+
+      if not _.isObject(options.headers)
+        $utils.throwErrByPath("visit.invalid_headers")
+
+      if _.isObject(options.body) and path = whatIsCircular(options.body)
+        $utils.throwErrByPath("visit.body_circular", { args: { path }})
 
       if options.log
+        message = url
+
+        if options.method != 'GET'
+          message = "#{options.method} #{message}"
+
         options._log = Cypress.log({
+          message: message
           consoleProps: -> consoleProps
         })
 
@@ -519,7 +581,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ({runOnLoadCallback}) ->
+      onLoad = ({runOnLoadCallback, totalTime}) ->
         ## reset window on load
         win = state("window")
 
@@ -527,7 +589,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if runOnLoadCallback isnt false
           options.onLoad?.call(runnable.ctx, win)
 
-        options._log.set({url: url}) if options._log
+        if options._log
+          options._log.set({
+            url
+            totalTime
+          })
 
         return Promise.resolve(win)
 
@@ -598,11 +664,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             if url isnt originalUrl
               consoleProps["Original Url"] = originalUrl
 
-          if options.log and redirects and redirects.length
-            indicateRedirects = ->
-              [originalUrl].concat(redirects).join(" -> ")
+          if options.log
+            message = options._log.get('message')
 
-            options._log.set({message: indicateRedirects()})
+            if redirects and redirects.length
+              message = [message].concat(redirects).join(" -> ")
+
+            options._log.set({message: message})
 
           consoleProps["Resolved Url"]  = url
           consoleProps["Redirects"]     = redirects
@@ -620,7 +688,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             url = $Location.fullyQualifyUrl(url)
 
             changeIframeSrc(url, "window:load")
-            .then(onLoad)
+            .then ->
+              onLoad(resp)
           else
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop
@@ -724,8 +793,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           go()
 
       visit()
-      .then ->
-        state("window")
       .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
         timedOutWaitingForPageLoad(options.timeout, options._log)

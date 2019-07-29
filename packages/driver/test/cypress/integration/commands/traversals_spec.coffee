@@ -5,21 +5,15 @@ dom = Cypress.dom
 helpers = require("../../support/helpers")
 
 describe "src/cy/commands/traversals", ->
-  before ->
-    cy
-      .visit("/fixtures/dom.html")
-      .then (win) ->
-        @body = win.document.body.outerHTML
-
   beforeEach ->
-    doc = cy.state("document")
-
-    $(doc.body).empty().html(@body)
+    cy.visit("/fixtures/dom.html")
 
   fns = [
     {find: "*"}
     {filter: ":first"}
+    {filter: (i) -> i == 0}
     {not: "div"}
+    {not: (i, e) -> e.tagName == 'div'}
     {eq: 0}
     {closest: "body"}
     "children", "first", "last", "next", "nextAll", "nextUntil", "parent", "parents", "parentsUntil", "prev", "prevAll", "prevUntil", "siblings"
@@ -137,15 +131,22 @@ describe "src/cy/commands/traversals", ->
 
         it "has a custom message", ->
           cy.get("#list")[name](arg).then ->
-            arg = if _.isUndefined(arg) then "" else arg.toString()
+            if _.isUndefined(arg) or _.isFunction(arg)
+              message = ""
+            else
+              message = arg.toString()
+
             lastLog = @lastLog
 
-            expect(lastLog.get("message")).to.eq arg
+            expect(lastLog.get("message")).to.eq message
 
         it "#consoleProps", ->
           cy.get("#list")[name](arg).then ($el) ->
             obj = {Command: name}
-            obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
+            if _.isFunction(arg)
+              obj.Selector = ""
+            else
+              obj.Selector = [].concat(arg).join(", ")
 
             yielded = Cypress.dom.getElements($el)
 
@@ -156,6 +157,12 @@ describe "src/cy/commands/traversals", ->
             }
 
             expect(@lastLog.invoke("consoleProps")).to.deep.eq obj
+
+        it "can be turned off", ->
+          cy.get("#list")[name](arg, {log: false}).then ->
+            lastLog = @lastLog
+
+            expect(lastLog.get("name")).to.eq "get"
 
   it "eventually resolves", ->
     cy.on "command:retry", _.after 2, ->

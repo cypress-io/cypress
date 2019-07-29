@@ -53,7 +53,7 @@ export default class Project {
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
-  @observable warning
+  @observable warnings = []
   @observable apiError
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
@@ -158,22 +158,33 @@ export default class Project {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)
       })
-      // if they already have a browser chosen
-      // that's been saved in localStorage, then select that
+
+      // use a custom browser if one is supplied. or, if they already have
+      // a browser chosen that's been saved in localStorage, then select that
       // otherwise just do the default.
-      if (localStorage.getItem('chosenBrowser')) {
-        this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
-      } else {
-        this.setChosenBrowser(this.defaultBrowser)
+      const customBrowser = _.find(this.browsers, { custom: true })
+
+      if (customBrowser) {
+        return this.setChosenBrowser(customBrowser, { save: false })
       }
+
+      if (localStorage.getItem('chosenBrowser')) {
+        return this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
+      }
+
+      return this.setChosenBrowser(this.defaultBrowser)
     }
   }
 
-  @action setChosenBrowser (browser) {
+  @action setChosenBrowser (browser, { save } = {}) {
     _.each(this.browsers, (browser) => {
       browser.isChosen = false
     })
-    localStorage.setItem('chosenBrowser', browser.name)
+
+    if (save !== false) {
+      localStorage.setItem('chosenBrowser', browser.name)
+    }
+
     browser.isChosen = true
   }
 
@@ -199,18 +210,23 @@ export default class Project {
     this.error = null
   }
 
-  @action setWarning (warning) {
+  @action addWarning (warning) {
     if (!this.dismissedWarnings[this._serializeWarning(warning)]) {
-      this.warning = warning
+      this.warnings.push(warning)
     }
   }
 
-  @action clearWarning () {
-    if (this.warning) {
-      this.dismissedWarnings[this._serializeWarning(this.warning)] = true
+  @action clearWarning (warning) {
+    if (!warning) {
+      // calling with no warning clears all warnings
+      return this.warnings.map((warning) => {
+        return this.clearWarning(warning)
+      })
     }
 
-    this.warning = null
+    this.dismissedWarnings[this._serializeWarning(warning)] = true
+
+    this.warnings = _.without(this.warnings, warning)
   }
 
   _serializeWarning (warning) {
