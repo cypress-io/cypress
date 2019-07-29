@@ -150,7 +150,6 @@
     "babelify": "10.0.0",
     "bin-up": "1.2.0",
     "body-parser": "1.19.0",
-    "chai": "4.2.0",
     "chai-uuid": "1.0.6",
     "chokidar-cli": "1.2.2",
     "chrome-har-capturer": "0.13.4",
