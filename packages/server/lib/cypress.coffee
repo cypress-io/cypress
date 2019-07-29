@@ -32,8 +32,8 @@ exitErr = (err) ->
   ## and exit with 1
   debug('exiting with err', err)
 
-  require("./errors").log(err)
-  .then -> exit(1)
+  require("./errors").logException err, ->
+    exit(1)
 
 module.exports = {
   isCurrentlyRunningElectron: ->

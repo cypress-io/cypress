@@ -121,7 +121,7 @@ describe "lib/cypress", ->
     sinon.stub(Server.prototype, "reset")
     sinon.stub(argsUtil, "startedFromCLI").returns(true)
     sinon.spy(errors, "log")
-    sinon.spy(errors, "warning")
+    sinon.spy(errors, "logException")
     sinon.spy(console, "log")
 
     @expectExitWith = (code) =>

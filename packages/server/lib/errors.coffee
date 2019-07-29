@@ -6,6 +6,9 @@ Promise = require("bluebird")
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
+isProduction = ->
+  process.env["CYPRESS_ENV"] is "production"
+
 listItems = (paths) ->
   _
   .chain(paths)
@@ -872,26 +875,38 @@ clone = (err, options = {}) ->
   obj
 
 log = (err, color = "red") ->
-  Promise.try ->
-    console.log chalk[color](err.message)
-    if err.details
-      console.log("\n", chalk["yellow"](err.details))
+  console.log chalk[color](err.message)
 
-    ## bail if this error came from known
-    ## list of Cypress errors
-    return if isCypressErr(err)
+  if err.details
+    console.log("\n", chalk["yellow"](err.details))
 
-    console.log chalk[color](err.stack)
+  ## bail if this error came from known
+  ## list of Cypress errors
+  return if isCypressErr(err)
 
-    if process.env["CYPRESS_ENV"] is "production"
-      ## log this error to raygun since its not
-      ## a known error
-      require("./logger").createException(err).catch(->)
+  console.log chalk[color](err.stack)
 
+  return err
+  
+logException = (err, cb) ->
+  ## TODO: remove context here
+  if @log(err) and isProduction()
+    ## log this exception since 
+    ## its not a known error
+    return require("./logger")
+    .createException(err)
+    .catch(->)
+    .finally(cb)
+
+  ## else just cb() immediately 
+  return cb()
+  
 module.exports = {
   get,
 
   log,
+
+  logException,
 
   clone,
 
