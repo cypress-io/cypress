@@ -99,7 +99,7 @@ describe "lib/errors", ->
         expect(logger.createException).not.to.be.called
     
     it "swallows creating exception errors", ->
-      sinon.stub(logger, "createException").rejects(new Error)
+      sinon.stub(logger, "createException").rejects(new Error("foo"))
       sinon.stub(process.env, "CYPRESS_ENV").value("production")
 
       err = errors.get("NOT_LOGGED_IN")
