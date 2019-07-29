@@ -14,7 +14,7 @@ Automation  = require("#{root}lib/automation")
 Fixtures    = require("#{root}/test/support/helpers/fixtures")
 
 cyPort  = 12345
-otherPort = 5555
+otherPort = 55551
 wsPort  = 20000
 wssPort = 8443
 
