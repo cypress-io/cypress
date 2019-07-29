@@ -247,7 +247,7 @@ billingLink = (orgId) ->
 gracePeriodMessage = (gracePeriodEnds) ->
   gracePeriodEnds or "the grace period ends"
 
-createRun = (options = {}) ->
+createRun = Promise.method (options = {}) ->
   _.defaults(options, {
     group: null,
     parallel: null,

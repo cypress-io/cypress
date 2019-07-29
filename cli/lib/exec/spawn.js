@@ -73,6 +73,8 @@ module.exports = {
     debug('needs to start own Xvfb?', needsXvfb)
 
     // always push cwd into the args
+    // which additionally acts as a signal to the
+    // binary that it was invoked through the NPM module
     args = [].concat(args, '--cwd', process.cwd())
 
     _.defaults(options, {
