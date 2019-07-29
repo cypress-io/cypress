@@ -37,7 +37,7 @@ gulp.task('backup', () => {
 
 gulp.task('background', () => {
   return browserify({
-    entries: 'app/background.coffee',
+    entries: 'app/init.js',
     transform: coffeeify,
   })
   .bundle()
