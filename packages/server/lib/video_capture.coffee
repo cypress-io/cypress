@@ -64,8 +64,6 @@ module.exports = {
 
       if wantsWrite
         if not wantsWrite = pt.write(data)
-          debugFrames("video stream wants to drain")
-      
           pt.once "drain", ->
             debugFrames("video stream drained")
       
@@ -73,7 +71,7 @@ module.exports = {
       else
         skipped += 1
 
-        debugFrames("skipping video frame. total is %d", skipped)
+        debugFrames("skipping video frame %o", { skipped })
 
     startCapturing = ->
       new Promise (resolve) ->

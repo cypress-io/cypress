@@ -4,9 +4,6 @@ path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
 debug      = require("debug")("cypress:server:run")
-# because this file also interacts with video recording
-# some debug logs should have ":video" namespace
-debugVideo = require("debug")("cypress:server:video")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
 
