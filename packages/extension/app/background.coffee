@@ -4,7 +4,6 @@ once    = require("lodash/once")
 Promise = require("bluebird")
 { client, circularParser } = require("@packages/socket/lib/browser")
 
-HOST_PATH_REPLACED = false
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
 
@@ -71,8 +70,7 @@ connect = (host, path) ->
   return ws
 
 ## initially connect
-if HOST_PATH_REPLACED
-  connect(HOST, PATH)
+connect(HOST, PATH)
 
 automation = {
   connect
