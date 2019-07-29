@@ -693,9 +693,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
-    # TODO: once we have a doc on global vs local install, add link
-    # QUESTION: should we show different ways to run Cypress CLI depending on OS?
-    when "OPENED_CYPRESS_DIRECTLY"
+    when "INVOKED_BINARY_OUTSIDE_NPM_MODULE"
       """
       It looks like you are running the Cypress binary directly.
 
@@ -703,7 +701,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Please install the 'cypress' NPM package and follow the instructions here:
       
-        https://on.cypress.io/installing-cypress
+      https://on.cypress.io/installing-cypress
       """
     when "DUPLICATE_TASK_KEY"
       """

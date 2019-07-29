@@ -73,9 +73,9 @@ module.exports = {
     debug('needs to start own Xvfb?', needsXvfb)
 
     // always push cwd into the args
-    // also pass a flag to let binary know it was not executed
-    // directly by the user, but through this NPM module
-    args = [].concat(args, '--run-from-cli', '--cwd', process.cwd())
+    // which additionally acts as a signal to the
+    // binary that it was invoked through the NPM module
+    args = [].concat(args, '--cwd', process.cwd())
 
     _.defaults(options, {
       dev: false,

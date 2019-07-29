@@ -10,7 +10,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource runFromCli'.split(' ')
+const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource'.split(' ')
 
 // returns true if the given string has double quote character "
 // only at the last position.
@@ -137,13 +137,7 @@ const sanitizeAndConvertNestedArgs = function (str) {
   .value()
 }
 
-const startedFromCLI = function (argv) {
-  return _.includes(argv, '--run-from-cli') || _.includes(argv, '--runFromCli=true')
-}
-
 module.exports = {
-  startedFromCLI,
-
   toObject (argv) {
     debug('argv array: %o', argv)
 
@@ -161,7 +155,6 @@ module.exports = {
       'proxy-source': 'proxySource',
       'reporter-options': 'reporterOptions',
       'return-pkg': 'returnPkg',
-      'run-from-cli': 'runFromCli',
       'run-mode': 'isTextTerminal',
       'run-project': 'runProject',
       'smoke-test': 'smokeTest',
@@ -175,10 +168,14 @@ module.exports = {
 
     const whitelisted = _.pick(argv, whitelist)
 
+    // were we invoked from the CLI or directly?
+    const invokedFromCli = Boolean(options.cwd)
+
     options = _
     .chain(options)
     .defaults(whitelisted)
     .omit(_.keys(alias)) // remove aliases
+    .extend({ invokedFromCli })
     .defaults({
       // set in case we
       // bypassed the cli

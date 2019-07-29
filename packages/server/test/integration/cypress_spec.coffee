@@ -119,7 +119,11 @@ describe "lib/cypress", ->
     sinon.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
     sinon.stub(process, "exit")
     sinon.stub(Server.prototype, "reset")
-    sinon.stub(argsUtil, "startedFromCLI").returns(true)
+    sinon.stub(errors, "warning")
+    .callThrough()
+    .withArgs("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+    .returns(null)
+    
     sinon.spy(errors, "log")
     sinon.spy(errors, "logException")
     sinon.spy(console, "log")
@@ -927,9 +931,10 @@ describe "lib/cypress", ->
       sinon.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns(@projectId)
 
       cypress.start([
+        "--cwd=/foo/bar"
         "--run-project=#{@noScaffolding}",
         "--record",
-        "--key=token-123"
+        "--key=token-123",
       ])
       .then =>
         expect(api.createRun).to.be.calledWithMatch({projectId: @projectId})
@@ -942,8 +947,9 @@ describe "lib/cypress", ->
       .withArgs("CYPRESS_RECORD_KEY").returns("token")
 
       cypress.start([
+        "--cwd=/foo/bar"
         "--run-project=#{@noScaffolding}",
-        "--record"
+        "--record",
       ])
       .then =>
         expect(api.createRun).to.be.calledWithMatch({
@@ -1390,27 +1396,21 @@ describe "lib/cypress", ->
       .then ->
         expect(event.sender.send.withArgs("response").firstCall.args[1].data).to.eql(warning)
 
-  context "--run-from-cli", ->
+  context "--cwd", ->
     beforeEach ->
+      errors.warning.restore()
       sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       sinon.stub(interactiveMode, "ready").resolves()
-      argsUtil.startedFromCLI.restore()
+      sinon.spy(errors, "warning")
 
     it "shows warning if Cypress has been started directly", ->
       cypress.start().then ->
-        expect(errors.warning).to.be.calledWith("OPENED_CYPRESS_DIRECTLY")
+        expect(errors.warning).to.be.calledWith("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+        expect(console.log).to.be.calledWithMatch("It looks like you are running the Cypress binary directly.")
+        expect(console.log).to.be.calledWithMatch("https://on.cypress.io/installing-cypress")
 
-    it "does not show warning if finds --run-from-cli", ->
-      cypress.start(["--run-from-cli"]).then ->
-        expect(errors.warning).not.to.be.called
-
-    it "does not show warning if finds --runFromCli=true", ->
-      cypress.start(["--runFromCli=true"]).then ->
-        expect(errors.warning).not.to.be.called
-
-    it "does not show warning if finds util method tells it not to worry", ->
-      sinon.stub(argsUtil, "startedFromCLI").returns(true)
-      cypress.start().then ->
+    it "does not show warning if finds --cwd", ->
+      cypress.start(["--cwd=/foo/bar"]).then ->
         expect(errors.warning).not.to.be.called
 
   context "no args", ->

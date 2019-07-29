@@ -253,7 +253,8 @@ module.exports = {
 
   args: (options = {}) ->
     args = [
-      "--run-from-cli", # hides a user warning to go through NPM module
+      ## hides a user warning to go through NPM module
+      "--cwd=#{process.cwd()}",
       "--run-project=#{options.project}"
     ]
 
