@@ -769,7 +769,7 @@ describe "lib/cypress", ->
           debugger: {
             on: sinon.stub()
             attach: sinon.stub()
-            sendCommand: sinon.stub()
+            sendCommand: sinon.stub().callsArg(2)
           }
           setUserAgent: sinon.stub()
           session: {
