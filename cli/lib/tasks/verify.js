@@ -19,7 +19,8 @@ const checkExecutable = (binaryDir) => {
 
   debug('checking if executable exists', executable)
 
-  return util.isExecutableAsync(executable)
+  return util
+  .isExecutableAsync(executable)
   .then((isExecutable) => {
     debug('Binary is executable? :', isExecutable)
     if (!isExecutable) {
@@ -59,7 +60,9 @@ const runSmokeTest = (binaryDir, options) => {
       if (linuxWithDisplayEnv && util.isBrokenGtkDisplay(errMessage)) {
         util.logBrokenGtkDisplayWarning()
 
-        return throwFormErrorText(errors.invalidSmokeTestDisplayError)(errMessage)
+        return throwFormErrorText(errors.invalidSmokeTestDisplayError)(
+          errMessage
+        )
       }
 
       return throwFormErrorText(errors.missingDependency)(errMessage)
@@ -90,21 +93,21 @@ const runSmokeTest = (binaryDir, options) => {
     debug('running smoke test')
     debug('using Cypress executable %s', executable)
     debug('smoke test command:', smokeTestCommand)
+    debug('smoke test timeout %d ms', options.smokeTestTimeout)
 
     const env = _.extend({}, process.env, {
       ELECTRON_ENABLE_LOGGING: true,
     })
 
-    const stdioOptions = _.extend({}, {
-      env,
-      timeout: options.smokeTestTimeout,
-    })
+    const stdioOptions = _.extend(
+      {},
+      {
+        env,
+        timeout: options.smokeTestTimeout,
+      }
+    )
 
-    return Promise.resolve(util.exec(
-      executable,
-      args,
-      stdioOptions,
-    ))
+    return Promise.resolve(util.exec(executable, args, stdioOptions))
     .catch(onSmokeTestError(smokeTestCommand, linuxWithDisplayEnv))
     .then((result) => {
       // TODO: when execa > 1.1 is released
@@ -114,9 +117,15 @@ const runSmokeTest = (binaryDir, options) => {
       debug('smoke test stdout "%s"', smokeTestReturned)
 
       if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
-        debug('Smoke test failed because could not find %d in:', random, result)
+        debug(
+          'Smoke test failed because could not find %d in:',
+          random,
+          result
+        )
 
-        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(result.stderr || result.stdout)
+        return throwFormErrorText(
+          errors.smokeTestFailure(smokeTestCommand, false)
+        )(result.stderr || result.stdout)
       }
     })
   }
@@ -131,12 +140,17 @@ const runSmokeTest = (binaryDir, options) => {
   }
 
   const userFriendlySpawn = (linuxWithDisplayEnv) => {
-    debug('spawning, should retry on display problem?', Boolean(linuxWithDisplayEnv))
+    debug(
+      'spawning, should retry on display problem?',
+      Boolean(linuxWithDisplayEnv)
+    )
 
-    return spawn(linuxWithDisplayEnv)
-    .catch({ code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR' }, () => {
-      return spawnInXvfb(linuxWithDisplayEnv)
-    })
+    return spawn(linuxWithDisplayEnv).catch(
+      { code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR' },
+      () => {
+        return spawnInXvfb(linuxWithDisplayEnv)
+      }
+    )
   }
 
   if (needsXvfb) {
@@ -171,45 +185,50 @@ function testBinary (version, binaryDir, options) {
     renderer,
   }
 
-  const tasks = new Listr([
-    {
-      title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
-      task: (ctx, task) => {
-        debug('clearing out the verified version')
+  const tasks = new Listr(
+    [
+      {
+        title: util.titleize(
+          'Verifying Cypress can run',
+          chalk.gray(binaryDir)
+        ),
+        task: (ctx, task) => {
+          debug('clearing out the verified version')
 
-        return state.clearBinaryStateAsync(binaryDir)
-        .then(() => {
-          return Promise.all([
-            runSmokeTest(binaryDir, options),
-            Promise.resolve().delay(1500), // good user experience
-          ])
-        })
-        .then(() => {
-          debug('write verified: true')
+          return state
+          .clearBinaryStateAsync(binaryDir)
+          .then(() => {
+            return Promise.all([
+              runSmokeTest(binaryDir, options),
+              Promise.resolve().delay(1500), // good user experience
+            ])
+          })
+          .then(() => {
+            debug('write verified: true')
 
-          return state.writeBinaryVerifiedAsync(true, binaryDir)
-        })
-        .then(() => {
-          util.setTaskTitle(
-            task,
-            util.titleize(
-              chalk.green('Verified Cypress!'),
-              chalk.gray(binaryDir)
-            ),
-            rendererOptions.renderer
-          )
-        })
+            return state.writeBinaryVerifiedAsync(true, binaryDir)
+          })
+          .then(() => {
+            util.setTaskTitle(
+              task,
+              util.titleize(
+                chalk.green('Verified Cypress!'),
+                chalk.gray(binaryDir)
+              ),
+              rendererOptions.renderer
+            )
+          })
+        },
       },
-    },
-  ], rendererOptions)
+    ],
+    rendererOptions
+  )
 
   return tasks.run()
 }
 
 const maybeVerify = (installedVersion, binaryDir, options) => {
-  return state.getBinaryVerifiedAsync(binaryDir)
-  .then((isVerified) => {
-
+  return state.getBinaryVerifiedAsync(binaryDir).then((isVerified) => {
     debug('is Verified ?', isVerified)
 
     let shouldVerify = !isVerified
@@ -221,8 +240,7 @@ const maybeVerify = (installedVersion, binaryDir, options) => {
     }
 
     if (shouldVerify) {
-      return testBinary(installedVersion, binaryDir, options)
-      .then(() => {
+      return testBinary(installedVersion, binaryDir, options).then(() => {
         if (options.welcomeMessage) {
           logger.log()
           logger.log('Opening Cypress...')
@@ -242,7 +260,7 @@ const start = (options = {}) => {
     dev: false,
     force: false,
     welcomeMessage: true,
-    smokeTestTimeout: 10000,
+    smokeTestTimeout: 30000,
   })
 
   if (options.dev) {
@@ -263,11 +281,14 @@ const start = (options = {}) => {
 
     logger.log()
 
-    return util.isExecutableAsync(envBinaryPath)
+    return util
+    .isExecutableAsync(envBinaryPath)
     .then((isExecutable) => {
       debug('CYPRESS_RUN_BINARY is executable? :', isExecutable)
       if (!isExecutable) {
-        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(stripIndent`
+        return throwFormErrorText(
+          errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath)
+        )(stripIndent`
           The supplied binary path is not executable
           `)
       }
@@ -277,7 +298,9 @@ const start = (options = {}) => {
     })
     .then((envBinaryDir) => {
       if (!envBinaryDir) {
-        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
+        return throwFormErrorText(
+          errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath)
+        )()
       }
 
       debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
@@ -285,7 +308,9 @@ const start = (options = {}) => {
       binaryDir = envBinaryDir
     })
     .catch({ code: 'ENOENT' }, (err) => {
-      return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(err.message)
+      return throwFormErrorText(
+        errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath)
+      )(err.message)
     })
   }
 
@@ -305,26 +330,40 @@ const start = (options = {}) => {
     return state.getBinaryPkgVersionAsync(binaryDir)
   })
   .then((binaryVersion) => {
-
     if (!binaryVersion) {
       debug('no Cypress binary found for cli version ', packageVersion)
 
       return throwFormErrorText(errors.missingApp(binaryDir))(`
-      Cannot read binary version from: ${chalk.cyan(state.getBinaryPkgPath(binaryDir))}
+      Cannot read binary version from: ${chalk.cyan(
+    state.getBinaryPkgPath(binaryDir)
+  )}
     `)
     }
 
-    debug(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
+    debug(
+      `Found binary version ${chalk.green(
+        binaryVersion
+      )} installed in: ${chalk.cyan(binaryDir)}`
+    )
 
     if (binaryVersion !== packageVersion) {
       // warn if we installed with CYPRESS_INSTALL_BINARY or changed version
       // in the package.json
-      logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
+      logger.log(
+        `Found binary version ${chalk.green(
+          binaryVersion
+        )} installed in: ${chalk.cyan(binaryDir)}`
+      )
+
       logger.log()
       logger.warn(stripIndent`
 
 
-      ${logSymbols.warning} Warning: Binary version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
+      ${logSymbols.warning} Warning: Binary version ${chalk.green(
+  binaryVersion
+)} does not match the expected package version ${chalk.green(
+  packageVersion
+)}
 
         These versions may not work properly together.
       `)
