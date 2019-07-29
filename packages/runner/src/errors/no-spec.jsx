@@ -18,7 +18,7 @@ class NoSpec extends Component {
               View All Tests
             </button>
           </p>
-          <img src={`/${this.props.config.namespace}/runner/no-spec-instructions.png`} />
+          <img src={require('../../static/no-spec-instructions.png')} />
         </div>
         {this.props.children}
       </div>

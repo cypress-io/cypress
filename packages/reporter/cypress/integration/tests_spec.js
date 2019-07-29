@@ -6,7 +6,7 @@ describe('controls', function () {
 
     this.runner = new EventEmitter()
 
-    cy.visit('cypress/support/index.html').then((win) => {
+    cy.visit('/dist').then((win) => {
       win.render({
         runner: this.runner,
         specPath: '/foo/bar',
@@ -25,6 +25,7 @@ describe('controls', function () {
       this.passingTestTitle = this.runnables.suites[0].tests[0].title
       this.failingTestTitle = this.runnables.suites[0].tests[1].title
     })
+
     describe('expand and collapse', function () {
       it('is collapsed by default', function () {
         cy.contains(this.passingTestTitle)
@@ -46,11 +47,14 @@ describe('controls', function () {
         it('expands/collapses on click', function () {
           cy.contains(this.passingTestTitle)
           .click()
+
           cy.get('@testWrapper')
           .should('have.class', 'is-open')
           .find('.collapsible-content').should('be.visible')
+
           cy.contains(this.passingTestTitle)
           .click()
+
           cy.get('@testWrapper')
           .should('not.have.class', 'is-open')
           .find('.collapsible-content').should('not.be.visible')
@@ -59,11 +63,14 @@ describe('controls', function () {
         it('expands/collapses on enter', function () {
           cy.contains(this.passingTestTitle)
           .focus().type('{enter}')
+
           cy.get('@testWrapper')
           .should('have.class', 'is-open')
           .find('.collapsible-content').should('be.visible')
+
           cy.contains(this.passingTestTitle)
           .focus().type('{enter}')
+
           cy.get('@testWrapper')
           .should('not.have.class', 'is-open')
           .find('.collapsible-content').should('not.be.visible')
@@ -72,11 +79,14 @@ describe('controls', function () {
         it('expands/collapses on space', function () {
           cy.contains(this.passingTestTitle)
           .focus().type(' ')
+
           cy.get('@testWrapper')
           .should('have.class', 'is-open')
           .find('.collapsible-content').should('be.visible')
+
           cy.contains(this.passingTestTitle)
           .focus().type(' ')
+
           cy.get('@testWrapper')
           .should('not.have.class', 'is-open')
           .find('.collapsible-content').should('not.be.visible')

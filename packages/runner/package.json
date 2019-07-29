@@ -1,50 +1,52 @@
 {
   "name": "@packages/runner",
   "version": "0.0.0",
-  "main": "lib/runner.js",
   "private": true,
+  "main": "src/index.js",
   "scripts": {
-    "postinstall": "echo '@packages/runner needs: npm run build'",
-    "prebuild": "npm run check-deps-pre && rebuild-node-sass",
-    "build": "node ./scripts/build-dev.js",
+    "prebuild": "npm run check-deps-pre",
+    "build": "webpack",
     "prebuild-prod": "npm run check-deps-pre",
-    "build-prod": "node ./scripts/build-prod.js",
-    "prewatch": "npm run check-deps-pre",
-    "watch": "node ./scripts/watch.js",
+    "build-prod": "cross-env NODE_ENV=production npm run build",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
+    "postinstall": "echo '@packages/runner needs: npm run build'",
     "pretest": "npm run check-deps-pre",
-    "test": "node ./scripts/test.js",
-    "lint": "bin-up eslint --fix scripts/*.js src/*.js* src/**/*.js*"
+    "test": "mocha src/**/*.spec.*",
+    "test-watch": "npm run test -- --watch",
+    "prewatch": "npm run check-deps-pre",
+    "watch": "webpack --watch --progress"
   },
-  "files": [
-    "dist",
-    "lib"
-  ],
   "devDependencies": {
-    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@cypress/react-tooltip": "0.5.0",
+    "@types/enzyme": "3.9.1",
+    "@types/react": "16.8.17",
     "bin-up": "1.2.0",
     "bluebird": "3.5.0",
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
+    "cross-env": "5.2.0",
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.12.1",
     "font-awesome": "4.7.0",
-    "jsdom": "13.2.0",
-    "lodash": "4.17.13",
-    "mobx": "3.6.2",
-    "mobx-react": "4.4.3",
+    "jsdom": "14.1.0",
+    "lodash": "4.17.15",
+    "mobx": "5.11.0",
+    "mobx-react": "5.4.4",
+    "mocha": "6.1.4",
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-input-autosize": "2.2.1",
-    "rebuild-node-sass": "1.1.0",
     "sinon": "7.0.0",
     "sinon-chai": "3.3.0",
-    "zunder": "6.4.1"
-  }
+    "webpack": "4.35.3",
+    "webpack-cli": "3.3.2"
+  },
+  "files": [
+    "dist",
+    "lib"
+  ]
 }

@@ -2,7 +2,7 @@ map     = require("lodash/map")
 pick    = require("lodash/pick")
 once    = require("lodash/once")
 Promise = require("bluebird")
-{ client, circularParser } = require("@packages/socket")
+{ client, circularParser } = require("@packages/socket/lib/browser")
 
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
