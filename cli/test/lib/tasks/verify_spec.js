@@ -230,7 +230,7 @@ context('lib/tasks/verify', () => {
       const stdioOptions = util.exec.firstCall.args[2]
 
       expect(stdioOptions).to.include({
-        timeout: 10000,
+        timeout: verify.VERIFY_TEST_RUNNER_TIMEOUT_MS,
       })
 
       expect(stdioOptions.env).to.include({
