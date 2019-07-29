@@ -6,6 +6,9 @@ Promise = require("bluebird")
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
+isProduction = ->
+  process.env["CYPRESS_ENV"] is "production"
+
 listItems = (paths) ->
   _
   .chain(paths)
@@ -690,6 +693,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "INVOKED_BINARY_OUTSIDE_NPM_MODULE"
+      """
+      It looks like you are running the Cypress binary directly.
+
+      This is not the recommended approach, and Cypress may not work correctly.
+
+      Please install the 'cypress' NPM package and follow the instructions here:
+      
+      https://on.cypress.io/installing-cypress
+      """
     when "DUPLICATE_TASK_KEY"
       """
       Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
@@ -841,6 +854,8 @@ get = (type, arg1, arg2) ->
 warning = (type, arg1, arg2) ->
   err = get(type, arg1, arg2)
   log(err, "magenta")
+  
+  return null
 
 throwErr = (type, arg1, arg2) ->
   throw get(type, arg1, arg2)
@@ -868,26 +883,34 @@ clone = (err, options = {}) ->
   obj
 
 log = (err, color = "red") ->
-  Promise.try ->
-    console.log chalk[color](err.message)
-    if err.details
-      console.log("\n", chalk["yellow"](err.details))
+  console.log chalk[color](err.message)
 
-    ## bail if this error came from known
-    ## list of Cypress errors
-    return if isCypressErr(err)
+  if err.details
+    console.log("\n", chalk["yellow"](err.details))
 
-    console.log chalk[color](err.stack)
+  ## bail if this error came from known
+  ## list of Cypress errors
+  return if isCypressErr(err)
 
-    if process.env["CYPRESS_ENV"] is "production"
-      ## log this error to raygun since its not
-      ## a known error
-      require("./logger").createException(err).catch(->)
+  console.log chalk[color](err.stack)
 
+  return err
+  
+logException = Promise.method (err) ->
+  ## TODO: remove context here
+  if @log(err) and isProduction()
+    ## log this exception since 
+    ## its not a known error
+    return require("./logger")
+    .createException(err)
+    .catch(->)
+  
 module.exports = {
   get,
 
   log,
+
+  logException,
 
   clone,
 
