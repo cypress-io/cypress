@@ -1,7 +1,7 @@
 fs         = require("fs")
 path       = require("path")
 Promise    = require("bluebird")
-background = require("../app/background")
+background = require("../app/background")()
 
 fs = Promise.promisifyAll(fs)
 
@@ -23,7 +23,6 @@ module.exports = {
     fs.readFileAsync(src, "utf8")
     .then (str) ->
       str
-      .replace("HOST_PATH_REPLACED = false", "HOST_PATH_REPLACED = true")
       .replace("CHANGE_ME_HOST", host)
       .replace("CHANGE_ME_PATH", path)
 

@@ -2,16 +2,34 @@ require("../spec_helper")
 
 exec      = require("child_process").exec
 fs        = require("fs-extra")
+EE        = require("events")
+eol       = require("eol")
 path      = require("path")
 Promise   = require("bluebird")
-eol       = require("eol")
+{ client } = require("@packages/socket/lib/browser")
 extension = require("../../index")
-cwd       = process.cwd()
+Background = require("../../app/background")
 
+cwd = process.cwd()
 fs = Promise.promisifyAll(fs)
 exec = Promise.promisify(exec)
 
 describe "Extension", ->
+  context ".connect", ->
+    it "does not automatically connect outside of extension", ->
+      sinon.stub(global, "chrome").value(undefined)
+      sinon.stub(client, "connect").returns(new EE)
+      
+      Background()
+      
+      expect(client.connect).not.to.be.called
+
+      sinon.stub(global, "chrome").value({})
+
+      Background()
+      
+      expect(client.connect).to.be.called
+  
   context ".getCookieUrl", ->
     it "returns cookie url", ->
       expect(extension.getCookieUrl({
