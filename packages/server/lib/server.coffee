@@ -644,22 +644,11 @@ class Server
         socket.end = ->
           socket.end = end
 
-          response = [
-            "HTTP/#{req.httpVersion} 502 #{statusCode.getText(502)}"
-            "X-Cypress-Proxy-Error-Message: #{err.message}"
-            "X-Cypress-Proxy-Error-Code: #{err.code}"
-          ].join("\r\n") + "\r\n\r\n"
-
-          proxiedUrl = "#{protocol}//#{hostname}:#{port}"
-
           debug(
-            "Got ERROR proxying websocket connection to url: '%s' received error: '%s' with code '%s'",
-            proxiedUrl,
-            err.toString()
-            err.code
+            "Got ERROR proxying websocket connection to url: received error %o", { err },
           )
 
-          socket.end(response)
+          socket.end()
 
       proxy.ws(req, socket, head, {
         secure: false
