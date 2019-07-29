@@ -27,13 +27,11 @@ packages/desktop-gui/src/jsconfig.json
 # from driver
 packages/driver/test/cypress/videos
 
-# from example
+# from example - these files come from separate package
+# https://github.com/cypress-io/cypress-example-kitchensink
 packages/example/app
 packages/example/build
-packages/example/cypress/screenshots
-packages/example/cypress/videos
-packages/example/cypress/fixtures/profile.json
-packages/example/cypress/fixtures/users.json
+packages/example/cypress
 
 # from driver
 packages/driver/test/cypress/videos
