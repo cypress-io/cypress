@@ -67,7 +67,7 @@ class SelectorPlayground extends Component {
             /><span>{'\''}</span>
             <span>)</span>
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-            <Tooltip title={model.infoHelp}>
+            <Tooltip title={model.infoHelp || ''}>
               <span className='info num-elements'>
                 {model.isValid ?
                   model.numElements :
@@ -76,7 +76,7 @@ class SelectorPlayground extends Component {
               </span>
             </Tooltip>
           </div>
-          <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
+          <Tooltip title={this.copyText || ''} updateCue={`${selectorText}${this.copyText}`}>
             <button
               ref={(node) => this._copyButton = node}
               className='copy-to-clipboard'
@@ -87,7 +87,7 @@ class SelectorPlayground extends Component {
               <i className='fa fa-copy' />
             </button>
           </Tooltip>
-          <Tooltip title={this.printText} updateCue={`${selectorText}${this.printText}`}>
+          <Tooltip title={this.printText || ''} updateCue={`${selectorText}${this.printText}`}>
             <button
               ref={(node) => this._printButton = node}
               className='print-to-console'

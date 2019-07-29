@@ -3,7 +3,6 @@ strip = require("strip-ansi")
 chalk = require("chalk")
 AU = require('ansi_up')
 Promise = require("bluebird")
-pluralize = require("pluralize")
 
 ansi_up = new AU.default
 
@@ -28,7 +27,7 @@ displayFlags = (obj, mapper) ->
   .value()
 
 displayRetriesRemaining = (tries) ->
-  times = pluralize('time', tries)
+  times = if tries is 1 then 'time' else 'times'
 
   lastTryNewLine = if tries is 1 then "\n" else ""
 
@@ -138,7 +137,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We encountered an unexpected error talking to our servers.
 
-      We will retry #{arg1.tries} more #{pluralize('time', arg1.tries)} in #{arg1.delay}...
+      We will retry #{arg1.tries} more #{if arg1.tries is 1 then 'time' else 'times'} in #{arg1.delay}...
 
       The server's response was:
 
@@ -174,6 +173,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The server's response was:
 
       #{arg1.response}
+      """
+    when "DASHBOARD_UNKNOWN_CREATE_RUN_WARNING"
+      """
+      Warning from Cypress Dashboard: #{arg1.message}
+
+      Details:
+      #{JSON.stringify(arg1.props, null, 2)}
       """
     when "DASHBOARD_STALE_RUN"
       """
@@ -782,6 +788,32 @@ getMsgByType = (type, arg1 = {}, arg2) ->
        > #{arg2.join(', ')}
 
       Provide a path to an existing fixture file.
+      """
+    when "AUTH_COULD_NOT_LAUNCH_BROWSER"
+      """
+      Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
+
+      ```
+      #{arg1}
+      ```
+      """
+    when "AUTH_BROWSER_LAUNCHED"
+      """
+      Check your browser to continue logging in.
+      """
+    when "BAD_POLICY_WARNING"
+      """
+      Cypress detected policy settings on your computer that may cause issues.
+
+      The following policies were detected that may prevent Cypress from automating Chrome:
+
+       > #{arg1.join('\n > ')}
+
+      For more information, see https://on.cypress.io/bad-browser-policy
+      """
+    when "BAD_POLICY_WARNING_TOOLTIP"
+      """
+      Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
 
 get = (type, arg1, arg2) ->

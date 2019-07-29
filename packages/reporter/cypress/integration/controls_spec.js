@@ -6,7 +6,7 @@ describe('controls', function () {
 
     this.runner = new EventEmitter()
 
-    cy.visit('cypress/support/index.html').then((win) => {
+    cy.visit('/dist').then((win) => {
       win.render({
         runner: this.runner,
         specPath: '/foo/bar',
@@ -25,8 +25,7 @@ describe('controls', function () {
       it('shows \'Tests\'', () => {
         cy.get('.focus-tests span').should('be.visible')
       })
-    }
-    )
+    })
 
     describe('< 400px wide', function () {
       beforeEach(() => {

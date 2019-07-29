@@ -40,9 +40,3 @@ This copies the src files from [`cypress-example-kitchensink`](https://github.co
 ```bash
 npm run deploy
 ```
-
-## Releasing
-
-```bash
-npm run release
-```

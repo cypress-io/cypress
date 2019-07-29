@@ -303,7 +303,7 @@ describe "src/cy/commands/navigation", ->
 
         return null
 
-      _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
+      _.each [null, undefined, NaN, Infinity, {}, [], ->{}], (val) =>
         it "throws on: '#{val}'", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq("cy.go() accepts only a string or number argument")
@@ -540,6 +540,11 @@ describe "src/cy/commands/navigation", ->
         .visit("http://localhost:3500/timeout", { auth })
         .then ->
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
+
+    ## https://github.com/cypress-io/cypress/issues/1727
+    it "can visit a page with undefined content type and html-shaped body", ->
+      cy
+        .visit("http://localhost:3500/undefined-content-type")
 
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
@@ -1454,6 +1459,34 @@ describe "src/cy/commands/navigation", ->
           done()
 
         cy.visit("https://google.com/foo")
+
+      it "displays body_circular when body is circular", (done) ->
+        foo = {
+          bar: {
+            baz: {}
+          }
+        }
+
+        foo.bar.baz.quux = foo
+
+        cy.visit({
+          method: "POST"
+          url: "http://foo.invalid/"
+          body: foo
+        })
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq """
+          The `body` parameter supplied to cy.visit() contained a circular reference at the path "bar.baz.quux".
+
+          `body` can only be a string or an object with no circular references.
+          """
+
+          done()
 
   context "#page load", ->
     it "sets initial=true and then removes", ->

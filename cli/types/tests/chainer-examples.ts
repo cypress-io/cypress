@@ -124,6 +124,28 @@ cy.wrap('foobar').should('have.string', 'bar')
 
 cy.wrap('foobar').should('include', 'foo')
 
+cy.wrap('foo').should('contain.value')
+cy.wrap('foo').should('contain.text')
+cy.wrap('foo').should('contain.html')
+cy.wrap('foo').should('not.contain.value')
+cy.wrap('foo').should('not.contain.text')
+cy.wrap('foo').should('not.contain.html')
+
+cy.wrap('foo').should('include.value')
+cy.wrap('foo').should('include.text')
+cy.wrap('foo').should('include.html')
+cy.wrap('foo').should('not.include.value')
+cy.wrap('foo').should('not.include.text')
+cy.wrap('foo').should('not.incldue.html')
+
+// Ensure we've extended chai.Includes correctly
+expect('foo').to.include.value('foo')
+expect('foo').to.contain.text('foo')
+expect('foo').to.include.html('foo')
+expect('foo').to.not.include.value('foo')
+expect('foo').to.not.include.text('foo')
+expect('foo').to.not.include.html('foo')
+
 cy.wrap([1, 2, 3]).should('include.members', [1, 2])
 ;
 () => {
@@ -424,3 +446,9 @@ cy
   })
 
 cy.get('#result').should('have.text', 'John Doe')
+
+cy.writeFile('../file.path', '', 'utf-8')
+cy.writeFile('../file.path', '', {
+  flag: 'a+',
+  encoding: 'utf-8'
+})

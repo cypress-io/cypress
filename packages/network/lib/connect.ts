@@ -22,6 +22,8 @@ export function byPortAndAddress (port: number, address: net.Address) {
 }
 
 export function getAddress (port: number, hostname: string) {
+  debug('beginning getAddress %o', { hostname, port })
+
   const fn = byPortAndAddress.bind({}, port)
 
   // promisify at the very last second which enables us to
@@ -35,8 +37,13 @@ export function getAddress (port: number, hostname: string) {
   // @ts-ignore
   return lookupAsync(hostname, { all: true })
   .then((addresses: net.Address[]) => {
+    debug('got addresses %o', { hostname, port, addresses })
+
     // convert to an array if string
     return Array.prototype.concat.call(addresses).map(fn)
+  })
+  .tapCatch((err) => {
+    debug('error getting address', { hostname, port, err })
   })
   .any()
 }
@@ -52,7 +59,7 @@ interface RetryingOptions {
   getDelayMsForRetry: (iteration: number, err: Error) => number | undefined
 }
 
-function createSocket(opts: RetryingOptions, onConnect): net.Socket {
+function createSocket (opts: RetryingOptions, onConnect): net.Socket {
   const netOpts = _.pick(opts, 'host', 'port')
 
   if (opts.useTls) {
@@ -70,40 +77,42 @@ export function createRetryingSocket (
     opts.getDelayMsForRetry = getDelayForRetry
   }
 
-  function tryConnect(iteration = 0) {
+  function tryConnect (iteration = 0) {
     const retry = (err) => {
       const delay = opts.getDelayMsForRetry(iteration, err)
 
       if (typeof delay === 'undefined') {
-        debug("retries exhausted, bubbling up error %o", { iteration, err })
+        debug('retries exhausted, bubbling up error %o', { iteration, err })
+
         return cb(err)
       }
 
-      debug("received error on connect, retrying %o", { iteration, delay, err })
+      debug('received error on connect, retrying %o', { iteration, delay, err })
 
       setTimeout(() => {
         tryConnect(iteration + 1)
       }, delay)
     }
 
-    function onError(err) {
-      sock.on("error", (err) => {
-        debug("second error received on retried socket %o", { opts, iteration, err })
+    function onError (err) {
+      sock.on('error', (err) => {
+        debug('second error received on retried socket %o', { opts, iteration, err })
       })
 
       retry(err)
     }
 
-    function onConnect() {
-      debug("successfully connected %o", { opts, iteration })
+    function onConnect () {
+      debug('successfully connected %o', { opts, iteration })
       // connection successfully established, pass control of errors/retries to consuming function
-      sock.removeListener("error", onError)
+      sock.removeListener('error', onError)
 
       cb(undefined, sock, retry)
     }
 
     const sock = createSocket(opts, onConnect)
-    sock.once("error", onError)
+
+    sock.once('error', onError)
   }
 
   tryConnect()

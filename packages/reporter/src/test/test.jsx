@@ -71,7 +71,7 @@ class Test extends Component {
       >
         <div className='runnable-content-region'>
           <i aria-hidden="true" className='runnable-state fa'></i>
-          <span
+          <div
             aria-expanded={this._shouldBeOpen() === true}
             className='runnable-title'
             onKeyPress={onEnterOrSpace(this._toggleOpen)}
@@ -80,7 +80,7 @@ class Test extends Component {
           >
             {model.title}
             <span className="visually-hidden">{model.state}</span>
-          </span>
+          </div>
           <div className='runnable-controls'>
             <Tooltip placement='top' title='One or more commands failed'>
               <i className='fa fa-warning'></i>
