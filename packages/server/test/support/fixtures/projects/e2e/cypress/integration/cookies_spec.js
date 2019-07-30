@@ -1,12 +1,14 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("cookies", function() {
+describe("cookies", () => {
   beforeEach(() => cy.wrap({foo: "bar"}));
 
-  context("with whitelist", function() {
+  context("with whitelist", () => {
     before(() =>
       Cypress.Cookies.defaults({
         whitelist: "foo1"
@@ -16,7 +18,7 @@ describe("cookies", function() {
     it("can get all cookies", () =>
       cy
         .clearCookie("foo1")
-        .setCookie("foo", "bar").then(function(c) {
+        .setCookie("foo", "bar").then(c => {
           expect(c.domain).to.eq("localhost");
           expect(c.httpOnly).to.eq(false);
           expect(c.name).to.eq("foo");
@@ -29,7 +31,7 @@ describe("cookies", function() {
             "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
           );}).getCookies()
           .should("have.length", 1)
-          .then(function(cookies) {
+          .then(cookies => {
             const c = cookies[0];
 
             expect(c.domain).to.eq("localhost");
@@ -45,7 +47,7 @@ describe("cookies", function() {
             );}).clearCookies()
           .should("be.null")
         .setCookie("wtf", "bob", {httpOnly: true, path: "/foo", secure: true})
-        .getCookie("wtf").then(function(c) {
+        .getCookie("wtf").then(c => {
           expect(c.domain).to.eq("localhost");
           expect(c.httpOnly).to.eq(true);
           expect(c.name).to.eq("wtf");
@@ -65,7 +67,7 @@ describe("cookies", function() {
           .should("be.empty")
     );
 
-    it("resets cookies between tests correctly", function() {
+    it("resets cookies between tests correctly", () => {
       Cypress.Cookies.preserveOnce("foo2");
 
       for (let i = 1; i <= 100; i++) {
@@ -80,7 +82,7 @@ describe("cookies", function() {
     return it("handles undefined cookies", () => cy.visit("http://localhost:2121/cookieWithNoName"));
   });
 
-  return context("without whitelist", function() {
+  return context("without whitelist", () => {
     before(() =>
       Cypress.Cookies.defaults({
         whitelist: []
