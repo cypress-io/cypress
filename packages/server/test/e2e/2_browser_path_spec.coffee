@@ -33,10 +33,10 @@ describe "e2e launching browsers by path", ->
     launcher.detect().then (browsers) =>
       browsers.find (browser) =>
         browser.family == "chrome"
-    .then (browser) =>
+    .tap (browser) =>
       if !browser
         throw new Error("A 'chrome' family browser must be installed for this test")
-      browser.path
+    .get("path")
     ## turn binary browser names ("google-chrome") into their absolute paths
     ## so that server recognizes them as a path, not as a browser name
     .then (absPath)

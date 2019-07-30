@@ -33,6 +33,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         force: false
         delay: 10
         release: true
+        parseSpecialCharSequences: true
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
       })
@@ -91,7 +92,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       hasTabIndex = $dom.isSelector(options.$el, "[tabindex]")
 
       ## TODO: tabindex can't be -1
-      ## TODO: can't be readonly
 
       isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
 
@@ -171,16 +171,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           return if not form.length
 
-          multipleInputsAndNoSubmitElements = (form) ->
-            inputs  = form.find("input")
+          multipleInputsAllowImplicitSubmissionAndNoSubmitElements = (form) ->
             submits = getDefaultButtons(form)
 
-            inputs.length > 1 and submits.length is 0
+            ## https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+            ## some types of inputs can submit the form when hitting {enter}
+            ## but only if they are the sole input that allows implicit submission
+            ## and there are no buttons or input[submits] in the form
+            implicitSubmissionInputs = form.find("input").filter (__, input) ->
+              $input = $dom.wrap(input)
+
+              $elements.isInputAllowingImplicitFormSubmission($input)
+
+            implicitSubmissionInputs.length > 1 and submits.length is 0
 
           ## throw an error here if there are multiple form parents
 
-          ## bail if we have multiple inputs and no submit elements
-          return if multipleInputsAndNoSubmitElements(form)
+          ## bail if we have multiple inputs allowing implicit submission and no submit elements
+          return if multipleInputsAllowImplicitSubmissionAndNoSubmitElements(form)
 
           clickedDefaultButton = (button) ->
             ## find the 'default button' as per HTML spec and click it natively
@@ -235,11 +243,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         isTextarea = $elements.isTextarea(options.$el.get(0))
 
         $Keyboard.type({
-          $el:     options.$el
-          chars:   options.chars
-          delay:   options.delay
-          release: options.release
-          window:  win
+          $el:                          options.$el
+          chars:                        options.chars
+          delay:                        options.delay
+          release:                      options.release
+          parseSpecialCharSequences:    options.parseSpecialCharSequences
+          window:                       win
 
           updateValue: (el, key) ->
             ## in these cases, the value must only be set after all
@@ -275,7 +284,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               return false
 
           onEvent: (id, key, column, which, value) ->
-            updateTable.apply(null, arguments) if updateTable
+            updateTable.apply(window, arguments) if updateTable
 
           ## fires only when the 'value'
           ## of input/text/contenteditable

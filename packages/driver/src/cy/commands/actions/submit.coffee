@@ -51,7 +51,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## now we need to check to see if we should actually submit
       ## the form!
-      ## dont submit the form if our dispatched event was cancelled (false)
+      ## dont submit the form if our dispatched event was canceled (false)
       form.submit() if dispatched
 
       cy.timeout($actionability.delay, true)

@@ -19,7 +19,10 @@ const hr = '----------'
 // common errors Cypress application can encounter
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
-  solution: 'Please check network connectivity and try again:',
+  solution: stripIndent`
+  Does your workplace require a proxy to be used to access the Internet? If so, you must configure the HTTP_PROXY environment variable before downloading Cypress. Read more: https://on.cypress.io/proxy-configuration
+
+  Otherwise, please check network connectivity and try again:`,
 }
 
 const failedUnzip = {

@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node8.9.3-chrome73
+      - image: cypress/browsers:node8.9.3-npm6.10.1-chrome75
     environment:
       PLATFORM: linux
 
@@ -35,6 +35,149 @@ executors:
       xcode: "10.1.0"
     environment:
       PLATFORM: mac
+
+commands:
+  # for caching node modules use project environment variable
+  # like CACHE_VERSION=15
+  save-cache:
+    description: |
+      Shorter command to save node_modules for a package
+      Warning! Only works with "packages/<name>/node_modules"
+    parameters:
+      packageName:
+        description: Name of the package to save, for example "server" or "desktop-gui"
+        type: string
+    steps:
+      - save_cache:
+          name: Saving cache for << parameters.packageName >>
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
+          paths:
+            - packages/<< parameters.packageName >>/node_modules
+
+  save-caches:
+    description: save each node_modules folder per package
+    steps:
+      # TODO switch to "save-cache" when it allows custom paths
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-cli-{{ checksum "cli/package.json" }}
+          paths:
+            - cli/node_modules
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - save-cache:
+          packageName: coffee
+      - save-cache:
+          packageName: desktop-gui
+      - save-cache:
+          packageName: driver
+      - save-cache:
+          packageName: example
+      # TODO switch to "save-cache" custom command when it allows passing list of paths
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
+          paths:
+            - packages/electron/node_modules
+            - ~/.cache/electron
+            - ~/.electron
+      - save-cache:
+          packageName: extension
+      - save-cache:
+          packageName: https-proxy
+      - save-cache:
+          packageName: launcher
+      - save-cache:
+          packageName: network
+      - save-cache:
+          packageName: reporter
+      - save-cache:
+          packageName: runner
+      - save-cache:
+          packageName: server
+      - save-cache:
+          packageName: socket
+      - save-cache:
+          packageName: static
+      - save-cache:
+          packageName: ts
+      - save-cache:
+          packageName: web-config
+
+  restore-cache:
+    description: |
+      Shorter command to restore node_modules for a package.
+      Since it does not list paths to restore, can restore any cache,
+      as long the key is the same as the saved one.
+    parameters:
+      packageName:
+        description: Name of the package to restore, for example "server" or "desktop-gui"
+        type: string
+      packagePath:
+        description: Path to package.json file
+        type: string
+    steps:
+      - restore_cache:
+          name: Restoring cache for << parameters.packageName >>
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "<< parameters.packagePath >>" }}
+
+  restore-caches:
+    description: need to restore a separate cache for each package.json
+    steps:
+      - restore-cache:
+          packageName: cli
+          packagePath: cli/package.json
+      - restore-cache:
+          packageName: root
+          packagePath: package.json
+      - restore-cache:
+          packageName: coffee
+          packagePath: packages/coffee/package.json
+      - restore-cache:
+          packageName: desktop-gui
+          packagePath: packages/desktop-gui/package.json
+      - restore-cache:
+          packageName: driver
+          packagePath: packages/driver/package.json
+      - restore-cache:
+          packageName: example
+          packagePath: packages/example/package.json
+      - restore-cache:
+          packageName: electron
+          packagePath: packages/electron/package.json
+      - restore-cache:
+          packageName: extension
+          packagePath: packages/extension/package.json
+      - restore-cache:
+          packageName: https-proxy
+          packagePath: packages/https-proxy/package.json
+      - restore-cache:
+          packageName: launcher
+          packagePath: packages/launcher/package.json
+      - restore-cache:
+          packageName: network
+          packagePath: packages/network/package.json
+      - restore-cache:
+          packageName: reporter
+          packagePath: packages/reporter/package.json
+      - restore-cache:
+          packageName: runner
+          packagePath: packages/runner/package.json
+      - restore-cache:
+          packageName: server
+          packagePath: packages/server/package.json
+      - restore-cache:
+          packageName: socket
+          packagePath: packages/socket/package.json
+      - restore-cache:
+          packageName: static
+          packagePath: packages/static/package.json
+      - restore-cache:
+          packageName: ts
+          packagePath: packages/ts/package.json
+      - restore-cache:
+          packageName: web-config
+          packagePath: packages/web-config/package.json
 
 jobs:
   ## code checkout and NPM installs
@@ -63,136 +206,26 @@ jobs:
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
       - run: npm run check-terminal
 
-      # need to restore a separate cache for each package.json
-      - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-cli-deps
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-root-deps
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui
-      - restore_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-driver
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-example
-      - restore_cache:
-          key: v7-{{ arch }}-{{ .Branch }}-deps-electron
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-extension
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher
-      - restore_cache:
-          key: v1-{{ arch }}-{{ .Branch }}-deps-network
-      - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-reporter
-      - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-runner
-      - restore_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-server
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-socket
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-static
-      - restore_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-ts
+      - run: npm run stop-only-all
+
+      - restore-caches
 
       # show what is already cached globally
       - run: ls $(npm -g bin)
       - run: ls $(npm -g bin)/../lib/node_modules
 
-      # only installs the root dependencies, without going into packages
-      # via postinstall script
-      - run: npm install --ignore-scripts
+      # Install the root packages
+      # Link sup packages in ./node_modules/@packages/*
+      # Install sub packages dependencies and build all sub packages via postinstall script
+      - run: npm install
       - run:
           name: Top level packages
           command: npm ls --depth=0 || true
 
-      ## symlink all of our sub packages in node_modules
-      - run: npm run link
-
-      ## now install all of the sub packages node_modules
-      - run: npm run all install -- --serial
+      # Prune so we do not save removed dependencies to cache
       - run: npm run all prune
 
-      # save each node_modules folder per package
-      - save_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-cli-deps-{{ checksum "cli/package.json" }}
-          paths:
-            - cli/node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-root-deps-{{ checksum "package.json" }}
-          paths:
-            - node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-coffee-{{ checksum "packages/coffee/package.json" }}
-          paths:
-            - packages/coffee/node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-desktop-gui-{{ checksum "packages/desktop-gui/package.json" }}
-          paths:
-            - packages/desktop-gui/node_modules
-      - save_cache:
-          key: v6-{{ arch }}-{{ .Branch }}-deps-driver-{{ checksum "packages/driver/package.json" }}
-          paths:
-            - packages/driver/node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-example-{{ checksum "packages/example/package.json" }}
-          paths:
-            - packages/example/node_modules
-      - save_cache:
-          key: v7-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
-          paths:
-            - packages/electron/node_modules
-            - ~/.cache/electron
-            - ~/.electron
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-extension-{{ checksum "packages/extension/package.json" }}
-          paths:
-            - packages/extension/node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-https-proxy-{{ checksum "packages/https-proxy/package.json" }}
-          paths:
-            - packages/https-proxy/node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-launcher-{{ checksum "packages/launcher/package.json" }}
-          paths:
-            - packages/launcher/node_modules
-      - save_cache:
-          key: v1-{{ arch }}-{{ .Branch }}-deps-network-{{ checksum "packages/network/package.json" }}
-          paths:
-            - packages/network/node_modules
-      - save_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-reporter-{{ checksum "packages/reporter/package.json" }}
-          paths:
-            - packages/reporter/node_modules
-      - save_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-runner-{{ checksum "packages/runner/package.json" }}
-          paths:
-            - packages/runner/node_modules
-      - save_cache:
-          key: v8-{{ arch }}-{{ .Branch }}-deps-server-{{ checksum "packages/server/package.json" }}
-          paths:
-            - packages/server/node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-socket-{{ checksum "packages/socket/package.json" }}
-          paths:
-            - packages/socket/node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-static-{{ checksum "packages/static/package.json" }}
-          paths:
-            - packages/static/node_modules
-      - save_cache:
-          key: v5-{{ arch }}-{{ .Branch }}-deps-ts-{{ checksum "packages/ts/package.json" }}
-          paths:
-            - packages/ts/node_modules
-
-      - run: npm run stop-only
-      ## now go build all of subpackages
-      - run: npm run prebuild -- --serial
-      - run: npm run build -- --serial
+      - save-caches
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
@@ -205,8 +238,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: npm run lint
-      - run: npm run all lint
+      ## this will catch .only's in js/coffee as well
+      - run: npm run lint-all
 
   unit-tests:
     <<: *defaults
@@ -237,7 +270,7 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  lint-typescript:
+  lint-types:
     <<: *defaults
     parallelism: 1
     steps:
@@ -616,6 +649,12 @@ jobs:
           working_directory: /tmp/testing
           command: $(npm bin)/cypress verify
       - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm /tmp/urls/npm-package-url.json \
+              --binary /tmp/urls/binary-url.json
+      - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
@@ -717,7 +756,7 @@ linux-workflow: &linux-workflow
         name: Linux lint
         requires:
           - build
-    - lint-typescript:
+    - lint-types:
         requires:
           - build
     # unit, integration and e2e tests
@@ -790,7 +829,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build
     - build-binary:
@@ -798,7 +836,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
@@ -806,7 +843,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - binary-metadata
         requires:
           - build-npm-package
           - build-binary
@@ -855,6 +891,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - test-example-repos-on-mac-4526
         requires:
           - Mac build
 
@@ -867,6 +904,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - binary-metadata
+              - test-example-repos-on-mac-4526
         requires:
           - Mac build
 
@@ -891,6 +929,19 @@ mac-workflow: &mac-workflow
         requires:
           - Mac NPM package
           - Mac binary
+
+    - test-binary-and-npm-against-other-projects:
+        name: Test Mac binary against other projects
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+              - test-example-repos-on-mac-4526
+        requires:
+          - Mac NPM package
+          - Mac binary
+
 workflows:
   linux:
     <<: *linux-workflow

@@ -10,7 +10,7 @@ describe('issue 1436', () => {
     })
   })
 
-  // 11/15/18 jira is throwing an error in one
+  // NOTE: 11/15/18 jira is throwing an error in one
   // of their scripts and its causing this test to fail
   it.skip('can visit jira', () => {
     // no javascript errors should have been thrown.

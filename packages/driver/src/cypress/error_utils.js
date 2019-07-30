@@ -80,7 +80,7 @@ const throwErr = (err, options = {}) => {
     err = cypressErr(err)
   }
 
-  let { onFail } = options
+  let { onFail, errProps } = options
 
   // assume onFail is a command if
   //# onFail is present and isnt a function
@@ -96,6 +96,10 @@ const throwErr = (err, options = {}) => {
 
   if (onFail) {
     err.onFail = onFail
+  }
+
+  if (errProps) {
+    _.extend(err, errProps)
   }
 
   // err.__proto__.toString = function () {
@@ -119,6 +123,12 @@ const throwErrByPath = (errPath, options = {}) => {
   }
 
   return throwErr(err, options)
+}
+
+const warnByPath = (errPath, options = {}) => {
+  const err = errMessageByPath(errPath, options.args)
+
+  $utils.warning(err)
 }
 
 const internalErr = (err) => {
@@ -288,6 +298,7 @@ module.exports = {
   makeErrFromObj,
   throwErr,
   throwErrByPath,
+  warnByPath,
   internalErr,
   cypressErr,
   normalizeMsgNewLines,

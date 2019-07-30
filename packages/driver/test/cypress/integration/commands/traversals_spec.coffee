@@ -5,16 +5,8 @@ dom = Cypress.dom
 helpers = require("../../support/helpers")
 
 describe "src/cy/commands/traversals", ->
-  before ->
-    cy
-      .visit("/fixtures/dom.html")
-      .then (win) ->
-        @body = win.document.body.outerHTML
-
   beforeEach ->
-    doc = cy.state("document")
-
-    $(doc.body).empty().html(@body)
+    cy.visit("/fixtures/dom.html")
 
   fns = [
     {find: "*"}

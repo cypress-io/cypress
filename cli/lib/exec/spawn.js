@@ -13,8 +13,9 @@ const { throwFormErrorText, errors } = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
+const isRenderWorkerRe = /\.RenderWorker-/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe]
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
@@ -59,6 +60,8 @@ function getStdio (needsXvfb) {
 }
 
 module.exports = {
+  isGarbageLineWarning,
+
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
     let executable = state.getPathToExecutable(state.getBinaryDir())
@@ -70,6 +73,8 @@ module.exports = {
     debug('needs to start own Xvfb?', needsXvfb)
 
     // always push cwd into the args
+    // which additionally acts as a signal to the
+    // binary that it was invoked through the NPM module
     args = [].concat(args, '--cwd', process.cwd())
 
     _.defaults(options, {

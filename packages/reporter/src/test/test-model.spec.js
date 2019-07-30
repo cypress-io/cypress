@@ -96,6 +96,7 @@ describe('Test model', () => {
       test.addCommand({ isMatchingEvent: () => {
         return false
       } }, 'some hook')
+
       expect(test.hooks.length).to.equal(1)
       expect(test.hooks[0].commands.length).to.equal(1)
       test.addCommand({}, 'some hook')

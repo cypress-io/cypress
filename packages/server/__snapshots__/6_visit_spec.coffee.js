@@ -836,7 +836,7 @@ You have set the browser to: 'chrome'
 A video will not be recorded when using this browser.
 
 
-  on localhost 100% of visits are faster than XX:XX, 90% are faster than XX:XX
+  on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
 histogram line
 histogram line
 histogram line
@@ -922,7 +922,7 @@ exports['e2e visit resolves visits quickly in electron (headless) 1'] = `
   Running: fast_visit_spec.coffee...                                                       (1 of 1) 
 
 
-  on localhost 100% of visits are faster than XX:XX, 90% are faster than XX:XX
+  on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
 histogram line
 histogram line
 histogram line

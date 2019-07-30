@@ -29,6 +29,7 @@ class Dropdown extends Component {
         this.setState({ open: false })
       }
     }
+
     document.body.addEventListener('click', this.outsideClickHandler)
   }
 

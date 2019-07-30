@@ -15,6 +15,7 @@ const wrap = (ipc, invoke, ids, args) => {
     childFile.on('rerun', () => {
       ipc.send('preprocessor:rerun', file.filePath)
     })
+
     ipc.on('preprocessor:close', (filePath) => {
       // no filePath means close all
       if (!filePath || filePath === file.filePath) {
@@ -34,5 +35,7 @@ module.exports = {
   _clearFiles: () => {
     for (let file in fileObjects) delete fileObjects[file]
   },
-  _getFiles: () => {return fileObjects},
+  _getFiles: () => {
+    return fileObjects
+  },
 }

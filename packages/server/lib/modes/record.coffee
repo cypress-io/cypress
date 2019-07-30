@@ -247,7 +247,7 @@ billingLink = (orgId) ->
 gracePeriodMessage = (gracePeriodEnds) ->
   gracePeriodEnds or "the grace period ends"
 
-createRun = (options = {}) ->
+createRun = Promise.method (options = {}) ->
   _.defaults(options, {
     group: null,
     parallel: null,
@@ -337,6 +337,11 @@ createRun = (options = {}) ->
           errors.warning("PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED", {
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
+          })
+        else
+          errors.warning("DASHBOARD_UNKNOWN_CREATE_RUN_WARNING", {
+            message: warning.message,
+            props: _.omit(warning, 'message')
           })
 
   .catch (err) ->
