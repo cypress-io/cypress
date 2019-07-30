@@ -126,7 +126,7 @@ const throwErrByPath = (errPath, options = {}) => {
 }
 
 const warnByPath = (errPath, options = {}) => {
-  const err = errMessageByPath(errPath, options.args)
+  const err = errMsgByPath(errPath, options.args)
 
   $utils.warning(err)
 }

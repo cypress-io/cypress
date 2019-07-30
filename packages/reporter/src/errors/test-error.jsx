@@ -60,4 +60,3 @@ class TestError extends Component {
 }
 
 export default TestError
-
