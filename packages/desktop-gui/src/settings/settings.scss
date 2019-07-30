@@ -18,6 +18,16 @@
     ul {
       margin-top: 10px;
     }
+
+    a>code {
+      color: #1079c3;
+
+      &:hover {
+        color: #0c65a5;
+        background-color: #e5ecf6;
+        border-bottom: 0;
+      }
+    }
   }
 
   .learn-more {
