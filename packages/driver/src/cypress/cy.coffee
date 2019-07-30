@@ -671,6 +671,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
+    ensureNotReadonly: ensures.ensureNotReadonly
     ensureReceivability: ensures.ensureReceivability
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability

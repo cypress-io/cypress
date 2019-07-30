@@ -354,6 +354,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## TODO: not scrolling here, but revisit when scroll algorithm changes
           return type()
 
+        
+        options.ensure = {
+          position: true
+          visibility: true
+          receivability: true
+          notReadonly: true
+        }
+
         $actionability.verify(cy, options.$el, options, {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)
