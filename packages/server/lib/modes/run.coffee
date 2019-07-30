@@ -411,10 +411,12 @@ trashAssets = (config = {}) ->
     ## dont make trashing assets fail the build
     errors.warning("CANNOT_TRASH_ASSETS", err.stack)
 
-## if we've been told to record and we're not spawning a headed browser
+## if we've been told to record and we're not spawning a compatible browser
 browserCanBeRecorded = (browser) ->
-  browser.name is "electron" and browser.isHeadless
-    
+  if browser.name is "electron" and isHeadless then return true
+  if browser.name is "chrome" and not isHeadless then return true
+  false
+
 createVideoRecording = (videoName) ->
   outputDir = path.dirname(videoName)
 
@@ -434,7 +436,7 @@ getVideoRecordingDelay = (startedVideoCapture) ->
     return DELAY_TO_LET_VIDEO_FINISH_MS
 
   return 0
-    
+
 maybeStartVideoRecording = Promise.method (options = {}) ->
   { spec, browser, video, videosFolder } = options
 
@@ -442,7 +444,7 @@ maybeStartVideoRecording = Promise.method (options = {}) ->
   ## a video recording
   if not video
     return
-  
+
   ## handle if this browser cannot actually
   ## be recorded
   if not browserCanBeRecorded(browser)
@@ -474,7 +476,7 @@ maybeStartVideoRecording = Promise.method (options = {}) ->
       writeVideoFrame: props.writeVideoFrame,
       startedVideoCapture: props.startedVideoCapture,
     }
-    
+
 module.exports = {
   collectTestResults
 
@@ -485,7 +487,7 @@ module.exports = {
   openProjectCreate
 
   createVideoRecording
-  
+
   getVideoRecordingDelay
 
   maybeStartVideoRecording
@@ -929,64 +931,6 @@ module.exports = {
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
 
-    # video can be recorded only for specific browser modes
-    browserCanBeRecorded = (browser) ->
-      if browser.name is "electron" and isHeadless then return true
-      if browser.name is "chrome" and not isHeadless then return true
-      false
-
-    if video
-      if browserCanBeRecorded(browser)
-        if not videosFolder
-          throw new Error("Missing videoFolder for recording")
-
-        name  = path.join(videosFolder, spec.name + ".mp4")
-        cname = path.join(videosFolder, spec.name + "-compressed.mp4")
-
-        recording = @createRecording(name)
-      else
-        console.log("")
-
-        if browser.name is "electron" and isHeaded
-          errors.warning("CANNOT_RECORD_VIDEO_HEADED")
-        else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name)
-
-    Promise.resolve(recording)
-    .then (props = {}) =>
-      ## extract the started + ended promises from recording
-      {start, end, write} = props
-
-      ## make sure we start the recording first
-      ## before doing anything
-      Promise.resolve(start)
-      .then (started) =>
-        Promise.props({
-          results: @waitForTestsToFinishRunning({
-            end
-            name
-            spec
-            cname
-            started
-            project
-            estimated
-            screenshots
-            exit:                 options.exit
-            videoCompression:     options.videoCompression
-            videoUploadOnPasses:  options.videoUploadOnPasses
-          }),
-
-          connection: @waitForBrowserToConnect({
-            spec
-            write
-            project
-            browser
-            screenshots
-            socketId:    options.socketId
-            webSecurity: options.webSecurity
-            projectRoot: options.projectRoot
-          })
-          
     @maybeStartVideoRecording({
       spec,
       browser,
@@ -1000,7 +944,7 @@ module.exports = {
           project
           estimated
           screenshots
-          videoName:            videoRecordProps.videoName 
+          videoName:            videoRecordProps.videoName
           compressedVideoName:  videoRecordProps.compressedVideoName
           endVideoCapture:      videoRecordProps.endVideoCapture
           startedVideoCapture:  videoRecordProps.startedVideoCapture
@@ -1014,10 +958,10 @@ module.exports = {
           project
           browser
           screenshots
-          writeVideoFrame: videoRecordProps.writeVideoFrame
-          socketId:    options.socketId
-          webSecurity: options.webSecurity
-          projectRoot: options.projectRoot
+          writeVideoFrame:  videoRecordProps.writeVideoFrame
+          socketId:         options.socketId
+          webSecurity:      options.webSecurity
+          projectRoot:      options.projectRoot
         })
       })
 
