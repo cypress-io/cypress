@@ -1,23 +1,9 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { _ } = Cypress
 const { Promise } = Cypress
 
 describe('src/cy/commands/cookies', () => {
-  beforeEach(() =>
-  //# call through normally on everything
-
-  {
-    return cy.stub(Cypress, 'automation').callThrough()
+  beforeEach(() => {
+    // call through normally on everything
+    cy.stub(Cypress, 'automation').callThrough()
   })
 
   context('test:before:run:async', () => {
@@ -28,7 +14,7 @@ describe('src/cy/commands/cookies', () => {
       .withArgs('clear:cookies', [{ domain: 'localhost', name: 'foo' }])
       .resolves([])
 
-      return Cypress.emitThen('test:before:run:async', {})
+      Cypress.emitThen('test:before:run:async', {})
       .then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'get:cookies',
@@ -45,7 +31,7 @@ describe('src/cy/commands/cookies', () => {
     it('does not call clear:cookies when get:cookies returns empty array', () => {
       Cypress.automation.withArgs('get:cookies').resolves([])
 
-      return Cypress.emitThen('test:before:run:async', {})
+      Cypress.emitThen('test:before:run:async', {})
       .then(() => {
         expect(Cypress.automation).not.to.be.calledWith(
           'clear:cookies'
@@ -62,7 +48,7 @@ describe('src/cy/commands/cookies', () => {
 
       const timeout = cy.spy(Promise.prototype, 'timeout')
 
-      return Cypress.emitThen('test:before:run:async', {})
+      Cypress.emitThen('test:before:run:async', {})
       .then(() => {
         expect(timeout).not.to.be.called
       })
@@ -73,7 +59,7 @@ describe('src/cy/commands/cookies', () => {
     it('returns array of cookies', () => {
       Cypress.automation.withArgs('get:cookies').resolves([])
 
-      return cy.getCookies().should('deep.eq', []).then(() => {
+      cy.getCookies().should('deep.eq', []).then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'get:cookies',
           { domain: 'localhost' }
@@ -89,7 +75,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.getCookies().then(() => {
+        cy.getCookies().then(() => {
           expect(timeout).to.be.calledWith(2500)
         })
       })
@@ -99,7 +85,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.getCookies({ timeout: 1000 }).then(() => {
+        cy.getCookies({ timeout: 1000 }).then(() => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
@@ -111,10 +97,10 @@ describe('src/cy/commands/cookies', () => {
 
         cy.spy(cy, 'clearTimeout')
 
-        return cy.getCookies().then(() => {
+        cy.getCookies().then(() => {
           expect(cy.clearTimeout).to.be.calledWith('get:cookies')
 
-          //# restores the timeout afterwards
+          // restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
         })
       })
@@ -130,11 +116,9 @@ describe('src/cy/commands/cookies', () => {
           if (attrs.name === 'getCookies') {
             this.lastLog = log
 
-            return this.logs.push(log)
+            this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs once on error', function (done) {
@@ -154,10 +138,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').name).to.eq('foo')
           expect(lastLog.get('error').stack).to.eq(error.stack)
 
-          return done()
+          done()
         })
 
-        return cy.getCookies()
+        cy.getCookies()
       })
 
       it('throws after timing out', function (done) {
@@ -173,10 +157,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('message')).to.eq('')
           expect(err.message).to.eq('cy.getCookies() timed out waiting \'50ms\' to complete.')
 
-          return done()
+          done()
         })
 
-        return cy.getCookies({ timeout: 50 })
+        cy.getCookies({ timeout: 50 })
       })
     })
 
@@ -188,7 +172,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        return Cypress.automation
+        Cypress.automation
         .withArgs('get:cookies', { domain: 'localhost' })
         .resolves([
           { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false },
@@ -196,13 +180,13 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can turn off logging', () => {
-        return cy.getCookies({ log: false }).then(function () {
+        cy.getCookies({ log: false }).then(function () {
           expect(this.lastLog).to.be.undefined
         })
       })
 
       it('ends immediately', () => {
-        return cy.getCookies().then(function () {
+        cy.getCookies().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('ended')).to.be.true
@@ -212,7 +196,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('snapshots immediately', () => {
-        return cy.getCookies().then(function () {
+        cy.getCookies().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
@@ -222,7 +206,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('displays name \'get cookies\'', () => {
-        return cy.getCookies().then(function () {
+        cy.getCookies().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('displayName')).to.eq('get cookies')
@@ -230,7 +214,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps', () => {
-        return cy.getCookies().then(function (cookies) {
+        cy.getCookies().then(function (cookies) {
           expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false }])
           const c = this.lastLog.invoke('consoleProps')
 
@@ -248,7 +232,7 @@ describe('src/cy/commands/cookies', () => {
         name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
       })
 
-      return cy.getCookie('foo').should('deep.eq', {
+      cy.getCookie('foo').should('deep.eq', {
         name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
       }).then(() => {
         expect(Cypress.automation).to.be.calledWith(
@@ -261,7 +245,7 @@ describe('src/cy/commands/cookies', () => {
     it('returns null when no cookie was found', () => {
       Cypress.automation.withArgs('get:cookie').resolves(null)
 
-      return cy.getCookie('foo').should('be.null')
+      cy.getCookie('foo').should('be.null')
     })
 
     describe('timeout', () => {
@@ -272,7 +256,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.getCookie('foo').then(() => {
+        cy.getCookie('foo').then(() => {
           expect(timeout).to.be.calledWith(2500)
         })
       })
@@ -282,7 +266,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.getCookie('foo', { timeout: 1000 }).then(() => {
+        cy.getCookie('foo', { timeout: 1000 }).then(() => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
@@ -294,10 +278,10 @@ describe('src/cy/commands/cookies', () => {
 
         cy.spy(cy, 'clearTimeout')
 
-        return cy.getCookie('foo').then(() => {
+        cy.getCookie('foo').then(() => {
           expect(cy.clearTimeout).to.be.calledWith('get:cookie')
 
-          //# restores the timeout afterwards
+          // restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
         })
       })
@@ -313,11 +297,9 @@ describe('src/cy/commands/cookies', () => {
           if (attrs.name === 'getCookie') {
             this.lastLog = log
 
-            return this.logs.push(log)
+            this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs once on error', function (done) {
@@ -337,10 +319,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').name).to.eq('foo')
           expect(lastLog.get('error').stack).to.eq(error.stack)
 
-          return done()
+          done()
         })
 
-        return cy.getCookie('foo')
+        cy.getCookie('foo')
       })
 
       it('throws after timing out', function (done) {
@@ -356,10 +338,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('message')).to.eq('foo')
           expect(err.message).to.eq('cy.getCookie() timed out waiting \'50ms\' to complete.')
 
-          return done()
+          done()
         })
 
-        return cy.getCookie('foo', { timeout: 50 })
+        cy.getCookie('foo', { timeout: 50 })
       })
 
       it('requires a string name', function (done) {
@@ -370,10 +352,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').message).to.eq('cy.getCookie() must be passed a string argument for name.')
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.getCookie(123)
+        cy.getCookie(123)
       })
     })
 
@@ -385,7 +367,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        return Cypress.automation
+        Cypress.automation
         .withArgs('get:cookie', { domain: 'localhost', name: 'foo' })
         .resolves({
           name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
@@ -395,13 +377,13 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can turn off logging', () => {
-        return cy.getCookie('foo', { log: false }).then(function () {
+        cy.getCookie('foo', { log: false }).then(function () {
           expect(this.log).to.be.undefined
         })
       })
 
       it('ends immediately', () => {
-        return cy.getCookie('foo').then(function () {
+        cy.getCookie('foo').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('ended')).to.be.true
@@ -411,7 +393,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('has correct message', () => {
-        return cy.getCookie('foo').then(function () {
+        cy.getCookie('foo').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('foo')
@@ -419,7 +401,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('snapshots immediately', () => {
-        return cy.getCookie('foo').then(function () {
+        cy.getCookie('foo').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
@@ -429,7 +411,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('displays name \'get cookie\'', () => {
-        return cy.getCookie('foo').then(function () {
+        cy.getCookie('foo').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('displayName')).to.eq('get cookie')
@@ -437,7 +419,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps', () => {
-        return cy.getCookie('foo').then(function (cookie) {
+        cy.getCookie('foo').then(function (cookie) {
           expect(cookie).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false })
           const c = this.lastLog.invoke('consoleProps')
 
@@ -446,7 +428,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps when no cookie found', () => {
-        return cy.getCookie('bar').then(function (cookie) {
+        cy.getCookie('bar').then(function (cookie) {
           expect(cookie).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
@@ -460,7 +442,7 @@ describe('src/cy/commands/cookies', () => {
 
   context('#setCookie', () => {
     beforeEach(() => {
-      return cy.stub(Cypress.utils, 'addTwentyYears').returns(12345)
+      cy.stub(Cypress.utils, 'addTwentyYears').returns(12345)
     })
 
     it('returns set cookie', () => {
@@ -468,7 +450,7 @@ describe('src/cy/commands/cookies', () => {
         name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: false, httpOnly: false, expiry: 12345,
       })
 
-      return cy.setCookie('foo', 'bar').should('deep.eq', {
+      cy.setCookie('foo', 'bar').should('deep.eq', {
         name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: false, httpOnly: false, expiry: 12345,
       }).then(() => {
         expect(Cypress.automation).to.be.calledWith(
@@ -483,7 +465,7 @@ describe('src/cy/commands/cookies', () => {
         name: 'foo', value: 'bar', domain: 'brian.dev.local', path: '/foo', secure: true, httpOnly: true, expiry: 987,
       })
 
-      return cy.setCookie('foo', 'bar', { domain: 'brian.dev.local', path: '/foo', secure: true, httpOnly: true, expiry: 987 }).should('deep.eq', {
+      cy.setCookie('foo', 'bar', { domain: 'brian.dev.local', path: '/foo', secure: true, httpOnly: true, expiry: 987 }).should('deep.eq', {
         name: 'foo', value: 'bar', domain: 'brian.dev.local', path: '/foo', secure: true, httpOnly: true, expiry: 987,
       }).then(() => {
         expect(Cypress.automation).to.be.calledWith(
@@ -501,7 +483,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.setCookie('foo', 'bar').then(() => {
+        cy.setCookie('foo', 'bar').then(() => {
           expect(timeout).to.be.calledWith(2500)
         })
       })
@@ -511,7 +493,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.setCookie('foo', 'bar', { timeout: 1000 }).then(() => {
+        cy.setCookie('foo', 'bar', { timeout: 1000 }).then(() => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
@@ -523,10 +505,10 @@ describe('src/cy/commands/cookies', () => {
 
         cy.spy(cy, 'clearTimeout')
 
-        return cy.setCookie('foo', 'bar').then(() => {
+        cy.setCookie('foo', 'bar').then(() => {
           expect(cy.clearTimeout).to.be.calledWith('set:cookie')
 
-          //# restores the timeout afterwards
+          // restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
         })
       })
@@ -542,11 +524,9 @@ describe('src/cy/commands/cookies', () => {
           if (attrs.name === 'setCookie') {
             this.lastLog = log
 
-            return this.logs.push(log)
+            this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs once on error', function (done) {
@@ -565,10 +545,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').name).to.eq('foo')
           expect(lastLog.get('error').stack).to.eq(error.stack)
 
-          return done()
+          done()
         })
 
-        return cy.setCookie('foo', 'bar')
+        cy.setCookie('foo', 'bar')
       })
 
       it('throws after timing out', function (done) {
@@ -584,10 +564,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('message')).to.eq('foo, bar')
           expect(err.message).to.eq('cy.setCookie() timed out waiting \'50ms\' to complete.')
 
-          return done()
+          done()
         })
 
-        return cy.setCookie('foo', 'bar', { timeout: 50 })
+        cy.setCookie('foo', 'bar', { timeout: 50 })
       })
 
       it('requires a string name', function (done) {
@@ -598,10 +578,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').message).to.eq('cy.setCookie() must be passed two string arguments for name and value.')
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.setCookie(123)
+        cy.setCookie(123)
       })
 
       it('requires a string value', function (done) {
@@ -612,10 +592,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').message).to.eq('cy.setCookie() must be passed two string arguments for name and value.')
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.setCookie('foo', 123)
+        cy.setCookie('foo', 123)
       })
     })
 
@@ -627,7 +607,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        return Cypress.automation
+        Cypress.automation
         .withArgs('set:cookie', {
           domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, expiry: 12345,
         })
@@ -637,13 +617,13 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can turn off logging', () => {
-        return cy.setCookie('foo', 'bar', { log: false }).then(function () {
+        cy.setCookie('foo', 'bar', { log: false }).then(function () {
           expect(this.log).to.be.undefined
         })
       })
 
       it('ends immediately', () => {
-        return cy.setCookie('foo', 'bar').then(function () {
+        cy.setCookie('foo', 'bar').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('ended')).to.be.true
@@ -662,7 +642,7 @@ describe('src/cy/commands/cookies', () => {
           it('displays name \'set cookie\'', () => {})
         })
 
-        return cy.setCookie('foo', 'bar').then(function () {
+        cy.setCookie('foo', 'bar').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('displayName')).to.eq('set cookie')
@@ -670,7 +650,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps', () => {
-        return cy.setCookie('foo', 'bar').then(function (cookie) {
+        cy.setCookie('foo', 'bar').then(function (cookie) {
           expect(cookie).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false })
           const c = this.lastLog.invoke('consoleProps')
 
@@ -684,7 +664,7 @@ describe('src/cy/commands/cookies', () => {
     it('returns null', () => {
       Cypress.automation.withArgs('clear:cookie').resolves(null)
 
-      return cy.clearCookie('foo').should('be.null').then(() => {
+      cy.clearCookie('foo').should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'clear:cookie',
           { domain: 'localhost', name: 'foo' }
@@ -700,7 +680,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.clearCookie('foo').then(() => {
+        cy.clearCookie('foo').then(() => {
           expect(timeout).to.be.calledWith(2500)
         })
       })
@@ -710,7 +690,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.clearCookie('foo', { timeout: 1000 }).then(() => {
+        cy.clearCookie('foo', { timeout: 1000 }).then(() => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
@@ -722,10 +702,10 @@ describe('src/cy/commands/cookies', () => {
 
         cy.spy(cy, 'clearTimeout')
 
-        return cy.clearCookie('foo').then(() => {
+        cy.clearCookie('foo').then(() => {
           expect(cy.clearTimeout).to.be.calledWith('clear:cookie')
 
-          //# restores the timeout afterwards
+          // restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
         })
       })
@@ -741,11 +721,9 @@ describe('src/cy/commands/cookies', () => {
           if (attrs.name === 'clearCookie') {
             this.lastLog = log
 
-            return this.logs.push(log)
+            this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs once on error', function (done) {
@@ -764,10 +742,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').name).to.eq('foo')
           expect(lastLog.get('error').stack).to.eq(error.stack)
 
-          return done()
+          done()
         })
 
-        return cy.clearCookie('foo')
+        cy.clearCookie('foo')
       })
 
       it('throws after timing out', function (done) {
@@ -783,10 +761,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('message')).to.eq('foo')
           expect(err.message).to.eq('cy.clearCookie() timed out waiting \'50ms\' to complete.')
 
-          return done()
+          done()
         })
 
-        return cy.clearCookie('foo', { timeout: 50 })
+        cy.clearCookie('foo', { timeout: 50 })
       })
 
       it('requires a string name', function (done) {
@@ -797,10 +775,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').message).to.eq('cy.clearCookie() must be passed a string argument for name.')
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.clearCookie(123)
+        cy.clearCookie(123)
       })
     })
 
@@ -812,7 +790,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        return Cypress.automation
+        Cypress.automation
         .withArgs('clear:cookie', { domain: 'localhost', name: 'foo' })
         .resolves({
           name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
@@ -822,13 +800,13 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can turn off logging', () => {
-        return cy.clearCookie('foo', { log: false }).then(function () {
+        cy.clearCookie('foo', { log: false }).then(function () {
           expect(this.log).to.be.undefined
         })
       })
 
       it('ends immediately', () => {
-        return cy.clearCookie('foo').then(function () {
+        cy.clearCookie('foo').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('ended')).to.be.true
@@ -847,7 +825,7 @@ describe('src/cy/commands/cookies', () => {
           it('displays name \'clear cookie\'', () => {})
         })
 
-        return cy.clearCookie('foo').then(function () {
+        cy.clearCookie('foo').then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('displayName')).to.eq('clear cookie')
@@ -855,7 +833,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps', () => {
-        return cy.clearCookie('foo').then(function (cookie) {
+        cy.clearCookie('foo').then(function (cookie) {
           expect(cookie).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
@@ -866,7 +844,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps when no matching cookie was found', () => {
-        return cy.clearCookie('bar').then(function (cookie) {
+        cy.clearCookie('bar').then(function (cookie) {
           expect(cookie).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
@@ -883,13 +861,13 @@ describe('src/cy/commands/cookies', () => {
     it('returns null', () => {
       Cypress.automation.withArgs('get:cookies').resolves([])
 
-      return cy.clearCookies().should('be.null')
+      cy.clearCookies().should('be.null')
     })
 
     it('does not call \'clear:cookies\' when no cookies were returned', () => {
       Cypress.automation.withArgs('get:cookies').resolves([])
 
-      return cy.clearCookies().then(() => {
+      cy.clearCookies().then(() => {
         expect(Cypress.automation).not.to.be.calledWith(
           'clear:cookies'
         )
@@ -914,7 +892,7 @@ describe('src/cy/commands/cookies', () => {
       .withArgs([{ name: 'foo' }, { name: 'bar' }])
       .returns([{ name: 'foo' }])
 
-      return cy.clearCookies().should('be.null').then(() => {
+      cy.clearCookies().should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'clear:cookies',
           [{ name: 'foo', domain: 'localhost' }]
@@ -947,13 +925,14 @@ describe('src/cy/commands/cookies', () => {
         name: 'foo',
       })
 
-      return cy
-      .clearCookies().should('be.null').then(() => {
+      cy.clearCookies().should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'clear:cookies',
           [{ name: 'foo', domain: 'localhost' }]
         )
-      }).clearCookies().should('be.null').then(() => {
+      })
+
+      cy.clearCookies().should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'clear:cookies', [
             { name: 'foo', domain: 'localhost' },
@@ -966,7 +945,7 @@ describe('src/cy/commands/cookies', () => {
 
     describe('timeout', () => {
       beforeEach(() => {
-        return Cypress.automation
+        Cypress.automation
         .withArgs('get:cookies')
         .resolves([{}])
         .withArgs('clear:cookies')
@@ -980,7 +959,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.clearCookies().then(() => {
+        cy.clearCookies().then(() => {
           expect(timeout).to.be.calledWith(2500)
         })
       })
@@ -990,7 +969,7 @@ describe('src/cy/commands/cookies', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.clearCookies({ timeout: 1000 }).then(() => {
+        cy.clearCookies({ timeout: 1000 }).then(() => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
@@ -1000,11 +979,11 @@ describe('src/cy/commands/cookies', () => {
 
         cy.spy(cy, 'clearTimeout')
 
-        return cy.clearCookies().then(() => {
+        cy.clearCookies().then(() => {
           expect(cy.clearTimeout).to.be.calledWith('get:cookies')
           expect(cy.clearTimeout).to.be.calledWith('clear:cookies')
 
-          //# restores the timeout afterwards
+          // restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
         })
       })
@@ -1020,11 +999,9 @@ describe('src/cy/commands/cookies', () => {
           if (attrs.name === 'clearCookies') {
             this.lastLog = log
 
-            return this.logs.push(log)
+            this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs once on \'get:cookies\' error', function (done) {
@@ -1044,10 +1021,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').stack).to.eq(err.stack)
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.clearCookies()
+        cy.clearCookies()
       })
 
       it('throws after timing out', function (done) {
@@ -1063,10 +1040,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('message')).to.eq('')
           expect(err.message).to.eq('cy.clearCookies() timed out waiting \'50ms\' to complete.')
 
-          return done()
+          done()
         })
 
-        return cy.clearCookies({ timeout: 50 })
+        cy.clearCookies({ timeout: 50 })
       })
 
       it('logs once on \'clear:cookies\' error', function (done) {
@@ -1090,10 +1067,10 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('error').stack).to.eq(error.stack)
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.clearCookies()
+        cy.clearCookies()
       })
     })
 
@@ -1105,7 +1082,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        return Cypress.automation
+        Cypress.automation
         .withArgs('get:cookies', { domain: 'localhost' })
         .resolves([{ name: 'foo' }])
         .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
@@ -1115,13 +1092,13 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('can turn off logging', () => {
-        return cy.clearCookies({ log: false }).then(function () {
+        cy.clearCookies({ log: false }).then(function () {
           expect(this.log).to.be.undefined
         })
       })
 
       it('ends immediately', () => {
-        return cy.clearCookies().then(function () {
+        cy.clearCookies().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('ended')).to.be.true
@@ -1140,7 +1117,7 @@ describe('src/cy/commands/cookies', () => {
           it('displays name \'get cookies\'', () => {})
         })
 
-        return cy.clearCookies().then(function () {
+        cy.clearCookies().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('displayName')).to.eq('clear cookies')
@@ -1148,7 +1125,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps', () => {
-        return cy.clearCookies().then(function (cookies) {
+        cy.clearCookies().then(function (cookies) {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
@@ -1168,13 +1145,13 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        return Cypress.automation
+        Cypress.automation
         .withArgs('get:cookies', { domain: 'localhost' })
         .resolves([])
       })
 
       it('#consoleProps', () => {
-        return cy.clearCookies().then(function (cookies) {
+        cy.clearCookies().then(function (cookies) {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
@@ -1194,7 +1171,7 @@ describe('src/cy/commands/cookies', () => {
           }
         })
 
-        return Cypress.automation
+        Cypress.automation
         .withArgs('get:cookies', { domain: 'localhost' })
         .resolves([{ name: 'foo' }])
         .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
@@ -1202,7 +1179,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps', () => {
-        return cy.clearCookies().then(function (cookies) {
+        cy.clearCookies().then(function (cookies) {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
