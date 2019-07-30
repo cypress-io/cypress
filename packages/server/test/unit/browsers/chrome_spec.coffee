@@ -14,9 +14,9 @@ describe "lib/browsers/chrome", ->
       @args = []
       # mock CRI client during testing
       @criClient = {
+        send: sinon.stub().resolves()
         Page: {
-          bringToFront: sinon.stub().resolves()
-          navigate: sinon.stub().resolves()
+          screencastFrame: sinon.stub().returns()
         }
       }
 
@@ -34,9 +34,10 @@ describe "lib/browsers/chrome", ->
     it "focuses on the page and calls CRI Page.visit", ->
       chrome.open("chrome", "http://", {}, {})
       .then =>
-        expect(@criClient.Page.bringToFront).to.have.been.calledOnce
-        expect(@criClient.Page.navigate).to.have.been.calledOnce
         expect(utils.getPort).to.have.been.calledOnce # to get remote interface port
+        expect(@criClient.send).to.have.been.calledTwice
+        expect(@criClient.send).to.have.been.calledWith("Page.bringToFront")
+        expect(@criClient.send).to.have.been.calledWith("Page.navigate")
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
