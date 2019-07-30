@@ -23,8 +23,7 @@
     "lodash": "4.17.15",
     "node-forge": "0.6.49",
     "proxy-from-env": "1.0.0",
-    "semaphore": "1.1.0",
-    "server-destroy-vvo": "1.0.1"
+    "semaphore": "1.1.0"
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",

@@ -1,23 +1,7 @@
+allowDestroy = require("@packages/network")
 http       = require("http")
 path       = require("path")
 httpsProxy = require("../../lib/proxy")
-
-## can't use server-destroy-vvo here - it doesn't listen for secureConnection events
-addDestroy = (server) =>
-  connections = []
-
-  trackConn = (conn) =>
-    connections.push(conn)
-
-    conn.on 'close', ->
-      connections = connections.filter((connection) => connection != conn)
-
-  server.on('connection', trackConn)
-  server.on('secureConnection', trackConn)
-
-  server.destroy = (cb) ->
-    server.close(cb)
-    connections.map((connection) => connection.destroy())
 
 prx = null
 
@@ -45,7 +29,7 @@ module.exports = {
   start: (port) ->
     prx = http.createServer()
 
-    addDestroy(prx)
+    allowDestroy(prx)
 
     dir = path.join(process.cwd(), "ca")
 

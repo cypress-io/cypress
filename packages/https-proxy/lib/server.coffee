@@ -1,6 +1,5 @@
 _            = require("lodash")
-{ agent, connect } = require("@packages/network")
-allowDestroy = require("server-destroy-vvo")
+{ agent, allowDestroy, connect } = require("@packages/network")
 debug        = require("debug")("cypress:https-proxy")
 fs           = require("fs-extra")
 getProxyForUrl = require("proxy-from-env").getProxyForUrl
