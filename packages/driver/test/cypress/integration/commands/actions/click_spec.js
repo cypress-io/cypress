@@ -423,6 +423,49 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('div', 'pointerover pointerenter pointerdown mousedown pointerup mouseup click').each(shouldBeCalled)
     })
 
+    it('events when element removed on pointerdown', () => {
+      const btn = cy.$$('button:first')
+      const div = cy.$$('div#tabindex')
+
+      attachFocusListeners({ btn })
+      attachMouseClickListeners({ btn, div })
+      attachMouseHoverListeners({ div })
+
+      btn.on('pointerdown', () => {
+        // synchronously remove this button
+
+        btn.remove()
+      })
+
+      // return
+      cy.contains('button').click()
+
+      cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
+      cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
+      cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
+    })
+
+    it('events when element removed on pointerover', () => {
+      const btn = cy.$$('button:first')
+      const div = cy.$$('div#tabindex')
+
+      // attachFocusListeners({ btn })
+      attachMouseClickListeners({ btn, div })
+      attachMouseHoverListeners({ btn, div })
+
+      btn.on('pointerover', () => {
+        // synchronously remove this button
+
+        btn.remove()
+      })
+
+      cy.contains('button').click()
+
+      cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalled)
+      cy.getAll('btn', 'pointerdown mousedown mouseover mouseenter').each(shouldNotBeCalled)
+      cy.getAll('div', 'pointerover pointerenter pointerdown mousedown pointerup mouseup click').each(shouldBeCalled)
+    })
+
     it('does not fire a click when element has been removed on mouseup', () => {
       const $btn = cy.$$('button:first')
 
@@ -599,9 +642,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#three-buttons button').click({ multiple: true }).then(() => {
         const calls = cy.timeout.getCalls()
 
-        const num = _.filter(calls, (call) => {
-          return _.isEqual(call.args, [50, true, 'click'])
-        })
+        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true, 'click']))
 
         expect(num.length).to.eq(count)
       })
@@ -1523,9 +1564,25 @@ describe('src/cy/commands/actions/click', () => {
         .focused().should('have.id', 'button-covered-in-span')
       })
 
+      it('focus window', () => {
+        const stub = cy.stub()
+        .callsFake(() => {
+          // debugger
+        })
+        // const win = cy.state('window')
+        const win = cy.$$('*')
+
+        cy.$$(cy.state('window')).on('focus', cy.stub().as('win'))
+
+        cy.$$(cy.state('document')).on('focus', cy.stub().as('doc'))
+
+        win.on('focus', stub)
+
+        cy.get('li').first().then((el) => el.focus().focus().focus())
+      })
+
       it('will not fire focus events when nothing can receive focus', () => {
         const onFocus = cy.stub()
-
         const win = cy.state('window')
         const $body = cy.$$('body')
         const $div = cy.$$('#nested-find')
@@ -1630,9 +1687,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           const { lastLog, logs } = this
-          const logsArr = logs.map((log) => {
-            return log.get().consoleProps()
-          })
+          const logsArr = logs.map((log) => log.get().consoleProps())
 
           expect(logsArr).to.have.length(4)
           expect(lastLog.get('error')).to.eq(err)
@@ -1906,9 +1961,7 @@ describe('src/cy/commands/actions/click', () => {
         const clicks = []
 
         // append two buttons
-        const button = () => {
-          return $('<button class=\'clicks\'>click</button>')
-        }
+        const button = () => $('<button class=\'clicks\'>click</button>')
 
         cy.$$('body').append(button()).append(button())
 
@@ -2014,9 +2067,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups MouseDown', () => {
-        cy.$$('input:first').mousedown(() => {
-          return false
-        })
+        cy.$$('input:first').mousedown(() => false)
 
         cy.get('input:first').click().then(function () {
 
@@ -2092,9 +2143,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups MouseUp', () => {
-        cy.$$('input:first').mouseup(() => {
-          return false
-        })
+        cy.$$('input:first').mouseup(() => false)
 
         cy.get('input:first').click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
@@ -2133,9 +2182,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups Click', () => {
-        cy.$$('input:first').click(() => {
-          return false
-        })
+        cy.$$('input:first').click(() => false)
 
         cy.get('input:first').click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
@@ -2242,9 +2289,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups have activated modifiers', () => {
-        cy.$$('input:first').click(() => {
-          return false
-        })
+        cy.$$('input:first').click(() => false)
 
         cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
@@ -2583,9 +2628,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#three-buttons button').dblclick().then(() => {
         const calls = cy.timeout.getCalls()
 
-        const num = _.filter(calls, (call) => {
-          return _.isEqual(call.args, [50, true, 'dblclick'])
-        })
+        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true, 'dblclick']))
 
         expect(num.length).to.eq(count)
       })
@@ -2709,9 +2752,7 @@ describe('src/cy/commands/actions/click', () => {
         const dblclicks = []
 
         // append two buttons
-        const $button = () => {
-          return $('<button class=\'dblclicks\'>dblclick</button')
-        }
+        const $button = () => $('<button class=\'dblclicks\'>dblclick</button')
 
         cy.$$('body').append($button()).append($button())
 
@@ -3152,9 +3193,7 @@ describe('src/cy/commands/actions/click', () => {
         const rightclicks = []
 
         // append two buttons
-        const $button = () => {
-          return $('<button class=\'rightclicks\'>rightclick</button')
-        }
+        const $button = () => $('<button class=\'rightclicks\'>rightclick</button')
 
         cy.$$('body').append($button()).append($button())
 
@@ -4019,9 +4058,7 @@ const getAllFn = (...aliases) => {
   }
 
   return Cypress.Promise.all(
-    aliases[0].split(' ').map((alias) => {
-      return cy.now('get', alias)
-    })
+    aliases[0].split(' ').map((alias) => cy.now('get', alias))
   )
 }
 

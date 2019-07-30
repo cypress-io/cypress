@@ -14,7 +14,7 @@ $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
 $Mouse = require("../cy/mouse")
-$Keyboard = require("../cy/keyboard")
+$Keyboard = require("../cy/keyboard").default
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -82,7 +82,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
-  keyboard = $Keyboard.create(state)
+  keyboard = new $Keyboard(state)
   mouse = $Mouse.create(state, focused)
   timers = $Timers.create()
 
@@ -156,19 +156,19 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         })
 
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.HTMLElement.prototype.blur = ->
-        focused.interceptBlur(this)
+        focused.interceptBlur(@)
 
       contentWindow.SVGElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.SVGElement.prototype.blur = ->
-        focused.interceptBlur(this)
+        focused.interceptBlur(@)
 
       contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(this)
+        $selection.interceptSelect.call(@)
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
@@ -680,6 +680,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
+    ensureNotReadonly: ensures.ensureNotReadonly
     ensureReceivability: ensures.ensureReceivability
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability

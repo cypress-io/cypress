@@ -158,6 +158,22 @@ describe "lib/project", ->
       sinon.stub(scaffold, "plugins").resolves()
       sinon.stub(plugins, "init").resolves()
 
+
+    # TODO: skip this for now
+    it.skip "passes watchers to Socket.startListening", ->
+      options = {}
+
+      @server.open(options).then ->
+        startListening = Socket::startListening
+        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
+        expect(startListening.getCall(0).args[1]).to.eq(options)
+        
+
+    # TODO: skip this for now
+    it.skip "watches cypress.json", ->
+      @server.open().bind(@).then ->
+        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
+
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
       @project.cfg = {}
@@ -210,18 +226,6 @@ describe "lib/project", ->
       .then (config) =>
         expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
         expect(config.state).to.eql({ autoScrollingEnabled: false })
-
-    it.skip "watches cypress.json", ->
-      @server.open().bind(@).then ->
-        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
-
-    it.skip "passes watchers to Socket.startListening", ->
-      options = {}
-
-      @server.open(options).then ->
-        startListening = Socket::startListening
-        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
-        expect(startListening.getCall(0).args[1]).to.eq(options)
 
   context "#close", ->
     beforeEach ->

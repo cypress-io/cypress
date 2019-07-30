@@ -7,6 +7,7 @@ const wrap = (obj) => {
 }
 
 const query = (selector, context) => {
+  // @ts-ignore
   return new $.fn.init(selector, context)
 }
 
