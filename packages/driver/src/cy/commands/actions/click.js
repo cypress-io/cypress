@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 
-const $Mouse = require('../../../cypress/mouse')
+const $Mouse = require('../../../cy/mouse')
 
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
