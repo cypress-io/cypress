@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -155,8 +155,8 @@
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",
-    "ts-node": "8.2.0",
-    "typescript": "3.4.5",
+    "ts-node": "8.3.0",
+    "typescript": "3.5.3",
     "vinyl-paths": "2.1.0"
   },
   "engines": {
