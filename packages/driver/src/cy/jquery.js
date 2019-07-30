@@ -1,30 +1,36 @@
-$ = require("jquery")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $ = require("jquery");
 
-$dom = require("../dom")
-$utils = require("../cypress/utils")
+const $dom = require("../dom");
+const $utils = require("../cypress/utils");
 
-remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
-  remoteJQuery and (remoteJQuery isnt $)
+const remoteJQueryisNotSameAsGlobal = remoteJQuery => remoteJQuery && (remoteJQuery !== $);
 
-create = (state) ->
-  jquery = ->
-    state("jQuery") or state("window").$
+const create = function(state) {
+  const jquery = () => state("jQuery") || state("window").$;
 
   return {
-    getRemotejQueryInstance: (subject) ->
-      remoteJQuery = jquery()
+    getRemotejQueryInstance(subject) {
+      const remoteJQuery = jquery();
 
-      ## we make assumptions that you cannot have
-      ## an array of mixed types, so we only look at
-      ## the first item (if there's an array)
-      firstSubject = $utils.unwrapFirst(subject)
+      //# we make assumptions that you cannot have
+      //# an array of mixed types, so we only look at
+      //# the first item (if there's an array)
+      const firstSubject = $utils.unwrapFirst(subject);
 
-      if $dom.isElement(firstSubject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
-        remoteSubject = remoteJQuery(subject)
+      if ($dom.isElement(firstSubject) && remoteJQueryisNotSameAsGlobal(remoteJQuery)) {
+        const remoteSubject = remoteJQuery(subject);
 
-        return remoteSubject
-  }
+        return remoteSubject;
+      }
+    }
+  };
+};
 
 module.exports = {
   create
-}
+};
