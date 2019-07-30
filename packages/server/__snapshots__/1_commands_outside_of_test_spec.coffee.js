@@ -107,8 +107,6 @@ We dynamically generated a new test to display this failure.
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
-      at stack trace line
 
 
 
