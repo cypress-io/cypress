@@ -1,4 +1,4 @@
-allowDestroy = require("@packages/network")
+{ allowDestroy } = require("@packages/network")
 http       = require("http")
 path       = require("path")
 httpsProxy = require("../../lib/proxy")
