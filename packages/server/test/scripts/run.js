@@ -24,6 +24,10 @@ const isWindows = () => {
   return os.platform() === 'win32'
 }
 
+const isGteNode12 = () => {
+  return Number(process.versions.node.split('.')[0]) >= 12
+}
+
 if (!run) {
   return exitErr(`
     Error: A path to a spec file must be specified!
@@ -64,10 +68,15 @@ if (options['inspect-brk']) {
   )
 }
 
-commandAndArguments.args.push(
+if (isGteNode12()) {
   // max HTTP header size 8kb -> 1mb
   // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
-  `--max-http-header-size=${1024 * 1024}`,
+  commandAndArguments.args.push(
+    `--max-http-header-size=${1024 * 1024}`
+  )
+}
+
+commandAndArguments.args.push(
   'node_modules/.bin/_mocha',
   run
 )
