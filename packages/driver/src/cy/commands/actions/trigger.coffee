@@ -77,7 +77,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if dispatchEarly
           return dispatch(subject, eventName, eventOptions)
 
-        $actionability.verify(cy, subject, options, {
+        $actionability.verify(cy, subject, options, 'trigger', {
           onScroll: ($el, type) ->
             Cypress.action("cy:scrolled", $el, type)
 

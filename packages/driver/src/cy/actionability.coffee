@@ -208,7 +208,7 @@ ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
   ## 5 pixels of x/y
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 
-verify = (cy, $el, options, callbacks) ->
+verify = (cy, $el, options, actionType, callbacks) ->
   win = $dom.getWindowByElement($el.get(0))
 
   { _log, force, position } = options
@@ -241,8 +241,12 @@ verify = (cy, $el, options, callbacks) ->
         ## ensure its visible
         cy.ensureVisibility($el, _log)
 
-        ## ensure its 'receivable' (not disabled, readonly)
+        ## ensure its 'receivable' (not disabled)
         cy.ensureReceivability($el, _log)
+
+        ## ensure its 'writable' only when typing (not readonly)
+        if actionType is 'type'
+          cy.ensureWriteability($el, _log)
 
       ## now go get all the coords for this element
       coords = getCoordinatesForEl(cy, $el, options)

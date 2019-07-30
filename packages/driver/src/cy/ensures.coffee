@@ -112,6 +112,8 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
+  ensureWriteability = (subject, onFail) -> 
+    cmd = state("current").get("name")
     # readonly can only be applied to input/textarea
     # not on checkboxes, radios, etc..
     if $dom.isTextLike(subject) and subject.prop("readonly")
@@ -326,6 +328,8 @@ create = (state, expect) ->
     ensureElementIsNotAnimating
 
     ensureReceivability
+
+    ensureWriteability
 
     ensureVisibility
 

@@ -66,6 +66,11 @@ describe "src/cy/commands/actions/select", ->
       cy.get("select[name=movies]").select(["The Human Condition", "There Will Be Blood"]).then ($select) ->
         expect($select.val()).to.deep.eq ["thc", "twbb"]
 
+    ## readonly should only be limited to inputs, not checkboxes
+    it "can select a readonly select", ->
+      cy.get("select[name=hunter]").select("gon").then ($select) ->
+        expect($select.val()).to.eq("gon-val")
+
     it "clears previous values when providing an array", ->
       ## make sure we have a previous value
       select = cy.$$("select[name=movies]").val(["2001"])

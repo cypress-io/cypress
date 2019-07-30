@@ -153,6 +153,14 @@ describe "src/cy/commands/actions/focus", ->
       cy.get("[data-cy=rect]").focus().then ->
         expect(onFocus).to.be.calledOnce
 
+    it "can focus on readonly inputs", ->
+      onFocus = cy.stub()
+
+      cy.$$("#readonly-attr").focus(onFocus)
+
+      cy.get("#readonly-attr").focus().then ->
+        expect(onFocus).to.be.calledOnce
+
     describe "assertion verification", ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>

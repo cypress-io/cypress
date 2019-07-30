@@ -289,7 +289,7 @@
           <input type="submit" value ="submit me2" />
         </form>
 
-        <form>
+        <form id="readonly">
           <!-- All values are valid readonly -->
           <input id="readonly-attr" readonly />
           <input id="readonly-readonly" readonly="readonly" />
@@ -297,6 +297,13 @@
 
           <!-- Although not strictly part of spec, Chrome respects any string -->
           <input id="readonly-str" readonly="abc" />
+
+          <!-- readonly doesn't enforce on non typeable inputs -->
+          <input type="checkbox" id="readonly-checkbox" readonly />
+          <input type="submit" id="readonly-submit" value="readonly click" readonly />
+          <select name="hunter" readonly>
+            <option value="gon-val" readonly>gon</option>
+          </select>
         </form>
       </div>
 

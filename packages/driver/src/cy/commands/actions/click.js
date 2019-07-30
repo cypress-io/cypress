@@ -153,7 +153,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         //# because we're issuing the clicks synchonrously
         //# once we establish the coordinates and the element
         //# passes all of the internal checks
-        return $actionability.verify(cy, $el, options, {
+        return $actionability.verify(cy, $el, options, 'click', {
           onScroll ($el, type) {
             return Cypress.action('cy:scrolled', $el, type)
           },
