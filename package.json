@@ -27,6 +27,7 @@
     "cypress:verify": "node ./cli/bin/cypress verify --dev",
     "predecaffeinate-bulk": "shx cp .eslintrc.decaffeinate.js .eslintrc.js",
     "decaffeinate-bulk": "bulk-decaffeinate",
+    "postdecaffeinate-bulk": "shx rm .eslintrc.js",
     "dev": "node ./scripts/start.js",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
