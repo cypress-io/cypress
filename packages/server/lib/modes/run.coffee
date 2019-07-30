@@ -513,7 +513,7 @@ module.exports = {
     chromeProps
 
   getElectronProps: (isHeaded, project, writeVideoFrame) ->
-    obj = {
+    electronProps = {
       width:  1280
       height: 720
       show:   isHeaded
