@@ -233,7 +233,7 @@ describe "aliases", ->
 
   context "element aliases", ->
     beforeEach ->
-      cy.fixture("aliases_runnables").as("runnables")
+      cy.fixture("runnables_aliases").as("runnables")
 
       @runner = new EventEmitter()
 
