@@ -198,12 +198,6 @@ exports['e2e plugins works with user extensions 1'] = `
                                                                                                     
   Running: app_spec.coffee...                                                              (1 of 1) 
 
-Warning: Cypress can only record videos when using the built in 'electron' browser.
-
-You have set the browser to: 'chrome'
-
-A video will not be recorded when using this browser.
-
 
   ✓ can inject text from an extension
 
@@ -219,10 +213,16 @@ A video will not be recorded when using this browser.
   │ Pending:      0               │
   │ Skipped:      0               │
   │ Screenshots:  0               │
-  │ Video:        false           │
+  │ Video:        true            │
   │ Duration:     X seconds       │
   │ Spec Ran:     app_spec.coffee │
   └───────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/plugin-extension/cypress/videos/abc123.mp4 (X seconds)
 
 
 ====================================================================================================
