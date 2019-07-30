@@ -160,7 +160,7 @@
     "express-session": "1.16.1",
     "express-useragent": "1.0.12",
     "http-mitm-proxy": "0.7.0",
-    "https-proxy-agent": "2.2.0",
+    "https-proxy-agent": "lpinca/node-https-proxy-agent#967f0115bddedbce0e4591c2a2250f988809dec8",
     "istanbul": "0.4.5",
     "mocked-env": "1.2.4",
     "mockery": "2.1.0",
