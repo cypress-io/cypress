@@ -413,8 +413,8 @@ trashAssets = (config = {}) ->
 
 ## if we've been told to record and we're not spawning a compatible browser
 browserCanBeRecorded = (browser) ->
-  if browser.name is "electron" and isHeadless then return true
-  if browser.name is "chrome" and not isHeadless then return true
+  if browser.name is "electron" and browser.isHeadless then return true
+  if browser.name is "chrome" and browser.isHeaded then return true
   false
 
 createVideoRecording = (videoName) ->
@@ -450,6 +450,7 @@ maybeStartVideoRecording = Promise.method (options = {}) ->
   if not browserCanBeRecorded(browser)
     console.log("")
 
+    # TODO update error messages and included browser name and headed mode
     if browser.name is "electron" and browser.isHeaded
       errors.warning("CANNOT_RECORD_VIDEO_HEADED")
     else
