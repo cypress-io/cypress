@@ -20,7 +20,7 @@ open         = require("#{root}lib/util/open")
 Fixtures     = require("#{root}/test/support/helpers/fixtures")
 
 ## TODO: why does node 12 hate this?
-describe.skip "lib/socket", ->
+describe "lib/socket", ->
   beforeEach ->
     Fixtures.scaffold()
 
@@ -144,7 +144,7 @@ describe.skip "lib/socket", ->
 
         it "does not clear any namespaced cookies", (done) ->
           sinon.stub(chrome.cookies, "getAll")
-          .withArgs({name: "session"})
+          .withArgs({name: "session", domain: "google.com"})
           .yieldsAsync([
             {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
           ])
