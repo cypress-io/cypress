@@ -1334,7 +1334,7 @@ describe "src/cy/commands/xhr", ->
       cy.route("GET", "/foo%25bar")
       .then ->
         expect(Cypress.utils.warning).to.be.calledWith """
-        A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.
+        A URL with percent-encoded characters was passed to `cy.route()`, but `cy.route()` expects a decoded URL.
 
         Did you mean to pass "/foo%bar"?
         """

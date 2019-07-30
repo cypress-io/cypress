@@ -749,7 +749,7 @@ describe "src/cypress/dom/visibility", ->
         @reasonIs @$tableVisCollapse.find("td.collapse"), "This element `<td.collapse>` is not visible because it has CSS property: `visibility: collapse`"
 
       it "has parent with 'visibility: collapse'", ->
-        @reasonIs @$tableVisCollapse.find("tr.collapse td:first"), "This element `<td>` is not visible because its parent '<tr.collapse>' has CSS property: `visibility: collapse`"
+        @reasonIs @$tableVisCollapse.find("tr.collapse td:first"), "This element `<td>` is not visible because its parent `<tr.collapse>` has CSS property: `visibility: collapse`"
 
       it "has effective zero width", ->
         @reasonIs @$divNoWidth, "This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels."
