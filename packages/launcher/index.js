@@ -32,13 +32,10 @@ if (!module.parent) {
       })
     })
   } else {
-    const pluralize = require('pluralize')
-
     launcher.detect().then((browsers) => {
-      console.log('detected %s', pluralize('browser', browsers.length, true))
+      console.log('detected %s', browsers.length === 1 ? 'browser' : 'browsers')
       console.log(browsers)
     }, console.error)
   }
-
   /* eslint-enable no-console */
 }

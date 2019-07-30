@@ -34,7 +34,7 @@ Fixtures      = require("#{root}test/support/helpers/fixtures")
 zlib = Promise.promisifyAll(zlib)
 
 ## force supertest-session to use promises provided in supertest
-Session = proxyquire("supertest-session", {supertest: supertest})
+session = proxyquire("supertest-session", {supertest: supertest})
 
 removeWhitespace = (c) ->
   c = str.clean(c)
@@ -126,7 +126,7 @@ describe "Routes", ->
 
               @srv = @server.getHttpServer()
 
-              @session = new (Session({app: @srv}))
+              @session = session(@srv)
 
               @proxy = "http://localhost:" + port
           ])

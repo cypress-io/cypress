@@ -1,16 +1,20 @@
 _          = require("lodash")
 utils      = require("fluent-ffmpeg/lib/utils")
 debug      = require("debug")("cypress:server:video")
+# extra verbose logs for logging individual frames
+debugFrames = require("debug")("cypress:server:video:frames")
 ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
 Promise    = require("bluebird")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
 fs         = require("./util/fs")
 
+debug("using ffmpeg from %s", ffmpegPath)
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 module.exports = {
   copy: (src, dest) ->
+    debug("copying from %s to %s", src, dest)
     fs
     .copyAsync(src, dest, {overwrite: true})
     .catch {code: "ENOENT"}, ->
@@ -18,7 +22,6 @@ module.exports = {
 
   start: (name, options = {}) ->
     pt         = stream.PassThrough()
-    started    = Promise.pending()
     ended      = Promise.pending()
     done       = false
     errored    = false
@@ -31,7 +34,7 @@ module.exports = {
       onError: ->
     })
 
-    end = ->
+    endVideoCapture = ->
       done = true
 
       if not written
@@ -47,7 +50,7 @@ module.exports = {
       ## get resolve or rejected
       return ended.promise
 
-    write = (data) ->
+    writeVideoFrame = (data) ->
       ## make sure we haven't ended
       ## our stream yet because paint
       ## events can linger beyond
@@ -57,64 +60,77 @@ module.exports = {
       ## we have written at least 1 byte
       written = true
 
+      debugFrames("writing video frame")
+
       if wantsWrite
         if not wantsWrite = pt.write(data)
           pt.once "drain", ->
+            debugFrames("video stream drained")
+      
             wantsWrite = true
       else
         skipped += 1
-        # console.log("skipping frame. total is", skipped)
 
-    # see ffmpeg options at https://ffmpeg.org/ffmpeg-formats.html
-    cmd = ffmpeg({
-      source: pt
-      priority: 20
-    })
-    .inputFormat("image2pipe")
-    .inputOptions("-use_wallclock_as_timestamps 1")
-    .videoCodec("libx264")
-    .outputOptions("-preset ultrafast")
-    .on "start", (command) ->
-      debug("capture started %o", { command })
+        debugFrames("skipping video frame %o", { skipped })
 
-      started.resolve(new Date)
+    startCapturing = ->
+      new Promise (resolve) ->
+        cmd = ffmpeg({
+          source: pt
+          priority: 20
+        })
+        .inputFormat("image2pipe")
+        .inputOptions("-use_wallclock_as_timestamps 1")
+        .videoCodec("libx264")
+        .outputOptions("-preset ultrafast")
+        .on "start", (command) ->
+          debug("capture started %o", { command })
 
-    .on "codecData", (data) ->
-      debug("capture codec data: %o", data)
+          resolve({
+            cmd
+            startedVideoCapture: new Date,
+          })
 
-    .on "stderr", (stderr) ->
-      debug("capture stderr log %o", { message: stderr })
+        .on "codecData", (data) ->
+          debug("capture codec data: %o", data)
 
-    .on "error", (err, stdout, stderr) ->
-      debug("capture errored: %o", { error: err.message, stdout, stderr })
+        .on "stderr", (stderr) ->
+          debug("capture stderr log %o", { message: stderr })
 
-      ## if we're supposed log errors then
-      ## bubble them up
-      if logErrors
-        options.onError(err, stdout, stderr)
+        .on "error", (err, stdout, stderr) ->
+          debug("capture errored: %o", { error: err.message, stdout, stderr })
 
-      err.recordingVideoFailed = true
+          ## if we're supposed log errors then
+          ## bubble them up
+          if logErrors
+            options.onError(err, stdout, stderr)
 
-      ## reject the ended promise
-      ended.reject(err)
+          err.recordingVideoFailed = true
 
-    .on "end", ->
-      debug("capture ended")
+          ## reject the ended promise
+          ended.reject(err)
 
-      ended.resolve()
-    .save(name)
+        .on "end", ->
+          debug("capture ended")
 
-    return {
-      cmd:     cmd
-      end:     end
-      start:   started.promise
-      write:   write
-    }
+          ended.resolve()
+        .save(name)
+        
+    startCapturing()
+    .then ({ cmd, startedVideoCapture }) ->
+      return {
+        cmd,    
+        endVideoCapture,
+        writeVideoFrame,
+        startedVideoCapture,          
+      }
 
   process: (name, cname, videoCompression, onProgress = ->) ->
     total = null
 
     new Promise (resolve, reject) ->
+      debug("processing video from %s to %s video compression %o",
+        name, cname, videoCompression)
       cmd = ffmpeg()
       .input(name)
       .videoCodec("libx264")

@@ -16,8 +16,6 @@ describe('src/cy/commands/actions/type', () => {
     cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
-      this.body = win.document.body.outerHTML
-
       const el = cy.$$('[contenteditable]:first').get(0)
 
       // by default... the last new line by itself
@@ -35,14 +33,16 @@ describe('src/cy/commands/actions/type', () => {
       // so this test is browser version agnostic
       const newLines = el.innerText
 
+      // disregard the last new line, and divide by 2...
+      // this tells us how many multiples of new lines
+      // the browser inserts for new lines other than
+      // the last new line
       this.multiplierNumNewLines = (newLines.length - 1) / 2
     })
   })
 
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    return $(doc.body).empty().html(this.body)
+  beforeEach(() => {
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#type', () => {
@@ -133,7 +133,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     it('delays 50ms before resolving', () => {
-      cy.$$(':text:first').on('change', () => {
+      cy.$$(':text:first').on('change', (e) => {
         cy.spy(Promise, 'delay')
       })
 
@@ -256,6 +256,28 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
+      it('waits until element is no longer readonly', () => {
+        const $txt = cy.$$(':text:first').prop('readonly', true)
+
+        let retried = false
+        let clicks = 0
+
+        $txt.on('click', () => {
+          clicks += 1
+        })
+
+        cy.on('command:retry', _.after(3, () => {
+          $txt.prop('readonly', false)
+          retried = true
+        }))
+
+        cy.get(':text:first').type('foo').then(() => {
+          expect(clicks).to.eq(1)
+
+          expect(retried).to.be.true
+        })
+      })
+
       it('waits until element stops animating', () => {
         let retries = 0
 
@@ -330,7 +352,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('input types where no extra formatting required', () => {
-      return _.each([
+      _.each([
         'password',
         'email',
         'number',
@@ -913,25 +935,25 @@ describe('src/cy/commands/actions/type', () => {
 
       it('overwrites text when selectAll in click handler', () => {
         cy.$$('#input-without-value').val('0').click(function () {
-          return $(this).select()
+          $(this).select()
         })
       })
 
       it('overwrites text when selectAll in mouseup handler', () => {
         cy.$$('#input-without-value').val('0').mouseup(function () {
-          return $(this).select()
+          $(this).select()
         })
       })
 
       it('overwrites text when selectAll in mouseup handler', () => {
         cy.$$('#input-without-value').val('0').mouseup(function () {
-          return $(this).select()
+          $(this).select()
         })
       })
 
       it('responsive to keydown handler', () => {
         cy.$$('#input-without-value').val('1234').keydown(function () {
-          return $(this).get(0).setSelectionRange(0, 0)
+          $(this).get(0).setSelectionRange(0, 0)
         })
 
         cy.get('#input-without-value').type('56').then(($input) => {
@@ -941,7 +963,7 @@ describe('src/cy/commands/actions/type', () => {
 
       it('responsive to keyup handler', () => {
         cy.$$('#input-without-value').val('1234').keyup(function () {
-          return $(this).get(0).setSelectionRange(0, 0)
+          $(this).get(0).setSelectionRange(0, 0)
         })
 
         cy.get('#input-without-value').type('56').then(($input) => {
@@ -951,7 +973,7 @@ describe('src/cy/commands/actions/type', () => {
 
       it('responsive to input handler', () => {
         cy.$$('#input-without-value').val('1234').keyup(function () {
-          return $(this).get(0).setSelectionRange(0, 0)
+          $(this).get(0).setSelectionRange(0, 0)
         })
 
         cy.get('#input-without-value').type('56').then(($input) => {
@@ -961,7 +983,7 @@ describe('src/cy/commands/actions/type', () => {
 
       it('responsive to change handler', () => {
         cy.$$('#input-without-value').val('1234').change(function () {
-          return $(this).get(0).setSelectionRange(0, 0)
+          $(this).get(0).setSelectionRange(0, 0)
         })
 
         // no change event should be fired
@@ -981,7 +1003,7 @@ describe('src/cy/commands/actions/type', () => {
           const val = $input.val()
 
           // setting value updates cursor to the end of input
-          return $input.val(`${val + key}-`)
+          $input.val(`${val + key}-`)
         })
 
         cy.get('#input-without-value').type('foo').then(($input) => {
@@ -994,10 +1016,10 @@ describe('src/cy/commands/actions/type', () => {
 
           const $input = $(e.target)
 
-          return _.defer(() => {
+          _.defer(() => {
             const val = $input.val()
 
-            return $input.val(`${val}-`)
+            $input.val(`${val}-`)
           })
         })
 
@@ -1065,7 +1087,7 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       it('does not fire input when textInput is preventedDefault', (done) => {
-        cy.$$('#input-without-value').get(0).addEventListener('input', () => {
+        cy.$$('#input-without-value').get(0).addEventListener('input', (e) => {
           done('should not have received input event')
         })
 
@@ -1240,11 +1262,11 @@ describe('src/cy/commands/actions/type', () => {
         it('overwrites text when input has selected range of text in click handler', () => {
           // e.preventDefault()
           cy.$$('#input-with-value').mouseup((e) => {
-            return e.target.setSelectionRange(1, 1)
+            e.target.setSelectionRange(1, 1)
           })
 
           const select = (e) => {
-            return e.target.select()
+            e.target.select()
           }
 
           cy
@@ -1451,7 +1473,7 @@ describe('src/cy/commands/actions/type', () => {
 
           cy.get('#generic-iframe')
           .then(($iframe) => {
-            return $iframe.load(() => {
+            $iframe.load(() => {
               loaded = true
             })
           }).scrollIntoView()
@@ -1479,7 +1501,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      // NOTE: fix this with 4.0 updates
+      // TODO: fix this with 4.0 updates
       describe.skip('element reference loss', () => {
         it('follows the focus of the cursor', () => {
           let charCount = 0
@@ -1489,7 +1511,7 @@ describe('src/cy/commands/actions/type', () => {
               cy.$$('input').eq(1).focus()
             }
 
-            return charCount++
+            charCount++
           })
 
           cy.get('input:first').type('foobar').then(() => {
@@ -1503,10 +1525,10 @@ describe('src/cy/commands/actions/type', () => {
 
     describe('specialChars', () => {
 
-      context('disableSpecialCharSequences: true', () => {
+      context('parseSpecialCharSequences: false', () => {
         it('types special character sequences literally', (done) => {
           cy.get(':text:first').invoke('val', 'foo')
-          .type('{{}{backspace}', { disableSpecialCharSequences: true }).then(($input) => {
+          .type('{{}{backspace}', { parseSpecialCharSequences: false }).then(($input) => {
             expect($input).to.have.value('foo{{}{backspace}')
 
             done()
@@ -1549,7 +1571,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('fires input event', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done()
           })
 
@@ -1587,7 +1609,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -1597,7 +1619,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -1632,7 +1654,7 @@ describe('src/cy/commands/actions/type', () => {
           // select the 'ar' characters
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-            return $input.get(0).setSelectionRange(1, 3)
+            $input.get(0).setSelectionRange(1, 3)
           }).get(':text:first').type('{backspace}').then(($input) => {
             expect($input).to.have.value('b')
           })
@@ -1655,7 +1677,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -1690,7 +1712,7 @@ describe('src/cy/commands/actions/type', () => {
           // select the 'ar' characters
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-            return $input.get(0).setSelectionRange(1, 3)
+            $input.get(0).setSelectionRange(1, 3)
           }).get(':text:first').type('{del}').then(($input) => {
             expect($input).to.have.value('b')
           })
@@ -1713,7 +1735,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -1723,19 +1745,19 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does fire input event when value changes', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done()
           })
 
           // select the 'a' characters
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-            return $input.get(0).setSelectionRange(0, 1)
+            $input.get(0).setSelectionRange(0, 1)
           }).get(':text:first').type('{del}')
         })
 
         it('does not fire input event when value does not change', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done('should not have fired input')
           })
 
@@ -1776,7 +1798,7 @@ describe('src/cy/commands/actions/type', () => {
           // select the 'a' character
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-            return $input.get(0).setSelectionRange(1, 2)
+            $input.get(0).setSelectionRange(1, 2)
           }).get(':text:first').type('{leftarrow}n').then(($input) => {
             expect($input).to.have.value('bnar')
           })
@@ -1786,7 +1808,7 @@ describe('src/cy/commands/actions/type', () => {
           // select the 'a' character
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-            return $input.get(0).setSelectionRange(0, 1)
+            $input.get(0).setSelectionRange(0, 1)
           }).get(':text:first').type('{leftarrow}n').then(($input) => {
             expect($input).to.have.value('nbar')
           })
@@ -1805,13 +1827,13 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          cy.get(':text:first').invoke('val', 'ab').type('{leftarrow}').then(() => {
+          cy.get(':text:first').invoke('val', 'ab').type('{leftarrow}').then(($input) => {
             done()
           })
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -1821,7 +1843,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -1849,7 +1871,7 @@ describe('src/cy/commands/actions/type', () => {
         it('can move the cursor from the beginning to beginning + 1', () => {
           // select the beginning
           cy.get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-            return $input.get(0).setSelectionRange(0, 0)
+            $input.get(0).setSelectionRange(0, 0)
           }).get(':text:first').type('{rightarrow}n').then(($input) => {
             expect($input).to.have.value('bnar')
           })
@@ -1865,7 +1887,7 @@ describe('src/cy/commands/actions/type', () => {
           // select the 'a' character
           cy
           .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
-            return $input.get(0).setSelectionRange(1, 2)
+            $input.get(0).setSelectionRange(1, 2)
           }).get(':text:first').type('{rightarrow}n').then(($input) => {
             expect($input).to.have.value('banr')
           })
@@ -1893,13 +1915,13 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          cy.get(':text:first').invoke('val', 'ab').type('{rightarrow}').then(() => {
+          cy.get(':text:first').invoke('val', 'ab').type('{rightarrow}').then(($input) => {
             done()
           })
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -1909,7 +1931,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -1947,13 +1969,13 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          cy.get('#comments').type('{home}').then(() => {
+          cy.get('#comments').type('{home}').then(($input) => {
             done()
           })
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$('#comments').on('textInput', () => {
+          cy.$$('#comments').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -1963,7 +1985,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$('#comments').on('input', () => {
+          cy.$$('#comments').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -2018,13 +2040,13 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          cy.get('#comments').type('{end}').then(() => {
+          cy.get('#comments').type('{end}').then(($input) => {
             done()
           })
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$('#comments').on('textInput', () => {
+          cy.$$('#comments').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -2034,7 +2056,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$('#comments').on('input', () => {
+          cy.$$('#comments').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -2093,13 +2115,13 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          cy.get('#comments').type('{uparrow}').then(() => {
+          cy.get('#comments').type('{uparrow}').then(($input) => {
             done()
           })
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$('#comments').on('textInput', () => {
+          cy.$$('#comments').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -2109,7 +2131,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$('#comments').on('input', () => {
+          cy.$$('#comments').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -2144,7 +2166,7 @@ describe('src/cy/commands/actions/type', () => {
           cy.document().then((doc) => {
             ce.focus()
 
-            return doc.getSelection().selectAllChildren(line)
+            doc.getSelection().selectAllChildren(line)
           })
 
           cy.get('[contenteditable]:first')
@@ -2186,13 +2208,13 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          cy.get('#comments').type('{downarrow}').then(() => {
+          cy.get('#comments').type('{downarrow}').then(($input) => {
             done()
           })
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$('#comments').on('textInput', () => {
+          cy.$$('#comments').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -2202,7 +2224,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$('#comments').on('input', () => {
+          cy.$$('#comments').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -2239,7 +2261,7 @@ describe('src/cy/commands/actions/type', () => {
           cy.document().then((doc) => {
             ce.focus()
 
-            return doc.getSelection().selectAllChildren(line)
+            doc.getSelection().selectAllChildren(line)
           })
 
           cy.get('[contenteditable]:first')
@@ -2273,7 +2295,7 @@ describe('src/cy/commands/actions/type', () => {
 
       context('{enter}', () => {
         it('sets which and keyCode to 13 and prevents EOL insertion', (done) => {
-          cy.$$('#input-types textarea').on('keypress', _.after(2, () => {
+          cy.$$('#input-types textarea').on('keypress', _.after(2, (e) => {
             done('should not have received keypress event')
           }))
 
@@ -2310,7 +2332,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -2320,7 +2342,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -2376,7 +2398,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -2386,7 +2408,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -2428,7 +2450,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -2438,7 +2460,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -2480,7 +2502,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire textInput event', (done) => {
-          cy.$$(':text:first').on('textInput', () => {
+          cy.$$(':text:first').on('textInput', (e) => {
             done('textInput should not have fired')
           })
 
@@ -2490,7 +2512,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('does not fire input event', (done) => {
-          cy.$$(':text:first').on('input', () => {
+          cy.$$(':text:first').on('input', (e) => {
             done('input should not have fired')
           })
 
@@ -2750,37 +2772,26 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         afterEach(function () {
-          return this.$input.off('keydown')
+          this.$input.off('keydown')
         })
 
-        it('sends keydown event for new modifiers', function (done) {
-          let event = null
+        it('sends keydown event for new modifiers', function () {
+          const spy = cy.spy().as('keydown')
 
-          this.$input.on('keydown', (e) => {
-            event = e
-          })
+          this.$input.on('keydown', spy)
 
           cy.get('input:text:first').type('{shift}').then(() => {
-            expect(event.shiftKey).to.be.true
-            expect(event.which).to.equal(16)
-
-            done()
+            expect(spy).to.be.calledWithMatch({ which: 16 })
           })
         })
 
-        it('does not send keydown event for already activated modifiers', function (done) {
-          let triggered = false
+        it('does not send keydown event for already activated modifiers', function () {
+          const spy = cy.spy().as('keydown')
 
-          this.$input.on('keydown', (e) => {
-            if ((e.which === 18) || (e.which === 17)) {
-              triggered = true
-            }
-          })
+          this.$input.on('keydown', spy)
 
           cy.get('input:text:first').type('{cmd}{alt}').then(() => {
-            expect(triggered).to.be.false
-
-            done()
+            expect(spy).to.not.be.called
           })
         })
       })
@@ -3244,10 +3255,10 @@ describe('src/cy/commands/actions/type', () => {
       // https://github.com/cypress-io/cypress/issues/3001
       describe('skip actionability if already focused', () => {
         it('inside input', () => {
-          cy.$$('body').append(Cypress.$('\
+          cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <input type="text" id="foo">\
-'))
+`))
 
           cy.$$('#foo').focus()
 
@@ -3256,10 +3267,10 @@ describe('src/cy/commands/actions/type', () => {
 
         it('inside textarea', () => {
 
-          cy.$$('body').append(Cypress.$('\
+          cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <textarea id="foo"></textarea>\
-'))
+`))
 
           cy.$$('#foo').focus()
 
@@ -3268,12 +3279,12 @@ describe('src/cy/commands/actions/type', () => {
 
         it('inside contenteditable', () => {
 
-          cy.$$('body').append(Cypress.$('\
+          cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <div id="foo" contenteditable> \
 <div>foo</div><div>bar</div><div>baz</div> \
 </div>\
-'))
+`))
 
           const win = cy.state('window')
           const doc = window.document
@@ -3297,7 +3308,7 @@ describe('src/cy/commands/actions/type', () => {
       it('can arrow from maxlength', () => {
         cy.get('input:first').invoke('attr', 'maxlength', '5').type('foobar{leftarrow}')
 
-        cy.window().then(() => {
+        cy.window().then((win) => {
           expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 4, end: 4 })
         })
@@ -3306,7 +3317,7 @@ describe('src/cy/commands/actions/type', () => {
       it('won\'t arrowright past length', () => {
         cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
 
-        cy.window().then(() => {
+        cy.window().then((win) => {
           expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
@@ -3315,7 +3326,7 @@ describe('src/cy/commands/actions/type', () => {
       it('won\'t arrowleft before word', () => {
         cy.get('input:first').type(`oo{leftarrow}{leftarrow}{leftarrow}f${'{leftarrow}'.repeat(5)}`)
 
-        cy.window().then(() => {
+        cy.window().then((win) => {
           expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 0, end: 0 })
         })
@@ -3324,7 +3335,7 @@ describe('src/cy/commands/actions/type', () => {
       it('leaves caret at the end of contenteditable', () => {
         cy.get('[contenteditable]:first').type('foobar')
 
-        cy.window().then(() => {
+        cy.window().then((win) => {
           expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
@@ -3337,7 +3348,7 @@ describe('src/cy/commands/actions/type', () => {
         el.innerHTML = 'foo'
         cy.get('[contenteditable]:first').type('bar')
 
-        cy.window().then(() => {
+        cy.window().then((win) => {
           expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
@@ -3346,7 +3357,7 @@ describe('src/cy/commands/actions/type', () => {
       it('can move the caret left on contenteditable', () => {
         cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
 
-        cy.window().then(() => {
+        cy.window().then((win) => {
           expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 1, end: 1 })
         })
@@ -3361,7 +3372,7 @@ describe('src/cy/commands/actions/type', () => {
       it('leaves caret at the end of input', () => {
         cy.get(':text:first').type('foobar')
 
-        cy.window().then(() => {
+        cy.window().then((win) => {
           expect($selection.getSelectionBounds(Cypress.$(':text:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
@@ -3370,7 +3381,7 @@ describe('src/cy/commands/actions/type', () => {
       it('leaves caret at the end of textarea', () => {
         cy.get('#comments').type('foobar')
 
-        cy.window().then(() => {
+        cy.window().then((win) => {
           expect($selection.getSelectionBounds(Cypress.$('#comments').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
@@ -3500,7 +3511,7 @@ describe('src/cy/commands/actions/type', () => {
           this.$forms.find('#single-input').submit((e) => {
             e.preventDefault()
 
-            return events.push('submit')
+            events.push('submit')
           })
 
           cy.on('log:added', (attrs, log) => {
@@ -3511,7 +3522,7 @@ describe('src/cy/commands/actions/type', () => {
                 return events.push(`${log.get('name')}:log:${state}`)
               })
 
-              return events.push(`${log.get('name')}:log:${state}`)
+              events.push(`${log.get('name')}:log:${state}`)
             }
           })
 
@@ -3531,6 +3542,7 @@ describe('src/cy/commands/actions/type', () => {
 
           this.$forms.find('#single-input').submit((e) => {
             e.preventDefault()
+
             submits += 1
           })
 
@@ -3879,7 +3891,7 @@ describe('src/cy/commands/actions/type', () => {
 
       context('disabled default button', () => {
         beforeEach(function () {
-          return this.$forms.find('#multiple-inputs-and-multiple-submits').find('button').prop('disabled', true)
+          this.$forms.find('#multiple-inputs-and-multiple-submits').find('button').prop('disabled', true)
         })
 
         it('will not receive click event', function (done) {
@@ -3912,13 +3924,13 @@ describe('src/cy/commands/actions/type', () => {
           }
         })
 
-        return null
+        null
       })
 
       it('eventually passes the assertion', () => {
         cy.$$('input:first').keyup(function () {
-          return _.delay(() => {
-            return $(this).addClass('typed')
+          _.delay(() => {
+            $(this).addClass('typed')
           }
           , 100)
         })
@@ -3940,7 +3952,7 @@ describe('src/cy/commands/actions/type', () => {
           this.lastLog = log
         })
 
-        return null
+        null
       })
 
       it('passes in $el', () => {
@@ -3979,7 +3991,7 @@ describe('src/cy/commands/actions/type', () => {
         }
 
         cy
-        .get('#comments').type('foobarbaz').then(() => {
+        .get('#comments').type('foobarbaz').then(($txt) => {
           expectToHaveValueAndCoords()
         }).get('#comments').clear().type('onetwothree').then(() => {
           expectToHaveValueAndCoords()
@@ -3998,7 +4010,7 @@ describe('src/cy/commands/actions/type', () => {
         }
 
         cy
-        .get('#comments').focus().type('foobarbaz').then(() => {
+        .get('#comments').focus().type('foobarbaz').then(($txt) => {
           expectToHaveValueAndNoCoords()
         }).get('#comments').clear().type('onetwothree').then(() => {
           expectToHaveValueAndNoCoords()
@@ -4012,7 +4024,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
           if (log.get('name') === 'type') {
-            return types.push(log)
+            types.push(log)
           }
         })
 
@@ -4167,10 +4179,10 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
-          return this.logs.push(log)
+          this.logs.push(log)
         })
 
-        return null
+        null
       })
 
       it('throws when not a dom subject', (done) => {
@@ -4184,10 +4196,10 @@ describe('src/cy/commands/actions/type', () => {
       it('throws when subject is not in the document', (done) => {
         let typed = 0
 
-        const input = cy.$$('input:first').keypress(() => {
+        const input = cy.$$('input:first').keypress((e) => {
           typed += 1
 
-          return input.remove()
+          input.remove()
         })
 
         cy.on('fail', (err) => {
@@ -4210,9 +4222,9 @@ describe('src/cy/commands/actions/type', () => {
           cy.get(`#${attrs.id}`).type('foo')
 
           cy.on('fail', (err) => {
-            expect(err.message).to.include('cy.type() cannot type into an element with a \'readonly\' attribute.')
-            expect(err.message).to.include('The element typed into was:')
+            expect(err.message).to.include('cy.type() failed because this element is readonly:')
             expect(err.message).to.include(`<input id="${attrs.id}" readonly="${attrs.val}">`)
+            expect(err.message).to.include('Fix this problem, or use {force: true} to disable error checking.')
 
             done()
           })
@@ -4236,7 +4248,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('textarea,:text').then(function ($inputs) {
           this.num = $inputs.length
 
-          return $inputs
+          $inputs
         }).type('foo')
 
         cy.on('fail', (err) => {
@@ -4324,7 +4336,11 @@ describe('src/cy/commands/actions/type', () => {
 
           const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(', ')
 
-          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}`)
+          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
+
+If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
+
+https://on.cypress.io/type`)
 
           done()
         })
@@ -4746,7 +4762,7 @@ describe('src/cy/commands/actions/type', () => {
         'week',
       ]
 
-      return inputTypes.forEach((type) => {
+      inputTypes.forEach((type) => {
         it(type, () => {
           cy.get(`#${type}-with-value`).clear().then(($input) => {
             expect($input.val()).to.equal('')
@@ -4763,13 +4779,13 @@ describe('src/cy/commands/actions/type', () => {
           }
         })
 
-        return null
+        null
       })
 
       it('eventually passes the assertion', () => {
         cy.$$('input:first').keyup(function () {
-          return _.delay(() => {
-            return $(this).addClass('cleared')
+          _.delay(() => {
+            $(this).addClass('cleared')
           }
           , 100)
         })
@@ -4786,8 +4802,8 @@ describe('src/cy/commands/actions/type', () => {
 
       it('eventually passes the assertion on multiple inputs', () => {
         cy.$$('input').keyup(function () {
-          return _.delay(() => {
-            return $(this).addClass('cleared')
+          _.delay(() => {
+            $(this).addClass('cleared')
           }
           , 100)
         })
@@ -4805,14 +4821,14 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
-          return this.logs.push(log)
+          this.logs.push(log)
         })
 
-        return null
+        null
       })
 
       it('throws when not a dom subject', (done) => {
-        cy.on('fail', () => {
+        cy.on('fail', (err) => {
           done()
         })
 
@@ -4822,10 +4838,10 @@ describe('src/cy/commands/actions/type', () => {
       it('throws when subject is not in the document', (done) => {
         let cleared = 0
 
-        const input = cy.$$('input:first').val('123').keydown(() => {
+        const input = cy.$$('input:first').val('123').keydown((e) => {
           cleared += 1
 
-          return input.remove()
+          input.remove()
         })
 
         cy.on('fail', (err) => {
@@ -4999,7 +5015,7 @@ describe('src/cy/commands/actions/type', () => {
           this.lastLog = log
         })
 
-        return null
+        null
       })
 
       it('logs immediately before resolving', () => {
@@ -5026,12 +5042,12 @@ describe('src/cy/commands/actions/type', () => {
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'clear') {
-            return logs.push(log)
+            logs.push(log)
           }
         })
 
         cy.get('input').invoke('slice', 0, 2).clear().then(() => {
-          return _.each(logs, (log) => {
+          _.each(logs, (log) => {
             expect(log.get('state')).to.eq('passed')
 
             expect(log.get('ended')).to.be.true
@@ -5040,7 +5056,7 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       it('snapshots after clicking', () => {
-        cy.get('input:first').clear().then(function () {
+        cy.get('input:first').clear().then(function ($input) {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)

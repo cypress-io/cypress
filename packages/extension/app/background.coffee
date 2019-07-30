@@ -2,10 +2,7 @@ map     = require("lodash/map")
 pick    = require("lodash/pick")
 once    = require("lodash/once")
 Promise = require("bluebird")
-{ client, circularParser } = require("@packages/socket/lib/browser")
-
-HOST = "CHANGE_ME_HOST"
-PATH = "CHANGE_ME_PATH"
+client  = require("./client")
 
 httpRe = /^http/
 
@@ -35,11 +32,7 @@ connect = (host, path) ->
     .catch (err) ->
       fail(id, err)
 
-  ws = client.connect(host, {
-    path: path,
-    transports: ["websocket"]
-    parser: circularParser
-  })
+  ws = client.connect(host, path)
 
   ws.on "automation:request", (id, msg, data) ->
     switch msg
@@ -68,10 +61,7 @@ connect = (host, path) ->
     ws.emit("automation:client:connected")
 
   return ws
-
-## initially connect
-connect(HOST, PATH)
-
+  
 automation = {
   connect
 
