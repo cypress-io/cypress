@@ -1,3 +1,10 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
 const moment = require('moment')
 const parser = require('cookie-parser')
 const e2e = require('../support/helpers/e2e')
@@ -7,17 +14,17 @@ const onServer = function (app) {
   app.use(parser())
 
   app.get('/logout', (req, res) => {
-    res.send('<html>logged out</html>')
+    return res.send('<html>logged out</html>')
   })
 
   app.get('/requestCookies', (req, res) => {
-    res.send(req.cookies)
+    return res.send(req.cookies)
   })
 
   app.get('/set', (req, res) => {
     res.cookie('shouldExpire', 'endOfsession')
 
-    res.send('<html></html>')
+    return res.send('<html></html>')
   })
 
   app.get('/setOneHourFromNowAndSecure', (req, res) => {
@@ -26,7 +33,7 @@ const onServer = function (app) {
       maxAge: humanInterval('1 hour'),
     })
 
-    res.send('<html></html>')
+    return res.send('<html></html>')
   })
 
   app.get('/expirationRedirect', (req, res) => {
@@ -36,7 +43,7 @@ const onServer = function (app) {
       maxAge: 0,
     })
 
-    res.redirect('/logout')
+    return res.redirect('/logout')
   })
 
   app.get('/expirationMaxAge', (req, res) => {
@@ -48,7 +55,7 @@ const onServer = function (app) {
     //# response to clear
     // auth=; Domain=.surveymonkey.com; Max-Age=0; Path=/; expires=Wed, 31-Dec-97 23:59:59 GMT
 
-    res.send('<html></html>')
+    return res.send('<html></html>')
   })
 
   app.get('/expirationExpires', (req, res) => {
@@ -56,20 +63,20 @@ const onServer = function (app) {
       expires: moment().subtract(1, 'day').toDate(),
     })
 
-    res.send('<html></html>')
+    return res.send('<html></html>')
   })
 
   app.get('/cookieWithNoName', (req, res) => {
     res.header('Set-Cookie',
       '=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=/')
 
-    res.send('<html></html>')
+    return res.send('<html></html>')
   })
 
-  app.get('/invalidCookies', (req, res) => {
+  return app.get('/invalidCookies', (req, res) => {
     res.header('Set-Cookie', 'foo=bar; domain=nope.not.this.one')
 
-    res.send('<html></html>')
+    return res.send('<html></html>')
   })
 }
 
@@ -90,7 +97,7 @@ describe('e2e cookies', () => {
 
   it('passes', function () {
     return e2e.exec(this, {
-      spec: 'cookies_spec.js',
+      spec: 'cookies_spec.coffee',
       snapshot: true,
       expectedExitCode: 0,
     })

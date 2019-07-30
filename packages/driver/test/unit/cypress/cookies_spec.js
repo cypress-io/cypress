@@ -1,10 +1,20 @@
 /* eslint-disable
+    brace-style,
     no-console,
     no-undef,
+    no-unused-vars,
 */
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
 require('../../support/unit_spec_helper')
 
 const _ = require('lodash')
+const Promise = require('bluebird')
 const Cookies = require('js-cookie')
 const $Cookies = require(`${src}/cypress/cookies`)
 
@@ -15,14 +25,15 @@ describe('src/cypress/cookies', () => {
     this.Cookies = $Cookies.create('__cypress', 'localhost')
 
     this.setCookie = (key, value) => {
-      Cookies.set(key, value, { path: '/' })
+      return Cookies.set(key, value, { path: '/' })
     }
   })
 
-  afterEach(() => {
-    // remove all cookies after each test
-    _.each(Cookies.get(), (value, key) => {
-      Cookies.remove(key, { path: '/' })
+  afterEach(() =>
+  //# remove all cookies after each test
+  {
+    return _.each(Cookies.get(), (value, key) => {
+      return Cookies.remove(key, { path: '/' })
     })
   })
 
@@ -34,8 +45,8 @@ describe('src/cypress/cookies', () => {
     })
   })
 
-  // TODO: fixme, something wrong
-  // with JSDOM and domain cookies
+  //# TODO: fixme, something wrong
+  //# with JSDOM and domain cookies
   context.skip('.setCy', () => {
     it('sets cypress cookie value', function () {
       this.Cookies.setCy('foo', 'bar')
@@ -52,8 +63,8 @@ describe('src/cypress/cookies', () => {
     })
   })
 
-  // TODO: fixme, something wrong
-  // with JSDOM and domain cookies
+  //# TODO: fixme, something wrong
+  //# with JSDOM and domain cookies
   context.skip('.getCy', () => {
     it('gets cypress cookie value', function () {
       this.Cookies.setCy('foo', 'bar')
@@ -89,18 +100,20 @@ describe('src/cypress/cookies', () => {
       this.Cookies.debug(false)
 
       this.sandbox.stub(console, 'info')
-      this.sandbox.stub(console, 'warn')
+
+      return this.sandbox.stub(console, 'warn')
     })
 
     it('is noop without debugging', function () {
       expect(this.Cookies.log()).to.be.undefined
-
       expect(console.info).not.to.be.called
+
       expect(console.warn).not.to.be.called
     })
 
     it('warns when removed is true', function () {
       this.Cookies.debug()
+
       this.Cookies.log('asdf', {}, true)
 
       expect(console.warn).to.be.calledWith('asdf', {})
@@ -108,6 +121,7 @@ describe('src/cypress/cookies', () => {
 
     it('infos when removed is false', function () {
       this.Cookies.debug()
+
       this.Cookies.log('asdf', {}, false)
 
       expect(console.info).to.be.calledWith('asdf', {})
@@ -115,6 +129,7 @@ describe('src/cypress/cookies', () => {
 
     it('does not log the cookie when verbose is false', function () {
       this.Cookies.debug(true, { verbose: false })
+
       this.Cookies.log('asdf', {}, false)
 
       expect(console.info).to.be.calledWithExactly('asdf')
@@ -122,6 +137,7 @@ describe('src/cypress/cookies', () => {
 
     it('does not log the cookie when false and verbose is true', function () {
       this.Cookies.debug(false, { verbose: true })
+
       this.Cookies.log('asdf', {}, false)
 
       expect(console.info).not.to.be.called
@@ -130,7 +146,7 @@ describe('src/cypress/cookies', () => {
 
   context('.defaults', () => {
     afterEach(function () {
-      this.Cookies.defaults({
+      return this.Cookies.defaults({
         whitelist: null,
       })
     })
@@ -188,10 +204,10 @@ describe('src/cypress/cookies', () => {
   })
 
   describe('removed methods', () => {
-    _.each(['set', 'get', 'remove', 'getAllCookies', 'clearCookies'], (method) => {
+    return _.each(['set', 'get', 'remove', 'getAllCookies', 'clearCookies'], (method) => {
       it(`throws invoking Cypress.Cookies.${method}()`, function () {
         const fn = () => {
-          this.Cookies[method]()
+          return this.Cookies[method]()
         }
 
         expect(fn).to.throw(`\
