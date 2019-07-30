@@ -1,6 +1,5 @@
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
-const { Keyboard } = Cypress
 const { Promise } = Cypress
 const $selection = require('../../../../../src/dom/selection')
 
@@ -4334,7 +4333,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
 
-          const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(', ')
+          const allChars = _.keys(cy.internal.keyboard.specialChars).concat(_.keys(cy.internal.keyboard.modifierChars)).join(', ')
 
           expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
 

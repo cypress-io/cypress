@@ -13,6 +13,8 @@ $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
+$Mouse = require("../cy/mouse")
+$Keyboard = require("../cy/keyboard")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -23,6 +25,8 @@ $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
 $Snapshots = require("../cy/snapshots")
 $CommandQueue = require("./command_queue")
+
+cy = {}
 
 crossOriginScriptRe = /^script error/i
 
@@ -80,6 +84,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  keyboard = $Keyboard.create(state, cy)
+  mouse = $Mouse.create(state, cy)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -152,19 +158,19 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         })
 
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.HTMLElement.prototype.blur = ->
-        focused.interceptBlur(this)
+        focused.interceptBlur(@)
 
       contentWindow.SVGElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.SVGElement.prototype.blur = ->
-        focused.interceptBlur(this)
+        focused.interceptBlur(@)
 
       contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(this)
+        $selection.interceptSelect.call(@)
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
@@ -594,7 +600,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## else figure out how to finisht this failure
     return finish(err)
 
-  cy = {
+  _.extend(cy, {
     id: _.uniqueId("cy")
 
     ## synchrounous querying
@@ -647,6 +653,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     needsFocus: focused.needsFocus
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
+
+    internal: {
+      mouse: mouse
+      keyboard: keyboard
+      focused: focused
+    }
 
     ## timer sync methods
     pauseTimers: timers.pauseTimers
@@ -1091,7 +1103,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## but we should still teardown and handle
           ## the error
           fail(err, runnable)
-  }
+  })
 
   _.each privateProps, (obj, key) =>
     Object.defineProperty(cy, key, {
