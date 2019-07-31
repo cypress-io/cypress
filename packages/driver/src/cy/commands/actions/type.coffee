@@ -337,6 +337,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## if it's the body, don't need to worry about focus
         return type() if isBody
 
+        options.ensure = {
+          position: true
+          visibility: true
+          receivability: true
+          notReadonly: true
+        }
+
         ## if the subject is already the focused element, start typing
         ## we handle contenteditable children by getting the host contenteditable,
         ## and seeing if that is focused
@@ -352,15 +359,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         if elToCheckCurrentlyFocused && elToCheckCurrentlyFocused is $focused
           ## TODO: not scrolling here, but revisit when scroll algorithm changes
-          return type()
-
-        
-        options.ensure = {
-          position: true
-          visibility: true
-          receivability: true
-          notReadonly: true
-        }
+          options.ensure = {
+            notReadonly: true
+          }
 
         $actionability.verify(cy, options.$el, options, {
           onScroll: ($el, type) ->
