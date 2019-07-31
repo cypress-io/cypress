@@ -103,7 +103,6 @@
     "cloudflare-cli": "3.2.2",
     "coffeelint": "1.16.2",
     "common-tags": "1.8.0",
-    "console.table": "0.10.0",
     "debug": "4.1.1",
     "decaffeinate": "6.0.1",
     "del": "3.0.0",
