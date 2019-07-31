@@ -120,7 +120,7 @@ create = (state, expect) ->
     if $dom.isTextLike(subject) and subject.prop("readonly")
       node = $dom.stringify(subject)
 
-      $utils.throwErrByPath("dom.readonly", {
+      $errUtils.throwErrByPath("dom.readonly", {
         onFail
         args: { cmd, node }
       })
@@ -247,7 +247,7 @@ create = (state, expect) ->
         'Inherited From': elInherited
       })
 
-      $utils.throwErrByPath("dom.pointer_events_none", {
+      $errUtils.throwErrByPath("dom.pointer_events_none", {
         onFail
         args: {
           cmd
