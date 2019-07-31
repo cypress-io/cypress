@@ -4280,7 +4280,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('fail', (err) => {
           // get + type logs
           expect(this.logs.length).eq(2)
-          expect(err.message).to.include('`cy.type()` failed because this element is disabled:\n')
+          expect(err.message).to.include('`cy.type()` failed because this element is `disabled`:\n')
 
           done()
         })
@@ -4508,7 +4508,7 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid date', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a date input with `cy.type()` requires a valid date with the format `yyyy-MM-dd`. You passed: `1989-04-31`')
+            expect(err.message).to.eq('Typing into a `date` input with `cy.type()` requires a valid date with the format `yyyy-MM-dd`. You passed: `1989-04-31`')
 
             done()
           })
@@ -4570,7 +4570,7 @@ https://on.cypress.io/type`)
         it('throws when chars is not a string', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a `week` input with cy.type() requires a valid `week` with the format `yyyy-Www`, where W is the literal character `W` and `ww` is the week number (00-53). You passed: `23`')
+            expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `23`')
 
             done()
           })
@@ -4581,7 +4581,7 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid format', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a `week` input with cy.type() requires a valid week with the format `yyyy-Www`, where W is the literal character `W` and `ww` is the week number (00-53). You passed: `2005/W18`')
+            expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `2005/W18`')
 
             done()
           })
@@ -4592,7 +4592,7 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid week', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `yyyy-Www`, where W is the literal character `W` and `ww` is the week number (00-53). You passed: `1995-W60`')
+            expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `1995-W60`')
 
             done()
           })
@@ -4605,7 +4605,7 @@ https://on.cypress.io/type`)
         it('throws when chars is not a string', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.equal(2)
-            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, ss is 00-59, and `SSS` is 000-999. You passed: `9999`')
+            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `9999`')
 
             done()
           })
@@ -4616,7 +4616,7 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid format (1:30)', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.equal(2)
-            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, ss is 00-59, and `SSS` is 000-999. You passed: `1:30`')
+            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `1:30`')
 
             done()
           })
@@ -4929,7 +4929,7 @@ https://on.cypress.io/type`)
         cy.on('fail', (err) => {
           // get + type logs
           expect(this.logs.length).eq(2)
-          expect(err.message).to.include('`cy.clear()` failed because this element is disabled:\n')
+          expect(err.message).to.include('`cy.clear()` failed because this element is `disabled`:\n')
 
           done()
         })
