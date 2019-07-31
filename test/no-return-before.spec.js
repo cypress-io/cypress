@@ -29,6 +29,8 @@ function execute (file, options = {}) {
     ...opts,
     ignore: false,
     useEslintrc: false,
+    plugins: [pluginName],
+
   })
 
   cli.addPlugin(pluginName, plugin)

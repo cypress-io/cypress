@@ -1,6 +1,7 @@
 {
   "name": "@cypress/eslint-plugin-dev",
   "version": "0.0.0-development",
+  "description": "Common ESLint rules shared by Internal Cypress packages",
   "scripts": {
     "lint": "eslint --ext .js,json,.eslintrc .",
     "lint-changed": "node ./scripts/lint-changed",
@@ -21,8 +22,8 @@
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
-    "@cypress/eslint-plugin-dev": "./",
-    "@cypress/eslint-plugin-json": "^3.0.3",
+    "@cypress/eslint-plugin-dev": "file:./",
+    "@cypress/eslint-plugin-json": "^3.2.2",
     "@fellow/eslint-plugin-coffee": "^0.4.13",
     "@types/chai": "^4.1.7",
     "@types/jest": "^24.0.15",
@@ -30,7 +31,7 @@
     "@types/sinon": "^7.0.13",
     "@types/sinon-chai": "^3.2.2",
     "chai": "^4.2.0",
-    "eslint": "^5.16.0",
+    "eslint": "^6.1.0",
     "eslint-plugin-mocha": "^5.3.0",
     "eslint-plugin-promise": "^4.2.1",
     "husky": "^2.7.0",
@@ -43,11 +44,11 @@
     "sinon-chai": "^3.3.0"
   },
   "peerDependencies": {
-    "@cypress/eslint-plugin-json": ">= 2.0.3",
+    "@cypress/eslint-plugin-json": ">= 3.2.2",
     "@typescript-eslint/eslint-plugin": ">= 1.11.0",
     "@typescript-eslint/parser": ">= 1.11.0",
     "babel-eslint": "^7.2.3",
-    "eslint": ">= 3.2.1 < 6",
+    "eslint": ">= 3.2.1",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.2.1"
   },
@@ -55,14 +56,13 @@
     "lint-changed": "./scripts/lint-changed.js",
     "lint-pre-commit": "./scripts/lint-pre-commit.js"
   },
-  "description": "Common ESLint rules shared by Internal Cypress packages",
-  "homepage": "https://github.com/cypress-io/eslint-plugin-dev#readme",
   "license": "MIT",
-  "author": "Chris Breiding (chris@cypress.io)",
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/eslint-plugin-dev.git"
   },
+  "homepage": "https://github.com/cypress-io/eslint-plugin-dev#readme",
+  "author": "Chris Breiding (chris@cypress.io)",
   "bugs": {
     "url": "https://github.com/cypress-io/eslint-plugin-dev/issues"
   },

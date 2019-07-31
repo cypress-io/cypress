@@ -15,7 +15,11 @@ jobs:
         paths:
         - ~/.cache
     - run:
+        # test with installed eslint
         command: yarn run test
+    - run:
+        # test with eslint@5
+        command: yarn add -D eslint@5.16.0 && yarn run test
     - run:
         command: yarn run semantic-release
 workflows:

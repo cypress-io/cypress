@@ -1,4 +1,10 @@
-const astUtils = require('eslint/lib/util/ast-utils')
+let astUtils
+
+try {
+  astUtils = require('eslint/lib/util/ast-utils')
+} catch (e) {
+  astUtils = require('eslint/lib/shared/ast-utils')
+}
 
 module.exports = {
   meta: {
