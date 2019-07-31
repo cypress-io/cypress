@@ -215,6 +215,7 @@ verify = (cy, $el, options, callbacks) ->
       position: true,
       visibility: true,
       receivability: true,
+      notCovered: true,
       notReadonly: false,
       custom: false
     }
@@ -281,7 +282,7 @@ verify = (cy, $el, options, callbacks) ->
         ## to figure out if its being covered by another element.
         ## this calculation is relative from the viewport so we
         ## only care about fromViewport coords
-        $elAtCoords = ensureElIsNotCovered(cy, win, $el, coords.fromViewport, options, _log, onScroll)
+        $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromViewport, options, _log, onScroll)
 
       ## pass our final object into onReady
       finalEl = $elAtCoords ? $el

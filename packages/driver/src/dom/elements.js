@@ -1,27 +1,10 @@
-/* eslint-disable
-    default-case,
-    no-case-declarations,
-    no-cond-assign,
-    no-const-assign,
-    no-dupe-keys,
-    no-undef,
-    one-var,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 const $jquery = require('./jquery')
 const $window = require('./window')
 const $document = require('./document')
 const $utils = require('../cypress/utils')
+const $selection = require('./selection')
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -181,7 +164,6 @@ const _getType = function () {
 
 const nativeGetters = {
   value: _getValue,
-  selectionStart: descriptor('HTMLInputElement', 'selectionStart').get,
   isContentEditable: _isContentEditable,
   isCollapsed: descriptor('Selection', 'isCollapsed').get,
   selectionStart: _getSelectionStart,
@@ -263,7 +245,7 @@ const setNativeProp = function (obj, prop, val) {
   if (!nativeProp) {
     const fns = _.keys(nativeSetters).join(', ')
 
-    throw new Error(`attempted to use a native setter prop called: ${fn}. Available props are: ${fns}`)
+    throw new Error(`attempted to use a native setter prop called: ${prop}. Available props are: ${fns}`)
   }
 
   let retProp = nativeProp.call(obj, val)
@@ -361,6 +343,30 @@ const isFocused = (el) => {
   } catch (err) {
     return false
   }
+}
+
+const isFocusedOrInFocused = (el) => {
+
+  const doc = $document.getDocumentFromElement(el)
+
+  const { activeElement, body } = doc
+
+  if (activeElementIsDefault(activeElement, body)) {
+    return false
+  }
+
+  let elToCheckCurrentlyFocused
+
+  if (isFocusable($(el))) {
+    elToCheckCurrentlyFocused = el
+  } else if (isContentEditable(el)) {
+    elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
+  }
+
+  if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    return true
+  }
+
 }
 
 const isElement = function (obj) {
@@ -832,7 +838,9 @@ const stringify = (el, form = 'long') => {
   })
 }
 
-module.exports = {
+// We extend `module.exports` to allow circular dependencies using `require`
+// Otherwise we would not be able to `require` this util from `./selection`, for example.
+_.extend(module.exports, {
   isElement,
 
   isSelector,
@@ -875,6 +883,8 @@ module.exports = {
 
   isFocused,
 
+  isFocusedOrInFocused,
+
   isInputAllowingImplicitFormSubmission,
 
   isNeedSingleValueChangeInputElement,
@@ -908,4 +918,4 @@ module.exports = {
   getFirstStickyPositionParent,
 
   getFirstScrollableParent,
-}
+})

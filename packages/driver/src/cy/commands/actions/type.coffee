@@ -341,6 +341,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           position: true
           visibility: true
           receivability: true
+          notCovered:true
           notReadonly: true
         }
 
@@ -349,16 +350,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## and seeing if that is focused
         ## Checking first if element is focusable accounts for focusable els inside
         ## of contenteditables
-        $focused = cy.getFocused()
-        $focused = $focused && $focused[0]
-
-        if $elements.isFocusable(options.$el)
-          elToCheckCurrentlyFocused = options.$el[0]
-        else if $elements.isContentEditable(options.$el[0])
-          elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
-
-        if elToCheckCurrentlyFocused && elToCheckCurrentlyFocused is $focused
-          ## TODO: not scrolling here, but revisit when scroll algorithm changes
+        if ($elements.isFocusedOrInFocused(options.$el.get(0)))
           options.ensure = {
             notReadonly: true
           }
@@ -368,12 +360,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Cypress.action("cy:scrolled", $el, type)
 
           onReady: ($elToClick) ->
-            $focused = cy.getFocused()
-
             ## if we dont have a focused element
             ## or if we do and its not ourselves
             ## then issue the click
-            if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
+            if (!$elements.isFocusedOrInFocused($elToClick[0]))
               ## click the element first to simulate focus
               ## and typical user behavior in case the window
               ## is out of focus
