@@ -2,14 +2,14 @@ const $dom = require('../dom')
 
 const { stopPropagation } = window.MouseEvent.prototype
 
-const create = (state, cy) => {
+const create = (state, keyboard) => {
   const mouse = {
     mouseDown ($elToClick, fromViewport) {
       const el = $elToClick.get(0)
 
       const win = $dom.getWindowByElement(el)
 
-      const mdownEvtProps = cy.internal.keyboard.mixinModifiers({
+      const mdownEvtProps = keyboard.mixinModifiers({
         bubbles: true,
         cancelable: true,
         view: win,
@@ -39,7 +39,7 @@ const create = (state, cy) => {
         stoppedPropagation: !!mdownEvt._hasStoppedPropagation,
       }
 
-      const modifiers = cy.internal.keyboard.getActiveModifiersArray()
+      const modifiers = keyboard.getActiveModifiersArray()
 
       if (modifiers.length) {
         props.modifiers = modifiers.join(', ')
@@ -53,7 +53,7 @@ const create = (state, cy) => {
 
       const win = $dom.getWindowByElement(el)
 
-      const mupEvtProps = cy.internal.keyboard.mixinModifiers({
+      const mupEvtProps = keyboard.mixinModifiers({
         bubbles: true,
         cancelable: true,
         view: win,
@@ -83,7 +83,7 @@ const create = (state, cy) => {
         stoppedPropagation: !!mupEvt._hasStoppedPropagation,
       }
 
-      const modifiers = cy.internal.keyboard.getActiveModifiersArray()
+      const modifiers = keyboard.getActiveModifiersArray()
 
       if (modifiers.length) {
         props.modifiers = modifiers.join(', ')
@@ -97,7 +97,7 @@ const create = (state, cy) => {
 
       const win = $dom.getWindowByElement(el)
 
-      const clickEvtProps = cy.internal.keyboard.mixinModifiers({
+      const clickEvtProps = keyboard.mixinModifiers({
         bubbles: true,
         cancelable: true,
         view: win,
@@ -127,7 +127,7 @@ const create = (state, cy) => {
         stoppedPropagation: !!clickEvt._hasStoppedPropagation,
       }
 
-      const modifiers = cy.internal.keyboard.getActiveModifiersArray()
+      const modifiers = keyboard.getActiveModifiersArray()
 
       if (modifiers.length) {
         props.modifiers = modifiers.join(', ')

@@ -26,8 +26,6 @@ $Stability = require("../cy/stability")
 $Snapshots = require("../cy/snapshots")
 $CommandQueue = require("./command_queue")
 
-cy = {}
-
 crossOriginScriptRe = /^script error/i
 
 privateProps = {
@@ -84,8 +82,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
-  keyboard = $Keyboard.create(state, cy)
-  mouse = $Mouse.create(state, cy)
+  keyboard = $Keyboard.create(state)
+  mouse = $Mouse.create(state, keyboard)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -600,7 +598,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## else figure out how to finisht this failure
     return finish(err)
 
-  _.extend(cy, {
+  cy = {
     id: _.uniqueId("cy")
 
     ## synchrounous querying
@@ -657,7 +655,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     internal: {
       mouse: mouse
       keyboard: keyboard
-      focused: focused
     }
 
     ## timer sync methods
@@ -1103,7 +1100,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## but we should still teardown and handle
           ## the error
           fail(err, runnable)
-  })
+  }
 
   _.each privateProps, (obj, key) =>
     Object.defineProperty(cy, key, {

@@ -37,7 +37,7 @@ const initialModifiers = {
   shift: false,
 }
 
-const create = (state, cy) => {
+const create = (state) => {
   const kb = {
 
     getActiveModifiers () {
