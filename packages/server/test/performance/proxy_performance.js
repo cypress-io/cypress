@@ -9,7 +9,6 @@ const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('@cypress/debugging-proxy')
 const HarCapturer = require('chrome-har-capturer')
 const Promise = require('bluebird')
-const Table = require('console-table-printer').Table
 const sanitizeFilename = require('sanitize-filename')
 
 process.env.CYPRESS_ENV = 'development'
@@ -382,14 +381,8 @@ describe('Proxy Performance', function () {
 
       after(() => {
         debug(`Done in ${Math.round((new Date() / 1000) - start)}s`)
-        // console.table not available until Node 10
-        const t = new Table()
-
-        t.addRows(testCases)
-
-        // console.log is bad for eslint, but nobody never said nothing about process.stdout.write
         process.stdout.write('Note: All times are in milliseconds.\n')
-        t.printTable()
+        console.table(testCases) // eslint-disable-line no-console
       })
     })
   })

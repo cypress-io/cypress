@@ -152,7 +152,6 @@
     "chokidar-cli": "1.2.2",
     "chrome-har-capturer": "0.13.4",
     "coffee-coverage": "3.0.1",
-    "console-table-printer": "1.0.0-beta12",
     "cors": "2.8.5",
     "eol": "0.9.1",
     "eventsource": "1.0.7",
