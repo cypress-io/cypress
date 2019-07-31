@@ -233,7 +233,7 @@ module.exports = {
       message: """
         #{cmd('{{cmd}}')} failed because this element is readonly:
 
-        {{node}}
+        `{{node}}`
 
         Fix this problem, or use {force: true} to disable error checking.
       """
