@@ -285,7 +285,7 @@ describe "src/cy/commands/request", ->
           ## make sure it really was 500!
           expect(resp.status).to.eq(500)
 
-          expect(warning).to.be.calledWith("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+          expect(warning).to.be.calledWith("The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.")
 
     describe "failOnStatusCode", ->
       it "does not fail on status 401", ->
