@@ -4348,7 +4348,7 @@ https://on.cypress.io/type`)
         cy.get(':text:first').type('foo{bar}')
       })
 
-      it('throws when attemping to type tab', function (done) {
+      it('throws when attempting to type tab', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
           expect(err.message).to.eq('`{tab}` isn\'t a supported character sequence. You\'ll want to use the command `cy.tab()`, which is not ready yet, but when it is done, that\'s what you\'ll use.')

@@ -1507,7 +1507,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           // get + click logs
           expect(this.logs.length).eq(2)
-          expect(err.message).to.include('`cy.click()` failed because this element is disabled:\n')
+          expect(err.message).to.include('`cy.click()` failed because this element is `disabled`:\n')
 
           done()
         })
@@ -1644,7 +1644,7 @@ describe('src/cy/commands/actions/click', () => {
       it('throws when attempting to click a <select> element', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('`cy.click()` cannot be called on a <select> element. Use cy.select() command instead to change the value.')
+          expect(err.message).to.eq('`cy.click()` cannot be called on a `<select>` element. Use `cy.select()` command instead to change the value.')
 
           done()
         })
