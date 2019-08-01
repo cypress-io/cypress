@@ -63,11 +63,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   warnMixingPromisesAndCommands = ->
     title = state("runnable").fullTitle()
 
-    msg = $errUtils.errMsgByPath("miscellaneous.mixing_promises_and_commands", {
-      title: title
+    $errUtils.warnByPath("miscellaneous.mixing_promises_and_commands", { 
+      args: {
+        title: title
+      }
     })
-
-    $utils.warning(msg)
 
   $$ = (selector, context) ->
     context ?= state("document")

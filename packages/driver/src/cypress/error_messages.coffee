@@ -497,8 +497,8 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/returning-promise-and-commands-in-another-command"
     }
-    mixing_promises_and_commands: (obj) ->
-      """
+    mixing_promises_and_commands: (obj) -> {
+      message: """
         Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
 
         The test title was:
@@ -508,9 +508,9 @@ module.exports = {
         While this works in practice, it's often indicative of an anti-pattern. You almost never need to return both a promise and also invoke cy commands.
 
         Cy commands themselves are already promise like, and you can likely avoid the use of the separate Promise.
-
-        https://on.cypress.io/returning-promise-and-commands-in-test
       """
+      docsUrl: "https://on.cypress.io/returning-promise-and-commands-in-test"
+    }
     command_log_renamed: """
       `Cypress.Log.command()` has been renamed to `Cypress.log()`
 
@@ -797,7 +797,7 @@ module.exports = {
 
   server:
     invalid_argument: "#{cmd('server')} accepts only an object literal as its argument."
-    xhrurl_not_set: "'Server.options.xhrUrl' has not been set"
+    xhrurl_not_set: "`Server.options.xhrUrl` has not been set"
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
