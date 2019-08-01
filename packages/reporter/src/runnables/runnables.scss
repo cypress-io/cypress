@@ -181,6 +181,7 @@
     overflow: auto;
     position: relative;
     display: inline-flex;
+    width: 100%;
 
     &:focus {
       outline: 1px dotted #6c6c6c;

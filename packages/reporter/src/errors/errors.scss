@@ -124,9 +124,18 @@
 
 .runnable-err-stack-expander {
   padding: 0 10px 0 5px;
-  text-decoration: underline;
+  padding-bottom: 2px;
+
+  &:hover {
+    color: lighten($err-text, 10%);
+  }
+
+  .collapsible-header-text {
+    text-decoration: underline;
+  }
 
   .collapsible-indicator {
+    line-height: 18px;
     color: #eb535e !important;
   }
 
