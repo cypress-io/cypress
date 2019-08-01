@@ -1090,6 +1090,13 @@ module.exports = {
 
         #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
       """
+    specify_file_by_relative_path: """
+      #{cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
+
+      However, you can pass in the relative path to the file from your projectRoot.
+
+      https://docs.cypress.io/api/commands/visit.html
+    """
 
   wait:
     alias_invalid: "'{{prop}}' is not a valid alias property. Are you trying to ask for the first request? If so write @{{str}}.request"
