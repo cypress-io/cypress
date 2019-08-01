@@ -44,6 +44,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
+        Cypress.config("isTextTerminal", true)
 
     it "is noop when no test.err", ->
       Cypress.config("isInteractive", false)
