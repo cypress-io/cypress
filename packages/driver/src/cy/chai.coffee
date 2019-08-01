@@ -250,7 +250,7 @@ chai.use (chai, u) ->
               if isAttached
                 "Expected #{node} not to exist in the DOM, but it was continuously found."
               else
-                "Expected to find element: '#{obj.selector}', but never found it."
+                "Expected to find element: `#{obj.selector}`, but never found it."
 
             e1.message = getLongExistsMessage(obj)
             throw e1

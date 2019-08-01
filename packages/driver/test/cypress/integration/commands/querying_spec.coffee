@@ -136,7 +136,7 @@ describe "src/cy/commands/querying", ->
         button.get(0).blur()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected to find element: 'focused', but never found it."
+          expect(err.message).to.include "Expected to find element: `focused`, but never found it."
           done()
 
         cy.focused()
@@ -1054,21 +1054,21 @@ describe "src/cy/commands/querying", ->
 
       it "throws after timing out not finding element", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
+          expect(err.message).to.include "Expected to find element: `#missing-el`, but never found it."
           done()
 
         cy.get("#missing-el")
 
       it "throws after timing out not finding element when should exist", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
+          expect(err.message).to.include "Expected to find element: `#missing-el`, but never found it."
           done()
 
         cy.get("#missing-el").should("exist")
 
       it "throws existence error without running assertions", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
+          expect(err.message).to.include "Expected to find element: `#missing-el`, but never found it."
           done()
 
         cy.get("#missing-el").should("have.prop", "foo")
@@ -1077,7 +1077,7 @@ describe "src/cy/commands/querying", ->
 
       it "throws after timing out after a .wait() alias reference", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected to find element: 'getJsonButton', but never found it."
+          expect(err.message).to.include "Expected to find element: `getJsonButton`, but never found it."
           done()
 
         cy

@@ -84,7 +84,7 @@ describe "src/cy/commands/traversals", ->
             node = dom.stringify cy.$$(node), "short"
 
             cy.on "fail", (err) ->
-              expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"
+              expect(err.message).to.include "Expected to find element: `#{el}`, but never found it. Queried from element: #{node}"
               done()
 
           switch name
@@ -239,7 +239,7 @@ describe "src/cy/commands/traversals", ->
 
     it "errors after timing out not finding element", (done) ->
       cy.on "fail", (err) ->
-        expect(err.message).to.include "Expected to find element: 'span', but never found it. Queried from element: <li.item>"
+        expect(err.message).to.include "Expected to find element: `span`, but never found it. Queried from element: <li.item>"
         done()
 
       cy.get("#list li:last").find("span")
