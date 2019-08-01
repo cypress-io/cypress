@@ -67,7 +67,7 @@ describe('ErrorMessage', function () {
     this.ipc.openProject.rejects({ name: 'Error', message: this.longErrMessage, stack: '[object Object]↵' })
     this.start()
 
-    cy.get('#updates-available').should('be.visible')
+    cy.get('.updates-available').should('be.visible')
     .contains('New updates are available')
 
     cy.get('.error')
