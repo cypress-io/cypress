@@ -6,7 +6,6 @@ describe('Project Mode', function () {
 
     cy.visitIndex().then((win) => {
       this.start = win.App.start
-      this.win = win
       this.ipc = win.App.ipc
 
       this.config.projectName = 'my-kitchen-sink'
@@ -16,32 +15,47 @@ describe('Project Mode', function () {
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'updaterCheck').resolves(false)
       cy.stub(this.ipc, 'openProject').resolves(this.config)
-      cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
+      cy.stub(this.ipc, 'getSpecs')
 
       this.getCurrentUser = this.util.deferred()
     })
   })
 
-  it('goes straight to project specs list', function () {
+  it('displays footer on bottom when loading (issue #4888)', function () {
+    const openProject = this.util.deferred()
+
+    this.ipc.openProject.resolves(openProject.promise)
     this.start()
-    cy.shouldBeOnProjectSpecs()
+
+    cy.get('footer').invoke('position').its('top').should('be.gt', 50)
   })
 
-  it('sets title as project path on Mac/Linux', function () {
-    this.start()
-    cy.title().should('eq', '/foo/bar')
-  })
+  describe('when specs load', function () {
+    beforeEach(function () {
+      this.ipc.getSpecs.yields(null, this.specs)
+    })
 
-  it('sets title as project path on Windows', function () {
-    this.ipc.getOptions.resolves({ projectRoot: 'C:\\foo\\bar' })
-    this.start()
-    cy.title().should('eq', 'C:\\foo\\bar')
-  })
+    it('goes straight to project specs list', function () {
+      this.start()
+      cy.shouldBeOnProjectSpecs()
+    })
 
-  it('shows project name in nav', function () {
-    this.start()
-    cy.get('.main-nav .nav:first-child div')
-    .should('contain', this.config.projectName)
-    .and('not.contain', 'foo')
+    it('sets title as project path on Mac/Linux', function () {
+      this.start()
+      cy.title().should('eq', '/foo/bar')
+    })
+
+    it('sets title as project path on Windows', function () {
+      this.ipc.getOptions.resolves({ projectRoot: 'C:\\foo\\bar' })
+      this.start()
+      cy.title().should('eq', 'C:\\foo\\bar')
+    })
+
+    it('shows project name in nav', function () {
+      this.start()
+      cy.get('.main-nav .nav:first-child div')
+      .should('contain', this.config.projectName)
+      .and('not.contain', 'foo')
+    })
   })
 })
