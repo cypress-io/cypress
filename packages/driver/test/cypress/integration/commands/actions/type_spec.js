@@ -16,8 +16,6 @@ describe('src/cy/commands/actions/type', () => {
     cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
-      this.body = win.document.body.outerHTML
-
       const el = cy.$$('[contenteditable]:first').get(0)
 
       // by default... the last new line by itself
@@ -43,10 +41,8 @@ describe('src/cy/commands/actions/type', () => {
     })
   })
 
-  beforeEach(function () {
-    const doc = cy.state('document')
-
-    $(doc.body).empty().html(this.body)
+  beforeEach(() => {
+    cy.visit('/fixtures/dom.html')
   })
 
   context('#type', () => {
@@ -250,6 +246,28 @@ describe('src/cy/commands/actions/type', () => {
 
         cy.on('command:retry', _.after(3, () => {
           $txt.prop('disabled', false)
+          retried = true
+        }))
+
+        cy.get(':text:first').type('foo').then(() => {
+          expect(clicks).to.eq(1)
+
+          expect(retried).to.be.true
+        })
+      })
+
+      it('waits until element is no longer readonly', () => {
+        const $txt = cy.$$(':text:first').prop('readonly', true)
+
+        let retried = false
+        let clicks = 0
+
+        $txt.on('click', () => {
+          clicks += 1
+        })
+
+        cy.on('command:retry', _.after(3, () => {
+          $txt.prop('readonly', false)
           retried = true
         }))
 
@@ -1507,10 +1525,10 @@ describe('src/cy/commands/actions/type', () => {
 
     describe('specialChars', () => {
 
-      context('disableSpecialCharSequences: true', () => {
+      context('parseSpecialCharSequences: false', () => {
         it('types special character sequences literally', (done) => {
           cy.get(':text:first').invoke('val', 'foo')
-          .type('{{}{backspace}', { disableSpecialCharSequences: true }).then(($input) => {
+          .type('{{}{backspace}', { parseSpecialCharSequences: false }).then(($input) => {
             expect($input).to.have.value('foo{{}{backspace}')
 
             done()
@@ -4204,9 +4222,9 @@ describe('src/cy/commands/actions/type', () => {
           cy.get(`#${attrs.id}`).type('foo')
 
           cy.on('fail', (err) => {
-            expect(err.message).to.include('cy.type() cannot type into an element with a \'readonly\' attribute.')
-            expect(err.message).to.include('The element typed into was:')
+            expect(err.message).to.include('cy.type() failed because this element is readonly:')
             expect(err.message).to.include(`<input id="${attrs.id}" readonly="${attrs.val}">`)
+            expect(err.message).to.include('Fix this problem, or use {force: true} to disable error checking.')
 
             done()
           })
@@ -4318,7 +4336,11 @@ describe('src/cy/commands/actions/type', () => {
 
           const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(', ')
 
-          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}`)
+          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
+
+If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
+
+https://on.cypress.io/type`)
 
           done()
         })

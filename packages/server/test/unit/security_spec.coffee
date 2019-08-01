@@ -16,6 +16,12 @@ original = """
     parent1
     grandparent
     grandparents
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
 
     <div style="left: 1500px; top: 0px;"></div>
     <div style="left: 1500px; top : 0px;"></div>
@@ -75,6 +81,12 @@ expected = """
     parent1
     grandparent
     grandparents
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
 
     <div style="left: 1500px; top: 0px;"></div>
     <div style="left: 1500px; top : 0px;"></div>

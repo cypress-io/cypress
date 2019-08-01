@@ -1,24 +1,10 @@
-/* eslint-disable
-    brace-style,
-    no-cond-assign,
-    no-unused-vars,
-    one-var,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
-const coerce = require('./coerce')
-const config = require('../config')
-const proxy = require('./proxy')
+const coerceUtil = require('./coerce')
+const configUtil = require('../config')
+const proxyUtil = require('./proxy')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
@@ -49,10 +35,10 @@ const normalizeBackslash = function (s) {
 }
 
 const normalizeBackslashes = function (options) {
-  //# remove stray double quote from runProject and other path properties
-  //# due to bug in NPM passing arguments with
-  //# backslash at the end
-  //# https://github.com/cypress-io/cypress/issues/535
+  // remove stray double quote from runProject and other path properties
+  // due to bug in NPM passing arguments with
+  // backslash at the end
+  // https://github.com/cypress-io/cypress/issues/535
   // these properties are paths and likely to have backslash on Windows
   const pathProperties = ['runProject', 'project', 'appPath', 'execPath']
 
@@ -74,18 +60,17 @@ const stringify = function (val) {
 }
 
 const strToArray = function (str) {
-  let parsed
+  const parsed = tryJSONParse(str)
 
-  if ((parsed = tryJSONParse(str))) {
+  if (parsed) {
     return parsed
   }
 
   return [].concat(str.split(','))
 }
 
-const commasToPipes = (match, p1, p2, p3) =>
-//# swap out comma's for bars
-{
+// swap out comma's for bars
+const commasToPipes = (match, p1, p2, p3) => {
   return match.split(',').join('|')
 }
 
@@ -105,23 +90,24 @@ const tryJSONParse = function (str) {
 }
 
 const JSONOrCoerce = function (str) {
-  //# valid JSON? horray
-  let parsed
-
-  if ((parsed = tryJSONParse(str))) {
+  // valid JSON? horray
+  const parsed = tryJSONParse(str)
+  if (parsed) {
     return parsed
   }
 
-  //# convert bars back to commas
+  // convert bars back to commas
   str = pipesToCommas(str)
+  
+  // try to parse again?
+  const parsed2 = tryJSONParse(str)
 
-  //# try to parse again?
-  if ((parsed = tryJSONParse(str))) {
-    return parsed
+  if (parsed2) {
+    return parsed2
   }
 
-  //# nupe :-(
-  return coerce(str)
+  // nupe :-(
+  return coerceUtil(str)
 }
 
 const removeCommaFromEnd = function (str) {
@@ -133,19 +119,19 @@ const removeCommaFromEnd = function (str) {
 }
 
 const sanitizeAndConvertNestedArgs = function (str) {
-  //# if this is valid JSON then just
-  //# parse it and call it a day
-  let parsed
+  // if this is valid JSON then just
+  // parse it and call it a day
+  const parsed = tryJSONParse(str)
 
-  if ((parsed = tryJSONParse(str))) {
+  if (parsed) {
     return parsed
   }
 
-  //# invalid JSON, so assume mixed usage
-  //# first find foo={a:b,b:c} and bar=[1,2,3]
-  //# syntax and turn those into
-  //# foo: a:b|b:c
-  //# bar: 1|2|3
+  // invalid JSON, so assume mixed usage
+  // first find foo={a:b,b:c} and bar=[1,2,3]
+  // syntax and turn those into
+  // foo: a:b|b:c
+  // bar: 1|2|3
 
   return _.chain(str)
   .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
@@ -164,62 +150,69 @@ const sanitizeAndConvertNestedArgs = function (str) {
 
 module.exports = {
   toObject (argv) {
-    let c, envs, op, p, ro, spec
-
     debug('argv array: %o', argv)
 
     const alias = {
-      'app-path': 'appPath',
-      'exec-path': 'execPath',
       'api-key': 'apiKey',
-      'smoke-test': 'smokeTest',
+      'app-path': 'appPath',
+      'ci-build-id': 'ciBuildId',
+      'clear-logs': 'clearLogs',
+      'exec-path': 'execPath',
+      'exit-with-code': 'exitWithCode',
+      'inspect-brk': 'inspectBrk',
       'get-key': 'getKey',
       'new-key': 'generateKey',
-      'clear-logs': 'clearLogs',
-      'run-project': 'runProject',
+      'output-path': 'outputPath',
+      'proxy-source': 'proxySource',
+      'reporter-options': 'reporterOptions',
       'return-pkg': 'returnPkg',
       'run-mode': 'isTextTerminal',
-      'ci-build-id': 'ciBuildId',
-      'exit-with-code': 'exitWithCode',
-      'reporter-options': 'reporterOptions',
-      'output-path': 'outputPath',
-      'inspect-brk': 'inspectBrk',
-      'proxy-source': 'proxySource',
+      'run-project': 'runProject',
+      'smoke-test': 'smokeTest',
     }
 
-    //# takes an array of args and converts
-    //# to an object
+    // takes an array of args and converts
+    // to an object
     let options = minimist(argv, {
       alias,
     })
 
     const whitelisted = _.pick(argv, whitelist)
 
-    options = _.chain(options)
+    // were we invoked from the CLI or directly?
+    const invokedFromCli = Boolean(options.cwd)
+
+    options = _
+    .chain(options)
     .defaults(whitelisted)
-    .omit(_.keys(alias)) //# remove aliases
+    .omit(_.keys(alias)) // remove aliases
+    .extend({ invokedFromCli })
     .defaults({
-      //# set in case we
-      //# bypassed the cli
+      // set in case we
+      // bypassed the cli
       cwd: process.cwd(),
     })
-    .mapValues(coerce)
+    .mapValues(coerceUtil)
     .value()
 
     debug('argv parsed: %o', options)
 
-    //# if we are updating we may have to pluck out the
-    //# appPath + execPath from the options._ because
-    //# in previous versions up until 0.14.0 these args
-    //# were not passed as dashes and instead were just
-    //# regular arguments
+    // if we are updating we may have to pluck out the
+    // appPath + execPath from the options._ because
+    // in previous versions up until 0.14.0 these args
+    // were not passed as dashes and instead were just
+    // regular arguments
     if (options.updating && !options.appPath) {
-      //# take the last two arguments that were unknown
-      //# and apply them to both appPath + execPath
+      // take the last two arguments that were unknown
+      // and apply them to both appPath + execPath
       [options.appPath, options.execPath] = options._.slice(-2)
     }
 
-    if ((spec = options.spec)) {
+    let { spec } = options
+    const { env, config, reporterOptions, outputPath } = options
+    const project = options.project || options.runProject
+
+    if (spec) {
       const resolvePath = (p) => {
         return path.resolve(options.cwd, p)
       }
@@ -233,11 +226,11 @@ module.exports = {
       options.spec = strToArray(spec).map(resolvePath)
     }
 
-    if ((envs = options.env)) {
-      options.env = sanitizeAndConvertNestedArgs(envs)
+    if (env) {
+      options.env = sanitizeAndConvertNestedArgs(env)
     }
 
-    const proxySource = proxy.loadSystemProxySettings()
+    const proxySource = proxyUtil.loadSystemProxySettings()
 
     if (process.env.HTTP_PROXY) {
       if (proxySource) {
@@ -248,46 +241,46 @@ module.exports = {
       options.proxyBypassList = process.env.NO_PROXY
     }
 
-    if ((ro = options.reporterOptions)) {
-      options.reporterOptions = sanitizeAndConvertNestedArgs(ro)
+    if (reporterOptions) {
+      options.reporterOptions = sanitizeAndConvertNestedArgs(reporterOptions)
     }
 
-    if ((c = options.config)) {
-      //# convert config to an object
-      //# annd store the config
-      options.config = sanitizeAndConvertNestedArgs(c)
+    if (config) {
+      // convert config to an object
+      // annd store the config
+      options.config = sanitizeAndConvertNestedArgs(config)
     }
 
-    //# get a list of the available config keys
-    const configKeys = config.getConfigKeys()
+    // get a list of the available config keys
+    const configKeys = configUtil.getConfigKeys()
 
-    //# and if any of our options match this
+    // and if any of our options match this
     const configValues = _.pick(options, configKeys)
 
-    //# then set them on config
-    //# this solves situations where we accept
-    //# root level arguments which also can
-    //# be set in configuration
+    // then set them on config
+    // this solves situations where we accept
+    // root level arguments which also can
+    // be set in configuration
     if (options.config == null) {
       options.config = {}
     }
 
     _.extend(options.config, configValues)
 
-    //# remove them from the root options object
+    // remove them from the root options object
     options = _.omit(options, configKeys)
 
     options = normalizeBackslashes(options)
     debug('options %o', options)
 
-    //# normalize project to projectRoot
-    if ((p = options.project || options.runProject)) {
-      options.projectRoot = path.resolve(options.cwd, p)
+    // normalize project to projectRoot
+    if (project) {
+      options.projectRoot = path.resolve(options.cwd, project)
     }
 
-    //# normalize output path from previous current working directory
-    if ((op = options.outputPath)) {
-      options.outputPath = path.resolve(options.cwd, op)
+    // normalize output path from previous current working directory
+    if (outputPath) {
+      options.outputPath = path.resolve(options.cwd, outputPath)
     }
 
     if (options.runProject) {
@@ -304,11 +297,12 @@ module.exports = {
   },
 
   toArray (obj = {}) {
-    //# goes in reverse, takes an object
-    //# and converts to an array by picking
-    //# only the whitelisted properties and
-    //# mapping them to include the argument
-    return _.chain(obj)
+    // goes in reverse, takes an object
+    // and converts to an array by picking
+    // only the whitelisted properties and
+    // mapping them to include the argument
+    return _
+    .chain(obj)
     .pick(...whitelist)
     .mapValues((val, key) => {
       return `--${key}=${stringify(val)}`

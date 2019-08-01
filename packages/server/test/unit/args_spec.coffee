@@ -231,6 +231,7 @@ describe "lib/util/args", ->
         cwd
         _: []
         getKey: true
+        invokedFromCli: false
         config: @config
         spec: @specs
       })
@@ -259,6 +260,7 @@ describe "lib/util/args", ->
         cwd
         _: []
         getKey: true
+        invokedFromCli: true
         config: @config
         spec: @specs
       })
@@ -285,6 +287,7 @@ describe "lib/util/args", ->
         config: {}
         appPath: "/Applications/Cypress.app"
         execPath: "/Applications/Cypress.app"
+        invokedFromCli: false
         updating: true
       })
 
@@ -308,6 +311,7 @@ describe "lib/util/args", ->
         config: {}
         appPath: "a"
         execPath: "e"
+        invokedFromCli: false
         updating: true
       })
 
