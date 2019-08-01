@@ -40,8 +40,8 @@ create = (state, config, log) ->
       msg = $errUtils.errMsgByPath("uncaught.cross_origin_script")
 
     createErrFromMsg = ->
-      new Error $errUtils.errMsgByPath("uncaught.error", { 
-        msg, source, lineno 
+      new Error $errUtils.errMsgByPath("uncaught.error", {
+        msg, source, lineno
       })
 
     ## if we have the 5th argument it means we're in a super
@@ -53,7 +53,7 @@ create = (state, config, log) ->
       when "spec" then "uncaught.fromSpec"
 
     uncaughtErrObj = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
-    
+
     err.name = "Uncaught " + err.name
 
     uncaughtErrProps = $errUtils.modifyErrMsg(err, uncaughtErrObj.message, (msg1, msg2) ->
