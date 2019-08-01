@@ -67,6 +67,15 @@ describe "lib/util/args", ->
         bar: "qux="
       })
 
+    it "accept comma in value and converts to object literal", ->
+      options = @setup("--env", "foo=bar,version=0,12,1,host=localhost:8888,bar=qux=")
+      expect(options.config.env).to.deep.eq({
+        foo: "bar"
+        version: "0,12,1"
+        host: "localhost:8888"
+        bar: "qux="
+      })
+
   context "--reporterOptions", ->
     it "converts to object literal", ->
       reporterOpts = {
@@ -159,8 +168,8 @@ describe "lib/util/args", ->
       expect(options).not.to.have.property("foo")
 
     it "overrides port in config", ->
-      options = @setup("--port", 2222, "--config", "port=3333")
-      expect(options.config.port).to.eq(2222)
+      options = @setup("--port", "2222", "--config", "port=3333")
+      expect(options.config.port).to.eq("2222")
 
       options = @setup("--port", 2222)
       expect(options.config.port).to.eq(2222)
@@ -185,7 +194,7 @@ describe "lib/util/args", ->
         path.join(cwd, "baz")
       ]
       @env = {
-        foo: "bar"
+        foo: "b,a,r"
         baz: "quux"
         bar: "foo=quz"
       }
@@ -205,7 +214,7 @@ describe "lib/util/args", ->
       ## make sure it works with both --env=foo=bar and --config foo=bar
       @obj = @setup(
         "--get-key",
-        "--env=foo=bar,baz=quux,bar=foo=quz",
+        "--env=foo=ar,baz=quux,bar=foo=quz",
         "--config",
         "requestTimeout=1234,blacklistHosts=#{s(@blacklistHosts)},hosts=#{s(@hosts)}"
         "--reporter-options=foo=bar"

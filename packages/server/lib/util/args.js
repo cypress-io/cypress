@@ -24,14 +24,16 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource'.split(' ')
+const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource'.split(
+  ' '
+)
 
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = function (s) {
   const quoteAt = s.indexOf('"')
 
-  return quoteAt === (s.length - 1)
+  return quoteAt === s.length - 1
 }
 
 const removeLastCharacter = (s) => {
@@ -44,7 +46,6 @@ const normalizeBackslash = function (s) {
   }
 
   return s
-
 }
 
 const normalizeBackslashes = function (options) {
@@ -75,7 +76,7 @@ const stringify = function (val) {
 const strToArray = function (str) {
   let parsed
 
-  if (parsed = tryJSONParse(str)) {
+  if ((parsed = tryJSONParse(str))) {
     return parsed
   }
 
@@ -92,7 +93,7 @@ const pipesToCommas = (str) =>
 //# convert foo=bar|version=1.2.3 to
 //# foo=bar,version=1.2.3
 {
-  return str.split('|').join(',')
+  return str ? str.split('|').join(',') : str
 }
 
 const tryJSONParse = function (str) {
@@ -107,7 +108,7 @@ const JSONOrCoerce = function (str) {
   //# valid JSON? horray
   let parsed
 
-  if (parsed = tryJSONParse(str)) {
+  if ((parsed = tryJSONParse(str))) {
     return parsed
   }
 
@@ -115,7 +116,7 @@ const JSONOrCoerce = function (str) {
   str = pipesToCommas(str)
 
   //# try to parse again?
-  if (parsed = tryJSONParse(str)) {
+  if ((parsed = tryJSONParse(str))) {
     return parsed
   }
 
@@ -123,12 +124,20 @@ const JSONOrCoerce = function (str) {
   return coerce(str)
 }
 
+const removeCommaFromEnd = function (str) {
+  if (str.substring(str.length - 1) === ',') {
+    return str.substring(0, str.length - 1)
+  }
+
+  return str
+}
+
 const sanitizeAndConvertNestedArgs = function (str) {
   //# if this is valid JSON then just
   //# parse it and call it a day
   let parsed
 
-  if (parsed = tryJSONParse(str)) {
+  if ((parsed = tryJSONParse(str))) {
     return parsed
   }
 
@@ -138,13 +147,15 @@ const sanitizeAndConvertNestedArgs = function (str) {
   //# foo: a:b|b:c
   //# bar: 1|2|3
 
-  return _
-  .chain(str)
+  return _.chain(str)
   .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
   .replace(nestedArraysInSquareBracketsRe, commasToPipes)
-  .split(',')
+  .split(/([^,=]+=(?:[a-zA-Z]|[0-9,]|[a-zA-Z:0-9])+,)/gi)
+  .filter((pair) => !!pair)
   .map((pair) => {
-    return pair.split(everythingAfterFirstEqualRe)
+    const prunedPair = removeCommaFromEnd(pair)
+
+    return prunedPair.split(everythingAfterFirstEqualRe)
   })
   .fromPairs()
   .mapValues(JSONOrCoerce)
@@ -184,8 +195,7 @@ module.exports = {
 
     const whitelisted = _.pick(argv, whitelist)
 
-    options = _
-    .chain(options)
+    options = _.chain(options)
     .defaults(whitelisted)
     .omit(_.keys(alias)) //# remove aliases
     .defaults({
@@ -209,7 +219,7 @@ module.exports = {
       [options.appPath, options.execPath] = options._.slice(-2)
     }
 
-    if (spec = options.spec) {
+    if ((spec = options.spec)) {
       const resolvePath = (p) => {
         return path.resolve(options.cwd, p)
       }
@@ -223,7 +233,7 @@ module.exports = {
       options.spec = strToArray(spec).map(resolvePath)
     }
 
-    if (envs = options.env) {
+    if ((envs = options.env)) {
       options.env = sanitizeAndConvertNestedArgs(envs)
     }
 
@@ -238,11 +248,11 @@ module.exports = {
       options.proxyBypassList = process.env.NO_PROXY
     }
 
-    if (ro = options.reporterOptions) {
+    if ((ro = options.reporterOptions)) {
       options.reporterOptions = sanitizeAndConvertNestedArgs(ro)
     }
 
-    if (c = options.config) {
+    if ((c = options.config)) {
       //# convert config to an object
       //# annd store the config
       options.config = sanitizeAndConvertNestedArgs(c)
@@ -271,12 +281,12 @@ module.exports = {
     debug('options %o', options)
 
     //# normalize project to projectRoot
-    if (p = options.project || options.runProject) {
+    if ((p = options.project || options.runProject)) {
       options.projectRoot = path.resolve(options.cwd, p)
     }
 
     //# normalize output path from previous current working directory
-    if (op = options.outputPath) {
+    if ((op = options.outputPath)) {
       options.outputPath = path.resolve(options.cwd, op)
     }
 
@@ -298,12 +308,12 @@ module.exports = {
     //# and converts to an array by picking
     //# only the whitelisted properties and
     //# mapping them to include the argument
-    return _
-    .chain(obj)
+    return _.chain(obj)
     .pick(...whitelist)
     .mapValues((val, key) => {
       return `--${key}=${stringify(val)}`
-    }).values()
+    })
+    .values()
     .value()
   },
 }
