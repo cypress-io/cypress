@@ -44,7 +44,7 @@ _.extend(jqueryProxyFn, $)
 ## provide the old interface and
 ## throw a deprecation message
 $Log.command = ->
-  $errUtils.throwErrByPath("miscellaneous.command_log_renamed")
+  $errUtils.throwErrByPath("deprecated.command_log")
 
 throwDeprecatedCommandInterface = (key = "commandName", method) ->
   signature = switch method

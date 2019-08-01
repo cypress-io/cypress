@@ -148,6 +148,11 @@ module.exports = {
 
   deprecated:
     agents: "`cy.agents()` is deprecated. Use `cy.stub()` and `cy.spy()` instead."
+    command_log: """
+      `Cypress.Log.command()` has been renamed to `Cypress.log()`
+
+      Please update your code. You should be able to safely do a find/replace.
+    """
     request:
       failonstatus: "The #{cmd('request')} `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time."
     server:
@@ -511,11 +516,6 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/returning-promise-and-commands-in-test"
     }
-    command_log_renamed: """
-      `Cypress.Log.command()` has been renamed to `Cypress.log()`
-
-      Please update your code. You should be able to safely do a find/replace.
-    """
     invalid_command: "Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n"
     invalid_overwrite: "Cannot overwite command for: `{{name}}`. An existing command does not exist by that name."
     invoking_child_without_parent: (obj) ->
