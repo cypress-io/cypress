@@ -18,7 +18,7 @@ throwErr = (arg) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   waitFunction = ->
-    $errUtils.throwErrByPath("wait.fn_deprecated")
+    $errUtils.throwErrByPath("deprecated.wait.fn")
 
   waitNumber = (subject, ms, options) ->
     ## increase the timeout by the delta

@@ -203,6 +203,7 @@ describe "src/cy/commands/xhr", ->
             expect(onreadystatechanged).to.be.true
             expect(xhr.status).to.eq(200)
 
+    ## FIXME: I have no idea why this is skipped, this test is rly old
     describe.skip "filtering requests", ->
       beforeEach ->
         cy.server()
@@ -931,7 +932,7 @@ describe "src/cy/commands/xhr", ->
             .window().then (win) ->
               win.$.get("/foo").done ->
                 throw new Error("specific ajax error")
-
+  ## FIXME: I have no idea why this is skipped, this test is rly old
   context.skip "#server", ->
     beforeEach ->
       defaults = {
@@ -1204,7 +1205,7 @@ describe "src/cy/commands/xhr", ->
           response: {}
         })
 
-    ## FIXME
+    ## FIXME: I have no idea why this is skipped, this test is rly old
     it.skip "can explicitly done() in onRequest function from options", (done) ->
       cy
         .server()
@@ -1299,6 +1300,7 @@ describe "src/cy/commands/xhr", ->
 
       cy.route(getUsers)
 
+    ## FIXME: I have no idea why this is skipped, this test is rly old
     it.skip "adds multiple routes to the responses array", ->
       cy
         .route("foo", {})
@@ -1346,6 +1348,7 @@ describe "src/cy/commands/xhr", ->
       .then ->
         expect(Cypress.utils.warning).to.not.be.called
 
+    ## FIXME: I have no idea why this is skipped, this test is rly old
     it.skip "does not error when response is null but respond is false", ->
       cy.route
         url: /foo/
@@ -1356,14 +1359,12 @@ describe "src/cy/commands/xhr", ->
         @warn = cy.spy(window.top.console, "warn")
 
       it "logs on {force404: false}", ->
-        cy
-          .server({force404: false})
+        cy.server({force404: false})
           .then ->
-            expect(@warn).to.be.calledWith("Cypress Warning: Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+            expect(@warn).to.be.calledWith("Cypress Warning: Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option.")
 
       it "does not log on {force404: true}", ->
-        cy
-          .server({force404: true})
+        cy.server({force404: true})
           .then ->
             expect(@warn).not.to.be.called
 
@@ -1527,7 +1528,7 @@ describe "src/cy/commands/xhr", ->
           .window().then (win) ->
             win.$.get("foo_bar").done ->
               foo.bar()
-
+      ## FIXME: I have no idea why this is skipped, this test is rly old
       it.skip "explodes if response fixture signature errors", (done) ->
         @trigger = cy.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {__error: "some error"})
 
@@ -2033,6 +2034,7 @@ describe "src/cy/commands/xhr", ->
             xhr.onload = resolve
         .wait("@getFoo").its("url").should("include", "/foo")
 
+  ## FIXME: I have no idea why this is skipped, this test is rly old
   context.skip "#cancel", ->
     it "calls server#cancel", (done) ->
       cancel = null
@@ -2045,6 +2047,7 @@ describe "src/cy/commands/xhr", ->
         cancel = cy.spy cy.state("server"), "cancel"
         @Cypress.trigger "abort"
 
+  ## FIXME: I have no idea why this is skipped, this test is rly old
   context.skip "#respond", ->
     it "calls server#respond", ->
       respond = null

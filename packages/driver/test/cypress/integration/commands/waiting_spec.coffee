@@ -35,7 +35,7 @@ describe "src/cy/commands/waiting", ->
       describe "errors thrown", ->
         it "is deprecated", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.eq "`cy.wait(fn)` has been deprecated. Instead just change this command to be `cy.should(fn)`."
+            expect(err.message).to.eq "`cy.wait(fn)` has been deprecated. Change this command to be `cy.should(fn)`."
             done()
 
           cy.get("body").wait ($body) ->
@@ -607,8 +607,7 @@ describe "src/cy/commands/waiting", ->
             expect(xhr.url).to.include "/users?num=3"
             expect(xhr.responseBody).to.deep.eq resp
 
-      ## TODO: fixme failing in CI sometimes
-      ## https://circleci.com/gh/cypress-io/cypress/5655
+      ## FIXME: failing in CI sometimes https://circleci.com/gh/cypress-io/cypress/5655
       it.skip "waits for the 4th request before resolving", ->
         resp = {foo: "foo"}
         response = 0

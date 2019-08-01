@@ -518,7 +518,7 @@ describe "src/cy/commands/agents", ->
       @agents = cy.agents()
 
     it "logs deprecation warning", ->
-      expect(top.console.warn).to.be.calledWith("Cypress Warning: cy.agents() is deprecated. Use cy.stub() and cy.spy() instead.")
+      expect(top.console.warn).to.be.calledWith("Cypress Warning: `cy.agents()` is deprecated. Use `cy.stub()` and `cy.spy()` instead.")
 
     it "synchronously returns #spy and #stub methods", ->
       expect(@agents.spy).to.be.a("function")

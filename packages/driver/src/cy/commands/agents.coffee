@@ -232,7 +232,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     stub: stub
 
     agents: ->
-      $errUtils.warnByPath("agents.deprecated_warning")
+      $errUtils.warnByPath("deprecated.agents")
 
       return {stub, spy}
   })

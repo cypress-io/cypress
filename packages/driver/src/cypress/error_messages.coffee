@@ -51,10 +51,7 @@ getHttpProps = (fields = []) ->
 
 module.exports = {
   add:
-    type_missing: "Cypress.add(key, fn, type) must include a type!"
-
-  agents:
-    deprecated_warning: "cy.agents() is deprecated. Use cy.stub() and cy.spy() instead."
+    type_missing: "`Cypress.add(key, fn, type)` must include a type!"
 
   alias:
     invalid: "Invalid alias: `{{name}}`.\nYou forgot the `@`. It should be written as: `@{{displayName}}`."
@@ -148,6 +145,23 @@ module.exports = {
         - `cy.clearCookies()`
     """
     timed_out: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
+
+  deprecated:
+    agents: "`cy.agents()` is deprecated. Use `cy.stub()` and `cy.spy()` instead."
+    request:
+      failonstatus: "The #{cmd('request')} `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time."
+    server:
+      force404: "Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option."
+      stub: ({ type }) -> {
+        message: "Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`."
+        docsUrl: "https://on.cypress.io/deprecated-stub-false-on-#{type}"
+      }
+    wait:
+      fn: "#{cmd('wait', 'fn')} has been deprecated. Change this command to be #{cmd('should', 'fn')}."
+    xhr:
+      requestjson: "`requestJSON` is now deprecated and will be removed in the next version. Update this to `requestBody` or `request.body`."
+      responsejson: "`responseJSON` is now deprecated and will be removed in the next version. Update this to `responseBody` or `response.body`."
+
 
   dom:
     animating: {
@@ -637,7 +651,6 @@ module.exports = {
     gzip_invalid: "#{cmd('request')} requires the `gzip` option to be a boolean."
     headers_invalid: "#{cmd('request')} requires the `headers` option to be an object literal."
     invalid_method: "#{cmd('request')} was called with an invalid method: `{{method}}`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser."
-    failonstatus_deprecated_warning: "The #{cmd('request')} `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time."
     form_invalid: """
     #{cmd('request')} requires the `form` option to be a boolean.
 
@@ -783,12 +796,7 @@ module.exports = {
     defaults_invalid_on_element: "`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`"
 
   server:
-    force404_deprecated: "Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option."
     invalid_argument: "#{cmd('server')} accepts only an object literal as its argument."
-    stub_deprecated: ({ type }) -> """
-      Passing #{cmd(type)}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
-      https://on.cypress.io/deprecated-stub-false-on-#{type}
-    """
     xhrurl_not_set: "'Server.options.xhrUrl' has not been set"
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
@@ -1094,7 +1102,6 @@ module.exports = {
 
   wait:
     alias_invalid: "`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`"
-    fn_deprecated: "#{cmd('wait', 'fn')} has been deprecated. Instead just change this command to be #{cmd('should', 'fn')}."
     invalid_1st_arg: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: `{{arg}}`"
     invalid_alias: "#{cmd('wait')} only accepts aliases for routes.\nThe alias: `{{alias}}` did not match a route."
     invalid_arguments: "#{cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
@@ -1111,6 +1118,4 @@ module.exports = {
     aborted: "This XHR was aborted by your code -- check this stack trace below."
     missing: "`XMLHttpRequest#xhr` is missing."
     network_error: "The network request for this XHR could not be made. Check your console for the reason."
-    requestjson_deprecated: "requestJSON is now deprecated and will be removed in the next version. Update this to 'requestBody' or 'request.body'."
-    responsejson_deprecated: "responseJSON is now deprecated and will be removed in the next version. Update this to 'responseBody' or 'response.body'."
 }
