@@ -548,17 +548,18 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/cannot-execute-commands-outside-test"
     }
-    outside_test_with_cmd: """
-      Cannot call #{cmd('{{cmd}}')} outside a running test.
+    outside_test_with_cmd: {
+      message: """
+        Cannot call #{cmd('{{cmd}}')} outside a running test.
 
-      This usually happens when you accidentally write commands outside an `it(...)` test.
+        This usually happens when you accidentally write commands outside an `it(...)` test.
 
-      If that is the case, just move these commands inside an `it(...)` test.
+        If that is the case, just move these commands inside an `it(...)` test.
 
-      Check your test file for errors.
-
-      https://on.cypress.io/cannot-execute-commands-outside-test
-    """
+        Check your test file for errors.
+      """
+      docsUrl: "https://on.cypress.io/cannot-execute-commands-outside-test"
+    }
     private_custom_command_interface: "You cannot use the undocumented private command interface: `{{method}}`"
     private_property:
       """
