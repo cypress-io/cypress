@@ -126,11 +126,10 @@ module.exports = {
     try
       webContents.debugger.attach()
       debug("debugger attached")
-      webContents.debugger.sendCommandAsync('Schema.getDomains')
-      .then (res = {}) ->
-        debug("supported CDP domains: %o", res.domains)
     catch err
       debug("debugger attached failed %o", { err })
+
+    webContents.debugger.sendCommandAsync('Browser.getVersion')
 
     webContents.debugger.on "detach", (event, reason) ->
       debug("debugger detached due to %o", { reason })
@@ -229,7 +228,9 @@ module.exports = {
             win.webContents.debugger.sendCommandAsync(message, data)
 
         normalizeGetCookieProps = (cookie) ->
-          cookie.expirationDate = cookie.expires ? -1
+          if cookie.expires == -1
+            delete cookie.expires
+          cookie.expirationDate = cookie.expires
           if _.isUndefined(cookie.hostOnly) ## TODO: do the right thing here instead
             cookie.hostOnly = true
           delete cookie.expires
