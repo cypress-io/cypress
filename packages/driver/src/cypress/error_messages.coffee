@@ -516,21 +516,6 @@ module.exports = {
 
       Please update your code. You should be able to safely do a find/replace.
     """
-    dangling_commands: """
-      Oops, Cypress detected something wrong with your test code.
-
-      The test has finished but Cypress still has commands in its queue.
-      The {{numCommands}} queued commands that have not yet run are:
-
-      {{commands}}
-
-      In every situation we've seen, this has been caused by programmer error.
-      Most often this indicates a race condition due to a forgotten 'return' or from commands in a previously run test bleeding into the current test.
-
-      For a much more thorough explanation including examples please review this error here:
-
-      https://on.cypress.io/command-queue-ended-early
-    """
     invalid_command: "Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n"
     invalid_overwrite: "Cannot overwite command for: `{{name}}`. An existing command does not exist by that name."
     invoking_child_without_parent: (obj) ->
