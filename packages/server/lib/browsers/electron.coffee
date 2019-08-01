@@ -240,6 +240,7 @@ module.exports = {
 
         normalizeSetCookieProps = (cookie) ->
           cookie.name or= "" ## name can't be undefined/null
+          cookie.value or= "" ## ditto
           cookie.expires = cookie.expirationDate
           delete cookie.expirationDate
           return cookie
