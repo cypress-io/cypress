@@ -12,15 +12,15 @@ describe "redirects + requests", ->
       .getCookies().then (cookies) ->
         console.log cookies
 
-        expect(cookies[0].domain).to.eq("localhost")
-        expect(cookies[0].name).to.eq("2293")
-        expect(cookies[0].value).to.eq("true")
-        expect(cookies[0].httpOnly).to.eq(true)
-        expect(cookies[0].path).to.eq("/")
-        expect(cookies[0].secure).to.eq(false)
-        expect(cookies[0].expiry).to.be.closeTo(oneMinuteFromNow, 5)
+        expect(cookies[1].domain).to.eq("localhost")
+        expect(cookies[1].name).to.eq("2293")
+        expect(cookies[1].value).to.eq("true")
+        expect(cookies[1].httpOnly).to.eq(true)
+        expect(cookies[1].path).to.eq("/")
+        expect(cookies[1].secure).to.eq(false)
+        expect(cookies[1].expiry).to.be.closeTo(oneMinuteFromNow, 5)
 
-        expect(cookies[1]).to.deep.eq({
+        expect(cookies[0]).to.deep.eq({
           domain: "localhost"
           name: "2293-session"
           value: "true"
