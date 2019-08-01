@@ -965,7 +965,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## do all the normal fail stuff and promise cancelation
       ## but dont re-throw the error
       if r = state("reject")
-        r($errUtils.processErr(err, config))
+        r(err)
 
       ## per the onerror docs we need to return true here
       ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
