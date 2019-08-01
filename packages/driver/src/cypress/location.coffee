@@ -19,6 +19,7 @@ ipAddressRe = /^[\d\.]+$/
 
 reHttp = /^https?:\/\//
 reWww = /^www/
+reFile = /^file:\/\//
 
 reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 
@@ -129,6 +130,9 @@ class $Location
       superDomain: @getSuperDomain()
       toString: _.bind(@getToString, @)
     }
+
+  @isLocalFileUrl = (url) ->
+    reFile.test(url)
 
   @isFullyQualifiedUrl = (url) ->
     reHttp.test(url)
