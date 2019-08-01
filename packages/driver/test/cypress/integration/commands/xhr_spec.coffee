@@ -1368,6 +1368,11 @@ describe "src/cy/commands/xhr", ->
           .then ->
             expect(@warn).not.to.be.called
 
+      it "logs on {stub: false}", ->
+        cy.server({stub: false})
+          .then ->
+            expect(@warn).to.be.calledWithMatch("Cypress Warning: Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`.\n\nhttps://on.cypress.io/deprecated-stub-false-on-server")
+
     describe "request response alias", ->
       it "matches xhrs with lowercase methods", ->
         cy

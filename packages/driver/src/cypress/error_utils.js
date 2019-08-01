@@ -126,7 +126,12 @@ const throwErrByPath = (errPath, options = {}) => {
 }
 
 const warnByPath = (errPath, options = {}) => {
-  const err = errMsgByPath(errPath, options.args)
+  const errObj = errObjByPath($errorMessages, errPath, options.args)
+  let err = errObj.message
+
+  if (errObj.docsUrl) {
+    err += `\n\n${errObj.docsUrl}`
+  }
 
   $utils.warning(err)
 }
