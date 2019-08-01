@@ -9,6 +9,14 @@ We searched for the reporter in these paths:
 The error we received was:
 
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
+Require stack:
+- /home/flotwig/Projects/cypress/cypress/packages/server/lib/reporter.coffee
+- /home/flotwig/Projects/cypress/cypress/packages/server/lib/project.coffee
+- /home/flotwig/Projects/cypress/cypress/packages/server/lib/modes/run.coffee
+- /home/flotwig/Projects/cypress/cypress/packages/server/lib/modes/index.coffee
+- /home/flotwig/Projects/cypress/cypress/packages/server/lib/cypress.coffee
+- /home/flotwig/Projects/cypress/cypress/packages/server/index.js
+- 
 
 Learn more at https://on.cypress.io/reporters
 
@@ -662,10 +670,6 @@ We searched for the reporter in these paths:
 The error we received was:
 
 Error: this reporter threw an error
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
     at stack trace line
     at stack trace line
     at stack trace line
