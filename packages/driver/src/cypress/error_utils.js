@@ -41,11 +41,11 @@ const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
     stack = stack.replace(originalErrMsg, message)
   }
 
-  return {
+  return _.extend({}, origErrObj, {
     renderMessage,
     message,
     stack,
-  }
+  })
 }
 
 const appendErrMsg = (err, messageOrObj) => {

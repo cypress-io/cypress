@@ -94,8 +94,6 @@ If that is the case, just move these commands inside an \`it(...)\` test.
 
 Check your test file for errors.
 
-https://on.cypress.io/cannot-execute-commands-outside-test
-
 This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
@@ -103,6 +101,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+
+https://on.cypress.io/cannot-execute-commands-outside-test
+
       at stack trace line
       at stack trace line
       at stack trace line
