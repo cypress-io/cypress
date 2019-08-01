@@ -10,12 +10,12 @@ The error we received was:
 
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
-- /home/flotwig/Projects/cypress/cypress/packages/server/lib/reporter.coffee
-- /home/flotwig/Projects/cypress/cypress/packages/server/lib/project.coffee
-- /home/flotwig/Projects/cypress/cypress/packages/server/lib/modes/run.coffee
-- /home/flotwig/Projects/cypress/cypress/packages/server/lib/modes/index.coffee
-- /home/flotwig/Projects/cypress/cypress/packages/server/lib/cypress.coffee
-- /home/flotwig/Projects/cypress/cypress/packages/server/index.js
+- lib/reporter.coffee
+- lib/project.coffee
+- lib/modes/run.coffee
+- lib/modes/index.coffee
+- lib/cypress.coffee
+- index.js
 - 
 
 Learn more at https://on.cypress.io/reporters
