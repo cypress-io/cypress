@@ -811,14 +811,10 @@ declare namespace Cypress {
 
     /**
      * Invoke a function on the previously yielded subject.
-     * This isn't possible to strongly type without generic override yet.
-     * If called on an object you can do this instead: `.then(s => s.show())`.
-     * If called on an array you can do this instead: `.each(s => s.show())`.
-     * From there the subject will be properly typed.
      *
      * @see https://on.cypress.io/invoke
      */
-    invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
+    invoke<K extends { [K in keyof Subject]: Subject[K] extends (...args: any[]) => any ? K : never }[keyof Subject], R extends Subject[K] extends (...args: any[]) => infer R ? R : never>(functionName: K, ...args: any[]): Chainable<R>
 
     /**
      * Get a property’s value on the previously yielded subject.
