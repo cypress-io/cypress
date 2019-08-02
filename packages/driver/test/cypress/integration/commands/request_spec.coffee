@@ -600,6 +600,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` must be passed an object literal for the `auth` option.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -615,6 +616,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires the `headers` option to be an object literal.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -645,6 +647,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires the `gzip` option to be a boolean.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -669,7 +672,8 @@ describe "src/cy/commands/request", ->
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "`cy.request()` was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          expect(err.message).to.contain "`cy.request()` was invoked with `{ failOnStatusCode: false, retryOnStatusCodeFailure: true }`."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -786,6 +790,7 @@ describe "src/cy/commands/request", ->
 
           `body` can only be a string or an object with no circular references.
           """
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
 
           done()
 

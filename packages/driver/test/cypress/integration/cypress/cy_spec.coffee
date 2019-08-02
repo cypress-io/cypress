@@ -328,7 +328,10 @@ describe "driver/src/cypress/cy", ->
       fn = ->
         Cypress.Commands.overwrite "foo", ->
 
-      expect(fn).to.throw("Cannot overwite command for: `foo`. An existing command does not exist by that name.")
+      expect(fn).to.throw().with.property("message")
+        .and.include("Cannot overwite command for: `foo`. An existing command does not exist by that name.")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.include("https://on.cypress.io/api")
 
     it "updates state('current') with modified args", ->
       cy.get("form").eq(0).submit().then =>

@@ -82,8 +82,10 @@ describe "driver/src/cypress/index", ->
       fn = ->
         Cypress.log('My Log')
 
-      expect(fn).to.throw(/Cypress.log() can only be called with an options object. Your argument was/)
-      expect(fn).to.throw(/My Log/)
+      expect(fn).to.throw().with.property("message")
+        .and.include("`Cypress.log()` can only be called with an options object. Your argument was: `My Log`")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/cypress-log")
 
     it "does not throw when Cypress.log() called outside of command", ->
       fn = ->

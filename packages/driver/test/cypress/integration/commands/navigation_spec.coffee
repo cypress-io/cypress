@@ -122,6 +122,7 @@ describe "src/cy/commands/navigation", ->
       it "throws passing more than 2 args", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(1, 2, 3)
@@ -129,6 +130,7 @@ describe "src/cy/commands/navigation", ->
       it "throws passing 2 invalid arguments", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(true, 1)
@@ -136,6 +138,7 @@ describe "src/cy/commands/navigation", ->
       it "throws passing 1 invalid argument", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(1)
@@ -1494,6 +1497,7 @@ describe "src/cy/commands/navigation", ->
 
           `body` can only be a string or an object with no circular references.
           """
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
 
           done()
 

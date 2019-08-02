@@ -602,6 +602,7 @@ describe "src/cy/commands/connectors", ->
             lastLog = @lastLog
 
             expect(err.message).to.eq "`cy.invoke()` only accepts a string as the first argument."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/invoke")
             expect(lastLog.get("error")).to.eq err
             done()
 
@@ -1096,6 +1097,7 @@ describe "src/cy/commands/connectors", ->
             lastLog = @lastLog
 
             expect(err.message).to.include "`cy.its()` only accepts a single argument."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/its")
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 

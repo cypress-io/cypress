@@ -178,7 +178,10 @@ module.exports = {
     }
 
   cookies:
-    timed_out: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
+    timed_out: (obj) -> {
+      message: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
+      docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
+    }
 
   deprecated:
     agents: "`cy.agents()` is deprecated. Use `cy.stub()` and `cy.spy()` instead."
@@ -507,49 +510,66 @@ module.exports = {
     }
 
   invoke_its:
-    nonexistent_prop:
+    nonexistent_prop: {
+      message: """
+        #{cmd('{{cmd}}')} errored because the property: `{{prop}}` does not exist on your subject.
+
+        #{cmd('{{cmd}}')} waited for the specified property `{{prop}}` to exist, but it never did.
+
+        If you do not expect the property `{{prop}}` to exist, then add an assertion such as:
+
+        `cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`
+        """
+      docsUrl: "https://on.cypress.io/{{cmd}}"
+    }
+    previous_prop_null_or_undefined: {
+      message: """
+        #{cmd('{{cmd}}')} errored because the property: `{{previousProp}}` returned a `{{value}}` value. The property: `{{prop}}` does not exist on a `{{value}}` value.
+
+        #{cmd('{{cmd}}')} waited for the specified property `{{prop}}` to become accessible, but it never did.
+
+        If you do not expect the property `{{prop}}` to exist, then add an assertion such as:
+
+        `cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')`
+        """
+      docsUrl: "https://on.cypress.io/{{cmd}}"
+    }
+    invalid_1st_arg: {
+      message: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
+      docsUrl: "https://on.cypress.io/{{cmd}}"
+    }
+    invalid_num_of_args: {
+      message: """
+        #{cmd('{{cmd}}')} only accepts a single argument.
+
+        If you want to invoke a function with arguments, use `.invoke()`.
+        """
+      docsUrl: "https://on.cypress.io/{{cmd}}"
+    }
+    timed_out: {
+      message: """
+        #{cmd('{{cmd}}')} timed out after waiting `{{timeout}}ms`.
+
+        Your callback function returned a promise which never resolved.
+
+        The callback function was:
+
+        {{func}}
       """
-      #{cmd('{{cmd}}')} errored because the property: `{{prop}}` does not exist on your subject.
-
-      #{cmd('{{cmd}}')} waited for the specified property `{{prop}}` to exist, but it never did.
-
-      If you do not expect the property `{{prop}}` to exist, then add an assertion such as:
-
-      `cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`
-      """
-    previous_prop_null_or_undefined:
-      """
-      #{cmd('{{cmd}}')} errored because the property: `{{previousProp}}` returned a `{{value}}` value. The property: `{{prop}}` does not exist on a `{{value}}` value.
-
-      #{cmd('{{cmd}}')} waited for the specified property `{{prop}}` to become accessible, but it never did.
-
-      If you do not expect the property `{{prop}}` to exist, then add an assertion such as:
-
-      `cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')`
-      """
-    invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
-    invalid_num_of_args:
-      """
-      #{cmd('{{cmd}}')} only accepts a single argument.
-
-      If you want to invoke a function with arguments, use `.invoke()`.
-      """
-    timed_out:
-      """
-      #{cmd('{{cmd}}')} timed out after waiting `{{timeout}}ms`.
-
-      Your callback function returned a promise which never resolved.
-
-      The callback function was:
-
-      {{func}}
-    """
+      docsUrl: "https://on.cypress.io/{{cmd}}" 
+    }
 
   location:
-    invalid_key: "Location object does not have key: `{{key}}`"
+    invalid_key: {
+      message: "Location object does not have key: `{{key}}`"
+      docsUrl: "https://on.cypress.io/location" 
+    }
 
   log:
-    invalid_argument: "Cypress.log() can only be called with an options object. Your argument was: '{{arg}}'"
+    invalid_argument: {
+      message: "`Cypress.log()` can only be called with an options object. Your argument was: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/cypress-log"
+    }
 
   miscellaneous:
     custom_command_interface_changed: (obj) -> {
@@ -638,8 +658,14 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/returning-promise-and-commands-in-test"
     }
-    invalid_command: "Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n"
-    invalid_overwrite: "Cannot overwite command for: `{{name}}`. An existing command does not exist by that name."
+    invalid_command: {
+      message: "Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n"
+      docsUrl: "https://on.cypress.io/api"
+    }
+    invalid_overwrite: {
+      message: "Cannot overwite command for: `{{name}}`. An existing command does not exist by that name."
+      docsUrl: "https://on.cypress.io/api"
+    }
     invoking_child_without_parent: (obj) ->
       """
       Oops, it looks like you are trying to call a child command before running a parent command.
@@ -738,26 +764,44 @@ module.exports = {
     no_global: "Angular global (`window.angular`) was not found in your window. You cannot use #{cmd('ng')} methods without angular."
 
   reload:
-    invalid_arguments: "#{cmd('reload')} can only accept a boolean or `options` as its arguments."
+    invalid_arguments: {
+      message: "#{cmd('reload')} can only accept a boolean or `options` as its arguments."
+      docsUrl: "https://on.cypress.io/reload"
+    }
 
   request:
-    body_circular: ({ path }) -> """
-      The `body` parameter supplied to #{cmd('request')} contained a circular reference at the path "#{path.join(".")}".
+    body_circular: ({ path }) -> {
+      message: """
+        The `body` parameter supplied to #{cmd('request')} contained a circular reference at the path "#{path.join(".")}".
 
-      `body` can only be a string or an object with no circular references.
-    """
-    status_code_flags_invalid: """
-    #{cmd('request')} was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }.
+        `body` can only be a string or an object with no circular references.
+      """
+      docsUrl: "https://on.cypress.io/request"
+    }
+    status_code_flags_invalid: {
+      message: """
+        #{cmd('request')} was invoked with `{ failOnStatusCode: false, retryOnStatusCodeFailure: true }`.
 
-    These options are incompatible with each other.
+        These options are incompatible with each other.
 
-     - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-     - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-     - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
-    """
-    auth_invalid: "#{cmd('request')} must be passed an object literal for the `auth` option."
-    gzip_invalid: "#{cmd('request')} requires the `gzip` option to be a boolean."
-    headers_invalid: "#{cmd('request')} requires the `headers` option to be an object literal."
+        - To retry on non-2xx status codes, pass `{ failOnStatusCode: true, retryOnStatusCodeFailure: true }`.
+        - To not retry on non-2xx status codes, pass `{ failOnStatusCode: true, retryOnStatusCodeFailure: true }`.
+        - To fail on non-2xx status codes without retrying (the default behavior), pass `{ failOnStatusCode: true, retryOnStatusCodeFailure: false }`
+      """
+      docsUrl: "https://on.cypress.io/request"
+    }
+    auth_invalid: {
+      message: "#{cmd('request')} must be passed an object literal for the `auth` option."
+      docsUrl: "https://on.cypress.io/request"
+    }
+    gzip_invalid: {
+      message: "#{cmd('request')} requires the `gzip` option to be a boolean."
+      docsUrl: "https://on.cypress.io/request"
+    }
+    headers_invalid: {
+      message: "#{cmd('request')} requires the `headers` option to be an object literal."
+      docsUrl: "https://on.cypress.io/request"
+    }
     invalid_method: "#{cmd('request')} was called with an invalid method: `{{method}}`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser."
     form_invalid: """
     #{cmd('request')} requires the `form` option to be a boolean.
