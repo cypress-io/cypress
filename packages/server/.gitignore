@@ -1,4 +1,5 @@
-lib/browsers/cri-client.js
-lib/util/ensure-url.js
-lib/util/proxy.js
+# we do not explicitly ignore JavaScript files in "lib/browsers" folder
+# because when we add TS files we do not transpile them as a build step
+# instead always use require hooks to transpile TS files on the fly
+
 .http-mitm-proxy
