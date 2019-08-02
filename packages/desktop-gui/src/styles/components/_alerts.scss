@@ -76,12 +76,14 @@
 }
 
 .project-content .alert-warning {
-  position: relative;
   border-bottom: 1px solid #ddd;
+  flex-grow: 0;
+  flex-shrink: 0;
+  position: relative;
 
   code, pre {
-    color: #8a6d3b;
     border: none;
+    color: #8a6d3b;
   }
 }
 
