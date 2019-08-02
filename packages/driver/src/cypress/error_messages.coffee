@@ -50,9 +50,6 @@ getHttpProps = (fields = []) ->
   .value()
 
 module.exports = {
-  add:
-    type_missing: "`Cypress.add(key, fn, type)` must include a type!"
-
   alias:
     invalid: "Invalid alias: `{{name}}`.\nYou forgot the `@`. It should be written as: `@{{displayName}}`."
     not_registered_with_available: "#{cmd('{{cmd}}')} could not find a registered alias for: `@{{displayName}}`.\nAvailable aliases are: `{{availableAliases}}`."
