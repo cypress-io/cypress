@@ -1546,6 +1546,7 @@ describe "src/cy/commands/querying", ->
         it "throws when text is #{val}", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq("`cy.contains()` can only accept a string, number or regular expression.")
+            expect(err.docsUrl).to.eq("https://on.cypress.io/contains")          
             done()
 
           cy.contains(val)
@@ -1553,6 +1554,7 @@ describe "src/cy/commands/querying", ->
       it "throws on a blank string", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "`cy.contains()` cannot be passed an empty string."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/contains")
           done()
 
         cy.contains("")
@@ -1621,6 +1623,7 @@ describe "src/cy/commands/querying", ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq 1
           expect(err.message).to.eq "`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/contains")
           done()
 
         cy.contains("Nested Find").should("have.length", 2)

@@ -108,7 +108,7 @@ $Cookies = (namespace, domain) ->
 
   _.each ["get", "set", "remove", "getAllCookies", "clearCookies"], (method) ->
     API[method] = ->
-      $errUtils.throwErrByPath("cookies.removed_method", {
+      $errUtils.throwErrByPath("deprecated.cookies.method", {
         args: { method }
       })
 

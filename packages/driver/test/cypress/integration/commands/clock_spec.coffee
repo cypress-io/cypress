@@ -90,6 +90,7 @@ describe "src/cy/commands/clock", ->
       it "throws if now is not a number (or options object)", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.equal("`cy.clock()` only accepts a number or an `options` object for its first argument. You passed: `\"250\"`")
+          expect(err.docsUrl).to.equal("https://on.cypress.io/clock")
           done()
 
         cy.clock("250")
@@ -97,6 +98,7 @@ describe "src/cy/commands/clock", ->
       it "throws if methods is not an array (or options object)", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.equal("`cy.clock()` only accepts an array of function names or an `options` object for its second argument. You passed: `\"setTimeout\"`")
+          expect(err.docsUrl).to.equal("https://on.cypress.io/clock")          
           done()
 
         cy.clock(0, "setTimeout")
@@ -104,6 +106,7 @@ describe "src/cy/commands/clock", ->
       it "throws if methods is not an array of strings (or options object)", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.equal("`cy.clock()` only accepts an array of function names or an `options` object for its second argument. You passed: `[42]`")
+          expect(err.docsUrl).to.equal("https://on.cypress.io/clock")          
           done()
 
         cy.clock(0, [42])
@@ -279,8 +282,7 @@ describe "src/cy/commands/clock", ->
           expect(clock).to.equal(@clock)
 
     it "defaults to 0ms", ->
-      cy
-        .clock()
+      cy.clock()
         .tick().then (clock) ->
           consoleProps = @logs[0].invoke("consoleProps")
           expect(consoleProps["Ticked"]).to.equal("0 milliseconds")
@@ -289,6 +291,7 @@ describe "src/cy/commands/clock", ->
       it "throws if there is not a clock", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.equal("`cy.tick()` cannot be called without first calling `cy.clock()`")
+          expect(err.docsUrl).to.equal('https://on.cypress.io/tick')          
           done()
 
         cy.tick()
@@ -296,6 +299,7 @@ describe "src/cy/commands/clock", ->
       it "throws if ms is not undefined or a number", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.equal("`clock.tick()`/`cy.tick()` only accepts a number as their argument. You passed: `\"100\"`")
+          expect(err.docsUrl).to.equal('https://on.cypress.io/tick')
           done()
 
         cy.clock().tick("100")

@@ -154,13 +154,28 @@ module.exports = {
     }
 
   clock:
-    invalid_1st_arg: "#{cmd('clock')} only accepts a number or an `options` object for its first argument. You passed: `{{arg}}`"
-    invalid_2nd_arg: "#{cmd('clock')} only accepts an array of function names or an `options` object for its second argument. You passed: `{{arg}}`"
+    invalid_1st_arg: {
+      message: "#{cmd('clock')} only accepts a number or an `options` object for its first argument. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/clock"
+    }
+    invalid_2nd_arg: {
+      message: "#{cmd('clock')} only accepts an array of function names or an `options` object for its second argument. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/clock"
+    }
 
   contains:
-    empty_string: "#{cmd('contains')} cannot be passed an empty string."
-    invalid_argument: "#{cmd('contains')} can only accept a string, number or regular expression."
-    length_option: "#{cmd('contains')} cannot be passed a `length` option because it will only ever return 1 element."
+    empty_string: {
+      message: "#{cmd('contains')} cannot be passed an empty string."
+      docsUrl: "https://on.cypress.io/contains"
+    }
+    invalid_argument: {
+      message: "#{cmd('contains')} can only accept a string, number or regular expression."
+      docsUrl: "https://on.cypress.io/contains"
+    }
+    length_option: {
+      message: "#{cmd('contains')} cannot be passed a `length` option because it will only ever return 1 element."
+      docsUrl: ""
+    }
 
   cookies:
     removed_method: """
@@ -184,6 +199,19 @@ module.exports = {
 
       Please update your code. You should be able to safely do a find/replace.
     """
+    cookies:
+      method: """
+        The `Cypress.Cookies.{{method}}()` method has been removed.
+
+        Setting, getting, and clearing cookies is now an asynchronous operation.
+
+        Replace this call with the appropriate command such as:
+          - `cy.getCookie()`
+          - `cy.getCookies()`
+          - `cy.setCookie()`
+          - `cy.clearCookie()`
+          - `cy.clearCookies()`
+      """
     request:
       failonstatus: "The #{cmd('request')} `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time."
     server:
@@ -906,8 +934,14 @@ module.exports = {
     """
 
   tick:
-    invalid_argument: "`clock.tick()`/#{cmd('tick')} only accepts a number as their argument. You passed: `{{arg}}`"
-    no_clock: "#{cmd('tick')} cannot be called without first calling #{cmd('clock')}"
+    invalid_argument: {
+      message: "`clock.tick()`/#{cmd('tick')} only accepts a number as their argument. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/tick"
+    }
+    no_clock: {
+      message: "#{cmd('tick')} cannot be called without first calling #{cmd('clock')}"
+      docsUrl: "https://on.cypress.io/tick"
+    }
 
   then:
     callback_mixes_sync_and_async: """
