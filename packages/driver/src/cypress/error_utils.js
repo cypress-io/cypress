@@ -134,12 +134,16 @@ const internalErr = (err) => {
   return err
 }
 
+const cypressErrObj = (errObj) => {
+  errObj.name = 'CypressError'
+
+  return errObj
+}
+
 const cypressErr = (msg) => {
   const err = new Error(msg)
 
-  err.name = 'CypressError'
-
-  return err
+  return cypressErrObj(err)
 }
 
 const normalizeMsgNewLines = (message) => {
@@ -302,6 +306,7 @@ module.exports = {
   warnByPath,
   internalErr,
   cypressErr,
+  cypressErrObj,
   normalizeMsgNewLines,
   errObjByPath,
   getErrMsgWithObjByPath,

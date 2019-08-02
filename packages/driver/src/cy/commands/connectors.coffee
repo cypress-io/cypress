@@ -4,6 +4,7 @@ Promise = require("bluebird")
 $dom = require("../../dom")
 $utils = require("../../cypress/utils")
 $errUtils = require("../../cypress/error_utils")
+$errMessages = require("../../cypress/error_messages")
 
 returnFalseIfThenable = (key, args...) ->
   if key is "then" and _.isFunction(args[0]) and _.isFunction(args[1])
@@ -174,44 +175,44 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
     propertyNotOnSubjectErr = (prop) ->
-      $errUtils.throwErrByPath("invoke_its.nonexistent_prop", {
-        args: {
+      $errUtils.cypressErrObj(
+        $errUtils.errObjByPath($errMessages, "invoke_its.nonexistent_prop", {
           prop,
           cmd: name
-        }
-      })
+        })
+      )
 
     propertyValueNullOrUndefinedErr = (prop, value) ->
       errMessagePath = if isCmdIts then "its" else "invoke"
 
-      $errUtils.throwErrByPath("#{errMessagePath}.null_or_undefined_prop_value", {
-        args: {
+      $errUtils.cypressErrObj(
+        $errUtils.errObjByPath($errMessages, "#{errMessagePath}.null_or_undefined_prop_value", {
           prop,
           value,
           cmd: name
-        }
-      })
+        })
+      )
 
     subjectNullOrUndefinedErr = (prop, value) ->
       errMessagePath = if isCmdIts then "its" else "invoke"
 
-      $errUtils.throwErrByPath("#{errMessagePath}.subject_null_or_undefined", {
-        args: {
+      $errUtils.cypressErrObj(
+        $errUtils.errObjByPath($errMessages, "#{errMessagePath}.subject_null_or_undefined", {
           prop,
           value,
           cmd: name
-        }
-      })
+        })
+      )
 
     propertyNotOnPreviousNullOrUndefinedValueErr = (prop, value, previousProp) ->
-      $errUtils.throwErrByPath("invoke_its.previous_prop_null_or_undefined", {
-        args: {
+      $errUtils.cypressErrObj(
+        $errUtils.errObjByPath($errMessages, "invoke_its.previous_prop_null_or_undefined", {
           prop,
           value,
           previousProp,
           cmd: name
-        }
-      })
+        })
+      )
 
     traverseObjectAtPath = (acc, pathsArray, index = 0) ->
       ## traverse at this depth
@@ -315,6 +316,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               Subject: getFormattedElement(actualSubject)
               Yielded: getFormattedElement(value)
             })
+
+            if traversalErr
+              obj.Error = "#{traversalErr.name}: #{traversalErr.message}"
 
             return obj
         })
