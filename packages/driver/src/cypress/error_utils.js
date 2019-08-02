@@ -185,10 +185,15 @@ const errObjByPath = (errLookupObj, errPath, args) => {
     }
   }
 
-  return _.extend({}, errObj, {
+  let extendErrObj = {
     message: replaceErrMsgTokens(errObj.message, args),
-    docsUrl: replaceErrMsgTokens(errObj.docsUrl, args),
-  })
+  }
+
+  if (errObj.docsUrl) {
+    extendErrObj.docsUrl = replaceErrMsgTokens(errObj.docsUrl, args)
+  }
+
+  return _.extend({}, errObj, extendErrObj)
 }
 
 const errMsgByPath = (errPath, args) => {

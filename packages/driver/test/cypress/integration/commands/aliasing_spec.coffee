@@ -129,7 +129,7 @@ describe "src/cy/commands/aliasing", ->
       _.each [null, undefined, {}, [], 123], (value) =>
         it "throws if when passed: #{value}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "`cy.as()` can only accept a string argument."
+            expect(err.message).to.eq "`cy.as()` can only accept a string."
             expect(err.docsUrl).to.eq "https://on.cypress.io/as"
             done()
 
@@ -137,7 +137,7 @@ describe "src/cy/commands/aliasing", ->
 
       it "throws on blank string", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "`cy.as()` cannot be passed an empty string argument."
+          expect(err.message).to.eq "`cy.as()` cannot be passed an empty string."
           expect(err.docsUrl).to.eq "https://on.cypress.io/as"
           done()
 

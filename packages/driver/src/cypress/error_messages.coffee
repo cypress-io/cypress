@@ -174,7 +174,7 @@ module.exports = {
     }
     length_option: {
       message: "#{cmd('contains')} cannot be passed a `length` option because it will only ever return 1 element."
-      docsUrl: ""
+      docsUrl: "https://on.cypress.io/contains"
     }
 
   cookies:
