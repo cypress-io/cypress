@@ -1443,7 +1443,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           expect(err.message).to.eq(`\`cy.click()\` can only be called on a single element. Your subject contained ${num} elements. Pass \`{ multiple: true }\` if you want to serially click each element.`)
-
+          expect(err.docsUrl).to.eq('https://on.cypress.io/click')
           done()
         })
 
@@ -1645,6 +1645,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
           expect(err.message).to.eq('`cy.click()` cannot be called on a `<select>` element. Use `cy.select()` command instead to change the value.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
         })

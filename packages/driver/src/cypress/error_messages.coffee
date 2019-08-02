@@ -118,25 +118,40 @@ module.exports = {
     }
 
   clear:
-    invalid_element: """
-      #{cmd('clear')} failed because it requires a valid clearable element.
+    invalid_element: {
+      message: """
+        #{cmd('clear')} failed because it requires a valid clearable element.
 
-      The element cleared was:
+        The element cleared was:
 
-        > `{{node}}`
+          > `{{node}}`
 
-      Cypress considers a `textarea`, any `element` with a `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid clearable elements.
-    """
+        Cypress considers a `textarea`, any `element` with a `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid clearable elements.
+      """
+      docsUrl: "https://on.cypress.io/clear"
+    }
 
   clearCookie:
-    invalid_argument: "#{cmd('clearCookie')} must be passed a string argument for name."
+    invalid_argument: {
+      message: "#{cmd('clearCookie')} must be passed a string argument for name."
+      docsUrl: "https://on.cypress.io/clearcookie"
+    }
 
   clearLocalStorage:
-    invalid_argument: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
+    invalid_argument: {
+      message: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
+      docsUrl: "https://on.cypress.io/clearlocalstorage"
+    }
 
   click:
-    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass `{ multiple: true }` if you want to serially click each element."
-    on_select_element: "#{cmd('click')} cannot be called on a `<select>` element. Use #{cmd('select')} command instead to change the value."
+    multiple_elements: {
+      message: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass `{ multiple: true }` if you want to serially click each element."
+      docsUrl: "https://on.cypress.io/click"
+    }
+    on_select_element: {
+      message: "#{cmd('click')} cannot be called on a `<select>` element. Use #{cmd('select')} command instead to change the value."
+      docsUrl: "https://on.cypress.io/select"
+    }
 
   clock:
     already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."

@@ -4865,6 +4865,7 @@ If you want to skip parsing special character sequences and type the text exactl
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('`<form id="checkboxes">...</form>`')
           expect(err.message).to.include('Cypress considers a `textarea`, any `element` with a `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid clearable elements.')
+          expect(err.docsUrl).to.include('https://on.cypress.io/clear')
 
           done()
         })
@@ -4878,6 +4879,7 @@ If you want to skip parsing special character sequences and type the text exactl
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('`<div id="dom">...</div>`')
           expect(err.message).to.include('Cypress considers a `textarea`, any `element` with a `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid clearable elements.')
+          expect(err.docsUrl).to.include('https://on.cypress.io/clear')
 
           done()
         })
@@ -4891,6 +4893,7 @@ If you want to skip parsing special character sequences and type the text exactl
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('`<input type="radio" name="gender" value="male">`')
           expect(err.message).to.include('Cypress considers a `textarea`, any `element` with a `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid clearable elements.')
+          expect(err.docsUrl).to.include('https://on.cypress.io/clear')
 
           done()
         })
@@ -4904,6 +4907,7 @@ If you want to skip parsing special character sequences and type the text exactl
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('`<input type="checkbox" name="colors" value="blue">`')
           expect(err.message).to.include('Cypress considers a `textarea`, any `element` with a `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid clearable elements.')
+          expect(err.docsUrl).to.include('https://on.cypress.io/clear')
 
           done()
         })
