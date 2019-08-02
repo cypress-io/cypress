@@ -4,7 +4,7 @@ import * as $jquery from './jquery'
 import * as $window from './window'
 import * as $document from './document'
 import $utils from '../cypress/utils.coffee'
-
+import * as $selection from './selection'
 import _ from '../config/lodash'
 
 const fixedOrStickyRe = /(fixed|sticky)/
@@ -427,6 +427,30 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
   }
 
   return null
+}
+
+const isFocusedOrInFocused = (el) => {
+
+  const doc = $document.getDocumentFromElement(el)
+
+  const { activeElement, body } = doc
+
+  if (activeElementIsDefault(activeElement, body)) {
+    return false
+  }
+
+  let elToCheckCurrentlyFocused
+
+  if (isFocusable($(el))) {
+    elToCheckCurrentlyFocused = el
+  } else if (isContentEditable(el)) {
+    elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
+  }
+
+  if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    return true
+  }
+
 }
 
 const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
@@ -1038,6 +1062,7 @@ export {
   isTextarea,
   isType,
   isFocused,
+  isFocusedOrInFocused,
   isInputAllowingImplicitFormSubmission,
   isNeedSingleValueChangeInputElement,
   canSetSelectionRangeElement,

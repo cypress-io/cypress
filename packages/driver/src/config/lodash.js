@@ -2,7 +2,7 @@ const _ = require('lodash')
 
 const inflection = require('@cypress/underscore.inflection')(_)
 
-//# only export exactly what we need, nothing more!
+// only export exactly what we need, nothing more!
 _.mixin({
   clean: require('underscore.string/clean'),
   count: require('underscore.string/count'),

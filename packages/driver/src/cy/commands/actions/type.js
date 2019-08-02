@@ -7,7 +7,7 @@ const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
 const Debug = require('debug')
-const debug = Debug('driver:command:type')
+const debug = Debug('cypress:driver:command:type')
 
 // const dateRegex = /^\d{4}-\d{2}-\d{2}/
 // const monthRegex = /^\d{4}-(0\d|1[0-2])/
@@ -33,7 +33,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
-      simulated: !!Cypress.config('simulatedOnly'),
+      parseSpecialCharSequences: true,
       delay: 10,
       release: true,
       waitForAnimations: config('waitForAnimations'),
@@ -134,7 +134,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         return (
           ($dom.isSelector($el, 'input') && $dom.isType($el, 'submit')) ||
-          ($dom.isSelector($el, 'button') && !$dom.isType($el, 'button'))
+          ($dom.isSelector($el, 'button') && !$dom.isType($el, 'button') && !$dom.isType($el, 'reset'))
         )
       })
     }
@@ -147,23 +147,32 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return
         }
 
-        const multipleInputsAndNoSubmitElements = function (form) {
-          const inputs = form.find('input')
+        const multipleInputsAllowImplicitSubmissionAndNoSubmitElements = function (form) {
           const submits = getDefaultButtons(form)
 
-          return inputs.length > 1 && submits.length === 0
+          // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+          // some types of inputs can submit the form when hitting {enter}
+          // but only if they are the sole input that allows implicit submission
+          // and there are no buttons or input[submits] in the form
+          const implicitSubmissionInputs = form.find('input').filter((__, input) => {
+            const $input = $dom.wrap(input)
+
+            return $elements.isInputAllowingImplicitFormSubmission($input)
+          })
+
+          return (implicitSubmissionInputs.length > 1) && (submits.length === 0)
         }
 
-        //# throw an error here if there are multiple form parents
+        // throw an error here if there are multiple form parents
 
-        //# bail if we have multiple inputs and no submit elements
-        if (multipleInputsAndNoSubmitElements(form)) {
+        // bail if we have multiple inputs allowing implicit submission and no submit elements
+        if (multipleInputsAllowImplicitSubmissionAndNoSubmitElements(form)) {
           return
         }
 
         const clickedDefaultButton = function (button) {
-          //# find the 'default button' as per HTML spec and click it natively
-          //# do not issue mousedown / mouseup since this is supposed to be synthentic
+          // find the 'default button' as per HTML spec and click it natively
+          // do not issue mousedown / mouseup since this is supposed to be synthentic
           if (button.length) {
             button.get(0).click()
 
@@ -171,6 +180,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
 
           return false
+
         }
 
         const getDefaultButton = (form) => {
@@ -231,6 +241,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         chars: charsToType,
         delay: options.delay,
         release: options.release,
+        parseSpecialCharSequences: options.parseSpecialCharSequences,
         window: win,
         force: options.force,
         simulated: options.simulated,
@@ -389,42 +400,32 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         return type()
       }
 
-      if (!$elements.isFocusableWhenNotDisabled(options.$el)) {
-        const node = $dom.stringify(options.$el)
+      // if (!$elements.isFocusableWhenNotDisabled(options.$el)) {
+      //   const node = $dom.stringify(options.$el)
 
-        $utils.throwErrByPath('type.not_on_typeable_element', {
-          onFail: options._log,
-          args: { node },
-        })
-      }
-
-      let elToCheckCurrentlyFocused
-      //# if the subject is already the focused element, start typing
-      //# we handle contenteditable children by getting the host contenteditable,
-      //# and seeing if that is focused
-      //# Checking first if element is focusable accounts for focusable els inside
-      //# of contenteditables
-      let $focused = cy.getFocused()
-
-      $focused = $focused && $focused[0]
-
-      if ($elements.isFocusable(options.$el)) {
-        elToCheckCurrentlyFocused = options.$el[0]
-      } else if ($elements.isContentEditable(options.$el[0])) {
-        elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
-      }
+      //   $utils.throwErrByPath('type.not_on_typeable_element', {
+      //     onFail: options._log,
+      //     args: { node },
+      //   })
+      // }
 
       options.ensure = {
         position: true,
         visibility: true,
         receivability: true,
-        notAnimatingOrCovered: true,
+        notAnimating: true,
+        notCovered: true,
         notReadonly: true,
       }
 
-      if (elToCheckCurrentlyFocused && (elToCheckCurrentlyFocused === $focused)) {
+      // if the subject is already the focused element, start typing
+      // we handle contenteditable children by getting the host contenteditable,
+      // and seeing if that is focused
+      // Checking first if element is focusable accounts for focusable els inside
+      // of contenteditables
+      if ($elements.isFocusedOrInFocused(options.$el.get(0))) {
+        debug('element is already focused, only checking readOnly property')
         options.ensure = {
-          receivability: true,
           notReadonly: true,
         }
       }
@@ -435,15 +436,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         },
 
         onReady ($elToClick) {
-          const $focused = cy.getFocused()
-
-          //# if we dont have a focused element
-          //# or if we do and its not ourselves
-          //# then issue the click
-          if (
-            !$focused ||
-            ($focused && $focused.get(0) !== $elToClick.get(0))
-          ) {
+          // if we dont have a focused element
+          // or if we do and its not ourselves
+          // then issue the click
+          if (!$elements.isFocusedOrInFocused($elToClick[0])) {
             //# click the element first to simulate focus
             //# and typical user behavior in case the window
             //# is out of focus

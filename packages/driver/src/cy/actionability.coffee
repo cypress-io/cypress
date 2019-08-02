@@ -215,7 +215,8 @@ verify = (cy, $el, options, callbacks) ->
       position: true,
       visibility: true,
       receivability: true,
-      notAnimatingOrCovered: true,
+      notCovered: true,
+      notAnimating: true,
       notReadonly: false,
       custom: false
     }
@@ -232,7 +233,7 @@ verify = (cy, $el, options, callbacks) ->
 
   ## if we have a position we must validate
   ## this ahead of time else bail early
-  if position and options.ensure.position
+  if options.ensure.position and position
     try
       cy.ensureValidPosition(position, _log)
     catch err
@@ -267,7 +268,7 @@ verify = (cy, $el, options, callbacks) ->
 
       ## if force is true OR waitForAnimations is false
       ## then do not perform these additional ensures...
-      if (options.ensure.notAnimatingOrCovered) and (force isnt true) and (options.waitForAnimations isnt false)
+      if (options.ensure.notAnimating) and (force isnt true) and (options.waitForAnimations isnt false)
         ## store the coords that were absolute
         ## from the window or from the viewport for sticky elements
         ## (see https://github.com/cypress-io/cypress/pull/1478)
@@ -282,7 +283,7 @@ verify = (cy, $el, options, callbacks) ->
         ## to figure out if its being covered by another element.
         ## this calculation is relative from the viewport so we
         ## only care about fromViewport coords
-        $elAtCoords = ensureElIsNotCovered(cy, win, $el, coords.fromViewport, options, _log, onScroll)
+        $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromViewport, options, _log, onScroll)
 
       ## pass our final object into onReady
       finalEl = $elAtCoords ? $el

@@ -1,7 +1,6 @@
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
-const $selection = require('../../../../../src/dom/selection')
 
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
@@ -556,12 +555,8 @@ describe('src/cy/commands/actions/type', () => {
             detail: 0,
             key: 'a',
             keyCode: 65, // deprecated but fired by chrome always uppercase in the ASCII table
-            layerX: 0,
-            layerY: 0,
             location: 0,
             metaKey: false,
-            pageX: 0,
-            pageY: 0,
             repeat: false,
             shiftKey: false,
             type: 'keydown',
@@ -590,12 +585,8 @@ describe('src/cy/commands/actions/type', () => {
             detail: 0,
             key: 'a',
             keyCode: 97, // deprecated
-            layerX: 0,
-            layerY: 0,
             location: 0,
             metaKey: false,
-            pageX: 0,
-            pageY: 0,
             repeat: false,
             shiftKey: false,
             type: 'keypress',
@@ -624,12 +615,8 @@ describe('src/cy/commands/actions/type', () => {
             detail: 0,
             key: 'a',
             keyCode: 65, // deprecated but fired by chrome always uppercase in the ASCII table
-            layerX: 0,
-            layerY: 0,
             location: 0,
             metaKey: false,
-            pageX: 0,
-            pageY: 0,
             repeat: false,
             shiftKey: false,
             type: 'keyup',
@@ -652,14 +639,8 @@ describe('src/cy/commands/actions/type', () => {
           expect(obj).to.deep.eq({
             bubbles: true,
             cancelable: true,
-            charCode: 0,
             data: 'a',
             detail: 0,
-            keyCode: 0,
-            layerX: 0,
-            layerY: 0,
-            pageX: 0,
-            pageY: 0,
             type: 'textInput',
             view: cy.state('window'),
             which: 0,
@@ -3215,7 +3196,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3223,7 +3204,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3231,7 +3212,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3239,7 +3220,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3247,7 +3228,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0])
         })
       })
 
@@ -3308,7 +3289,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').invoke('attr', 'maxlength', '5').type('foobar{leftarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 4, end: 4 })
         })
       })
@@ -3317,7 +3298,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3326,7 +3307,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type(`oo{leftarrow}{leftarrow}{leftarrow}f${'{leftarrow}'.repeat(5)}`)
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 0, end: 0 })
         })
       })
@@ -3335,7 +3316,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3348,7 +3329,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('bar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3357,7 +3338,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 1, end: 1 })
         })
       })
@@ -3372,7 +3353,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get(':text:first').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$(':text:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$(':text:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3381,7 +3362,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('#comments').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('#comments').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('#comments').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3649,14 +3630,18 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       context('2 inputs, no \'submit\' elements, only 1 input allowing implicit submission', () => {
-        it('does submit event', function (done) {
+        it('does submit event', function () {
+          const submit = cy.stub().as('submit')
+
           this.$forms.find('#no-buttons-and-only-one-input-allowing-implicit-submission').submit((e) => {
             e.preventDefault()
-
-            done()
+            submit()
           })
 
           cy.get('#no-buttons-and-only-one-input-allowing-implicit-submission input:first').type('f{enter}')
+          cy.then(() => {
+            expect(submit).calledOnce
+          })
         })
       })
 
@@ -3744,15 +3729,21 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      context('2 inputs, 1 \'submit\' button[type=submit], 1 \'reset\' button[type=reset]', () => {
-        it('triggers form submit', function (done) {
+      context(`2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=reset]`, () => {
+        it('triggers form submit', function () {
+          const submit = cy.stub()
+
           this.$forms.find('#multiple-inputs-and-reset-and-submit-buttons').submit((e) => {
             e.preventDefault()
-
-            done()
+            submit()
           })
 
-          cy.get('#multiple-inputs-and-reset-and-submit-buttons input:first').type('foo{enter}')
+          cy.get('#multiple-inputs-and-reset-and-submit-buttons input:first')
+          .type('foo{enter}')
+
+          cy.then(() => {
+            expect(submit).calledOnce
+          })
         })
 
         it('causes click event on the button[type=submit]', function (done) {
@@ -4235,7 +4226,7 @@ describe('src/cy/commands/actions/type', () => {
           expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
           expect(err.message).to.include('The element typed into was:')
           expect(err.message).to.include('<form id="by-id">...</form>')
-          expect(err.message).to.include('Cypress considers the \'body\', \'textarea\', any \'element\' with a \'tabindex\' or \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid typeable elements.')
+          expect(err.message).to.include(`Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, any focusable 'element', or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.`)
 
           done()
         })
@@ -4345,15 +4336,10 @@ https://on.cypress.io/type`)
         cy.get(':text:first').type('foo{bar}')
       })
 
-      it('throws when attemping to type tab', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('{tab} isn\'t a supported character sequence. You\'ll want to use the command cy.tab(), which is not ready yet, but when it is done that\'s what you\'ll use.')
-
-          done()
-        })
+      it('does not throw when attemping to type tab', function () {
 
         cy.get(':text:first').type('foo{tab}')
+
       })
 
       it('throws on an empty string', function (done) {

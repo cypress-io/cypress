@@ -2,9 +2,9 @@ const $dom = require('../dom')
 const $elements = require('../dom/elements')
 const $ = require('jquery')
 const _ = require('lodash')
-const $Keyboard = require('./keyboard')
+const $Keyboard = require('./keyboard').default
 const $selection = require('../dom/selection')
-const debug = require('debug')('driver:mouse')
+const debug = require('debug')('cypress:driver:mouse')
 
 /**
  * @typedef Coords
@@ -330,12 +330,6 @@ const create = (state, focused) => {
         return mouseDownEvents
       }
 
-      if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
-        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
-          $selection.moveSelectionToEnd(el)
-        }
-      }
-
       //# retrieve the first focusable $el in our parent chain
       const $elToFocus = $elements.getFirstFocusableEl($(el))
 
@@ -355,6 +349,13 @@ const create = (state, focused) => {
           focused.fireFocus($elToFocus.get(0))
         }
 
+      }
+
+      if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
+        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
+          debug('moveSelectionToEnd due to click')
+          $selection.moveSelectionToEnd($dom.getDocumentFromElement(el))
+        }
       }
 
       return mouseDownEvents

@@ -11,7 +11,7 @@ import $utils from '../cypress/utils.coffee'
 import { keyboardMappings as USKeyboard } from '../cypress/UsKeyboardLayout'
 import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/types'
 
-const debug = Debug('driver:keyboard')
+const debug = Debug('cypress:driver:keyboard')
 
 export interface keyboardModifiers {
   alt: boolean
@@ -505,6 +505,13 @@ const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
   ArrowDown: (el) => {
     return $selection.moveCursorDown(el)
   },
+
+  Home: (el) => {
+    return $selection.moveCursorToLineStart(el)
+  },
+  End: (el) => {
+    return $selection.moveCursorToLineEnd(el)
+  },
 }
 
 const modifierChars = {
@@ -608,6 +615,7 @@ export default class Keyboard {
       onEnterPressed: _.noop,
       onNoMatchingSpecialChars: _.noop,
       onBeforeSpecialCharAction: _.noop,
+      parseSpecialCharSequences: true,
     })
 
     if (options.force) {
@@ -619,18 +627,25 @@ export default class Keyboard {
     const el = options.$el.get(0)
     const doc = $document.getDocumentFromElement(el)
 
-    const keys = _.flatMap(
-      options.chars.split(charsBetweenCurlyBracesRe),
-      (chars) => {
-        if (charsBetweenCurlyBracesRe.test(chars)) {
-          //# allow special chars and modifiers to be case-insensitive
-          return parseCharsBetweenCurlyBraces(chars) //.toLowerCase()
-        }
+    let keys: string[]
 
-        // ignore empty strings
-        return _.filter(_.split(chars, ''))
-      }
-    )
+    if (!options.parseSpecialCharSequences) {
+      keys = options.chars.split('')
+    } else {
+      keys = _.flatMap(
+        options.chars.split(charsBetweenCurlyBracesRe),
+        (chars) => {
+          if (charsBetweenCurlyBracesRe.test(chars)) {
+            //# allow special chars and modifiers to be case-insensitive
+            return parseCharsBetweenCurlyBraces(chars) //.toLowerCase()
+          }
+
+          // ignore empty strings
+          return _.filter(_.split(chars, ''))
+        }
+      )
+
+    }
 
     const keyDetailsArr = _.map(
       keys,
