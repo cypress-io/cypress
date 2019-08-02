@@ -54,9 +54,32 @@ describe "lib/server", ->
 
         done()
 
-      @setup({onError: onError})
+      @setup({ onError })
       .then (srv) ->
         conn = srv._makeDirectConnection({url: "localhost:8444"}, socket, head)
+
+      return
+
+    ## https://github.com/cypress-io/cypress/issues/3250
+    it "does not crash when an erroneous URL is provided, just destroys socket", (done) ->
+      socket = new EE()
+      socket.destroy = @sandbox.stub()
+      head = {}
+
+      onError = (err, socket, head, port) ->
+        expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:443")
+
+        expect(socket).to.eq(socket)
+        expect(head).to.eq(head)
+        expect(port).to.eq("443")
+
+        expect(socket.destroy).to.be.calledOnce
+
+        done()
+
+      @setup({ onError })
+      .then (srv) ->
+        conn = srv._makeDirectConnection({url: "%7Balgolia_application_id%7D-dsn.algolia.net:443"}, socket, head)
 
       return
 
@@ -79,7 +102,7 @@ describe "lib/server", ->
       process.env.HTTPS_PROXY = 'http://localhost:8444'
       process.env.NO_PROXY = ''
 
-      @setup({onError: onError})
+      @setup({ onError })
       .then (srv) ->
         conn = srv._makeDirectConnection({url: "should-not-reach.invalid:11111"}, socket, head)
 
