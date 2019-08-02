@@ -287,6 +287,7 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error").message).to.eq "`cy.getCookie()` must be passed a string argument for name."
+          expect(lastLog.get("error").docsUrl).to.eq("https://on.cypress.io/getcookie")
           expect(lastLog.get("error")).to.eq(err)
           done()
 

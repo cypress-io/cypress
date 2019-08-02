@@ -265,6 +265,7 @@ describe "src/cy/commands/actions/focus", ->
       it "throws when not a[href],link[href],button,input,select,textarea,[tabindex]", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.focus()` can only be called on a valid focusable element. Your subject is a: `<form id=\"by-id\">...</form>`"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/focus")
           done()
 
         cy.get("form").focus()
@@ -278,6 +279,7 @@ describe "src/cy/commands/actions/focus", ->
 
         cy.on "fail", (err) =>
           expect(err.message).to.include "`cy.focus()` can only be called on a single element. Your subject contained #{@num} elements."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/focus")
           done()
 
       it "logs once when not dom subject", (done) ->

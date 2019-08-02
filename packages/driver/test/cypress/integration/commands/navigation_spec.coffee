@@ -307,6 +307,7 @@ describe "src/cy/commands/navigation", ->
         it "throws on: '#{val}'", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq("`cy.go()` accepts only a string or number argument")
+            expect(err.docsUrl).to.eq("https://on.cypress.io/go")
             done()
 
           cy.go(val)
@@ -314,6 +315,8 @@ describe "src/cy/commands/navigation", ->
       it "throws on invalid string", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.go()` accepts either `forward` or `back`. You passed: `foo`")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/go")
+
           done()
 
         cy.go("foo")
@@ -321,6 +324,8 @@ describe "src/cy/commands/navigation", ->
       it "throws on zero", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.go()` cannot accept `0`. The number must be greater or less than `0`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/go")
+
           done()
 
         cy.go(0)

@@ -384,25 +384,58 @@ module.exports = {
     }
 
   fixture:
-    set_to_false: "#{cmd('fixture')} is not valid because you have configured `fixturesFolder` to `false`."
-    timed_out: "#{cmd('fixture')} timed out waiting `{{timeout}}ms` to receive a fixture. No fixture was ever sent by the server."
+    set_to_false: {
+      message: "#{cmd('fixture')} is not valid because you have configured `fixturesFolder` to `false`."
+      docsUrl: "https://on.cypress.io/fixture"
+    }
+    timed_out: {
+      message: "#{cmd('fixture')} timed out waiting `{{timeout}}ms` to receive a fixture. No fixture was ever sent by the server."
+      docsUrl: "https://on.cypress.io/fixture" 
+    }
 
   focus:
-    invalid_element: "#{cmd('focus')} can only be called on a valid focusable element. Your subject is a: `{{node}}`"
-    multiple_elements: "#{cmd('focus')} can only be called on a single element. Your subject contained {{num}} elements."
-    timed_out: "#{cmd('focus')} timed out because your browser did not receive any `focus` events. This is a known bug in Chrome when it is not the currently focused window."
+    invalid_element: {
+      message: "#{cmd('focus')} can only be called on a valid focusable element. Your subject is a: `{{node}}`"
+      docsUrl: "https://on.cypress.io/focus"  
+    }
+    multiple_elements: {
+      message: "#{cmd('focus')} can only be called on a single element. Your subject contained {{num}} elements."
+      docsUrl: "https://on.cypress.io/focus"
+    }
+    timed_out: {
+      message: "#{cmd('focus')} timed out because your browser did not receive any `focus` events. This is a known bug in Chrome when it is not the currently focused window."
+      docsUrl: "https://on.cypress.io/focus"
+    }
 
   get:
-    alias_invalid: "`{{prop}}` is not a valid alias property. Only numbers or `all` is permitted."
-    alias_zero: "`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@{{alias}}.1`"
+    alias_invalid: {
+      message: "`{{prop}}` is not a valid alias property. Only numbers or `all` is permitted."
+      docsUrl: "https://on.cypress.io/get"
+    }
+    alias_zero: {
+      message: "`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@{{alias}}.1`"
+      docsUrl: "https://on.cypress.io/get"
+    }
 
   getCookie:
-    invalid_argument: "#{cmd('getCookie')} must be passed a string argument for name."
+    invalid_argument: {
+      message: "#{cmd('getCookie')} must be passed a string argument for name."
+      docsUrl: "https://on.cypress.io/getcookie"
+    }
 
   go:
-    invalid_argument: "#{cmd('go')} accepts only a string or number argument"
-    invalid_direction: "#{cmd('go')} accepts either `forward` or `back`. You passed: `{{str}}`"
-    invalid_number: "#{cmd('go')} cannot accept `0`. The number must be greater or less than `0`."
+    invalid_argument: {
+      message: "#{cmd('go')} accepts only a string or number argument"
+      docsUrl: "https://on.cypress.io/go"
+    }
+    invalid_direction: {
+      message: "#{cmd('go')} accepts either `forward` or `back`. You passed: `{{str}}`"
+      docsUrl: "https://on.cypress.io/go"
+    }
+    invalid_number: {
+      message: "#{cmd('go')} cannot accept `0`. The number must be greater or less than `0`."
+      docsUrl: "https://on.cypress.io/go"
+    }
 
   hover:
     not_implemented: {
@@ -414,54 +447,64 @@ module.exports = {
       docsUrl: "https://on.cypress.io/hover"
     }
   invoke:
-    prop_not_a_function:
-      """
-      #{cmd('invoke')} errored because the property: `{{prop}}` returned a `{{type}}` value instead of a function. #{cmd('invoke')} can only be used on properties that return callable functions.
+    prop_not_a_function: {
+      message: """
+        #{cmd('invoke')} errored because the property: `{{prop}}` returned a `{{type}}` value instead of a function. #{cmd('invoke')} can only be used on properties that return callable functions.
 
-      #{cmd('invoke')} waited for the specified property `{{prop}}` to return a function, but it never did.
+        #{cmd('invoke')} waited for the specified property `{{prop}}` to return a function, but it never did.
 
-      If you want to assert on the property's value, then switch to use #{cmd('its')} and add an assertion such as:
+        If you want to assert on the property's value, then switch to use #{cmd('its')} and add an assertion such as:
 
-      `cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')`
-      """
-    subject_null_or_undefined:
-      """
-      #{cmd('invoke')} errored because your subject is: `{{value}}`. You cannot invoke any functions such as `{{prop}}` on a `{{value}}` value.
+        `cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')`
+        """
+      docsUrl: "https://on.cypress.io/invoke"
+    }
+    subject_null_or_undefined: {
+      message: """
+        #{cmd('invoke')} errored because your subject is: `{{value}}`. You cannot invoke any functions such as `{{prop}}` on a `{{value}}` value.
 
-      If you expect your subject to be `{{value}}`, then add an assertion such as:
+        If you expect your subject to be `{{value}}`, then add an assertion such as:
 
-      `cy.wrap({{value}}).should('be.{{value}}')`
-      """
-    null_or_undefined_prop_value:
-      """
-      #{cmd('invoke')} errored because the property: `{{prop}}` is not a function, and instead returned a `{{value}}` value.
+        `cy.wrap({{value}}).should('be.{{value}}')`
+        """
+      docsUrl: "https://on.cypress.io/invoke" 
+    }
+    null_or_undefined_prop_value: {
+      message: """
+        #{cmd('invoke')} errored because the property: `{{prop}}` is not a function, and instead returned a `{{value}}` value.
 
-      #{cmd('invoke')} waited for the specified property `{{prop}}` to become a callable function, but it never did.
+        #{cmd('invoke')} waited for the specified property `{{prop}}` to become a callable function, but it never did.
 
-      If you expect the property `{{prop}}` to be `{{value}}`, then switch to use #{cmd('its')} and add an assertion such as:
+        If you expect the property `{{prop}}` to be `{{value}}`, then switch to use #{cmd('its')} and add an assertion such as:
 
-      `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
-      """
+        `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
+        """
+      docsUrl: "https://on.cypress.io/invoke"  
+    }
 
   its:
-    subject_null_or_undefined:
-      """
-      #{cmd('its')} errored because your subject is: `{{value}}`. You cannot access any properties such as `{{prop}}` on a `{{value}}` value.
+    subject_null_or_undefined: {
+      message: """
+        #{cmd('its')} errored because your subject is: `{{value}}`. You cannot access any properties such as `{{prop}}` on a `{{value}}` value.
 
-      If you expect your subject to be `{{value}}`, then add an assertion such as:
+        If you expect your subject to be `{{value}}`, then add an assertion such as:
 
-      `cy.wrap({{value}}).should('be.{{value}}')`
-      """
-    null_or_undefined_prop_value:
-      """
-      #{cmd('its')} errored because the property: `{{prop}}` returned a `{{value}}` value.
+        `cy.wrap({{value}}).should('be.{{value}}')`
+        """
+      docsUrl: "https://on.cypress.io/its"
+    }
+    null_or_undefined_prop_value: {
+      message: """
+        #{cmd('its')} errored because the property: `{{prop}}` returned a `{{value}}` value.
 
-      #{cmd('its')} waited for the specified property `{{prop}}` to become accessible, but it never did.
+        #{cmd('its')} waited for the specified property `{{prop}}` to become accessible, but it never did.
 
-      If you expect the property `{{prop}}` to be `{{value}}`, then add an assertion such as:
+        If you expect the property `{{prop}}` to be `{{value}}`, then add an assertion such as:
 
-      `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
-      """
+        `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
+        """
+      docsUrl: "https://on.cypress.io/its"
+    }
 
   invoke_its:
     nonexistent_prop:

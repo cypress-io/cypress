@@ -1147,32 +1147,32 @@ describe "src/cy/commands/querying", ->
       it "throws when alias property is '0'", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@getUsers.1`"
+          expect(err.docsUrl).to.eq("http://on.cypress.io/get")
           done()
 
-        cy
-          .server()
-          .route(/users/, {}).as("getUsers")
-          .get("@getUsers.0")
+        cy.server()
+        cy.route(/users/, {}).as("getUsers")
+        cy.get("@getUsers.0")
 
       it "throws when alias property isnt just a digit", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`1b` is not a valid alias property. Only numbers or `all` is permitted."
+          expect(err.docsUrl).to.eq("http://on.cypress.io/get")
           done()
 
-        cy
-          .server()
-          .route(/users/, {}).as("getUsers")
-          .get("@getUsers.1b")
+        cy.server()
+        cy.route(/users/, {}).as("getUsers")
+        cy.get("@getUsers.1b")
 
       it "throws when alias property isnt a digit or 'all'", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`all ` is not a valid alias property. Only numbers or `all` is permitted."
+          expect(err.docsUrl).to.eq("http://on.cypress.io/get")
           done()
 
-        cy
-          .server()
-          .route(/users/, {}).as("getUsers")
-          .get("@getUsers.all ")
+        cy.server()
+        cy.route(/users/, {}).as("getUsers")
+        cy.get("@getUsers.all ")
 
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button").hide()
