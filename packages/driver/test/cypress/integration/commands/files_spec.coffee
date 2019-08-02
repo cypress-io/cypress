@@ -131,6 +131,7 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/readfile")
           done()
 
         `cy.readFile()`
@@ -143,6 +144,7 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/readfile")
           done()
 
         cy.readFile(2)
@@ -155,6 +157,7 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/readfile")
           done()
 
         cy.readFile("")
@@ -182,6 +185,8 @@ describe "src/cy/commands/files", ->
 
             > "EISDIR: illegal operation on a directory, read"
           """
+          expect(err.docsUrl).to.eq("https://on.cypress.io/readfile")
+
           done()
 
         cy.readFile("foo")
@@ -205,6 +210,7 @@ describe "src/cy/commands/files", ->
 
             `/path/to/foo.json`
           """)
+          expect(err.docsUrl).to.eq("https://on.cypress.io/readfile")
           done()
 
         cy.readFile("foo.json")
@@ -223,6 +229,7 @@ describe "src/cy/commands/files", ->
 
           `/path/to/foo.json`
           """)
+          expect(err.docsUrl).to.eq("httos://on.cypress.io/readfile")
           done()
 
         cy.readFile("foo.json").should("not.exist")
@@ -392,6 +399,7 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/writefile")
           done()
 
         `cy.writeFile()`
@@ -404,6 +412,7 @@ describe "src/cy/commands/files", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/writefile")
           done()
 
         cy.writeFile(2)
@@ -454,6 +463,7 @@ describe "src/cy/commands/files", ->
 
             > "WHOKNOWS: unable to write file"
           """
+          expect(err.docsUrl).to.eq("https://on.cypress.io/writefile")
 
           done()
 

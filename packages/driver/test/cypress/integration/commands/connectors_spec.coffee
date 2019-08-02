@@ -1279,6 +1279,7 @@ describe "src/cy/commands/connectors", ->
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("`cy.each()` timed out after waiting `50ms`.\n\nYour callback function returned a promise which never resolved.")
+            expect(err.docsUrl).to.include("https://on.cypress.io/each")
             done()
 
           cy.get("ul").each ($ul) ->
@@ -1294,6 +1295,7 @@ describe "src/cy/commands/connectors", ->
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("`cy.each()` must be passed a callback function.")
+            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
             done()
 
           cy.get("ul").each({})
@@ -1303,6 +1305,7 @@ describe "src/cy/commands/connectors", ->
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: `100`")
+            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
             done()
 
           cy.wrap(100).each ->
@@ -1312,6 +1315,7 @@ describe "src/cy/commands/connectors", ->
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: `{}`")
+            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
             done()
 
           cy.wrap({}).each ->

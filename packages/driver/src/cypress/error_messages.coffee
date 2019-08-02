@@ -178,18 +178,6 @@ module.exports = {
     }
 
   cookies:
-    removed_method: """
-      The `Cypress.Cookies.{{method}}()` method has been removed.
-
-      Setting, getting, and clearing cookies is now an asynchronous operation.
-
-      Replace this call with the appropriate command such as:
-        - `cy.getCookie()`
-        - `cy.getCookies()`
-        - `cy.setCookie()`
-        - `cy.clearCookie()`
-        - `cy.clearCookies()`
-    """
     timed_out: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
 
   deprecated:
@@ -225,7 +213,6 @@ module.exports = {
     xhr:
       requestjson: "`requestJSON` is now deprecated and will be removed in the next version. Update this to `requestBody` or `request.body`."
       responsejson: "`responseJSON` is now deprecated and will be removed in the next version. Update this to `responseBody` or `response.body`."
-
 
   dom:
     animating: {
@@ -319,46 +306,82 @@ module.exports = {
     }
 
   each:
-    invalid_argument: "#{cmd('each')} must be passed a callback function."
-    non_array: "#{cmd('each')} can only operate on an array like subject. Your subject was: `{{subject}}`"
+    invalid_argument: {
+      message: "#{cmd('each')} must be passed a callback function."
+      docsUrl: "https://on.cypress.io/each"
+    }
+    non_array: {
+      message: "#{cmd('each')} can only operate on an array like subject. Your subject was: `{{subject}}`"
+      docsUrl: "https://on.cypress.io/each"
+    }
 
   exec:
-    failed: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:
+    failed: {
+      message: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:
 
-        > "{{error}}"
-    """
-    invalid_argument: "#{cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'."
-    non_zero_exit: """
-      #{cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code.
+          > "{{error}}"
+      """
+      docsUrl: "https://on.cypress.io/exec"
+    }
+    invalid_argument: {
+      message: "#{cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'."
+      docsUrl: "https://on.cypress.io/exec"
+    }
+    non_zero_exit: {
+      message: """
+        #{cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code.
 
-      Pass `{failOnNonZeroExit: false}` to ignore exit code failures.
+        Pass `{failOnNonZeroExit: false}` to ignore exit code failures.
 
-      Information about the failure:
-      Code: {{code}}
-      {{output}}
-    """
-    timed_out: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting `{{timeout}}ms`."
+        Information about the failure:
+        Code: {{code}}
+        {{output}}
+      """
+      docsUrl: "https://on.cypress.io/exec"
+    }
+    timed_out: {
+      message: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting `{{timeout}}ms`."
+      docsUrl: "https://on.cypress.io/exec"
+    }
 
   files:
-    unexpected_error:  """#{cmd('{{cmd}}', '"{{file}}"')} failed while trying to {{action}} the file at the following path:
+    unexpected_error: (obj) -> {
+      message: """#{cmd('{{cmd}}', '"{{file}}"')} failed while trying to {{action}} the file at the following path:
 
-      `{{filePath}}`
+        `{{filePath}}`
 
-    The following error occurred:
+      The following error occurred:
 
-      > "{{error}}"
-    """
-    existent: """#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
+        > "{{error}}"
+      """
+      docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
+    }
+    existent: {
+      message: """#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
 
-      `{{filePath}}`
-    """
-    invalid_argument: "#{cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: `{{file}}`."
-    invalid_contents: "#{cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `{{contents}}`."
-    nonexistent: """#{cmd('readFile', '"{{file}}"')} failed because the file does not exist at the following path:
+        `{{filePath}}`
+      """
+      docsUrl: "https://on.cypress.io/readfile"
+    }
+    invalid_argument: (obj) -> {
+      message: "#{cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: `{{file}}`."
+      docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
+    }
+    invalid_contents: {
+      message: "#{cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `{{contents}}`."
+      docsUrl: "https://on.cypress.io/writefile"
+    }
+    nonexistent: {
+      message: """#{cmd('readFile', '"{{file}}"')} failed because the file does not exist at the following path:
 
-      `{{filePath}}`
-    """
-    timed_out: "#{cmd('{{cmd}}', '"{{file}}"')} timed out after waiting `{{timeout}}ms`."
+        `{{filePath}}`
+      """
+      docsUrl: "https://on.cypress.io/readfile"
+    }
+    timed_out: (obj) -> {
+      message: "#{cmd('{{cmd}}', '"{{file}}"')} timed out after waiting `{{timeout}}ms`."
+      docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
+    }
 
   fill:
     invalid_1st_arg: "#{cmd('fill')} must be passed an object literal as its 1st argument"
