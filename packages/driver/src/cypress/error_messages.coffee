@@ -111,13 +111,6 @@ module.exports = {
         This can sometimes happen if a previous assertion changed the subject.
       """
 
-  chain:
-    removed: """
-      #{cmd('chain')} was an undocumented command that has now been removed.
-
-      You can safely remove this from your code and it should work without it.
-    """
-
   check_uncheck:
     invalid_element: "#{cmd('{{cmd}}')} can only be called on `:checkbox`{{phrase}}. Your subject {{word}} a: `{{node}}`"
 
