@@ -6,8 +6,8 @@ const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $actionability = require('../../actionability')
 
-module.exports = (Commands, Cypress, cy, state, config) => {
-  const mouse = cy.internal.mouse
+module.exports = (Commands, Cypress, cy, state, config, log, devices) => {
+  const { mouse } = devices
 
   return Commands.addAll({ prevSubject: 'element' }, {
     click (subject, positionOrX, y, options = {}) {

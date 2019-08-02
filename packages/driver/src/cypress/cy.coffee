@@ -652,7 +652,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
 
-    internal: {
+    devices: {
       mouse: mouse
       keyboard: keyboard
     }

@@ -15,9 +15,9 @@ const monthRegex = /^\d{4}-(0\d|1[0-2])$/
 const weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
 const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
-module.exports = function (Commands, Cypress, cy, state, config) {
+module.exports = function (Commands, Cypress, cy, state, config, log, devices) {
 
-  const { keyboard } = cy.internal
+  const { keyboard } = devices
 
   return Commands.addAll({ prevSubject: 'element' }, {
     type (subject, chars, options = {}) {
