@@ -1147,7 +1147,7 @@ describe "src/cy/commands/querying", ->
       it "throws when alias property is '0'", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@getUsers.1`"
-          expect(err.docsUrl).to.eq("http://on.cypress.io/get")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/get")
           done()
 
         cy.server()
@@ -1157,7 +1157,7 @@ describe "src/cy/commands/querying", ->
       it "throws when alias property isnt just a digit", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`1b` is not a valid alias property. Only numbers or `all` is permitted."
-          expect(err.docsUrl).to.eq("http://on.cypress.io/get")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/get")
           done()
 
         cy.server()
@@ -1167,7 +1167,7 @@ describe "src/cy/commands/querying", ->
       it "throws when alias property isnt a digit or 'all'", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`all ` is not a valid alias property. Only numbers or `all` is permitted."
-          expect(err.docsUrl).to.eq("http://on.cypress.io/get")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/get")
           done()
 
         cy.server()
