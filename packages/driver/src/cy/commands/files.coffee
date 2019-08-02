@@ -2,6 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $errUtils = require("../../cypress/error_utils")
+$errMessages = require("../../cypress/error_messages")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
@@ -50,16 +51,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             onFail: (err) ->
               return unless err.type is "existence"
 
-              if contents?
+              { message, docsUrl } = if contents?
                 ## file exists but it shouldn't
-                err.message = $errUtils.errMsgByPath("files.existent", {
+                $errUtils.errObjByPath($errMessages, "files.existent", {
                   file, filePath
                 })
               else
                 ## file doesn't exist but it should
-                err.message = $errUtils.errMsgByPath("files.nonexistent", {
+                $errUtils.errObjByPath($errMessages, "files.nonexistent", {
                   file, filePath
                 })
+
+              err.message = message
+              err.docsUrl = docsUrl
+
             onRetry: verifyAssertions
           })
 

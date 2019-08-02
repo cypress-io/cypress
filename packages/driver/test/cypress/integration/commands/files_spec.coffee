@@ -229,7 +229,7 @@ describe "src/cy/commands/files", ->
 
           `/path/to/foo.json`
           """)
-          expect(err.docsUrl).to.eq("httos://on.cypress.io/readfile")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/readfile")
           done()
 
         cy.readFile("foo.json").should("not.exist")
