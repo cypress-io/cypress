@@ -185,6 +185,7 @@ const errObjByPath = (errLookupObj, errPath, args) => {
 
   return _.extend({}, errObj, {
     message: replaceErrMsgTokens(errObj.message, args),
+    docsUrl: replaceErrMsgTokens(errObj.docsUrl, args),
   })
 }
 

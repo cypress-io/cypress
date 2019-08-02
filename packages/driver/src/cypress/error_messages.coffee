@@ -112,7 +112,10 @@ module.exports = {
       """
 
   check_uncheck:
-    invalid_element: "#{cmd('{{cmd}}')} can only be called on `:checkbox`{{phrase}}. Your subject {{word}} a: `{{node}}`"
+    invalid_element: {
+      message: "#{cmd('{{cmd}}')} can only be called on `:checkbox`{{phrase}}. Your subject {{word}} a: `{{node}}`"
+      docsUrl: "https://on.cypress.io/{{cmd}}"
+    }
 
   clear:
     invalid_element: """
