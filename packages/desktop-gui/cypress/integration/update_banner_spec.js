@@ -44,7 +44,7 @@ describe('Update Banner', function () {
     it('does not display update banner when no update available', function () {
       this.updaterCheck.resolve(false)
 
-      cy.get('#updates-available').should('not.exist')
+      cy.get('.updates-available').should('not.exist')
 
       cy.get('html').should('not.have.class', 'has-updates')
     })
@@ -55,7 +55,7 @@ describe('Update Banner', function () {
 
     it('displays banner if new version is available', function () {
       this.updaterCheck.resolve(NEW_VERSION)
-      cy.get('#updates-available').should('be.visible')
+      cy.get('.updates-available').should('be.visible')
       cy.contains('New updates are available')
 
       cy.get('html').should('have.class', 'has-updates')
@@ -139,11 +139,16 @@ describe('Update Banner', function () {
       this.start()
       this.updaterCheck.resolve(NEW_VERSION)
 
-      cy.get('#updates-available')
+      cy.get('.updates-available')
     })
 
     it('displays all folders/specs within visible area', () => {
       cy.get('.folder-name')
+      .last()
+      .scrollIntoView()
+      .should('be.visible')
+
+      cy.get('.file-name')
       .last()
       .scrollIntoView()
       .should('be.visible')
