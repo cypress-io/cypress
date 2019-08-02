@@ -57,11 +57,11 @@ module.exports = {
 
   as:
     empty_string: {
-      message: "#{cmd('as')} cannot be passed an empty string argument."
+      message: "#{cmd('as')} cannot be passed an empty string."
       docsUrl: "https://on.cypress.io/as"
     }
     invalid_type: {
-      message: "#{cmd('as')} can only accept a string argument."
+      message: "#{cmd('as')} can only accept a string."
       docsUrl: "https://on.cypress.io/as"
     }
     invalid_first_token: {
