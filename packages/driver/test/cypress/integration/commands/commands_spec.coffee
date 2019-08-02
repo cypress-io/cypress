@@ -65,7 +65,7 @@ describe "src/cy/commands/commands", ->
           expect($ce.get(0)).to.eq(ce.get(0))
 
   context "errors", ->
-    it.only "throws when cannot find command by name", (done) ->
+    it "throws when cannot find command by name", (done) ->
       cy.on "fail", (err) ->
         cmds = _.keys(Cypress.Chainer.prototype)
         expect(cmds.length).to.be.gt(1)
