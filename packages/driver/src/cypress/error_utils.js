@@ -102,10 +102,6 @@ const throwErr = (err, options = {}) => {
     _.extend(err, errProps)
   }
 
-  // err.__proto__.toString = function () {
-  //   return `${err.name}: "${err.message}" \n\n${err.docsUrl} \n\n${err.stack}`
-  // }
-
   throw err
 }
 
