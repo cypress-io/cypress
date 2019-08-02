@@ -831,7 +831,8 @@ describe "src/cy/commands/cookies", ->
         cy.clearCookies()
 
       it "throws after timing out", (done) ->
-        Cypress.automation.resolves(Promise.delay(1000))
+        Cypress.automation.resolves([{ name: "foo" }])
+        Cypress.automation.withArgs("clear:cookies").resolves(Promise.delay(1000))
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
