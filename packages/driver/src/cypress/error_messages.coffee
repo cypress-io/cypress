@@ -393,13 +393,13 @@ module.exports = {
     }
     timed_out: {
       message: "#{cmd('fixture')} timed out waiting `{{timeout}}ms` to receive a fixture. No fixture was ever sent by the server."
-      docsUrl: "https://on.cypress.io/fixture" 
+      docsUrl: "https://on.cypress.io/fixture"
     }
 
   focus:
     invalid_element: {
       message: "#{cmd('focus')} can only be called on a valid focusable element. Your subject is a: `{{node}}`"
-      docsUrl: "https://on.cypress.io/focus"  
+      docsUrl: "https://on.cypress.io/focus"
     }
     multiple_elements: {
       message: "#{cmd('focus')} can only be called on a single element. Your subject contained {{num}} elements."
@@ -470,7 +470,7 @@ module.exports = {
 
         `cy.wrap({{value}}).should('be.{{value}}')`
         """
-      docsUrl: "https://on.cypress.io/invoke" 
+      docsUrl: "https://on.cypress.io/invoke"
     }
     null_or_undefined_prop_value: {
       message: """
@@ -482,7 +482,7 @@ module.exports = {
 
         `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
         """
-      docsUrl: "https://on.cypress.io/invoke"  
+      docsUrl: "https://on.cypress.io/invoke"
     }
 
   its:
@@ -556,13 +556,13 @@ module.exports = {
 
         {{func}}
       """
-      docsUrl: "https://on.cypress.io/{{cmd}}" 
+      docsUrl: "https://on.cypress.io/{{cmd}}"
     }
 
   location:
     invalid_key: {
       message: "Location object does not have key: `{{key}}`"
-      docsUrl: "https://on.cypress.io/location" 
+      docsUrl: "https://on.cypress.io/location"
     }
 
   log:
@@ -1170,11 +1170,14 @@ module.exports = {
     missing_preset: "#{cmd('viewport')} could not find a preset for: `{{preset}}`. Available presets are: {{presets}}"
 
   visit:
-    body_circular: ({ path }) -> """
-      The `body` parameter supplied to #{cmd('visit')} contained a circular reference at the path "#{path.join(".")}".
+    body_circular: ({ path }) -> {
+      message: """
+        The `body` parameter supplied to #{cmd('visit')} contained a circular reference at the path "#{path.join(".")}".
 
-      `body` can only be a string or an object with no circular references.
-    """
+        `body` can only be a string or an object with no circular references.
+      """
+      docsUrl: "https://on.cypress.io/visit"
+    }
     status_code_flags_invalid: """
 
     These options are incompatible with each other.

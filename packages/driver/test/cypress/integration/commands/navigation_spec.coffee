@@ -1497,7 +1497,7 @@ describe "src/cy/commands/navigation", ->
 
           `body` can only be a string or an object with no circular references.
           """
-          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
 
           done()
 
