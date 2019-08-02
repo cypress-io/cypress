@@ -141,7 +141,7 @@ class SetupProject extends Component {
         </div>
         <div>
           <input
-            autoFocus='true'
+            autoFocus={true}
             ref='projectName'
             type='text'
             className='form-control'
