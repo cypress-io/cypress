@@ -56,10 +56,22 @@ module.exports = {
     not_registered_without_available: "#{cmd('{{cmd}}')} could not find a registered alias for: `@{{displayName}}`.\nYou have not aliased anything yet."
 
   as:
-    empty_string: "#{cmd('as')} cannot be passed an empty string."
-    invalid_type: "#{cmd('as')} can only accept a string."
-    invalid_first_token: "`{{alias}}` cannot be named starting with the `@` symbol. Try renaming the alias to `{{suggestedName}}`, or something else that does not start with the `@` symbol."
-    reserved_word: "#{cmd('as')} cannot be aliased as: `{{alias}}`. This word is reserved."
+    empty_string: {
+      message: "#{cmd('as')} cannot be passed an empty string argument."
+      docsUrl: "https://on.cypress.io/as"
+    }
+    invalid_type: {
+      message: "#{cmd('as')} can only accept a string argument."
+      docsUrl: "https://on.cypress.io/as"
+    }
+    invalid_first_token: {
+      message: "`{{alias}}` cannot be named starting with the `@` symbol. Try renaming the alias to `{{suggestedName}}`, or something else that does not start with the `@` symbol."
+      docsUrl: "https://on.cypress.io/as"
+    }
+    reserved_word: {
+      message: "#{cmd('as')} cannot be aliased as: `{{alias}}`. This word is reserved."
+      docsUrl: "https://on.cypress.io/as"
+    }
 
   blur:
     multiple_elements: "#{cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements."
