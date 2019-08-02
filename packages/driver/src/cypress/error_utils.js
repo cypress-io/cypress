@@ -4,7 +4,7 @@ const { codeFrameColumns } = require('@babel/code-frame')
 const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
 
-const ERROR_PROPS = 'message renderMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl'.split(' ')
+const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl'.split(' ')
 
 const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
@@ -23,17 +23,13 @@ const mergeErrProps = (origErr, newProps) => {
 }
 
 const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
-  let { stack, message, renderMessage } = origErrObj
+  let { stack, message } = origErrObj
 
   // preserve message
   const originalErrMsg = message
 
   // modify message
   message = cb(originalErrMsg, newErrMsg)
-
-  if (renderMessage) {
-    renderMessage = cb(renderMessage, newErrMsg)
-  }
 
   if (stack) {
     // reset stack by replacing the original
@@ -42,7 +38,6 @@ const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
   }
 
   return _.extend({}, origErrObj, {
-    renderMessage,
     message,
     stack,
   })
@@ -188,10 +183,7 @@ const errObjByPath = (errLookupObj, errPath, args) => {
     }
   }
 
-  const escapedArgs = _.mapValues(args, escapeErrMarkdown)
-
   return _.extend({}, errObj, {
-    renderMessage: replaceErrMsgTokens(errObj.message, escapedArgs),
     message: replaceErrMsgTokens(errObj.message, args),
   })
 }

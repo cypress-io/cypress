@@ -377,7 +377,6 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(obj).to.deep.eq({
         message: '`click` simple error message'
-        renderMessage: '`click` simple error message'
         docsUrl: 'https://on.cypress.io'
       })
 
@@ -388,7 +387,6 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(obj).to.deep.eq({
         message: '`click` simple error message'
-        renderMessage: '`click` simple error message'
       })
 
     it "returns obj when err is function", ->
@@ -398,7 +396,6 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(obj).to.deep.eq({
         message: '`click` simple error message'
-        renderMessage: '`click` simple error message'
       })
 
     it "does not mutate the error message when it is an object", ->
@@ -412,7 +409,6 @@ describe "driver/src/cypress/error_utils", ->
       expect(obj).to.deep.eq({
         docsUrl: 'https://on.cypress.io'
         message: '`dblclick` simple error message'
-        renderMessage: '`dblclick` simple error message'
       })
 
   context ".getErrMsgWithObjByPath", ->
