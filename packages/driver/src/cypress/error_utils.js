@@ -154,6 +154,8 @@ const normalizeMsgNewLines = (message) => {
 }
 
 const replaceErrMsgTokens = (errMessage, args) => {
+  if (!errMessage) return errMessage
+
   const getMsg = function (args = {}) {
     return _.reduce(args, (message, argValue, argKey) => {
       return message.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
