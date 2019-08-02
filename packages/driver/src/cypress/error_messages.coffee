@@ -74,10 +74,22 @@ module.exports = {
     }
 
   blur:
-    multiple_elements: "#{cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements."
-    no_focused_element: "#{cmd('blur')} can only be called when there is a currently focused element."
-    timed_out:  "#{cmd('blur')} timed out because your browser did not receive any `blur` events. This is a known bug in Chrome when it is not the currently focused window."
-    wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: `{{node}}`"
+    multiple_elements: {
+      message: "#{cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements."
+      docsUrl: "https://on.cypress.io/blur"
+    }
+    no_focused_element: {
+      message: "#{cmd('blur')} can only be called when there is a currently focused element."
+      docsUrl: "https://on.cypress.io/blur"
+    }
+    timed_out: {
+      message: "#{cmd('blur')} timed out because your browser did not receive any `blur` events. This is a known bug in Chrome when it is not the currently focused window."
+      docsUrl: "https://on.cypress.io/blur"
+    }
+    wrong_focused_element: {
+      message: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: `{{node}}`"
+      docsUrl: "https://on.cypress.io/blur"
+    }
 
   chai:
     length_invalid_argument: "You must provide a valid number to a `length` assertion. You passed: `{{length}}`"

@@ -595,7 +595,9 @@ describe "src/cy/commands/actions/focus", ->
         return null
 
       it "throws when not a dom subject", (done) ->
-        cy.on "fail", -> done()
+        cy.on "fail", (err) -> 
+          expect(err.message).to.include "`cy.blur()` failed because it requires a DOM element"
+          done()
 
         cy.noop({}).blur()
 
@@ -612,6 +614,7 @@ describe "src/cy/commands/actions/focus", ->
         cy.on "fail", (err) ->
           expect(blurred).to.eq 1
           expect(err.message).to.include "`cy.blur()` failed because this element"
+          expect(err.docsUrl).to.include "https://on.cypress.io/element-has-detached-from-dom"
           done()
 
         cy.get("input:first").focus().blur().focus().blur()
@@ -620,15 +623,16 @@ describe "src/cy/commands/actions/focus", ->
         num = cy.$$("textarea,:text").length
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "`cy.blur()` can only be called on a single element. Your subject contained #{num} elements."
+          expect(err.message).to.include("`cy.blur()` can only be called on a single element. Your subject contained #{num} elements.")
+          expect(err.docsUrl).to.include("https://on.cypress.io/blur")
           done()
 
-        cy
-          .get("textarea,:text").blur()
+        cy.get("textarea,:text").blur()
 
       it "throws when there isnt an activeElement", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.blur()` can only be called when there is a currently focused element."
+          expect(err.docsUrl).to.include("https://on.cypress.io/blur")          
           done()
 
         cy.get("form:first").blur()
@@ -636,11 +640,11 @@ describe "src/cy/commands/actions/focus", ->
       it "throws when blur is called on a non-active element", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.blur()` can only be called on the focused element. Currently the focused element is a: `<input id=\"input\">`"
+          expect(err.docsUrl).to.include("https://on.cypress.io/blur")                    
           done()
 
-        cy
-          .get("input:first").focus()
-          .get("#button").blur()
+        cy.get("input:first").focus()
+        cy.get("#button").blur()
 
       it "logs delta options on error", (done) ->
         cy.$$("button:first").click ->
