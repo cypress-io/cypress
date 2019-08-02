@@ -301,6 +301,9 @@ cy.wrap('foobar').should('not.have.string', 'baz')
 
 cy.wrap('foobar').should('not.include', 'baz')
 
+cy.wrap({ foo: () => 1, bar: 2 }).invoke('foo').should('equal', 1)
+// cy.wrap({ foo: () => 1, bar: 2 }).invoke('bar') // compile ERROR
+
 ;
 () => {
   let val = 1
