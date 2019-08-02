@@ -802,99 +802,119 @@ module.exports = {
       message: "#{cmd('request')} requires the `headers` option to be an object literal."
       docsUrl: "https://on.cypress.io/request"
     }
-    invalid_method: "#{cmd('request')} was called with an invalid method: `{{method}}`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser."
-    form_invalid: """
-    #{cmd('request')} requires the `form` option to be a boolean.
+    invalid_method: {
+      message: "#{cmd('request')} was called with an invalid method: `{{method}}`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser."
+      docsUrl: "https://on.cypress.io/request"
+    }
+    form_invalid: {
+      message: """
+        #{cmd('request')} requires the `form` option to be a boolean.
 
-    If you're trying to send a `x-www-form-urlencoded` request then pass either a string or object literal to the `body` property.
-    """
-    loading_failed: (obj) ->
-      """
-      #{cmd('request')} failed trying to load:
+        If you're trying to send a `x-www-form-urlencoded` request then pass either a string or object literal to the `body` property.
+        """
+      docsUrl: "https://on.cypress.io/request"
+    }
+    loading_failed: (obj) -> {
+      message: """
+        #{cmd('request')} failed trying to load:
 
-      #{obj.url}
+        #{obj.url}
 
-      We attempted to make an http request to this URL but the request failed without a response.
+        We attempted to make an http request to this URL but the request failed without a response.
 
-      We received this error at the network level:
+        We received this error at the network level:
 
-        > #{obj.error}
+          > #{obj.error}
 
-      #{divider(60, '-')}
+        #{divider(60, '-')}
 
-      The request we sent was:
+        The request we sent was:
 
-      #{getHttpProps([
-        {key: 'method',    value: obj.method},
-        {key: 'URL',       value: obj.url},
-      ])}
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+        ])}
 
-      #{divider(60, '-')}
+        #{divider(60, '-')}
 
-      Common situations why this would fail:
-        - you don't have internet access
-        - you forgot to run / boot your web server
-        - your web server isn't accessible
-        - you have weird network configuration settings on your computer
+        Common situations why this would fail:
+          - you don't have internet access
+          - you forgot to run / boot your web server
+          - your web server isn't accessible
+          - you have weird network configuration settings on your computer
 
-      The stack trace for this error is:
+        The stack trace for this error is:
 
-      #{obj.stack}
-      """
+        #{obj.stack}
+        """
+      docsUrl: "https://on.cypress.io/request"
+    }
+    status_invalid: (obj) -> {
+      message: """
+        #{cmd('request')} failed on:
 
-    status_invalid: (obj) ->
-      """
-      #{cmd('request')} failed on:
+        #{obj.url}
 
-      #{obj.url}
+        The response we received from your web server was:
 
-      The response we received from your web server was:
+          > #{obj.status}: #{obj.statusText}
 
-        > #{obj.status}: #{obj.statusText}
+        This was considered a failure because the status code was not `2xx` or `3xx`.
 
-      This was considered a failure because the status code was not `2xx` or `3xx`.
+        If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
 
-      If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
+        #{divider(60, '-')}
 
-      #{divider(60, '-')}
+        The request we sent was:
 
-      The request we sent was:
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+          {key: 'headers',   value: obj.requestHeaders},
+          {key: 'body',      value: obj.requestBody}
+          {key: 'redirects', value: obj.redirects}
+        ])}
 
-      #{getHttpProps([
-        {key: 'method',    value: obj.method},
-        {key: 'URL',       value: obj.url},
-        {key: 'headers',   value: obj.requestHeaders},
-        {key: 'body',      value: obj.requestBody}
-        {key: 'redirects', value: obj.redirects}
-      ])}
+        #{divider(60, '-')}
 
-      #{divider(60, '-')}
+        The response we got was:
 
-      The response we got was:
+        #{getHttpProps([
+          {key: 'status',  value: obj.status + ' - ' + obj.statusText},
+          {key: 'headers', value: obj.responseHeaders},
+          {key: 'body',    value: obj.responseBody}
+        ])}
 
-      #{getHttpProps([
-        {key: 'status',  value: obj.status + ' - ' + obj.statusText},
-        {key: 'headers', value: obj.responseHeaders},
-        {key: 'body',    value: obj.responseBody}
-      ])}
+        """
+      docsUrl: "https://on.cypress.io/request"
+    }
+    timed_out: (obj) -> {
+      message: """
+        #{cmd('request')} timed out waiting `#{obj.timeout}ms` for a response from your server.
 
-      """
-    timed_out: (obj) ->
-      """
-      #{cmd('request')} timed out waiting `#{obj.timeout}ms` for a response from your server.
+        The request we sent was:
 
-      The request we sent was:
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+        ])}
 
-      #{getHttpProps([
-        {key: 'method',    value: obj.method},
-        {key: 'URL',       value: obj.url},
-      ])}
-
-      No response was received within the timeout.
-      """
-    url_missing: "#{cmd('request')} requires a `url`. You did not provide a `url`."
-    url_invalid: "#{cmd('request')} must be provided a fully qualified `url` - one that begins with `http`. By default #{cmd('request')} will use either the current window's origin or the `baseUrl` in `cypress.json`. Neither of those values were present."
-    url_wrong_type: "#{cmd('request')} requires the `url` to be a string."
+        No response was received within the timeout.
+        """
+      docsUrl: "https://on.cypress.io/request"
+    }
+    url_missing: {
+      message: "#{cmd('request')} requires a `url`. You did not provide a `url`."
+      docsUrl: "https://on.cypress.io/request"
+    }
+    url_invalid: {
+      message: "#{cmd('request')} must be provided a fully qualified `url` - one that begins with `http`. By default #{cmd('request')} will use either the current window's origin or the `baseUrl` in `cypress.json`. Neither of those values were present."
+      docsUrl: "https://on.cypress.io/request"
+    }
+    url_wrong_type: {
+      message: "#{cmd('request')} requires the `url` to be a string."
+      docsUrl: "https://on.cypress.io/request"
+    }
 
   route:
     failed_prerequisites: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"

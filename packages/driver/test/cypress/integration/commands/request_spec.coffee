@@ -559,6 +559,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires a `url`. You did not provide a `url`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request()
@@ -574,6 +575,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window's origin or the `baseUrl` in `cypress.json`. Neither of those values were present.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request("/foo/bar")
@@ -586,6 +588,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires the `url` to be a string.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -632,6 +635,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` was called with an invalid method: `FOO`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -663,6 +667,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires the `form` option to be a boolean.\n\nIf you're trying to send a `x-www-form-urlencoded` request then pass either a string or object literal to the `body` property.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -708,6 +713,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           expect(err.message).to.include("""
             `cy.request()` failed on:
 
@@ -817,6 +823,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           expect(err.message).to.include("""
             `cy.request()` failed on:
 
@@ -917,7 +924,7 @@ describe "src/cy/commands/request", ->
 
             The stack trace for this error is:
             """)
-
+            expect(err.docsUrl).to.eq("https://on.cypress.io/request")
             done()
 
           cy.request("http://localhost:1234/foo")
@@ -933,6 +940,7 @@ describe "src/cy/commands/request", ->
             expect(@logs.length).to.eq(1)
             expect(lastLog.get("error")).to.eq(err)
             expect(lastLog.get("state")).to.eq("failed")
+            expect(err.docsUrl).to.eq("https://on.cypress.io/request")
             expect(err.message).to.eq("""
               `cy.request()` timed out waiting `50ms` for a response from your server.
 
