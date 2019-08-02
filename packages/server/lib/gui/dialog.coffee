@@ -15,10 +15,7 @@ module.exports = {
       properties: ["openDirectory"]
     }
 
-    new Promise (resolve, reject) ->
-      dialog.showOpenDialog props, (paths = []) ->
-        process.nextTick ->
-          ## return the first path since there can only ever
-          ## be a single directory selection
-          resolve(paths[0])
+    dialog.showOpenDialog(props)
+    .then ({ filePaths }) ->
+      return filePaths[0]
 }
