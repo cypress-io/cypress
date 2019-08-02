@@ -43,11 +43,11 @@ describe "lib/server", ->
       socket.destroy = @sandbox.stub()
       head = {}
 
-      onError = (err, socket, head, port) ->
+      onError = (err, socket2, head2, port) ->
         expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:8444")
 
-        expect(socket).to.eq(socket)
-        expect(head).to.eq(head)
+        expect(socket).to.eq(socket2)
+        expect(head).to.eq(head2)
         expect(port).to.eq("8444")
 
         expect(socket.destroy).to.be.calledOnce
@@ -66,11 +66,11 @@ describe "lib/server", ->
       socket.destroy = @sandbox.stub()
       head = {}
 
-      onError = (err, socket, head, port) ->
+      onError = (err, socket2, head2, port) ->
         expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:443")
 
-        expect(socket).to.eq(socket)
-        expect(head).to.eq(head)
+        expect(socket).to.eq(socket2)
+        expect(head).to.eq(head2)
         expect(port).to.eq("443")
 
         expect(socket.destroy).to.be.calledOnce
@@ -88,11 +88,11 @@ describe "lib/server", ->
       socket.destroy = @sandbox.stub()
       head = {}
 
-      onError = (err, socket, head, port) ->
+      onError = (err, socket2, head2, port) ->
         expect(err.message).to.eq("A connection to the upstream proxy could not be established: connect ECONNREFUSED 127.0.0.1:8444")
 
-        expect(socket).to.eq(socket)
-        expect(head).to.eq(head)
+        expect(socket).to.eq(socket2)
+        expect(head).to.eq(head2)
         expect(port).to.eq("11111")
 
         expect(socket.destroy).to.be.calledOnce
