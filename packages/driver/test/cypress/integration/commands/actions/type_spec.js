@@ -4334,13 +4334,13 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
 
-          const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(', ')
+          const allChars = `\`${_.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join('`, `')}\``
 
           expect(err.message).to.eq(`Special character sequence: \`{bar}\` is not recognized. Available sequences are: ${allChars}
 
-If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
+If you want to skip parsing special character sequences and type the text exactly as written, pass the option: \`{parseSpecialCharSequences: false}\``)
 
-https://on.cypress.io/type`)
+          expect(err.docsUrl).to.eq('https://on.cypress.io/type')
 
           done()
         })

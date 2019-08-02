@@ -897,13 +897,14 @@ module.exports = {
 
   type:
     empty_string: "#{cmd('type')} cannot accept an empty string. You need to actually type something."
-    invalid: """
-      Special character sequence: `{{chars}}` is not recognized. Available sequences are: {{allChars}}
+    invalid: {
+      message: """
+        Special character sequence: `{{chars}}` is not recognized. Available sequences are: {{allChars}}
 
-      If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
-
-      https://on.cypress.io/type
-    """
+        If you want to skip parsing special character sequences and type the text exactly as written, pass the option: `{parseSpecialCharSequences: false}`
+      """
+      docsUrl: "https://on.cypress.io/type"
+    }
     invalid_date: "Typing into a `date` input with #{cmd('type')} requires a valid date with the format `yyyy-MM-dd`. You passed: `{{chars}}`"
     invalid_month: "Typing into a `month` input with #{cmd('type')} requires a valid month with the format `yyyy-MM`. You passed: `{{chars}}`"
     invalid_time: "Typing into a `time` input with #{cmd('type')} requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `{{chars}}`"

@@ -412,7 +412,7 @@ const $Keyboard = {
       case !charsBetweenCurlyBracesRe.test(chars): {
         //# between curly braces, but not a valid special
         //# char or modifier
-        const allChars = _.keys(this.specialChars).concat(_.keys(this.modifierChars)).join(', ')
+        const allChars = `\`${_.keys(this.specialChars).concat(_.keys(this.modifierChars)).join('`, `')}\``
 
         return Promise
         .resolve(options.onNoMatchingSpecialChars(chars, allChars))
