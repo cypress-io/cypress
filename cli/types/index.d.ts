@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 2.8
+// TypeScript Version: 3.0
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
@@ -816,8 +816,9 @@ declare namespace Cypress {
      */
     invoke<
       TName extends { [K in keyof Subject]: Subject[K] extends (...args: any[]) => any ? K : never }[keyof Subject],
+      TArgs extends Subject[TName] extends (...args: infer A) => any ? A : never,
       TReturn extends Subject[TName] extends (...args: any[]) => infer R ? R : never,
-    >(functionName: TName, ...args: any[]): Chainable<TReturn>
+    >(functionName: TName, ...args: TArgs): Chainable<TReturn>
 
     /**
      * Get a property’s value on the previously yielded subject.
