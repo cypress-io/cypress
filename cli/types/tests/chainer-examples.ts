@@ -301,8 +301,10 @@ cy.wrap('foobar').should('not.have.string', 'baz')
 
 cy.wrap('foobar').should('not.include', 'baz')
 
-cy.wrap({ foo: () => 1, bar: 2 }).invoke('foo').should('equal', 1)
-// cy.wrap({ foo: () => 1, bar: 2 }).invoke('bar') // compile ERROR
+const mrObj = { foo: (value: number, name = 'n') => `${ name } = ${ value + 1 }`, bar: 2 }
+cy.wrap(mrObj).invoke('foo', 1) // $ExpectType Chainable<string>
+cy.wrap(mrObj).invoke('foo', 5, 'b') // $ExpectType Chainable<string>
+cy.wrap(mrObj).invoke('bar') // $ExpectError
 
 ;
 () => {
