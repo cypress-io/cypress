@@ -305,6 +305,8 @@ const mrObj = { foo: (value: number, name = 'n') => `${ name } = ${ value + 1 }`
 cy.wrap(mrObj).invoke('foo', 1) // $ExpectType Chainable<string>
 cy.wrap(mrObj).invoke('foo', 5, 'b') // $ExpectType Chainable<string>
 cy.wrap(mrObj).invoke('bar') // $ExpectError
+cy.wrap(mrObj).invoke('foo', 5, 1) // $ExpectError
+cy.wrap(mrObj).invoke('foo', 5, 'b', 1) // $ExpectError
 
 ;
 () => {
