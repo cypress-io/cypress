@@ -815,9 +815,10 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke<
-      TName extends { [K in keyof Subject]: Subject[K] extends (...args: any[]) => any ? K : never }[keyof Subject],
-      TArgs extends Subject[TName] extends (...args: infer A) => any ? A : never,
-      TReturn extends Subject[TName] extends (...args: any[]) => infer R ? R : never,
+      TActualSubject extends (Subject extends Node | Node[] ? JQuery<Subject> : Subject),
+      TName extends ({ [K in keyof TActualSubject]: TActualSubject[K] extends (...args: any[]) => any ? K : never }[keyof TActualSubject]),
+      TArgs extends (TActualSubject[TName] extends (...args: infer A) => any ? A : never),
+      TReturn extends (TActualSubject[TName] extends (...args: any[]) => infer R ? R : never),
     >(functionName: TName, ...args: TArgs): Chainable<TReturn>
 
     /**
