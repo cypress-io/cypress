@@ -814,7 +814,10 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/invoke
      */
-    invoke<K extends { [K in keyof Subject]: Subject[K] extends (...args: any[]) => any ? K : never }[keyof Subject], R extends Subject[K] extends (...args: any[]) => infer R ? R : never>(functionName: K, ...args: any[]): Chainable<R>
+    invoke<
+      TName extends { [K in keyof Subject]: Subject[K] extends (...args: any[]) => any ? K : never }[keyof Subject],
+      TReturn extends Subject[TName] extends (...args: any[]) => infer R ? R : never,
+    >(functionName: TName, ...args: any[]): Chainable<TReturn>
 
     /**
      * Get a property’s value on the previously yielded subject.
