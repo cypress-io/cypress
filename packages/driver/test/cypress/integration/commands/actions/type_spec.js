@@ -2742,7 +2742,7 @@ describe('src/cy/commands/actions/type', () => {
 
         it('resets modifiers before next test', () => {
           // this test will fail if you comment out
-          // $Keyboard.resetModifiers
+          // keyboard.resetModifiers
 
           const $input = cy.$$('input:text:first')
           const events = []

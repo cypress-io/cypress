@@ -39,7 +39,6 @@ const initialModifiers = {
 
 const create = (state) => {
   const kb = {
-
     getActiveModifiers () {
       return _.clone(state('keyboardModifiers')) || _.clone(initialModifiers)
     },
