@@ -206,13 +206,8 @@ module.exports = {
         sourceType: 'module',
       },
       plugins: [
-        'json-format',
+        '@cypress/json',
       ],
-      settings: {
-        json: {
-          'sort-package-json': 'pro',
-        },
-      },
       env: {
         node: true,
         es6: true,
