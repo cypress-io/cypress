@@ -1,5 +1,6 @@
 _             = require("lodash")
 EE            = require("events")
+net           = require("net")
 Promise       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers:electron")
 menu          = require("../gui/menu")
@@ -231,7 +232,8 @@ module.exports = {
           if cookie.expires == -1
             delete cookie.expires
           cookie.expirationDate = cookie.expires
-          if _.isUndefined(cookie.hostOnly) ## TODO: do the right thing here instead
+          cookie.hostOnly = false
+          if cookie.domain[0] != '.'
             cookie.hostOnly = true
           delete cookie.expires
           return cookie
@@ -243,6 +245,9 @@ module.exports = {
           cookie.name or= "" ## name can't be undefined/null
           cookie.value or= "" ## ditto
           cookie.expires = cookie.expirationDate
+          if !cookie.hostOnly and cookie.domain[0] != '.' and cookie.domain != 'localhost' and !net.isIP(cookie.domain)
+            cookie.domain = ".#{cookie.domain}"
+          delete cookie.hostOnly
           delete cookie.expirationDate
           return cookie
 
@@ -259,16 +264,20 @@ module.exports = {
           onRequest: (message, data) ->
             switch message
               when "get:cookies"
+                if data?.url
+                  return getCookies({ urls: [ data.url ]})
                 getCookies()
               when "get:cookie"
                 getCookie(data)
               when "set:cookie"
                 data = normalizeSetCookieProps(data)
+                # return Promise.resolve() if data.value == 'good'
                 invokeViaDebugger("Network.setCookie", data).then ->
                   getCookie(data)
               when "clear:cookies"
                 invokeViaDebugger("Network.clearBrowserCookies").return(null)
               when "clear:cookie"
+                return invokeViaDebugger("Network.clearBrowserCookies").return(null)
                 data = normalizeSetCookieProps(data)
                 delete data.expiry
                 invokeViaDebugger("Network.deleteCookies", data).return(null)

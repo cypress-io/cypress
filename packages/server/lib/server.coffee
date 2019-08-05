@@ -371,10 +371,9 @@ class Server
 
         ## reset the cookies from the existing stream's jar
         return runPhase ->
+          ## TODO: should i be doing something here?
           resolve(
-            request.setJarCookies(obj.jar, automationRequest)
-            .then (c) ->
-              return obj.details
+            obj.details
           )
 
       redirects = []
@@ -412,10 +411,9 @@ class Server
             _.pick(incomingRes, "headers", "statusCode")
           )
 
-          jar = str.getJar()
-
           runPhase =>
-            request.setJarCookies(jar, automationRequest)
+            # request.setJarCookies(jar, automationRequest)
+            Promise.resolve({})
             .then (c) =>
               @_remoteVisitingUrl = false
 
@@ -484,7 +482,8 @@ class Server
 
                   buffers.set({
                     url: newUrl
-                    jar: jar
+                    # jar: jar
+                    jar: null
                     stream: responseBufferStream
                     details: details
                     originalUrl: originalUrl

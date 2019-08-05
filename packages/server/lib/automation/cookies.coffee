@@ -5,7 +5,7 @@ debug     = require("debug")("cypress:server:cookies")
 
 ## match the w3c webdriver spec on return cookies
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
+COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry hostOnly".split(" ")
 
 normalizeCookies = (cookies, includeHostOnly) ->
   _.map cookies, (c) ->
@@ -16,13 +16,14 @@ normalizeCookieProps = (props, includeHostOnly) ->
 
   ## pick off only these specific cookie properties
   ## only if they are defined
-  cookie = _.chain(props, COOKIE_PROPERTIES)
+  cookie = _.chain(props)
   .pick(COOKIE_PROPERTIES)
   .omitBy(_.isUndefined)
+  .omitBy(_.isNull)
   .value()
 
-  if includeHostOnly
-    cookie.hostOnly = props.hostOnly
+  # if includeHostOnly
+  #   cookie.hostOnly = props.hostOnly
 
   ## when sending cookie props we need to convert
   ## expiry to expirationDate
@@ -51,19 +52,6 @@ cookies = (cyNamespace, cookieNamespace) ->
     name.startsWith(cyNamespace) or name is cookieNamespace
 
   return {
-    # normalize: (message, data, automate) ->
-    #   invoke = (fn) =>
-    #     fn.call(@, data, automate)
-
-    #   fn = switch message
-    #     when "get:cookies"   then @getCookies
-    #     when "get:cookie"    then @getCookie
-    #     when "set:cookie"    then @setCookie
-    #     when "clear:cookie"  then @clearCookie
-    #     when "clear:cookies" then @clearCookies
-
-    #   invoke(fn)
-
     getCookies: (data, automate) ->
       { includeHostOnly } = data
 
@@ -95,6 +83,7 @@ cookies = (cyNamespace, cookieNamespace) ->
           return cookie
 
     setCookie: (data, automate) ->
+      debug("set:cookie %o", data)
       if isNamespaced(data)
         throw new Error("Sorry, you cannot set a Cypress namespaced cookie.")
       else
@@ -103,20 +92,6 @@ cookies = (cyNamespace, cookieNamespace) ->
         ## lets construct the url ourselves right now
         ## unless we already have a URL
         cookie.url = data.url ? extension.getCookieUrl(data)
-
-        ## https://github.com/SalesforceEng/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie
-        ## a host only cookie is when domain was not explictly
-        ## set in the Set-Cookie header and instead was implied.
-        ## when this is the case we need to remove the domain
-        ## property else our cookie will incorrectly be set
-        ## as a domain cookie
-        ##
-        ## hostOnly=true means no domain= property was set, so
-        ##   this cookie is specific to being bound to the exact domain
-        ## hostOnly=false means that a domain= property was set, so
-        ##   this cookie has been relaxed to apply to multiple subdomains
-        if data.hostOnly
-          cookie = _.omit(cookie, "domain")
 
         debug("set:cookie %o", cookie)
 
