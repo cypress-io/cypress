@@ -24,7 +24,7 @@ npm install --save-dev @cypress/eslint-plugin-dev
 1) install the following `devDependencies`:
 ```sh
 @cypress/eslint-plugin-dev
-eslint-plugin-json-format
+@cypress/eslint-plugin-json
 @typescript-eslint/parser
 @typescript-eslint/eslint-plugin
 eslint-plugin-mocha
@@ -88,12 +88,12 @@ To auto-fix all staged & unstaged files, run `./node_modules/.bin/lint-changed -
 
 _Should usually be used at the root of the package._
 - The majority of the rules. 
-- auto-fixes `json` files and sorts your `package.json` via [`eslint-plugin-json-format`](https://github.com/bkucera/eslint-plugin-json-format)
+- auto-fixes `json` files and sorts your `package.json` via [`@cypress/eslint-plugin-json`](https://github.com/cypress-io/eslint-plugin-json)
 
 
 **requires you to install the following `devDependencies`**:
 ```sh
-eslint-plugin-json-format
+@cypress/eslint-plugin-json
 @typescript-eslint/parser
 @typescript-eslint/eslint-plugin
 ```

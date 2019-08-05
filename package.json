@@ -2,10 +2,9 @@
   "name": "@cypress/eslint-plugin-dev",
   "version": "0.0.0-development",
   "description": "Common ESLint rules shared by Internal Cypress packages",
-  "main": "./lib",
   "scripts": {
     "lint": "eslint --ext .js,json,.eslintrc .",
-    "lint-changed": "node ./lib/scripts/lint-changed",
+    "lint-changed": "node ./scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
     "semantic-release": "semantic-release",
     "test": "jest"
@@ -23,7 +22,8 @@
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
-    "@cypress/eslint-plugin-dev": "file:./shim",
+    "@cypress/eslint-plugin-dev": "file:./",
+    "@cypress/eslint-plugin-json": "^3.2.2",
     "@fellow/eslint-plugin-coffee": "^0.4.13",
     "@types/chai": "^4.1.7",
     "@types/jest": "^24.0.15",
@@ -32,7 +32,6 @@
     "@types/sinon-chai": "^3.2.2",
     "chai": "^4.2.0",
     "eslint": "^6.1.0",
-    "eslint-plugin-json-format": "^2.0.0",
     "eslint-plugin-mocha": "^5.3.0",
     "eslint-plugin-promise": "^4.2.1",
     "husky": "^2.7.0",
@@ -45,17 +44,17 @@
     "sinon-chai": "^3.3.0"
   },
   "peerDependencies": {
+    "@cypress/eslint-plugin-json": ">= 3.2.2",
     "@typescript-eslint/eslint-plugin": ">= 1.11.0",
     "@typescript-eslint/parser": ">= 1.11.0",
     "babel-eslint": "^7.2.3",
     "eslint": ">= 3.2.1",
-    "eslint-plugin-json-format": ">= 2.0.0",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.2.1"
   },
   "bin": {
-    "lint-changed": "./lib/scripts/lint-changed.js",
-    "lint-pre-commit": "./lib/scripts/lint-pre-commit.js"
+    "lint-changed": "./scripts/lint-changed.js",
+    "lint-pre-commit": "./scripts/lint-pre-commit.js"
   },
   "license": "MIT",
   "repository": {
