@@ -917,17 +917,38 @@ module.exports = {
     }
 
   route:
-    failed_prerequisites: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"
-    invalid_arguments: "#{cmd('route')} was not provided any arguments. You must provide valid arguments."
-    method_invalid: "#{cmd('route')} was called with an invalid method: `{{method}}`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser."
-    response_invalid: "#{cmd('route')} cannot accept an `undefined` or `null` response. It must be set to something, even an empty string will work."
-    url_invalid: "#{cmd('route')} was called with an invalid `url`. `url` must be either a string or regular expression."
-    url_missing: "#{cmd('route')} must be called with a `url`. It can be a string or regular expression."
-    url_percentencoding_warning: ({ decodedUrl }) -> """
-    A URL with percent-encoded characters was passed to #{cmd('route')}, but #{cmd('route')} expects a decoded URL.
+    failed_prerequisites: {
+      message: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"
+      docsUrl: "https://on.cypress.io/server"
+    }
+    invalid_arguments: {
+      message: "#{cmd('route')} was not provided any arguments. You must provide valid arguments."
+      docsUrl: "https://on.cypress.io/route"
+    }
+    method_invalid: {
+      message: "#{cmd('route')} was called with an invalid method: `{{method}}`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser."
+      docsUrl: "https://on.cypress.io/route"
+    } 
+    response_invalid: {
+      message: "#{cmd('route')} cannot accept an `undefined` or `null` response. It must be set to something, even an empty string will work."
+      docsUrl: "https://on.cypress.io/route"
+    }
+    url_invalid: {
+      message: "#{cmd('route')} was called with an invalid `url`. `url` must be either a string or regular expression."
+      docsUrl: "https://on.cypress.io/route"
+    }
+    url_missing: {
+      message: "#{cmd('route')} must be called with a `url`. It can be a string or regular expression."
+      docsUrl: "https://on.cypress.io/route"
+    }
+    url_percentencoding_warning: ({ decodedUrl }) -> {
+      message: """
+        A `url` with percent-encoded characters was passed to #{cmd('route')}, but #{cmd('route')} expects a decoded `url`.
 
-    Did you mean to pass "#{decodedUrl}"?
-    """
+        Did you mean to pass "#{decodedUrl}"?
+        """
+      docsUrl: "https://on.cypress.io/route"
+    }
 
   scrollIntoView:
     invalid_argument: "#{cmd('scrollIntoView')} can only be called with an `options` object. Your argument was: `{{arg}}`"

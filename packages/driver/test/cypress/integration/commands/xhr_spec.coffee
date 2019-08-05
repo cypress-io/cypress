@@ -357,16 +357,15 @@ describe "src/cy/commands/xhr", ->
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/fixtures/phones/phones.json")
 
       it "does not rewrite CORS", ->
-        cy
-          .window().then (win) ->
-            @open = cy.spy(cy.state("server").options, "onOpen")
-            new Promise (resolve) ->
-              win.$.get("http://www.google.com/phones/phones.json").fail ->
-                resolve()
-          .then ->
-            xhr = cy.state("requests")[0].xhr
-            expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
-            expect(@open).to.be.calledWith("GET", "http://www.google.com/phones/phones.json")
+        cy.window().then (win) ->
+          @open = cy.spy(cy.state("server").options, "onOpen")
+          new Promise (resolve) ->
+            win.$.get("http://www.google.com/phones/phones.json").fail ->
+              resolve()
+        .then ->
+          xhr = cy.state("requests")[0].xhr
+          expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
+          expect(@open).to.be.calledWith("GET", "http://www.google.com/phones/phones.json")
 
       it "can stub real CORS requests too", ->
         cy
@@ -790,12 +789,11 @@ describe "src/cy/commands/xhr", ->
           expect(lastLog.get("error")).to.eq err
           done()
 
-        cy
-          .window().then (win) ->
-            new Promise (resolve) ->
-              win.$.get("http://www.google.com/foo.json")
-              .fail ->
-                foo.bar()
+        cy.window().then (win) ->
+          new Promise (resolve) ->
+            win.$.get("http://www.google.com/foo.json")
+            .fail ->
+              foo.bar()
 
       it "causes errors caused by onreadystatechange callback function", (done) ->
         e = new Error("onreadystatechange caused this error")
@@ -886,6 +884,7 @@ describe "src/cy/commands/xhr", ->
       it "after turning off server it throws attempting to route", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.route()` cannot be invoked before starting the `cy.server()`")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/server")
           done()
 
         cy
@@ -1336,9 +1335,11 @@ describe "src/cy/commands/xhr", ->
       cy.route("GET", "/foo%25bar")
       .then ->
         expect(Cypress.utils.warning).to.be.calledWith """
-        A URL with percent-encoded characters was passed to `cy.route()`, but `cy.route()` expects a decoded URL.
+        A `url` with percent-encoded characters was passed to `cy.route()`, but `cy.route()` expects a decoded `url`.
 
         Did you mean to pass "/foo%bar"?
+
+        https://on.cypress.io/route
         """
 
     it "does not warn if an invalid percent-encoded URL is used", ->
@@ -1451,6 +1452,7 @@ describe "src/cy/commands/xhr", ->
       it "url must be a string or regexp", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.route()` was called with an invalid `url`. `url` must be either a string or regular expression."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/route")
           done()
 
         cy.route({
@@ -1460,6 +1462,7 @@ describe "src/cy/commands/xhr", ->
       it "url must be a string or regexp when a function", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.route()` was called with an invalid `url`. `url` must be either a string or regular expression."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/route")
           done()
 
         getUrl = ->
@@ -1482,6 +1485,7 @@ describe "src/cy/commands/xhr", ->
       it "fails when method is invalid", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.route()` was called with an invalid method: `POSTS`."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/route")
 
           done()
 
@@ -1498,6 +1502,7 @@ describe "src/cy/commands/xhr", ->
         it "throws if response options was explicitly set to #{val}", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.include "`cy.route()` cannot accept an `undefined` or `null` response. It must be set to something, even an empty string will work."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/route")
             done()
 
           cy.route({url: /foo/, response: val})
@@ -1512,6 +1517,7 @@ describe "src/cy/commands/xhr", ->
       it "requires arguments", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.route()` was not provided any arguments. You must provide valid arguments."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/route")
           done()
 
         cy.route()
