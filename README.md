@@ -20,7 +20,6 @@ npm install --save-dev @cypress/eslint-plugin-dev
 
 ## Usage
 
-> ⚠️ Currently does **not** support ESLint version 6+
 1) install the following `devDependencies`:
 ```sh
 @cypress/eslint-plugin-dev
