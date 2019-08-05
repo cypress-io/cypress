@@ -154,7 +154,7 @@ create = (Cypress, cy, state, config) ->
 
   ## perf loop
   for cmd in builtInCommands
-    cmd(Commands, Cypress, cy, state, config, devices)
+    cmd(Commands, Cypress, cy, state, config)
 
   return Commands
 
