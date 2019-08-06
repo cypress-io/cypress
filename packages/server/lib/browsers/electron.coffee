@@ -2,6 +2,7 @@ _             = require("lodash")
 EE            = require("events")
 net           = require("net")
 Promise       = require("bluebird")
+tough         = require("tough-cookie")
 debug         = require("debug")("cypress:server:browsers:electron")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
@@ -248,27 +249,32 @@ module.exports = {
           delete cookie.expirationDate
           return cookie
 
-        getAllCookies = () ->
+        getAllCookies = (data) ->
           invokeViaDebugger("Network.getAllCookies")
           .then (result) ->
             normalizeGetCookies(result.cookies)
+            .filter (cookie) ->
+              _.every([
+                !data.domain || tough.domainMatch(cookie.domain, data.domain)
+                !data.path || tough.pathMatch(cookie.path, data.path)
+                !data.name || data.name == cookie.name
+              ])
 
-        getCookies = (data) ->
-          invokeViaDebugger("Network.getCookies", data)
+        getCookiesByUrl = (url) ->
+          invokeViaDebugger("Network.getCookies", { urls: [ url ] })
           .then (result) ->
             normalizeGetCookies(result.cookies)
 
         getCookie = (data) ->
-          getAllCookies().then (cookies) ->
-            _.find(cookies, _.pick(data, 'name', 'domain', 'path')) or null
+          getAllCookies(data).then _.partialRight(_.get, 0, null)
 
         automation.use({
           onRequest: (message, data) ->
             switch message
               when "get:cookies"
                 if data?.url
-                  return getCookies({ urls: [ data.url ]})
-                getAllCookies()
+                  return getCookiesByUrl(data.url)
+                getAllCookies(data)
               when "get:cookie"
                 getCookie(data)
               when "set:cookie"
