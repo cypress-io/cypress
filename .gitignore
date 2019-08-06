@@ -26,6 +26,7 @@ packages/desktop-gui/src/jsconfig.json
 
 # from driver
 packages/driver/test/cypress/videos
+packages/driver/test/cypress/screenshots
 
 # from example
 packages/example/app
