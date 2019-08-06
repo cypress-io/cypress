@@ -317,3 +317,18 @@ namespace CypressContainsTests {
   cy.contains('#app', 'my text to find', {log: false, timeout: 100})
   cy.contains('my text to find', {log: false, timeout: 100})
 }
+
+namespace CypressInvokeTests {
+  const obj = {
+    foo: (value: number, name = 'n') => `${ name } = ${ value + 1 }`,
+    bar: { baz: (a: number) => a + 1 }
+  }
+  cy.wrap(obj).invoke('foo', 1).should('equal', 'n = 2') // $ExpectType Chainable<string>
+  cy.wrap(obj).invoke('foo', 5, 'b').should('equal', 'b = 6') // $ExpectType Chainable<string>
+  cy.wrap(obj).its('bar').invoke('baz', 2).should('equal', 3) // $ExpectType Chainable<number>
+  cy.wrap(obj).invoke('bar', 2) // $ExpectError
+  cy.wrap(obj).invoke('bar.baz', 2).should('equal', 3) // $ExpectError
+  cy.wrap(obj).invoke('foo', 5, 1) // $ExpectError
+  cy.wrap(obj).invoke('foo', 5, 'b', 1) // $ExpectError
+  cy.get('input').then(it => it[0]).invoke('checkValidity') // $ExpectError
+}
