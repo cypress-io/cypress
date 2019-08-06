@@ -332,6 +332,7 @@ describe "src/cy/commands/querying", ->
         it "throws if passed anything other than a function, such as: #{value}", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.include "`cy.within()` must be called with a function."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/within")
             done()
 
           cy.get("body").within(value)

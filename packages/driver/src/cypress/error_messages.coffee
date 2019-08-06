@@ -1359,14 +1359,26 @@ module.exports = {
      - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
      - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }
     """
-    invalid_1st_arg: "#{cmd('visit')} must be called with a `url` or an `options` object containing a `url` as its 1st argument"
-    invalid_method: "#{cmd('visit')} was called with an invalid method: `{{method}}`. Method can only be `GET` or `POST`."
-    invalid_headers: "#{cmd('visit')} requires the `headers` option to be an object."
-    no_duplicate_url: """
-      #{cmd('visit')} must be called with only one `url`. You specified two urls:
-      `url` from the `options` object: {{optionsUrl}}
-      `url` from the `url` parameter: {{url}}
-    """
+    invalid_1st_arg: {
+      message: "#{cmd('visit')} must be called with a `url` or an `options` object containing a `url` as its 1st argument"
+      docsUrl: "https://on.cypress.io/visit"
+    }
+    invalid_method: {
+      message: "#{cmd('visit')} was called with an invalid method: `{{method}}`. Method can only be `GET` or `POST`."
+      docsUrl: "https://on.cypress.io/visit"
+    }
+    invalid_headers: {
+      message: "#{cmd('visit')} requires the `headers` option to be an object."
+      docsUrl: "https://on.cypress.io/visit"
+    }
+    no_duplicate_url: {
+      message: """
+        #{cmd('visit')} must be called with only one `url`. You specified two urls:
+        `url` from the `options` object: {{optionsUrl}}
+        `url` from the `url` parameter: {{url}}
+      """
+      docsUrl: "https://on.cypress.io/visit"
+    } 
     cannot_visit_2nd_domain: {
       message: """
         #{cmd('visit')} failed because you are attempting to visit a second unique domain.
@@ -1457,17 +1469,32 @@ module.exports = {
 
   wait:
     alias_invalid: "`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`"
-    invalid_1st_arg: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: `{{arg}}`"
-    invalid_alias: "#{cmd('wait')} only accepts aliases for routes.\nThe alias: `{{alias}}` did not match a route."
-    invalid_arguments: "#{cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
-    timed_out: "#{cmd('wait')} timed out waiting `{{timeout}}ms` for the {{num}} {{type}} to the route: `{{alias}}`. No {{type}} ever occurred."
+    invalid_1st_arg: {
+      message: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/wait"
+    }
+    invalid_alias: {
+      message: "#{cmd('wait')} only accepts aliases for routes.\nThe alias: `{{alias}}` did not match a route."
+      docsUrl: "https://on.cypress.io/wait"
+   }
+    invalid_arguments: {
+      message: "#{cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
+      docsUrl: "https://on.cypress.io/wait"
+    }
+    timed_out: {
+      message: "#{cmd('wait')} timed out waiting `{{timeout}}ms` for the {{num}} {{type}} to the route: `{{alias}}`. No {{type}} ever occurred."
+      docsUrl: "https://on.cypress.io/wait"
+    }
 
   window:
     iframe_doc_undefined: "The remote iframe's document is `undefined`"
     iframe_undefined: "The remote iframe is `undefined`"
 
   within:
-    invalid_argument: "#{cmd('within')} must be called with a function."
+    invalid_argument: {
+      message: "#{cmd('within')} must be called with a function."
+      docsUrl: "https://on.cypress.io/within"
+    }
 
   xhr:
     aborted: "This XHR was aborted by your code -- check this stack trace below."

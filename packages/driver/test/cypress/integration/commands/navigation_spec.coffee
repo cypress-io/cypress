@@ -1026,6 +1026,7 @@ describe "src/cy/commands/navigation", ->
       it "throws when url isnt a string", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "`cy.visit()` must be called with a `url` or an `options` object containing a `url` as its 1st argument"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit()
@@ -1033,6 +1034,7 @@ describe "src/cy/commands/navigation", ->
       it "throws when url is specified twice", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.contain "`cy.visit()` must be called with only one `url`. You specified two urls"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit("http://foobarbaz", {
@@ -1042,6 +1044,7 @@ describe "src/cy/commands/navigation", ->
       it "throws when method is unsupported", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.contain "`cy.visit()` was called with an invalid method: `FOO`"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit({
@@ -1052,6 +1055,7 @@ describe "src/cy/commands/navigation", ->
       it "throws when headers is not an object", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.contain "`cy.visit()` requires the `headers` option to be an object"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit({
