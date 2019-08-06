@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 3.0
+// TypeScript Version: 2.8
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
@@ -810,22 +810,15 @@ declare namespace Cypress {
     hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
-     * Invoke a function on the previously yielded subject, yielding the result.
+     * Invoke a function on the previously yielded subject.
+     * This isn't possible to strongly type without generic override yet.
+     * If called on an object you can do this instead: `.then(s => s.show())`.
+     * If called on an array you can do this instead: `.each(s => s.show())`.
+     * From there the subject will be properly typed.
      *
      * @see https://on.cypress.io/invoke
-     * @example
-     *    // Invoke the 'add' function, passing in parameters
-     *    cy.wrap({ add: (a, b) => a + b }).invoke('add', 1, 2).should('eq', 3)
-     *    // DOM elements are automatically wrapped with jQuery,
-     *    //   so jQuery functions (including 3rd party plugins) can be invoked
-     *    cy.get('.modal').invoke('show').should('be.visible') // jQuery's 'show' functions
      */
-    invoke<
-      TActualSubject extends (Subject extends Node | Node[] ? JQuery<Subject> : Subject),
-      TName extends ({ [K in keyof TActualSubject]: TActualSubject[K] extends (...args: any[]) => any ? K : never }[keyof TActualSubject]),
-      TArgs extends (TActualSubject[TName] extends (...args: infer A) => any ? A : never),
-      TReturn extends (TActualSubject[TName] extends (...args: any[]) => infer R ? R : never),
-    >(functionName: TName, ...args: TArgs): Chainable<TReturn>
+    invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
 
     /**
      * Get a property’s value on the previously yielded subject.
