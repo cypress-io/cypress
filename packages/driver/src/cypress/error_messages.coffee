@@ -1060,20 +1060,38 @@ module.exports = {
     }
 
   selector_playground:
-    defaults_invalid_arg: "`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`"
-    defaults_invalid_priority: "`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`"
-    defaults_invalid_on_element: "`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`"
+    defaults_invalid_arg: {
+      message: "`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/selector-playground-api"
+    }
+    defaults_invalid_priority: {
+      message: "`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/selector-playground-api" 
+    }
+    defaults_invalid_on_element: {
+      message: "`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/selector-playground-api" 
+    }
 
   server:
-    invalid_argument: "#{cmd('server')} accepts only an object literal as its argument."
-    xhrurl_not_set: "`Server.options.xhrUrl` has not been set"
+    invalid_argument: {
+      message: "#{cmd('server')} accepts only an object literal as its argument."
+      docsUrl: "https://on.cypress.io/server"
+    }
+    xhrurl_not_set: "`Server.options.xhrUrl` has not been set"""
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
-    invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for `name` and `value`."
+    invalid_arguments: {
+      message: "#{cmd('setCookie')} must be passed two string arguments for `name` and `value`."
+      docsUrl: "https://on.cypress.io/#{_.toLower("setCookie")}"
+    }
 
   spread:
-    invalid_type: "#{cmd('spread')} requires the existing subject be array-like."
+    invalid_type: {
+      message: "#{cmd('spread')} requires the existing subject be array-like."
+      docsUrl: "https://on.cypress.io/spread"
+    }
 
   subject:
     not_dom: (obj) ->

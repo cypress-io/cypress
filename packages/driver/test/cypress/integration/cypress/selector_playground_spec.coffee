@@ -31,20 +31,41 @@ describe "src/cypress/selector_playground", ->
       expect(SelectorPlayground.getOnElement()).to.equal(onElement)
 
     it "throws if not passed an object", ->
-      expect =>
+      fn = () =>
         SelectorPlayground.defaults()
-      .to.throw("`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: ")
+
+      expect(fn).to.throw()
+      .with.property("message")
+      .and.include("`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: ")
+
+      expect(fn).to.throw()
+      .with.property("docsUrl")
+      .and.include("https://on.cypress.io/selector-playground-api")
 
     it "throws if selectorPriority is not an array", ->
-      expect =>
+      fn = () =>
         SelectorPlayground.defaults({ selectorPriority: "foo" })
-      .to.throw("`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `foo`")
+
+      expect(fn).to.throw()
+      .with.property("message")
+      .and.include("`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `foo`")
+
+      expect(fn).to.throw()
+      .with.property("docsUrl")
+      .and.include("https://on.cypress.io/selector-playground-api")
 
     it "throws if onElement is not a function", ->
-      expect =>
+      fn = () =>
         SelectorPlayground.defaults({ onElement: "foo" })
-      .to.throw("`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `foo`")
+        
+      expect(fn).to.throw()
+      .with.property("message")
+      .and.include("`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `foo`")
 
+      expect(fn).to.throw()
+      .with.property("docsUrl")
+      .and.include("https://on.cypress.io/selector-playground-api")
+      
   context ".getSelector", ->
     it "uses defaults.selectorPriority", ->
       $div = $("<div data-cy='main button 123' data-foo-bar-baz='quux' data-test='qwerty' data-foo='bar' />")

@@ -42,6 +42,7 @@ describe "src/cy/commands/connectors", ->
         it "throws when subject isn't array-like", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.eq "`cy.spread()` requires the existing subject be array-like."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/spread")
             done()
 
           cy.noop({}).spread ->

@@ -468,6 +468,7 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error").message).to.eq "`cy.setCookie()` must be passed two string arguments for `name` and `value`."
+          expect(lastLog.get("error").docsUrl).to.eq "https://on.cypress.io/setcookie"
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -479,6 +480,7 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error").message).to.eq "`cy.setCookie()` must be passed two string arguments for `name` and `value`."
+          expect(lastLog.get("error").docsUrl).to.eq "https://on.cypress.io/setcookie"
           expect(lastLog.get("error")).to.eq(err)
           done()
 

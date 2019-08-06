@@ -877,6 +877,7 @@ describe "src/cy/commands/xhr", ->
           it "throws on bad argument: #{arg}", (done) ->
             cy.on "fail", (err) ->
               expect(err.message).to.include "`cy.server()` accepts only an object literal as its argument"
+              expect(err.docsUrl).to.eq("https://on.cypress.io/server")
               done()
 
             cy.server(arg)
@@ -887,11 +888,10 @@ describe "src/cy/commands/xhr", ->
           expect(err.docsUrl).to.eq("https://on.cypress.io/server")
           done()
 
-        cy
-          .server()
-          .route(/app/, {})
-          .server({enable: false})
-          .route(/app/, {})
+        cy.server()
+        cy.route(/app/, {})
+        cy.server({enable: false})
+        cy.route(/app/, {})
 
       describe ".log", ->
         beforeEach ->
