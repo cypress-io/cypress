@@ -1030,13 +1030,34 @@ module.exports = {
     }
 
   select:
-    disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n`{{node}}`"
-    invalid_element: "#{cmd('select')} can only be called on a `<select>`. Your subject is a: `{{node}}`"
-    invalid_multiple: "#{cmd('select')} was called with an array of arguments but does not have a `multiple` attribute set."
-    multiple_elements: "#{cmd('select')} can only be called on a single `<select>`. Your subject contained {{num}} elements."
-    multiple_matches: "#{cmd('select')} matched more than one `option` by value or text: `{{value}}`"
-    no_matches: "#{cmd('select')} failed because it could not find a single `<option>` with value or text matching: `{{value}}`"
-    option_disabled: "#{cmd('select')} failed because this `<option>` you are trying to select is currently disabled:\n\n`{{node}}`"
+    disabled: {
+      message: "#{cmd('select')} failed because this element is currently disabled:\n\n`{{node}}`"
+      docsUrl: "https://on.cypress.io/select"
+    }
+    invalid_element: {
+      message: "#{cmd('select')} can only be called on a `<select>`. Your subject is a: `{{node}}`"
+      docsUrl: "https://on.cypress.io/select"
+    }
+    invalid_multiple: {
+      message: "#{cmd('select')} was called with an array of arguments but does not have a `multiple` attribute set."
+      docsUrl: "https://on.cypress.io/select"
+    }
+    multiple_elements: {
+      message: "#{cmd('select')} can only be called on a single `<select>`. Your subject contained {{num}} elements."
+      docsUrl: "https://on.cypress.io/select"
+    }
+    multiple_matches: {
+      message: "#{cmd('select')} matched more than one `option` by value or text: `{{value}}`"
+      docsUrl: "https://on.cypress.io/select"
+    }
+    no_matches: {
+      message: "#{cmd('select')} failed because it could not find a single `<option>` with value or text matching: `{{value}}`"
+      docsUrl: "https://on.cypress.io/select"
+    }
+    option_disabled: {
+      message: "#{cmd('select')} failed because this `<option>` you are trying to select is currently disabled:\n\n`{{node}}`"
+      docsUrl: "https://on.cypress.io/select"
+    }
 
   selector_playground:
     defaults_invalid_arg: "`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`"
