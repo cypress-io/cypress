@@ -810,9 +810,15 @@ declare namespace Cypress {
     hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
-     * Invoke a function on the previously yielded subject.
+     * Invoke a function on the previously yielded subject, yielding the result.
      *
      * @see https://on.cypress.io/invoke
+     * @example
+     *    // Invoke the 'add' function, passing in parameters
+     *    cy.wrap({ add: (a, b) => a + b }).invoke('add', 1, 2).should('eq', 3)
+     *    // DOM elements are automatically wrapped with jQuery,
+     *    //   so jQuery functions (including 3rd party plugins) can be invoked
+     *    cy.get('.modal').invoke('show').should('be.visible') // jQuery's 'show' functions
      */
     invoke<
       TActualSubject extends (Subject extends Node | Node[] ? JQuery<Subject> : Subject),
