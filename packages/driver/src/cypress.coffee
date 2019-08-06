@@ -16,7 +16,6 @@ $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
 $SetterGetter = require("./cypress/setter_getter")
-$Keyboard = require("./cy/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
@@ -171,7 +170,7 @@ class $Cypress
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @state, @config, @log)
+    @Commands = $Commands.create(@, @cy, @state, @config)
 
     @events.proxyTo(@cy)
 
@@ -467,7 +466,6 @@ class $Cypress
   Commands: $Commands
   dom: $dom
   errorMessages: $errorMessages
-  Keyboard: $Keyboard
   Location: $Location
   Log: $Log
   LocalStorage: $LocalStorage
