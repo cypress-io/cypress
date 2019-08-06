@@ -666,6 +666,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if arg passed as non-object", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollIntoView()` can only be called with an `options` object. Your argument was: `foo`"
+            expect(err.docsUrl).to.eq("https://on.cypress.io/scrollintoview")
             done()
 
           cy.get("#scroll-into-view-both h5").scrollIntoView("foo")
