@@ -11,6 +11,7 @@ agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 streamBuffer = require("./util/stream_buffer").streamBuffer
 
+SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly']
 NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND".split(" ")
 VERBOSE_REQUEST_OPTS = "followRedirect strictSSL".split(" ")
 HTTP_CLIENT_REQUEST_EVENTS = "abort connect continue information socket timeout upgrade".split(" ")
@@ -415,32 +416,48 @@ module.exports = (options = {}) ->
       return response
 
     getRequestCookieHeader: (reqUrl, automationFn) ->
-      ## TODO: decide if we should set secure: reqUrl.startsWith('https:') here
-      automationFn('get:cookies', { url: reqUrl })
+      secure = reqUrl.startsWith('https:')
+      automationFn('get:cookies', {
+        url: reqUrl,
+        secure
+      })
+      .then _.partialRight(_.filter, { secure })
       .then (cookies) ->
         debug('getting cookies from browser %o', { reqUrl, cookies })
         cookies.map (cookie) ->
           "#{cookie.name}=#{cookie.value}"
-        .join("; ")
+        .join("; ") || undefined
 
     setCookiesOnBrowser: (res, resUrl, automationFn) ->
-      setCookie = res.headers['set-cookie']
-      if !setCookie
+      cookies = res.headers['set-cookie']
+      if !cookies
         return Promise.resolve()
 
-      parsedUrl = url.parse(resUrl)
-      if (setCookie instanceof Array)
-        cookies = setCookie.map(tough.Cookie.parse)
-      else
-        cookies = [tough.Cookie.parse(setCookie)]
+      if !(cookies instanceof Array)
+        cookies = [cookies]
 
+      parsedUrl = url.parse(resUrl)
       debug('setting cookies on browser %o', { url: parsedUrl, cookies })
 
       Promise.map cookies, (cookie) ->
+        cookie = tough.Cookie.parse(cookie, { loose: true })
+        cookie.name = cookie.key
+
         if not cookie.domain
           ## take the domain from the URL
           cookie.domain = parsedUrl.hostname
           cookie.hostOnly = true
+
+        return if not tough.domainMatch(cookie.domain, parsedUrl.hostname)
+
+        expiry = cookie.expiryTime()
+        if isFinite(expiry)
+          cookie.expiry = expiry / 1000
+
+        cookie = _.pick(cookie, SERIALIZABLE_COOKIE_PROPS)
+
+        if expiry <= 0
+          return automationFn('clear:cookie', cookie)
         automationFn('set:cookie', cookie)
 
     sendStream: (headers, automationFn, options = {}) ->
@@ -591,9 +608,11 @@ module.exports = (options = {}) ->
         ## if we have a cookie object then just
         ## send the request up!
         if _.isObject(c)
-          options.headers.Cookie = _.keys(c).map (k) ->
+          cookieHeader = _.keys(c).map (k) ->
             "#{k}=#{c[k]}"
           .join('; ')
+          if cookieHeader
+            options.headers.Cookie = cookieHeader
           send()
         else
           ## else go get the cookies first

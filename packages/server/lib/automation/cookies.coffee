@@ -7,11 +7,10 @@ debug     = require("debug")("cypress:server:cookies")
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
 COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry hostOnly".split(" ")
 
-normalizeCookies = (cookies, includeHostOnly) ->
-  _.map cookies, (c) ->
-    normalizeCookieProps(c, includeHostOnly)
+normalizeCookies = (cookies) ->
+  _.map cookies, normalizeCookieProps
 
-normalizeCookieProps = (props, includeHostOnly) ->
+normalizeCookieProps = (props) ->
   return props if not props
 
   ## pick off only these specific cookie properties
@@ -21,9 +20,6 @@ normalizeCookieProps = (props, includeHostOnly) ->
   .omitBy(_.isUndefined)
   .omitBy(_.isNull)
   .value()
-
-  # if includeHostOnly
-  #   cookie.hostOnly = props.hostOnly
 
   ## when sending cookie props we need to convert
   ## expiry to expirationDate
@@ -41,6 +37,15 @@ normalizeCookieProps = (props, includeHostOnly) ->
 
   cookie
 
+normalizeGetCookies = (cookies) ->
+  _.map cookies, normalizeGetCookieProps
+
+normalizeGetCookieProps = (props) ->
+  return props if not props
+
+  cookie = normalizeCookieProps(props)
+  _.omit(cookie, 'hostOnly')
+
 cookies = (cyNamespace, cookieNamespace) ->
   isNamespaced = (cookie) ->
     name = cookie and cookie.name
@@ -53,15 +58,11 @@ cookies = (cyNamespace, cookieNamespace) ->
 
   return {
     getCookies: (data, automate) ->
-      { includeHostOnly } = data
-
-      delete data.includeHostOnly
-
       debug("getting:cookies %o", data)
 
       automate(data)
       .then (cookies) ->
-        cookies = normalizeCookies(cookies, includeHostOnly)
+        cookies = normalizeGetCookies(cookies)
         cookies = _.reject(cookies, isNamespaced)
 
         debug("received get:cookies %o", cookies)
@@ -76,7 +77,7 @@ cookies = (cyNamespace, cookieNamespace) ->
         if isNamespaced(cookie)
           throw new Error("Sorry, you cannot get a Cypress namespaced cookie.")
         else
-          cookie = normalizeCookieProps(cookie)
+          cookie = normalizeGetCookieProps(cookie)
 
           debug("received get:cookie %o", cookie)
 
@@ -97,7 +98,7 @@ cookies = (cyNamespace, cookieNamespace) ->
 
         automate(cookie)
         .then (cookie) ->
-          cookie = normalizeCookieProps(cookie)
+          cookie = normalizeGetCookieProps(cookie)
 
           debug("received set:cookie %o", cookie)
 

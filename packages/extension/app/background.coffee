@@ -4,6 +4,8 @@ once    = require("lodash/once")
 Promise = require("bluebird")
 client  = require("./client")
 
+GET_ALL_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'session', 'storeId']
+
 httpRe = /^http/
 
 firstOrNull = (cookies) ->
@@ -61,7 +63,7 @@ connect = (host, path) ->
     ws.emit("automation:client:connected")
 
   return ws
-  
+
 automation = {
   connect
 
@@ -85,6 +87,7 @@ automation = {
     .map(clear)
 
   getAll: (filter = {}) ->
+    filter = pick(filter, GET_ALL_PROPS)
     get = ->
       new Promise (resolve) ->
         chrome.cookies.getAll(filter, resolve)

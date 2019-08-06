@@ -232,9 +232,6 @@ module.exports = {
           if cookie.expires == -1
             delete cookie.expires
           cookie.expirationDate = cookie.expires
-          cookie.hostOnly = false
-          if cookie.domain[0] != '.'
-            cookie.hostOnly = true
           delete cookie.expires
           return cookie
 
@@ -251,8 +248,13 @@ module.exports = {
           delete cookie.expirationDate
           return cookie
 
-        getCookies = ->
+        getAllCookies = () ->
           invokeViaDebugger("Network.getAllCookies")
+          .then (result) ->
+            normalizeGetCookies(result.cookies)
+
+        getCookies = (data) ->
+          invokeViaDebugger("Network.getCookies", data)
           .then (result) ->
             normalizeGetCookies(result.cookies)
 
@@ -266,20 +268,16 @@ module.exports = {
               when "get:cookies"
                 if data?.url
                   return getCookies({ urls: [ data.url ]})
-                getCookies()
+                getAllCookies()
               when "get:cookie"
                 getCookie(data)
               when "set:cookie"
                 data = normalizeSetCookieProps(data)
-                # return Promise.resolve() if data.value == 'good'
                 invokeViaDebugger("Network.setCookie", data).then ->
                   getCookie(data)
               when "clear:cookies"
-                invokeViaDebugger("Network.clearBrowserCookies").return(null)
+                throw new Error('reasonably sure this is not used')
               when "clear:cookie"
-                return invokeViaDebugger("Network.clearBrowserCookies").return(null)
-                data = normalizeSetCookieProps(data)
-                delete data.expiry
                 invokeViaDebugger("Network.deleteCookies", data).return(null)
               when "is:automation:client:connected"
                 invoke("isAutomationConnected", data)

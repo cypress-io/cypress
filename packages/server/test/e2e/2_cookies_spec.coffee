@@ -80,9 +80,14 @@ describe "e2e cookies", ->
     }
   })
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "cookies_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  [
+    'electron',
+    'chrome'
+  ].map (browser) ->
+    it "passes in #{browser}", ->
+      e2e.exec(@, {
+        spec: "cookies_spec.coffee"
+        snapshot: true
+        expectedExitCode: 0
+        browser
+      })
