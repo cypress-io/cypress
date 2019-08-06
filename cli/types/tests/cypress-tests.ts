@@ -331,4 +331,17 @@ namespace CypressInvokeTests {
   cy.wrap(obj).invoke('foo', 5, 1) // $ExpectError
   cy.wrap(obj).invoke('foo', 5, 'b', 1) // $ExpectError
   cy.get('input').then(it => it[0]).invoke('checkValidity') // $ExpectError
+
+  // sanity check with double .invoke
+  const largerObject = {
+    getSmallObject() {
+      return obj
+    }
+  }
+
+  cy.wrap(largerObject).invoke('getSmallObject').invoke('foo', 3, 'label').should('equal', 'label = 3')
+
+  // make sure we can invoke jQuery method and pass an argument
+  cy.get('.trigger-input-range')
+    .invoke('val', 25)
 }
