@@ -413,7 +413,7 @@ class Server
 
           runPhase =>
             # request.setJarCookies(jar, automationRequest)
-            Promise.resolve({})
+            Promise.resolve([])
             .then (c) =>
               @_remoteVisitingUrl = false
 

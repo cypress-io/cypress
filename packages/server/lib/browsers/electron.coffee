@@ -259,8 +259,8 @@ module.exports = {
             normalizeGetCookies(result.cookies)
 
         getCookie = (data) ->
-          getCookies().then (cookies) ->
-            _.find(cookies, { name: data.name }) or null
+          getAllCookies().then (cookies) ->
+            _.find(cookies, _.pick(data, 'name', 'domain', 'path')) or null
 
         automation.use({
           onRequest: (message, data) ->

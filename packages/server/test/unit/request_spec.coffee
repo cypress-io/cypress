@@ -10,15 +10,6 @@ describe "lib/request", ->
   it "is defined", ->
     expect(request).to.be.an("object")
 
-  context "#reduceCookieToArray", ->
-    it "converts object to array of key values", ->
-      obj = {
-        foo: "bar"
-        baz: "quux"
-      }
-
-      expect(request.reduceCookieToArray(obj)).to.deep.eq(["foo=bar", "baz=quux"])
-
   context "#getDelayForRetry", ->
     it "divides by 10 when delay >= 1000 and err.code = ECONNREFUSED", ->
       retryIntervals = [1,2,3,4]
@@ -103,15 +94,6 @@ describe "lib/request", ->
       opts = request.setDefaults({ delaysRemaining })
 
       expect(opts.delaysRemaining).to.eq(delaysRemaining)
-
-  context "#createCookieString", ->
-    it "joins array by '; '", ->
-      obj = {
-        foo: "bar"
-        baz: "quux"
-      }
-
-      expect(request.createCookieString(obj)).to.eq("foo=bar; baz=quux")
 
   context "#normalizeResponse", ->
     beforeEach ->
@@ -335,6 +317,8 @@ describe "lib/request", ->
         ])
 
     it "includes redirects", ->
+      @fn.resolves()
+
       nock("http://www.github.com")
       .get("/dashboard")
       .reply(301, null, {
@@ -609,6 +593,9 @@ describe "lib/request", ->
           expect(resp.status).to.eq(200)
 
     context "followRedirect", ->
+      beforeEach ->
+        @fn.resolves()
+
       it "by default follow redirects", ->
         nock("http://localhost:8080")
         .get("/dashboard")
