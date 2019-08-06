@@ -607,6 +607,7 @@ describe "src/cy/commands/actions/trigger", ->
       it "throws when eventName is not a string", ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "`cy.trigger()` can only be called on a single element. Your subject contained 15 elements."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/trigger")
           done()
 
         cy.get("button:first").trigger("`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
@@ -621,6 +622,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         cy.on "fail", (err) ->
           expect(err.message).to.eq "`cy.trigger()` can only be called on a single element. Your subject contained #{num} elements."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/trigger")
           done()
 
         cy.get("button").trigger("mouseover")

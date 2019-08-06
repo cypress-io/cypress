@@ -1078,7 +1078,7 @@ module.exports = {
       message: "#{cmd('server')} accepts only an object literal as its argument."
       docsUrl: "https://on.cypress.io/server"
     }
-    xhrurl_not_set: "`Server.options.xhrUrl` has not been set"""
+    xhrurl_not_set: "`Server.options.xhrUrl` has not been set"
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
@@ -1156,8 +1156,14 @@ module.exports = {
       """
 
   submit:
-    multiple_forms: "#{cmd('submit')} can only be called on a single `form`. Your subject contained {{num}} `form` elements."
-    not_on_form: "#{cmd('submit')} can only be called on a `<form>`. Your subject {{word}} a: `{{node}}`"
+    multiple_forms: {
+      message: "#{cmd('submit')} can only be called on a single `form`. Your subject contained {{num}} `form` elements."
+      docsUrl: "https://on.cypress.io/submit"
+    }
+    not_on_form: {
+      message: "#{cmd('submit')} can only be called on a `<form>`. Your subject {{word}} a: `{{node}}`"
+      docsUrl: "https://on.cypress.io/submit"
+    }
 
   task:
     known_error: """#{cmd('task', '\'{{task}}\'')} failed with the following error:
@@ -1168,8 +1174,14 @@ module.exports = {
 
         > {{error}}
     """
-    invalid_argument: "#{cmd('task')} must be passed a non-empty string as its 1st argument. You passed: `{{task}}`."
-    timed_out: "#{cmd('task', '\'{{task}}\'')} timed out after waiting `{{timeout}}ms`."
+    invalid_argument: {
+      message: "#{cmd('task')} must be passed a non-empty string as its 1st argument. You passed: `{{task}}`."
+      docsUrl: "https://on.cypress.io/task"
+    }
+    timed_out: {
+      message: "#{cmd('task', '\'{{task}}\'')} timed out after waiting `{{timeout}}ms`."
+      docsUrl: "https://on.cypress.io/task"
+    }
     server_timed_out: """#{cmd('task', '\'{{task}}\'')} timed out after waiting `{{timeout}}ms`.
 
         {{error}}
@@ -1199,11 +1211,20 @@ module.exports = {
     """
 
   trigger:
-    invalid_argument: "#{cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: `{{cmd}}`."
-    multiple_elements: "#{cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements."
+    invalid_argument: {
+      message: "#{cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: `{{cmd}}`."
+      docsUrl: "https://on.cypress.io/trigger"
+    }
+    multiple_elements: {
+      message: "#{cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements."
+      docsUrl: "https://on.cypress.io/trigger" 
+    }
 
   type:
-    empty_string: "#{cmd('type')} cannot accept an empty string. You need to actually type something."
+    empty_string: {
+      message: "#{cmd('type')} cannot accept an empty string. You need to actually type something."
+      docsUrl: "https://on.cypress.io/type"
+    }
     invalid: {
       message: """
         Special character sequence: `{{chars}}` is not recognized. Available sequences are: {{allChars}}
@@ -1212,24 +1233,46 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/type"
     }
-    invalid_date: "Typing into a `date` input with #{cmd('type')} requires a valid date with the format `yyyy-MM-dd`. You passed: `{{chars}}`"
-    invalid_month: "Typing into a `month` input with #{cmd('type')} requires a valid month with the format `yyyy-MM`. You passed: `{{chars}}`"
-    invalid_time: "Typing into a `time` input with #{cmd('type')} requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `{{chars}}`"
-    invalid_week: "Typing into a `week` input with #{cmd('type')} requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `{{chars}}`"
-    empty_string: "#{cmd('type')} cannot accept an empty string. You need to actually type something."
-    multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
-    not_on_typeable_element: """
-      #{cmd('type')} failed because it requires a valid typeable element.
+    invalid_date: {
+      message: "Typing into a `date` input with #{cmd('type')} requires a valid date with the format `yyyy-MM-dd`. You passed: `{{chars}}`"
+      docsUrl: "https://on.cypress.io/type"
+    }
+    invalid_month: {
+      message: "Typing into a `month` input with #{cmd('type')} requires a valid month with the format `yyyy-MM`. You passed: `{{chars}}`"
+      docsUrl: "https://on.cypress.io/type"
+    }
+    invalid_time: {
+      message: "Typing into a `time` input with #{cmd('type')} requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `{{chars}}`"
+      docsUrl: "https://on.cypress.io/type"
+    }
+    invalid_week: {
+      message: "Typing into a `week` input with #{cmd('type')} requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `{{chars}}`"
+      docsUrl: "https://on.cypress.io/type"
+    }
+    multiple_elements: {
+      message: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
+      docsUrl: "https://on.cypress.io/type"
+    }
+    not_on_typeable_element: {
+      message: """
+        #{cmd('type')} failed because it requires a valid typeable element.
 
-      The element typed into was:
+        The element typed into was:
 
-        > `{{node}}`
+          > `{{node}}`
 
-      Cypress considers the `body`, `textarea`, any `element` with a `tabindex` or `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid typeable elements.
-    """
-    readonly: "#{cmd('type')} cannot type into an element with a 'readonly' attribute. The element typed into was: {{node}}"
-    tab: "`{tab}` isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done, that's what you'll use."
-    wrong_type: "#{cmd('type')} can only accept a string or number. You passed in: `{{chars}}`"
+        Cypress considers the `body`, `textarea`, any `element` with a `tabindex` or `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid typeable elements.
+      """
+      docsUrl: "https://on.cypress.io/type"
+    }
+    tab: {
+      message: "`{tab}` isn't a supported character sequence."
+      docsUrl: "https://on.cypress.io/type"
+    }
+    wrong_type: {
+      message: "#{cmd('type')} can only accept a string or number. You passed in: `{{chars}}`"
+      docsUrl: "https://on.cypress.io/type"
+    }
 
   uncaught:
     cross_origin_script: """
@@ -1278,11 +1321,26 @@ module.exports = {
       """
 
   viewport:
-    bad_args:  "#{cmd('viewport')} can only accept a string preset or a `width` and `height` as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} `width` and `height` must be between `20px` and `3000px`."
-    empty_string: "#{cmd('viewport')} cannot be passed an empty string."
-    invalid_orientation: "#{cmd('viewport')} can only accept `{{all}}` as valid orientations. Your orientation was: `{{orientation}}`"
-    missing_preset: "#{cmd('viewport')} could not find a preset for: `{{preset}}`. Available presets are: {{presets}}"
+    bad_args: {
+      message: "#{cmd('viewport')} can only accept a string preset or a `width` and `height` as numbers."
+      docsUrl: "https://on.cypress.io/viewport"
+    }
+    dimensions_out_of_range: {
+      message: "#{cmd('viewport')} `width` and `height` must be between `20px` and `3000px`."
+      docsUrl: "https://on.cypress.io/viewport"
+    }
+    empty_string: {
+      message: "#{cmd('viewport')} cannot be passed an empty string."
+      docsUrl: "https://on.cypress.io/viewport" 
+    }
+    invalid_orientation: {
+      message: "#{cmd('viewport')} can only accept `{{all}}` as valid orientations. Your orientation was: `{{orientation}}`"
+      docsUrl: "https://on.cypress.io/viewport" 
+    }
+    missing_preset: {
+      message: "#{cmd('viewport')} could not find a preset for: `{{preset}}`. Available presets are: {{presets}}"
+      docsUrl: "https://on.cypress.io/viewport" 
+    }
 
   visit:
     body_circular: ({ path }) -> {
