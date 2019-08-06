@@ -1,8 +1,8 @@
 import _ from 'lodash'
-import { $ } from '@packages/driver'
-import Promise from 'bluebird'
 
+import { $ } from '@packages/driver'
 import selectorPlaygroundHighlight from '../selector-playground/highlight'
+import selectorPlaygroundCSS from '!../selector-playground/selector-playground.scss'
 
 const styles = (styleString) => {
   return styleString.replace(/\s*\n\s*/g, '')
@@ -141,11 +141,11 @@ function getOrCreateSelectorHelperDom ($body) {
   if ($container.length) {
     const shadowRoot = $container[0].shadowRoot
 
-    return Promise.resolve({
+    return {
       $container,
       shadowRoot,
       $reactContainer: $(shadowRoot).find('.react-container'),
-    })
+    }
   }
 
   $container = $('<div />')
@@ -159,66 +159,52 @@ function getOrCreateSelectorHelperDom ($body) {
   .addClass('react-container')
   .appendTo(shadowRoot)
 
-  return Promise.try(() => {
-    return fetch('/__cypress/runner/cypress_selector_playground.css')
-  })
-  .then((result) => {
-    return result.text()
-  })
-  .then((content) => {
-    $('<style />', { html: content }).prependTo(shadowRoot)
+  $('<style />', { html: selectorPlaygroundCSS.toString() }).prependTo(shadowRoot)
 
-    return { $container, shadowRoot, $reactContainer }
-  })
-  .catch((error) => {
-    console.error('Selector playground failed to load styles:', error) // eslint-disable-line no-console
-
-    return { $container, shadowRoot, $reactContainer }
-  })
+  return { $container, shadowRoot, $reactContainer }
 }
 
 function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
-  getOrCreateSelectorHelperDom($body)
-  .then(({ $container, shadowRoot, $reactContainer }) => {
-    if (!$el) {
-      selectorPlaygroundHighlight.unmount($reactContainer[0])
-      $reactContainer.off('click')
-      $container.remove()
+  const { $container, shadowRoot, $reactContainer } = getOrCreateSelectorHelperDom($body)
 
-      return
+  if (!$el) {
+    selectorPlaygroundHighlight.unmount($reactContainer[0])
+    $reactContainer.off('click')
+    $container.remove()
+
+    return
+  }
+
+  const borderSize = 2
+
+  const styles = $el.map((__, el) => {
+    const $el = $(el)
+    const offset = $el.offset()
+
+    return {
+      position: 'absolute',
+      margin: 0,
+      padding: 0,
+      width: $el.outerWidth(),
+      height: $el.outerHeight(),
+      top: offset.top - borderSize,
+      left: offset.left - borderSize,
+      transform: $el.css('transform'),
+      zIndex: getZIndex($el),
     }
+  }).get()
 
-    const borderSize = 2
+  if ($el.length === 1) {
+    $reactContainer
+    .off('click')
+    .on('click', onClick)
+  }
 
-    const styles = $el.map((__, el) => {
-      const $el = $(el)
-      const offset = $el.offset()
-
-      return {
-        position: 'absolute',
-        margin: 0,
-        padding: 0,
-        width: $el.outerWidth(),
-        height: $el.outerHeight(),
-        top: offset.top - borderSize,
-        left: offset.left - borderSize,
-        transform: $el.css('transform'),
-        zIndex: getZIndex($el),
-      }
-    }).get()
-
-    if ($el.length === 1) {
-      $reactContainer
-      .off('click')
-      .on('click', onClick)
-    }
-
-    selectorPlaygroundHighlight.render($reactContainer[0], {
-      selector,
-      appendTo: shadowRoot,
-      showTooltip,
-      styles,
-    })
+  selectorPlaygroundHighlight.render($reactContainer[0], {
+    selector,
+    appendTo: shadowRoot,
+    showTooltip,
+    styles,
   })
 }
 
