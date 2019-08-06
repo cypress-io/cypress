@@ -27,6 +27,9 @@ formatProp = (memo, field) ->
 cmd = (command, args = "") ->
   "`cy.#{command}(#{args})`"
 
+getScreenshotDocsPath = (cmd) ->
+  if cmd is "Cypress.Screenshot.defaults" then "screenshot-api" else "screenshot"
+
 getRedirects = (obj, phrase) ->
   redirects = obj.redirects ? []
 
@@ -280,7 +283,9 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/element-cannot-be-interacted-with"
     }
-    invalid_position_argument: "Invalid position argument: `{{position}}`. Position may only be {{validPositions}}."
+    invalid_position_argument: {
+      message: "Invalid position argument: `{{position}}`. Position may only be {{validPositions}}."
+    }
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
       `{{node}}`\n
@@ -955,26 +960,74 @@ module.exports = {
       message: "#{cmd('scrollIntoView')} can only be called with an `options` object. Your argument was: `{{arg}}`"
       docsUrl: "https://on.cypress.io/scrollintoview"
     }
-    multiple_elements: "#{cmd('scrollIntoView')} can only be used to scroll to 1 element, you tried to scroll to {{num}} elements.\n\n"
-    invalid_easing: "#{cmd('scrollIntoView')} must be called with a valid `easing`. Your easing was: `{{easing}}`"
-    invalid_duration: "#{cmd('scrollIntoView')} must be called with a valid `duration`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: `{{duration}}`"
+    multiple_elements: {
+      message: "#{cmd('scrollIntoView')} can only be used to scroll to 1 element, you tried to scroll to {{num}} elements.\n\n"
+      docsUrl: "https://on.cypress.io/scrollintoview"
+    }
+    invalid_easing: {
+      message: "#{cmd('scrollIntoView')} must be called with a valid `easing`. Your easing was: `{{easing}}`"
+      docsUrl: "https://on.cypress.io/scrollintoview"
+    }
+    invalid_duration: {
+      message: "#{cmd('scrollIntoView')} must be called with a valid `duration`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: `{{duration}}`"
+      docsUrl: "https://on.cypress.io/scrollintoview"
+    }
 
   scrollTo:
-    invalid_target: "#{cmd('scrollTo')} must be called with a valid `position`. It can be a string, number or object. Your position was: `{{x}}, {{y}}`"
-    multiple_containers: "#{cmd('scrollTo')} can only be used to scroll one element, you tried to scroll {{num}} elements.\n\n"
-    invalid_easing: "#{cmd('scrollTo')} must be called with a valid `easing`. Your easing was: `{{easing}}`"
-    invalid_duration: "#{cmd('scrollTo')} must be called with a valid `duration`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: `{{duration}}`"
-    animation_failed: "#{cmd('scrollTo')} failed."
+    animation_failed: {
+      message: "#{cmd('scrollTo')} failed to scroll."
+      docsUrl: "https://on.cypress.io/scrollto"
+    }
+    invalid_easing: {
+      message: "#{cmd('scrollTo')} must be called with a valid `easing`. Your easing was: `{{easing}}`"
+      docsUrl: "https://on.cypress.io/scrollto"
+    }
+    invalid_duration: {
+      message: "#{cmd('scrollTo')} must be called with a valid `duration`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: `{{duration}}`"
+      docsUrl: "https://on.cypress.io/scrollto"
+    }
+    invalid_target: {
+      message: "#{cmd('scrollTo')} must be called with a valid `position`. It can be a string, number or object. Your position was: `{{x}}, {{y}}`"
+      docsUrl: "https://on.cypress.io/scrollto"
+    }
+    multiple_containers: {
+      message: "#{cmd('scrollTo')} can only be used to scroll 1 element, you tried to scroll {{num}} elements.\n\n"
+      docsUrl: "https://on.cypress.io/scrollto"
+    }
 
   screenshot:
-    invalid_arg: "`{{cmd}}()` must be called with an object. You passed: `{{arg}}`"
-    invalid_capture: "`{{cmd}}()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `{{arg}}`"
-    invalid_boolean: "`{{cmd}}()` `{{option}}` option must be a boolean. You passed: `{{arg}}`"
-    invalid_blackout: "`{{cmd}}()` `blackout` option must be an array of strings. You passed: `{{arg}}`"
-    invalid_clip: "`{{cmd}}()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{{arg}}`"
-    invalid_callback: "`{{cmd}}()` `{{callback}}` option must be a function. You passed: `{{arg}}`"
-    multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
-    timed_out: "#{cmd('screenshot')} timed out waiting `{{timeout}}ms` to complete."
+    invalid_arg: (obj) -> {
+      message: "`{{cmd}}()` must be called with an object. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    invalid_capture: (obj) -> {
+      message: "`{{cmd}}()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    invalid_boolean: (obj) -> {
+      message: "`{{cmd}}()` `{{option}}` option must be a boolean. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    invalid_blackout: (obj) -> {
+      message: "`{{cmd}}()` `blackout` option must be an array of strings. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    invalid_clip: (obj) -> {
+      message: "`{{cmd}}()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    invalid_callback: (obj) -> {
+      message: "`{{cmd}}()` `{{callback}}` option must be a function. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    multiple_elements: {
+      message: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
+      docsUrl: "https://on.cypress.io/screenshot"
+    }
+    timed_out: {
+      message: "#{cmd('screenshot')} timed out waiting `{{timeout}}ms` to complete."
+      docsUrl: "https://on.cypress.io/screenshot"
+    }
 
   select:
     disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n`{{node}}`"
