@@ -177,7 +177,7 @@ const _stopServer = () => {
   authRedirectReached = false
 }
 
-const _launchNativeAuth = (loginUrl, sendMessage) => {
+const _launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
   const warnCouldNotLaunch = () => {
     if (openExternalAttempted && !authRedirectReached) {
       sendMessage('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
@@ -190,15 +190,12 @@ const _launchNativeAuth = (loginUrl, sendMessage) => {
 
   openExternalAttempted = true
 
-  // wrap openExternal here in case `electron.shell` is not available (during tests)
-  return Promise.try(() => {
-    return shell.openExternal(loginUrl)
-  })
+  return shell.openExternal(loginUrl)
   .catch((err) => {
     debug('Error launching native auth: %o', { err })
     warnCouldNotLaunch()
   })
-}
+})
 
 module.exports = {
   _buildFullLoginUrl,
