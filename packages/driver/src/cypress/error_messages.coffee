@@ -815,15 +815,15 @@ module.exports = {
       """
     not_attached: (obj) ->
       """
-      #{cmd(obj.name)} failed because this element is detached from the DOM.
+      #{cmd(obj.cmd)} failed because this element is detached from the DOM.
 
-      #{obj.subject}
+      #{obj.node}
 
       Cypress requires elements be attached in the DOM to interact with them.
 
       The previous command that ran was:
 
-        > #{cmd(obj.previous)}
+        > #{cmd(obj.prev)}
 
       This DOM element likely became detached somewhere between the previous and current command.
 

@@ -120,6 +120,7 @@ describe "src/cypress/dom/visibility", ->
       @$btnOpacity = add "<button style='opacity: 0;'>opacity: 0</button>"
       @$divNoWidth = add "<div style='width: 0; height: 100px;'>width: 0</div>"
       @$divNoHeight = add "<div style='width: 50px; height: 0px;'>height: 0</div>"
+      @$divDetached = $("<div id='detach-from-dom'>foo</div>")
 
       @$optionInSelect = add """
         <select>
@@ -751,6 +752,8 @@ describe "src/cypress/dom/visibility", ->
       it "has parent with 'visibility: collapse'", ->
         @reasonIs @$tableVisCollapse.find("tr.collapse td:first"), "This element '<td>' is not visible because its parent '<tr.collapse>' has CSS property: 'visibility: collapse'"
 
+      it "is detached from the DOM", ->
+        @reasonIs @$divDetached, "This element '<div>' is not visible because it is detached from the DOM"
       it "has effective zero width", ->
         @reasonIs @$divNoWidth, "This element '<div>' is not visible because it has an effective width and height of: '0 x 100' pixels."
 

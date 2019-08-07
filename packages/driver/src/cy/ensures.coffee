@@ -27,7 +27,7 @@ create = (state, expect) ->
         ## if this is an element then ensure its currently attached
         ## to its document context
         if $dom.isElement(subject)
-          ensureAttached(subject, name)
+          ensureAttached(subject, _.noop)
 
         ## always ensure this is an element
         ensureElement(subject, name)
@@ -137,17 +137,15 @@ create = (state, expect) ->
         args: { cmd, node, reason }
       })
 
-  ensureAttached = (subject, name, onFail) ->
+  ensureAttached = (subject, onFail) ->
     if $dom.isDetached(subject)
-      prev = state("current").get("prev")
+      cmd = state("current").get("name")
+      prev = state("current").get("prev").get("name")
+      node = $dom.stringify(subject)
 
       $utils.throwErrByPath("subject.not_attached", {
         onFail
-        args: {
-          name
-          subject: $dom.stringify(subject),
-          previous: prev.get("name")
-        }
+        args: { cmd, prev, node }
       })
 
   ensureElement = (subject, name, onFail) ->

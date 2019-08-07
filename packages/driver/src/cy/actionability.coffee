@@ -238,10 +238,13 @@ verify = (cy, $el, options, callbacks) ->
         if onScroll
           onScroll($el, "element")
 
-        ## ensure its visible
+        ## ensure it's attached
+        cy.ensureAttached($el, _log)
+
+        ## ensure it's visible
         cy.ensureVisibility($el, _log)
 
-        ## ensure its 'receivable' (not disabled, readonly)
+        ## ensure it's 'receivable' (not disabled, readonly)
         cy.ensureReceivability($el, _log)
 
       ## now go get all the coords for this element
