@@ -896,11 +896,79 @@ declare namespace Cypress {
     invoke<
       TActualSubject extends (Subject extends Node | Node[] ? JQuery<Subject> : Subject),
       TName extends ({ [K in keyof TActualSubject]: TActualSubject[K] extends (...args: any[]) => any ? K : never }[keyof TActualSubject]),
-      TArgs extends (TActualSubject[TName] extends (...args: infer A) => any ? A : never),
-      TReturn extends (TActualSubject[TName] extends (...args: any[]) => infer R ? R : never),
+      TArgs extends OverloadedArgumentsType<TActualSubject[TName]>,
+      TReturn extends OverloadedReturnType<TActualSubject[TName], TArgs>,
     >(functionName: TName, ...args: TArgs): Chainable<TReturn>
     invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
 
+  }
+
+    type OverloadedReturnType<T, TArgs> = 
+      T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; (...args: infer A4): infer R4; }
+        ? unknown extends (TArgs extends A1 ? R1 : unknown)
+        ? unknown extends (TArgs extends A2 ? R2 : unknown)
+        ? unknown extends (TArgs extends A3 ? R3 : unknown)
+        ? unknown extends (TArgs extends A4 ? R4 : unknown) ? 0 : R4 : R3 : R2 : R1 :
+      T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; }
+        ? unknown extends (TArgs extends A1 ? R1 : unknown)
+        ? unknown extends (TArgs extends A2 ? R2 : unknown)
+        ? unknown extends (TArgs extends A3 ? R3 : unknown) ? 1 : R3 : R2 : R1 :
+      T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; }
+        ? unknown extends (TArgs extends A1 ? R1 : unknown)
+        ? unknown extends (TArgs extends A2 ? R2 : unknown) ? 2 : R2 : R1 :
+      T extends { (...args: infer A1): infer R1; }
+        ? unknown extends (TArgs extends A1 ? R1 : unknown) ? 3 : R1 :
+      4
+        // [[A1, R1],[A2, R2],[A3, R3],[A4, R4]]:never
+    // type OverloadedReturnType<T, TArgs> = 
+    //   T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; (...args: infer A4): infer R4; }
+    //     ? (A1 extends TArgs ? R1 : A2 extends TArgs ? R2 : A3 extends TArgs ? R3 : A4 extends TArgs ? R4 : never) : 1
+    // type OverloadedReturnType<T, TArgs> = 
+    //   T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; }
+    //     ? A1 | A2 | A3 | A4 :
+    //   T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; } ? A1 | A2 | A3 :
+    //   T extends { (...args: infer A1): any; (...args: infer A2): any; } ? A1 | A2 :
+    //   T extends { (...args: infer A1): any; } ? A1 :
+    //   never
+    type OverloadedArgumentsType<T> = 
+      T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; } ? A1 | A2 | A3 | A4 :
+      T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; } ? A1 | A2 | A3 :
+      T extends { (...args: infer A1): any; (...args: infer A2): any; } ? A1 | A2 :
+      T extends { (...args: infer A1): any; } ? A1 :
+      never
+    type TActualSubject = JQuery<HTMLInputElement>
+    type TFunctionNames = { [K in keyof TActualSubject]: TActualSubject[K] extends (...args: any[]) => any ? K : never }[keyof TActualSubject]
+    type TFunctions = TActualSubject['css']
+    type TFunc = TFunctions extends (arg: infer A) => any ? A : 
+      TFunctions extends (arg1: infer A, arg2: infer B) => any ? [A, B] : never
+    type Css = TActualSubject['css']
+    type CssA = OverloadedArgumentsType<Css>
+    type CssR = OverloadedReturnType<Css, [string]>
+    type Val = TActualSubject['val']
+    type ValA = OverloadedArgumentsType<Val>
+    type ValR1 = OverloadedReturnType<Val, [number]>
+    type ValR2 = OverloadedReturnType<Val, []>
+    type Foo = {
+      (s: string, b: number): string;
+      (s: string): string;
+      (n: number): number;
+      (o: string | number): string | number
+    }
+    type FooA = OverloadedArgumentsType<Foo>
+    type FooR1 = OverloadedReturnType<Foo, [string, number]>
+    type FooR2 = OverloadedReturnType<Foo, [string]>
+    type FooR3 = OverloadedReturnType<Foo, [number]>
+    type FooR4 = OverloadedReturnType<Foo, [number|string]>
+    // type asdf = [number] extends unknown[] ? R1 : unknown[]) extends unknown[] ? 1 : 0
+    type assdf = unknown[] extends [number] ? 1 : 0
+    type dsijfog = number extends unknown ? 1 : 0
+    type dsdijfog = unknown extends number ? 1 : 0
+    type basdf = [number] extends [number|string] ? 1 : 0
+    type bassdf = [number|string] extends [number] ? 1 : 0
+    // type ValC = (...args: )
+    // type TReturn = TActualSubject[TFunctionNames] extends (...args: TArgs) => infer R ? R : never
+
+    interface Chainable<Subject = any> {
     /**
      * Get a property’s value on the previously yielded subject.
      *
