@@ -232,7 +232,7 @@ class Server
   ## https://github.com/cypress-io/cypress/issues/771
   _getServerPortForIp: (ip, data) =>
     if server = @_ipServers[ip]
-      return Promise.resolve(server.address().port)
+      return server.address().port
 
     new Promise (resolve) =>
       @_ipServers[ip] = server = https.createServer(data)
@@ -247,7 +247,6 @@ class Server
         debug("Created HTTPS Proxy for IP %s on port %s", ip, port)
 
         resolve(port)
-
 
   listen: ->
     new Promise (resolve) =>
