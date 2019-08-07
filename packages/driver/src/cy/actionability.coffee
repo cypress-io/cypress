@@ -239,7 +239,7 @@ verify = (cy, $el, options, callbacks) ->
           onScroll($el, "element")
 
         ## ensure it's attached
-        cy.ensureAttached($el, _log)
+        cy.ensureAttached($el, null, _log)
 
         ## ensure it's visible
         cy.ensureVisibility($el, _log)
