@@ -1182,10 +1182,13 @@ module.exports = {
       message: "#{cmd('task', '\'{{task}}\'')} timed out after waiting `{{timeout}}ms`."
       docsUrl: "https://on.cypress.io/task"
     }
-    server_timed_out: """#{cmd('task', '\'{{task}}\'')} timed out after waiting `{{timeout}}ms`.
+    server_timed_out: {
+      message: """#{cmd('task', '\'{{task}}\'')} timed out after waiting `{{timeout}}ms`.
 
-        {{error}}
-    """
+          {{error}}
+      """
+      docsUrl: "https://on.cypress.io/task"
+    }
 
   tick:
     invalid_argument: {

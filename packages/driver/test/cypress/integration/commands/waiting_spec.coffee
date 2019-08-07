@@ -777,7 +777,6 @@ describe "src/cy/commands/waiting", ->
 
             expect(lastLog.get("error")).to.eq err
             expect(err.message).to.include "`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `getBar`. No request ever occurred."
-            expect(err.docsUrl).to.eq("https://on.cypress.io/wait")
             done()
 
           cy
