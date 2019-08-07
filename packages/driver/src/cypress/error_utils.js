@@ -7,7 +7,7 @@ const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
 const $sourceMapUtils = require('./source_map_utils')
 
-const ERROR_PROPS = 'message renderMessage type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrames'.split(' ')
+const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrames'.split(' ')
 
 const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
@@ -26,7 +26,7 @@ const mergeErrProps = (origErr, newProps) => {
 }
 
 const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
-  let { stack, message, renderMessage } = origErrObj
+  let { stack, message } = origErrObj
 
   // preserve message
   const originalErrMsg = message
@@ -34,21 +34,16 @@ const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
   // modify message
   message = cb(originalErrMsg, newErrMsg)
 
-  if (renderMessage) {
-    renderMessage = cb(renderMessage, newErrMsg)
-  }
-
   if (stack) {
     // reset stack by replacing the original
     // first line with the new one
     stack = stack.replace(originalErrMsg, message)
   }
 
-  return {
-    renderMessage,
+  return _.extend({}, origErrObj, {
     message,
     stack,
-  }
+  })
 }
 
 const appendErrMsg = (err, messageOrObj) => {
@@ -83,7 +78,7 @@ const throwErr = (err, options = {}) => {
     err = cypressErr(err)
   }
 
-  let { onFail } = options
+  let { onFail, errProps } = options
 
   // assume onFail is a command if
   //# onFail is present and isnt a function
@@ -101,9 +96,9 @@ const throwErr = (err, options = {}) => {
     err.onFail = onFail
   }
 
-  // err.__proto__.toString = function () {
-  //   return `${err.name}: "${err.message}" \n\n${err.docsUrl} \n\n${err.stack}`
-  // }
+  if (errProps) {
+    _.extend(err, errProps)
+  }
 
   throw err
 }
@@ -124,6 +119,17 @@ const throwErrByPath = (errPath, options = {}) => {
   return throwErr(err, options)
 }
 
+const warnByPath = (errPath, options = {}) => {
+  const errObj = errObjByPath($errorMessages, errPath, options.args)
+  let err = errObj.message
+
+  if (errObj.docsUrl) {
+    err += `\n\n${errObj.docsUrl}`
+  }
+
+  $utils.warning(err)
+}
+
 const internalErr = (err) => {
   err = new Error(err)
   err.name = 'InternalError'
@@ -131,12 +137,16 @@ const internalErr = (err) => {
   return err
 }
 
+const cypressErrObj = (errObj) => {
+  errObj.name = 'CypressError'
+
+  return errObj
+}
+
 const cypressErr = (msg) => {
   const err = new Error(msg)
 
-  err.name = 'CypressError'
-
-  return err
+  return cypressErrObj(err)
 }
 
 const normalizeMsgNewLines = (message) => {
@@ -151,6 +161,8 @@ const normalizeMsgNewLines = (message) => {
 }
 
 const replaceErrMsgTokens = (errMessage, args) => {
+  if (!errMessage) return errMessage
+
   const getMsg = function (args = {}) {
     return _.reduce(args, (message, argValue, argKey) => {
       return message.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
@@ -180,20 +192,15 @@ const errObjByPath = (errLookupObj, errPath, args) => {
     }
   }
 
-  const escapedArgs = _.mapValues(args, escapeErrMarkdown)
+  let extendErrObj = {
+    message: replaceErrMsgTokens(errObj.message, args),
+  }
 
-  errObj.renderMessage = replaceErrMsgTokens(errObj.message, escapedArgs)
-  errObj.message = replaceErrMsgTokens(errObj.message, args)
+  if (errObj.docsUrl) {
+    extendErrObj.docsUrl = replaceErrMsgTokens(errObj.docsUrl, args)
+  }
 
-  // THIS ends up being called on every retry,
-  // so it appends a LOT of docs links to the message
-  // if (errObj.docsUrl) {
-  //   const errProps = appendErrMsg(errObj, errObj.docsUrl)
-
-  //   mergeErrProps(errObj, errProps)
-  // }
-
-  return errObj
+  return _.extend({}, errObj, extendErrObj)
 }
 
 const errMsgByPath = (errPath, args) => {
@@ -308,6 +315,17 @@ const getStackLineDetails = (stackString, lineIndex = 0, cwd) => {
   return stack.parseLine(line)
 }
 
+//// all errors flow through this function before they're finally thrown
+//// or used to reject promises
+const processErr = (errObj = {}, config) => {
+  if (config('isInteractive') || !errObj.docsUrl) {
+    return errObj
+  }
+
+  // append the docs url when not interactive so it appears in the stdout
+  return appendErrMsg(errObj, `${errObj.docsUrl}\n`)
+}
+
 module.exports = {
   wrapErr,
   modifyErrMsg,
@@ -316,8 +334,10 @@ module.exports = {
   makeErrFromObj,
   throwErr,
   throwErrByPath,
+  warnByPath,
   internalErr,
   cypressErr,
+  cypressErrObj,
   normalizeMsgNewLines,
   errObjByPath,
   getErrMsgWithObjByPath,
@@ -329,4 +349,5 @@ module.exports = {
   escapeErrMarkdown,
   getObjValueByPath,
   getStackLineDetails,
+  processErr,
 }

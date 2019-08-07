@@ -126,9 +126,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set(obj)
 
-      ## we always want to strip everything after the first '.'
-      ## since we support alias propertys like '1' or 'all'
-      if aliasObj = cy.getAlias(selector.split(".")[0])
+      ## We want to strip everything after the last '.'
+      ## only when it is potentially a number or 'all'
+      if _.indexOf(selector, ".") == -1 ||
+      selector.slice(1) in _.keys(cy.state("aliases"))
+        toSelect = selector
+      else
+         allParts = _.split(selector, '.')
+         toSelect = _.join(_.dropRight(allParts, 1), '.')
+
+      if aliasObj = cy.getAlias(toSelect)
         {subject, alias, command} = aliasObj
 
         return do resolveAlias = ->
@@ -176,7 +183,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             ## if this is a route command
             when command.get("name") is "route"
-              alias = _.compact([alias, selector.split(".")[1]]).join(".")
+              if !(_.indexOf(selector, ".") == -1 ||
+              selector.slice(1) in _.keys(cy.state("aliases")))
+                allParts = _.split(selector, ".")
+                index = _.last(allParts)
+                alias = _.join([alias, index], ".")
               requests = cy.getRequestsByAlias(alias) ? null
               log(requests, "route")
               return requests
@@ -206,7 +217,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         try
           $el = cy.$$(selector, options.withinSubject)
         catch e
-          e.onFail = -> options._log.error(e)
+          e.onFail = -> if options.log is false then e else options._log.error(e)
           throw e
 
         ## if that didnt find anything and we have a within subject
@@ -269,13 +280,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         subject = null
 
       switch
+        ## .contains(filter, text)
         when _.isRegExp(text)
           text = text
           filter = filter
+        ## .contains(text, options)
         when _.isObject(text)
           options = text
           text = filter
           filter = ""
+        ## .contains(text)
         when _.isUndefined(text)
           text = filter
           filter = ""

@@ -7,6 +7,7 @@ const fileObjects = {}
 const wrap = (ipc, invoke, ids, args) => {
   const file = _.pick(args[0], 'filePath', 'outputPath', 'shouldWatch')
   let childFile = fileObjects[file.filePath]
+
   // the emitter methods don't come through from the parent process
   // so we have to re-apply them here
   if (!childFile) {
@@ -14,6 +15,7 @@ const wrap = (ipc, invoke, ids, args) => {
     childFile.on('rerun', () => {
       ipc.send('preprocessor:rerun', file.filePath)
     })
+
     ipc.on('preprocessor:close', (filePath) => {
       // no filePath means close all
       if (!filePath || filePath === file.filePath) {
@@ -22,6 +24,7 @@ const wrap = (ipc, invoke, ids, args) => {
       }
     })
   }
+
   util.wrapChildPromise(ipc, invoke, ids, [childFile])
 }
 
@@ -32,5 +35,7 @@ module.exports = {
   _clearFiles: () => {
     for (let file in fileObjects) delete fileObjects[file]
   },
-  _getFiles: () => fileObjects,
+  _getFiles: () => {
+    return fileObjects
+  },
 }

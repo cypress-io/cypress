@@ -355,7 +355,7 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(normalizedMsg).to.eq("one new line\ntwo new lines\n\nthree new lines\n\nend")
 
-  context.skip ".errObjByPath", ->
+  context ".errObjByPath", ->
     beforeEach ->
       @errMsgs = {
         command: {
@@ -374,9 +374,9 @@ describe "driver/src/cypress/error_utils", ->
       obj = $errUtils.errObjByPath(@errMsgs, 'command.obj', {
         cmd: 'click'
       })
+
       expect(obj).to.deep.eq({
         message: '`click` simple error message'
-        mdMessage: '`click` simple error message'
         docsUrl: 'https://on.cypress.io'
       })
 
@@ -387,7 +387,6 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(obj).to.deep.eq({
         message: '`click` simple error message'
-        mdMessage: '`click` simple error message'
       })
 
     it "returns obj when err is function", ->
@@ -397,7 +396,19 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(obj).to.deep.eq({
         message: '`click` simple error message'
-        mdMessage: '`click` simple error message'
+      })
+
+    it "does not mutate the error message when it is an object", ->
+      $errUtils.errObjByPath(@errMsgs, 'command.obj', {
+        cmd: 'click'
+      })
+      obj = $errUtils.errObjByPath(@errMsgs, 'command.obj', {
+        cmd: 'dblclick'
+      })
+
+      expect(obj).to.deep.eq({
+        docsUrl: 'https://on.cypress.io'
+        message: '`dblclick` simple error message'
       })
 
   context ".getErrMsgWithObjByPath", ->

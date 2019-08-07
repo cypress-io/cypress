@@ -127,13 +127,13 @@ Object.defineProperties XMLHttpRequest.prototype,
 
   requestJSON: {
     get: ->
-      $utils.warning("requestJSON is now deprecated and will be removed in the next version. Update this to 'requestBody' or 'request.body'.")
+      $errUtils.warnByPath("deprecated.xhr.requestjson")
       @requestBody
   }
 
   responseJSON: {
     get: ->
-      $utils.warning("responseJSON is now deprecated and will be removed in the next version. Update this to 'responseBody' or 'response.body'.")
+      $errUtils.warnByPath("deprecated.xhr.responsejson")
       @responseBody
   }
 

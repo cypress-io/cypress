@@ -20,7 +20,7 @@ describe "promises", ->
 
         expect(msg).to.include("Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.")
         expect(msg).to.include(title)
-        expect(msg).to.include(title)
+        expect(msg).to.include("https://on.cypress.io/returning-promise-and-commands-in-test")
 
         expect(top.console.warn).to.be.calledOnce
 
@@ -38,8 +38,8 @@ describe "promises", ->
       msg = top.console.warn.firstCall.args[0]
 
       expect(msg).to.include("Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.")
-
       expect(msg).to.include(title)
+      expect(msg).to.include("https://on.cypress.io/returning-promise-and-commands-in-test")
 
       expect(top.console.warn).to.be.calledOnce
 

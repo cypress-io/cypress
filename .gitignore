@@ -13,7 +13,6 @@ _test-output
 cypress.zip
 tmp/
 .nyc_output
-.vscode/settings.json
 
 # from extension
 Cached Theme.pak
@@ -27,14 +26,12 @@ packages/desktop-gui/src/jsconfig.json
 
 # from driver
 packages/driver/test/cypress/videos
+packages/driver/test/cypress/screenshots
 
 # from example
 packages/example/app
 packages/example/build
-packages/example/cypress/screenshots
-packages/example/cypress/videos
-packages/example/cypress/fixtures/profile.json
-packages/example/cypress/fixtures/users.json
+packages/example/cypress
 
 # from driver
 packages/driver/test/cypress/videos
@@ -43,6 +40,7 @@ packages/driver/test/cypress/videos
 packages/server/.cy
 packages/server/.projects
 packages/server/support
+packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
 
 # CLI tool
@@ -64,3 +62,6 @@ scripts/support
 package-lock.json
 yarn.lock
 binary-url.json
+
+# Allows us to dynamically create eslint rules that override the default for Decaffeinate scripts
+.eslintrc.js

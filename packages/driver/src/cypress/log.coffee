@@ -113,7 +113,7 @@ defaults = (state, config, obj) ->
     if not parentOrChildRe.test(obj.type)
       ## does this command have a previously linked command
       ## by chainer id
-      obj.type = if current.hasPreviouslyLinkedCommand() then "child" else "parent"
+      obj.type = if current?.hasPreviouslyLinkedCommand() then "child" else "parent"
 
     _.defaults(obj, {
       event: false
@@ -132,7 +132,7 @@ defaults = (state, config, obj) ->
 
     # if obj.isCurrent
       ## stringify the obj.message (if it exists) or current.get("args")
-    obj.message = $utils.stringify(obj.message ? current.get("args"))
+    obj.message = $utils.stringify(obj.message ? current?.get("args"))
 
     ## allow type to by a dynamic function
     ## so it can conditionally return either
@@ -157,7 +157,7 @@ defaults = (state, config, obj) ->
     consoleProps: -> {}
   })
 
-Log = (state, config, obj) ->
+Log = (cy, state, config, obj) ->
   obj = defaults(state, config, obj)
 
   ## private attributes of each log
@@ -248,30 +248,21 @@ Log = (state, config, obj) ->
       }
 
     snapshot: (name, options = {}) ->
-      ## bail early and dont snapshot
-      ## if we're in headless mode
-      ## TODO: fix this
-      if not config("isInteractive")
+      ## bail early and don't snapshot if we're in headless mode
+      ## or we're not storing tests
+      if not config("isInteractive") or config("numTestsKeptInMemory") is 0
         return @
 
       _.defaults options,
         at: null
         next: null
 
-      {body, htmlAttrs, headStyles, bodyStyles} = cy.createSnapshot(@get("$el"))
-
-      obj = {
-        name: name
-        body: body
-        htmlAttrs: htmlAttrs
-        headStyles: headStyles
-        bodyStyles: bodyStyles
-      }
+      snapshot = cy.createSnapshot(name, @get("$el"))
 
       snapshots = @get("snapshots") ? []
 
       ## insert at index 'at' or whatever is the next position
-      snapshots[options.at or snapshots.length] = obj
+      snapshots[options.at or snapshots.length] = snapshot
 
       @set("snapshots", snapshots)
 
@@ -436,10 +427,13 @@ create = (Cypress, cy, state, config) ->
 
     logs[id] = true
 
-  logFn = (obj = {}) ->
+  logFn = (options = {}) ->
+    if !_.isObject(options)
+      $errUtils.throwErrByPath "log.invalid_argument", {args: { arg: options }}
+
     attributes = {}
 
-    log = Log(state, config, obj)
+    log = Log(cy, state, config, options)
 
     ## add event emitter interface
     $Events.extend(log)
@@ -451,7 +445,7 @@ create = (Cypress, cy, state, config) ->
     ## as fast as every 4ms
     log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
 
-    log.set(obj)
+    log.set(options)
 
     ## if snapshot was passed
     ## in, go ahead and snapshot
@@ -479,6 +473,10 @@ create = (Cypress, cy, state, config) ->
     addToLogs(log)
 
     triggerLog(log)
+
+    ## if not current state then the log is being run
+    ## with no command reference, so just end the log
+    if not state("current") then log.end({silent: true})
 
     return log
 

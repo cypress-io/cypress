@@ -16,7 +16,6 @@ $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
 $SetterGetter = require("./cypress/setter_getter")
-$Keyboard = require("./cypress/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
@@ -31,7 +30,7 @@ $sourceMapUtils = require("./cypress/source_map_utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
-  cy: "getStyles".split(" ")
+  cy: "detachDom getStyles".split(" ")
 }
 
 jqueryProxyFn = ->
@@ -45,7 +44,7 @@ _.extend(jqueryProxyFn, $)
 ## provide the old interface and
 ## throw a deprecation message
 $Log.command = ->
-  $errUtils.throwErrByPath("miscellaneous.command_log_renamed")
+  $errUtils.throwErrByPath("deprecated.command_log")
 
 throwDeprecatedCommandInterface = (key = "commandName", method) ->
   signature = switch method
@@ -165,17 +164,18 @@ class $Cypress
   ## or parsed. we have not received any custom commands
   ## at this point
   onSpecWindow: (specWindow) ->
-    logFn = =>
-      @log.apply(@, arguments)
+    logFn = (args...) =>
+      @log.apply(@, args)
 
     ## create cy and expose globally
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
+    @isCy = @cy.isCy
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @state, @config, @log)
+    @Commands = $Commands.create(@, @cy, @state, @config)
 
     @events.proxyTo(@cy)
 
@@ -399,6 +399,9 @@ class $Cypress
       when "app:window:unload"
         @emit("window:unload", args[0])
 
+      when "app:css:modified"
+        @emit("css:modified", args[0])
+
       when "spec:script:error"
         @emit("script:error", args...)
 
@@ -468,7 +471,6 @@ class $Cypress
   Commands: $Commands
   dom: $dom
   errorMessages: $errorMessages
-  Keyboard: $Keyboard
   Location: $Location
   Log: $Log
   LocalStorage: $LocalStorage

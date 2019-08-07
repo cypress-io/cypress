@@ -237,6 +237,7 @@ describe "src/cy/commands/actions/check", ->
       it "throws when subject isnt a checkbox or radio", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`"
+          expect(err.docsUrl).to.include("https://on.cypress.io/check")
           done()
 
         ## this will find multiple forms
@@ -245,6 +246,7 @@ describe "src/cy/commands/actions/check", ->
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<textarea id=\"comments\"></textarea>`"
+          expect(err.docsUrl).to.include("https://on.cypress.io/check")          
           done()
 
         ## find a textare which should blow up
@@ -648,6 +650,7 @@ describe "src/cy/commands/actions/check", ->
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.uncheck()` can only be called on `:checkbox`."
+          expect(err.docsUrl).to.include("https://on.cypress.io/uncheck")          
           done()
 
       it "throws if not a checkbox", (done) ->

@@ -40,6 +40,7 @@ const spaceDelimitedSpecsMsg = (files) => {
     If you are trying to pass multiple spec filenames, separate them by commas instead:
       cypress run --spec spec1,spec2,spec3
   `)
+
   logger.log()
 }
 
@@ -73,8 +74,7 @@ const parseOpts = (opts) => {
     'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
     'port', 'env', 'cypressVersion', 'config', 'record', 'key',
     'browser', 'detached', 'headed', 'global', 'dev', 'force', 'exit',
-    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId'
-  )
+    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId')
 
   if (opts.exit) {
     opts = _.omit(opts, 'exit')
@@ -153,6 +153,8 @@ module.exports = {
     // in usage help docs
     program._name = 'cypress'
 
+    program.usage('<command> [options]')
+
     program
     .command('help')
     .description('Shows CLI help and exits')
@@ -228,6 +230,7 @@ module.exports = {
     .command('verify')
     .usage('[options]')
     .description('Verifies that Cypress is installed correctly and executable')
+    .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       const defaultOpts = { force: true, welcomeMessage: false }
       const parsedOpts = parseOpts(opts)

@@ -29,11 +29,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if !_.isObject(options)
         $errUtils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
 
-      ## ensure the subject is not window itself
-      ## cause how are you gonna scroll the window into view...
-      if subject is state("window")
-        $errUtils.throwErrByPath("scrollIntoView.subject_is_window")
-
       ## throw if we're trying to scroll to multiple elements
       if subject.length > 1
         $errUtils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
@@ -194,7 +189,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $container.contentWindow = $container
 
       ## throw if we're trying to scroll multiple containers
-      if $container.length > 1
+      if (!isWin && $container.length > 1)
         $errUtils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
 
       _.defaults(options, {

@@ -122,6 +122,7 @@ describe "src/cy/commands/navigation", ->
       it "throws passing more than 2 args", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(1, 2, 3)
@@ -129,6 +130,7 @@ describe "src/cy/commands/navigation", ->
       it "throws passing 2 invalid arguments", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(true, 1)
@@ -136,6 +138,7 @@ describe "src/cy/commands/navigation", ->
       it "throws passing 1 invalid argument", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(1)
@@ -303,10 +306,11 @@ describe "src/cy/commands/navigation", ->
 
         return null
 
-      _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
+      _.each [null, undefined, NaN, Infinity, {}, [], ->{}], (val) =>
         it "throws on: '#{val}'", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq("`cy.go()` accepts only a string or number argument")
+            expect(err.docsUrl).to.eq("https://on.cypress.io/go")
             done()
 
           cy.go(val)
@@ -314,6 +318,8 @@ describe "src/cy/commands/navigation", ->
       it "throws on invalid string", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.go()` accepts either `forward` or `back`. You passed: `foo`")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/go")
+
           done()
 
         cy.go("foo")
@@ -321,6 +327,8 @@ describe "src/cy/commands/navigation", ->
       it "throws on zero", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq("`cy.go()` cannot accept `0`. The number must be greater or less than `0`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/go")
+
           done()
 
         cy.go(0)
@@ -541,6 +549,11 @@ describe "src/cy/commands/navigation", ->
         .then ->
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
 
+    ## https://github.com/cypress-io/cypress/issues/1727
+    it "can visit a page with undefined content type and html-shaped body", ->
+      cy
+        .visit("http://localhost:3500/undefined-content-type")
+
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0
@@ -595,6 +608,15 @@ describe "src/cy/commands/navigation", ->
         }
       })
       cy.contains('"x-foo-baz":"bar-quux"')
+
+    it "can send user-agent header", ->
+      cy.visit({
+        url: "http://localhost:3500/dump-headers",
+        headers: {
+          "user-agent": "something special"
+        }
+      })
+      cy.contains('"user-agent":"something special"')
 
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
@@ -1004,6 +1026,7 @@ describe "src/cy/commands/navigation", ->
       it "throws when url isnt a string", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "`cy.visit()` must be called with a `url` or an `options` object containing a `url` as its 1st argument"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit()
@@ -1011,6 +1034,7 @@ describe "src/cy/commands/navigation", ->
       it "throws when url is specified twice", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.contain "`cy.visit()` must be called with only one `url`. You specified two urls"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit("http://foobarbaz", {
@@ -1020,6 +1044,7 @@ describe "src/cy/commands/navigation", ->
       it "throws when method is unsupported", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.contain "`cy.visit()` was called with an invalid method: `FOO`"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit({
@@ -1030,11 +1055,23 @@ describe "src/cy/commands/navigation", ->
       it "throws when headers is not an object", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.contain "`cy.visit()` requires the `headers` option to be an object"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit({
           url: "http://foobarbaz",
           headers: "quux"
+        })
+
+      it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "These options are incompatible with each other."
+          done()
+
+        cy.visit({
+          url: "http://foobarbaz",
+          failOnStatusCode: false
+          retryOnStatusCodeFailure: true
         })
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
@@ -1438,6 +1475,35 @@ describe "src/cy/commands/navigation", ->
           done()
 
         cy.visit("https://google.com/foo")
+
+      it "displays body_circular when body is circular", (done) ->
+        foo = {
+          bar: {
+            baz: {}
+          }
+        }
+
+        foo.bar.baz.quux = foo
+
+        cy.visit({
+          method: "POST"
+          url: "http://foo.invalid/"
+          body: foo
+        })
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq """
+          The `body` parameter supplied to `cy.visit()` contained a circular reference at the path "bar.baz.quux".
+
+          `body` can only be a string or an object with no circular references.
+          """
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
+
+          done()
 
   context "#page load", ->
     it "sets initial=true and then removes", ->

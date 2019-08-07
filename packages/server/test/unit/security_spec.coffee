@@ -16,6 +16,12 @@ original = """
     parent1
     grandparent
     grandparents
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
 
     <div style="left: 1500px; top: 0px;"></div>
     <div style="left: 1500px; top : 0px;"></div>
@@ -75,6 +81,12 @@ expected = """
     parent1
     grandparent
     grandparents
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
 
     <div style="left: 1500px; top: 0px;"></div>
     <div style="left: 1500px; top : 0px;"></div>
@@ -201,8 +213,8 @@ describe "lib/util/security", ->
         emberProd: "#{cdnUrl}/ember.js/2.18.2/ember.prod.js"
         reactDev: "#{cdnUrl}/react/16.2.0/umd/react.development.js"
         reactProd: "#{cdnUrl}/react/16.2.0/umd/react.production.min.js"
-        vendorBundle: "https://s3.amazonaws.com/assets.cypress.io/vendor.bundle.js"
-        hugeApp: "https://s3.amazonaws.com/assets.cypress.io/huge_app.js"
+        vendorBundle: "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js"
+        hugeApp: "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js"
       })
       .value()
 

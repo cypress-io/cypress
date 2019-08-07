@@ -75,71 +75,173 @@ describe "src/cypress/screenshot", ->
 
     describe "errors", ->
       it "throws if not passed an object", ->
-        expect =>
-          Screenshot.defaults()
-        .to.throw("`Cypress.Screenshot.defaults()` must be called with an object. You passed: ")
+        fn = () =>
+          return Screenshot.defaults()
+
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` must be called with an object. You passed: ")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if capture is not a string", ->
-        expect =>
-          Screenshot.defaults({ capture: true })
-        .to.throw("`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `true`")
+        fn = () =>
+          return Screenshot.defaults({ capture: true })
+
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `true`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.eq("https://on.cypress.io/screenshot-api")
 
       it "throws if capture is not a valid option", ->
-        expect =>
-          Screenshot.defaults({ capture: "foo" })
-        .to.throw("`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `foo`")
+        fn = () =>
+          return Screenshot.defaults({ capture: "foo" })
+
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `foo`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.eq("https://on.cypress.io/screenshot-api")
 
       it "throws if scale is not a boolean", ->
-        expect =>
-          Screenshot.defaults({ scale: "foo" })
-        .to.throw("`Cypress.Screenshot.defaults()` `scale` option must be a boolean. You passed: `foo`")
+        fn = () =>
+          return Screenshot.defaults({ scale: "foo" })
+
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `scale` option must be a boolean. You passed: `foo`")
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.eq("https://on.cypress.io/screenshot-api")
 
       it "throws if disableTimersAndAnimations is not a boolean", ->
-        expect =>
-          Screenshot.defaults({ disableTimersAndAnimations: "foo" })
-        .to.throw("`Cypress.Screenshot.defaults()` `disableTimersAndAnimations` option must be a boolean. You passed: `foo`")
+        fn = () =>
+          return Screenshot.defaults({ disableTimersAndAnimations: "foo" })
+
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `disableTimersAndAnimations` option must be a boolean. You passed: `foo`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.eq("https://on.cypress.io/screenshot-api")
 
       it "throws if screenshotOnRunFailure is not a boolean", ->
-        expect =>
-          Screenshot.defaults({ screenshotOnRunFailure: "foo" })
-        .to.throw("`Cypress.Screenshot.defaults()` `screenshotOnRunFailure` option must be a boolean. You passed: `foo`")
+        fn = () =>
+          return Screenshot.defaults({ screenshotOnRunFailure: "foo" })
+
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `screenshotOnRunFailure` option must be a boolean. You passed: `foo`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if blackout is not an array", ->
-        expect =>
-          Screenshot.defaults({ blackout: "foo" })
-        .to.throw("`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `foo`")
+        fn = () =>
+          return Screenshot.defaults({ blackout: "foo" })
+        
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `foo`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if blackout is not an array of strings", ->
-        expect =>
-          Screenshot.defaults({ blackout: [true] })
-        .to.throw("`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `true`")
+        fn = () =>
+          return Screenshot.defaults({ blackout: [true] })
+        
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `true`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if clip is not an object", ->
-        expect =>
-          Screenshot.defaults({ clip: true })
-        .to.throw("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `true`")
+        fn = () =>
+          return Screenshot.defaults({ clip: true })
+        
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `true`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if clip is lacking proper keys", ->
-        expect =>
-          Screenshot.defaults({ clip: { x: 5 } })
-        .to.throw("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`")
+        fn = () =>
+          return Screenshot.defaults({ clip: { x: 5 } })
+        
+        expect(fn).to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if clip has extraneous keys", ->
-        expect =>
-          Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
-        .to.throw("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`")
+        fn = () =>
+          return Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
+        
+        expect(fn)
+        .to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if clip has non-number values", ->
-        expect =>
-          Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: "5" } })
-        .to.throw("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{4}`")
+        fn = () =>
+          return Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: "5" } })
+
+        expect(fn)
+        .to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{4}`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if onBeforeScreenshot is not a function", ->
-        expect =>
-          Screenshot.defaults({ onBeforeScreenshot: "foo" })
-        .to.throw("`Cypress.Screenshot.defaults()` `onBeforeScreenshot` option must be a function. You passed: `foo`")
+        fn = () =>
+          return Screenshot.defaults({ onBeforeScreenshot: "foo" })
+        
+        expect(fn)
+        .to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `onBeforeScreenshot` option must be a function. You passed: `foo`")
+
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
 
       it "throws if onAfterScreenshot is not a function", ->
-        expect =>
-          Screenshot.defaults({ onAfterScreenshot: "foo" })
-        .to.throw("`Cypress.Screenshot.defaults()` `onAfterScreenshot` option must be a function. You passed: `foo`")
+        fn = () =>
+          return Screenshot.defaults({ onAfterScreenshot: "foo" })
+        
+        expect(fn)
+        .to.throw()
+        .with.property("message")
+        .and.include("`Cypress.Screenshot.defaults()` `onAfterScreenshot` option must be a function. You passed: `foo`")
+        
+        expect(fn).to.throw()
+        .with.property("docsUrl")
+        .and.include("https://on.cypress.io/screenshot-api")
+        

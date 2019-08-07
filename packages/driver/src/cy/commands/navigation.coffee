@@ -1,4 +1,5 @@
 _ = require("lodash")
+whatIsCircular = require("@cypress/what-is-circular")
 moment = require("moment")
 UrlParse = require("url-parse")
 Promise = require("bluebird")
@@ -14,8 +15,12 @@ hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
-REQUEST_URL_OPTS = ["auth", "failOnStatusCode", "method", "body", "headers"]
-VISIT_OPTS = ["url", "log", "onBeforeLoad", "onLoad", "timeout"].concat(REQUEST_URL_OPTS)
+REQUEST_URL_OPTS = "auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers"
+.split(" ")
+
+VISIT_OPTS = "url log onBeforeLoad onLoad timeout requestTimeout"
+.split(" ")
+.concat(REQUEST_URL_OPTS)
 
 reset = (test = {}) ->
   knownCommandCausedInstability = false
@@ -242,6 +247,20 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
     catch err
       reject(err)
 
+normalizeTimeoutOptions = (options) ->
+  ## there are really two timeout values - pageLoadTimeout
+  ## and the underlying responseTimeout. for the purposes
+  ## of resolving resolving the url, we only care about
+  ## responseTimeout - since pageLoadTimeout is a driver
+  ## and browser concern. therefore we normalize the options
+  ## object and send 'responseTimeout' as options.timeout
+  ## for the backend.
+  _
+  .chain(options)
+  .pick(REQUEST_URL_OPTS)
+  .extend({ timeout: options.responseTimeout })
+  .value()
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
@@ -269,7 +288,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, REQUEST_URL_OPTS)
+      normalizeTimeoutOptions(options)
     )
     .then (resp = {}) ->
       switch
@@ -484,20 +503,29 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
+        retryOnNetworkFailure: true
+        retryOnStatusCodeFailure: false
         method: 'GET'
         body: null
         headers: {}
         log: true
+        responseTimeout: config('responseTimeout')
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
       })
+
+      if options.retryOnStatusCodeFailure and not options.failOnStatusCode
+        $errUtils.throwErrByPath("visit.status_code_flags_invalid")
 
       if not isValidVisitMethod(options.method)
         $errUtils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
 
       if not _.isObject(options.headers)
         $errUtils.throwErrByPath("visit.invalid_headers")
+
+      if _.isObject(options.body) and path = whatIsCircular(options.body)
+        $errUtils.throwErrByPath("visit.body_circular", { args: { path }})
 
       if options.log
         message = url
@@ -554,7 +582,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ({runOnLoadCallback}) ->
+      onLoad = ({runOnLoadCallback, totalTime}) ->
         ## reset window on load
         win = state("window")
 
@@ -562,7 +590,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if runOnLoadCallback isnt false
           options.onLoad?.call(runnable.ctx, win)
 
-        options._log.set({url: url}) if options._log
+        if options._log
+          options._log.set({
+            url
+            totalTime
+          })
 
         return Promise.resolve(win)
 
@@ -657,7 +689,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             url = $Location.fullyQualifyUrl(url)
 
             changeIframeSrc(url, "window:load")
-            .then(onLoad)
+            .then ->
+              onLoad(resp)
           else
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop
@@ -761,8 +794,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           go()
 
       visit()
-      .then ->
-        state("window")
       .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
         timedOutWaitingForPageLoad(options.timeout, options._log)

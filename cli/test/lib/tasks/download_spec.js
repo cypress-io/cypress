@@ -1,10 +1,13 @@
 require('../../spec_helper')
 
+const _ = require('lodash')
 const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const path = require('path')
 const nock = require('nock')
+const hasha = require('hasha')
+const debug = require('debug')('test')
 const snapshot = require('../../support/snapshot')
 
 const fs = require(`${lib}/fs`)
@@ -17,6 +20,7 @@ const normalize = require('../../support/normalize')
 
 const downloadDestination = path.join(os.tmpdir(), 'Cypress', 'download', 'cypress.zip')
 const version = '1.2.3'
+const examplePath = 'test/fixture/example.zip'
 
 describe('lib/tasks/download', function () {
   require('mocha-banner').register()
@@ -110,7 +114,7 @@ describe('lib/tasks/download', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
     .reply(200, () => {
-      return fs.createReadStream('test/fixture/example.zip')
+      return fs.createReadStream(examplePath)
     })
 
     nock('https://download.cypress.io')
@@ -135,11 +139,115 @@ describe('lib/tasks/download', function () {
     })
   })
 
+  context('verify downloaded file', function () {
+    before(function () {
+      this.expectedChecksum = hasha.fromFileSync(examplePath)
+      this.expectedFileSize = fs.statSync(examplePath).size
+      this.onProgress = sinon.stub().returns(undefined)
+      debug('example file %s should have checksum %s and file size %d',
+        examplePath, this.expectedChecksum, this.expectedFileSize)
+    })
+
+    it('throws if file size is different from expected', function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        // definitely incorrect file size
+        'content-length': '10',
+      })
+
+      return expect(download.start({
+        downloadDestination: this.options.downloadDestination,
+        version: this.options.version,
+        progress: { onProgress: this.onProgress },
+      })).to.be.rejected
+    })
+
+    it('throws if file size is different from expected x-amz-meta-size', function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        // definitely incorrect file size
+        'x-amz-meta-size': '10',
+      })
+
+      return expect(download.start({
+        downloadDestination: this.options.downloadDestination,
+        version: this.options.version,
+        progress: { onProgress: this.onProgress },
+      })).to.be.rejected
+    })
+
+    it('throws if checksum is different from expected', function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        'x-amz-meta-checksum': 'incorrect-checksum',
+      })
+
+      return expect(download.start({
+        downloadDestination: this.options.downloadDestination,
+        version: this.options.version,
+        progress: { onProgress: this.onProgress },
+      })).to.be.rejected
+    })
+
+    it('throws if checksum and file size are different from expected', function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        return fs.createReadStream(examplePath)
+      }, {
+        'x-amz-meta-checksum': 'incorrect-checksum',
+        'x-amz-meta-size': '10',
+      })
+
+      return expect(download.start({
+        downloadDestination: this.options.downloadDestination,
+        version: this.options.version,
+        progress: { onProgress: this.onProgress },
+      })).to.be.rejected
+    })
+
+    it('passes when checksum and file size match', function () {
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(200, () => {
+        debug('creating read stream for %s', examplePath)
+
+        return fs.createReadStream(examplePath)
+      }, {
+        'x-amz-meta-checksum': this.expectedChecksum,
+        'x-amz-meta-size': String(this.expectedFileSize),
+      })
+
+      debug('downloading %s to %s for test version %s',
+        examplePath, this.options.downloadDestination, this.options.version)
+
+      return download.start({
+        downloadDestination: this.options.downloadDestination,
+        version: this.options.version,
+        progress: { onProgress: this.onProgress },
+      })
+    })
+  })
+
   it('resolves with response x-version if present', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
     .reply(200, () => {
-      return fs.createReadStream('test/fixture/example.zip')
+      return fs.createReadStream(examplePath)
     })
 
     nock('https://download.cypress.io')
@@ -161,7 +269,7 @@ describe('lib/tasks/download', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
     .reply(200, () => {
-      return fs.createReadStream('test/fixture/example.zip')
+      return fs.createReadStream(examplePath)
     })
 
     nock('https://download.cypress.io')
@@ -201,6 +309,32 @@ describe('lib/tasks/download', function () {
       logger.error(err)
 
       return snapshot('download status errors 1', normalize(ctx.stdout.toString()))
+    })
+  })
+
+  context('with proxy env vars', () => {
+    beforeEach(function () {
+      this.env = _.clone(process.env)
+    })
+
+    afterEach(function () {
+      process.env = this.env
+    })
+
+    it('prefers https_proxy over http_proxy', () => {
+      process.env.HTTP_PROXY = 'foo'
+      expect(download.getProxyUrl()).to.eq('foo')
+      process.env.https_proxy = 'bar'
+      expect(download.getProxyUrl()).to.eq('bar')
+    })
+
+    it('falls back to npm_config_proxy', () => {
+      process.env.npm_config_proxy = 'foo'
+      expect(download.getProxyUrl()).to.eq('foo')
+      process.env.npm_config_https_proxy = 'bar'
+      expect(download.getProxyUrl()).to.eq('bar')
+      process.env.https_proxy = 'baz'
+      expect(download.getProxyUrl()).to.eq('baz')
     })
   })
 })

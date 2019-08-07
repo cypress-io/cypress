@@ -16,9 +16,7 @@ class Watchers
 
   watch: (filePath, options = {}) ->
     _.defaults options,
-      interval:   250
-      usePolling: true
-      useFsEvents: false
+      useFsEvents: true
       ignored:    null
       onChange:   null
       onReady:    null

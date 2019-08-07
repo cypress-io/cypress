@@ -23,14 +23,14 @@
         "check-more-types",
         "console-table",
         "execa-wrap",
+        "is-fork-pr",
         "lazy-ass",
         "make-empty-github-commit",
         "mocha-banner",
         "prefixed-list",
         "rebuild-node-sass",
         "snap-shot-it",
-        "terminal-banner",
-        "zunder"
+        "terminal-banner"
       ],
       "groupName": "team NPM packages",
       "schedule": "after 2am and before 4am"

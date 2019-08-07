@@ -51,6 +51,20 @@ describe "src/cy/commands/aliasing", ->
 
       cy.get("@obj").should("deep.eq", { foo: "bar" })
 
+    it "allows dot in alias names", ->
+      cy.get("body").as("body.foo").then ->
+        expect(cy.get('@body.foo')).to.be.defined
+        expect(cy.state("aliases")['body.foo']).to.be.defined
+
+    it "recognizes dot and non dot with same alias names", ->
+      cy.get("body").as("body").then ->
+        expect(cy.get('@body')).to.be.defined
+        expect(cy.state("aliases")['body']).to.be.defined
+      cy.contains("foo").as("body.foo").then ->
+        expect(cy.get('@body.foo')).to.be.defined
+        expect(cy.get('@body.foo')).to.not.eq(cy.get('@body'))
+        expect(cy.state("aliases")['body.foo']).to.be.defined
+
     context "DOM subjects", ->
       it "assigns the remote jquery instance", ->
         obj = {}
@@ -74,6 +88,10 @@ describe "src/cy/commands/aliasing", ->
         cy
           .noop({}).as("baz").then (obj) ->
             expect(@baz).to.eq obj
+
+      it "assigns subject with dot to runnable ctx", ->
+        cy.noop({}).as("bar.baz").then (obj) ->
+          expect(@["bar.baz"]).to.eq obj
 
       describe "nested hooks", ->
         afterEach ->
@@ -103,7 +121,7 @@ describe "src/cy/commands/aliasing", ->
       it "throws as a parent command", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include("before running a parent command")
-          expect(err.message).to.include("cy.as(\"foo\")")
+          expect(err.message).to.include("`cy.as(\"foo\")`")
           done()
 
         cy.as("foo")
@@ -112,6 +130,7 @@ describe "src/cy/commands/aliasing", ->
         it "throws if when passed: #{value}", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq "`cy.as()` can only accept a string."
+            expect(err.docsUrl).to.eq "https://on.cypress.io/as"
             done()
 
           cy.get("div:first").as(value)
@@ -119,6 +138,7 @@ describe "src/cy/commands/aliasing", ->
       it "throws on blank string", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "`cy.as()` cannot be passed an empty string."
+          expect(err.docsUrl).to.eq "https://on.cypress.io/as"
           done()
 
         cy.get("div:first").as("")
@@ -126,9 +146,18 @@ describe "src/cy/commands/aliasing", ->
       it "throws on alias starting with @ char", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "`@myAlias` cannot be named starting with the `@` symbol. Try renaming the alias to `myAlias`, or something else that does not start with the `@` symbol."
+          expect(err.docsUrl).to.eq "https://on.cypress.io/as"
           done()
 
         cy.get("div:first").as("@myAlias")
+
+      it "throws on alias starting with @ char and dots", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "`@my.alias` cannot be named starting with the `@` symbol. Try renaming the alias to `my.alias`, or something else that does not start with the `@` symbol."
+          expect(err.docsUrl).to.eq "https://on.cypress.io/as"
+          done()
+
+        cy.get("div:first").as("@my.alias")
 
       it "does not throw on alias with @ char in non-starting position", () ->
         cy.get("div:first").as("my@Alias")
@@ -138,6 +167,7 @@ describe "src/cy/commands/aliasing", ->
         it "throws on a blacklisted word: #{blacklist}", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq "`cy.as()` cannot be aliased as: `#{blacklist}`. This word is reserved."
+            expect(err.docsUrl).to.eq "https://on.cypress.io/as"
             done()
 
           cy.get("div:first").as(blacklist)
@@ -157,7 +187,6 @@ describe "src/cy/commands/aliasing", ->
           lastLog = @lastLog
 
           expect(lastLog.get("aliasType")).to.eq "primitive"
-
       it "sets aliasType to 'dom'", ->
         cy.get("body").find("button:first").click().as("button").then ->
           lastLog = @lastLog
@@ -197,11 +226,6 @@ describe "src/cy/commands/aliasing", ->
 
             expect(@logs[1].get("name")).to.eq("route")
             expect(@logs[1].get("alias")).to.eq("getFoo")
-
-      # it "does not alias previous logs when no matching chainerId", ->
-      #   cy
-      #     .get("div:first")
-      #     .noop({}).as("foo").then ->
 
   context "#replayCommandsFrom", ->
     describe "subject in document", ->

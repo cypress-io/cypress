@@ -11,9 +11,13 @@ require("./environment")
 
 _       = require("lodash")
 cp      = require("child_process")
+os      = require("os")
 path    = require("path")
 Promise = require("bluebird")
 debug   = require("debug")("cypress:server:cypress")
+
+warning = (code) ->
+  require("./errors").warning(code)
 
 exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
@@ -31,7 +35,7 @@ exitErr = (err) ->
   ## and exit with 1
   debug('exiting with err', err)
 
-  require("./errors").log(err)
+  require("./errors").logException(err)
   .then -> exit(1)
 
 module.exports = {
@@ -48,18 +52,31 @@ module.exports = {
       ## like in production and we shouldn't spawn a new
       ## process
       if @isCurrentlyRunningElectron()
+        ## if we weren't invoked from the CLI
+        ## then display a warning to the user
+        if not options.invokedFromCli
+          warning("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+        
         ## just run the gui code directly here
         ## and pass our options directly to main
         require("./modes")(mode, options)
       else
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
+
           fn = (code) ->
             ## juggle up the totalFailed since our outer
             ## promise is expecting this object structure
             debug("electron finished with", code)
+
+            if mode is "smokeTest"
+              return resolve(code)
+
             resolve({totalFailed: code})
-          cypressElectron.open(".", require("./util/args").toArray(options), fn)
+
+          args = require("./util/args").toArray(options)
+          debug("electron open arguments %o", args)
+          cypressElectron.open(".", args, fn)
 
   openProject: (options) ->
     ## this code actually starts a project
@@ -174,10 +191,16 @@ module.exports = {
         .catch(exitErr)
 
       when "smokeTest"
-        require("./modes/smoke_test")(options)
-        .then (pong) ->
-          console.log(pong)
-        .then(exit0)
+        @runElectron(mode, options)
+        .then (pong) =>
+          if not @isCurrentlyRunningElectron()
+            return pong
+
+          if pong is options.ping
+            return 0
+
+          return 1
+        .then(exit)
         .catch(exitErr)
 
       when "returnPkg"

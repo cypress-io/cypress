@@ -49,6 +49,11 @@ describe "src/cy/commands/actions/scroll", ->
         cy.window().scrollTo("10px").then (win) ->
           expect(win.pageXOffset).to.eq(10)
 
+      it "can handle window w/length > 1 as a subject", ->
+        cy.visit('/fixtures/dom.html')
+        cy.window().should('have.length.gt', 1)
+        .scrollTo('10px')
+
     describe "x axis only", ->
       it "scrolls x axis to num px", ->
         expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
@@ -342,7 +347,8 @@ describe "src/cy/commands/actions/scroll", ->
 
         it "throws if scrollable container is multiple elements", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include "`cy.scrollTo()` can only be used to scroll one element, you tried to scroll 2 elements."
+            expect(err.message).to.include "`cy.scrollTo()` can only be used to scroll 1 element, you tried to scroll 2 elements."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/scrollto")
             done()
 
           cy.get("button").scrollTo("500px")
@@ -351,6 +357,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if no args passed", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `position`. It can be a string, number or object."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/scrollto")
             done()
 
           cy.scrollTo()
@@ -358,6 +365,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if NaN", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `position`. It can be a string, number or object. Your position was: `25, NaN`"
+            expect(err.docsUrl).to.eq("https://on.cypress.io/scrollto")
             done()
 
           cy.get("#scroll-to-both").scrollTo(25, 0/0)
@@ -365,6 +373,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if Infinity", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `position`. It can be a string, number or object. Your position was: `25, Infinity`"
+            expect(err.docsUrl).to.eq("https://on.cypress.io/scrollto")
             done()
 
           cy.get("#scroll-to-both").scrollTo(25, 10/0)
@@ -380,6 +389,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if duration is not a number or valid string", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `duration`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: `foo`"
+            expect(err.docsUrl).to.eq("https://on.cypress.io/scrollto")
             done()
 
           cy.get("#scroll-to-both").scrollTo("25px", { duration: "foo" })
@@ -387,6 +397,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if unrecognized easing", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollTo()` must be called with a valid `easing`. Your easing was: `flower`"
+            expect(err.docsUrl).to.eq("https://on.cypress.io/scrollto")
             done()
 
           cy.get("#scroll-to-both").scrollTo("25px", { easing: "flower" })
@@ -653,6 +664,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if scrollable container is multiple elements", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollIntoView()` can only be used to scroll to 1 element, you tried to scroll to 2 elements."
+            expect(err.docsUrl).to.include("https://on.cypress.io/scrollintoview")
             done()
 
           cy.get("button").scrollIntoView()
@@ -661,6 +673,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if arg passed as non-object", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollIntoView()` can only be called with an `options` object. Your argument was: `foo`"
+            expect(err.docsUrl).to.eq("https://on.cypress.io/scrollintoview")
             done()
 
           cy.get("#scroll-into-view-both h5").scrollIntoView("foo")
@@ -669,6 +682,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if duration is not a number or valid string", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollIntoView()` must be called with a valid `duration`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: `foo`"
+            expect(err.docsUrl).to.include("https://on.cypress.io/scrollintoview")
             done()
 
           cy.get("#scroll-into-view-both h5").scrollIntoView({ duration: "foo" })
@@ -676,6 +690,7 @@ describe "src/cy/commands/actions/scroll", ->
         it "throws if unrecognized easing", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.include "`cy.scrollIntoView()` must be called with a valid `easing`. Your easing was: `flower`"
+            expect(err.docsUrl).to.include("https://on.cypress.io/scrollintoview")
             done()
 
           cy.get("#scroll-into-view-both h5").scrollIntoView({ easing: "flower" })

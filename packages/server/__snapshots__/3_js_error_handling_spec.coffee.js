@@ -28,8 +28,8 @@ exports['e2e js error handling fails 1'] = `
       ✓ t6
     cross origin script errors
       5) explains where script errored
-    bad gzipped js
-      ✓ it does not crash
+    bad gzipped content
+      ✓ destroys the request socket
 
 
   3 passing
@@ -42,8 +42,10 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
-https://on.cypress.io/uncaught-exception-from-application
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+
       at stack trace line
       at stack trace line
       at stack trace line
@@ -63,8 +65,10 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
-https://on.cypress.io/uncaught-exception-from-application
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+
       at stack trace line
       at stack trace line
       at stack trace line
@@ -90,8 +94,10 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
-https://on.cypress.io/uncaught-exception-from-application
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+
       at stack trace line
       at stack trace line
       at stack trace line

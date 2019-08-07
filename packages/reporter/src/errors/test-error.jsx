@@ -11,7 +11,7 @@ class TestError extends Component {
   render () {
     const md = new Markdown('zero')
 
-    md.enable(['backticks', 'escape'])
+    md.enable(['backticks', 'emphasis', 'escape'])
 
     const formattedMessage = (message) => {
       return message ? md.renderInline(message) : ''

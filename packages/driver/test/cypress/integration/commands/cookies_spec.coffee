@@ -135,6 +135,7 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("name")).to.eq("getCookies")
           expect(lastLog.get("message")).to.eq("")
           expect(err.message).to.eq("`cy.getCookies()` timed out waiting `50ms` to complete.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/getcookies")
           done()
 
         cy.getCookies({timeout: 50})
@@ -277,6 +278,7 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("name")).to.eq("getCookie")
           expect(lastLog.get("message")).to.eq("foo")
           expect(err.message).to.eq("`cy.getCookie()` timed out waiting `50ms` to complete.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/getcookie")
           done()
 
         cy.getCookie("foo", {timeout: 50})
@@ -287,6 +289,7 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error").message).to.eq "`cy.getCookie()` must be passed a string argument for name."
+          expect(lastLog.get("error").docsUrl).to.eq("https://on.cypress.io/getcookie")
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -454,6 +457,7 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("name")).to.eq("setCookie")
           expect(lastLog.get("message")).to.eq("foo, bar")
           expect(err.message).to.eq("`cy.setCookie()` timed out waiting `50ms` to complete.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/setcookie")
           done()
 
         cy.setCookie("foo", "bar", {timeout: 50})
@@ -464,6 +468,7 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error").message).to.eq "`cy.setCookie()` must be passed two string arguments for `name` and `value`."
+          expect(lastLog.get("error").docsUrl).to.eq "https://on.cypress.io/setcookie"
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -475,6 +480,7 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error").message).to.eq "`cy.setCookie()` must be passed two string arguments for `name` and `value`."
+          expect(lastLog.get("error").docsUrl).to.eq "https://on.cypress.io/setcookie"
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -609,6 +615,7 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("name")).to.eq("clearCookie")
           expect(lastLog.get("message")).to.eq("foo")
           expect(err.message).to.eq("`cy.clearCookie()` timed out waiting `50ms` to complete.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/clearcookie")
           done()
 
         cy.clearCookie("foo", {timeout: 50})
@@ -619,6 +626,7 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error").message).to.eq "`cy.clearCookie()` must be passed a string argument for name."
+          expect(lastLog.get("error").docsUrl).to.eq "https://on.cypress.io/clearcookie"
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -825,7 +833,8 @@ describe "src/cy/commands/cookies", ->
         cy.clearCookies()
 
       it "throws after timing out", (done) ->
-        Cypress.automation.resolves(Promise.delay(1000))
+        Cypress.automation.resolves([{ name: "foo" }])
+        Cypress.automation.withArgs("clear:cookies").resolves(Promise.delay(1000))
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -836,6 +845,7 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("name")).to.eq("clearCookies")
           expect(lastLog.get("message")).to.eq("")
           expect(err.message).to.eq("`cy.clearCookies()` timed out waiting `50ms` to complete.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/clearcookies")
           done()
 
         cy.clearCookies({timeout: 50})

@@ -18,7 +18,7 @@ throwErr = (arg) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   waitFunction = ->
-    $errUtils.throwErrByPath("wait.fn_deprecated")
+    $errUtils.throwErrByPath("deprecated.wait.fn")
 
   waitNumber = (subject, ms, options) ->
     ## increase the timeout by the delta
@@ -62,13 +62,19 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       args = arguments
 
       cy.retry ->
-        checkForXhr.apply(null, args)
+        checkForXhr.apply(window, args)
       , options
 
     waitForXhr = (str, options) ->
-      ## we always want to strip everything after the first '.'
+      ## we always want to strip everything after the last '.'
       ## since we support alias property 'request'
-      [str, str2] = str.split(".")
+      if _.indexOf(str, ".") == -1 ||
+      str.slice(1) in _.keys(cy.state("aliases"))
+        [str, str2] = [str, null]
+      else
+        # potentially request, response or index
+        allParts = _.split(str, '.')
+        [str, str2] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
 
       if not aliasObj = cy.getAlias(str, "wait", log)
         cy.aliasNotFoundFor(str, "wait", log)
@@ -79,7 +85,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       {alias, command} = aliasObj
 
       str = _.compact([alias, str2]).join(".")
-
+ 
       type = cy.getXhrTypeByAlias(str)
 
       [ index, num ] = getNumRequests(state, alias)
@@ -167,13 +173,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       try
         switch
           when _.isFinite(msOrFnOrAlias)
-            waitNumber.apply(null, args)
+            waitNumber.apply(window, args)
           when _.isFunction(msOrFnOrAlias)
             waitFunction()
           when _.isString(msOrFnOrAlias)
-            waitString.apply(null, args)
+            waitString.apply(window, args)
           when _.isArray(msOrFnOrAlias) and not _.isEmpty(msOrFnOrAlias)
-            waitString.apply(null, args)
+            waitString.apply(window, args)
           else
             ## figure out why this error failed
             arg = switch

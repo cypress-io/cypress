@@ -47,14 +47,53 @@ describe "driver/src/cypress/index", ->
 
         done()
 
-  context "Log", ->
+    ## https://github.com/cypress-io/cypress/issues/4346
+    it "can complete if a circular reference is sent", ->
+      foo = {
+        bar: {}
+      }
+
+      foo.bar.baz = foo
+
+      Cypress.backend("foo", foo)
+      .then ->
+        throw new Error("should not reach")
+      .catch (e) ->
+        expect(e.message).to.eq("You requested a backend event we cannot handle: foo")
+
+  context ".isCy", ->
+    it "returns true on cy, cy chainable", ->
+      expect(Cypress.isCy(cy)).to.be.true
+      chainer = cy.wrap().then ->
+        expect(Cypress.isCy(chainer)).to.be.true
+
+    it "returns false on non-cy objects", ->
+      expect(Cypress.isCy(undefined)).to.be.false
+      expect(Cypress.isCy(() => {})).to.be.false
+
+  context ".Log", ->
     it "throws when using Cypress.Log.command()", ->
       fn = ->
         Cypress.Log.command({})
 
       expect(fn).to.throw(/has been renamed to Cypress.log/)
 
-  context "DeprecatedCommanInterface", ->
+    it "throws when passing non-object to Cypress.log()", ->
+      fn = ->
+        Cypress.log('My Log')
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("`Cypress.log()` can only be called with an options object. Your argument was: `My Log`")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/cypress-log")
+
+    it "does not throw when Cypress.log() called outside of command", ->
+      fn = ->
+        Cypress.log({ message: 'My Log' })
+
+      expect(fn).to.not.throw()
+
+  context "DeprecatedCommandInterface", ->
     it "throws when using Cypress.add...Command", ->
       fn = ->
         Cypress.addParentCommand()
@@ -63,7 +102,7 @@ describe "driver/src/cypress/index", ->
         .and.include("Cypress.addParentCommand(...) has been removed and replaced")
       expect(fn).to.throw().with.property("docsUrl")
         .and.eq("https://on.cypress.io/custom-command-interface-changed")
-      
+
       fn = ->
         Cypress.addChildCommand()
 
@@ -71,7 +110,7 @@ describe "driver/src/cypress/index", ->
         .and.include("Cypress.addChildCommand(...) has been removed and replaced")
       expect(fn).to.throw().with.property("docsUrl")
         .and.eq("https://on.cypress.io/custom-command-interface-changed")
-      
+
       fn = ->
         Cypress.addDualCommand()
 
@@ -87,10 +126,9 @@ describe "driver/src/cypress/index", ->
 
       expect(fn).to.throw().with.property("message")
         .and.include("You cannot use the undocumented private command interface: `addAssertionCommand`")
-      
+
       fn = ->
         Cypress.addUtilityCommand()
 
       expect(fn).to.throw().with.property("message")
         .and.include("You cannot use the undocumented private command interface: `addUtilityCommand`")
-

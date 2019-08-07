@@ -15,6 +15,16 @@ describe "src/cy/commands/request", ->
         .resolves({ isOkStatusCode: true, status: 200 })
 
         @expectOptionsToBe = (opts) ->
+          _.defaults(opts, {
+            failOnStatusCode: true
+            retryOnNetworkFailure: true
+            retryOnStatusCodeFailure: false
+            gzip: true
+            followRedirect: true
+            timeout: RESPONSE_TIMEOUT
+            method: "GET"
+          })
+
           options = backend.firstCall.args[1]
 
           _.each options, (value, key) ->
@@ -26,10 +36,6 @@ describe "src/cy/commands/request", ->
         cy.request({url: "http://localhost:8000/foo"}).then ->
           @expectOptionsToBe({
             url: "http://localhost:8000/foo"
-            method: "GET"
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -45,22 +51,16 @@ describe "src/cy/commands/request", ->
             url: "http://github.com/users"
             method: "POST"
             json: true
-            gzip: true
-            followRedirect: true
             body: {name: "brian"}
             headers: {
               "x-token": "abc123"
             }
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts object with url + timeout", ->
         cy.request({url: "http://localhost:8000/foo", timeout: 23456}).then ->
           @expectOptionsToBe({
             url: "http://localhost:8000/foo"
-            method: "GET"
-            gzip: true
-            followRedirect: true
             timeout: 23456
           })
 
@@ -68,10 +68,6 @@ describe "src/cy/commands/request", ->
         cy.request("http://localhost:8080/status").then ->
           @expectOptionsToBe({
             url: "http://localhost:8080/status"
-            method: "GET"
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts method + url", ->
@@ -79,9 +75,6 @@ describe "src/cy/commands/request", ->
           @expectOptionsToBe({
             url: "http://localhost:1234/users/1"
             method: "DELETE"
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts method + url + body", ->
@@ -91,32 +84,21 @@ describe "src/cy/commands/request", ->
             method: "POST"
             body: {name: "brian"}
             json: true
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts url + body", ->
         cy.request("http://www.github.com/projects/foo", {commits: true}).then ->
           @expectOptionsToBe({
             url: "http://www.github.com/projects/foo"
-            method: "GET"
             body: {commits: true}
             json: true
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       it "accepts url + string body", ->
         cy.request("http://www.github.com/projects/foo", "foo").then ->
           @expectOptionsToBe({
             url: "http://www.github.com/projects/foo"
-            method: "GET"
             body: "foo"
-            gzip: true
-            followRedirect: true
-            timeout: RESPONSE_TIMEOUT
           })
 
       context "method normalization", ->
@@ -125,9 +107,6 @@ describe "src/cy/commands/request", ->
             @expectOptionsToBe({
               url: "https://www.foo.com/"
               method: "POST"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "url normalization", ->
@@ -137,30 +116,18 @@ describe "src/cy/commands/request", ->
           cy.request("https://www.foo.com").then ->
             @expectOptionsToBe({
               url: "https://www.foo.com/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "uses localhost urls", ->
           cy.request("localhost:1234").then ->
             @expectOptionsToBe({
               url: "http://localhost:1234/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "uses www urls", ->
           cy.request("www.foo.com").then ->
             @expectOptionsToBe({
               url: "http://www.foo.com/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "prefixes with baseUrl when origin is empty", ->
@@ -170,10 +137,6 @@ describe "src/cy/commands/request", ->
           cy.request("/foo/bar?cat=1").then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/app/foo/bar?cat=1"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "prefixes with baseUrl over current origin", ->
@@ -183,10 +146,6 @@ describe "src/cy/commands/request", ->
           cy.request("foobar?cat=1").then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/app/foobar?cat=1"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "gzip", ->
@@ -197,10 +156,7 @@ describe "src/cy/commands/request", ->
           }).then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/"
-              method: "GET"
               gzip: false
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "auth", ->
@@ -214,14 +170,10 @@ describe "src/cy/commands/request", ->
           }).then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
               auth: {
                 user: "brian"
                 pass: "password"
               }
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "followRedirect", ->
@@ -230,10 +182,6 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "can be set to false", ->
@@ -244,10 +192,7 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               followRedirect: false
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "normalizes followRedirects -> followRedirect", ->
@@ -258,10 +203,7 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               followRedirect: false
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "qs", ->
@@ -275,11 +217,7 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
-              followRedirect: true
               qs: {foo: "bar"}
-              timeout: RESPONSE_TIMEOUT
             })
 
       context "form", ->
@@ -294,12 +232,8 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               form: true
-              followRedirect: true
               body: {foo: "bar"}
-              timeout: RESPONSE_TIMEOUT
             })
 
         it "accepts a string for body", ->
@@ -311,12 +245,8 @@ describe "src/cy/commands/request", ->
           .then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               form: true
-              followRedirect: true
               body: "foo=bar&baz=quux"
-              timeout: RESPONSE_TIMEOUT
             })
 
         ## https://github.com/cypress-io/cypress/issues/2923
@@ -331,16 +261,12 @@ describe "src/cy/commands/request", ->
           }).then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
-              method: "GET"
-              gzip: true
               form: true
-              followRedirect: true
               headers: {
                 "a": "b"
                 "Content-type": "application/x-www-form-urlencoded"
               }
               body: { foo: "bar" }
-              timeout: RESPONSE_TIMEOUT
             })
 
     describe "failOnStatus", ->
@@ -359,7 +285,7 @@ describe "src/cy/commands/request", ->
           ## make sure it really was 500!
           expect(resp.status).to.eq(500)
 
-          expect(warning).to.be.calledWith("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+          expect(warning).to.be.calledWith("The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.")
 
     describe "failOnStatusCode", ->
       it "does not fail on status 401", ->
@@ -382,6 +308,16 @@ describe "src/cy/commands/request", ->
           method: 'm-Search'
         }).then (res) =>
           expect(res.body).to.contain('M-SEARCH')
+
+    describe "headers", ->
+      it "can send user-agent header", ->
+        cy.request({
+          url: "http://localhost:3500/dump-headers",
+          headers: {
+            "user-agent": "something special"
+          }
+        }).then (res) ->
+          expect(res.body).to.contain('"user-agent":"something special"')
 
     describe "subjects", ->
       it "resolves with response obj", ->
@@ -623,6 +559,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires a `url`. You did not provide a `url`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request()
@@ -638,6 +575,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window's origin or the `baseUrl` in `cypress.json`. Neither of those values were present.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request("/foo/bar")
@@ -650,6 +588,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires the `url` to be a string.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -664,6 +603,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` must be passed an object literal for the `auth` option.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -679,6 +619,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires the `headers` option to be an object literal.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -694,6 +635,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` was called with an invalid method: `FOO`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -709,6 +651,7 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires the `gzip` option to be a boolean.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -724,11 +667,24 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq("`cy.request()` requires the `form` option to be a boolean.\n\nIf you're trying to send a `x-www-form-urlencoded` request then pass either a string or object literal to the `body` property.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
           url: "http://localhost:1234/foo"
           form: {foo: "bar"}
+        })
+
+      it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "`cy.request()` was invoked with `{ failOnStatusCode: false, retryOnStatusCodeFailure: true }`."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
+          done()
+
+        cy.request({
+          url: "http://foobarbaz",
+          failOnStatusCode: false
+          retryOnStatusCodeFailure: true
         })
 
       it "throws when status code doesnt start with 2 and failOnStatusCode is true", (done) ->
@@ -757,6 +713,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           expect(err.message).to.include("""
             `cy.request()` failed on:
 
@@ -804,6 +761,45 @@ describe "src/cy/commands/request", ->
           }
         })
 
+      ## https://github.com/cypress-io/cypress/issues/4346
+      it "throws on network failure when nested", (done) ->
+        cy.request("http://localhost:3500/dump-method")
+        .then ->
+          cy.request("http://0.0.0.0:12345")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "`cy.request()` failed trying to load:"
+          done()
+
+      it "displays body_circular when body is circular", (done) ->
+        foo = {
+          bar: {
+            baz: {}
+          }
+        }
+
+        foo.bar.baz.quux = foo
+
+        cy.request({
+          method: "POST"
+          url: "http://foo.invalid/"
+          body: foo
+        })
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq """
+          The `body` parameter supplied to `cy.request()` contained a circular reference at the path "bar.baz.quux".
+
+          `body` can only be a string or an object with no circular references.
+          """
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
+
+          done()
+
       it "does not include redirects when there were no redirects", (done) ->
         backend = Cypress.backend
         .withArgs("http:request")
@@ -827,6 +823,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           expect(err.message).to.include("""
             `cy.request()` failed on:
 
@@ -927,7 +924,7 @@ describe "src/cy/commands/request", ->
 
             The stack trace for this error is:
             """)
-
+            expect(err.docsUrl).to.eq("https://on.cypress.io/request")
             done()
 
           cy.request("http://localhost:1234/foo")
@@ -943,6 +940,7 @@ describe "src/cy/commands/request", ->
             expect(@logs.length).to.eq(1)
             expect(lastLog.get("error")).to.eq(err)
             expect(lastLog.get("state")).to.eq("failed")
+            expect(err.docsUrl).to.eq("https://on.cypress.io/request")
             expect(err.message).to.eq("""
               `cy.request()` timed out waiting `50ms` for a response from your server.
 

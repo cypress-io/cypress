@@ -4,7 +4,6 @@ EE         = require("events")
 app        = require("electron").app
 image      = require("electron").nativeImage
 Promise    = require("bluebird")
-Position   = require("electron-positioner")
 cyIcons    = require("@cypress/icons")
 user       = require("../user")
 errors     = require("../errors")

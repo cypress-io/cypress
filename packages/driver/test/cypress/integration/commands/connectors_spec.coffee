@@ -42,6 +42,7 @@ describe "src/cy/commands/connectors", ->
         it "throws when subject isn't array-like", (done) ->
           cy.on "fail", (err) =>
             expect(err.message).to.eq "`cy.spread()` requires the existing subject be array-like."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/spread")
             done()
 
           cy.noop({}).spread ->
@@ -434,12 +435,10 @@ describe "src/cy/commands/connectors", ->
 
             cy.on "fail", (err) ->
               expect(err.message).to.include("Timed out retrying: `cy.invoke()` errored because the property: `foo` returned a `regexp` value instead of a function. `cy.invoke()` can only be used on properties that return callable functions.")
-
               expect(err.message).to.include("`cy.invoke()` waited for the specified property `foo` to return a function, but it never did.")
-
               expect(err.message).to.include("If you want to assert on the property's value, then switch to use `cy.its()` and add an assertion such as:")
-
               expect(err.message).to.include("`cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')`")
+              expect(err.docsUrl).to.eq("https://on.cypress.io/invoke")
 
               done()
 
@@ -454,12 +453,10 @@ describe "src/cy/commands/connectors", ->
 
             cy.on "fail", (err) ->
               expect(err.message).to.include("Timed out retrying: `cy.invoke()` errored because the property: `bar` returned a `string` value instead of a function. `cy.invoke()` can only be used on properties that return callable functions.")
-
               expect(err.message).to.include("`cy.invoke()` waited for the specified property `bar` to return a function, but it never did.")
-
               expect(err.message).to.include("If you want to assert on the property's value, then switch to use `cy.its()` and add an assertion such as:")
-
               expect(err.message).to.include("`cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')`")
+              expect(err.docsUrl).to.eq("https://on.cypress.io/invoke")
 
               done()
 
@@ -583,14 +580,11 @@ describe "src/cy/commands/connectors", ->
             lastLog = @lastLog
 
             expect(err.message).to.include "Timed out retrying: `cy.invoke()` errored because the property: `foo` does not exist on your subject."
-
             expect(err.message).to.include "`cy.invoke()` waited for the specified property `foo` to exist, but it never did."
-
             expect(err.message).to.include "If you do not expect the property `foo` to exist, then add an assertion such as:"
-
             expect(err.message).to.include "`cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`"
-
             expect(lastLog.get("error").message).to.include(err.message)
+            expect(err.docsUrl).to.eq("https://on.cypress.io/invoke")
 
             done()
 
@@ -609,6 +603,7 @@ describe "src/cy/commands/connectors", ->
             lastLog = @lastLog
 
             expect(err.message).to.eq "`cy.invoke()` only accepts a string as the first argument."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/invoke")
             expect(lastLog.get("error")).to.eq err
             done()
 
@@ -634,7 +629,7 @@ describe "src/cy/commands/connectors", ->
 
             expect(err.message).to.eq("Timed out retrying: expected 'foo' to equal 'bar'")
 
-            expect(lastLog.get("error").message).to.eq("expected 'foo' to equal 'bar'")
+            expect(lastLog.get("error").message).to.eq("Timed out retrying: expected 'foo' to equal 'bar'")
 
             done()
 
@@ -645,11 +640,9 @@ describe "src/cy/commands/connectors", ->
             lastLog = @lastLog
 
             expect(err.message).to.include("Timed out retrying: `cy.invoke()` errored because your subject is: `undefined`. You cannot invoke any functions such as `foo` on a `undefined` value.")
-
             expect(err.message).to.include("If you expect your subject to be `undefined`, then add an assertion such as:")
-
             expect(err.message).to.include("`cy.wrap(undefined).should('be.undefined')`")
-
+            expect(err.docsUrl).to.eq("https://on.cypress.io/invoke")
             expect(lastLog.get("error").message).to.include(err.message)
 
             done()
@@ -661,14 +654,11 @@ describe "src/cy/commands/connectors", ->
             lastLog = @lastLog
 
             expect(err.message).to.include "Timed out retrying: `cy.invoke()` errored because the property: `foo` is not a function, and instead returned a `undefined` value."
-
             expect(err.message).to.include "`cy.invoke()` waited for the specified property `foo` to become a callable function, but it never did."
-
             expect(err.message).to.include "If you expect the property `foo` to be `undefined`, then switch to use `cy.its()` and add an assertion such as:"
-
             expect(err.message).to.include "`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`"
-
             expect(lastLog.get("error").message).to.include(err.message)
+            expect(err.docsUrl).to.eq("https://on.cypress.io/invoke")
 
             done()
 
@@ -680,6 +670,7 @@ describe "src/cy/commands/connectors", ->
 
             expect(err.message).to.include("Timed out retrying: `cy.invoke()` errored because the property: `baz` does not exist on your subject.")
             expect(lastLog.get("error").message).to.include(err.message)
+            expect(err.docsUrl).to.eq("https://on.cypress.io/invoke")
             done()
 
           obj = {
@@ -961,7 +952,7 @@ describe "src/cy/commands/connectors", ->
             expect(err.message).to.include "`cy.its()` waited for the specified property `foo` to exist, but it never did."
             expect(err.message).to.include "If you do not expect the property `foo` to exist, then add an assertion such as:"
             expect(err.message).to.include "`cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`"
-
+            expect(err.docsUrl).to.eq("https://on.cypress.io/its")
             expect(lastLog.get("error").message).to.include(err.message)
 
             done()
@@ -976,7 +967,7 @@ describe "src/cy/commands/connectors", ->
             expect(err.message).to.include "`cy.its()` waited for the specified property `foo` to become accessible, but it never did."
             expect(err.message).to.include "If you expect the property `foo` to be `undefined`, then add an assertion such as:"
             expect(err.message).to.include "`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`"
-
+            expect(err.docsUrl).to.eq("https://on.cypress.io/its")
             expect(lastLog.get("error").message).to.include(err.message)
 
             done()
@@ -991,7 +982,7 @@ describe "src/cy/commands/connectors", ->
             expect(err.message).to.include "`cy.its()` waited for the specified property `foo` to become accessible, but it never did."
             expect(err.message).to.include "If you expect the property `foo` to be `null`, then add an assertion such as:"
             expect(err.message).to.include "`cy.wrap({ foo: null }).its('foo').should('be.null')`"
-
+            expect(err.docsUrl).to.eq("https://on.cypress.io/its")
             expect(lastLog.get("error").message).to.include(err.message)
 
             done()
@@ -1021,7 +1012,7 @@ describe "src/cy/commands/connectors", ->
             expect(err.message).to.include "`cy.its()` waited for the specified property `a` to become accessible, but it never did."
             expect(err.message).to.include "If you expect the property `a` to be `undefined`, then add an assertion such as:"
             expect(err.message).to.include "`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`"
-
+            expect(err.docsUrl).to.eq("https://on.cypress.io/its")
             expect(lastLog.get("error").message).to.include(err.message)
 
             done()
@@ -1067,6 +1058,7 @@ describe "src/cy/commands/connectors", ->
             lastLog = @lastLog
 
             expect(err.message).to.include("Timed out retrying: `cy.its()` errored because the property: `baz` does not exist on your subject.")
+            expect(err.docsUrl).to.eq("https://on.cypress.io/its")
             expect(lastLog.get("error").message).to.include(err.message)
             expect(lastLog.get("error").message).to.include(err.message)
             done()
@@ -1086,7 +1078,7 @@ describe "src/cy/commands/connectors", ->
               expect(err.message).to.include("`cy.its()` waited for the specified property `b` to become accessible, but it never did.")
               expect(err.message).to.include("If you do not expect the property `b` to exist, then add an assertion such as:")
               expect(err.message).to.include("`cy.wrap({ foo: #{val} }).its('foo.baz').should('not.exist')`")
-
+              expect(err.docsUrl).to.eq("https://on.cypress.io/its")
               done()
 
             cy.wrap({ a: val }).its("a.b.c")
@@ -1096,7 +1088,7 @@ describe "src/cy/commands/connectors", ->
               expect(err.message).to.include("Timed out retrying: `cy.its()` errored because your subject is: `#{val}`. You cannot access any properties such as `foo` on a `#{val}` value.")
               expect(err.message).to.include("If you expect your subject to be `#{val}`, then add an assertion such as:")
               expect(err.message).to.include("`cy.wrap(#{val}).should('be.#{val}')`")
-
+              expect(err.docsUrl).to.eq("https://on.cypress.io/its")
               done()
 
             cy.wrap(val).its("foo")
@@ -1106,6 +1098,7 @@ describe "src/cy/commands/connectors", ->
             lastLog = @lastLog
 
             expect(err.message).to.include "`cy.its()` only accepts a single argument."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/its")
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -1114,7 +1107,7 @@ describe "src/cy/commands/connectors", ->
           fn.bar.baz = "baz"
 
           cy.wrap(fn).its("bar", "baz").should("eq", "baz")
-        
+
         it "resets traversalErr and throws the right assertion", (done) ->
           cy.timeout(200)
 
@@ -1279,6 +1272,7 @@ describe "src/cy/commands/connectors", ->
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("`cy.each()` timed out after waiting `50ms`.\n\nYour callback function returned a promise which never resolved.")
+            expect(err.docsUrl).to.include("https://on.cypress.io/each")
             done()
 
           cy.get("ul").each ($ul) ->
@@ -1294,6 +1288,7 @@ describe "src/cy/commands/connectors", ->
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("`cy.each()` must be passed a callback function.")
+            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
             done()
 
           cy.get("ul").each({})
@@ -1303,6 +1298,7 @@ describe "src/cy/commands/connectors", ->
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: `100`")
+            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
             done()
 
           cy.wrap(100).each ->
@@ -1312,6 +1308,7 @@ describe "src/cy/commands/connectors", ->
             ## get + each
             expect(@logs.length).to.eq(2)
             expect(err.message).to.include("`cy.each()` can only operate on an array like subject. Your subject was: `{}`")
+            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
             done()
 
           cy.wrap({}).each ->

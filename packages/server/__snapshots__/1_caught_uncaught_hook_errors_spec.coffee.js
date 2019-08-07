@@ -40,22 +40,10 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
   3 failing
 
   1) s1a "before each" hook for "t2a":
-     CypressError: Timed out retrying: Expected to find element: '.does-not-exist', but never found it.
+     AssertionError: Timed out retrying: Expected to find element: \`.does-not-exist\`, but never found it.
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1a'
+  
 
   2) s3a "before all" hook for "t8a":
      Error: s3a before hook failed
@@ -153,9 +141,10 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1b'
       at stack trace line
@@ -237,6 +226,7 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
+
 
 Because this error occurred during a \`before each\` hook we are skipping all of the remaining tests.
       at stack trace line
@@ -321,9 +311,10 @@ This error originated from your application code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1'
       at stack trace line

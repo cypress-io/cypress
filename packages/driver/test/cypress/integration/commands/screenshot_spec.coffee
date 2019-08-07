@@ -44,6 +44,8 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
+      .finally ->
+        Cypress.config("isTextTerminal", true)
 
     it "is noop when no test.err", ->
       Cypress.config("isInteractive", false)
@@ -303,6 +305,11 @@ describe "src/cy/commands/screenshot", ->
           width: $(window.parent).width()
           height: $(window.parent).height()
         })
+
+    it "can handle window w/length > 1 as a subject", ->
+      cy.visit('/fixtures/dom.html')
+      cy.window().should('have.length.gt', 1)
+      .screenshot()
 
     describe "before/after events", ->
       beforeEach ->
@@ -609,55 +616,109 @@ describe "src/cy/commands/screenshot", ->
             @lastLog = log
             @logs.push(log)
 
-        @assertErrorMessage = (message, done) =>
-          cy.on "fail", (err) =>
-            expect(@lastLog.get("error").message).to.eq(message)
-            done()
-
         return null
 
       it "throws if capture is not a string", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `true`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `true`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          
+          done()
+
         cy.screenshot({ capture: true })
 
       it "throws if capture is not a valid option", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `foo`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `foo`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          
+          done()
+
         cy.screenshot({ capture: "foo" })
 
       it "throws if scale is not a boolean", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `scale` option must be a boolean. You passed: `foo`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `scale` option must be a boolean. You passed: `foo`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          
+          done()
+
         cy.screenshot({ scale: "foo" })
 
       it "throws if disableTimersAndAnimations is not a boolean", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `disableTimersAndAnimations` option must be a boolean. You passed: `foo`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `disableTimersAndAnimations` option must be a boolean. You passed: `foo`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          
+          done()
+
         cy.screenshot({ disableTimersAndAnimations: "foo" })
 
       it "throws if blackout is not an array", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `blackout` option must be an array of strings. You passed: `foo`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `blackout` option must be an array of strings. You passed: `foo`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          done()
+
         cy.screenshot({ blackout: "foo" })
 
       it "throws if blackout is not an array of strings", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `blackout` option must be an array of strings. You passed: `true`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `blackout` option must be an array of strings. You passed: `true`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          done()
+
         cy.screenshot({ blackout: [true] })
 
       it "throws if clip is not an object", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `true`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `true`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")          
+          done()
+
         cy.screenshot({ clip: true })
 
       it "throws if clip is lacking proper keys", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")          
+          done()
+
         cy.screenshot({ clip: { x: 5 } })
 
       it "throws if clip has extraneous keys", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")          
+          done()
+
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
 
       it "throws if clip has non-number values", (done) ->
-        @assertErrorMessage("`cy.screenshot()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{4}`", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `Object{4}`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")          
+          done()
+
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: "5" } })
 
       it "throws if element capture with multiple elements", (done) ->
-        @assertErrorMessage("`cy.screenshot()` only works for a single element. You attempted to screenshot 4 elements.", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` only works for a single element. You attempted to screenshot 4 elements.")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")  
+          done()
+
         cy.visit("/fixtures/screenshots.html")
         cy.get(".multiple").screenshot()
 
@@ -692,6 +753,7 @@ describe "src/cy/commands/screenshot", ->
           expect(lastLog.get("name")).to.eq("screenshot")
           expect(lastLog.get("message")).to.eq("foo")
           expect(err.message).to.eq("`cy.screenshot()` timed out waiting `50ms` to complete.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/screenshot")
           done()
 
         cy.screenshot("foo", {timeout: 50})
