@@ -4,7 +4,9 @@ once    = require("lodash/once")
 Promise = require("bluebird")
 client  = require("./client")
 
-GET_ALL_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'session', 'storeId']
+COOKIE_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'storeId']
+GET_ALL_PROPS = COOKIE_PROPS.concat(['session'])
+SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
 
 httpRe = /^http/
 
@@ -108,6 +110,7 @@ automation = {
       new Promise (resolve, reject) =>
         ## only get the url if its not already set
         props.url ?= @getUrl(props)
+        props = pick(props, SET_PROPS)
         chrome.cookies.set props, (details) ->
           switch
             when details
