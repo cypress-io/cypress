@@ -1,4 +1,4 @@
-allowDestroy = require("@packages/network")
+{ allowDestroy } = require("@packages/network")
 http       = require("http")
 path       = require("path")
 httpsProxy = require("../../lib/proxy")
@@ -64,7 +64,7 @@ module.exports = {
 
   stop: ->
     new Promise (resolve) ->
-      prx.close(resolve)
+      prx.destroy(resolve)
     .then ->
       prx.proxy.close()
 }

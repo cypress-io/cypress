@@ -22,8 +22,9 @@ SSL_RECORD_TYPES = [
 ]
 
 class Server
-  constructor: (@_ca, @_port) ->
+  constructor: (@_ca, @_port, @_options) ->
     @_onError = null
+    @_ipServers = {}
 
   connect: (req, browserSocket, head, options = {}) ->
     ## don't buffer writes - thanks a lot, Nagle
@@ -216,25 +217,48 @@ class Server
 
   _getPortFor: (hostname) ->
     @_getCertificatePathsFor(hostname)
-
     .catch (err) =>
       @_generateMissingCertificates(hostname)
-
     .then (data = {}) =>
+      if net.isIP(hostname)
+        return @_getServerPortForIp(hostname, data)
+
       @_sniServer.addContext(hostname, data)
 
       return @_sniPort
 
-  listen: (options = {}) ->
+  ## browsers will not do SNI for an IP address, so we need to serve
+  ## 1 HTTPS server per IP
+  ## https://github.com/cypress-io/cypress/issues/771
+  _getServerPortForIp: (ip, data) =>
+    if server = @_ipServers[ip]
+      return Promise.resolve(server.address().port)
+
     new Promise (resolve) =>
-      @_onError = options.onError
+      @_ipServers[ip] = server = https.createServer(data)
+
+      allowDestroy(server)
+
+      server.on "upgrade", @_onUpgrade.bind(@, @_options.onUpgrade)
+      server.on "request", @_onRequest.bind(@, @_options.onRequest)
+      server.listen 0, '127.0.0.1', =>
+        port = server.address().port
+
+        debug("Created HTTPS Proxy for IP %s on port %s", ip, port)
+
+        resolve(port)
+
+
+  listen: ->
+    new Promise (resolve) =>
+      @_onError = @_options.onError
 
       @_sniServer = https.createServer({})
 
       allowDestroy(@_sniServer)
 
-      @_sniServer.on "upgrade", @_onUpgrade.bind(@, options.onUpgrade)
-      @_sniServer.on "request", @_onRequest.bind(@, options.onRequest)
+      @_sniServer.on "upgrade", @_onUpgrade.bind(@, @_options.onUpgrade)
+      @_sniServer.on "request", @_onRequest.bind(@, @_options.onRequest)
       @_sniServer.listen 0, '127.0.0.1', =>
         ## store the port of our current sniServer
         @_sniPort = @_sniServer.address().port
@@ -245,8 +269,10 @@ class Server
 
   close: ->
     close = =>
-      new Promise (resolve) =>
-        @_sniServer.destroy(resolve)
+      servers = _.values(@_ipServers).concat([@_sniServer])
+      Promise.map servers, (server) ->
+        Promise.fromCallback (cb) ->
+          server.destroy(cb)
 
     close()
     .finally ->
@@ -257,9 +283,9 @@ module.exports = {
     sslServers = {}
 
   create: (ca, port, options = {}) ->
-    srv = new Server(ca, port)
+    srv = new Server(ca, port, options)
 
     srv
-    .listen(options)
+    .listen()
     .return(srv)
 }

@@ -152,6 +152,28 @@ describe "Proxy", ->
           proxy: "http://localhost:3333"
         })
 
+    ## https://github.com/cypress-io/cypress/issues/771
+    it "generates certs and can proxy requests for HTTPS requests to IPs", ->
+      @sandbox.spy(@proxy, "_generateMissingCertificates")
+      @sandbox.spy(@proxy, "_getServerPortForIp")
+
+      request({
+        strictSSL: false
+        url: "https://1.1.1.1/"
+        proxy: "http://localhost:3333"
+      })
+      .then =>
+        proxy.reset()
+
+        request({
+          strictSSL: false
+          url: "https://localhost:8443/"
+          proxy: "http://localhost:3333"
+        })
+      .then =>
+        expect(@proxy._generateMissingCertificates).to.be.calledOnce
+        expect(@proxy._getServerPortForIp).to.be.calledWith('1.1.1.1', sinon.match.any)
+
   context "closing", ->
     it "resets sslServers and can reopen", ->
       request({
@@ -256,7 +278,7 @@ describe "Proxy", ->
       })
       .then =>
         throw new Error('should not succeed')
-      .catch { message: 'Error: socket hang up' }, =>
+      .catch { message: 'Error: Client network socket disconnected before secure TLS connection was established' }, =>
         expect(createProxyConn).to.not.be.called
         expect(createSocket).to.be.calledWith({
           port: @proxy._sniPort
