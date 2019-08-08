@@ -112,12 +112,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const isMonth = $dom.isType(options.$el, 'month')
       const isWeek = $dom.isType(options.$el, 'week')
       const hasTabIndex = $dom.isSelector(options.$el, '[tabindex]')
+      const isCurrentlyFocused = $dom.isFocused($dom.getElements(options.$el))
 
       // TODO: tabindex can't be -1
 
       const isTypeableButNotAnInput = isBody || (hasTabIndex && !isTextLike)
 
-      if (!isBody && !isTextLike && !hasTabIndex) {
+      if (!isBody && !isTextLike && !hasTabIndex && !isCurrentlyFocused) {
         const node = $dom.stringify(options.$el)
 
         $utils.throwErrByPath('type.not_on_typeable_element', {
