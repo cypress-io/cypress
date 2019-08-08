@@ -4,6 +4,7 @@ const $document = require('./document')
 const $elements = require('./elements')
 const $visibility = require('./visibility')
 const $coordinates = require('./coordinates')
+const { scrollIntoView } = require('./scrollIntoView')
 
 const { isWindow, getWindowByElement } = $window
 const { isDocument } = $document
@@ -71,6 +72,8 @@ module.exports = {
   getWindowByElement,
 
   getReasonIsHidden,
+
+  scrollIntoView,
 
   getFirstScrollableParent,
 

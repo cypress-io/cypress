@@ -164,6 +164,8 @@ export default class AutIframe {
   }
 
   highlightEl = ({ body }, { $el, coords, highlightAttr, scrollBy }) => {
+    const Cypress = eventManager.getCypress()
+
     this.removeHighlights()
 
     if (body) {
@@ -174,7 +176,7 @@ export default class AutIframe {
 
     // scroll the top of the element into view
     if ($el.get(0)) {
-      $el.get(0).scrollIntoView()
+      Cypress.dom.scrollIntoView($el[0], { block: 'start', inline: 'nearest', scrollMode: 'if-needed' })
       // if we have a scrollBy on our command
       // then we need to additional scroll the window
       // by these offsets

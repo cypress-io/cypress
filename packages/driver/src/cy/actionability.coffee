@@ -4,6 +4,7 @@ Promise = require("bluebird")
 
 $dom = require("../dom")
 $utils = require("../cypress/utils")
+{ scrollIntoView } = require('../dom/scrollIntoView')
 
 delay = 50
 
@@ -233,7 +234,19 @@ verify = (cy, $el, options, callbacks) ->
     runAllChecks = ->
       if force isnt true
         ## scroll the element into view
-        $el.get(0).scrollIntoView({block: "center", inline: "nearest"})
+        scrollIntoView($el[0], {
+          block: "center",
+          inline: "nearest",
+          scrollMode: 'if-needed',
+          behavior: (instructions) =>
+            debugger
+            _.each instructions, (instr) =>
+              debugger
+              { el, left, top } = instr
+              debugger
+              el.scrollLeft = left
+              el.scrollTop = top
+        })
 
         if onScroll
           onScroll($el, "element")
