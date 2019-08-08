@@ -198,7 +198,6 @@ module.exports = {
         rewrite = (body) ->
           ## transparently decode their body to a node string and then re-encode
           nodeCharset = getNodeCharsetFromResponse(headers, body)
-          debug('rewriting', { body, headers })
           decodedBody = iconv.decode(body, nodeCharset)
           rewrittenBody = rewriter.html(decodedBody, remoteState.domainName, wantsInjection, wantsSecurityRemoved)
           iconv.encode(rewrittenBody, nodeCharset)

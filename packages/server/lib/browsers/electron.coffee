@@ -7,6 +7,7 @@ debug         = require("debug")("cypress:server:browsers:electron")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
 appData       = require("../util/app_data")
+cors          = require("../util/cors")
 plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
@@ -219,12 +220,6 @@ module.exports = {
         ## https://github.com/cypress-io/cypress/issues/1939
         tryToCall(win, "focusOnWebView")
 
-        a = Windows.automation(win)
-
-        invoke = (method, data) =>
-          tryToCall win, ->
-            a[method](data)
-
         invokeViaDebugger = (message, data) ->
           tryToCall win, ->
             win.webContents.debugger.sendCommandAsync(message, data)
@@ -243,8 +238,15 @@ module.exports = {
           cookie.name or= "" ## name can't be undefined/null
           cookie.value or= "" ## ditto
           cookie.expires = cookie.expirationDate
-          if !cookie.hostOnly and cookie.domain[0] != '.' and cookie.domain != 'localhost' and !net.isIP(cookie.domain)
-            cookie.domain = ".#{cookie.domain}"
+
+          ## see Chromium's GetCookieDomainWithString for the logic here:
+          ## https://cs.chromium.org/chromium/src/net/cookies/cookie_util.cc?l=120&rcl=1b63a4b7ba498e3f6d25ec5d33053d7bc8aa4404
+          if !cookie.hostOnly and cookie.domain[0] != '.'
+            parsedDomain = cors.parseDomain(cookie.domain)
+            ## not a top-level domain (localhost, ...) or IP address
+            if parsedDomain?.tld != cookie.domain
+              cookie.domain = ".#{cookie.domain}"
+
           delete cookie.hostOnly
           delete cookie.expirationDate
           return cookie
@@ -281,14 +283,13 @@ module.exports = {
                 data = normalizeSetCookieProps(data)
                 invokeViaDebugger("Network.setCookie", data).then ->
                   getCookie(data)
-              when "clear:cookies"
-                throw new Error('reasonably sure this is not used')
               when "clear:cookie"
                 invokeViaDebugger("Network.deleteCookies", data).return(null)
               when "is:automation:client:connected"
-                invoke("isAutomationConnected", data)
+                tryToCall(win, 'isDestroyed') == false
               when "take:screenshot"
-                invoke("takeScreenshot")
+                tryToCall(win, 'capturePage')
+                .then _.partialRight(_.invoke, 'toDataURL')
               else
                 throw new Error("No automation handler registered for: '#{message}'")
         })

@@ -107,7 +107,6 @@ describe "e2e subdomain", ->
     "chrome"
   ].forEach (browser) ->
     it "passes in #{browser}", ->
-      @timeout(1200000000)
       e2e.exec(@, {
         spec: "subdomain_spec.coffee"
         snapshot: true

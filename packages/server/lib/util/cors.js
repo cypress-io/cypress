@@ -6,6 +6,11 @@ const parseDomain = require('parse-domain')
 
 const ipAddressRe = /^[\d\.]+$/
 
+const _parseDomain = _.partialRight(parseDomain, {
+  privateTlds: true,
+  customTlds: ipAddressRe,
+})
+
 function parseUrlIntoDomainTldPort (str) {
   let { hostname, port, protocol } = url.parse(str)
 
@@ -13,10 +18,7 @@ function parseUrlIntoDomainTldPort (str) {
     port = protocol === 'https:' ? '443' : '80'
   }
 
-  let parsed = parseDomain(hostname, {
-    privateTlds: true, // use the public suffix
-    customTlds: ipAddressRe,
-  })
+  let parsed = _parseDomain(hostname)
 
   // if we couldn't get a parsed domain
   if (!parsed) {
@@ -47,6 +49,8 @@ function parseUrlIntoDomainTldPort (str) {
 
 module.exports = {
   parseUrlIntoDomainTldPort,
+
+  parseDomain: _parseDomain,
 
   // matches #getSuperDomain from driver
   // https://github.com/cypress-io/cypress/blob/adb56d0f79d0378840cd7b2011862f7792cfe992/packages/driver/src/cypress/location.coffee#L85-L85
