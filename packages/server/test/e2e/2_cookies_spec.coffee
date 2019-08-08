@@ -81,9 +81,9 @@ describe "e2e cookies", ->
   })
 
   [
-    'electron',
-    'chrome'
-  ].map (browser) ->
+    "electron",
+    "chrome"
+  ].forEach (browser) ->
     it "passes in #{browser}", ->
       e2e.exec(@, {
         spec: "cookies_spec.coffee"

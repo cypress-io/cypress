@@ -103,9 +103,9 @@ describe "e2e subdomain", ->
   })
 
   [
-    'electron',
-    'chrome'
-  ].map (browser) ->
+    "electron",
+    "chrome"
+  ].forEach (browser) ->
     it "passes in #{browser}", ->
       @timeout(1200000000)
       e2e.exec(@, {
