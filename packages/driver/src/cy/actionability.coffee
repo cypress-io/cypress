@@ -235,7 +235,7 @@ verify = (cy, $el, options, callbacks) ->
       if force isnt true
         ## scroll the element into view
         scrollIntoView($el[0], {
-          block: "center",
+          block: "start",
           inline: "nearest",
           scrollMode: 'if-needed',
           behavior: (instructions) =>
