@@ -452,3 +452,7 @@ cy.writeFile('../file.path', '', {
   flag: 'a+',
   encoding: 'utf-8'
 })
+
+cy.get('foo').click()
+cy.get('foo').rightclick()
+cy.get('foo').dblclick()
