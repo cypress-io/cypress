@@ -895,80 +895,12 @@ declare namespace Cypress {
      */
     invoke<
       TActualSubject extends (Subject extends Node | Node[] ? JQuery<Subject> : Subject),
-      TName extends ({ [K in keyof TActualSubject]: TActualSubject[K] extends (...args: any[]) => any ? K : never }[keyof TActualSubject]),
-      TArgs extends OverloadedArgumentsType<TActualSubject[TName]>,
+      TName extends FunctionKeys<TActualSubject>,
+      TArgs extends OverloadedParameters<TActualSubject[TName]>,
       TReturn extends OverloadedReturnType<TActualSubject[TName], TArgs>,
     >(functionName: TName, ...args: TArgs): Chainable<TReturn>
     invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
 
-  }
-
-    type OverloadedReturnType<T, TArgs> = 
-      T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; (...args: infer A4): infer R4; }
-        ? unknown extends (TArgs extends A1 ? R1 : unknown)
-        ? unknown extends (TArgs extends A2 ? R2 : unknown)
-        ? unknown extends (TArgs extends A3 ? R3 : unknown)
-        ? unknown extends (TArgs extends A4 ? R4 : unknown) ? 0 : R4 : R3 : R2 : R1 :
-      T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; }
-        ? unknown extends (TArgs extends A1 ? R1 : unknown)
-        ? unknown extends (TArgs extends A2 ? R2 : unknown)
-        ? unknown extends (TArgs extends A3 ? R3 : unknown) ? 1 : R3 : R2 : R1 :
-      T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; }
-        ? unknown extends (TArgs extends A1 ? R1 : unknown)
-        ? unknown extends (TArgs extends A2 ? R2 : unknown) ? 2 : R2 : R1 :
-      T extends { (...args: infer A1): infer R1; }
-        ? unknown extends (TArgs extends A1 ? R1 : unknown) ? 3 : R1 :
-      4
-        // [[A1, R1],[A2, R2],[A3, R3],[A4, R4]]:never
-    // type OverloadedReturnType<T, TArgs> = 
-    //   T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; (...args: infer A4): infer R4; }
-    //     ? (A1 extends TArgs ? R1 : A2 extends TArgs ? R2 : A3 extends TArgs ? R3 : A4 extends TArgs ? R4 : never) : 1
-    // type OverloadedReturnType<T, TArgs> = 
-    //   T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; }
-    //     ? A1 | A2 | A3 | A4 :
-    //   T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; } ? A1 | A2 | A3 :
-    //   T extends { (...args: infer A1): any; (...args: infer A2): any; } ? A1 | A2 :
-    //   T extends { (...args: infer A1): any; } ? A1 :
-    //   never
-    type OverloadedArgumentsType<T> = 
-      T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; } ? A1 | A2 | A3 | A4 :
-      T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; } ? A1 | A2 | A3 :
-      T extends { (...args: infer A1): any; (...args: infer A2): any; } ? A1 | A2 :
-      T extends { (...args: infer A1): any; } ? A1 :
-      never
-    type TActualSubject = JQuery<HTMLInputElement>
-    type TFunctionNames = { [K in keyof TActualSubject]: TActualSubject[K] extends (...args: any[]) => any ? K : never }[keyof TActualSubject]
-    type TFunctions = TActualSubject['css']
-    type TFunc = TFunctions extends (arg: infer A) => any ? A : 
-      TFunctions extends (arg1: infer A, arg2: infer B) => any ? [A, B] : never
-    type Css = TActualSubject['css']
-    type CssA = OverloadedArgumentsType<Css>
-    type CssR = OverloadedReturnType<Css, [string]>
-    type Val = TActualSubject['val']
-    type ValA = OverloadedArgumentsType<Val>
-    type ValR1 = OverloadedReturnType<Val, [number]>
-    type ValR2 = OverloadedReturnType<Val, []>
-    type Foo = {
-      (s: string, b: number): string;
-      (s: string): string;
-      (n: number): number;
-      (o: string | number): string | number
-    }
-    type FooA = OverloadedArgumentsType<Foo>
-    type FooR1 = OverloadedReturnType<Foo, [string, number]>
-    type FooR2 = OverloadedReturnType<Foo, [string]>
-    type FooR3 = OverloadedReturnType<Foo, [number]>
-    type FooR4 = OverloadedReturnType<Foo, [number|string]>
-    // type asdf = [number] extends unknown[] ? R1 : unknown[]) extends unknown[] ? 1 : 0
-    type assdf = unknown[] extends [number] ? 1 : 0
-    type dsijfog = number extends unknown ? 1 : 0
-    type dsdijfog = unknown extends number ? 1 : 0
-    type basdf = [number] extends [number|string] ? 1 : 0
-    type bassdf = [number|string] extends [number] ? 1 : 0
-    // type ValC = (...args: )
-    // type TReturn = TActualSubject[TFunctionNames] extends (...args: TArgs) => infer R ? R : never
-
-    interface Chainable<Subject = any> {
     /**
      * Get a property’s value on the previously yielded subject.
      *
@@ -4558,6 +4490,54 @@ declare namespace Cypress {
   // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
+  /**
+   * Obtain the keys of T whose values are functions
+   */
+  type FunctionKeys<T> = ({ [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never }[keyof T])
+
+  /**
+   * Obtain the union of all parameters of an overloaded function type in a tuple
+   * 
+   * Accepts functions with up to 5 overloads
+   */
+  type OverloadedParameters<T> =
+    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; (...args: infer A5): any; } ? A1 | A2 | A3 | A4 | A5 :
+    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; } ? A1 | A2 | A3 | A4 :
+    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; } ? A1 | A2 | A3 :
+    T extends { (...args: infer A1): any; (...args: infer A2): any; } ? A1 | A2 :
+    T extends { (...args: infer A1): any; } ? A1 :
+    // T extends (...args: infer A1) => any ? A1 :
+    any[]
+
+  /**
+   * Obtain the return type of an overloaded function type corresponding to the provided arguments tuple type
+   * 
+   * Accepts functions with up to 5 overloads
+   */
+  type OverloadedReturnType<T, TArgs extends unknown[]> =
+    T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; (...args: infer A4): infer R4; (...args: infer A5): infer R5; }
+      ? unknown extends (TArgs extends A1 ? R1 : unknown)
+      ? unknown extends (TArgs extends A2 ? R2 : unknown)
+      ? unknown extends (TArgs extends A3 ? R3 : unknown)
+      ? unknown extends (TArgs extends A4 ? R4 : unknown)
+      ? unknown extends (TArgs extends A5 ? R5 : unknown) ? R5 : R5 : R4 : R3 : R2 : R1 :
+    T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; (...args: infer A4): infer R4; }
+      ? unknown extends (TArgs extends A1 ? R1 : unknown)
+      ? unknown extends (TArgs extends A2 ? R2 : unknown)
+      ? unknown extends (TArgs extends A3 ? R3 : unknown)
+      ? unknown extends (TArgs extends A4 ? R4 : unknown) ? R4 : R4 : R3 : R2 : R1 :
+    T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; }
+      ? unknown extends (TArgs extends A1 ? R1 : unknown)
+      ? unknown extends (TArgs extends A2 ? R2 : unknown)
+      ? unknown extends (TArgs extends A3 ? R3 : unknown) ? R3 : R3 : R2 : R1 :
+    T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; }
+      ? unknown extends (TArgs extends A1 ? R1 : unknown)
+      ? unknown extends (TArgs extends A2 ? R2 : unknown) ? R2 : R2 : R1 :
+    T extends { (...args: infer A1): infer R1; }
+      ? unknown extends (TArgs extends A1 ? R1 : unknown) ? R1 : R1 :
+    // T extends (...args: infer A1) => infer R1 ? R1 :
+    any
 
   /**
    * Public interface for the global "cy" object. If you want to add

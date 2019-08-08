@@ -334,6 +334,26 @@ namespace CypressContainsTests {
 }
 
 namespace CypressInvokeTests {
+  class TestClass {
+    foo(s: string, b: number): string | number
+    foo(s: string): string
+    foo(n: number): number
+    foo(o: string | number): string | number {
+      return typeof(o) === 'string' ? o + '1' : o + 1
+    }
+    bar(): number{
+      return 1
+    }
+  }
+
+  const instance = new TestClass()
+  cy.wrap(instance).invoke('foo', 'a', 1) // $ExpectType Chainable<string | number>
+  cy.wrap(instance).invoke('foo', 'a') // $ExpectType Chainable<string>
+  cy.wrap(instance).invoke('foo', 1) // $ExpectType Chainable<number>
+  cy.wrap(instance).invoke('foo') // $ExpectError
+  cy.wrap(instance).invoke('bar') // $ExpectType Chainable<number>
+  cy.wrap(instance).invoke('foo', 1, 1) // $ExpectError
+
   const obj = {
     foo: (value: number, name = 'n') => `${ name } = ${ value + 1 }`,
     bar: { baz: (a: number) => a + 1 }
@@ -346,6 +366,9 @@ namespace CypressInvokeTests {
   cy.wrap(obj).invoke('foo', 5, 1) // $ExpectError
   cy.wrap(obj).invoke('foo', 5, 'b', 1) // $ExpectError
   cy.get('input').then(it => it[0]).invoke('checkValidity') // $ExpectError
+  cy.get('input').invoke('val', 25) // $ExpectType Chainable<JQuery<HTMLInputElement>>
+  cy.get('input').invoke('css', '') // $ExpectType Chainable<string>
+  cy.get('input').invoke('css') // $ExpectError
 }
 
 // https://github.com/cypress-io/cypress/pull/5574
