@@ -7,6 +7,11 @@ Request = require("#{root}lib/request")
 request = Request({timeout: 100})
 
 describe "lib/request", ->
+  beforeEach ->
+    @fn = sinon.stub()
+    @fn.withArgs('set:cookie').resolves({})
+    @fn.withArgs('get:cookies').resolves([])
+
   it "is defined", ->
     expect(request).to.be.an("object")
 
@@ -246,9 +251,6 @@ describe "lib/request", ->
           expect(@hits).to.eq(5)
 
   context "#sendPromise", ->
-    beforeEach ->
-      @fn = sinon.stub()
-
     it "sets strictSSL=false", ->
       init = sinon.spy(request.rp.Request.prototype, "init")
 
@@ -803,9 +805,6 @@ describe "lib/request", ->
         })
 
   context "#sendStream", ->
-    beforeEach ->
-      @fn = sinon.stub()
-
     it "allows overriding user-agent in headers", ->
       nock("http://localhost:8080")
         .matchHeader("user-agent", "custom-agent")

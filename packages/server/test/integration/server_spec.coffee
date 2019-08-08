@@ -29,8 +29,8 @@ describe "Server", ->
       nock.enableNetConnect()
 
       @automationRequest = sinon.stub()
-      .withArgs("get:cookies").resolves([])
-      .withArgs("set:cookie").resolves({})
+      @automationRequest.withArgs("get:cookies").resolves([])
+      @automationRequest.withArgs("set:cookie").resolves({})
 
       @setup = (initialUrl, obj = {}) =>
         if _.isObject(initialUrl)
