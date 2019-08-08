@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 3.0
+// TypeScript Version: 3.4
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
@@ -4496,48 +4496,90 @@ declare namespace Cypress {
    */
   type FunctionKeys<T> = ({ [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never }[keyof T])
 
+  type ExcludeUnknownArray<T> = unknown[] extends T ? never : T
+  type ExcludeUnknown<T> = unknown extends T ? never : T
+
   /**
-   * Obtain the union of all parameters of an overloaded function type in a tuple
-   * 
+   * Obtain the union of all overloaded parameters tuples of a function type
+   *
    * Accepts functions with up to 5 overloads
    */
   type OverloadedParameters<T> =
-    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; (...args: infer A5): any; } ? A1 | A2 | A3 | A4 | A5 :
-    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; } ? A1 | A2 | A3 | A4 :
-    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; } ? A1 | A2 | A3 :
-    T extends { (...args: infer A1): any; (...args: infer A2): any; } ? A1 | A2 :
-    T extends { (...args: infer A1): any; } ? A1 :
-    // T extends (...args: infer A1) => any ? A1 :
+    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; (...args: infer A5): any; } ?
+      ExcludeUnknownArray<A1> | ExcludeUnknownArray<A2> | ExcludeUnknownArray<A3> | ExcludeUnknownArray<A4> | ExcludeUnknownArray<A5> :
+    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; (...args: infer A4): any; } ?
+      ExcludeUnknownArray<A1> | ExcludeUnknownArray<A2> | ExcludeUnknownArray<A3> | ExcludeUnknownArray<A4> :
+    T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any; } ?
+      ExcludeUnknownArray<A1> | ExcludeUnknownArray<A2> | ExcludeUnknownArray<A3> :
+    T extends { (...args: infer A1): any; (...args: infer A2): any; } ?
+      ExcludeUnknownArray<A1> | ExcludeUnknownArray<A2> :
+    T extends { (...args: infer A1): any; } ?
+      ExcludeUnknownArray<A1> :
     any[]
 
+  type ValidReturn<TArgs, TInferredArgs, TInferredReturn> =
+    [TArgs, TInferredReturn] extends [ExcludeUnknownArray<TInferredArgs>, ExcludeUnknown<TInferredReturn>]
+      ? TInferredReturn : never
+
   /**
-   * Obtain the return type of an overloaded function type corresponding to the provided arguments tuple type
-   * 
+   * Obtain the return type of a function type corresponding to the provided arguments tuple type
+   *
    * Accepts functions with up to 5 overloads
    */
   type OverloadedReturnType<T, TArgs extends unknown[]> =
     T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; (...args: infer A4): infer R4; (...args: infer A5): infer R5; }
-      ? unknown extends (TArgs extends A1 ? R1 : unknown)
-      ? unknown extends (TArgs extends A2 ? R2 : unknown)
-      ? unknown extends (TArgs extends A3 ? R3 : unknown)
-      ? unknown extends (TArgs extends A4 ? R4 : unknown)
-      ? unknown extends (TArgs extends A5 ? R5 : unknown) ? R5 : R5 : R4 : R3 : R2 : R1 :
+      ? ValidReturn<TArgs, A1, R1> | ValidReturn<TArgs, A2, R2> | ValidReturn<TArgs, A3, R3> | ValidReturn<TArgs, A4, R4> | ValidReturn<TArgs, A5, R5> :
     T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; (...args: infer A4): infer R4; }
-      ? unknown extends (TArgs extends A1 ? R1 : unknown)
-      ? unknown extends (TArgs extends A2 ? R2 : unknown)
-      ? unknown extends (TArgs extends A3 ? R3 : unknown)
-      ? unknown extends (TArgs extends A4 ? R4 : unknown) ? R4 : R4 : R3 : R2 : R1 :
+      ? ValidReturn<TArgs, A1, R1> | ValidReturn<TArgs, A2, R2> | ValidReturn<TArgs, A3, R3> | ValidReturn<TArgs, A4, R4> :
     T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; (...args: infer A3): infer R3; }
-      ? unknown extends (TArgs extends A1 ? R1 : unknown)
-      ? unknown extends (TArgs extends A2 ? R2 : unknown)
-      ? unknown extends (TArgs extends A3 ? R3 : unknown) ? R3 : R3 : R2 : R1 :
+      ? ValidReturn<TArgs, A1, R1> | ValidReturn<TArgs, A2, R2> | ValidReturn<TArgs, A3, R3> :
     T extends { (...args: infer A1): infer R1; (...args: infer A2): infer R2; }
-      ? unknown extends (TArgs extends A1 ? R1 : unknown)
-      ? unknown extends (TArgs extends A2 ? R2 : unknown) ? R2 : R2 : R1 :
+      ? ValidReturn<TArgs, A1, R1> | ValidReturn<TArgs, A2, R2> :
     T extends { (...args: infer A1): infer R1; }
-      ? unknown extends (TArgs extends A1 ? R1 : unknown) ? R1 : R1 :
-    // T extends (...args: infer A1) => infer R1 ? R1 :
+      ? ValidReturn<TArgs, A1, R1> :
     any
+
+  interface Foo {
+    (s: string, b: number): string
+    (s: string): string
+    (n: number): number
+    (o: string | number): string | number
+  }
+  interface Bar {
+    (): number
+  }
+  interface Baz {
+    (a: number): number
+    (a: string): number
+  }
+  type jargs = OverloadedParameters<JQuery['val']>
+  type cargs = OverloadedParameters<JQuery['css']>
+  type FooP = OverloadedParameters<Foo>
+  type BarP = OverloadedParameters<Bar>
+  type BazP = OverloadedParameters<Baz>
+
+  type BarR1 = OverloadedReturnType<Bar, []>
+  type BarR2 = OverloadedReturnType<Bar, [string, number]>
+  type BazR1 = OverloadedReturnType<Bar, []>
+  type BazR2 = OverloadedReturnType<Bar, [string, number]>
+  type BazR3 = OverloadedReturnType<Bar, [number]>
+
+  type FooR1 = OverloadedReturnType<Foo, [string, number]>
+  type FooR2 = OverloadedReturnType<Foo, [string]>
+  type FooR3 = OverloadedReturnType<Foo, [number]>
+  type FooR4 = OverloadedReturnType<Foo, [number|string]>
+
+  type jr1 = OverloadedReturnType<JQuery['val'], [string]>
+  type jr2 = OverloadedReturnType<JQuery['val'], []>
+
+  type cr1 = OverloadedReturnType<JQuery['css'], [string, string]>
+  type cr2 = OverloadedReturnType<JQuery['css'], [JQuery.PlainObject<string>]>
+  type cr3 = OverloadedReturnType<JQuery['css'], [string]>
+  type cr4 = OverloadedReturnType<JQuery['css'], [string[]]>
+
+  type asdf = ExcludeUnknown<unknown>
+  type fjkds = never extends unknown ? 1 : 0
+  type fjdkds = never | 12
 
   /**
    * Public interface for the global "cy" object. If you want to add
