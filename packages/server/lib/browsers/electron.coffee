@@ -244,7 +244,7 @@ module.exports = {
           if !cookie.hostOnly and cookie.domain[0] != '.'
             parsedDomain = cors.parseDomain(cookie.domain)
             ## not a top-level domain (localhost, ...) or IP address
-            if parsedDomain?.tld != cookie.domain
+            if parsedDomain && parsedDomain.tld != cookie.domain
               cookie.domain = ".#{cookie.domain}"
 
           delete cookie.hostOnly

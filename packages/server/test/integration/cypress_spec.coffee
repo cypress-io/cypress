@@ -123,7 +123,7 @@ describe "lib/cypress", ->
     .callThrough()
     .withArgs("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
     .returns(null)
-    
+
     sinon.spy(errors, "log")
     sinon.spy(errors, "logException")
     sinon.spy(console, "log")
@@ -786,7 +786,6 @@ describe "lib/cypress", ->
 
         sinon.stub(browserUtils, "launch").resolves(ee)
         sinon.stub(Windows, "create").returns(ee)
-        sinon.stub(Windows, "automation")
 
       context "before:browser:launch", ->
         it "chrome", ->
