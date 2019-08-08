@@ -38,7 +38,11 @@ normalizeCookieProps = (props) ->
   cookie
 
 normalizeGetCookies = (cookies) ->
-  _.map cookies, normalizeGetCookieProps
+  _.chain(cookies)
+  .map(normalizeGetCookieProps)
+  ## sort in order of expiration date, ascending
+  .sortBy(_.partialRight(_.get, 'expiry', Number.MAX_SAFE_INTEGER))
+  .value()
 
 normalizeGetCookieProps = (props) ->
   return props if not props
