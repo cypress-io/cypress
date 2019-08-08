@@ -415,18 +415,15 @@ module.exports = (options = {}) ->
 
       return response
 
-    getRequestCookieHeader: (reqUrl, automationFn) ->
-      secure = reqUrl.startsWith('https:')
-      automationFn('get:cookies', {
-        url: reqUrl,
-        secure
-      })
-      .then _.partialRight(_.filter, { secure })
+    setRequestCookieHeader: (req, reqUrl, automationFn) ->
+      automationFn('get:cookies', { url: reqUrl })
       .then (cookies) ->
         debug('getting cookies from browser %o', { reqUrl, cookies })
-        cookies.map (cookie) ->
+        header = cookies.map (cookie) ->
           "#{cookie.name}=#{cookie.value}"
         .join("; ") || undefined
+        req.headers.Cookie = header
+        header
 
     setCookiesOnBrowser: (res, resUrl, automationFn) ->
       cookies = res.headers['set-cookie']
@@ -489,17 +486,15 @@ module.exports = (options = {}) ->
         req.init = _.wrap req.init, (orig, opts) =>
           options.onBeforeReqInit ->
             self.setCookiesOnBrowser(incomingRes, options.url, automationFn)
-            .then ->
-              self.getRequestCookieHeader(newUrl, automationFn)
+            .then (cookies) ->
+              self.setRequestCookieHeader(req, newUrl, automationFn)
             .then (cookieHeader) ->
-              req.headers.Cookie = cookieHeader
               orig.call(req, opts)
 
         followRedirect.call(req, incomingRes)
 
-      @getRequestCookieHeader(options.url, automationFn)
-      .then (cookieHeader) =>
-        options.headers.Cookie = cookieHeader
+      @setRequestCookieHeader(options, options.url, automationFn)
+      .then =>
         return =>
           debug("sending request as stream %o", merge(options))
 
@@ -573,9 +568,8 @@ module.exports = (options = {}) ->
             req.init = _.wrap req.init, (orig, opts) =>
               self.setCookiesOnBrowser(incomingRes, options.url, automationFn)
               .then ->
-                self.getRequestCookieHeader(newUrl, automationFn)
-              .then (cookieHeader) ->
-                req.headers.Cookie = cookieHeader
+                self.setRequestCookieHeader(req, newUrl, automationFn)
+              .then ->
                 orig.call(req, opts)
 
             ## cause the redirect to happen
@@ -617,10 +611,8 @@ module.exports = (options = {}) ->
         else
           ## else go get the cookies first
           ## then make the request
-          self.getRequestCookieHeader(options.url, automationFn)
-          .then (cookieHeader) =>
-            options.headers.Cookie = cookieHeader
-            send()
+          self.setRequestCookieHeader(options, options.url, automationFn)
+          .then(send)
       else
         send()
 

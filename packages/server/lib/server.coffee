@@ -369,11 +369,12 @@ class Server
       if obj = buffers.getByOriginalUrl(urlStr)
         debug("got previous request buffer for url:", urlStr)
 
-        ## reset the cookies from the existing stream's jar
+        ## reset the cookies from the buffer on the browser
         return runPhase ->
-          ## TODO: should i be doing something here?
           resolve(
-            obj.details
+            Promise.map obj.details.cookies, _.partial(automationRequest, 'set:cookie')
+            .then ->
+              obj.details
           )
 
       redirects = []
@@ -411,13 +412,15 @@ class Server
             _.pick(incomingRes, "headers", "statusCode")
           )
 
-          runPhase =>
-            # request.setJarCookies(jar, automationRequest)
-            Promise.resolve([])
-            .then (c) =>
-              @_remoteVisitingUrl = false
+          newUrl ?= urlStr
 
-              newUrl ?= urlStr
+          runPhase =>
+            ## get the cookies that would be sent with this request so they can be rehydrated
+            automationRequest("get:cookies", {
+              domain: cors.getSuperDomain(newUrl)
+            })
+            .then (cookies) =>
+              @_remoteVisitingUrl = false
 
               statusIs2xxOrAllowedFailure = ->
                 ## is our status code in the 2xx range, or have we disabled failing
@@ -432,7 +435,7 @@ class Server
                 contentType
                 url: newUrl
                 status: incomingRes.statusCode
-                cookies: c
+                cookies
                 statusText: statusCode.getText(incomingRes.statusCode)
                 redirects
                 originalUrl
@@ -482,10 +485,8 @@ class Server
 
                   buffers.set({
                     url: newUrl
-                    # jar: jar
-                    jar: null
                     stream: responseBufferStream
-                    details: details
+                    details
                     originalUrl: originalUrl
                     response: incomingRes
                   })

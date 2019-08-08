@@ -6,44 +6,54 @@ const parseDomain = require('parse-domain')
 
 const ipAddressRe = /^[\d\.]+$/
 
+function parseUrlIntoDomainTldPort (str) {
+  let { hostname, port, protocol } = url.parse(str)
+
+  if (port == null) {
+    port = protocol === 'https:' ? '443' : '80'
+  }
+
+  let parsed = parseDomain(hostname, {
+    privateTlds: true, // use the public suffix
+    customTlds: ipAddressRe,
+  })
+
+  // if we couldn't get a parsed domain
+  if (!parsed) {
+    // then just fall back to a dumb check
+    // based on assumptions that the tld
+    // is the last segment after the final
+    // '.' and that the domain is the segment
+    // before that
+    const segments = hostname.split('.')
+
+    parsed = {
+      tld: segments[segments.length - 1] || '',
+      domain: segments[segments.length - 2] || '',
+    }
+  }
+
+  const obj = {}
+
+  obj.port = port
+  obj.tld = parsed.tld
+  obj.domain = parsed.domain
+  // obj.protocol = protocol
+
+  debug('Parsed URL %o', obj)
+
+  return obj
+}
+
 module.exports = {
-  parseUrlIntoDomainTldPort (str) {
-    let { hostname, port, protocol } = url.parse(str)
+  parseUrlIntoDomainTldPort,
 
-    if (port == null) {
-      port = protocol === 'https:' ? '443' : '80'
-    }
+  // matches #getSuperDomain from driver
+  // https://github.com/cypress-io/cypress/blob/adb56d0f79d0378840cd7b2011862f7792cfe992/packages/driver/src/cypress/location.coffee#L85-L85
+  getSuperDomain (url) {
+    const parsed = parseUrlIntoDomainTldPort(url)
 
-    let parsed = parseDomain(hostname, {
-      privateTlds: true, // use the public suffix
-      customTlds: ipAddressRe,
-    })
-
-    // if we couldn't get a parsed domain
-    if (!parsed) {
-      // then just fall back to a dumb check
-      // based on assumptions that the tld
-      // is the last segment after the final
-      // '.' and that the domain is the segment
-      // before that
-      const segments = hostname.split('.')
-
-      parsed = {
-        tld: segments[segments.length - 1] || '',
-        domain: segments[segments.length - 2] || '',
-      }
-    }
-
-    const obj = {}
-
-    obj.port = port
-    obj.tld = parsed.tld
-    obj.domain = parsed.domain
-    // obj.protocol = protocol
-
-    debug('Parsed URL %o', obj)
-
-    return obj
+    return _.compact([parsed.domain, parsed.tld]).join('.')
   },
 
   urlMatchesOriginPolicyProps (urlStr, props) {
