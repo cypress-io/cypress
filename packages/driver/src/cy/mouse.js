@@ -30,12 +30,10 @@ const getMouseCoords = (state) => {
   return state('mouseCoords')
 }
 
-const create = (state, focused) => {
-
+const create = (state, keyboard, focused) => {
   const mouse = {
-
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
+      const _activeModifiers = keyboard.getActiveModifiers()
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 

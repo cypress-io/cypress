@@ -6,7 +6,7 @@ const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
 
 module.exports = (Commands, Cypress, cy, state, config) => {
-  const mouse = cy.internal.mouse
+  const { mouse } = cy.devices
 
   return Commands.addAll({ prevSubject: 'element' }, {
     click (subject, positionOrX, y, options = {}) {
