@@ -3316,7 +3316,7 @@ describe('mouse state', () => {
               doc: cy.state('document'),
             }
 
-            cy.internal.mouse.mouseMove(coords)
+            cy.devices.mouse.mouseMove(coords)
             expect(mouseenter).to.be.calledOnce
             expect(cy.state('mouseCoords')).ok
           })
