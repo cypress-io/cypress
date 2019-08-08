@@ -616,7 +616,14 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<Loggable>): Chainable
+    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+
+    /**
+     * Right-click a DOM element.
+     *
+     * @see https://on.cypress.io/rightclick
+     */
+    rightclick(options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
      * Set a debugger and log what the previous command yields.
