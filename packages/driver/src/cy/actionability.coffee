@@ -233,7 +233,7 @@ verify = (cy, $el, options, callbacks) ->
     runAllChecks = ->
       if force isnt true
         ## scroll the element into view
-        $el.get(0).scrollIntoView()
+        $el.get(0).scrollIntoView({block: "center", inline: "nearest"})
 
         if onScroll
           onScroll($el, "element")
