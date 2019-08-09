@@ -3,7 +3,7 @@ _ = require("lodash")
 $Cypress = require("../cypress")
 
 class $Chainer
-  constructor: (@invocationStack, @win) ->
+  constructor: (@invocationStack, @specWindow) ->
     @chainerId = _.uniqueId("chainer")
     @firstCall = true
 
@@ -17,8 +17,7 @@ class $Chainer
       invocationStack = if @useInitialStack
         @invocationStack
       else
-        "Error: foo\nat Context.<anonymous> (http://localhost:58701/__cypress/tests?p=cypress/integration/scratch.js:4:4)"
-        # (new @win.Error("command invocation stack")).stack
+        @specWindow.__getStackFromSpecFrame()
 
       ## call back the original function with our new args
       ## pass args an as array and not a destructured invocation
@@ -31,8 +30,8 @@ class $Chainer
       return @
 
   ## creates a new chainer instance
-  @create = (key, invocationStack, win, args) ->
-    chainer = new $Chainer(invocationStack, win)
+  @create = (key, invocationStack, specWindow, args) ->
+    chainer = new $Chainer(invocationStack, specWindow)
 
     ## this is the first command chained off of cy, so we use
     ## the stack passed in from that call instead of the stack

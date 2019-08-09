@@ -8,6 +8,10 @@
     <script type="text/javascript">
       document.domain = '{{domain}}';
 
+      window.__getStackFromSpecFrame = (cb) => {
+        return (new Error("command invocation stack")).stack
+      }
+
       (function(parent) {
         var Cypress = window.Cypress = parent.Cypress;
         if (!Cypress) {

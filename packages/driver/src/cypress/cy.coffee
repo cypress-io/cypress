@@ -565,7 +565,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     stopped = true
 
     stack = state("current")?.get("invocationStack")
-    codeFrame = $errUtils.getCodeFrameFromStack(stack)
+    codeFrame = $errUtils.getCodeFrameFromStack(stack, 1)
+
     if codeFrame
       err.codeFrames = [codeFrame]
 
@@ -811,14 +812,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           fn.apply(runnableCtx(name), args)
 
       cy[name] = (args...) ->
-        # invocationStack = (new state("window").Error("command invocation stack")).stack
-        invocationStack = "Error: foo\nat Context.<anonymous> (#{window.location.origin}/__cypress/tests?p=cypress/integration/scratch.js:7:6)"
+        invocationStack = specWindow.__getStackFromSpecFrame()
 
         ensures.ensureRunnable(name)
 
         ## this is the first call on cypress
         ## so create a new chainer instance
-        chain = $Chainer.create(name, invocationStack, state("window"), args)
+        chain = $Chainer.create(name, invocationStack, specWindow, args)
 
         ## store the chain so we can access it later
         state("chain", chain)
