@@ -204,8 +204,8 @@ module.exports = {
           {
             label: 'Quit',
             accelerator: 'Command+Q',
-            //role: "quit" ## must upgrade to latest electron
-            click: () => {
+            role: 'quit',
+            click () {
               return process.exit(0)
             },
           },
