@@ -9,6 +9,27 @@ describe('Error Message', function () {
       type: 'PORT_IN_USE_SHORT',
     }
 
+    this.detailsErr = {
+      name: 'Error',
+      message: 'This is an error message explaining an event. Learn more about this event in the error details section.',
+      stack: '[object Object]↵',
+      details: 'ReferenceError: alsdkjf is not defined\n \
+\tat module.exports (/Users/lilaconlee/cypress/debug/desktop-gui-mishap/cypress/plugins/index.js:15:3)\n \
+\tat Promise.try (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:62:12)\n \
+\tat tryCatcher (/Users/lilaconlee/cypress/cypress/packages/server/node_modules/bluebird/js/release/util.js:16:23)\n \
+\tat Function.Promise.attempt.Promise.try (/Users/lilaconlee/cypress/cypress/packages/server/node_modules/bluebird/js/release/method.js:39:29)\n \
+\tat load (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:61:7)\n \
+\tat EventEmitter.ipc.on (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:132:5)\n \
+\tat emitOne (events.js:115:13)\n \
+\tat EventEmitter.emit (events.js:210:7)\n \
+\tat process.<anonymous> (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/util.coffee:18:7)\n \
+\tat emitTwo (events.js:125:13)\n \
+\tat process.emit (events.js:213:7)\n \
+\tat emit (internal/child_process.js:768:12)\n \
+\tat _combinedTickCallback (internal/process/next_tick.js:141:11)\n \
+\tat process._tickCallback (internal/process/next_tick.js:180:9)',
+    }
+
     cy.visitIndex().then((win) => {
       ({ start: this.start, ipc: this.ipc } = win.App)
 
@@ -103,29 +124,6 @@ describe('Error Message', function () {
   })
 
   it('shows error details if provided', function () {
-    const messageText = 'This is an error message explaining an event. Learn more about this event in the error details section.'
-
-    this.detailsErr = {
-      name: 'Error',
-      message: messageText,
-      stack: '[object Object]↵',
-      details: 'ReferenceError: alsdkjf is not defined\n \
-\tat module.exports (/Users/lilaconlee/cypress/debug/desktop-gui-mishap/cypress/plugins/index.js:15:3)\n \
-\tat Promise.try (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:62:12)\n \
-\tat tryCatcher (/Users/lilaconlee/cypress/cypress/packages/server/node_modules/bluebird/js/release/util.js:16:23)\n \
-\tat Function.Promise.attempt.Promise.try (/Users/lilaconlee/cypress/cypress/packages/server/node_modules/bluebird/js/release/method.js:39:29)\n \
-\tat load (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:61:7)\n \
-\tat EventEmitter.ipc.on (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/child/run_plugins.js:132:5)\n \
-\tat emitOne (events.js:115:13)\n \
-\tat EventEmitter.emit (events.js:210:7)\n \
-\tat process.<anonymous> (/Users/lilaconlee/cypress/cypress/packages/server/lib/plugins/util.coffee:18:7)\n \
-\tat emitTwo (events.js:125:13)\n \
-\tat process.emit (events.js:213:7)\n \
-\tat emit (internal/child_process.js:768:12)\n \
-\tat _combinedTickCallback (internal/process/next_tick.js:141:11)\n \
-\tat process._tickCallback (internal/process/next_tick.js:180:9)',
-    }
-
     cy.stub(this.ipc, 'onProjectError').yields(null, this.detailsErr)
     this.start()
 
@@ -192,5 +190,25 @@ describe('Error Message', function () {
         expect(top).to.equal(Cypress.config('viewportHeight') - height)
       })
     })
+  })
+
+  it('does not overlay the nav/footer when long details are expanded (issue #4959)', function () {
+    this.detailsErr.details = `${this.detailsErr.details}${this.detailsErr.details}` // make details longer
+    this.ipc.openProject.rejects(this.detailsErr)
+    this.start()
+
+    cy.get('details').click()
+    cy.get('nav').should('be.visible')
+    cy.get('footer').should('be.visible')
+  })
+
+  it('it scrolls the error details when details are expanded (issue #4959)', function () {
+    this.detailsErr.details = `${this.detailsErr.details}${this.detailsErr.details}` // make details longer
+    this.ipc.openProject.rejects(this.detailsErr)
+    this.start()
+
+    cy.get('details').click()
+    cy.contains('Try Again').should('be.visible')
+    cy.get('.full-alert pre').should('have.css', 'overflow', 'auto')
   })
 })
