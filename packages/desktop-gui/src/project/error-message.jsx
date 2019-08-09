@@ -56,32 +56,34 @@ class ErrorMessage extends Component {
     let err = this.props.error
 
     return (
-      <div className='full-alert alert alert-danger error'>
-        <p className='header'>
-          <i className='fa fa-warning'></i>{' '}
-          <strong>{err.title || 'Can\'t start server'}</strong>
-        </p>
-        <span className='alert-content'>
-          <div ref={(node) => this.errorMessageNode = node} dangerouslySetInnerHTML={{
-            __html: md.render(err.message),
-          }}></div>
-          {err.details && (
-            <ErrorDetails err={err} />
-          )}
-          {err.portInUse && (
-            <div>
-              <hr />
-              <p>To fix, stop the other running process or change the port in <code>cypress.json</code></p>
-            </div>
-          )}
-        </span>
-        <button
-          className='btn btn-default btn-sm'
-          onClick={this.props.onTryAgain}
-        >
-          <i className='fa fa-refresh'></i>{' '}
-          Try Again
-        </button>
+      <div className='full-alert-container'>
+        <div className='full-alert alert alert-danger error'>
+          <p className='header'>
+            <i className='fa fa-warning'></i>{' '}
+            <strong>{err.title || 'Can\'t start server'}</strong>
+          </p>
+          <span className='alert-content'>
+            <div ref={(node) => this.errorMessageNode = node} dangerouslySetInnerHTML={{
+              __html: md.render(err.message),
+            }}></div>
+            {err.details && (
+              <ErrorDetails err={err} />
+            )}
+            {err.portInUse && (
+              <div>
+                <hr />
+                <p>To fix, stop the other running process or change the port in <code>cypress.json</code></p>
+              </div>
+            )}
+          </span>
+          <button
+            className='btn btn-default btn-sm'
+            onClick={this.props.onTryAgain}
+          >
+            <i className='fa fa-refresh'></i>{' '}
+            Try Again
+          </button>
+        </div>
       </div>
     )
   }

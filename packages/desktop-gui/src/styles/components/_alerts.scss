@@ -37,11 +37,17 @@
   }
 }
 
+.full-alert-container {
+  align-items: center;
+  display: flex;
+  flex-grow: 2;
+  justify-content: center;
+}
+
 .full-alert {
   overflow: auto;
   text-align: center;
   padding: 20px;
-  margin: 80px 60px 60px;
 
   .alert-content {
     text-align: left;
@@ -76,12 +82,14 @@
 }
 
 .project-content .alert-warning {
-  position: relative;
   border-bottom: 1px solid #ddd;
+  flex-grow: 0;
+  flex-shrink: 0;
+  position: relative;
 
   code, pre {
-    color: #8a6d3b;
     border: none;
+    color: #8a6d3b;
   }
 }
 

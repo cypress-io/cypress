@@ -1,4 +1,4 @@
-describe('ErrorMessage', function () {
+describe('Error Message', function () {
   beforeEach(function () {
     this.err = {
       message: 'Port 2020 is already in use.',
@@ -67,7 +67,7 @@ describe('ErrorMessage', function () {
     this.ipc.openProject.rejects({ name: 'Error', message: this.longErrMessage, stack: '[object Object]↵' })
     this.start()
 
-    cy.get('#updates-available').should('be.visible')
+    cy.get('.updates-available').should('be.visible')
     .contains('New updates are available')
 
     cy.get('.error')
@@ -180,6 +180,17 @@ describe('ErrorMessage', function () {
 
     cy.contains('strong', 'not here').click().then(function () {
       expect(this.ipc.externalOpen).to.not.be.called
+    })
+  })
+
+  it('footer is at bottom when error is displayed (issue #4912)', function () {
+    this.ipc.openProject.rejects(this.err)
+    this.start()
+
+    cy.get('footer').invoke('position').then(({ top }) => {
+      cy.get('footer').invoke('outerHeight').then((height) => {
+        expect(top).to.equal(Cypress.config('viewportHeight') - height)
+      })
     })
   })
 })
