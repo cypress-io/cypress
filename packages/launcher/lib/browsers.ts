@@ -48,5 +48,13 @@ export function launch (
 
   log('spawning browser %o with args %s', browser, args.join(' '))
 
-  return cp.spawn(browser.path, args, { stdio: 'ignore' })
+  const options: cp.SpawnOptions = {
+    stdio: 'ignore',
+  }
+
+  if (log.enabled) {
+    options.stdio = 'inherit'
+  }
+
+  return cp.spawn(browser.path, args, options)
 }
