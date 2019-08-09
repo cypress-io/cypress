@@ -83,6 +83,13 @@ const getCommonConfig = () => {
           exclude: /node_modules/,
           use: [
             { loader: MiniCSSExtractWebpackPlugin.loader },
+          ],
+        },
+        {
+          test: /\.s?css$/,
+          exclude: /node_modules/,
+          enforce: 'pre',
+          use: [
             {
               loader: require.resolve('css-loader'),
               options: {
