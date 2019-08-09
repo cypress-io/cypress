@@ -18,7 +18,7 @@ CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
 
-defaultArgs = [
+_defaultArgs = [
   "--test-type"
   "--ignore-certificate-errors"
   "--start-maximized"
@@ -125,8 +125,10 @@ _disableRestorePagesPrompt = (userDir) ->
         fs.writeJson(prefsPath, preferences)
   .catch ->
 
-module.exports = {
-  defaultArgs,
+launcher = {
+  name: "chrome",
+
+  defaultArgs: _defaultArgs,
 
   _normalizeArgExtensions
 
@@ -151,7 +153,7 @@ module.exports = {
       browser: {}
     })
 
-    args = [].concat(defaultArgs)
+    args = [].concat(this.defaultArgs)
 
     if os.platform() is "linux"
       args.push("--disable-gpu")
@@ -183,6 +185,8 @@ module.exports = {
     args
 
   open: (browser, url, options = {}, automation) ->
+    debug("opening browser '%s' via '%s' launcher at url '%s'",
+      browser.name, this.name, url)
     { isTextTerminal } = options
 
     userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -209,17 +213,19 @@ module.exports = {
         _removeRootExtension(),
         _disableRestorePagesPrompt(userDir),
       ])
-      .spread (extDest) ->
+      .spread (extDest) =>
         ## normalize the --load-extensions argument by
         ## massaging what the user passed into our own
-        args = _normalizeArgExtensions(extDest, args)
+        args = this._normalizeArgExtensions(extDest, args)
 
         ## this overrides any previous user-data-dir args
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
 
-        debug("launch in chrome: %s, %s", url, args)
+        debug("launch in %s: %s, %s", this.name, url, args)
 
         utils.launch(browser, url, args)
 }
+
+module.exports = launcher

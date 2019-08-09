@@ -105,7 +105,7 @@ module.exports = {
         family: "electron-app"
         displayName: "cypress-example-electron"
         version: "0.0.0"
-        path: "/Users/gleb/git/cypress-example-electron"
+        path: "/Users/gleb/git/cypress-example-electron/node_modules/.bin/electron"
         majorVersion: "99"
         info: "Electron.js app that supports the Cypress launcher"
       })
