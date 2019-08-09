@@ -4,6 +4,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 _           = require("lodash")
 DebugProxy  = require("@cypress/debugging-proxy")
+fs          = require("fs-extra")
+https       = require("https")
 net         = require("net")
 network     = require("@packages/network")
 path        = require("path")
@@ -157,22 +159,31 @@ describe "Proxy", ->
       @sandbox.spy(@proxy, "_generateMissingCertificates")
       @sandbox.spy(@proxy, "_getServerPortForIp")
 
-      request({
-        strictSSL: false
-        url: "https://1.1.1.1/"
-        proxy: "http://localhost:3333"
-      })
-      .then =>
-        proxy.reset()
+      remove = (folder, file) =>
+        fs.removeAsync(path.join(folder, file))
 
+      Promise.all([
+        httpsServer.start(8445),
+        remove(@proxy._ca.certsFolder, '127.0.0.1.pem'),
+        remove(@proxy._ca.keysFolder, '127.0.0.1.key'),
+        remove(@proxy._ca.keysFolder, '127.0.0.1.public.key')
+      ])
+      .then =>
+        request({
+          strictSSL: false
+          url: "https://127.0.0.1:8445/"
+          proxy: "http://localhost:3333"
+        })
+      .then =>
+        ## this should not stand up its own https server
         request({
           strictSSL: false
           url: "https://localhost:8443/"
           proxy: "http://localhost:3333"
         })
       .then =>
-        expect(@proxy._generateMissingCertificates).to.be.calledOnce
-        expect(@proxy._getServerPortForIp).to.be.calledWith('1.1.1.1', sinon.match.any)
+        expect(@proxy._ipServers["127.0.0.1"]).to.be.an.instanceOf(https.Server)
+        expect(@proxy._getServerPortForIp).to.be.calledWith('127.0.0.1', sinon.match.any)
 
   context "closing", ->
     it "resets sslServers and can reopen", ->
@@ -278,7 +289,7 @@ describe "Proxy", ->
       })
       .then =>
         throw new Error('should not succeed')
-      .catch { message: 'Error: socket hang up' }, =>
+      .catch { message: "Error: socket hang up" }, =>
         expect(createProxyConn).to.not.be.called
         expect(createSocket).to.be.calledWith({
           port: @proxy._sniPort
