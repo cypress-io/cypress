@@ -33,9 +33,6 @@ module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
   app.get "/__cypress/runner/*", (req, res) ->
     runner.handle(req, res)
 
-  app.get "/__cypress/source-mappings.wasm", (req, res) ->
-    runner.handleSourceMappings(req, res)
-
   app.get "/__cypress/static/*", (req, res) ->
     staticCtrl.handle(req, res)
 

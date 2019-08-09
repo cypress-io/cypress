@@ -4,7 +4,7 @@ let sourceMapConsumers = {}
 
 const initialize = (file, sourceMapBase64) => {
   SourceMapConsumer.initialize({
-    'lib/mappings.wasm': '/__cypress/source-mappings.wasm',
+    'lib/mappings.wasm': require('source-map/lib/mappings.wasm'),
   })
 
   const sourceMap = base64toJson(sourceMapBase64)

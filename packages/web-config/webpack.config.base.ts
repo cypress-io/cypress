@@ -144,6 +144,19 @@ const getCommonConfig = () => {
             },
           ],
         },
+        {
+          test: /\.(wasm)$/,
+          type: 'javascript/auto',
+          use: [
+            {
+              loader: require.resolve('file-loader'),
+              options: {
+                name: './wasm/[name].[ext]',
+                publicPath: '/__cypress/runner',
+              },
+            },
+          ],
+        },
       ],
     },
 

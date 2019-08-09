@@ -14,8 +14,4 @@ module.exports = {
   getPathToIndex () {
     return dist('index.html')
   },
-
-  getPathToSourceMappings () {
-    return dist('driver/mappings.wasm')
-  },
 }
