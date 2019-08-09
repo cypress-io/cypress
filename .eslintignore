@@ -27,3 +27,4 @@ packages/launcher/lib/**/*.js
 **/tsconfig.json
 **/.vscode
 **/.history
+**/.cy
