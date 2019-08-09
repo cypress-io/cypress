@@ -31,16 +31,20 @@ cleanup = ->
   instance = null
 
 getBrowserLauncherByFamily = (family) ->
+  debug("selecting browser launcher for family #{family}")
   switch family
     when "electron"
       require("./electron")
     when "chrome"
       require("./chrome")
+    when "electron-app"
+      require("./electron-app")
 
 isValidPathToBrowser = (str) ->
   path.basename(str) isnt str
 
 ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
+  debug("getting '%s' browser by name or path, return all? %o", nameOrPath, returnAll)
   utils.getBrowsers(nameOrPath)
   .then (browsers = []) ->
     ## try to find the browser by name with the highest version property
@@ -67,6 +71,7 @@ ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
 
 throwBrowserNotFound = (browserName, browsers = []) ->
   names = _.map(browsers, "name").join(", ")
+  debug("BROWSER_NOT_FOUND_BY_NAME %o available browser names %o", browserName, names)
   errors.throw("BROWSER_NOT_FOUND_BY_NAME", browserName, names)
 
 process.once "exit", kill
@@ -88,6 +93,7 @@ module.exports = {
     utils.getBrowsers()
 
   open: (browser, options = {}, automation) ->
+    debug("opening browser %o", browser)
     kill(true)
     .then ->
       _.defaults(options, {
@@ -96,7 +102,8 @@ module.exports = {
       })
 
       if not browserLauncher = getBrowserLauncherByFamily(browser.family)
-        return throwBrowserNotFound(browser, options.browsers)
+        debug("could not find browser launcher for family '%s'", browser.family)
+        return throwBrowserNotFound(browser.name, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)

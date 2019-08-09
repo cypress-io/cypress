@@ -96,4 +96,17 @@ module.exports = {
         majorVersion: version.split(".")[0]
         info: "Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
       })
+
+      # add Electron application that can be controlled from Cypress
+      # TODO read the list of apps dynamically?
+      # maybe look in the current project folder?
+      browsers.concat({
+        name: "cypress-example-electron"
+        family: "electron-app"
+        displayName: "cypress-example-electron"
+        version: "0.0.0"
+        path: "/Users/gleb/git/cypress-example-electron"
+        majorVersion: "99"
+        info: "Electron.js app that supports the Cypress launcher"
+      })
 }
