@@ -14,6 +14,8 @@ viewports = {
   "iphone-5"   : "320x568"
   "iphone-4"   : "320x480"
   "iphone-3"   : "320x480"
+  "samsung-s10"   : "360x760"
+  "samsung-note9"   : "414x846"
 }
 
 validOrientations = ["landscape", "portrait"]

@@ -546,6 +546,20 @@ describe "src/cy/commands/window", ->
 
         cy.viewport("ipad-mini")
 
+      it "iphone-xr", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 896}
+          done()
+
+        cy.viewport("iphone-xr")
+      
+      it "iphone-x", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 375, viewportHeight: 812}
+          done()
+
+        cy.viewport("iphone-x")
+
       it "iphone-6+", (done) ->
         cy.on "viewport:changed", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 736}
@@ -580,6 +594,20 @@ describe "src/cy/commands/window", ->
           done()
 
         cy.viewport("iphone-5", "portrait")
+
+      it "samsung-s10", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 360, viewportHeight: 760}
+          done()
+
+        cy.viewport("samsung-s10")
+
+      it "samsung-note9", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 846}
+          done()
+
+        cy.viewport("samsung-note9")
 
     context "errors", ->
       beforeEach ->
