@@ -2,6 +2,7 @@ const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
 const chaiSubset = require('chai-subset')
+const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
 
 chai.use(chaiSubset)
 
@@ -2338,6 +2339,34 @@ describe('src/cy/commands/actions/click', () => {
               'Modifiers': null,
             },
           ])
+        })
+      })
+
+      it('can print table of keys on click', () => {
+        const spyTableName = cy.spy(top.console, 'groupCollapsed')
+        const spyTableData = cy.spy(top.console, 'table')
+
+        cy.get('input:first').click()
+
+        cy.wrap(null)
+        .should(() => {
+          spyTableName.reset()
+          spyTableData.reset()
+
+          return withMutableReporterState(() => {
+
+            const commandLogEl = getCommandLogWithText('click')
+
+            const reactCommandInstance = findReactInstance(commandLogEl)
+
+            reactCommandInstance.props.appState.isRunning = false
+
+            $(commandLogEl).find('.command-wrapper').click()
+
+            expect(spyTableName).calledWith('Mouse Move Events')
+            expect(spyTableName).calledWith('Mouse Click Events')
+            expect(spyTableData).calledTwice
+          })
         })
       })
 

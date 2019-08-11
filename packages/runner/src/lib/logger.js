@@ -76,8 +76,6 @@ export default {
 
     if (!groups) return
 
-    delete consoleProps.groups
-
     return _.map(groups, (group) => {
       group.items = this._formatted(group.items)
 
@@ -86,6 +84,18 @@ export default {
   },
 
   _logTable (consoleProps) {
+
+    if (isMultiEntryTable(consoleProps.table)) {
+      _.each(
+        _.sortBy(consoleProps.table, (val, key) => key),
+        (table) => {
+          return this._logTable({ table })
+        }
+      )
+
+      return
+    }
+
     const table = this._getTable(consoleProps)
 
     if (!table) return
@@ -104,8 +114,8 @@ export default {
 
     if (!table) return
 
-    delete consoleProps.table
-
     return table
   },
 }
+
+const isMultiEntryTable = (table) => !_.isFunction(table) && !_.some(_.keys(table).map(isNaN).filter(Boolean), true)

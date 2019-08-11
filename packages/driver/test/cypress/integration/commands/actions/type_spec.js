@@ -2,6 +2,7 @@ const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
 const $selection = require('../../../../../src/dom/selection')
+const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
 
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
@@ -4130,6 +4131,30 @@ describe('src/cy/commands/actions/type', () => {
             }
 
             expect(table.data).to.deep.eq(expectedTable)
+          })
+        })
+
+        it('can print table of keys on click', () => {
+          cy.get('input:first').type('foo')
+
+          .then(() => {
+            return withMutableReporterState(() => {
+              const spyTableName = cy.spy(top.console, 'groupCollapsed')
+              const spyTableData = cy.spy(top.console, 'table')
+
+              const commandLogEl = getCommandLogWithText('foo')
+
+              const reactCommandInstance = findReactInstance(commandLogEl)
+
+              reactCommandInstance.props.appState.isRunning = false
+
+              $(commandLogEl).find('.command-wrapper').click()
+
+              expect(spyTableName.firstCall).calledWith('Mouse Move Events')
+              expect(spyTableName.secondCall).calledWith('Mouse Click Events')
+              expect(spyTableName.thirdCall).calledWith('Keyboard Events')
+              expect(spyTableData).calledThrice
+            })
           })
         })
 
