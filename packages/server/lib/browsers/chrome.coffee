@@ -141,7 +141,7 @@ _connectToChromeRemoteInterface = (port) ->
     debug("received wsUrl %s for port %d", wsUrl, port)
     Promise.resolve(initCriClient(wsUrl))
     .tap (client) =>
-      debug("saving remove debugger client")
+      debug("saving remote debugger client")
       global.remoteDebuggerClient = client
 
 _maybeRecordVideo = (options) ->
@@ -274,22 +274,25 @@ launcher = {
       .spread (extDest) =>
         ## normalize the --load-extensions argument by
         ## massaging what the user passed into our own
-        args = this._normalizeArgExtensions(extDest, args)
+        # args = this._normalizeArgExtensions(extDest, args)
 
         ## this overrides any previous user-data-dir args
         ## by being the last one
-        args.push("--user-data-dir=#{userDir}")
-        args.push("--disk-cache-dir=#{cacheDir}")
+        # args.push("--user-data-dir=#{userDir}")
+        # args.push("--disk-cache-dir=#{cacheDir}")
         debug("get random port %d for remote debugging", port)
         args.push("--remote-debugging-port=#{port}")
 
         debug("launch in %s: %s, %s", this.name, url, args)
+        debug("browser %o", browser)
 
         # FIRST load the blank page
         # first allows us to connect the remote interface,
         # start video recording and then
         # we will load the actual page
-        utils.launch(browser, null, args)
+        # utils.launch(browser, null, args)
+        # for now force electron to load main.js file
+        utils.launch(browser, url, args)
 
       .tap =>
         # SECOND connect to the Chrome remote interface

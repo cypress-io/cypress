@@ -65,10 +65,11 @@ getAllCookies = (data) ->
 electronAppLauncher.name = "electron-app"
 electronAppLauncher.open = (browser, url, options = {}, automation) ->
   # TODO pass actual discovered start file
-  pathToMainElectronFile = '.'
+  # pathToMainElectronFile = '.'
+  pathToMainElectronFile = "/Users/gleb/git/cypress-example-electron/main.js"
 
-  cliArgs = R.clone(_defaultArgs)
-  # cliArgs = []
+  # cliArgs = R.clone(_defaultArgs)
+  cliArgs = []
   cliArgs.push("--cypress-runner-url=#{url}")
   # cliArgs.push("--inspect=5858")
   electronAppLauncher.defaultArgs = cliArgs
@@ -77,6 +78,7 @@ electronAppLauncher.open = (browser, url, options = {}, automation) ->
 
   chrome.open.call(electronAppLauncher, browser, pathToMainElectronFile, options, automation)
   .tap () ->
+
     debug("checking if global debugger client has been created")
     la(global.remoteDebuggerClient, "missing global.remoteDebuggerClient")
 
