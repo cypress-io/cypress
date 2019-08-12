@@ -171,7 +171,7 @@ class $Cypress
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @state, @config, @log)
+    @Commands = $Commands.create(@, @cy, @state, @config)
 
     @events.proxyTo(@cy)
 
@@ -467,7 +467,6 @@ class $Cypress
   Commands: $Commands
   dom: $dom
   errorMessages: $errorMessages
-  Keyboard: $Keyboard
   Location: $Location
   Log: $Log
   LocalStorage: $LocalStorage

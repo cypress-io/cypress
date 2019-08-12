@@ -35,8 +35,17 @@ const normalizeEnvironmentProxy = () => {
 
   if (!process.env.hasOwnProperty('NO_PROXY')) {
     // don't proxy localhost, to match Chrome's default behavior and user expectation
-    debug('setting default NO_PROXY of `localhost`')
-    process.env.NO_PROXY = 'localhost'
+    debug('setting default NO_PROXY of ``')
+    process.env.NO_PROXY = ''
+  }
+
+  const noProxyParts = _.compact((process.env.NO_PROXY || '').split(','))
+
+  if (!noProxyParts.includes('<-loopback>')) {
+    debug('<-loopback> not found, adding localhost to NO_PROXY')
+    process.env.NO_PROXY = noProxyParts.concat([
+      '127.0.0.1', '::1', 'localhost',
+    ]).join(',')
   }
 
   debug('normalized proxy environment variables %o', _.pick(process.env, [

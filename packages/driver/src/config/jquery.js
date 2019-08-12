@@ -1,26 +1,19 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 const $ = require('jquery')
-
-require('jquery.scrollto')
 const _ = require('lodash')
 
+require('jquery.scrollto')
+
 const $dom = require('../dom')
-// const $elements = require('../dom/elements')
 
-//# force jquery to have the same visible
-//# and hidden logic as cypress
+// force jquery to have the same visible
+// and hidden logic as cypress
 
-//# this prevents `is` from calling into the native .matches method
-//# which would prevent our `focus` code from ever being called during
-//# is(:focus).
-//# see https://github.com/jquery/sizzle/wiki#sizzlematchesselector-domelement-element-string-selector-
+// this prevents `is` from calling into the native .matches method
+// which would prevent our `focus` code from ever being called during
+// is(:focus).
+// see https://github.com/jquery/sizzle/wiki#sizzlematchesselector-domelement-element-string-selector-
 
-//# this is to help to interpretor make optimizations around try/catch
+// this is to help to interpretor make optimizations around try/catch
 const tryCatchFinally = function ({ tryFn, catchFn, finallyFn }) {
   try {
     return tryFn()
@@ -33,7 +26,7 @@ const tryCatchFinally = function ({ tryFn, catchFn, finallyFn }) {
 
 const { matchesSelector } = $.find
 
-$.find.matchesSelector = function (elem, expr, ...otherArgs) {
+$.find.matchesSelector = function (elem, expr) {
   let supportMatchesSelector
   const isUsingFocus = _.includes(expr, ':focus')
 
@@ -42,7 +35,8 @@ $.find.matchesSelector = function (elem, expr, ...otherArgs) {
     $.find.support.matchesSelector = false
   }
 
-  const args = [elem, expr, ...otherArgs]
+  // eslint-disable-next-line prefer-rest-params
+  const args = arguments
   const _this = this
 
   return tryCatchFinally({
@@ -54,14 +48,14 @@ $.find.matchesSelector = function (elem, expr, ...otherArgs) {
     },
     finallyFn () {
       if (isUsingFocus) {
-        return $.find.support.matchesSelector = supportMatchesSelector
+        $.find.support.matchesSelector = supportMatchesSelector
       }
     },
   })
 }
 
-//# see difference between 'filters' and 'pseudos'
-//# https://api.jquery.com/filter/ and https://api.jquery.com/category/selectors/
+// see difference between 'filters' and 'pseudos'
+// https://api.jquery.com/filter/ and https://api.jquery.com/category/selectors/
 
 $.expr.pseudos.focus = $dom.isFocused
 $.expr.filters.focus = $dom.isFocused

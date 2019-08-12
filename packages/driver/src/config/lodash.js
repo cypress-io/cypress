@@ -8,8 +8,6 @@ _.mixin({
   count: require('underscore.string/count'),
   isBlank: require('underscore.string/isBlank'),
   toBoolean: require('underscore.string/toBoolean'),
-  capitalize: require('underscore.string/capitalize'), //# its mo' better the lodash version
+  capitalize: require('underscore.string/capitalize'), // its mo' better the lodash version
   ordinalize: inflection.ordinalize,
 })
-
-module.exports = _

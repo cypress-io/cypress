@@ -2723,7 +2723,7 @@ describe('src/cy/commands/actions/type', () => {
 
         it('resets modifiers before next test', () => {
           // this test will fail if you comment out
-          // $Keyboard.resetModifiers
+          // keyboard.resetModifiers
 
           const $input = cy.$$('input:text:first')
           const events = []
@@ -4224,7 +4224,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it.only('throws when not textarea or text-like', () => {
+      it('throws when not textarea or text-like', () => {
         cy.get('#specific-contains').type('foo')
 
         // cy.on('fail', (err) => {

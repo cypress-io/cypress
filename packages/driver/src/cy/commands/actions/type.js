@@ -115,18 +115,18 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     //   const isTextLike = $dom.isTextLike(el)
 
     //   const isFocusable = $elements.isFocusable($el)
-    
+
     //   if (!isFocusable && !isTextLike) {
     //     const node = $dom.stringify($el)
-    
+
     //     $utils.throwErrByPath('type.not_on_typeable_element', {
     //       args: { node },
     //     })
     //   }
-    
+
     //   if (!isFocusable && isTextLike) {
     //     const node = $dom.stringify($el)
-    
+
     //     $utils.throwErrByPath('type.not_actionable_textlike', {
     //       args: { node },
     //     })
@@ -135,18 +135,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
     // verifyElementForType(el)
 
-
-
-
-
-
-
-
-
-    
-
-
-  
     if (options.$el.length > 1) {
 
       $utils.throwErrByPath('type.multiple_elements', {
