@@ -527,10 +527,19 @@ describe "lib/modes/run", ->
       .then ->
         expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_HEADED")
 
-    it "disables video recording for non-electron browser", ->
-      runMode.run({browser: "chrome"})
+    it "disables video recording for non-electron non-chrome browser", ->
+      browser = { name: "canary" }
+
+      sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves(browser)
+
+      runMode.run({browser: "canary"})
       .then ->
         expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+
+    it "shows no warnings for chrome browser", ->
+      runMode.run({browser: "chrome"})
+      .then ->
+        expect(errors.warning).to.not.be.called
 
     it "names video file with spec name", ->
       runMode.run()

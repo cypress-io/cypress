@@ -4,12 +4,16 @@ _         = require("lodash")
 os        = require("os")
 path      = require("path")
 Promise   = require("bluebird")
+la        = require('lazy-ass')
+check     = require('check-more-types')
 extension = require("@packages/extension")
 debug     = require("debug")("cypress:server:browsers")
 plugins   = require("../plugins")
 fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
+protocol  = require("./protocol")
+{initCriClient} = require("./cri-client")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
@@ -130,9 +134,59 @@ launcher = {
 
   defaultArgs: _defaultArgs,
 
+# After the browser has been opened, we can connect to
+# its remote interface via a websocket.
+_connectToChromeRemoteInterface = (port) ->
+  la(check.userPort(port), "expected port number to connect CRI to", port)
+
+  debug("connecting to Chrome remote interface at random port %d", port)
+  # at first the tab will be blank "new tab"
+  protocol.getWsTargetFor(port)
+  .then (wsUrl) ->
+    debug("received wsUrl %s for port %d", wsUrl, port)
+    initCriClient(wsUrl)
+
+_maybeRecordVideo = (options) ->
+  (client) ->
+    if options.screencastFrame
+      debug('starting screencast')
+      client.Page.screencastFrame(options.screencastFrame)
+      client.send('Page.startScreencast', {
+        format: 'jpeg'
+      })
+    client
+
+# a utility function that navigates to the given URL
+# once Chrome remote interface client is passed to it.
+_navigateUsingCRI = (url) ->
+  la(check.url(url), "missing url to navigate to", url)
+
+  (client) ->
+    la(client, "could not get CRI client")
+    debug("received CRI client")
+    debug('navigating to page %s', url)
+    # when opening the blank page and trying to navigate
+    # the focus gets lost. Restore it and then navigate.
+    client.send("Page.bringToFront")
+    .then ->
+      client.send("Page.navigate", { url })
+
+module.exports = {
+  #
+  # tip:
+  #   by adding utility functions that start with "_"
+  #   as methods here we can easily stub them from our unit tests
+  #
+
   _normalizeArgExtensions
 
   _removeRootExtension
+
+  _connectToChromeRemoteInterface
+
+  _maybeRecordVideo
+
+  _navigateUsingCRI
 
   _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
@@ -200,9 +254,11 @@ launcher = {
         ## before launching the browser every time
         utils.ensureCleanCache(browser, isTextTerminal),
 
-        pluginsBeforeBrowserLaunch(options.browser, args)
+        pluginsBeforeBrowserLaunch(options.browser, args),
+
+        utils.getPort()
       ])
-    .spread (cacheDir, args) =>
+    .spread (cacheDir, args, port) =>
       Promise.all([
         @_writeExtension(
           browser,
@@ -222,10 +278,24 @@ launcher = {
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
+        debug("get random port %d for remote debugging", port)
+        args.push("--remote-debugging-port=#{port}")
 
         debug("launch in %s: %s, %s", this.name, url, args)
 
-        utils.launch(browser, url, args)
+        # FIRST load the blank page
+        # first allows us to connect the remote interface,
+        # start video recording and then
+        # we will load the actual page
+        utils.launch(browser, null, args)
+
+      .tap =>
+        # SECOND connect to the Chrome remote interface
+        # and when the connection is ready
+        # navigate to the actual url
+        @_connectToChromeRemoteInterface(port)
+        .then @_maybeRecordVideo(options)
+        .then @_navigateUsingCRI(url)
 }
 
 module.exports = launcher

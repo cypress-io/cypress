@@ -3,6 +3,9 @@ pkg        = require("@packages/root")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
+# because this file also interacts with video recording
+# some debug logs should have ":video" namespace
+debugVideo = require("debug")("cypress:server:video")
 debug      = require("debug")("cypress:server:run")
 Promise    = require("bluebird")
 logSymbols = require("log-symbols")
@@ -408,10 +411,12 @@ trashAssets = (config = {}) ->
     ## dont make trashing assets fail the build
     errors.warning("CANNOT_TRASH_ASSETS", err.stack)
 
-## if we've been told to record and we're not spawning a headed browser
+## if we've been told to record and we're not spawning a compatible browser
 browserCanBeRecorded = (browser) ->
-  browser.name is "electron" and browser.isHeadless
-    
+  if browser.name is "electron" and browser.isHeadless then return true
+  if browser.name is "chrome" and browser.isHeaded then return true
+  false
+
 createVideoRecording = (videoName) ->
   outputDir = path.dirname(videoName)
 
@@ -431,7 +436,7 @@ getVideoRecordingDelay = (startedVideoCapture) ->
     return DELAY_TO_LET_VIDEO_FINISH_MS
 
   return 0
-    
+
 maybeStartVideoRecording = Promise.method (options = {}) ->
   { spec, browser, video, videosFolder } = options
 
@@ -439,12 +444,13 @@ maybeStartVideoRecording = Promise.method (options = {}) ->
   ## a video recording
   if not video
     return
-  
+
   ## handle if this browser cannot actually
   ## be recorded
   if not browserCanBeRecorded(browser)
     console.log("")
 
+    # TODO update error messages and included browser name and headed mode
     if browser.name is "electron" and browser.isHeaded
       errors.warning("CANNOT_RECORD_VIDEO_HEADED")
     else
@@ -471,7 +477,7 @@ maybeStartVideoRecording = Promise.method (options = {}) ->
       writeVideoFrame: props.writeVideoFrame,
       startedVideoCapture: props.startedVideoCapture,
     }
-    
+
 module.exports = {
   collectTestResults
 
@@ -482,10 +488,29 @@ module.exports = {
   openProjectCreate
 
   createVideoRecording
-  
+
   getVideoRecordingDelay
 
   maybeStartVideoRecording
+
+  getChromeProps: (isHeaded, project, writeVideoFrame) ->
+    chromeProps = {}
+
+    # for observing difference in wallclock and frame timestamps
+    # UTC time in seconds
+    # start = new Date() / 1000
+    if isHeaded && writeVideoFrame
+      chromeProps.screencastFrame = (e) ->
+        # https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
+        # now = new Date() / 1000
+        # clockElapsed = now - start
+        # videoTimestampElapsed = e.metadata.timestamp - start
+        # debugVideo('%d frame %d received screencastFrame', clockElapsed, videoTimestampElapsed)
+        # now if only there was a way to pass the exact frame timestamp
+        # from e.metadata.timestamp to FFMPEG stream to generate better video!
+        writeVideoFrame(new Buffer(e.data, 'base64'))
+
+    chromeProps
 
   getElectronProps: (isHeaded, project, writeVideoFrame) ->
     electronProps = {
@@ -634,6 +659,8 @@ module.exports = {
     browserOpts = switch browser.name
       when "electron"
         @getElectronProps(browser.isHeaded, project, writeVideoFrame)
+      when "chrome"
+        @getChromeProps(browser.isHeaded, project, writeVideoFrame)
       else
         {}
 
@@ -918,7 +945,7 @@ module.exports = {
           project
           estimated
           screenshots
-          videoName:            videoRecordProps.videoName 
+          videoName:            videoRecordProps.videoName
           compressedVideoName:  videoRecordProps.compressedVideoName
           endVideoCapture:      videoRecordProps.endVideoCapture
           startedVideoCapture:  videoRecordProps.startedVideoCapture
@@ -932,10 +959,10 @@ module.exports = {
           project
           browser
           screenshots
-          writeVideoFrame: videoRecordProps.writeVideoFrame
-          socketId:    options.socketId
-          webSecurity: options.webSecurity
-          projectRoot: options.projectRoot
+          writeVideoFrame:  videoRecordProps.writeVideoFrame
+          socketId:         options.socketId
+          webSecurity:      options.webSecurity
+          projectRoot:      options.projectRoot
         })
       })
 
