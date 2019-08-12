@@ -64,7 +64,8 @@ const getWsTargetFor = (port) => {
     // typically there are two targets found like
     // { title: 'Cypress', type: 'background_page', url: 'chrome-extension://...', ... }
     // { title: 'New Tab', type: 'page', url: 'chrome://newtab/', ...}
-    const newTabTargetFields = { type: 'page', url: 'chrome://newtab/' }
+    // const newTabTargetFields = { type: 'page', url: 'chrome://newtab/' }
+    const newTabTargetFields = { type: 'page', title: 'Electron' }
     const target = _.find(targets, newTabTargetFields)
 
     la(target, 'could not find CRI target')

@@ -129,11 +129,6 @@ _disableRestorePagesPrompt = (userDir) ->
         fs.writeJson(prefsPath, preferences)
   .catch ->
 
-launcher = {
-  name: "chrome",
-
-  defaultArgs: _defaultArgs,
-
 # After the browser has been opened, we can connect to
 # its remote interface via a websocket.
 _connectToChromeRemoteInterface = (port) ->
@@ -144,7 +139,10 @@ _connectToChromeRemoteInterface = (port) ->
   protocol.getWsTargetFor(port)
   .then (wsUrl) ->
     debug("received wsUrl %s for port %d", wsUrl, port)
-    initCriClient(wsUrl)
+    Promise.resolve(initCriClient(wsUrl))
+    .tap (client) =>
+      debug("saving remove debugger client")
+      global.remoteDebuggerClient = client
 
 _maybeRecordVideo = (options) ->
   (client) ->
@@ -171,12 +169,16 @@ _navigateUsingCRI = (url) ->
     .then ->
       client.send("Page.navigate", { url })
 
-module.exports = {
+launcher = {
   #
   # tip:
   #   by adding utility functions that start with "_"
   #   as methods here we can easily stub them from our unit tests
   #
+
+  name: "chrome",
+
+  defaultArgs: _defaultArgs,
 
   _normalizeArgExtensions
 
@@ -295,7 +297,7 @@ module.exports = {
         # navigate to the actual url
         @_connectToChromeRemoteInterface(port)
         .then @_maybeRecordVideo(options)
-        .then @_navigateUsingCRI(url)
+        .then @_navigateUsingCRI(options.loadUrl || url)
 }
 
 module.exports = launcher
