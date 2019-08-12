@@ -16,6 +16,9 @@ path    = require("path")
 Promise = require("bluebird")
 debug   = require("debug")("cypress:server:cypress")
 
+warning = (code) ->
+  require("./errors").warning(code)
+
 exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
   ## but cannot figure out how null is
@@ -32,7 +35,7 @@ exitErr = (err) ->
   ## and exit with 1
   debug('exiting with err', err)
 
-  require("./errors").log(err)
+  require("./errors").logException(err)
   .then -> exit(1)
 
 module.exports = {
@@ -49,6 +52,11 @@ module.exports = {
       ## like in production and we shouldn't spawn a new
       ## process
       if @isCurrentlyRunningElectron()
+        ## if we weren't invoked from the CLI
+        ## then display a warning to the user
+        if not options.invokedFromCli
+          warning("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+        
         ## just run the gui code directly here
         ## and pass our options directly to main
         require("./modes")(mode, options)

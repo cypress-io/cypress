@@ -1,6 +1,30 @@
-__snapshots__
+# unignore hidden files
+!.*
+
+**/__snapshots__
+**/build
+**/cypress/fixtures
+**/dist
+**/dist-test
+**/node_modules
+**/support/fixtures
+**/test/fixtures
+**/vendor
+
+# cli/types is linted by tslint/dtslint
+cli/types
+# packages/example is not linted (think about changing this)
+packages/example
+
+packages/extension/test/helpers/background.js
 packages/server/lib/scaffold/plugins/index.js
 packages/server/lib/scaffold/support/index.js
 packages/server/lib/scaffold/support/commands.js
-packages/server/test/fixtures
-packages/example/cypress
+
+packages/launcher/lib/**/*.js
+
+**/package-lock.json
+**/tsconfig.json
+**/.vscode
+**/.history
+**/.cy

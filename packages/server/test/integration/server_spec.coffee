@@ -320,7 +320,7 @@ describe "Server", ->
 
             Promise.delay(100)
             .then =>
-              ## the p1 should not have a current promise phase or reqStream until it's cancelled
+              ## the p1 should not have a current promise phase or reqStream until it's canceled
               expect(p1).not.to.have.property('currentPromisePhase')
               expect(p1).not.to.have.property('reqStream')
 

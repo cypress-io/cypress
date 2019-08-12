@@ -14,7 +14,7 @@ export default class Browsers extends Component {
     if (!project.browsers.length) return null
 
     return (
-      <ul className='browsers nav navbar-nav navbar-right'>
+      <ul className='browsers nav'>
         {this._closeBrowserBtn()}
         <Dropdown
           className='browsers-list'

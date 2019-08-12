@@ -6,6 +6,7 @@ describe('src/cypress/log', function () {
       this.cy = {
         createSnapshot: cy.stub().returns({}),
       }
+
       this.state = cy.stub()
       this.config = cy.stub()
       this.config.withArgs('isInteractive').returns(true)

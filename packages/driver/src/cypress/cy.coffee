@@ -13,6 +13,8 @@ $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
+$Mouse = require("../cy/mouse")
+$Keyboard = require("../cy/keyboard")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -57,7 +59,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   isStopped = -> stopped
 
   onFinishAssertions = ->
-    assertions.finishAssertions.apply(null, arguments)
+    assertions.finishAssertions.apply(window, arguments)
 
   warnMixingPromisesAndCommands = ->
     title = state("runnable").fullTitle()
@@ -80,6 +82,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  keyboard = $Keyboard.create(state)
+  mouse = $Mouse.create(state, keyboard)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -152,19 +156,19 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         })
 
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.HTMLElement.prototype.blur = ->
-        focused.interceptBlur(this)
+        focused.interceptBlur(@)
 
       contentWindow.SVGElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.SVGElement.prototype.blur = ->
-        focused.interceptBlur(this)
+        focused.interceptBlur(@)
 
       contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(this)
+        $selection.interceptSelect.call(@)
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
@@ -648,6 +652,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
 
+    devices: {
+      mouse: mouse
+      keyboard: keyboard
+    }
+
     ## timer sync methods
     pauseTimers: timers.pauseTimers
 
@@ -668,6 +677,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureAttached: ensures.ensureAttached
     ensureExistence: ensures.ensureExistence
     ensureElExistence: ensures.ensureElExistence
+    ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
     ensureReceivability: ensures.ensureReceivability
@@ -956,7 +966,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## listeners returned false
       return if _.some(results, returnedFalse)
 
-      ## do all the normal fail stuff and promise cancellation
+      ## do all the normal fail stuff and promise cancelation
       ## but dont re-throw the error
       if r = state("reject")
         r(err)

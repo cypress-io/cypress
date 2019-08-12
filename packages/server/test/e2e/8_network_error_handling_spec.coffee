@@ -222,6 +222,8 @@ describe "e2e network error handling", ->
     onVisit = null
     counts = {}
 
+  ## NOTE: We can just skip these tests, they are really only useful for learning
+  ## about how Chrome does it.
   context.skip "Google Chrome", ->
     testRetries = (path) ->
       launchBrowser("http://127.0.0.1:#{PORT}#{path}")
@@ -398,7 +400,7 @@ describe "e2e network error handling", ->
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
-        process.env.NO_PROXY = "" ## proxy everything including localhost
+        process.env.NO_PROXY = "<-loopback>" ## proxy everything including localhost
 
         e2e.exec(@, {
           spec: "https_passthru_spec.js"
@@ -423,7 +425,7 @@ describe "e2e network error handling", ->
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
-        process.env.NO_PROXY = "localhost:13373" ## proxy everything except for the irrelevant test
+        process.env.NO_PROXY = "<-loopback>,localhost:13373" ## proxy everything except for the irrelevant test
 
         e2e.exec(@, {
           spec: "https_passthru_spec.js"

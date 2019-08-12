@@ -1,21 +1,3 @@
-/* eslint-disable
-    default-case,
-    no-case-declarations,
-    no-cond-assign,
-    no-const-assign,
-    no-dupe-keys,
-    no-undef,
-    one-var,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 const $jquery = require('./jquery')
@@ -181,7 +163,6 @@ const _getType = function () {
 
 const nativeGetters = {
   value: _getValue,
-  selectionStart: descriptor('HTMLInputElement', 'selectionStart').get,
   isContentEditable: _isContentEditable,
   isCollapsed: descriptor('Selection', 'isCollapsed').get,
   selectionStart: _getSelectionStart,
@@ -263,7 +244,7 @@ const setNativeProp = function (obj, prop, val) {
   if (!nativeProp) {
     const fns = _.keys(nativeSetters).join(', ')
 
-    throw new Error(`attempted to use a native setter prop called: ${fn}. Available props are: ${fns}`)
+    throw new Error(`attempted to use a native setter prop called: ${prop}. Available props are: ${fns}`)
   }
 
   let retProp = nativeProp.call(obj, val)
@@ -494,6 +475,28 @@ const isTextLike = function ($el) {
   ])
 }
 
+const isInputAllowingImplicitFormSubmission = function ($el) {
+  const type = (type) => {
+    return isType($el, type)
+  }
+
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+  return _.some([
+    type('text'),
+    type('search'),
+    type('url'),
+    type('tel'),
+    type('email'),
+    type('password'),
+    type('date'),
+    type('month'),
+    type('week'),
+    type('time'),
+    type('datetime-local'),
+    type('number'),
+  ])
+}
+
 const isScrollable = ($el) => {
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
@@ -550,6 +553,27 @@ const isDescendent = ($el1, $el2) => {
   }
 
   return !!(($el1.get(0) === $el2.get(0)) || $el1.has($el2).length)
+}
+
+const findParent = (el, fn) => {
+
+  const recurse = (curEl, prevEl) => {
+    if (!curEl) {
+      return null
+    }
+
+    const retEl = fn(curEl, prevEl)
+
+    if (retEl) {
+      return retEl
+    }
+
+    const nextEl = curEl.parentElement
+
+    return recurse(nextEl, curEl)
+  }
+
+  return recurse(el.parentElement, el) || el
 }
 
 // in order to simulate actual user behavior we need to do the following:
@@ -832,6 +856,8 @@ module.exports = {
 
   isFocused,
 
+  isInputAllowingImplicitFormSubmission,
+
   isNeedSingleValueChangeInputElement,
 
   canSetSelectionRangeElement,
@@ -845,6 +871,8 @@ module.exports = {
   callNativeMethod,
 
   tryCallNativeMethod,
+
+  findParent,
 
   getElements,
 

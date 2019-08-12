@@ -1,8 +1,5 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
-
-const $Mouse = require('../../../cypress/mouse')
-
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
 const $elements = require('../../../dom/elements')
@@ -10,6 +7,8 @@ const $selection = require('../../../dom/selection')
 const $actionability = require('../../actionability')
 
 module.exports = (Commands, Cypress, cy, state, config) => {
+  const { mouse } = cy.devices
+
   return Commands.addAll({ prevSubject: 'element' }, {
     click (subject, positionOrX, y, options = {}) {
     //# TODO handle pointer-events: none
@@ -74,11 +73,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           //# https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
           if ($dom.isAttached($elToClick)) {
-            domEvents.mouseUp = $Mouse.mouseUp($elToClick, fromViewport)
+            domEvents.mouseUp = mouse.mouseUp($elToClick, fromViewport)
           }
 
           if ($dom.isAttached($elToClick)) {
-            domEvents.click = $Mouse.click($elToClick, fromViewport)
+            domEvents.click = mouse.click($elToClick, fromViewport)
           }
 
           if (options._log) {
@@ -167,9 +166,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
             el = $elToClick.get(0)
 
-            domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords.fromViewport)
+            domEvents.mouseDown = mouse.mouseDown($elToClick, coords.fromViewport)
 
-            //# if mousedown was cancelled then or caused
+            //# if mousedown was canceled then or caused
             //# our element to be removed from the DOM
             //# just resolve after mouse down and dont
             //# send a focus event
@@ -291,7 +290,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       //# create a new promise and chain off of it using reduce to insert
-      //# the artificial delays.  we have to set this as cancellable for it
+      //# the artificial delays.  we have to set this as cancelable for it
       //# to propogate since this is an "inner" promise
 
       //# return our original subject when our promise resolves
@@ -302,4 +301,3 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     },
   })
 }
-

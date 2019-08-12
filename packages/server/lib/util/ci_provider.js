@@ -250,21 +250,34 @@ const _providerCiParams = () => {
       'ghprbPullId',
     ]),
     // https://semaphoreci.com/docs/available-environment-variables.html
+    // some come from v1, some from v2 of semaphore
     semaphore: extract([
       'SEMAPHORE_BRANCH_ID',
       'SEMAPHORE_BUILD_NUMBER',
       'SEMAPHORE_CURRENT_JOB',
       'SEMAPHORE_CURRENT_THREAD',
       'SEMAPHORE_EXECUTABLE_UUID',
+      'SEMAPHORE_GIT_BRANCH',
+      'SEMAPHORE_GIT_DIR',
+      'SEMAPHORE_GIT_REF',
+      'SEMAPHORE_GIT_REF_TYPE',
+      'SEMAPHORE_GIT_REPO_SLUG',
+      'SEMAPHORE_GIT_SHA',
+      'SEMAPHORE_GIT_URL',
       'SEMAPHORE_JOB_COUNT',
-      'SEMAPHORE_JOB_UUID',
+      'SEMAPHORE_JOB_ID', // v2
+      'SEMAPHORE_JOB_NAME',
+      'SEMAPHORE_JOB_UUID', // v1
+      'SEMAPHORE_PIPELINE_ID',
       'SEMAPHORE_PLATFORM',
       'SEMAPHORE_PROJECT_DIR',
       'SEMAPHORE_PROJECT_HASH_ID',
+      'SEMAPHORE_PROJECT_ID', // v2
       'SEMAPHORE_PROJECT_NAME',
-      'SEMAPHORE_PROJECT_UUID',
+      'SEMAPHORE_PROJECT_UUID', // v1
       'SEMAPHORE_REPO_SLUG',
       'SEMAPHORE_TRIGGER_SOURCE',
+      'SEMAPHORE_WORKFLOW_ID',
       'PULL_REQUEST_NUMBER', // pull requests from forks ONLY
     ]),
     // see http://docs.shippable.com/ci/env-vars/
@@ -434,12 +447,12 @@ const _providerCommitParams = function () {
     },
     // Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
     semaphore: {
-      sha: env.REVISION,
-      branch: env.BRANCH_NAME,
+      sha: env.SEMAPHORE_GIT_SHA,
+      branch: env.SEMAPHORE_GIT_BRANCH,
       // message: ???
       // authorName: ???
       // authorEmail: ???
-      // remoteOrigin: ???
+      remoteOrigin: env.SEMAPHORE_GIT_REPO_SLUG,
       // defaultBranch: ???
     },
     shippable: {

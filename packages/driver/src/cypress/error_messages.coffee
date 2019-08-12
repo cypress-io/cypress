@@ -53,6 +53,9 @@ module.exports = {
   add:
     type_missing: "Cypress.add(key, fn, type) must include a type!"
 
+  agents:
+    deprecated_warning: "cy.agents() is deprecated. Use cy.stub() and cy.spy() instead."
+
   alias:
     invalid: "Invalid alias: '{{name}}'.\nYou forgot the '@'. It should be written as: '@{{displayName}}'."
     not_registered_with_available: "#{cmd('{{cmd}}')} could not find a registered alias for: '@{{displayName}}'.\nAvailable aliases are: '{{availableAliases}}'."
@@ -183,6 +186,20 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
       """
+    pointer_events_none: (obj) ->
+      """
+      #{cmd(obj.cmd)} failed because this element:
+
+      #{obj.element}
+
+      has CSS 'pointer-events: none'#{if obj.elementInherited then ", inherited from this element:\n\n#{obj.elementInherited}\n" else ""}
+
+      'pointer-events: none' prevents user mouse interaction.
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+      """
     disabled: """
       #{cmd('{{cmd}}')} failed because this element is disabled:
 
@@ -203,6 +220,15 @@ module.exports = {
       {{node}}
 
       {{reason}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+    """
+    readonly: """
+      #{cmd('{{cmd}}')} failed because this element is readonly:
+
+      {{node}}
 
       Fix this problem, or use {force: true} to disable error checking.
 
@@ -611,6 +637,7 @@ module.exports = {
     gzip_invalid: "#{cmd('request')} requires the 'gzip' option to be a boolean."
     headers_invalid: "#{cmd('request')} requires the 'headers' option to be an object literal."
     invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser."
+    failonstatus_deprecated_warning: "The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time."
     form_invalid: """
     #{cmd('request')} requires the 'form' option to be a boolean.
 
@@ -711,6 +738,11 @@ module.exports = {
     response_invalid: "#{cmd('route')} cannot accept an undefined or null response. It must be set to something, even an empty string will work."
     url_invalid: "#{cmd('route')} was called with an invalid url. Url must be either a string or regular expression."
     url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
+    url_percentencoding_warning: ({ decodedUrl }) -> """
+    A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.
+
+    Did you mean to pass "#{decodedUrl}"?
+    """
 
   scrollIntoView:
     invalid_argument: "#{cmd('scrollIntoView')} can only be called with an options object. Your argument was: {{arg}}"
@@ -751,7 +783,13 @@ module.exports = {
     defaults_invalid_on_element: "Cypress.SelectorPlayground.defaults() called with invalid 'onElement' property. It must be a function. You passed: {{arg}}"
 
   server:
+    force404_deprecated: "Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option."
     invalid_argument: "#{cmd('server')} accepts only an object literal as its argument."
+    stub_deprecated: ({ type }) -> """
+      Passing #{cmd(type)}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
+      https://on.cypress.io/deprecated-stub-false-on-#{type}
+    """
+    xhrurl_not_set: "'Server.options.xhrUrl' has not been set"
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
@@ -865,7 +903,14 @@ module.exports = {
 
   type:
     empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."
-    invalid: "Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}"
+    readonly: "#{cmd('type')} cannot type into an element with a 'readonly' attribute. The element typed into was: {{node}}"
+    invalid: """
+      Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}
+
+      If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
+
+      https://on.cypress.io/type
+    """
     invalid_date: "Typing into a date input with #{cmd('type')} requires a valid date with the format 'yyyy-MM-dd'. You passed: {{chars}}"
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
@@ -1065,4 +1110,6 @@ module.exports = {
     aborted: "This XHR was aborted by your code -- check this stack trace below."
     missing: "XMLHttpRequest#xhr is missing."
     network_error: "The network request for this XHR could not be made. Check your console for the reason."
+    requestjson_deprecated: "requestJSON is now deprecated and will be removed in the next version. Update this to 'requestBody' or 'request.body'."
+    responsejson_deprecated: "responseJSON is now deprecated and will be removed in the next version. Update this to 'responseBody' or 'response.body'."
 }
