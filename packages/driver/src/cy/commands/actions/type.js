@@ -110,6 +110,43 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       options._log.snapshot('before', { next: 'after' })
     }
 
+    // const verifyElementForType = ($el) => {
+    //   const el = $el.get(0)
+    //   const isTextLike = $dom.isTextLike(el)
+
+    //   const isFocusable = $elements.isFocusable($el)
+    
+    //   if (!isFocusable && !isTextLike) {
+    //     const node = $dom.stringify($el)
+    
+    //     $utils.throwErrByPath('type.not_on_typeable_element', {
+    //       args: { node },
+    //     })
+    //   }
+    
+    //   if (!isFocusable && isTextLike) {
+    //     const node = $dom.stringify($el)
+    
+    //     $utils.throwErrByPath('type.not_actionable_textlike', {
+    //       args: { node },
+    //     })
+    //   }
+    // }
+
+    // verifyElementForType(el)
+
+
+
+
+
+
+
+
+
+    
+
+
+  
     if (options.$el.length > 1) {
 
       $utils.throwErrByPath('type.multiple_elements', {
@@ -118,9 +155,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       })
     }
 
-    chars = `${chars}`
+    if (!(_.isString(chars) || _.isFinite(chars))) {
+      $utils.throwErrByPath('type.wrong_type', {
+        onFail: options._log,
+        args: { chars },
+      })
+    }
 
-    const charsToType = `${chars}`
+    chars = `${chars}`
 
     // _setCharsNeedingType(nextChars)
 
@@ -238,13 +280,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return keyboard.type({
         $el: options.$el,
-        chars: charsToType,
+        chars,
         delay: options.delay,
         release: options.release,
         parseSpecialCharSequences: options.parseSpecialCharSequences,
         window: win,
         force: options.force,
         simulated: options.simulated,
+        onFail: options._log,
 
         updateValue (el, key, charsToType) {
           // in these cases, the value must only be set after all
@@ -392,22 +435,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     }
 
     const handleFocused = function () {
-
       //# if it's the body, don't need to worry about focus
       const isBody = options.$el.is('body')
 
       if (isBody) {
         return type()
       }
-
-      // if (!$elements.isFocusableWhenNotDisabled(options.$el)) {
-      //   const node = $dom.stringify(options.$el)
-
-      //   $utils.throwErrByPath('type.not_on_typeable_element', {
-      //     onFail: options._log,
-      //     args: { node },
-      //   })
-      // }
 
       options.ensure = {
         position: true,

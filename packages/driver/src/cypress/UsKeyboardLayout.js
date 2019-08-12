@@ -1,5 +1,5 @@
 module.exports = {
-  keyboardMappings: {
+  USKeyboard: {
     '0': { keyCode: 48, key: '0', code: 'Digit0' },
     '1': { keyCode: 49, key: '1', code: 'Digit1' },
     '2': { keyCode: 50, key: '2', code: 'Digit2' },

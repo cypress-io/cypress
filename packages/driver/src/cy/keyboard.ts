@@ -8,7 +8,7 @@ import * as $document from '../dom/document'
 import * as $selection from '../dom/selection'
 import $window from '../dom/window'
 import $utils from '../cypress/utils.coffee'
-import { keyboardMappings as USKeyboard } from '../cypress/UsKeyboardLayout'
+import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/types'
 
 const debug = Debug('cypress:driver:keyboard')
@@ -152,10 +152,6 @@ const joinKeyArrayToString = (keyArr: KeyDetails[]) => {
   }).join('')
 }
 
-// const isSpecialChar = (chars) => {
-//   return !!kb.specialChars[chars]
-// }
-
 type modifierKeyDetails = KeyDetails & {
   key: keyof typeof keyToModifierMap
 }
@@ -164,11 +160,32 @@ const isModifier = (details: KeyDetails): details is modifierKeyDetails => {
   return !!keyToModifierMap[details.key]
 }
 
+const isSpecialChar = (key:string) => {
+  return !!findKeyDetailsOrLowercase(key)
+}
+
+const getFormattedKeyString = (details: KeyDetails) => {
+  let foundKeyString = _.findKey(keyboardMappings, { key: details.key })
+
+  if (foundKeyString) {
+    return `{${foundKeyString}}`
+  }
+
+  foundKeyString = keyToModifierMap[details.key]
+
+  if (foundKeyString) {
+    return `<${foundKeyString}>`
+  }
+
+  return details.key
+
+}
+
 const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
   return _.countBy(keys, isModifier)['false']
 }
 
-const findKeyDetailsOrLowercase = (key):KeyDetailsPartial => {
+const findKeyDetailsOrLowercase = (key:string):KeyDetailsPartial => {
   const keymap = getKeymap()
   const foundKey = keymap[key]
 
@@ -179,9 +196,18 @@ const findKeyDetailsOrLowercase = (key):KeyDetailsPartial => {
   })[_.toLower(key)]
 }
 
+const getTextLength = (str) => _.toArray(str).length
+
 const getKeyDetails = (onKeyNotFound) => {
   return (key: string) => {
-    const foundKey = findKeyDetailsOrLowercase(key)
+    let foundKey
+
+    if (getTextLength(key) === 1) {
+      foundKey = USKeyboard[key]
+      foundKey = foundKey || { key }
+    } else {
+      foundKey = findKeyDetailsOrLowercase(key)
+    }
 
     if (foundKey) {
       const details = _.defaults({}, foundKey, {
@@ -193,7 +219,7 @@ const getKeyDetails = (onKeyNotFound) => {
         events: {},
       })
 
-      if (details.key.length === 1) {
+      if (getTextLength(details.key) === 1) {
         details.text = details.key
       }
 
@@ -267,7 +293,8 @@ const getKeymap = () => {
   return {
     ...keyboardMappings,
     ...modifierChars,
-    ...USKeyboard,
+    // TODO: add the reset of USKeyboard to available keys
+    // ...USKeyboard,
   }
 }
 const validateTyping = (
@@ -336,13 +363,6 @@ const validateTyping = (
     $utils.throwErrByPath('type.multiple_elements', {
       onFail,
       args: { num: numElements },
-    })
-  }
-
-  if (!(_.isString(chars) || _.isFinite(chars))) {
-    $utils.throwErrByPath('type.wrong_type', {
-      onFail,
-      args: { chars },
     })
   }
 
@@ -529,7 +549,7 @@ const modifierChars = {
 }
 
 const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
-  selectall: {
+  selectAll: {
     key: 'selectAll',
     simulatedDefault: (el) => {
       const doc = $document.getDocumentFromElement(el)
@@ -538,7 +558,7 @@ const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
     },
     simulatedDefaultOnly: true,
   },
-  movetostart: {
+  moveToStart: {
     key: 'moveToStart',
     simulatedDefault: (el) => {
       const doc = $document.getDocumentFromElement(el)
@@ -547,7 +567,7 @@ const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
     },
     simulatedDefaultOnly: true,
   },
-  movetoend: {
+  moveToEnd: {
     key: 'moveToEnd',
     simulatedDefault: (el) => {
       const doc = $document.getDocumentFromElement(el)
@@ -561,10 +581,15 @@ const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
   backspace: USKeyboard.Backspace,
   esc: USKeyboard.Escape,
   enter: USKeyboard.Enter,
-  rightarrow: USKeyboard.ArrowRight,
-  leftarrow: USKeyboard.ArrowLeft,
-  uparrow: USKeyboard.ArrowUp,
-  downarrow: USKeyboard.ArrowDown,
+  rightArrow: USKeyboard.ArrowRight,
+  leftArrow: USKeyboard.ArrowLeft,
+  upArrow: USKeyboard.ArrowUp,
+  downArrow: USKeyboard.ArrowDown,
+  home: USKeyboard.Home,
+  end: USKeyboard.End,
+  insert: USKeyboard.Insert,
+  pageUp: USKeyboard.PageUp,
+  pageDown: USKeyboard.PageDown,
   '{': USKeyboard.BracketLeft,
 }
 
@@ -616,6 +641,7 @@ export default class Keyboard {
       onNoMatchingSpecialChars: _.noop,
       onBeforeSpecialCharAction: _.noop,
       parseSpecialCharSequences: true,
+      onFail: _.noop,
     })
 
     if (options.force) {
@@ -689,7 +715,7 @@ export default class Keyboard {
             const { skipCheckUntilIndex, isClearChars } = validateTyping(
               activeEl,
               joinKeyArrayToString(keyDetailsArr.slice(i)),
-              options._log,
+              options.onFail,
               _skipCheckUntilIndex
             )
 
@@ -917,14 +943,13 @@ export default class Keyboard {
     const dispatched = el.dispatchEvent(event)
 
     debug(`dispatched [${eventType}] on ${el}`)
-    options.onEvent(options.id, key, eventType, which, dispatched)
+    const formattedKeyString = getFormattedKeyString(keyDetails)
+
+    debug('format string', formattedKeyString)
+    options.onEvent(options.id, formattedKeyString, eventType, which, dispatched)
 
     return dispatched
   }
-
-  // foo('a')(1)
-
-  // const maybeFireSimulatedEvent:Curry = (shouldFire:boolean | undefined, fireSimulatedEvent) => {
 
   getModifierKeyDetails (key: KeyDetails) {
     const modifiers = getActiveModifiers(this.state)
@@ -1150,6 +1175,6 @@ export default class Keyboard {
   static modifiersToString = modifiersToString
   static fromModifierEventOptions = fromModifierEventOptions
   static validateTyping = validateTyping
-  static getKeymap = getKeymap
+  getKeymap = getKeymap
   static keyboardMappings = keyboardMappings
 }
