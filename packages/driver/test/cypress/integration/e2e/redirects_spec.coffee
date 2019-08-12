@@ -50,7 +50,7 @@ describe "redirection", ->
 
     it "binds to the new page on immediate refresh", ->
       cy
-        .visit("/fixtures/js-redirect.html")
+        .visit("/fixtures/js-redirect-onload.html")
         .get("a:first")
         .then ->
           ## visit, get, page load, new url
