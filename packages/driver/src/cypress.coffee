@@ -21,7 +21,6 @@ $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
-$Server = require("./cypress/server")
 $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
@@ -471,7 +470,6 @@ class $Cypress
   LocalStorage: $LocalStorage
   Mocha: $Mocha
   Runner: $Runner
-  Server: $Server
   Screenshot: $Screenshot
   SelectorPlayground: $SelectorPlayground
   utils: $utils

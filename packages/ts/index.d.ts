@@ -44,6 +44,10 @@ declare module 'http' {
     uri: Url
   }
 
+  interface OutgoingMessage {
+    destroy(error?: Error): void
+  }
+
   export const CRLF: string
 }
 

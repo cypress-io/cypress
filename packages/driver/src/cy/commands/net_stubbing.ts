@@ -5,16 +5,17 @@ export const SERIALIZABLE_REQ_PROPS = [
   'body', // doesn't exist on the OG message, but will be attached by the backend
   'url',
   'method',
-  'httpVersion'
+  'httpVersion',
 ]
 
 export const SERIALIZABLE_RES_PROPS = _.concat(
   SERIALIZABLE_REQ_PROPS,
-  "statusCode",
-  "statusMessage"
+  'statusCode',
+  'statusMessage'
 )
 
 export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
+
 export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
 
 type GlobPattern = string
@@ -68,7 +69,7 @@ interface RouteMatcherCompatOptions {
 }
 
 /** Types for Route Responses **/
-export namespace CyHttpMessages {
+export declare namespace CyHttpMessages {
   interface BaseMessage {
     // as much stuff from `incomingmessage` as makes sense to serialize and send
     body: any
@@ -144,7 +145,7 @@ interface WebSocketController {
   onOutgoingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
   onDisconnect?: (socket: CyWebSocket) => void
 
-  transport: 'socket.io'  // socket.io client over websockets
+  transport: 'socket.io' // socket.io client over websockets
               | 'socket.io-longpolling' // socket.io client via longpolling
               | 'websockets' // vanilla websockets server
 }
@@ -155,7 +156,7 @@ type RouteHandler = string | object | RouteHandlerController
 
 /** Types for messages between driver and server */
 
-export namespace NetEventFrames {
+export declare namespace NetEventFrames {
   export interface AddRoute {
     routeMatcher: AnnotatedRouteMatcherOptions
     staticResponse?: StaticResponse
@@ -193,17 +194,17 @@ export namespace NetEventFrames {
 /**
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
  */
-function _annotateMatcherOptionsTypes(options: RouteMatcherOptions) {
+function _annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
   const stringMatcherFields = STRING_MATCHER_FIELDS
   .concat(
     // add the nested DictStringMatcher values to the list of fields to annotate
     _.flatten(
       _.filter(
-        DICT_STRING_MATCHER_FIELDS.map(field => {
+        DICT_STRING_MATCHER_FIELDS.map((field) => {
           const value = options[field]
 
           if (value) {
-            return _.keys(value).map(key => {
+            return _.keys(value).map((key) => {
               return `${field}.${key}`
             })
           }
@@ -216,36 +217,37 @@ function _annotateMatcherOptionsTypes(options: RouteMatcherOptions) {
 
   const ret : AnnotatedRouteMatcherOptions = {}
 
-  stringMatcherFields.forEach(field => {
+  stringMatcherFields.forEach((field) => {
     const value = _.get(options, field)
 
     if (value) {
       _.set(ret, field, {
         type: (_isRegExp(value)) ? 'regex' : 'glob',
-        value: value.toString()
+        value: value.toString(),
       } as AnnotatedStringMatcher)
     }
   })
 
   const noAnnotationRequiredFields = ['https', 'port', 'webSocket']
+
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 
   return ret
 }
 
-function _getUniqueId() {
+function _getUniqueId () {
   return `${Number(new Date()).toString()}-${_.uniqueId()}`
 }
 
-function _isHttpController(obj) : obj is HTTPController {
+function _isHttpController (obj) : obj is HTTPController {
   return typeof obj === 'function'
 }
 
-function _isWebSocketController(obj, options) : obj is WebSocketController {
+function _isWebSocketController (obj, options) : obj is WebSocketController {
   return typeof obj === 'object' && options.webSocket === true
 }
 
-function _isRegExp(obj) : obj is RegExp {
+function _isRegExp (obj) : obj is RegExp {
   return obj && (obj instanceof RegExp || obj.__proto__ === RegExp.prototype || obj.__proto__.constructor.name === 'RegExp')
 }
 
@@ -262,7 +264,7 @@ interface Request {
 let routes : { [key: string]: Route } = {}
 let requests : { [key: string]: Request } = {}
 
-function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Function) : void {
+function _addRoute (options: RouteMatcherOptions, handler: RouteHandler, emit: Function) : void {
   const handlerId = _getUniqueId()
 
   const frame: NetEventFrames.AddRoute = {
@@ -277,7 +279,7 @@ function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Fu
       break
     case typeof handler === 'string':
       frame.staticResponse = { body: <string>handler }
-    break
+      break
     case typeof handler === 'object':
       // TODO: automatically JSONify staticResponse.body objects
       frame.staticResponse = <StaticResponse>handler
@@ -289,26 +291,26 @@ function _addRoute(options: RouteMatcherOptions, handler: RouteHandler, emit: Fu
   routes[handlerId] = {
     options,
     handler,
-    hitCount: 0
+    hitCount: 0,
   }
 
-  emit("route:added", frame)
+  emit('route:added', frame)
 }
 
-export function registerCommands(Commands, Cypress, /** cy, state, config */) {
+export function registerCommands (Commands, Cypress, /** cy, state, config */) {
   // TODO: figure out what to do for XHR compatibility
 
-  function _emit(eventName: string, ...args: any[]) {
+  function _emit (eventName: string, ...args: any[]) {
     // all messages from driver to server are wrapped in backend:request
-    Cypress.backend("net", eventName, ...args)
+    Cypress.backend('net', eventName, ...args)
   }
 
-  function route(matcher: RouteMatcher, handler: RouteHandler) {
+  function route (matcher: RouteMatcher, handler: RouteHandler) {
     let options : RouteMatcherOptions
 
     if (matcher instanceof RegExp || typeof matcher === 'string') {
       options = {
-        url: matcher
+        url: matcher,
       }
     } else {
       options = matcher
@@ -317,44 +319,60 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
     _addRoute(options, handler, _emit)
   }
 
-  function server() : void {
+  function server () : void {
 
   }
 
-  function _onRequestReceived(frame: NetEventFrames.HttpRequestReceived) {
+  function _onRequestReceived (frame: NetEventFrames.HttpRequestReceived) {
     const route = routes[frame.routeHandlerId]
     const { req, requestId, routeHandlerId } = frame
 
     const continueFrame : NetEventFrames.HttpRequestContinue = {
       routeHandlerId,
-      requestId
+      requestId,
     }
 
+    let continueSent = false
+
     const sendContinueFrame = () => {
+      if (continueSent) {
+        throw new Error('Cannot continue a request twice.')
+      }
+
+      continueSent = true
       // copy changeable attributes of userReq to req in frame
       // @ts-ignore
       continueFrame.req = {
-        ..._.pick(userReq, SERIALIZABLE_REQ_PROPS)
+        ..._.pick(userReq, SERIALIZABLE_REQ_PROPS),
       }
+
       _emit('http:request:continue', continueFrame)
+    }
+
+    if (!route) {
+      // TODO: remove this logging once we're done
+      // eslint-disable-next-line no-console
+      console.log('no handler for HttpRequestReceived', { frame })
+
+      return sendContinueFrame()
     }
 
     const userReq : CyHttpMessages.IncomingHTTPRequest = {
       ...req,
-      reply: function (responseHandler) {
+      reply (responseHandler, maybeBody?, maybeHeaders?) {
         // TODO: this can only be called once
         if (_.isNumber(responseHandler)) {
           // responseHandler is a status code
           const staticResponse : StaticResponse = {
-            statusCode: responseHandler
+            statusCode: responseHandler,
           }
 
-          if (!_.isUndefined(arguments[1])) {
-            staticResponse.body = arguments[1]
+          if (!_.isUndefined(maybeBody)) {
+            staticResponse.body = maybeBody
           }
 
-          if (!_.isUndefined(arguments[2])) {
-            staticResponse.headers = arguments[2]
+          if (!_.isUndefined(maybeHeaders)) {
+            staticResponse.headers = maybeHeaders
           }
 
           responseHandler = staticResponse
@@ -363,36 +381,34 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
         if (_.isFunction(responseHandler)) {
           // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
           requests[requestId] = {
-            responseHandler
+            responseHandler,
           }
+
+          // signals server to send a http:response:received
           continueFrame.hasResponseHandler = true
-        } else if (!_.isUndefined(responseHandler)) {
+
+          return
+        }
+
+        if (!_.isUndefined(responseHandler)) {
           // `replyHandler` is a StaticResponse
           continueFrame.staticResponse = <StaticResponse>responseHandler
         }
-        // if `replyHandler` is null, response doesn't need to come back to the driver
-        sendContinueFrame()
       },
-      redirect: function (location, statusCode = 302) {
-        this.reply({
+      redirect (location, statusCode = 302) {
+        userReq.reply({
           headers: { location },
-          statusCode
+          statusCode,
         })
       },
-      destroy: function () {
-        this.reply({
-          destroySocket: true
+      destroy () {
+        userReq.reply({
+          destroySocket: true,
         })
-      }
+      },
     }
 
-    if (!route) {
-      // TODO: remove this logging once we're done
-      console.log('no handler for frame', { frame })
-      return sendContinueFrame()
-    }
-
-    const { handler } = route
+    const handler = route.handler as Function
 
     // next() can be called to pass this to the next route
     const next = () => {
@@ -401,64 +417,79 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
       sendContinueFrame()
     }
 
-    (<Function>handler)(userReq, next)
+    if (!_.isFunction(handler)) {
+      return next()
+    }
+
+    if (handler.length === 1) {
+      // did not consume next(), so call it synchronously
+      handler(userReq)
+
+      return next()
+    }
+
+    // rely on handler to call next()
+    handler(userReq, next)
   }
 
-  function _onResponseReceived(frame: NetEventFrames.HttpResponseReceived) {
+  function _onResponseReceived (frame: NetEventFrames.HttpResponseReceived) {
     const { res, requestId, routeHandlerId } = frame
     const request = requests[requestId]
 
     const continueFrame : NetEventFrames.HttpResponseContinue = {
       routeHandlerId,
-      requestId
+      requestId,
     }
 
     const sendContinueFrame = () => {
       // copy changeable attributes of userReq to req in frame
       // @ts-ignore
       continueFrame.res = {
-        ..._.pick(userRes, SERIALIZABLE_RES_PROPS)
+        ..._.pick(userRes, SERIALIZABLE_RES_PROPS),
       }
+
       _emit('http:response:continue', continueFrame)
     }
 
     const userRes : CyHttpMessages.IncomingHttpResponse = {
       ...res,
-      send: function (staticResponse) {
+      send (staticResponse) {
         if (staticResponse) {
           continueFrame.staticResponse = staticResponse
         }
 
         return sendContinueFrame()
       },
-      delay: function (delayMs) {
+      delay (delayMs) {
         this.delayMs = delayMs
+
         return this
       },
-      throttle: function (throttleKbps) {
+      throttle (throttleKbps) {
         this.throttleKbps = throttleKbps
+
         return this
-      }
+      },
     }
 
     if (!request) {
       // TODO: remove this logging once we're done
-      console.log('no handler for frame', { frame })
+      // eslint-disable-next-line no-console
+      console.log('no handler for HttpResponseReceived', { frame })
+
       return sendContinueFrame()
     }
 
     request.responseHandler(userRes)
   }
 
-  Cypress.on("test:before:run", () => {
+  Cypress.on('test:before:run', () => {
     // wipe out callbacks and routes when tests start
     routes = {}
     Cypress.routes = routes
-    // TODO: there is probably a better way to do this without remitting an event to the server
-    _emit('clear:routes')
   })
 
-  Cypress.on("net:event", (eventName, ...args) => {
+  Cypress.on('net:event', (eventName, ...args) => {
     switch (eventName) {
       case 'http:request:received':
         _onRequestReceived(<NetEventFrames.HttpRequestReceived>args[0])
@@ -474,12 +505,12 @@ export function registerCommands(Commands, Cypress, /** cy, state, config */) {
         break
       case 'ws:frame:incoming':
         break
+      default:
     }
   })
 
-
   Commands.addAll({
     route,
-    server
+    server,
   })
 }

@@ -32,17 +32,17 @@ interface ProxyIncomingMessage extends IncomingMessage {
 
 const debug = debugModule('cypress:server:net_stubbing')
 
-function _getAllStringMatcherFields(options) {
+function _getAllStringMatcherFields (options) {
   return _.concat(
     _.filter(STRING_MATCHER_FIELDS, _.partial(_.has, options)),
     // add the nested DictStringMatcher values to the list of fields
     _.flatten(
       _.filter(
-        DICT_STRING_MATCHER_FIELDS.map(field => {
+        DICT_STRING_MATCHER_FIELDS.map((field) => {
           const value = options[field]
 
           if (value) {
-            return _.keys(value).map(key => {
+            return _.keys(value).map((key) => {
               return `${field}.${key}`
             })
           }
@@ -54,12 +54,12 @@ function _getAllStringMatcherFields(options) {
   )
 }
 
-function _restoreMatcherOptionsTypes(options: AnnotatedRouteMatcherOptions) {
+function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
   const stringMatcherFields = _getAllStringMatcherFields(options)
 
   const ret : RouteMatcherOptions = {}
 
-  stringMatcherFields.forEach(field => {
+  stringMatcherFields.forEach((field) => {
     const obj = _.get(options, field)
 
     if (obj) {
@@ -68,6 +68,7 @@ function _restoreMatcherOptionsTypes(options: AnnotatedRouteMatcherOptions) {
   })
 
   const noAnnotationRequiredFields = ['https', 'port', 'webSocket']
+
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 
   return ret
@@ -76,32 +77,36 @@ function _restoreMatcherOptionsTypes(options: AnnotatedRouteMatcherOptions) {
 // TODO: clear between specs
 let routes : BackendRoute[] = []
 
-function _onRouteAdded(options: NetEventFrames.AddRoute) {
+function _onRouteAdded (options: NetEventFrames.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
 
   debug('adding route %o', { routeMatcher, options })
 
   routes.push({
     routeMatcher,
-    ..._.omit(options, 'routeMatcher')
+    ..._.omit(options, 'routeMatcher'),
   })
 }
 
-function _getRouteForRequest(req: ProxyIncomingMessage, prevRoute?: BackendRoute) {
+function _getRouteForRequest (req: ProxyIncomingMessage, prevRoute?: BackendRoute) {
   const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
-  return _.find(possibleRoutes, route => {
+
+  return _.find(possibleRoutes, (route) => {
     return _doesRouteMatch(route.routeMatcher, req)
   })
 }
 
-export function _getMatchableForRequest(req) {
+export function _getMatchableForRequest (req) {
   let matchable : any = _.pick(req, ['headers', 'method', 'webSocket'])
 
   const authorization = req.headers['authorization']
+
   if (authorization) {
     const [mechanism, credentials] = authorization.split(' ', 2)
+
     if (mechanism && credentials && mechanism.toLowerCase() === 'basic') {
       const [username, password] = Buffer.from(credentials, 'base64').toString().split(':', 2)
+
       matchable.auth = { username, password }
     }
   }
@@ -125,7 +130,7 @@ export function _getMatchableForRequest(req) {
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
 // TOOD: optimize to short-circuit on route not match
-export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyIncomingMessage) {
+export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: ProxyIncomingMessage) {
   const matchable = _getMatchableForRequest(req)
 
   let match = true
@@ -146,6 +151,7 @@ export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyInc
     if (matcher.test) {
       // value is a regex
       match = match && matcher.test(value)
+
       return
     }
 
@@ -162,17 +168,21 @@ export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyInc
   booleanFields.forEach((field) => {
     const matcher = _.get(routeMatcher, field)
     const value = _.get(matchable, field)
+
     match = match && (matcher === value)
   })
 
   numberFields.forEach((field) => {
     const matcher = _.get(routeMatcher, field)
     const value = _.get(matchable, field)
+
     if (matcher.length) {
       // list of numbers, any one can match
       match = match && matcher.includes(value)
+
       return
     }
+
     match = match && (matcher === value)
   })
 
@@ -181,20 +191,21 @@ export function _doesRouteMatch(routeMatcher: RouteMatcherOptions, req: ProxyInc
   return match
 }
 
-function _emit(socket: any, eventName: string, data: any) {
+function _emit (socket: any, eventName: string, data: any) {
   debug('sending event to driver %o', { eventName, data })
   socket.toDriver('net:event', eventName, data)
 }
 
-function _sendStaticResponse(res: ServerResponse, staticResponse: StaticResponse) {
+function _sendStaticResponse (res: ServerResponse, staticResponse: StaticResponse) {
   if (staticResponse.destroySocket) {
     res.connection.destroy()
     res.destroy()
+
     return
   }
 
   if (staticResponse.headers) {
-    _.keys(staticResponse.headers).forEach(key => {
+    _.keys(staticResponse.headers).forEach((key) => {
       res.setHeader(key, (<StaticResponse>staticResponse.headers)[key])
     })
   }
@@ -207,17 +218,18 @@ function _sendStaticResponse(res: ServerResponse, staticResponse: StaticResponse
   res.end()
 }
 
-export function onDriverEvent(socket: any, eventName: string, ...args: any[]) {
+export function reset () {
+  debug('resetting net_stubbing state')
+  requests = {}
+  routes = []
+}
+
+export function onDriverEvent (socket: any, eventName: string, ...args: any[]) {
   debug('received driver event %o', { eventName, args })
 
-  switch(eventName) {
+  switch (eventName) {
     case 'route:added':
       _onRouteAdded(<NetEventFrames.AddRoute>args[0])
-      break
-    case 'clear:routes':
-      // TODO: initiate this from an existing point in the server, not a new request
-      requests = {}
-      routes = []
       break
     case 'http:request:continue':
       _onRequestContinue(<NetEventFrames.HttpRequestContinue>args[0], socket)
@@ -231,6 +243,7 @@ export function onDriverEvent(socket: any, eventName: string, ...args: any[]) {
       break
     case 'ws:frame:incoming:continue':
       break
+    default:
   }
 }
 
@@ -250,10 +263,17 @@ interface BackendRequest {
   sendResponseToDriver?: boolean
 }
 
-// TODO: clear on each test
 let requests : { [key: string]: BackendRequest } = {}
 
-export function onProxiedRequest(project: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
+export function onProxiedRequest (project: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
+  try {
+    return _onProxiedRequest(project, req, res, cb)
+  } catch (err) {
+    debug('error in onProxiedRequest: %o', { err, req, res, routes })
+  }
+}
+
+function _onProxiedRequest (project: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
   const route = _getRouteForRequest(req)
 
   if (!route) {
@@ -262,6 +282,7 @@ export function onProxiedRequest(project: any, req: ProxyIncomingMessage, res: S
 
   if (route.staticResponse) {
     _sendStaticResponse(res, route.staticResponse)
+
     return // don't call cb since we've satisfied the response here
   }
 
@@ -272,7 +293,7 @@ export function onProxiedRequest(project: any, req: ProxyIncomingMessage, res: S
     route,
     continueRequest: cb,
     req,
-    res
+    res,
   }
 
   req.requestId = requestId
@@ -285,16 +306,16 @@ export function onProxiedRequest(project: any, req: ProxyIncomingMessage, res: S
     req: _.extend(_.pick(req, SERIALIZABLE_REQ_PROPS), {
       url: req.proxiedUrl,
       // body: "not implemented... yet" // TODO: buffer the body here with the stream-buffer from net-retries
-    }) as CyHttpMessages.IncomingRequest
+    }) as CyHttpMessages.IncomingRequest,
   }
 
-  req.pipe(concatStream(reqBody => {
+  req.pipe(concatStream((reqBody) => {
     frame.req.body = reqBody.toString()
     _emit(project.server._socket, 'http:request:received', frame)
   }))
 }
 
-function _onRequestContinue(frame: NetEventFrames.HttpRequestContinue, socket: any) {
+function _onRequestContinue (frame: NetEventFrames.HttpRequestContinue, socket: any) {
   const backendRequest = requests[frame.requestId]
 
   if (!backendRequest) {
@@ -314,18 +335,20 @@ function _onRequestContinue(frame: NetEventFrames.HttpRequestContinue, socket: a
     if (!route) {
       // no "next route" available, so just continue that bad boy
       backendRequest.continueRequest()
+
       return
     }
 
     if (route.staticResponse) {
       _sendStaticResponse(backendRequest.res, route.staticResponse)
+
       return
     }
 
     const nextFrame : NetEventFrames.HttpRequestReceived = {
       routeHandlerId: <string>route.handlerId,
       requestId: backendRequest.requestId,
-      req: frame.req!
+      req: frame.req!,
     }
 
     _emit(socket, 'http:request:received', nextFrame)
@@ -335,6 +358,7 @@ function _onRequestContinue(frame: NetEventFrames.HttpRequestContinue, socket: a
 
   if (frame.staticResponse) {
     _sendStaticResponse(backendRequest.res, frame.staticResponse)
+
     return
   }
 
@@ -345,16 +369,26 @@ function _onRequestContinue(frame: NetEventFrames.HttpRequestContinue, socket: a
   backendRequest.continueRequest()
 }
 
-export function onProxiedResponse(project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
+export function onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
+  try {
+    return _onProxiedResponse(project, req, resStream, incomingRes, cb)
+  } catch (err) {
+    debug('error in onProxiedResponse: %o', { err, req, resStream, incomingRes, routes })
+  }
+}
+
+function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
   if (!req.requestId) {
     // original request was not intercepted, so response should not be either
-    return
+    return cb()
   }
 
   const backendRequest = requests[req.requestId]
 
+  debug('onProxiedResponse %o', { req, backendRequest })
+
   if (!backendRequest.sendResponseToDriver) {
-    cb()
+    return cb()
   }
 
   // this may get set back to `true` by another route
@@ -366,20 +400,21 @@ export function onProxiedResponse(project: any, req: ProxyIncomingMessage, resSt
     requestId: backendRequest.requestId,
     res: _.extend(_.pick(incomingRes, SERIALIZABLE_RES_PROPS), {
       url: req.proxiedUrl,
-    }) as CyHttpMessages.IncomingResponse
+    }) as CyHttpMessages.IncomingResponse,
   }
 
-  resStream.pipe(concatStream(resBody => {
+  resStream.pipe(concatStream((resBody) => {
     frame.res.body = resBody.toString()
     _emit(project.server._socket, 'http:response:received', frame)
   }))
 }
 
-function _onResponseContinue(frame: NetEventFrames.HttpResponseContinue) {
+function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
   const backendRequest = requests[frame.requestId]
 
   if (frame.staticResponse) {
     _sendStaticResponse(backendRequest.res, frame.staticResponse)
+
     return
   }
 

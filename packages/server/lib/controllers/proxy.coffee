@@ -117,10 +117,16 @@ module.exports = {
 
     thr = passthruStream()
 
-    ## immediately before sending the request, offer it to netStubbing for interception
-    netStubbing.onProxiedRequest project, req, res, =>
+    continueRequest = =>
       @getHttpContent(thr, req, res, remoteState, config, request, project)
       .pipe(res)
+
+    if buffers.get(req.proxiedUrl)
+      ## server has already sent this through the proxy, don't intercept twice
+      return continueRequest()
+
+    ## immediately before sending the request, offer it to netStubbing for interception
+    netStubbing.onProxiedRequest project, req, res, continueRequest
 
   getHttpContent: (thr, req, res, remoteState, config, request, project) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
@@ -338,7 +344,7 @@ module.exports = {
     if obj = buffers.take(req.proxiedUrl)
       wantsInjection = "full"
 
-      onResponse(obj.stream, obj.response)
+      handleResponse(obj.stream, obj.response)
     else
       opts = {
         timeout: null

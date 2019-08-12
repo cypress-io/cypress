@@ -14,6 +14,7 @@ files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
+netStubbing   = require("./net_stubbing")
 preprocessor  = require("./plugins/preprocessor")
 
 runnerEvents = [
@@ -340,6 +341,9 @@ class Socket
 
       socket.on "external:open", (url) ->
         require("electron").shell.openExternal(url)
+
+      socket.on "test:before:run:async", =>
+        netStubbing.reset()
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>

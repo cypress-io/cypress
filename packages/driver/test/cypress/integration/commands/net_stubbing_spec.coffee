@@ -175,16 +175,21 @@ describe "src/cy/commands/net_stubbing", ->
         xhr.open("GET", "/abc123")
         xhr.send()
 
+      it "can stub a cy.visit with static body", ->
+        cy.route("/foo", "<html>hello cruel world</html>")
+        .visit("/foo")
+        .document()
+        .should("contain.text", "hello cruel world")
+
     context "stubbing with dynamic response", ->
       it "receives the original request in handler", (done) ->
-        cy.route "/abc123", (req) ->
+        cy.route "/def456", (req) ->
           req.reply({
             statusCode: 404
           })
 
           expect(req).to.include({
-            url: "http://localhost:3500/abc123",
-            body: "not implemented... yet",
+            url: "http://localhost:3500/def456",
             method: "GET",
             httpVersion: "1.1"
           })
@@ -192,11 +197,11 @@ describe "src/cy/commands/net_stubbing", ->
           done()
         .then ->
           xhr = new XMLHttpRequest()
-          xhr.open("GET", "/abc123")
+          xhr.open("GET", "/def456")
           xhr.send()
 
-    context "intercepting request", ->
-      it.only "receives the original request body in handler", (done) ->
+    context.only "intercepting request", ->
+      it "receives the original request body in handler", (done) ->
         cy.route "/aaa", (req) ->
           expect(req.body).to.eq("foo-bar-baz")
 
@@ -207,7 +212,7 @@ describe "src/cy/commands/net_stubbing", ->
           xhr.open("POST", "/aaa")
           xhr.send("foo-bar-baz")
 
-      it.only "can modify original request body and have it passed to next handler", (done) ->
+      it "can modify original request body and have it passed to next handler", (done) ->
         cy.route "/post-only", (req, next) ->
           expect(req.body).to.eq("foo-bar-baz")
 
@@ -225,11 +230,26 @@ describe "src/cy/commands/net_stubbing", ->
           cy.route "/post-only", (req) ->
             expect(req.body).to.eq('quux')
 
-            req.reply()
+            done()
         .then ->
           xhr = new XMLHttpRequest()
           xhr.open("POST", "/post-only")
           xhr.send("foo-bar-baz")
+
+      it "can modify a cy.visit before it goes out", ->
+        cy.route "/dump-headers", (req) ->
+          expect(req.headers['foo']).to.eq('bar')
+
+          req.headers['foo'] = 'quux'
+        .then ->
+          cy.visit({
+            url: '/dump-headers',
+            headers: {
+              'foo': 'bar'
+            }
+          })
+
+          cy.get('body').should('contain.text', '"foo":"quux"')
 
     context "intercepting response", ->
       it "receives the original response in handler", (done) ->

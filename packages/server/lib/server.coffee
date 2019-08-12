@@ -515,6 +515,9 @@ class Server
         delete options.body
 
       _.assign(options, {
+        ## send it through the Cypress proxy
+        proxy: "http://127.0.0.1:#{@_port()}"
+        agent: null
         ## turn off gzip since we need to eventually
         ## rewrite these contents
         gzip: false
