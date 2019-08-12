@@ -18,8 +18,10 @@ electronAppLauncher.open = (browser, url, options = {}, automation) ->
   # TODO pass actual discovered start file
   pathToMainElectronFile = '.'
 
-  cliArgs = R.clone(_defaultArgs)
+  # cliArgs = R.clone(_defaultArgs)
+  cliArgs = []
   cliArgs.push("--cypress-runner-url=#{url}")
+  cliArgs.push("--inspect=5858")
   electronAppLauncher.defaultArgs = cliArgs
 
   chrome.open.call(electronAppLauncher, browser, pathToMainElectronFile, options, automation)
