@@ -346,7 +346,7 @@ describe "lib/browsers/electron", ->
     it "sets proxy rules for webContents", ->
       webContents = {
         session: {
-          setProxy: sinon.stub().yieldsAsync()
+          setProxy: sinon.stub().resolves()
         }
       }
 

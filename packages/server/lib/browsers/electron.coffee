@@ -112,19 +112,14 @@ module.exports = {
     .return(win)
 
   _attachDebugger: (webContents) ->
-    ## this method doesn't like Promise.promisify because when there's
-    ## only one argument it can't be called with 2 arguments + the callback
     webContents.debugger.sendCommandAsync = (message, data = {}) ->
-      new Promise (resolve, reject) ->
-        debug("debugger: sendCommand(%s, %o)", message, data)
-        callback = (err, result) ->
-          debug("debugger: received response for %s: err: %o result: %o", message, err, result)
-          if not _.isEmpty(err)
-            reject(err)
-          else
-            resolve(result)
-
-        webContents.debugger.sendCommand(message, data, callback)
+      webContents.debugger.sendCommand(message, data)
+      .then (result) =>
+        debug("debugger: received response for %s: result: %o", message, result)
+        result
+      .catch (err) =>
+        debug("debugger: received error on %s: result: %o", message, err)
+        throw err
 
     try
       webContents.debugger.attach()
@@ -160,8 +155,7 @@ module.exports = {
 
   _clearCache: (webContents) ->
     debug("clearing cache")
-    new Promise (resolve) ->
-      webContents.session.clearCache(resolve)
+    webContents.session.clearCache()
 
   _setUserAgent: (webContents, userAgent) ->
     debug("setting user agent to:", userAgent)
@@ -170,14 +164,13 @@ module.exports = {
     webContents.session.setUserAgent(userAgent)
 
   _setProxy: (webContents, proxyServer) ->
-    new Promise (resolve) ->
-      webContents.session.setProxy({
-        proxyRules: proxyServer
-        ## this should really only be necessary when
-        ## running Chromium versions >= 72
-        ## https://github.com/cypress-io/cypress/issues/1872
-        proxyBypassRules: "<-loopback>"
-      }, resolve)
+    webContents.session.setProxy({
+      proxyRules: proxyServer
+      ## this should really only be necessary when
+      ## running Chromium versions >= 72
+      ## https://github.com/cypress-io/cypress/issues/1872
+      proxyBypassRules: "<-loopback>"
+    })
 
   open: (browser, url, options = {}, automation) ->
     { projectRoot, isTextTerminal } = options
@@ -284,7 +277,7 @@ module.exports = {
                 invokeViaDebugger("Network.setCookie", data).then ->
                   getCookie(data)
               when "clear:cookie"
-                invokeViaDebugger("Network.deleteCookies", data).return(null)
+                invokeViaDebugger("Network.deleteCookies", data)
               when "is:automation:client:connected"
                 tryToCall(win, 'isDestroyed') == false
               when "take:screenshot"
