@@ -15,6 +15,10 @@ export const findReactInstance = function (dom) {
 export const withMutableReporterState = (fn) => {
   top.Runner.configureMobx({ enforceActions: 'never' })
 
+  const currentTestLog = findReactInstance(cy.$$('.runnable-active', top.document)[0])
+
+  currentTestLog.props.model.isOpen = true
+
   return Cypress.Promise.try(() => {
     return fn()
   }).then(() => {
