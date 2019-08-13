@@ -6,9 +6,6 @@ $utils = require("../cypress/utils")
 create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
   return {
     retry: (fn, options, log) ->
-      if options.error
-        if !options.error.message.includes('coordsHistory must be')
-          console.error(options.error)
       ## remove the runnables timeout because we are now in retry
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
@@ -55,6 +52,7 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
           _.get(err, 'displayMessage') or
             _.get(err, 'message') or
               err
+
         $utils.throwErrByPath "miscellaneous.retry_timed_out", {
           onFail: (options.onFail or log)
           args: { error: getErrMessage(options.error) }

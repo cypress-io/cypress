@@ -45,7 +45,7 @@ const focusableWhenNotDisabled = [
 
 //'body,a[href],button,select,[tabindex],input,textarea,[contenteditable]'
 
-const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month)$/
+const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 
 declare global {

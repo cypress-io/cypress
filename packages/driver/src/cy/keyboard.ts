@@ -195,8 +195,8 @@ const findKeyDetailsOrLowercase = (key: string): KeyDetailsPartial => {
 const getTextLength = (str) => _.toArray(str).length
 
 const getKeyDetails = (onKeyNotFound) => {
-  return (key: string) => {
-    let foundKey
+  return (key: string): KeyDetails => {
+    let foundKey: KeyDetailsPartial
 
     if (getTextLength(key) === 1) {
       foundKey = USKeyboard[key]
@@ -695,6 +695,7 @@ export default class Keyboard {
             )
 
             _skipCheckUntilIndex = skipCheckUntilIndex
+
             if (
               _skipCheckUntilIndex
               && $elements.isNeedSingleValueChangeInputElement(el)
@@ -723,6 +724,7 @@ export default class Keyboard {
                 )
               }
             }
+
           } else {
             debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
           }
