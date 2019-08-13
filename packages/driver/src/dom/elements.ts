@@ -985,14 +985,14 @@ const stringify = (el, form = 'long') => {
 
   const long = () => {
     const str = $el
-      .clone()
-      .empty()
-      .prop('outerHTML')
+    .clone()
+    .empty()
+    .prop('outerHTML')
 
     const text = (_.chain($el.text()) as any)
-      .clean()
-      .truncate({ length: 10 })
-      .value()
+    .clean()
+    .truncate({ length: 10 })
+    .value()
     const children = $el.children().length
 
     if (children) {

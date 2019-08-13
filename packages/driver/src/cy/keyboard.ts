@@ -769,18 +769,18 @@ export default class Keyboard {
         return fn()
       }).delay(options.delay)
     })
-      .then(() => {
-        if (options.release !== false) {
-          return Promise.map(modifierKeys, (key) => {
-            return this.simulatedKeyup(getActiveEl(doc), key, options)
-          })
-        }
+    .then(() => {
+      if (options.release !== false) {
+        return Promise.map(modifierKeys, (key) => {
+          return this.simulatedKeyup(getActiveEl(doc), key, options)
+        })
+      }
 
-        return []
-      })
-      .then(() => {
-        options.onAfterType()
-      })
+      return []
+    })
+    .then(() => {
+      options.onAfterType()
+    })
   }
 
   fireSimulatedEvent (

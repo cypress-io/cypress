@@ -9,7 +9,11 @@
     "indent": "off",
     "@typescript-eslint/indent": [
       "error",
-      2
+      2,
+      {
+        "SwitchCase": 1,
+        "MemberExpression": 0
+      }
     ],
     "@typescript-eslint/no-unused-vars": [
       "error",

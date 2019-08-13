@@ -479,18 +479,18 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               timeout: options.timeout,
               interval: options.interval,
             })
-              .then(() => {
+            .then(() => {
 
-                return type()
+              return type()
 
-                // BEOW DOES NOT APPLY
-                // cannot just call .focus, since children of contenteditable will not receive cursor
-                // with .focus()
+              // BEOW DOES NOT APPLY
+              // cannot just call .focus, since children of contenteditable will not receive cursor
+              // with .focus()
 
-                // focusCursor calls focus on first focusable
-                // then moves cursor to end if in textarea, input, or contenteditable
+              // focusCursor calls focus on first focusable
+              // then moves cursor to end if in textarea, input, or contenteditable
               // $selection.focusCursor($elToFocus[0])
-              })
+            })
           }
 
           return type()
@@ -561,35 +561,35 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return cy
-        .now('type', $el, '{selectall}{del}', {
-          $el,
-          log: false,
-          verify: false, //# handle verification ourselves
-          _log: options._log,
-          force: options.force,
-          timeout: options.timeout,
-          interval: options.interval,
-        })
-        .then(() => {
-          if (options._log) {
-            options._log.snapshot().end()
-          }
+      .now('type', $el, '{selectall}{del}', {
+        $el,
+        log: false,
+        verify: false, //# handle verification ourselves
+        _log: options._log,
+        force: options.force,
+        timeout: options.timeout,
+        interval: options.interval,
+      })
+      .then(() => {
+        if (options._log) {
+          options._log.snapshot().end()
+        }
 
-          return null
-        })
+        return null
+      })
     }
 
     return Promise.resolve(subject.toArray())
-      .each(clear)
-      .then(() => {
-        let verifyAssertions
+    .each(clear)
+    .then(() => {
+      let verifyAssertions
 
-        return (verifyAssertions = () => {
-          return cy.verifyUpcomingAssertions(subject, options, {
-            onRetry: verifyAssertions,
-          })
-        })()
-      })
+      return (verifyAssertions = () => {
+        return cy.verifyUpcomingAssertions(subject, options, {
+          onRetry: verifyAssertions,
+        })
+      })()
+    })
   }
 
   return Commands.addAll(
