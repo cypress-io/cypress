@@ -483,6 +483,7 @@ class $Cypress
   minimatch: minimatch
   sinon: sinon
   lolex: lolex
+  Keyboard: $Keyboard
 
   @create = (config) ->
     new $Cypress(config)

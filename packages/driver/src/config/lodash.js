@@ -11,3 +11,5 @@ _.mixin({
   capitalize: require('underscore.string/capitalize'), // its mo' better the lodash version
   ordinalize: inflection.ordinalize,
 })
+
+export default _

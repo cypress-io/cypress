@@ -101,7 +101,6 @@ export default {
 
   _getTable (consoleProps) {
     const table = _.result(consoleProps, 'table')
-    debugger
 
     if (!table) return
 

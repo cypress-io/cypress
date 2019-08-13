@@ -519,7 +519,7 @@ const getFirstCommonAncestor = (el1, el2) => {
 
 const getAllParents = (el) => {
   let curEl = el.parentNode
-  const allParents:any[] = []
+  const allParents: any[] = []
 
   while (curEl) {
     allParents.push(curEl)
@@ -537,7 +537,7 @@ const isChild = ($el, $maybeChild) => {
   return $el.children().index($maybeChild) >= 0
 }
 
-const isDisabled = ($el:JQuery) => {
+const isDisabled = ($el: JQuery) => {
   return $el.prop('disabled')
 }
 
@@ -619,28 +619,33 @@ const isSame = function ($el1, $el2) {
   return el1 && el2 && _.isEqual(el1, el2)
 }
 
-export interface HTMLContentEditableElement extends HTMLElement {}
+export interface HTMLContentEditableElement extends HTMLElement {
+  isContenteditable: true
+}
 
 export interface HTMLTextLikeInputElement extends HTMLInputElement {
   type:
-    | 'text'
-    | 'password'
-    | 'email'
-    | 'number'
-    | 'date'
-    | 'week'
-    | 'month'
-    | 'time'
-    | 'datetime'
-    | 'datetime-local'
-    | 'search'
-    | 'url'
-    | 'tel'
+  | 'text'
+  | 'password'
+  | 'email'
+  | 'number'
+  | 'date'
+  | 'week'
+  | 'month'
+  | 'time'
+  | 'datetime'
+  | 'datetime-local'
+  | 'search'
+  | 'url'
+  | 'tel'
   setSelectionRange: HTMLInputElement['setSelectionRange']
 }
 
 export interface HTMLElementCanSetSelectionRange extends HTMLElement {
   setSelectionRange: HTMLInputElement['setSelectionRange']
+  value: HTMLInputElement['value']
+  selectionStart: number
+  selectionEnd: number
 }
 
 export type HTMLTextLikeElement = HTMLTextAreaElement | HTMLTextLikeInputElement | HTMLContentEditableElement
@@ -980,14 +985,14 @@ const stringify = (el, form = 'long') => {
 
   const long = () => {
     const str = $el
-    .clone()
-    .empty()
-    .prop('outerHTML')
+      .clone()
+      .empty()
+      .prop('outerHTML')
 
     const text = (_.chain($el.text()) as any)
-    .clean()
-    .truncate({ length: 10 })
-    .value()
+      .clean()
+      .truncate({ length: 10 })
+      .value()
     const children = $el.children().length
 
     if (children) {

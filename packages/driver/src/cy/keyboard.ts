@@ -160,10 +160,6 @@ const isModifier = (details: KeyDetails): details is modifierKeyDetails => {
   return !!keyToModifierMap[details.key]
 }
 
-const isSpecialChar = (key:string) => {
-  return !!findKeyDetailsOrLowercase(key)
-}
-
 const getFormattedKeyString = (details: KeyDetails) => {
   let foundKeyString = _.findKey(keyboardMappings, { key: details.key })
 
@@ -185,7 +181,7 @@ const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
   return _.countBy(keys, isModifier)['false']
 }
 
-const findKeyDetailsOrLowercase = (key:string):KeyDetailsPartial => {
+const findKeyDetailsOrLowercase = (key: string): KeyDetailsPartial => {
   const keymap = getKeymap()
   const foundKey = keymap[key]
 
@@ -251,9 +247,9 @@ const shouldIgnoreEvent = <
   T extends KeyEventType,
   K extends { [key in T]?: boolean }
 >(
-    eventName: T,
-    options: K
-  ) => {
+  eventName: T,
+  options: K
+) => {
   return options[eventName] === false
 }
 
@@ -299,10 +295,15 @@ const getKeymap = () => {
 }
 const validateTyping = (
   el: HTMLElement,
-  chars: string,
+  keys: KeyDetails[],
+  currentIndex: number,
   onFail: Function,
-  skipCheckUntilIndex?: number
+  skipCheckUntilIndex?: number,
 ) => {
+
+  const chars = joinKeyArrayToString(keys.slice(currentIndex))
+  const allChars = joinKeyArrayToString(keys)
+
   if (skipCheckUntilIndex) {
     return { skipCheckUntilIndex: skipCheckUntilIndex-- }
   }
@@ -330,7 +331,6 @@ const validateTyping = (
   }
 
   const isFocusable = $elements.isFocusable($el)
-  const isEmptyChars = _.isEmpty(chars)
   const clearChars = '{selectall}{delete}'
   const isClearChars = _.startsWith(chars.toLowerCase(), clearChars)
 
@@ -366,10 +366,6 @@ const validateTyping = (
     })
   }
 
-  if (isEmptyChars) {
-    $utils.throwErrByPath('type.empty_string', { onFail })
-  }
-
   if (isClearChars) {
     skipCheckUntilIndex = 2 // {selectAll}{del} is two keys
 
@@ -392,7 +388,7 @@ const validateTyping = (
     $utils.throwErrByPath('type.invalid_date', {
       onFail,
       // set matched date or entire char string
-      args: { chars: dateChars ? dateChars[0] : chars },
+      args: { chars: allChars },
     })
   }
 
@@ -407,7 +403,7 @@ const validateTyping = (
 
     $utils.throwErrByPath('type.invalid_month', {
       onFail,
-      args: { chars },
+      args: { chars: allChars },
     })
   }
 
@@ -422,7 +418,7 @@ const validateTyping = (
 
     $utils.throwErrByPath('type.invalid_week', {
       onFail,
-      args: { chars },
+      args: { chars: allChars },
     })
   }
 
@@ -437,7 +433,7 @@ const validateTyping = (
 
     $utils.throwErrByPath('type.invalid_time', {
       onFail,
-      args: { chars },
+      args: { chars: allChars },
     })
   }
 
@@ -455,7 +451,7 @@ const validateTyping = (
 
     $utils.throwErrByPath('type.invalid_dateTime', {
       onFail,
-      args: { chars },
+      args: { chars: allChars },
     })
   }
 
@@ -474,42 +470,18 @@ function _getEndIndex (str, substr) {
 const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
   Enter: (el, key, options) => {
     if ($elements.isContentEditable(el) || $elements.isTextarea(el)) {
-      $selection.replaceSelectionContents(el, '\n')
-      key.events.input = true
+      key.events.input = $selection.replaceSelectionContents(el, '\n')
     } else {
-      key.events.textInput = false
       key.events.input = false
     }
 
     options.onEnterPressed()
   },
   Delete: (el, key) => {
-    if ($selection.isCollapsed(el)) {
-      //# if there's no text selected, delete the prev char
-      //# if deleted char, send the input event
-      key.events.input = $selection.deleteRightOfCursor(el)
-
-      return
-    }
-
-    //# text is selected, so delete the selection
-    //# contents and send the input event
-    $selection.deleteSelectionContents(el)
-    key.events.input = true
+    key.events.input = $selection.deleteRightOfCursor(el)
   },
   Backspace: (el, key) => {
-    if ($selection.isCollapsed(el)) {
-      //# if there's no text selected, delete the prev char
-      //# if deleted char, send the input event
-      key.events.input = $selection.deleteLeftOfCursor(el)
-
-      return
-    }
-
-    //# text is selected, so delete the selection
-    //# contents and send the input event
-    $selection.deleteSelectionContents(el)
-    key.events.input = true
+    key.events.input = $selection.deleteLeftOfCursor(el)
   },
   ArrowLeft: (el) => {
     return $selection.moveCursorLeft(el)
@@ -711,18 +683,16 @@ export default class Keyboard {
 
           const activeEl = getActiveEl(doc)
 
+          _skipCheckUntilIndex = _skipCheckUntilIndex && _skipCheckUntilIndex - 1
+
           if (!_skipCheckUntilIndex) {
             const { skipCheckUntilIndex, isClearChars } = validateTyping(
               activeEl,
-              joinKeyArrayToString(keyDetailsArr.slice(i)),
+              keyDetailsArr,
+              i,
               options.onFail,
-              _skipCheckUntilIndex
+              _skipCheckUntilIndex,
             )
-
-            if (skipCheckUntilIndex) {
-
-              debug('skipCheckUntilIndex:', skipCheckUntilIndex)
-            }
 
             _skipCheckUntilIndex = skipCheckUntilIndex
             if (
@@ -739,20 +709,22 @@ export default class Keyboard {
                 key.simulatedDefault = _.noop
               })
 
-            _.last(keysType)!.simulatedDefault = () => {
-              options.onValueChange(originalText, el)
+              _.last(keysType)!.simulatedDefault = () => {
+                options.onValueChange(originalText, el)
 
-              const valToSet = isClearChars ? '' : joinKeyArrayToString(keysType)
+                const valToSet = isClearChars ? '' : joinKeyArrayToString(keysType)
 
-              debug('setting element value', valToSet, el)
+                debug('setting element value', valToSet, el)
 
-              return $elements.setNativeProp(
-                el as HTMLTextLikeInputElement,
-                'value',
-                valToSet
-              )
+                return $elements.setNativeProp(
+                  el as HTMLTextLikeInputElement,
+                  'value',
+                  valToSet
+                )
+              }
             }
-            }
+          } else {
+            debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
           }
 
           if (key.simulatedDefaultOnly && key.simulatedDefault) {
@@ -795,18 +767,18 @@ export default class Keyboard {
         return fn()
       }).delay(options.delay)
     })
-    .then(() => {
-      if (options.release !== false) {
-        return Promise.map(modifierKeys, (key) => {
-          return this.simulatedKeyup(getActiveEl(doc), key, options)
-        })
-      }
+      .then(() => {
+        if (options.release !== false) {
+          return Promise.map(modifierKeys, (key) => {
+            return this.simulatedKeyup(getActiveEl(doc), key, options)
+          })
+        }
 
-      return []
-    })
-    .then(() => {
-      options.onAfterType()
-    })
+        return []
+      })
+      .then(() => {
+        options.onAfterType()
+      })
   }
 
   fireSimulatedEvent (
