@@ -565,7 +565,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     stopped = true
 
     stack = state("current")?.get("invocationStack")
-    codeFrame = $errUtils.getCodeFrameFromStack(stack, 1)
+    codeFrame = $errUtils.getCodeFrameFromStack(stack)
 
     if codeFrame
       err.codeFrames = [codeFrame]
@@ -812,7 +812,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           fn.apply(runnableCtx(name), args)
 
       cy[name] = (args...) ->
-        invocationStack = specWindow.__getStackFromSpecFrame()
+        invocationStack = (new specWindow.Error()).stack
 
         ensures.ensureRunnable(name)
 
