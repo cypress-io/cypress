@@ -105,10 +105,10 @@ chai.use (chai, u) ->
 
     Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
 
-  overrideChaiAsserts = (assertFn) ->
+  overrideChaiAsserts = (specWindow, assertFn) ->
     _this = @
 
-    chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
+    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, assertFn)
 
     chaiUtils.getMessage = (assert, args) ->
       obj = assert._obj
@@ -148,7 +148,7 @@ chai.use (chai, u) ->
 
         ## the assert checks below only work if $dom.isJquery(obj)
         ## https://github.com/cypress-io/cypress/issues/3549
-        if not ($dom.isJquery(obj)) 
+        if not ($dom.isJquery(obj))
           obj = $(obj)
 
         @assert(
@@ -255,7 +255,7 @@ chai.use (chai, u) ->
             e1.message = getLongExistsMessage(obj)
             throw e1
 
-  createPatchedAssert = (assertFn) ->
+  createPatchedAssert = (specWindow, assertFn) ->
     return (args...) ->
       passed    = chaiUtils.test(@, args)
       value     = chaiUtils.flag(@, "object")
@@ -274,6 +274,12 @@ chai.use (chai, u) ->
         err = e
 
       assertFn(passed, message, value, actual, expected, err)
+
+      stack = (new specWindow.Error()).stack
+      codeFrame = $errUtils.getCodeFrameFromStack(stack)
+
+      if codeFrame
+        err.codeFrames = [codeFrame]
 
       throw err if err
 
@@ -316,7 +322,7 @@ chai.use (chai, u) ->
     restoreAsserts()
 
     # overrideChai()
-    overrideChaiAsserts(assertFn)
+    overrideChaiAsserts(specWindow, assertFn)
 
     return setSpecWindowGlobals(specWindow)
 
