@@ -11,11 +11,14 @@ class ErrorCodeFrame extends Component {
   render () {
     const { file, line, column, frame } = this.props.codeFrame
     const language = this.props.codeFrame.language || 'text'
+    // since we pull out 2 lines above the highlighted code, it will always
+    // be the 3rd line unless it's at the top of the file (lines 1 or 2)
+    const highlightLine = line < 3 ? line : 3
 
     return (
       <div className='test-error-code-frame'>
         <div className='runnable-err-code-frame-file-path'>{file}:{line}:{column}</div>
-        <pre ref='codeFrame' data-line={3}>
+        <pre ref='codeFrame' data-line={highlightLine}>
           <code className={`language-${language}`}>{frame}</code>
         </pre>
       </div>
