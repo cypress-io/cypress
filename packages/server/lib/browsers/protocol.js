@@ -69,6 +69,12 @@ const getWsTargetFor = (port) => {
       type: 'page',
       title: 'cypress-example-electron',
     }
+    // const isThisTheTestAutomationPage = (target) => {
+    //   return (
+    //     target.type === 'page' &&
+    //       target.title.startsWith('https://example.cypress.io')
+    //   )
+    // }
     const target = _.find(targets, newTabTargetFields)
 
     la(target, 'could not find CRI target')

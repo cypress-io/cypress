@@ -64,6 +64,9 @@ getAllCookies = (data) ->
 # TODO find the name and the version of the app from "package.json" file?
 electronAppLauncher.name = "electron-app"
 electronAppLauncher.open = (browser, url, options = {}, automation) ->
+  # TODO overwrite the url to load with local host for experimentation
+  # url = "http://localhost:5556/__/#/tests/integration/spec.js"
+
   # TODO pass actual discovered start file
   # pathToMainElectronFile = '.'
   pathToMainElectronFile = "/Users/gleb/git/cypress-example-electron/main.js"
@@ -84,6 +87,7 @@ electronAppLauncher.open = (browser, url, options = {}, automation) ->
 
     automation.use({
       onRequest: (message, data) ->
+        console.log("automation message #{message}")
         switch message
           when "get:cookies"
             # TODO call either getCookies or getAllCookies
@@ -95,6 +99,9 @@ electronAppLauncher.open = (browser, url, options = {}, automation) ->
           when "clear:cookie"
             debug("clear:cookie", data)
             return global.remoteDebuggerClient.send("Network.deleteCookies", data)
+          # when "clear:cookies"
+          #   debug("clear:cookies", data)
+            # return true
           when "is:automation:client:connected"
             console.log("is:automation:client:connected ?")
             return Boolean(global.remoteDebuggerClient)
