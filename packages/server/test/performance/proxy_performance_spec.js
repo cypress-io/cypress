@@ -322,6 +322,9 @@ describe('Proxy Performance', function () {
 
   beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+    if (global.nock) {
+      global.nock.enableNetConnect()
+    }
   })
 
   before(function () {
