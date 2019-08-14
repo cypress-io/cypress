@@ -36,43 +36,17 @@ describe('gui/menu', function () {
   })
 
   context('Cypress', function () {
-    describe('on macOS', function () {
-      it('contains about, services, hide, hide others, show all, quit', () => {
-        menu.set()
-        const labels = getLabels(getMenuItem('Cypress').submenu)
+    it('on darwin has appMenu role', () => {
+      menu.set()
+      const cyMenu = getMenuItem('Cypress')
 
-        expect(labels).to.eql([
-          'About Cypress',
-          'Services',
-          'Hide Cypress',
-          'Hide Others',
-          'Show All',
-          'Quit',
-        ])
-      })
-
-      it('sets roles and shortcuts', () => {
-        menu.set()
-        const cyMenu = getMenuItem('Cypress')
-
-        expect(getSubMenuItem(cyMenu, 'About Cypress').role).to.equal('about')
-        expect(getSubMenuItem(cyMenu, 'Services').role).to.equal('services')
-        expect(getSubMenuItem(cyMenu, 'Hide Cypress').role).to.equal('hide')
-        expect(getSubMenuItem(cyMenu, 'Hide Cypress').accelerator).to.equal('Command+H')
-        expect(getSubMenuItem(cyMenu, 'Hide Others').role).to.equal('hideothers')
-        expect(getSubMenuItem(cyMenu, 'Hide Others').accelerator).to.equal('Command+Shift+H')
-        expect(getSubMenuItem(cyMenu, 'Show All').role).to.equal('unhide')
-        expect(getSubMenuItem(cyMenu, 'Quit').accelerator).to.equal('Command+Q')
-        expect(getSubMenuItem(cyMenu, 'Quit').role).to.equal('quit')
-      })
+      expect(cyMenu.role).to.eq('appMenu')
     })
 
-    describe('other OS', () => {
-      it('does not exist', () => {
-        os.platform.returns('linux')
-        menu.set()
-        expect(getMenuItem('Cypress')).to.be.undefined
-      })
+    it('on other OS does not exist', () => {
+      os.platform.returns('linux')
+      menu.set()
+      expect(getMenuItem('Cypress')).to.be.undefined
     })
   })
 
