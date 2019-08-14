@@ -284,7 +284,7 @@ module.exports = {
                 tryToCall(win, 'isDestroyed') == false
               when "take:screenshot"
                 tryToCall(win, 'capturePage')
-                .call('toDataURL')
+                .then _.partialRight(_.invoke, 'toDataURL')
               else
                 throw new Error("No automation handler registered for: '#{message}'")
         })
