@@ -112,8 +112,9 @@ module.exports = {
     .return(win)
 
   _attachDebugger: (webContents) ->
-    webContents.debugger.sendCommandAsync = (message, data = {}) ->
-      webContents.debugger.sendCommand(message, data)
+    originalSendCommand = webContents.debugger.sendCommand
+    webContents.debugger.sendCommand = (message, data = {}) ->
+      originalSendCommand.call(webContents.debugger, message, data)
       .then (result) =>
         debug("debugger: received response for %s: result: %o", message, result)
         result
@@ -127,7 +128,7 @@ module.exports = {
     catch err
       debug("debugger attached failed %o", { err })
 
-    webContents.debugger.sendCommandAsync('Browser.getVersion')
+    webContents.debugger.sendCommand('Browser.getVersion')
 
     webContents.debugger.on "detach", (event, reason) ->
       debug("debugger detached due to %o", { reason })
@@ -139,8 +140,8 @@ module.exports = {
   _enableDebugger: (webContents) ->
     debug("debugger: enable Console and Network")
     Promise.join(
-      webContents.debugger.sendCommandAsync("Console.enable"),
-      webContents.debugger.sendCommandAsync("Network.enable")
+      webContents.debugger.sendCommand("Console.enable"),
+      webContents.debugger.sendCommand("Network.enable")
     )
 
   _getPartition: (options) ->
@@ -215,7 +216,7 @@ module.exports = {
 
         invokeViaDebugger = (message, data) ->
           tryToCall win, ->
-            win.webContents.debugger.sendCommandAsync(message, data)
+            win.webContents.debugger.sendCommand(message, data)
 
         normalizeGetCookieProps = (cookie) ->
           if cookie.expires == -1
@@ -282,7 +283,7 @@ module.exports = {
                 tryToCall(win, 'isDestroyed') == false
               when "take:screenshot"
                 tryToCall(win, 'capturePage')
-                .then _.partialRight(_.invoke, 'toDataURL')
+                .call('toDataURL')
               else
                 throw new Error("No automation handler registered for: '#{message}'")
         })

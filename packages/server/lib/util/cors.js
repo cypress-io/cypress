@@ -6,10 +6,18 @@ const parseDomain = require('parse-domain')
 
 const ipAddressRe = /^[\d\.]+$/
 
-const _parseDomain = _.partialRight(parseDomain, {
-  privateTlds: true,
-  customTlds: ipAddressRe,
-})
+function getSuperDomain (url) {
+  const parsed = parseUrlIntoDomainTldPort(url)
+
+  return _.compact([parsed.domain, parsed.tld]).join('.')
+}
+
+function _parseDomain (domain, options = {}) {
+  return parseDomain(domain, _.defaults(options, {
+    privateTlds: true,
+    customTlds: ipAddressRe,
+  }))
+}
 
 function parseUrlIntoDomainTldPort (str) {
   let { hostname, port, protocol } = url.parse(str)
@@ -47,36 +55,34 @@ function parseUrlIntoDomainTldPort (str) {
   return obj
 }
 
+function urlMatchesOriginPolicyProps (urlStr, props) {
+  // take a shortcut here in the case
+  // where remoteHostAndPort is null
+  if (!props) {
+    return false
+  }
+
+  const parsedUrl = this.parseUrlIntoDomainTldPort(urlStr)
+
+  // does the parsedUrl match the parsedHost?
+  return _.isEqual(parsedUrl, props)
+}
+
+function urlMatchesOriginProtectionSpace (urlStr, origin) {
+  const normalizedUrl = uri.addDefaultPort(urlStr).format()
+  const normalizedOrigin = uri.addDefaultPort(origin).format()
+
+  return _.startsWith(normalizedUrl, normalizedOrigin)
+}
+
 module.exports = {
   parseUrlIntoDomainTldPort,
 
   parseDomain: _parseDomain,
 
-  // matches #getSuperDomain from driver
-  // https://github.com/cypress-io/cypress/blob/adb56d0f79d0378840cd7b2011862f7792cfe992/packages/driver/src/cypress/location.coffee#L85-L85
-  getSuperDomain (url) {
-    const parsed = parseUrlIntoDomainTldPort(url)
+  getSuperDomain,
 
-    return _.compact([parsed.domain, parsed.tld]).join('.')
-  },
+  urlMatchesOriginPolicyProps,
 
-  urlMatchesOriginPolicyProps (urlStr, props) {
-    // take a shortcut here in the case
-    // where remoteHostAndPort is null
-    if (!props) {
-      return false
-    }
-
-    const parsedUrl = this.parseUrlIntoDomainTldPort(urlStr)
-
-    // does the parsedUrl match the parsedHost?
-    return _.isEqual(parsedUrl, props)
-  },
-
-  urlMatchesOriginProtectionSpace (urlStr, origin) {
-    const normalizedUrl = uri.addDefaultPort(urlStr).format()
-    const normalizedOrigin = uri.addDefaultPort(origin).format()
-
-    return _.startsWith(normalizedUrl, normalizedOrigin)
-  },
+  urlMatchesOriginProtectionSpace,
 }

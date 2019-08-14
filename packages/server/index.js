@@ -20,6 +20,6 @@ require && require.extensions && delete require.extensions['.coffee.md']
 
 // warn when deprecated callback apis are used in electron
 // https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
-process.enablePromiseAPIs = process.env.CYPRESS_ENV === 'development'
+process.enablePromiseAPIs = process.env.CYPRESS_ENV !== 'production'
 
 module.exports = require('./lib/cypress').start(process.argv)

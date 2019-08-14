@@ -86,7 +86,7 @@ module.exports = {
 
       cp.spawn(execPath, argv, {stdio: "inherit"})
       .on "close", (code, errCode) ->
-        debug("electron closing with code: %s, error code: %s", code, errCode)
+        debug("electron closing %o", { code, errCode })
 
         if code
           debug("original command was")

@@ -373,8 +373,7 @@ class Server
         return runPhase ->
           resolve(
             Promise.map obj.details.cookies, _.partial(automationRequest, 'set:cookie')
-            .then ->
-              obj.details
+            .return(obj.details)
           )
 
       redirects = []
@@ -635,19 +634,7 @@ class Server
       {hostname} = url.parse("http://#{host}")
 
       onProxyErr = (err, req, res) ->
-        ## by default http-proxy will call socket.end
-        ## with no data, so we need to override the end
-        ## function and write our own response
-        ## https://github.com/nodejitsu/node-http-proxy/blob/master/lib/http-proxy/passes/ws-incoming.js#L159
-        end = socket.end
-        socket.end = ->
-          socket.end = end
-
-          debug(
-            "Got ERROR proxying websocket connection to url: received error %o", { err },
-          )
-
-          socket.end()
+        debug("Got ERROR proxying websocket connection", { err, port, protocol, hostname, req })
 
       proxy.ws(req, socket, head, {
         secure: false

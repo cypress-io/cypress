@@ -79,7 +79,6 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
-          '--max-http-header-size=1048576',
           '--foo',
           '--cwd',
           cwd,
@@ -98,7 +97,6 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo', { dev: true, foo: 'bar' })
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('node', [
-          '--max-http-header-size=1048576',
           p,
           '--foo',
           '--cwd',
