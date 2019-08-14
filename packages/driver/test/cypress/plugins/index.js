@@ -1,9 +1,16 @@
+require('../../../../ts/register')
+
 const _ = require('lodash')
 const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
+const webpack = require('@cypress/webpack-preprocessor')
+
+const webpackOptions = require('../../../../runner/webpack.config.ts').default
 
 module.exports = (on) => {
+  on('file:preprocessor', webpack({ webpackOptions }))
+
   on('task', {
     'return:arg' (arg) {
       return arg

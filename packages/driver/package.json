@@ -17,6 +17,7 @@
     "@cypress/sinon-chai": "1.1.0",
     "@cypress/underscore.inflection": "1.0.1",
     "@cypress/unique-selector": "0.4.2",
+    "@cypress/webpack-preprocessor": "4.1.0",
     "@cypress/what-is-circular": "1.0.1",
     "angular": "1.7.7",
     "backbone": "1.4.0",

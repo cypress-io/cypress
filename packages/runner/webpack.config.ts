@@ -5,7 +5,7 @@ import webpack from 'webpack'
 const lessCommonConfig = getCommonConfig()
 
 // @ts-ignore
-lessCommonConfig.module.rules[1].use.options.plugins.push(['prismjs', {
+lessCommonConfig.module.rules[1].use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
   'languages': ['javascript'],
   'plugins': ['line-numbers', 'line-highlight'],
   'theme': 'default',
