@@ -15,6 +15,7 @@ stripAnsi  = require("strip-ansi")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
+argsUtil   = require("#{root}lib/util/args")
 fs         = require("#{root}lib/util/fs")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings   = require("#{root}lib/util/settings")
@@ -118,8 +119,13 @@ describe "lib/cypress", ->
     sinon.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
     sinon.stub(process, "exit")
     sinon.stub(Server.prototype, "reset")
+    sinon.stub(errors, "warning")
+    .callThrough()
+    .withArgs("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+    .returns(null)
+
     sinon.spy(errors, "log")
-    sinon.spy(errors, "warning")
+    sinon.spy(errors, "logException")
     sinon.spy(console, "log")
 
     @expectExitWith = (code) =>
@@ -805,8 +811,8 @@ describe "lib/cypress", ->
             @expectExitWith(0)
 
         it "electron", ->
-          write = sinon.stub()
-          videoCapture.start.returns({ write })
+          writeVideoFrame = sinon.stub()
+          videoCapture.start.returns({ writeVideoFrame })
 
           cypress.start([
             "--run-project=#{@pluginBrowser}"
@@ -954,9 +960,10 @@ describe "lib/cypress", ->
       sinon.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns(@projectId)
 
       cypress.start([
+        "--cwd=/foo/bar"
         "--run-project=#{@noScaffolding}",
         "--record",
-        "--key=token-123"
+        "--key=token-123",
       ])
       .then =>
         expect(api.createRun).to.be.calledWithMatch({projectId: @projectId})
@@ -969,8 +976,9 @@ describe "lib/cypress", ->
       .withArgs("CYPRESS_RECORD_KEY").returns("token")
 
       cypress.start([
+        "--cwd=/foo/bar"
         "--run-project=#{@noScaffolding}",
-        "--record"
+        "--record",
       ])
       .then =>
         expect(api.createRun).to.be.calledWithMatch({
@@ -1459,6 +1467,23 @@ describe "lib/cypress", ->
           fs.readJsonAsync(path.join(@pristinePath, @filename))
           .then (json) =>
             expect(json).to.deep.equal({})
+
+  context "--cwd", ->
+    beforeEach ->
+      errors.warning.restore()
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(interactiveMode, "ready").resolves()
+      sinon.spy(errors, "warning")
+
+    it "shows warning if Cypress has been started directly", ->
+      cypress.start().then ->
+        expect(errors.warning).to.be.calledWith("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+        expect(console.log).to.be.calledWithMatch("It looks like you are running the Cypress binary directly.")
+        expect(console.log).to.be.calledWithMatch("https://on.cypress.io/installing-cypress")
+
+    it "does not show warning if finds --cwd", ->
+      cypress.start(["--cwd=/foo/bar"]).then ->
+        expect(errors.warning).not.to.be.called
 
   context "no args", ->
     beforeEach ->

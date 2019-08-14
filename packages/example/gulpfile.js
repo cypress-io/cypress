@@ -2,7 +2,6 @@ let gulp = require('gulp')
 let ghPages = require('gulp-gh-pages-will')
 let clean = require('gulp-clean')
 let RevAll = require('gulp-rev-all')
-let runSequence = require('run-sequence')
 
 gulp.task('assets', function () {
   let revAllOpts = {
@@ -23,12 +22,12 @@ gulp.task('cname', function () {
 })
 
 gulp.task('gitignore', function () {
-  return gulp.src('.gitignore')
+  return gulp.src('.gitignore', { allowEmpty: true })
   .pipe(gulp.dest('build'))
 })
 
 gulp.task('clean', function () {
-  return gulp.src('./build')
+  return gulp.src('./build', { allowEmpty: true })
   .pipe(clean())
 })
 
@@ -37,10 +36,6 @@ gulp.task('push-gh-pages', function () {
   .pipe(ghPages())
 })
 
-gulp.task('build', function (cb) {
-  return runSequence('clean', ['assets', 'cname', 'gitignore'], cb)
-})
+gulp.task('build', gulp.series('clean', gulp.parallel('assets', 'cname', 'gitignore')))
 
-gulp.task('deploy', function (cb) {
-  return runSequence('build', 'push-gh-pages', cb)
-})
+gulp.task('deploy', gulp.series('build', 'push-gh-pages'))
