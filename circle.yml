@@ -820,10 +820,10 @@ linux-workflow: &linux-workflow
     - server-e2e-tests-8:
         requires:
           - build
-    - driver-integration-tests-chrome-5x:
+    - driver-integration-tests-chrome:
         requires:
           - build
-    - driver-integration-tests-electron-5x:
+    - driver-integration-tests-electron:
         requires:
           - build
     - desktop-gui-integration-tests-2x:
