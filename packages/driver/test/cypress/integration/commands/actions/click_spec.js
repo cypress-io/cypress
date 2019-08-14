@@ -743,12 +743,12 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('iframe')
       .should(($iframe) => {
         // wait for iframe to load
-        expect($iframe.contents().find('body').html()).ok
+        expect($iframe.first().contents().find('body').html()).ok
       })
       .then(($iframe) => {
         // cypress does not wrap this as a DOM element (does not wrap in jquery)
         // return cy.wrap($iframe[0].contentDocument.body)
-        return cy.wrap($iframe.contents().find('body'))
+        return cy.wrap($iframe.first().contents().find('body'))
       })
 
       .within(() => {
