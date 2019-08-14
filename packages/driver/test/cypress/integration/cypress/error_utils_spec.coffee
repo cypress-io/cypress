@@ -1,5 +1,6 @@
 $errUtils = require("../../../../src/cypress/error_utils.js")
 $errorMessages = require("../../../../src/cypress/error_messages")
+$sourceMapUtils = require("../../../../src/cypress/source_map_utils.js")
 
 describe "driver/src/cypress/error_utils", ->
   context.skip ".modifyErrMsg", ->
@@ -446,50 +447,44 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(msg).to.eq("click simple error message")
 
-  context ".getCodeFrame", ->
-    it "returns a code frame the line and column marked", ->
-      sourceCode = """
-        <!DOCTYPE html>
-        <html>
-        <body>
-          <script type="text/javascript">
-            foo.bar()
-          </script>
-        </body>
-        </html>
-      """
-
-      { frame, file, line, column } = $errUtils.getCodeFrame(sourceCode, {
-        source: "foo/bar/baz"
-        line: 5
-        column: 6
+  context ".addCodeFrameToErr", ->
+    beforeEach ->
+      @err = {}
+      sourceCode = """it('is a failing test', () => {
+        cy.get('.not-there')
       })
-
-      expect(frame).to.contain("> 5 |     foo.bar()")
-      expect(frame).to.contain("    |      ^")
-      expect(file).to.eq("foo/bar/baz")
-      expect(line).to.eq(5)
-      expect(column).to.eq(6)
-
-    it "returns null when code frame can't be generated", ->
-      sourceCode = """
-        <!DOCTYPE html>
-        <html>
-        <body>
-          <script type="text/javascript">
-            foo.bar()
-          </script>
-        </body>
-        </html>
       """
+      cy.stub($sourceMapUtils, "getSourceContents").returns(sourceCode)
 
-      result = $errUtils.getCodeFrame(sourceCode, {
-        source: "foo/bar/baz"
-        line: 100 ## There are not 100 lines in src
-        column: 6
+    it "adds code frame if provided stack yields one", ->
+      cy.stub($sourceMapUtils, "getSourcePosition").returns({
+        source: "http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js"
+        line: 3
+        column: 5
       })
+      err = $errUtils.addCodeFrameToErr(@err, """Error
+        at Context.<anonymous> (http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js:5:21)
+      """)
 
-      expect(result).to.be.null
+      expect(err.codeFrames).to.be.an("array")
+
+      { frame, file, line, column } = err.codeFrames[0]
+
+      expect(frame).to.contain("  1 | it('is a failing test', () => {")
+      expect(frame).to.contain("  2 |   cy.get('.not-there'")
+      expect(frame).to.contain("> 3 | }")
+      expect(file).to.equal("http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js")
+      expect(line).to.equal(3)
+      expect(column).to.eq(5)
+
+    it "does not add code frame if stack does not yield one", ->
+      cy.stub($sourceMapUtils, "getSourcePosition").returns(null)
+
+      err = $errUtils.addCodeFrameToErr(@err, """Error
+        at Context.<anonymous> (http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js:5:21)
+      """)
+
+      expect(err.codeFrames).to.be.undefined
 
   context ".escapeErrMarkdown", ->
     it "accepts non-strings", ->

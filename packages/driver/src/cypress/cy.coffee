@@ -565,10 +565,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     stopped = true
 
     stack = state("current")?.get("invocationStack")
-    codeFrame = $errUtils.getCodeFrameFromStack(stack)
-
-    if codeFrame
-      err.codeFrames = [codeFrame]
+    err = $errUtils.addCodeFrameToErr(err, stack)
 
     ## store the error on state now
     state("error", err)

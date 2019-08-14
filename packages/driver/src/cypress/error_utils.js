@@ -268,6 +268,16 @@ const getCodeFrameFromStack = (stack, lineIndex = 0) => {
   return getCodeFrame($sourceMapUtils.getSourceContents(file), stackLineDetails)
 }
 
+const addCodeFrameToErr = (err, stack) => {
+  const codeFrame = getCodeFrameFromStack(stack)
+
+  if (codeFrame) {
+    err.codeFrames = [codeFrame]
+  }
+
+  return err
+}
+
 const escapeErrMarkdown = (text) => {
   if (!_.isString(text)) {
     return text
@@ -344,8 +354,7 @@ module.exports = {
   getErrMessage,
   errMsgByPath,
   getErrStack,
-  getCodeFrame,
-  getCodeFrameFromStack,
+  addCodeFrameToErr,
   escapeErrMarkdown,
   getObjValueByPath,
   getStackLineDetails,

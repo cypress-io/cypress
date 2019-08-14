@@ -276,10 +276,7 @@ chai.use (chai, u) ->
       assertFn(passed, message, value, actual, expected, err)
 
       stack = (new specWindow.Error()).stack
-      codeFrame = $errUtils.getCodeFrameFromStack(stack)
-
-      if codeFrame
-        err.codeFrames = [codeFrame]
+      err = $errUtils.addCodeFrameToErr(err, stack)
 
       throw err if err
 
