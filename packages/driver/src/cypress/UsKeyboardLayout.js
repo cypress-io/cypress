@@ -321,10 +321,19 @@ module.exports = {
     y: { keyCode: 89, key: 'y', code: 'KeyY' },
     z: { keyCode: 90, key: 'z', code: 'KeyZ' },
     Meta: { keyCode: 91, key: 'Meta', code: 'MetaLeft', location: 1 },
-    '*': { keyCode: 106, key: '*', code: 'NumpadMultiply', location: 3 },
-    '+': { keyCode: 107, key: '+', code: 'NumpadAdd', location: 3 },
-    '-': { keyCode: 109, key: '-', code: 'NumpadSubtract', location: 3 },
-    '/': { keyCode: 111, key: '/', code: 'NumpadDivide', location: 3 },
+
+    '*': { keyCode: 56, code: 'Digit8', key: '*' },
+    // '*': { keyCode: 106, key: '*', code: 'NumpadMultiply', location: 3 },
+
+    '+': { keyCode: 187, code: 'Equal', key: '+' },
+    // '+': { keyCode: 107, key: '+', code: 'NumpadAdd', location: 3 },
+
+    '-': { keyCode: 189, code: 'Minus', key: '-' },
+    // '-': { keyCode: 109, key: '-', code: 'NumpadSubtract', location: 3 },
+
+    '/': { keyCode: 191, code: 'Slash', key: '/' },
+    // '/': { keyCode: 111, key: '/', code: 'NumpadDivide', location: 3 },
+
     ';': { keyCode: 186, key: ';', code: 'Semicolon' },
     '=': { keyCode: 187, key: '=', code: 'Equal' },
     ',': { keyCode: 188, key: ',', code: 'Comma' },
