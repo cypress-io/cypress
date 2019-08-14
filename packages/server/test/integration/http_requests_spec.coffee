@@ -3,7 +3,9 @@ require("../spec_helper")
 _             = require("lodash")
 r             = require("request")
 rp            = require("request-promise")
+compression   = require("compression")
 dns           = require("dns")
+express       = require("express")
 http          = require("http")
 path          = require("path")
 url           = require("url")
@@ -1002,6 +1004,39 @@ describe "Routes", ->
           expect(res.body).to.include("gzip")
           expect(res.body).not.to.include("document.domain = 'github.com'")
           expect(res.body).to.include("</html>")
+
+      ## https://github.com/cypress-io/cypress/issues/1746
+      it "can ungzip utf-8 javascript and inject without corrupting it", ->
+        js = ""
+
+        app = express()
+
+        app.use compression({ chunkSize: 64, threshold: 1 })
+
+        app.get "/", (req, res) =>
+          res.setHeader('content-type', 'application/javascript; charset=UTF-8')
+          res.setHeader('transfer-encoding', 'chunked')
+
+          write = (chunk) =>
+            js += chunk
+            res.write(chunk)
+
+          write("function ")
+          _.times 100, =>
+            write("😡😈".repeat(10))
+          write(" () { }")
+          res.end()
+
+        Promise.fromCallback (cb) =>
+          app.listen(12345, cb)
+        .then (server) =>
+          @rp({
+            url: "http://localhost:12345"
+            gzip: true
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.deep.eq(js)
 
     context "accept-encoding", ->
       beforeEach ->
