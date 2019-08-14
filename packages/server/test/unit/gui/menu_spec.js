@@ -63,13 +63,7 @@ describe('gui/menu', function () {
         expect(getSubMenuItem(cyMenu, 'Hide Others').accelerator).to.equal('Command+Shift+H')
         expect(getSubMenuItem(cyMenu, 'Show All').role).to.equal('unhide')
         expect(getSubMenuItem(cyMenu, 'Quit').accelerator).to.equal('Command+Q')
-      })
-
-      it('exits process when Quit is clicked', () => {
-        sinon.stub(process, 'exit')
-        menu.set()
-        getSubMenuItem(getMenuItem('Cypress'), 'Quit').click()
-        expect(process.exit).to.be.calledWith(0)
+        expect(getSubMenuItem(cyMenu, 'Quit').role).to.equal('quit')
       })
     })
 

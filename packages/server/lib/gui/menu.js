@@ -205,9 +205,6 @@ module.exports = {
             label: 'Quit',
             accelerator: 'Command+Q',
             role: 'quit',
-            click () {
-              return process.exit(0)
-            },
           },
         ],
       })
