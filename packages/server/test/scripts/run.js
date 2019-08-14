@@ -70,7 +70,7 @@ if (options['inspect-brk']) {
 
 if (isGteNode12()) {
   // max HTTP header size 8kb -> 1mb
-  // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
+  // https://github.com/cypress-io/cypress/issues/76
   commandAndArguments.args.push(
     `--max-http-header-size=${1024 * 1024}`
   )

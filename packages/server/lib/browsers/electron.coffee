@@ -114,7 +114,8 @@ module.exports = {
   _attachDebugger: (webContents) ->
     originalSendCommand = webContents.debugger.sendCommand
     webContents.debugger.sendCommand = (message, data = {}) ->
-      originalSendCommand.call(webContents.debugger, message, data)
+      originalSendCommand
+      .call(webContents.debugger, message, data)
       .then (result) =>
         debug("debugger: received response for %s: result: %o", message, result)
         result
