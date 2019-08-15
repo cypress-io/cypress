@@ -4,7 +4,7 @@ const $ = require('jquery')
 const _ = require('lodash')
 const $Keyboard = require('./keyboard')
 const $selection = require('../dom/selection')
-const debug = require('debug')('driver:mouse')
+const debug = require('debug')('cypress:driver:mouse')
 
 /**
  * @typedef Coords
@@ -23,7 +23,16 @@ const getLastHoveredEl = (state) => {
   }
 
   return lastHoveredEl
+}
 
+const defaultPointerDownUpOptions = {
+  pointerType: 'mouse',
+  pointerId: 1,
+  isPrimary: true,
+  detail: 0,
+  // pressure 0.5 is default for mouse that doesn't support pressure
+  // https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pressure
+  pressure: 0.5,
 }
 
 const getMouseCoords = (state) => {
@@ -188,7 +197,6 @@ const create = (state, keyboard, focused) => {
 
       }
 
-      // if (!Cypress.config('mousemoveBeforeMouseover') && el) {
       pointermove = () => {
         return sendPointermove(el, defaultPointerOptions)
       }
@@ -213,7 +221,6 @@ const create = (state, keyboard, focused) => {
       events.push({ mousemove: mousemove() })
 
       return events
-
     },
 
     /**
@@ -229,10 +236,7 @@ const create = (state, keyboard, focused) => {
 
       const el = doc.elementFromPoint(x, y)
 
-      // mouse._mouseMoveEvents(el, { x, y })
-
       return el
-
     },
 
     /**
@@ -264,14 +268,10 @@ const create = (state, keyboard, focused) => {
       const defaultOptions = mouse._getDefaultMouseOptions(x, y, win)
 
       const pointerEvtOptions = _.extend({}, defaultOptions, {
+        ...defaultPointerDownUpOptions,
         button: 0,
         which: 1,
         buttons: 1,
-        detail: 0,
-        pressure: 0.5,
-        pointerType: 'mouse',
-        pointerId: 1,
-        isPrimary: true,
         relatedTarget: null,
       }, pointerEvtOptionsExtend)
 
@@ -399,12 +399,8 @@ const create = (state, keyboard, focused) => {
       let defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
 
       const pointerEvtOptions = _.extend({}, defaultOptions, {
+        ...defaultPointerDownUpOptions,
         buttons: 0,
-        pressure: 0.5,
-        pointerType: 'mouse',
-        pointerId: 1,
-        isPrimary: true,
-        detail: 0,
       }, pointerEvtOptionsExtend)
 
       let mouseEvtOptions = _.extend({}, defaultOptions, {
@@ -533,12 +529,12 @@ const create = (state, keyboard, focused) => {
 
 const { stopPropagation } = window.MouseEvent.prototype
 
-const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, constructor) => {
+const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, Constructor) => {
   evtOptions = _.extend({}, evtOptions, { bubbles, cancelable })
   const _eventModifiers = $Keyboard.fromModifierEventOptions(evtOptions)
   const modifiers = $Keyboard.modifiersToString(_eventModifiers)
 
-  const evt = new constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
+  const evt = new Constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
 
   if (bubbles) {
     evt.stopPropagation = function (...args) {
@@ -560,16 +556,16 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
 }
 
 const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
-  const constructor = el.ownerDocument.defaultView.PointerEvent
+  const Constructor = el.ownerDocument.defaultView.PointerEvent
 
-  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
+  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, Constructor)
 }
 const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
-  // IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
+  // TODO: IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
   // https://dom.spec.whatwg.org/#dom-document-createevent
-  const constructor = el.ownerDocument.defaultView.MouseEvent
+  const Constructor = el.ownerDocument.defaultView.MouseEvent
 
-  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
+  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, Constructor)
 }
 
 const sendPointerup = (el, evtOptions) => {
@@ -630,7 +626,6 @@ const formatReasonNotFired = (reason) => {
 }
 
 const toCoordsEventOptions = (x, y, win) => {
-
   // these are the coords from the document, ignoring scroll position
   const fromDocCoords = $elements.getFromDocCoords(x, y, win)
 

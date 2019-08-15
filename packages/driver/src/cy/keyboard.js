@@ -57,14 +57,7 @@ const fromModifierEventOptions = (eventOptions) => {
   }, Boolean)
 }
 
-const modifiersToString = (modifiers) => {
-  return _.keys(
-    _.pickBy(modifiers, (val) => {
-      return val
-    })
-  )
-  .join(', ')
-}
+const modifiersToString = (modifiers) => _.keys(_.pickBy(modifiers, Boolean)).join(', ')
 
 const create = (state) => {
   const kb = {
@@ -680,6 +673,7 @@ const create = (state) => {
 
       return kb.specialChars[chars].call(this, el, options)
     },
+
     isModifier (chars) {
       return _.includes(_.keys(kb.modifierChars), chars)
     },
