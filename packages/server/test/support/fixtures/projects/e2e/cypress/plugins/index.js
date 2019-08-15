@@ -3,6 +3,8 @@ const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
 
+const performance = require('../../../../test/support/helpers/performance')
+
 module.exports = (on) => {
   // save some time by only reading the originals once
   let cache = {}
@@ -97,10 +99,22 @@ module.exports = (on) => {
       })
     },
 
-    'console:log' (obj) {
-      console.log(obj) // eslint-disable-line no-console
+    'record:fast_visit_spec' ({ percentiles, url, browser }) {
+      percentiles.forEach(([percent, percentile]) => {
+        console.log(`${percent}%\t of visits to ${url} finished in less than ${percentile}ms`)
+      })
 
-      return null
+      const data = {
+        url,
+        browser,
+        ...percentiles.reduce((acc, pair) => {
+          acc[pair[0]] = pair[1]
+          return acc
+        }, {})
+      }
+
+      return performance.track('fast_visit_spec percentiles', data)
+      .return(null)
     },
   })
 }

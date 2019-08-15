@@ -24,12 +24,15 @@ fastVisitSpec = (url) ->
       i = Math.floor(p / 100 * times.length) - 1
       times[i]
 
-    message = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 97, 99, 100].map (p) ->
-      "#{p}%\t of visits to #{url} finished in less than #{percentile(p)}ms"
-    .join("\n")
+    percentiles = [1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 97, 99, 100].map (p) ->
+      [p, percentile(p)]
 
     cy
-    .task('console:log', message)
+    .task('record:fast_visit_spec', {
+      percentiles,
+      url,
+      browser: Cypress.config('browser').name
+    })
     .then ->
       expect(percentile(80)).to.be.lte(100)
 

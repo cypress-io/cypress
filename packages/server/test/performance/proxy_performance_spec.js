@@ -8,6 +8,7 @@ const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('@cypress/debugging-proxy')
 const HarCapturer = require('chrome-har-capturer')
+const performance = require('../support/helpers/performance')
 const Promise = require('bluebird')
 const Table = require('console-table-printer').Table
 const sanitizeFilename = require('sanitize-filename')
@@ -372,7 +373,7 @@ describe('Proxy Performance', function () {
         })
       })
 
-      testCases.slice(1).map((testCase) => {
+      testCases.map((testCase) => {
         it(`${testCase.name} loads 1000 images, with 75% loading no more than 2x as slow as the slowest baseline request`, function () {
           debug('Current test: ', testCase.name)
 
@@ -393,6 +394,8 @@ describe('Proxy Performance', function () {
         // console.log is bad for eslint, but nobody never said nothing about process.stdout.write
         process.stdout.write('Note: All times are in milliseconds.\n')
         t.printTable()
+
+        return Promise.map(testCases, _.partial(performance.track, 'Proxy Performance'))
       })
     })
   })
