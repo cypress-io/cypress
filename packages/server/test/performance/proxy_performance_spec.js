@@ -395,7 +395,11 @@ describe('Proxy Performance', function () {
         process.stdout.write('Note: All times are in milliseconds.\n')
         t.printTable()
 
-        return Promise.map(testCases, _.partial(performance.track, 'Proxy Performance'))
+        return Promise.map(testCases, (testCase) => {
+          testCase['URL'] = urlUnderTest
+
+          return performance.track('Proxy Performance', testCase)
+        })
       })
     })
   })
