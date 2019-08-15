@@ -15,13 +15,15 @@ function track (type, data) {
   return Promise.join(
     execa.stdout('git', ['rev-parse', 'HEAD']),
     execa.stdout('git', ['log', 'HEAD', '-1', '|', 'tail', '-n1'], { shell: true }).then(_.trim),
+    execa.stdout('git', ['log', '-1', '--format=%cd']).then((d) => new Date(d).toISOString()),
     execa.stdout('git', ['branch', '|', 'grep', '\\*', '|', 'cut', '-d', '\'', '\'', '-f2'], { shell: true }),
-    (commitSha, commitMessage, branch) => {
+    (commitSha, commitMessage, commitTimestamp, branch) => {
       const body = {
         type,
         data: {
           'Commit SHA': commitSha,
           'Commit Message': commitMessage,
+          'Commit Timestamp': commitTimestamp,
           'Branch': branch,
           ...data,
         },
