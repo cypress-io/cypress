@@ -3,7 +3,7 @@ const $jquery = require('./jquery')
 const docNode = window.Node.DOCUMENT_NODE
 
 //TODO: make this not allow jquery
-const isDocument = (obj:HTMLElement | Document): obj is Document => {
+const isDocument = (obj: HTMLElement | Document): obj is Document => {
   try {
     if ($jquery.isJquery(obj)) {
       obj = obj[0]
@@ -20,7 +20,7 @@ const hasActiveWindow = (doc) => {
   return !!doc.defaultView
 }
 
-const getDocumentFromElement = (el:HTMLElement):Document => {
+const getDocumentFromElement = (el: HTMLElement): Document => {
   if (isDocument(el)) {
     return el
   }

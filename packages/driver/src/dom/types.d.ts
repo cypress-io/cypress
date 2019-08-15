@@ -19,26 +19,26 @@ declare global {
 }
 
 export interface HTMLSingleValueChangeInputElement extends HTMLInputElement {
-		type: 'date' | 'time' | 'week' | 'month'
-	}
+  type: 'date' | 'time' | 'week' | 'month'
+}
 
 export interface HTMLContentEditableElement extends HTMLElement {}
 
 export interface HTMLTextLikeInputElement extends HTMLInputElement {
   type:
-    | 'text'
-    | 'password'
-    | 'email'
-    | 'number'
-    | 'date'
-    | 'week'
-    | 'month'
-    | 'time'
-    | 'datetime'
-    | 'datetime-local'
-    | 'search'
-    | 'url'
-    | 'tel'
+  | 'text'
+  | 'password'
+  | 'email'
+  | 'number'
+  | 'date'
+  | 'week'
+  | 'month'
+  | 'time'
+  | 'datetime'
+  | 'datetime-local'
+  | 'search'
+  | 'url'
+  | 'tel'
   setSelectionRange: HTMLInputElement['setSelectionRange']
 }
 
