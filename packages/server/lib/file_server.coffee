@@ -2,6 +2,7 @@
 
 _            = require("lodash")
 url          = require("url")
+http         = require("http")
 path         = require("path")
 send         = require("send")
 errors       = require("./errors")

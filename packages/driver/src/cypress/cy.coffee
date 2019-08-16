@@ -728,7 +728,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## listeners time to be invoked prior to moving on
           stability.isStable(true, "load")
         catch err
-          debugger
           ## we failed setting the remote window props
           ## which means we're in a cross domain failure
           ## check first to see if you have a callback function

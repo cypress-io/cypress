@@ -70,8 +70,8 @@ extensionDest = appData.path("web-extension")
 extensionBg = appData.path("web-extension", "background.js")
 
 module.exports = {
-  ensureProfileDir: (name) ->
-    fs.ensureDirAsync(path.join(profiles, name))
+  # ensureProfileDir: (name) ->
+  #   fs.ensureDirAsync(path.join(profiles, name))
 
   copyExtension
 
@@ -86,12 +86,18 @@ module.exports = {
   getBrowserByPath: launcher.detectByPath
 
   launch: launcher.launch
-  writeExtension: (proxyUrl, socketIoRoute) ->
+
+  writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
+    require('debug')('cypress:server:browsers')(browser, isTextTerminal, proxyUrl)
+    # debug('writing extension to chrome browser')
     ## get the string bytes for the final extension file
     extension.setHostAndPath(proxyUrl, socketIoRoute)
-    .then (str) =>
+    .then (str) ->
+      extensionDest = getExtensionDir(browser, isTextTerminal)
+      extensionBg   = path.join(extensionDest, "background.js")
+
       ## copy the extension src to the extension dist
-      @copyExtension(pathToExtension, extensionDest)
+      copyExtension(pathToExtension, extensionDest)
       .then ->
         ## and overwrite background.js with the final string bytes
         fs.writeFileAsync(extensionBg, str)

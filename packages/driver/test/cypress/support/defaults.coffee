@@ -4,9 +4,6 @@ $ = Cypress.$
 ## backup the original config
 ORIG_CONFIG = _.clone(Cypress.config())
 
-Cypress.on "fail", (err) ->
-  debugger
-
 beforeEach ->
   ## restore it before each test
   Cypress.config(ORIG_CONFIG)

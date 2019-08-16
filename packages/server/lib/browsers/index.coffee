@@ -138,8 +138,8 @@ module.exports = {
           options.onBrowserOpen()
 
           return instance
-    .catch (err) ->
-      debug("Error launching #{name}:", err)
-      throw err
+    # .catch (err) ->
+    #   debug("Error launching #{name}:", err)
+    #   throw err
 
 }

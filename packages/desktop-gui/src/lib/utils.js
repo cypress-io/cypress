@@ -12,12 +12,8 @@ const osIconLookup = {
 
 const browserIconLookup = {
   chrome: 'chrome',
-  chromium: 'chrome',
-  canary: 'chrome',
-  electron: 'chrome',
+  Electron: 'chrome',
   firefox: 'firefox',
-  firefoxDeveloperEdition: 'firefox',
-  firefoxNightly: 'firefox',
   safari: 'safari',
 }
 

@@ -417,7 +417,6 @@ create = (Cypress, cy, state, config) ->
   delay ?= setDelay(config("logAttrsDelay"))
 
   trigger = (log, event) ->
-    # return
     ## bail if we never fired our initial log event
     return if not log._hasInitiallyLogged
 

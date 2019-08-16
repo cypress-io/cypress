@@ -19,18 +19,19 @@ pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
 
 defaultArgs = [
-  "--test-type" ## Type of the current test harness ("browser" or "ui") QUESTION: Are we using this right?
+  "--test-type"
   "--ignore-certificate-errors"
   "--start-maximized"
-  "--silent-debugger-extension-api" ## Does not show an infobar when an extension attaches to a page using chrome.debugger page
+  "--silent-debugger-extension-api"
   "--no-default-browser-check"
   "--no-first-run"
-  "--noerrdialogs" ## Suppresses all error dialogs
-  "--enable-fixed-layout" ## QUESTION: Does this do anything? Can't find info on what it does
+  "--noerrdialogs"
+  "--enable-fixed-layout"
   "--disable-popup-blocking"
   "--disable-password-generation"
   "--disable-save-password-bubble"
   "--disable-single-click-autofill"
+  "--disable-prompt-on-repos"
   "--disable-background-timer-throttling"
   "--disable-renderer-backgrounding"
   "--disable-renderer-throttling"
@@ -52,9 +53,10 @@ defaultArgs = [
   "--disable-site-isolation-trials"
 
   ## the following come frome chromedriver
-  "--metrics-recording-only" ## Enables the recording of metrics reports but disables reporting
-  "--disable-prompt-on-repost" ## Disables prompt when user re-submits POST form
-  "--disable-hang-monitor" ## Suppresses hang monitor dialogs in renderer processes
+  ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
+  "--metrics-recording-only"
+  "--disable-prompt-on-repost"
+  "--disable-hang-monitor"
   "--disable-sync"
   ## this flag is causing throttling of XHR callbacks for
   ## as much as 30 seconds. If you VNC in and open dev tools or
@@ -128,20 +130,6 @@ module.exports = {
 
   _removeRootExtension
 
-  _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
-    ## get the string bytes for the final extension file
-    extension.setHostAndPath(proxyUrl, socketIoRoute)
-    .then (str) ->
-      extensionDest = utils.getExtensionDir(browser, isTextTerminal)
-      extensionBg   = path.join(extensionDest, "background.js")
-
-      ## copy the extension src to the extension dist
-      utils.copyExtension(pathToExtension, extensionDest)
-      .then ->
-        ## and overwrite background.js with the final string bytes
-        fs.writeFileAsync(extensionBg, str)
-      .return(extensionDest)
-
   _getArgs: (options = {}) ->
     _.defaults(options, {
       browser: {}
@@ -156,8 +144,11 @@ module.exports = {
     if ua = options.userAgent
       args.push("--user-agent=#{ua}")
 
-    if pacUrl = options.pacUrl
-      args.push("--proxy-pac-url=#{pacUrl}")
+    # if pacUrl = options.pacUrl
+      # args.push("--proxy-pac-url=#{pacUrl}")
+
+    if ps = options.proxyServer
+      args.push("--proxy-server=#{ps}")
 
     if options.chromeWebSecurity is false
       args.push("--disable-web-security")
@@ -196,7 +187,7 @@ module.exports = {
       ])
     .spread (cacheDir, args) =>
       Promise.all([
-        @_writeExtension(
+        utils.writeExtension(
           browser,
           isTextTerminal,
           options.proxyUrl,

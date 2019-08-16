@@ -134,8 +134,8 @@ module.exports = {
     .then ->
       Promise.all([
         utils.ensureCleanCache(browserName)
-        utils.writeExtension(options.proxyUrl, options.socketIoRoute)
-        utils.ensureProfileDir(browserName)
+        utils.writeExtension(options.browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute)
+        utils.ensureCleanCache(browserName)
       ])
     .spread (cacheDir, extensionDest, profileDir) ->
       extensions.push(extensionDest)
@@ -161,10 +161,10 @@ module.exports = {
       debug("launch in firefox: %s, %s", url, args)
 
       utils.launch(browserName, null, args)
-      .then (browserInstance) ->
-        firefoxUtil.setup(extensions, url)
-        # .then ->
-        #   return browserInstance
+    .then (browserInstance) ->
+      firefoxUtil.setup(extensions, url)
+      # .then ->
+      #   return browserInstance
     .catch (err) ->
       debug("launch error:", err.stack)
       throw err

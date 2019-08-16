@@ -25,14 +25,14 @@ $Server = require("./cypress/server")
 $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
-browserInfo = require("./cypress/browser")
+# browserInfo = require("./cypress/browser")
 
-tryCatch = (fn) ->
-  try
-    fn()
-  catch err
-    debugger
-    throw err
+# tryCatch = (fn) ->
+#   try
+#     fn()
+#   catch err
+#     debugger
+#     throw err
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
@@ -115,6 +115,7 @@ class $Cypress
     @arch = config.arch
     @spec = config.spec
     @version = config.version
+    @browser = config.browser
     @platform = config.platform
 
     ## normalize this into boolean
@@ -140,7 +141,7 @@ class $Cypress
 
     config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state")
 
-    _.extend(@, browserInfo(config))
+    # _.extend(@, browserInfo(config))
 
     @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)
@@ -186,229 +187,229 @@ class $Cypress
     return null
 
   action: (eventName, args...) ->
-    tryCatch =>
-      ## normalizes all the various ways
-      ## other objects communicate intent
-      ## and 'action' to Cypress
-      switch eventName
-        when "cypress:stop"
-          @emit("stop")
+    # tryCatch =>
+    ## normalizes all the various ways
+    ## other objects communicate intent
+    ## and 'action' to Cypress
+    switch eventName
+      when "cypress:stop"
+        @emit("stop")
 
-        when "cypress:config"
-          @emit("config", args[0])
+      when "cypress:config"
+        @emit("config", args[0])
 
-        when "runner:start"
-          ## mocha runner has begun running the tests
-          @emit("run:start")
+      when "runner:start"
+        ## mocha runner has begun running the tests
+        @emit("run:start")
 
-          return if @_RESUMED_AT_TEST
+        return if @_RESUMED_AT_TEST
 
-          if @config("isTextTerminal")
-            @emit("mocha", "start", args[0])
+        if @config("isTextTerminal")
+          @emit("mocha", "start", args[0])
 
-        when "runner:end"
-          ## mocha runner has finished running the tests
+      when "runner:end"
+        ## mocha runner has finished running the tests
 
-          ## end may have been caused by an uncaught error
-          ## that happened inside of a hook.
-          ##
-          ## when this happens mocha aborts the entire run
-          ## and does not do the usual cleanup so that means
-          ## we have to fire the test:after:hooks and
-          ## test:after:run events ourselves
-          @emit("run:end")
+        ## end may have been caused by an uncaught error
+        ## that happened inside of a hook.
+        ##
+        ## when this happens mocha aborts the entire run
+        ## and does not do the usual cleanup so that means
+        ## we have to fire the test:after:hooks and
+        ## test:after:run events ourselves
+        @emit("run:end")
 
-          if @config("isTextTerminal")
-            @emit("mocha", "end", args[0])
+        if @config("isTextTerminal")
+          @emit("mocha", "end", args[0])
 
-        when "runner:set:runnable"
-          ## when there is a hook / test (runnable) that
-          ## is about to be invoked
-          @cy.setRunnable(args...)
+      when "runner:set:runnable"
+        ## when there is a hook / test (runnable) that
+        ## is about to be invoked
+        @cy.setRunnable(args...)
 
-        when "runner:suite:start"
-          ## mocha runner started processing a suite
-          if @config("isTextTerminal")
-            @emit("mocha", "suite", args...)
+      when "runner:suite:start"
+        ## mocha runner started processing a suite
+        if @config("isTextTerminal")
+          @emit("mocha", "suite", args...)
 
-        when "runner:suite:end"
-          ## mocha runner finished processing a suite
-          if @config("isTextTerminal")
-            @emit("mocha", "suite end", args...)
+      when "runner:suite:end"
+        ## mocha runner finished processing a suite
+        if @config("isTextTerminal")
+          @emit("mocha", "suite end", args...)
 
-        when "runner:hook:start"
-          ## mocha runner started processing a hook
-          if @config("isTextTerminal")
-            @emit("mocha", "hook", args...)
+      when "runner:hook:start"
+        ## mocha runner started processing a hook
+        if @config("isTextTerminal")
+          @emit("mocha", "hook", args...)
 
-        when "runner:hook:end"
-          ## mocha runner finished processing a hook
-          if @config("isTextTerminal")
-            @emit("mocha", "hook end", args...)
+      when "runner:hook:end"
+        ## mocha runner finished processing a hook
+        if @config("isTextTerminal")
+          @emit("mocha", "hook end", args...)
 
-        when "runner:test:start"
-          ## mocha runner started processing a hook
-          if @config("isTextTerminal")
-            @emit("mocha", "test", args...)
+      when "runner:test:start"
+        ## mocha runner started processing a hook
+        if @config("isTextTerminal")
+          @emit("mocha", "test", args...)
 
-        when "runner:test:end"
-          if @config("isTextTerminal")
-            @emit("mocha", "test end", args...)
+      when "runner:test:end"
+        if @config("isTextTerminal")
+          @emit("mocha", "test end", args...)
 
-        when "runner:pass"
-          ## mocha runner calculated a pass
-          if @config("isTextTerminal")
-            @emit("mocha", "pass", args...)
+      when "runner:pass"
+        ## mocha runner calculated a pass
+        if @config("isTextTerminal")
+          @emit("mocha", "pass", args...)
 
-        when "runner:pending"
-          ## mocha runner calculated a pending test
-          if @config("isTextTerminal")
-            @emit("mocha", "pending", args...)
+      when "runner:pending"
+        ## mocha runner calculated a pending test
+        if @config("isTextTerminal")
+          @emit("mocha", "pending", args...)
 
-        when "runner:fail"
-          ## mocha runner calculated a failure
-          if @config("isTextTerminal")
-            @emit("mocha", "fail", args...)
+      when "runner:fail"
+        ## mocha runner calculated a failure
+        if @config("isTextTerminal")
+          @emit("mocha", "fail", args...)
 
-        when "mocha:runnable:run"
-          @runner.onRunnableRun(args...)
+      when "mocha:runnable:run"
+        @runner.onRunnableRun(args...)
 
-        when "runner:test:before:run"
-          ## get back to a clean slate
-          @cy.reset()
+      when "runner:test:before:run"
+        ## get back to a clean slate
+        @cy.reset()
 
-          @emit("test:before:run", args...)
+        @emit("test:before:run", args...)
 
-        when "runner:test:before:run:async"
-          ## TODO: handle timeouts here? or in the runner?
-          @emitThen("test:before:run:async", args...)
+      when "runner:test:before:run:async"
+        ## TODO: handle timeouts here? or in the runner?
+        @emitThen("test:before:run:async", args...)
 
-        when "runner:runnable:after:run:async"
-          @emitThen("runnable:after:run:async", args...)
+      when "runner:runnable:after:run:async"
+        @emitThen("runnable:after:run:async", args...)
 
-        when "runner:test:after:run"
-          @runner.cleanupQueue(@config("numTestsKeptInMemory"))
+      when "runner:test:after:run"
+        @runner.cleanupQueue(@config("numTestsKeptInMemory"))
 
-          ## this event is how the reporter knows how to display
-          ## stats and runnable properties such as errors
-          @emit("test:after:run", args...)
+        ## this event is how the reporter knows how to display
+        ## stats and runnable properties such as errors
+        @emit("test:after:run", args...)
 
-          if @config("isTextTerminal")
-            ## needed for calculating wallClockDuration
-            ## and the timings of after + afterEach hooks
-            @emit("mocha", "test:after:run", args[0])
+        if @config("isTextTerminal")
+          ## needed for calculating wallClockDuration
+          ## and the timings of after + afterEach hooks
+          @emit("mocha", "test:after:run", args[0])
 
-        when "cy:before:all:screenshots"
-          @emit("before:all:screenshots", args...)
+      when "cy:before:all:screenshots"
+        @emit("before:all:screenshots", args...)
 
-        when "cy:before:screenshot"
-          @emit("before:screenshot", args...)
+      when "cy:before:screenshot"
+        @emit("before:screenshot", args...)
 
-        when "cy:after:screenshot"
-          @emit("after:screenshot", args...)
+      when "cy:after:screenshot"
+        @emit("after:screenshot", args...)
 
-        when "cy:after:all:screenshots"
-          @emit("after:all:screenshots", args...)
+      when "cy:after:all:screenshots"
+        @emit("after:all:screenshots", args...)
 
-        when "command:log:added"
-          @runner.addLog(args[0], @config("isInteractive"))
+      when "command:log:added"
+        @runner.addLog(args[0], @config("isInteractive"))
 
-          @emit("log:added", args...)
+        @emit("log:added", args...)
 
-        when "command:log:changed"
-          @runner.addLog(args[0], @config("isInteractive"))
+      when "command:log:changed"
+        @runner.addLog(args[0], @config("isInteractive"))
 
-          @emit("log:changed", args...)
+        @emit("log:changed", args...)
 
-        when "cy:fail"
-          ## comes from cypress errors fail()
-          @emitMap("fail", args...)
+      when "cy:fail"
+        ## comes from cypress errors fail()
+        @emitMap("fail", args...)
 
-        when "cy:stability:changed"
-          @emit("stability:changed", args...)
+      when "cy:stability:changed"
+        @emit("stability:changed", args...)
 
-        when "cy:paused"
-          @emit("paused", args...)
+      when "cy:paused"
+        @emit("paused", args...)
 
-        when "cy:canceled"
-          @emit("canceled")
+      when "cy:canceled"
+        @emit("canceled")
 
-        when "cy:visit:failed"
-          @emit("visit:failed", args[0])
+      when "cy:visit:failed"
+        @emit("visit:failed", args[0])
 
-        when "cy:viewport:changed"
-          @emit("viewport:changed", args...)
+      when "cy:viewport:changed"
+        @emit("viewport:changed", args...)
 
-        when "cy:command:start"
-          @emit("command:start", args...)
+      when "cy:command:start"
+        @emit("command:start", args...)
 
-        when "cy:command:end"
-          @emit("command:end", args...)
+      when "cy:command:end"
+        @emit("command:end", args...)
 
-        when "cy:command:retry"
-          @emit("command:retry", args...)
+      when "cy:command:retry"
+        @emit("command:retry", args...)
 
-        when "cy:command:enqueued"
-          @emit("command:enqueued", args[0])
+      when "cy:command:enqueued"
+        @emit("command:enqueued", args[0])
 
-        when "cy:command:queue:before:end"
-          @emit("command:queue:before:end")
+      when "cy:command:queue:before:end"
+        @emit("command:queue:before:end")
 
-        when "cy:command:queue:end"
-          @emit("command:queue:end")
+      when "cy:command:queue:end"
+        @emit("command:queue:end")
 
-        when "cy:url:changed"
-          @emit("url:changed", args[0])
+      when "cy:url:changed"
+        @emit("url:changed", args[0])
 
-        when "cy:next:subject:prepared"
-          @emit("next:subject:prepared", args...)
+      when "cy:next:subject:prepared"
+        @emit("next:subject:prepared", args...)
 
-        when "cy:collect:run:state"
-          @emitThen("collect:run:state")
+      when "cy:collect:run:state"
+        @emitThen("collect:run:state")
 
-        when "cy:scrolled"
-          @emit("scrolled", args...)
+      when "cy:scrolled"
+        @emit("scrolled", args...)
 
-        when "app:uncaught:exception"
-          @emitMap("uncaught:exception", args...)
+      when "app:uncaught:exception"
+        @emitMap("uncaught:exception", args...)
 
-        when "app:window:alert"
-          @emit("window:alert", args[0])
+      when "app:window:alert"
+        @emit("window:alert", args[0])
 
-        when "app:window:confirm"
-          @emitMap("window:confirm", args[0])
+      when "app:window:confirm"
+        @emitMap("window:confirm", args[0])
 
-        when "app:window:confirmed"
-          @emit("window:confirmed", args...)
+      when "app:window:confirmed"
+        @emit("window:confirmed", args...)
 
-        when "app:page:loading"
-          @emit("page:loading", args[0])
+      when "app:page:loading"
+        @emit("page:loading", args[0])
 
-        when "app:window:before:load"
-          @cy.onBeforeAppWindowLoad(args[0])
+      when "app:window:before:load"
+        @cy.onBeforeAppWindowLoad(args[0])
 
-          @emit("window:before:load", args[0])
+        @emit("window:before:load", args[0])
 
-        when "app:navigation:changed"
-          @emit("navigation:changed", args...)
+      when "app:navigation:changed"
+        @emit("navigation:changed", args...)
 
-        when "app:form:submitted"
-          @emit("form:submitted", args[0])
+      when "app:form:submitted"
+        @emit("form:submitted", args[0])
 
-        when "app:window:load"
-          @emit("window:load", args[0])
+      when "app:window:load"
+        @emit("window:load", args[0])
 
-        when "app:window:before:unload"
-          @emit("window:before:unload", args[0])
+      when "app:window:before:unload"
+        @emit("window:before:unload", args[0])
 
-        when "app:window:unload"
-          @emit("window:unload", args[0])
+      when "app:window:unload"
+        @emit("window:unload", args[0])
 
-        when "app:css:modified"
-          @emit("css:modified", args[0])
+      when "app:css:modified"
+        @emit("css:modified", args[0])
 
-        when "spec:script:error"
-          @emit("script:error", args...)
+      when "spec:script:error"
+        @emit("script:error", args...)
 
   backend: (eventName, args...) ->
     new Promise (resolve, reject) =>

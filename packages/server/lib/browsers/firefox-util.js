@@ -9,7 +9,7 @@ const promisify = (fn) => {
     return new Promise((resolve, reject) => {
       fn(...args, (data) => {
         if ('error' in data) {
-          reject(new Exception(data))
+          reject(new Exception(data, data))
         } else {
           resolve(data)
         }

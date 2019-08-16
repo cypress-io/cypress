@@ -1,3 +1,17 @@
+# fs = require('fs-extra')
+
+# fs.ensureFileSync('./logFile.log')
+# logStream = fs.createWriteStream('./logFile.log', {flags: 'a'})
+
+# process.stdout.pipe(logStream)
+# process.stderr.pipe(logStream)
+
+# process.on('close', (code) ->
+#   console.log('child process exited with code ' + code)
+# )
+
+
+
 _            = require("lodash")
 exphbs       = require("express-handlebars")
 url          = require("url")
@@ -30,8 +44,8 @@ errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
-pacServer    = require("./pac_server")
 fileServer   = require("./file_server")
+# pacServer    = require("./pac_server")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -61,12 +75,12 @@ setProxiedUrl = (req) ->
 notSSE = (req, res) ->
   req.headers.accept isnt "text/event-stream" and compression.filter(req, res)
 
-  debug("setting proxied url for request %o", {
-    url: req.url
-    proxiedUrl: req.proxiedUrl
-  })
+  # debug("setting proxied url for request %o", {
+  #   url: req.url
+  #   proxiedUrl: req.proxiedUrl
+  # })
 
-  return req
+  # return req
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -82,9 +96,9 @@ class Server
     @_baseUrl    = null
     @_nodeProxy  = null
     @_fileServer = null
-    @_pacServer  = null
     @_httpsProxy = null
     @_urlResolver = null
+    @_pacServer  = null
 
   createExpressApp: (morgan) ->
     app = express()
@@ -173,9 +187,9 @@ class Server
 
       @_server = http.createServer(app)
 
-      ## TODO: currently undefined but
-      ## will be set by env later
-      bypassPort = undefined
+      # ## TODO: currently undefined but
+      # ## will be set by env later
+      # bypassPort = undefined
 
       allowDestroy(@_server)
 
@@ -238,20 +252,20 @@ class Server
 
       @_server.once "error", onError
 
-      connectToBaseUrl = =>
-        ## if we have a baseUrl let's go ahead
-        ## and make sure the server is connectable!
-        return if not baseUrl
+      # connectToBaseUrl = =>
+      #   ## if we have a baseUrl let's go ahead
+      #   ## and make sure the server is connectable!
+      #   return if not baseUrl
         
-        @_baseUrl = baseUrl
+      #   @_baseUrl = baseUrl
 
-        connect.ensureUrl(baseUrl)
-        .return(null)
-        .catch (err) =>
-          if config.isTextTerminal
-            reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
-          else
-            errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+      #   connect.ensureUrl(baseUrl)
+      #   .return(null)
+      #   .catch (err) =>
+      #     if config.isTextTerminal
+      #       reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
+      #     else
+      #       errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
 
       @_listen(port, onError)
       .then (port) =>
@@ -263,15 +277,15 @@ class Server
 
           fileServer.create(fileServerFolder),
 
-          pacServer.create(port, bypassPort),
+          # pacServer.create(port, bypassPort),
 
-          connectToBaseUrl(),
+          # connectToBaseUrl(),
         ])
         .spread (httpsProxy, fileServer, pacServer, warning) =>
           @_httpsProxy = httpsProxy
           @_fileServer = fileServer
-          @_pacServer = pacServer
-          pacUrl = pacServer.address()
+          # @_pacServer = pacServer
+          # pacUrl = pacServer.address()
           # pacUrl = "http://dev.local:#{pacUrl}"
           
           ## if we have a baseUrl let's go ahead
@@ -298,7 +312,8 @@ class Server
           ## to http sites redirects to /__/ cypress
           @_onDomainSet(baseUrl ? "<root>")
 
-          resolve([port, pacUrl, warning])
+          # resolve([port, pacUrl, warning])
+          resolve([port, warning])
 
   _port: ->
     _.chain(@_server).invoke("address").get("port").value()
@@ -734,8 +749,8 @@ class Server
       @_close()
       @_socket?.close()
       @_fileServer?.close()
-      @_pacServer?.close()
       @_httpsProxy?.close()
+      # @_pacServer?.close()
     )
     .then =>
       ## reset any middleware
