@@ -8,7 +8,7 @@ describe('<AutomationDisconnected />', () => {
   it('renders the message', () => {
     const component = shallow(<AutomationDisconnected />)
 
-    expect(component.find('p').first()).to.have.text('Whoops, the Cypress Chrome extension has disconnected.')
+    expect(component.find('p').first()).to.have.text('Whoops, the Cypress extension has disconnected.')
   })
 
   it('calls onReload when button is clicked', () => {

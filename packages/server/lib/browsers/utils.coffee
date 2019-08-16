@@ -2,6 +2,7 @@ path     = require("path")
 Promise  = require("bluebird")
 launcher = require("@packages/launcher")
 fs       = require("../util/fs")
+extension = require("@packages/extension")
 appData  = require("../util/app_data")
 profileCleaner = require("../util/profile_cleaner")
 
@@ -64,7 +65,14 @@ removeOldProfiles = ->
     profileCleaner.removeInactiveByPid(pathToPartitions, "run-"),
   ])
 
+pathToExtension = extension.getPathToExtension()
+extensionDest = appData.path("web-extension")
+extensionBg = appData.path("web-extension", "background.js")
+
 module.exports = {
+  ensureProfileDir: (name) ->
+    fs.ensureDirAsync(path.join(profiles, name))
+
   copyExtension
 
   getProfileDir
@@ -78,6 +86,16 @@ module.exports = {
   getBrowserByPath: launcher.detectByPath
 
   launch: launcher.launch
+  writeExtension: (proxyUrl, socketIoRoute) ->
+    ## get the string bytes for the final extension file
+    extension.setHostAndPath(proxyUrl, socketIoRoute)
+    .then (str) =>
+      ## copy the extension src to the extension dist
+      @copyExtension(pathToExtension, extensionDest)
+      .then ->
+        ## and overwrite background.js with the final string bytes
+        fs.writeFileAsync(extensionBg, str)
+      .return(extensionDest)
 
   getBrowsers: ->
     ## TODO: accept an options object which

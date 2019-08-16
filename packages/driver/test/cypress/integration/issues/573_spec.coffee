@@ -4,7 +4,9 @@ run = ->
     new Cypress.Promise (resolve) ->
       i = win.document.createElement("iframe")
       i.onload = resolve
-      i.src = "/basic_auth"
+      ## ?foo is necessary for firefox b/c it won't load a nested
+      ## iframe with an identical url
+      i.src = "/basic_auth?foo"
       win.document.body.appendChild(i)
   .get("iframe").should ($iframe) ->
     expect($iframe.contents().text()).to.include("basic auth worked")

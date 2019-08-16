@@ -30,6 +30,7 @@ errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
+pacServer    = require("./pac_server")
 fileServer   = require("./file_server")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
@@ -60,6 +61,13 @@ setProxiedUrl = (req) ->
 notSSE = (req, res) ->
   req.headers.accept isnt "text/event-stream" and compression.filter(req, res)
 
+  debug("setting proxied url for request %o", {
+    url: req.url
+    proxiedUrl: req.proxiedUrl
+  })
+
+  return req
+
 ## currently not making use of event emitter
 ## but may do so soon
 class Server
@@ -74,6 +82,7 @@ class Server
     @_baseUrl    = null
     @_nodeProxy  = null
     @_fileServer = null
+    @_pacServer  = null
     @_httpsProxy = null
     @_urlResolver = null
 
@@ -162,7 +171,11 @@ class Server
     new Promise (resolve, reject) =>
       {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
 
-      @_server  = http.createServer(app)
+      @_server = http.createServer(app)
+
+      ## TODO: currently undefined but
+      ## will be set by env later
+      bypassPort = undefined
 
       allowDestroy(@_server)
 
@@ -225,6 +238,21 @@ class Server
 
       @_server.once "error", onError
 
+      connectToBaseUrl = =>
+        ## if we have a baseUrl let's go ahead
+        ## and make sure the server is connectable!
+        return if not baseUrl
+        
+        @_baseUrl = baseUrl
+
+        connect.ensureUrl(baseUrl)
+        .return(null)
+        .catch (err) =>
+          if config.isTextTerminal
+            reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
+          else
+            errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+
       @_listen(port, onError)
       .then (port) =>
         Promise.all([
@@ -233,12 +261,19 @@ class Server
             onUpgrade: onSniUpgrade
           }),
 
-          fileServer.create(fileServerFolder)
+          fileServer.create(fileServerFolder),
+
+          pacServer.create(port, bypassPort),
+
+          connectToBaseUrl(),
         ])
-        .spread (httpsProxy, fileServer) =>
+        .spread (httpsProxy, fileServer, pacServer, warning) =>
           @_httpsProxy = httpsProxy
           @_fileServer = fileServer
-
+          @_pacServer = pacServer
+          pacUrl = pacServer.address()
+          # pacUrl = "http://dev.local:#{pacUrl}"
+          
           ## if we have a baseUrl let's go ahead
           ## and make sure the server is connectable!
           if baseUrl
@@ -263,7 +298,7 @@ class Server
           ## to http sites redirects to /__/ cypress
           @_onDomainSet(baseUrl ? "<root>")
 
-          resolve([port, warning])
+          resolve([port, pacUrl, warning])
 
   _port: ->
     _.chain(@_server).invoke("address").get("port").value()
@@ -699,6 +734,7 @@ class Server
       @_close()
       @_socket?.close()
       @_fileServer?.close()
+      @_pacServer?.close()
       @_httpsProxy?.close()
     )
     .then =>

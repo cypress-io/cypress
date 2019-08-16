@@ -10,7 +10,12 @@ const icon = (browser) => {
     case 'chrome':
     case 'chromium':
     case 'canary':
+    case 'electron':
       return 'chrome'
+    case 'firefox':
+    case 'firefoxDeveloperEdition':
+    case 'firefoxNightly':
+      return 'firefox'
     default:
       return ''
   }

@@ -28,6 +28,7 @@ create = (state, config, log) ->
 
   createUncaughtException = (type, args) ->
     [msg, source, lineno, colno, err] = args
+    debugger
 
     current = state("current")
 

@@ -12,7 +12,7 @@ firstOrNull = (cookies) ->
 
 connect = (host, path) ->
   listenToCookieChanges = once ->
-    chrome.cookies.onChanged.addListener (info) ->
+    browser.cookies.onChanged.addListener (info) ->
       if info.cause isnt "overwrite"
         ws.emit("automation:push:request", "change:cookie", info)
 
@@ -71,25 +71,27 @@ automation = {
 
   clear: (filter = {}) ->
     clear = (cookie) =>
-      new Promise (resolve, reject) =>
-        url = @getUrl(cookie)
-        props = {url: url, name: cookie.name}
-        chrome.cookies.remove props, (details) ->
-          if details
-            resolve(cookie)
-          else
-            err = new Error("Removing cookie failed for: #{JSON.stringify(props)}")
-            reject(chrome.runtime.lastError ? err)
+      url = @getUrl(cookie)
+      props = {url: url, name: cookie.name}
+
+      throwError = (err) ->
+        throw (err ? new Error("Removing cookie failed for: #{JSON.stringify(props)}"))
+
+      Promise.try ->
+        browser.cookies.remove(props)
+      .then (details) ->
+        if details
+          return cookie
+        else
+          throwError()
+      .catch(throwError)
 
     @getAll(filter)
     .map(clear)
 
   getAll: (filter = {}) ->
-    get = ->
-      new Promise (resolve) ->
-        chrome.cookies.getAll(filter, resolve)
-
-    get()
+    Promise.try ->
+      browser.cookies.getAll(filter)
 
   getCookies: (filter, fn) ->
     @getAll(filter)
@@ -101,23 +103,14 @@ automation = {
     .then(fn)
 
   setCookie: (props = {}, fn) ->
-    set = =>
-      new Promise (resolve, reject) =>
-        ## only get the url if its not already set
-        props.url ?= @getUrl(props)
-        chrome.cookies.set props, (details) ->
-          switch
-            when details
-              resolve(details)
-            when err = chrome.runtime.lastError
-              reject(err)
-            else
-              ## the cookie callback could be null such as the
-              ## case when expirationDate is before now
-              resolve(null)
-
-    set()
-    .then(fn)
+    ## only get the url if its not already set
+    props.url ?= @getUrl(props)
+    Promise.try ->
+      browser.cookies.set(props)
+    .then (details) ->
+      ## the cookie callback could be null such as the
+      ## case when expirationDate is before now
+      return fn(details or null)
 
   clearCookie: (filter, fn) ->
     @clear(filter)
@@ -135,26 +128,24 @@ automation = {
     ## TODO: if we REALLY want to be nice its possible we can
     ## figure out the exact window that's running Cypress but
     ## that's too much work with too little value at the moment
-    chrome.windows.getCurrent (window) ->
-      chrome.windows.update window.id, {focused: true}, ->
-        fn()
+    Promise.try ->
+      browser.windows.getCurrent()
+    .then (window) ->
+      browser.windows.update(window.id, {focused: true})
+    .then(fn)
 
   query: (data) ->
     code = "var s; (s = document.getElementById('#{data.element}')) && s.textContent"
 
-    query = ->
-      new Promise (resolve) ->
-        chrome.tabs.query({windowType: "normal"}, resolve)
-
     queryTab = (tab) ->
-      new Promise (resolve, reject) ->
-        chrome.tabs.executeScript tab.id, {code: code}, (result) ->
-          if result and result[0] is data.string
-            resolve()
-          else
-            reject(new Error)
+      Promise.try ->
+        browser.tabs.executeScript(tab.id, {code: code})
+      .then (results) ->
+        if not results or results[0] isnt data.string
+          throw new Error("Executed script did not return result")
 
-    query()
+    Promise.try ->
+      browser.tabs.query({windowType: "normal"})
     .filter (tab) ->
       ## the tab's url must begin with
       ## http or https so that we filter out
@@ -171,19 +162,15 @@ automation = {
     .then(fn)
 
   lastFocusedWindow: ->
-    new Promise (resolve) ->
-      chrome.windows.getLastFocused(resolve)
+    Promise.try ->
+      browser.windows.getLastFocused()
 
   takeScreenshot: (fn) ->
     @lastFocusedWindow()
     .then (win) ->
-      new Promise (resolve, reject) ->
-        chrome.tabs.captureVisibleTab win.id, {format: "png"}, (dataUrl) ->
-          if dataUrl
-            resolve(dataUrl)
-          else
-            reject(chrome.runtime.lastError)
-    .then(fn)
+      browser.tabs.captureVisibleTab(win.id, {format: "png"})
+    .then (dataUrl) ->
+      fn(dataUrl)
 }
 
 module.exports = automation

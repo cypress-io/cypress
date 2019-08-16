@@ -65,6 +65,7 @@ onServer = (app) ->
 
     res.send("<html></html>")
 
+## FIREFOX FIXME: tests all fail
 describe "e2e cookies", ->
   e2e.setup({
     servers: [{

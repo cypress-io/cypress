@@ -450,6 +450,7 @@ describe "src/cy/commands/actions/focus", ->
         .get("[contenteditable]:first").focus().blur().then ($ce) ->
           expect($ce.get(0)).to.eq ce.get(0)
 
+    ## FIREFOX FIXME: "cy.blur() can only be called when there is a currently focused element."
     it "can blur input[type=time]", ->
       blurred = false
 

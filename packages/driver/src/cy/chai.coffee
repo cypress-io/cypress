@@ -118,6 +118,7 @@ chai.use (chai, u) ->
         assert._obj = $dom.stringify(obj, "short")
 
       msg = getMessage.call(@, assert, args)
+      # msg = 'foobarbaz'
 
       ## restore the real obj if we changed it
       if obj isnt assert._obj

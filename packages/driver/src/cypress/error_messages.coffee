@@ -73,6 +73,9 @@ module.exports = {
     timed_out:  "#{cmd('blur')} timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
     wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: {{node}}"
 
+  browser:
+    invalid_arg: "Cypress.{{method}}() must be passed the name of a browser. You passed: {{browserName}}"
+
   chai:
     length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
     match_invalid_argument: "'match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"

@@ -1,6 +1,6 @@
 # Extension
 
-This is the Chrome Extension responsible for automating Chrome
+This is the WebExtension responsible for automating the browser
 
 ## Installing
 
@@ -33,6 +33,8 @@ npm run test
 
 ## Debugging
 
+### In Chrome
+
 1. Open Chrome
 2. Go into Extensions
 3. Check **Developer Mode**
@@ -40,3 +42,7 @@ npm run test
 5. Choose **packages/extension/dist** directory
 6. Click **background page** to debug `background.js`
 7. Click **Reload (⌘R)** to pull in changes to `manifest.json`
+
+### In Firefox
+
+To be written...

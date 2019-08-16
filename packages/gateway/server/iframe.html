@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		button {
+			background-color: aliceblue;
+		}
+		button:active {
+			background-color: salmon;
+		}
+		*{margin:0;padding:0}
+
+	</style>
+</head>
+<body>
+	<button>button</button>
+
+	<script>
+		document.getElementsByTagName('button')[0]
+			.addEventListener('click', function(e){
+
+				console.log('clicked', e)
+				})
+	</script>
+</body>
+</html>

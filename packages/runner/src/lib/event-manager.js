@@ -177,7 +177,7 @@ const eventManager = {
   },
 
   setup (config, specPath) {
-    Cypress = $Cypress.create(config)
+    Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
     window.Cypress = Cypress
@@ -187,7 +187,15 @@ const eventManager = {
     ws.emit('watch:test:file', specPath)
   },
 
+  isBrowserType (browserName) {
+    if (!this.Cypress) return false
+
+    return this.Cypress.isBrowserType(browserName)
+  },
+
   initialize ($autIframe, config) {
+    performance.mark('initialize-start')
+
     Cypress.initialize($autIframe)
 
     // get the current runnable in case we reran mid-test due to a visit
@@ -195,6 +203,8 @@ const eventManager = {
     ws.emit('get:existing:run:state', (state = {}) => {
       const runnables = Cypress.normalizeAll(state.tests)
       const run = () => {
+        performance.mark('initialize-end')
+        performance.measure('initialize', 'initialize-start', 'initialize-end')
         this._runDriver(state)
       }
 
@@ -303,7 +313,11 @@ const eventManager = {
   },
 
   _runDriver (state) {
-    Cypress.run(() => {})
+    performance.mark('run-s')
+    Cypress.run(() => {
+      performance.mark('run-e')
+      performance.measure('run', 'run-s', 'run-e')
+    })
 
     reporterBus.emit('reporter:start', {
       startTime: Cypress.getStartTime(),

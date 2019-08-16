@@ -1,6 +1,11 @@
 {
   "name": "Cypress",
-  "description": "Adds chrome.* API's for testing with Cypress",
+  "description": "Adds WebExtension APIs for testing with Cypress",
+  "applications": {
+    "gecko": {
+      "id": "automation-extension@cypress.io"
+    }
+  },
   "permissions": [
     "cookies",
     "tabs",
@@ -24,11 +29,13 @@
   },
   "background": {
     "scripts": [
+      "browser-polyfill.js",
       "background.js"
     ]
   },
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
-  "manifest_version": 2
+  "manifest_version": 2,
+  "version": "0.0.0"
 }

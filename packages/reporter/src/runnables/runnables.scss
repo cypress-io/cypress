@@ -1,14 +1,17 @@
+.fa { &:not(.fa-spin) { animation: none; } }
+
 .reporter {
+  min-height: 0; // needed for firefox or else scrolling gets funky
+
   .container {
     box-shadow: 0 1px 2px #aaa;
     flex-grow: 2;
-    overflow: auto;
-    padding-bottom: 40px;
+    overflow-y: auto;
   }
 
   .wrap {
     box-shadow: 0 1px 2px #aaa;
-    overflow: auto;
+    margin-bottom: 40px;
     padding-left: 0;
     width: 100%;
   }
@@ -169,6 +172,7 @@
     &.runnable-passed > .runnable-wrapper {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
+
         color: $pass;
       }
     }

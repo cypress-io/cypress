@@ -28,6 +28,37 @@ export const browsers: Browser[] = [
     profile: true,
     binary: 'google-chrome-canary',
   },
+  {
+    name: 'firefox',
+    family: 'firefox',
+    displayName: 'Firefox',
+    versionRegex: /Firefox (\S+)/,
+    profile: true,
+    binary: 'firefox',
+  },
+  {
+    name: 'firefoxDeveloperEdition',
+    family: 'firefox',
+    displayName: 'Firefox Developer Edition',
+    versionRegex: /Firefox Developer Edition (\S+)/,
+    profile: true,
+    binary: 'firefox-developer-edition',
+  },
+  {
+    name: 'firefoxNightly',
+    family: 'firefox',
+    displayName: 'Firefox Nightly',
+    versionRegex: /Firefox Nightly (\S+)/,
+    profile: true,
+    binary: 'firefox-nightly',
+  },
+  // {
+  //   name: 'ie',
+  //   displayName: 'IE',
+  //   versionRegex: /.*/,
+  //   profile: false,
+  //   binary: 'iexplorer',
+  // },
 ]
 
 /** starts a found browser and opens URL if given one */

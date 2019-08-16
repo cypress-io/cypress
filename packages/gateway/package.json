@@ -1,0 +1,25 @@
+{
+  "name": "@packages/gateway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.2",
+    "debug": "^4.0.0",
+    "express": "^4.16.3",
+    "header-case-normalizer": "^1.0.3",
+    "iedriver": "^3.9.2",
+    "promise-retry": "^1.1.1",
+    "request-promise": "^4.2.2",
+    "socket.io": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/socket.io": "^1.4.38"
+  },
+  "license": "ISC",
+  "author": "",
+  "keywords": []
+}

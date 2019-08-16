@@ -242,12 +242,13 @@ describe "src/cy/commands/actions/trigger", ->
       it "issues event to descendent", ->
         mouseovers = 0
 
-        $btn = $("<button>", {
-          id: "button-covered-in-span"
+        $btn = $("<div>", {
+          id: "div-covered-in-span"
         })
+        .css({ padding: 10, margin: 0, border: "solid 1px #000" })
         .prependTo(cy.$$("body"))
 
-        $span = $("<span>span in button</span>")
+        $span = $("<span>span covering div</span>")
         .css({ padding: 5, display: "inline-block", backgroundColor: "yellow" })
         .appendTo($btn)
 
@@ -255,8 +256,8 @@ describe "src/cy/commands/actions/trigger", ->
         $span.on "mouseover", -> mouseovers += 1
 
         cy
-          .get("#button-covered-in-span").trigger("mouseover")
-          .then ->
+          .get("#div-covered-in-span").trigger("mouseover")
+          .should ->
             expect(mouseovers).to.eq(2)
 
       it "scrolls the window past a fixed position element when being covered", ->

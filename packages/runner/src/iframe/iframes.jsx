@@ -19,12 +19,12 @@ export default class Iframes extends Component {
   _disposers = []
 
   render () {
-    const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
+    const { width, height, scale, marginLeft, headerHeight, reporterWidth, scriptError } = this.props.state
 
     return (
       <div
         className={cs('iframes-container', { 'has-error': !!scriptError })}
-        style={{ top: headerHeight }}
+        style={{ left: reporterWidth, top: headerHeight }}
       >
         <div
           ref='container'

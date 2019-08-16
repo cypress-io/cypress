@@ -36,6 +36,10 @@ getBrowserLauncherByFamily = (family) ->
       require("./electron")
     when "chrome"
       require("./chrome")
+    when "firefox", "firefoxDeveloperEdition", "firefoxNightly"
+      require("./firefox")
+    when 'ie'
+      require('./ie.js')
 
 isValidPathToBrowser = (str) ->
   path.basename(str) isnt str
@@ -134,5 +138,8 @@ module.exports = {
           options.onBrowserOpen()
 
           return instance
+    .catch (err) ->
+      debug("Error launching #{name}:", err)
+      throw err
 
 }

@@ -92,8 +92,10 @@ class Project extends EE
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
-      @server.open(cfg, @, options.onWarning)
-      .spread (port, warning) =>
+      @server.open(cfg, @)
+      .spread (port, pacUrl, warning) =>
+        cfg.pacUrl = pacUrl
+
         ## if we didnt have a cfg.port
         ## then get the port once we
         ## open the server
@@ -250,7 +252,7 @@ class Project extends EE
           name: reporter
         })
 
-      reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
+      reporterInstance = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
 
     @automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
@@ -268,19 +270,19 @@ class Project extends EE
 
       onSetRunnables: (runnables) ->
         debug("received runnables %o", runnables)
-        reporter?.setRunnables(runnables)
+        reporterInstance?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
         debug("onMocha", event)
         ## bail if we dont have a
         ## reporter instance
-        return if not reporter
+        return if not reporterInstance
 
-        reporter.emit(event, runnable)
+        reporterInstance.emit(event, runnable)
 
         if event is "end"
           Promise.all([
-            reporter?.end()
+            reporterInstance?.end()
             @server.end()
           ])
           .spread (stats = {}) =>

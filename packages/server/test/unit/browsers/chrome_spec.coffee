@@ -14,12 +14,11 @@ describe "lib/browsers/chrome", ->
       @args = []
 
       sinon.stub(chrome, "_getArgs").returns(@args)
-      sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
+      sinon.stub(utils, "writeExtension").resolves("/path/to/ext")
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
       sinon.stub(utils, "launch")
-      sinon.stub(utils, "getProfileDir").returns("/profile/dir")
-      sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
+      sinon.stub(utils, "ensureProfile").resolves("/profile/dir")
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)

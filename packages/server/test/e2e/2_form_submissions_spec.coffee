@@ -9,6 +9,9 @@ Fixtures = require("../support/helpers/fixtures")
 
 HTTPS_PORT = 11443
 HTTP_PORT = 11180
+## FIREFOX FIXME: errors slightly different and stack trace lines not replaced in snapshot
+describe "e2e form submissions", ->
+  e2e.setup()
 
 e2ePath = Fixtures.projectPath("e2e")
 pathToLargeImage = Fixtures.path("server/imgs/earth.jpg")

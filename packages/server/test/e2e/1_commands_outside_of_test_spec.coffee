@@ -1,6 +1,7 @@
 e2e = require("../support/helpers/e2e")
 _ = require('lodash')
 
+## FIREFOX FIXME: errors slightly different and stack trace lines not replaced in snapshot
 describe "e2e commands outside of test", ->
   e2e.setup()
 

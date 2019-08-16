@@ -57,16 +57,13 @@ export type AppInfo = {
   version: string
 }
 
-function formApplicationPath (executable: string) {
-  const parts = executable.split('/')
-  const name = parts[parts.length - 1]
-  const appName = `${name}.app`
-
+function formApplicationPath (appName: string) {
   return path.join('/Applications', appName)
 }
 
 /** finds an application and its version */
 export function findApp (
+  appName: string,
   executable: string,
   appId: string,
   versionProperty: string
@@ -87,7 +84,7 @@ export function findApp (
   }
 
   const tryFullApplicationFind = () => {
-    const applicationPath = formApplicationPath(executable)
+    const applicationPath = formApplicationPath(appName)
 
     log('looking for application %s', applicationPath)
 

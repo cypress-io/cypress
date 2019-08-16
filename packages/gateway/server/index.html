@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<script src="/node_modules/socket.io-client/dist/socket.io.js"></script>
+	<style>
+		* {
+			margin: 0;
+			padding: 0
+		}
+
+		iframe {
+			margin: 10px;
+			border: 1px solid black;
+			width: 300px;
+			height: 300px;
+		}
+	</style>
+</head>
+
+<body>
+	<iframe src="iframe.html" frameborder="0"></iframe>
+	<script>
+		console.log(io)
+
+		document.addEventListener('click', function (e) {
+			debugger
+			// console.log('CLICKED', e)
+		})
+		// fetch('http://localhost:3000/config').then(console.log)
+		var socket = io(
+			'http://localhost:3000',
+			{ transports: ['websocket'] }
+		)
+		socket.on('connect', function () {
+			console.log('connected')
+			cypressDriverCode()
+		})
+
+
+		function cypressDriverCode() {
+			socket.emit('command', {
+				name: 'WebDriver:PerformActions',
+				parameters: {
+					actions: [{
+						"type": "pointer",
+						"id": "finger1",
+						parameters: {
+							pointerType: "mouse"
+						},
+						actions: [
+							{
+								type: 'pointerMove',
+								x: 15,
+								y: 15
+							},
+							{
+								type: 'pointerDown',
+								button: 0
+							}, {
+								type: 'pointerUp',
+								button: 0
+							}
+						]
+					}]
+				}
+			}, console.log)
+		
+		}
+
+
+	</script>
+</body>
+
+</html>
