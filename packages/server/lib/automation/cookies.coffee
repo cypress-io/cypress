@@ -128,7 +128,7 @@ cookies = (cyNamespace, cookieNamespace) ->
       debug("clear:cookies %o", cookies)
 
       clear = (cookie) ->
-        automate("clear:cookie", { name: cookie.name, domain: cookie.domain })
+        automate("clear:cookie", { name: cookie.name })
         .then(normalizeCookieProps)
 
       Promise.map(cookies, clear)
