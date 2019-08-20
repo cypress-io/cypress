@@ -1096,7 +1096,7 @@ module.exports = {
 
       However, you can pass in the relative path to the file from the projectRoot if the baseUrl variable is unset in the configuration options.  
       
-      If the baseUrl has been set, the baseUrl is appended to the path to the file automatically.
+      If the baseUrl has been set, the baseUrl is prepended to the path to the file automatically.
 
       https://docs.cypress.io/api/commands/visit.html
 
