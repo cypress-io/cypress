@@ -1,5 +1,7 @@
 const _ = require('lodash')
+const ciProvider = require('../../../lib/util/ci_provider')
 const execa = require('execa')
+const pkg = require('../../../../../package.json')
 const Promise = require('bluebird')
 const rp = require('request-promise')
 
@@ -13,18 +15,22 @@ function track (type, data) {
   }
 
   return Promise.join(
-    execa.stdout('git', ['rev-parse', 'HEAD']),
     execa.stdout('git', ['log', 'HEAD', '-1', '|', 'tail', '-n1'], { shell: true }).then(_.trim),
     execa.stdout('git', ['log', '-1', '--format=%cd']).then((d) => new Date(d).toISOString()),
-    execa.stdout('git', ['branch', '|', 'grep', '\\*', '|', 'cut', '-d', '\'', '\'', '-f2'], { shell: true }),
-    (commitSha, commitMessage, commitTimestamp, branch) => {
+    (commitMessage, commitTimestamp) => {
+      const { sha, branch, author } = ciProvider.commitParams()
+
       const body = {
         type,
         data: {
-          'Commit SHA': commitSha,
+          'package.json Version': pkg.version,
+          'Next Version': process.env.NEXT_DEV_VERSION,
+          'Commit SHA': sha,
+          'Commit Branch': branch,
+          'Commit Author': author,
           'Commit Message': commitMessage,
           'Commit Timestamp': commitTimestamp,
-          'Branch': branch,
+          'Build URL': process.env.CIRCLE_BUILD_URL,
           ...data,
         },
       }
