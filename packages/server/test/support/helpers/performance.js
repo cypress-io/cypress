@@ -31,6 +31,8 @@ function track (type, data) {
           'Commit Message': commitMessage,
           'Commit Timestamp': commitTimestamp,
           'Build URL': process.env.CIRCLE_BUILD_URL,
+          'Build Platform': process.platform,
+          'Build Arch': process.arch,
           ...data,
         },
       }
