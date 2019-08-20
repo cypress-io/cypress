@@ -88,7 +88,6 @@ cookies = (cyNamespace, cookieNamespace) ->
           return cookie
 
     setCookie: (data, automate) ->
-      debug("set:cookie %o", data)
       if isNamespaced(data)
         throw new Error("Sorry, you cannot set a Cypress namespaced cookie.")
       else
