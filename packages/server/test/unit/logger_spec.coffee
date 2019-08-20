@@ -108,20 +108,17 @@ describe "lib/logger", ->
 
     context "handleErr", ->
       it "is called after resolving", ->
-        logger.setErrorHandler -> true
         logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.called
 
       it "is called after rejecting", ->
-        logger.setErrorHandler -> true
         @create.rejects(new Error())
         logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.called
 
       it "calls process.exit(1)", ->
-        logger.setErrorHandler -> true
         logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.calledWith(1)
