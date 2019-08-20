@@ -67,8 +67,8 @@
     "@cypress/bumpercar": "2.0.9",
     "@cypress/commit-message-install": "2.7.0",
     "@cypress/env-or-json-file": "2.0.0",
-    "@cypress/eslint-plugin-dev": "3.7.1",
-    "@cypress/eslint-plugin-json": "3.2.1",
+    "@cypress/eslint-plugin-dev": "3.7.2",
+    "@cypress/eslint-plugin-json": "3.2.3",
     "@cypress/github-commit-status-check": "1.5.0",
     "@cypress/npm-run-all": "4.0.5",
     "@cypress/questions-remain": "1.0.1",
@@ -189,7 +189,11 @@
     "testing"
   ],
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,coffee,json,eslintrc}": [
+    "*.coffee": [
+      "npm run stop-only -- --folder",
+      "git add"
+    ],
+    "*.{js,jsx,ts,tsx,json,eslintrc}": [
       "npm run stop-only -- --folder",
       "eslint --fix",
       "git add"
