@@ -373,7 +373,8 @@ describe('Proxy Performance', function () {
         })
       })
 
-      testCases.map((testCase) => {
+      // slice(1) since first test is used as baseline above
+      testCases.slice(1).map((testCase) => {
         it(`${testCase.name} loads 1000 images, with 75% loading no more than 2x as slow as the slowest baseline request`, function () {
           debug('Current test: ', testCase.name)
 
