@@ -32,7 +32,7 @@ fastVisitSpec = (url) ->
       percentiles,
       url,
       browser: Cypress.config('browser').name
-      retryIndex: Cypress.env('retryIndex')
+      currentRetry: Cypress.env('currentRetry')
     })
     .then ->
       expect(percentile(80)).to.be.lte(100)

@@ -38,7 +38,7 @@ context('cy.visit performance tests', function () {
           expectedExitCode: 0,
           config: {
             env: {
-              retryIndex: this.test._currentRetry,
+              currentRetry: this.test._currentRetry,
             },
           },
           browser,
