@@ -2650,20 +2650,6 @@ describe "Routes", ->
               ## shouldn't be more than 500ms
               expect(reqTime).to.be.lt(500)
 
-              # b = res.body
-              #
-              # console.time("1")
-              # b.replace(topOrParentEqualityBeforeRe, "$self")
-              # console.timeEnd("1")
-              #
-              # console.time("2")
-              # b.replace(topOrParentEqualityAfterRe, "self$2")
-              # console.timeEnd("2")
-              #
-              # console.time("3")
-              # b.replace(topOrParentLocationOrFramesRe, "$1self$3$4")
-              # console.timeEnd("3")
-
       describe "off with config", ->
         beforeEach ->
           @setup("http://www.google.com", {
