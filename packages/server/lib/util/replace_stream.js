@@ -4,6 +4,7 @@ const through = require('through')
 const splitter = new GraphemeSplitter()
 
 // UTF-8 grapheme aware stream replacer
+// https://github.com/cypress-io/cypress/pull/4984
 function replaceStream (pattern, replacement, options = { maxTailLength: 100 }) {
   let tail = ''
 
