@@ -2,7 +2,6 @@
 
 const pumpify = require('pumpify')
 const { replaceStream } = require('./replace_stream')
-
 const utf8Stream = require('utf8-stream')
 
 const topOrParentEqualityBeforeRe = /((?:window|self)(?:\.|\[['"](?:top|self)['"]\])?\s*[!=]==?\s*(?:(?:window|self)(?:\.|\[['"]))?)(top|parent)(?![\w])/g
