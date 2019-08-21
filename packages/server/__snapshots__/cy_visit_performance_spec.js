@@ -1,4 +1,4 @@
-exports['cy.visit performance tests pass in chrome (headed) 1'] = `
+exports['cy.visit performance tests pass in chrome 1'] = `
 
 ====================================================================================================
 
@@ -90,7 +90,7 @@ histogram line
 
 `
 
-exports['cy.visit performance tests pass in electron (headless) 1'] = `
+exports['cy.visit performance tests pass in electron 1'] = `
 
 ====================================================================================================
 

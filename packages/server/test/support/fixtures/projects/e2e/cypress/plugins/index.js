@@ -99,7 +99,7 @@ module.exports = (on) => {
       })
     },
 
-    'record:fast_visit_spec' ({ percentiles, url, browser }) {
+    'record:fast_visit_spec' ({ percentiles, url, browser, retryIndex }) {
       percentiles.forEach(([percent, percentile]) => {
         console.log(`${percent}%\t of visits to ${url} finished in less than ${percentile}ms`)
       })
@@ -107,6 +107,7 @@ module.exports = (on) => {
       const data = {
         url,
         browser,
+        retryIndex,
         ...percentiles.reduce((acc, pair) => {
           acc[pair[0]] = pair[1]
           return acc

@@ -27,23 +27,23 @@ context('cy.visit performance tests', function () {
   }
 
   context('pass', function () {
-    it('in chrome (headed)', function () {
-      return e2e.exec(this, {
-        spec: 'fast_visit_spec.coffee',
-        snapshot: true,
-        expectedExitCode: 0,
-        browser: 'chrome',
-        onStdout,
-      })
-    })
-
-    it('in electron (headless)', function () {
-      return e2e.exec(this, {
-        spec: 'fast_visit_spec.coffee',
-        snapshot: true,
-        expectedExitCode: 0,
-        browser: 'electron',
-        onStdout,
+    [
+      'chrome',
+      'electron',
+    ].forEach((browser) => {
+      it(`in ${browser}`, function () {
+        return e2e.exec(this, {
+          spec: 'fast_visit_spec.coffee',
+          snapshot: true,
+          expectedExitCode: 0,
+          config: {
+            env: {
+              retryIndex: this.test._currentRetry,
+            },
+          },
+          browser,
+          onStdout,
+        })
       })
     })
   })
