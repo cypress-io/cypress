@@ -1,3 +1,5 @@
+require('../spec_helper')
+
 const cp = require('child_process')
 const fse = require('fs-extra')
 const os = require('os')
@@ -323,9 +325,7 @@ describe('Proxy Performance', function () {
 
   beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-    if (global.nock) {
-      global.nock.enableNetConnect()
-    }
+    nock.enableNetConnect()
   })
 
   before(function () {
