@@ -5,7 +5,6 @@ const moment = require('moment')
 const $dom = require('../../../dom')
 const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
-const $Keyboard = require('../../../cypress/keyboard')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
 
@@ -17,9 +16,7 @@ const weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/
 const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?$/
 
 module.exports = function (Commands, Cypress, cy, state, config) {
-  Cypress.on('test:before:run', () => {
-    return $Keyboard.resetModifiers(state('document'), state('window'))
-  })
+  const { keyboard } = cy.devices
 
   return Commands.addAll({ prevSubject: 'element' }, {
     type (subject, chars, options = {}) {
@@ -54,7 +51,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          const modifiers = $Keyboard.activeModifiers()
+          const modifiers = keyboard.getActiveModifiersArray()
 
           if (modifiers.length) {
             obj.modifiers = modifiers.join(', ')
@@ -300,7 +297,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         const isContentEditable = $elements.isContentEditable(options.$el.get(0))
         const isTextarea = $elements.isTextarea(options.$el.get(0))
 
-        return $Keyboard.type({
+        return keyboard.type({
           $el: options.$el,
           chars: options.chars,
           delay: options.delay,

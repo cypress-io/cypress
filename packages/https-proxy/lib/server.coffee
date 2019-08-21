@@ -138,6 +138,8 @@ class Server
 
       browserSocket.resume()
 
+    port or= "443"
+
     if upstreamProxy = @_getProxyForUrl("https://#{hostname}:#{port}")
       # todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
       debug("making proxied connection %o", {
