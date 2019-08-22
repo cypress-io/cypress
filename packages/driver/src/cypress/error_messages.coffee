@@ -1094,8 +1094,7 @@ module.exports = {
     specify_file_by_relative_path: """
       #{cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
 
-      However, you can pass in the relative path to the file from the projectRoot (Note: if the configuration value 'baseUrl' is set, the supplied path will be resolved from the 'baseUrl' instead)   
-      
+      To visit a local file, you can pass in the relative path to the file from the `projectRoot` (Note: if the configuration value `baseUrl` is set, the supplied path will be resolved from the `baseUrl` instead of `projectRoot`)
 
       https://docs.cypress.io/api/commands/visit.html
 
