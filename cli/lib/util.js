@@ -136,6 +136,26 @@ function printNodeOptions (log = debug) {
 }
 
 /**
+ * Allow platform specific environment variables. A variable can be
+ * specified for Linux and Windows like:
+ *
+ * CYPRESS_INSTALL_BINARY___linux='https://this.is/the/linux/binary.zip'
+ * CYPRESS_INSTALL_BINARY___win32='https://this.is/the/win32/binary.zip'
+ *
+ * And if there is such a platform specific variable, it will be used,
+ * or else the CYPRESS_INSTALL_BINARY will be used.
+ */
+function getPlatformSpecificEnv (varName, platform = process.platform) {
+  const platformVariable = `${varName}___${platform}`
+
+  if (process.env[platformVariable]) {
+    return process.env[platformVariable]
+  }
+
+  return process.env[varName]
+}
+
+/**
  * Removes double quote characters
  * from the start and end of the given string IF they are both present
  *
@@ -323,10 +343,12 @@ const util = {
     return path.join(process.cwd(), '..', '..', filename)
   },
 
+  getPlatformSpecificEnv,
+
   getEnv (varName, trim) {
     la(is.unemptyString(varName), 'expected environment variable name, not', varName)
 
-    const envVar = process.env[varName]
+    const envVar = getPlatformSpecificEnv(varName)
     const configVar = process.env[`npm_config_${varName}`]
     const packageConfigVar = process.env[`npm_package_config_${varName}`]
 

@@ -416,6 +416,15 @@ describe('util', () => {
     })
   })
 
+  describe('.getPlatformSpecificEnv', () => {
+    it('prefers platform specific env var', () => {
+      process.env.CYPRESS_INSTALL_BINARY___linux = 'Linux value'
+      process.env.CYPRESS_INSTALL_BINARY = 'Default value'
+      expect(util.getPlatformSpecificEnv('CYPRESS_INSTALL_BINARY', 'linux')).to.eql('Linux value')
+      expect(util.getPlatformSpecificEnv('CYPRESS_INSTALL_BINARY', 'win32')).to.eql('Default value')
+    })
+  })
+
   describe('.getEnv', () => {
     it('reads from package.json config', () => {
       process.env.npm_package_config_CYPRESS_FOO = 'bar'
