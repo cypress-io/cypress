@@ -554,7 +554,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
 
       if qs = options.qs
-        url = $Location.mergeUrlWithqs(url, qs)
+        url = $Location.mergeUrlWithParams(url, qs)
 
       cleanup = null
 

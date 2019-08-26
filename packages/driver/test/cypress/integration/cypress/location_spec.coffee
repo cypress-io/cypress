@@ -183,10 +183,10 @@ describe "src/cypress/location", ->
       obj = Location.create(urls.signin)
       expect(obj.toString()).to.eq("http://localhost:2020/signin")
 
-  context ".mergeWithParams", ->
+  context ".mergeUrlWithParams", ->
     beforeEach ->
       @url = (str, expected, params) ->
-        url = Location.mergeWithParams(str, params)
+        url = Location.mergeUrlWithParams(str, params)
         expect(url).to.eq(expected)
 
     it "merges params into a URL", ->
