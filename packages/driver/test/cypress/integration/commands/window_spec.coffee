@@ -552,7 +552,7 @@ describe "src/cy/commands/window", ->
           done()
 
         cy.viewport("iphone-xr")
-      
+
       it "iphone-x", (done) ->
         cy.on "viewport:changed", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 375, viewportHeight: 812}
@@ -624,7 +624,7 @@ describe "src/cy/commands/window", ->
       it "throws with passed invalid preset", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() could not find a preset for: 'foo'. Available presets are: macbook-15, macbook-13, macbook-11, ipad-2, ipad-mini, iphone-6+, iphone-6, iphone-5, iphone-4, iphone-3"
+          expect(err.message).to.match /^cy.viewport\(\) could not find a preset for: 'foo'. Available presets are: /
           done()
 
         cy.viewport("foo")
