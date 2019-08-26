@@ -14,7 +14,7 @@ hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
-REQUEST_URL_OPTS = "auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers qs"
+REQUEST_URL_OPTS = "auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers"
 .split(" ")
 
 VISIT_OPTS = "url log onBeforeLoad onLoad timeout requestTimeout"
@@ -46,6 +46,8 @@ timedOutWaitingForPageLoad = (ms, log) ->
     onFail: log
     args: { ms }
   })
+
+mergeUrlWithParams = (url, params) ->
 
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
   ## the remote has a hash
@@ -522,6 +524,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         onLoad: ->
       })
 
+      if !_.isUndefined(options.params) and not _.isObject(options.params)
+        $utils.throwErrByPath("visit.invalid_params", { args: { params: String(options.params) }})
+
       if options.retryOnStatusCodeFailure and not options.failOnStatusCode
         $utils.throwErrByPath("visit.status_code_flags_invalid")
 
@@ -549,6 +554,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
+
+      if params = options.params
+        url = $Location.mergeUrlWithParams(url, params)
 
       cleanup = null
 
