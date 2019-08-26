@@ -47,8 +47,6 @@ timedOutWaitingForPageLoad = (ms, log) ->
     args: { ms }
   })
 
-mergeUrlWithParams = (url, params) ->
-
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
   ## the remote has a hash
   ## or the last char of href
