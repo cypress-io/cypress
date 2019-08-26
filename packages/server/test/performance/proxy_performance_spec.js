@@ -1,3 +1,5 @@
+require('../spec_helper')
+
 const cp = require('child_process')
 const fse = require('fs-extra')
 const os = require('os')
@@ -8,6 +10,7 @@ const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('@cypress/debugging-proxy')
 const HarCapturer = require('chrome-har-capturer')
+const performance = require('../support/helpers/performance')
 const Promise = require('bluebird')
 const Table = require('console-table-printer').Table
 const sanitizeFilename = require('sanitize-filename')
@@ -322,6 +325,7 @@ describe('Proxy Performance', function () {
 
   beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+    nock.enableNetConnect()
   })
 
   before(function () {
@@ -369,6 +373,7 @@ describe('Proxy Performance', function () {
         })
       })
 
+      // slice(1) since first test is used as baseline above
       testCases.slice(1).map((testCase) => {
         it(`${testCase.name} loads 1000 images, with 75% loading no more than 2x as slow as the slowest baseline request`, function () {
           debug('Current test: ', testCase.name)
@@ -390,6 +395,12 @@ describe('Proxy Performance', function () {
         // console.log is bad for eslint, but nobody never said nothing about process.stdout.write
         process.stdout.write('Note: All times are in milliseconds.\n')
         t.printTable()
+
+        return Promise.map(testCases, (testCase) => {
+          testCase['URL'] = urlUnderTest
+
+          return performance.track('Proxy Performance', testCase)
+        })
       })
     })
   })
