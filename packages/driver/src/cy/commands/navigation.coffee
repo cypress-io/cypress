@@ -14,7 +14,7 @@ hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
-REQUEST_URL_OPTS = "auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers"
+REQUEST_URL_OPTS = "auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers qs"
 .split(" ")
 
 VISIT_OPTS = "url log onBeforeLoad onLoad timeout requestTimeout"
@@ -610,7 +610,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         existing = $utils.locExisting()
 
         ## TODO: $Location.resolve(existing.origin, url)
-        
+
         if $Location.isLocalFileUrl(url)
           return specifyFileByRelativePath(url, options._log)
 

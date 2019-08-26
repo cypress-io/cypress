@@ -543,11 +543,11 @@ describe "src/cy/commands/navigation", ->
 
     it "does not support file:// protocol", (done) ->
       Cypress.config("baseUrl", "")
-    
+
       cy.on "fail", (err) ->
         expect(err.message).to.contain("cy.visit() failed because the 'file://...' protocol is not supported by Cypress.")
         done()
-    
+
       cy.visit("file:///cypress/fixtures/generic.html")
 
     ## https://github.com/cypress-io/cypress/issues/1727
@@ -618,6 +618,14 @@ describe "src/cy/commands/navigation", ->
         }
       })
       cy.contains('"user-agent":"something special"')
+
+    it "can send querystring", ->
+      qs = { "foo bar": "baz quux" }
+
+      cy
+        .visit("http://localhost:3500/dump-qs", { qs })
+        .then ->
+          cy.contains(JSON.stringify(qs))
 
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
