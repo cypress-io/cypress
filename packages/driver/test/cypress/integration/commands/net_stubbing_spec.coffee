@@ -200,7 +200,7 @@ describe "src/cy/commands/net_stubbing", ->
           xhr.open("GET", "/def456")
           xhr.send()
 
-    context.only "intercepting request", ->
+    context "intercepting request", ->
       it "receives the original request body in handler", (done) ->
         cy.route "/aaa", (req) ->
           expect(req.body).to.eq("foo-bar-baz")

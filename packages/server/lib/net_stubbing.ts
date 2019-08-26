@@ -30,7 +30,34 @@ interface ProxyIncomingMessage extends IncomingMessage {
   requestId: string
 }
 
+interface BackendRequest {
+  requestId: string
+  /**
+   * The route that matched this request.
+   */
+  route: BackendRoute
+  /**
+   * A callback that can be used to make the request go outbound.
+   */
+  continueRequest: Function
+  /**
+   * A callback that can be used to send the response through the proxy.
+   */
+  continueResponse?: Function
+  req: ProxyIncomingMessage
+  res: ServerResponse
+  /**
+   * Should the response go to the driver, or should it be allowed to continue?
+   */
+  sendResponseToDriver?: boolean
+}
+
 const debug = debugModule('cypress:server:net_stubbing')
+
+let routes : BackendRoute[] = []
+
+// map of request IDs to requests in flight
+let requests : { [key: string]: BackendRequest } = {}
 
 function _getAllStringMatcherFields (options) {
   return _.concat(
@@ -73,9 +100,6 @@ function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
 
   return ret
 }
-
-// TODO: clear between specs
-let routes : BackendRoute[] = []
 
 function _onRouteAdded (options: NetEventFrames.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
@@ -247,36 +271,26 @@ export function onDriverEvent (socket: any, eventName: string, ...args: any[]) {
   }
 }
 
-interface BackendRequest {
-  requestId: string
-  route: BackendRoute
-  /**
-   * A callback that can be used to make the request go outbound.
-   */
-  continueRequest: Function
-  /**
-   * A callback that can be used to send the response through the proxy.
-   */
-  continueResponse?: Function
-  req: ProxyIncomingMessage
-  res: ServerResponse
-  sendResponseToDriver?: boolean
-}
-
-let requests : { [key: string]: BackendRequest } = {}
-
+/**
+ * Called when a new request is received in the proxy layer.
+ * @param project
+ * @param req
+ * @param res
+ * @param cb Can be called to resume the proxy's normal behavior. If `res` is not handled and this is not called, the request will hang.
+ */
 export function onProxiedRequest (project: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
+  const route = _getRouteForRequest(req)
+
   try {
-    return _onProxiedRequest(project, req, res, cb)
+    return _onProxiedRequest(route, project.server._socket, req, res, cb)
   } catch (err) {
     debug('error in onProxiedRequest: %o', { err, req, res, routes })
   }
 }
 
-function _onProxiedRequest (project: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
-  const route = _getRouteForRequest(req)
-
+function _onProxiedRequest (route: BackendRoute | undefined, socket: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
   if (!route) {
+    // not intercepted, carry on normally...
     return cb()
   }
 
@@ -296,6 +310,7 @@ function _onProxiedRequest (project: any, req: ProxyIncomingMessage, res: Server
     res,
   }
 
+  // attach requestId to the original req object for later use
   req.requestId = requestId
 
   requests[requestId] = request
@@ -309,9 +324,19 @@ function _onProxiedRequest (project: any, req: ProxyIncomingMessage, res: Server
     }) as CyHttpMessages.IncomingRequest,
   }
 
+  function emit () {
+    _emit(socket, 'http:request:received', frame)
+  }
+
+  // if we already have a body, just emit
+  if (frame.req.body) {
+    return emit()
+  }
+
+  // else, buffer the body
   req.pipe(concatStream((reqBody) => {
     frame.req.body = reqBody.toString()
-    _emit(project.server._socket, 'http:request:received', frame)
+    emit()
   }))
 }
 
@@ -327,33 +352,17 @@ function _onRequestContinue (frame: NetEventFrames.HttpRequestContinue, socket: 
   _.assign(backendRequest.req, _.pick(frame.req, SERIALIZABLE_REQ_PROPS))
 
   if (frame.tryNextRoute) {
-    // frame.req has been modified, now pass this to the next available route handler
+    // outgoing request has been modified, now pass this to the next available route handler
     const prevRoute = _.find(routes, { handlerId: frame.routeHandlerId })
 
-    const route = _getRouteForRequest(backendRequest.req, prevRoute)
-
-    if (!route) {
-      // no "next route" available, so just continue that bad boy
-      backendRequest.continueRequest()
-
-      return
+    if (!prevRoute) {
+      // route no longer registered, it's fine
+      return backendRequest.continueRequest()
     }
 
-    if (route.staticResponse) {
-      _sendStaticResponse(backendRequest.res, route.staticResponse)
+    const nextRoute = _getRouteForRequest(backendRequest.req, prevRoute)
 
-      return
-    }
-
-    const nextFrame : NetEventFrames.HttpRequestReceived = {
-      routeHandlerId: <string>route.handlerId,
-      requestId: backendRequest.requestId,
-      req: frame.req!,
-    }
-
-    _emit(socket, 'http:request:received', nextFrame)
-
-    return
+    return _onProxiedRequest(nextRoute, socket, backendRequest.req, backendRequest.res, backendRequest.continueRequest)
   }
 
   if (frame.staticResponse) {
@@ -378,18 +387,14 @@ export function onProxiedResponse (project: any, req: ProxyIncomingMessage, resS
 }
 
 function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
-  if (!req.requestId) {
-    // original request was not intercepted, so response should not be either
-    return cb()
-  }
-
   const backendRequest = requests[req.requestId]
 
-  debug('onProxiedResponse %o', { req, backendRequest })
-
-  if (!backendRequest.sendResponseToDriver) {
+  if (!backendRequest || !backendRequest.sendResponseToDriver) {
+    // either the original request was not intercepted, or there's nothing for the driver to do with this response
     return cb()
   }
+
+  debug('onProxiedResponse %o', { req, backendRequest })
 
   // this may get set back to `true` by another route
   backendRequest.sendResponseToDriver = false
