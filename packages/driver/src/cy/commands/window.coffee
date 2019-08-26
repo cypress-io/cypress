@@ -9,7 +9,7 @@ viewports = {
   "macbook-11" : "1366x768"
   "ipad-2"     : "768x1024"
   "ipad-mini"  : "768x1024"
-  "iphone-xr"  : "414X896"
+  "iphone-xr"  : "414x896"
   "iphone-x"   : "375x812"
   "iphone-6+"  : "414x736"
   "iphone-6"   : "375x667"
