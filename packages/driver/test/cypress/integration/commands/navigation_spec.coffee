@@ -620,12 +620,12 @@ describe "src/cy/commands/navigation", ->
       cy.contains('"user-agent":"something special"')
 
     it "can send querystring params", ->
-      params = { "foo bar": "baz quux" }
+      qs = { "foo bar": "baz quux" }
 
       cy
-        .visit("http://localhost:3500/dump-qs", { params })
+        .visit("http://localhost:3500/dump-qs", { qs })
         .then ->
-          cy.contains(JSON.stringify(params))
+          cy.contains(JSON.stringify(qs))
           cy.url().should('eq', 'http://localhost:3500/dump-qs?foo%20bar=baz%20quux')
 
     describe "can send a POST request", ->
@@ -1073,17 +1073,17 @@ describe "src/cy/commands/navigation", ->
         "foo",
         null,
         false,
-      ].forEach (params) =>
-        str = String(params)
+      ].forEach (qs) =>
+        str = String(qs)
 
-        it "throws when params is #{str}", (done) ->
+        it "throws when qs is #{str}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.contain "cy.visit() requires the 'params' option to be an object, but received: '#{str}'"
+            expect(err.message).to.contain "cy.visit() requires the 'qs' option to be an object, but received: '#{str}'"
             done()
 
           cy.visit({
             url: "http://foobarbaz",
-            params
+            qs
           })
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
