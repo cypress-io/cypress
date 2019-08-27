@@ -39,7 +39,11 @@ describe('lib/exec/spawn', function () {
       },
     }
 
-    sinon.stub(process, 'stdin').value(new EE)
+    // process.stdin is both an event emitter and a readable stream
+    const processStdin = new EE()
+
+    processStdin.pipe = sinon.stub().returns(undefined)
+    sinon.stub(process, 'stdin').value(processStdin)
     sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
     sinon.stub(xvfb, 'start').resolves()
     sinon.stub(xvfb, 'stop').resolves()
