@@ -97,12 +97,10 @@ export declare namespace CyHttpMessages {
      * Wait for `delayMs` milliseconds before sending the response to the client.
      */
     delay: (delayMs: number) => IncomingHttpResponse
-    delayMs?: number
     /**
      * Serve the response at a maximum of `throttleKbps` kilobytes per second.
      */
     throttle: (throttleKbps: number) => IncomingHttpResponse
-    throttleKbps?: number
   }
 
   export interface IncomingRequest extends BaseMessage {
@@ -130,8 +128,6 @@ export interface StaticResponse {
    * Useful for simulating a server that is not reachable.
    */
   destroySocket?: boolean
-  // TODO: add some additional fields to customize the response?
-  // ideas: delayMs, throttleKbps
 }
 
 type CyResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse, send?: () => void) => void
@@ -198,6 +194,8 @@ export declare namespace NetEventFrames {
   export interface HttpResponseContinue extends BaseHttp {
     res?: CyHttpMessages.IncomingResponse
     staticResponse?: StaticResponse
+    delayMs?: number
+    throttleKbps?: number
   }
 }
 
@@ -473,12 +471,12 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
         return sendContinueFrame()
       },
       delay (delayMs) {
-        this.delayMs = delayMs
+        continueFrame.delayMs = delayMs
 
         return this
       },
       throttle (throttleKbps) {
-        this.throttleKbps = throttleKbps
+        continueFrame.throttleKbps = throttleKbps
 
         return this
       },

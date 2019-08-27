@@ -4,6 +4,7 @@ import debugModule from 'debug'
 import { IncomingMessage, ServerResponse } from 'http'
 import minimatch from 'minimatch'
 import { Readable } from 'stream'
+import Throttle from 'throttle'
 import url from 'url'
 // TODO: figure out the right way to make these types accessible in server and driver
 import {
@@ -28,6 +29,7 @@ interface ProxyIncomingMessage extends IncomingMessage {
   proxiedUrl: string
   webSocket: boolean // TODO: populate
   requestId: string
+  body?: string
 }
 
 interface BackendRequest {
@@ -45,7 +47,7 @@ interface BackendRequest {
    */
   continueResponse?: Function
   req: ProxyIncomingMessage
-  res: ServerResponse
+  res: ServerResponse & { body?: string | any }
   /**
    * Should the response go to the driver, or should it be allowed to continue?
    */
@@ -456,6 +458,7 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
   }
 
   resStream.pipe(concatStream((resBody) => {
+    // @ts-ignore
     frame.res.body = resBody.toString()
     _emit(project.server._socket, 'http:response:received', frame)
   }))
@@ -467,13 +470,31 @@ function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
   debug('_onResponseContinue %o', { backendRequest, frame })
 
   if (frame.staticResponse) {
-    _sendStaticResponse(backendRequest.res, frame.staticResponse)
+    if (frame.staticResponse.destroySocket) {
+      backendRequest.res.destroy()
 
-    return
+      return
+    }
+
+    // TODO: see if this can be cleaned up, this has converged to do the same thing
+    // in two similar ways
+    _.assign(backendRequest.res, _.pick(frame.staticResponse, SERIALIZABLE_RES_PROPS))
+  } else {
+    // merge the changed response attributes with our response and continue
+    _.assign(backendRequest.res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
   }
 
-  // merge the changed response attributes with our response and continue
-  _.assign(backendRequest.res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
-  // TODO: do something with the changed body?
-  backendRequest.continueResponse!()
+  if (frame.throttleKbps) {
+    const throttleStr = new Throttle(frame.throttleKbps * 1024)
+
+    throttleStr.write(backendRequest.res.body)
+
+    backendRequest.res.body = throttleStr
+  }
+
+  if (frame.delayMs) {
+    return setTimeout(backendRequest.continueResponse, frame.delayMs)
+  }
+
+  backendRequest.continueResponse()
 }

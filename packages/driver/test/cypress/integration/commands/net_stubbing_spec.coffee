@@ -335,6 +335,40 @@ describe "src/cy/commands/net_stubbing", ->
           xhr.open("GET", "/json-content-type")
           xhr.send()
 
+      it "can delay the response", (done) ->
+        cy.route "/timeout", (req) =>
+          req.reply (res) =>
+            @start = Date.now()
+            res.delay(1000).send()
+        .then =>
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "/timeout")
+          xhr.send()
+
+          xhr.onload = =>
+            expect(Date.now() - @start).to.be.closeTo(1000, 100)
+            done()
+
+      it "can throttle the response", (done) ->
+        payload = "A".repeat(1024)
+        kbps = .25
+        expectedSeconds = payload.length / (1024 * kbps)
+
+        cy.route "/timeout", (req) =>
+          delete req.headers['if-none-match'] ## TODO: handle 304's better
+
+          req.reply (res) =>
+            @start = Date.now()
+            res.throttle(kbps).send({ statusCode: 200, body: payload })
+        .then =>
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "/timeout")
+          xhr.send()
+
+          xhr.onload = =>
+            expect(Date.now() - @start).to.be.closeTo(expectedSeconds * 1000, 100)
+            done()
+
     context "intercepting response errors", ->
       it "sends an error object to handler if host DNE", (done) ->
         cy.route "/should-err", (req) ->
