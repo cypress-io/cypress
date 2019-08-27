@@ -354,6 +354,10 @@ module.exports = {
         retryIntervals: [0, 100, 200, 200]
       }
 
+      ## if the request has been buffered, can't stream body
+      if req.body
+        _.assign opts, _.pick(req, 'method', 'body', 'headers')
+
       ## strip unsupported accept-encoding headers
       encodings = accept.parser(req.headers["accept-encoding"]) ? []
 
@@ -399,8 +403,9 @@ module.exports = {
         rq.abort()
 
       ## proxy the request body, content-type, headers
-      ## to the new rq
-      req.pipe(rq)
+      ## to the new rq if necessary
+      if !req.body
+        req.pipe(rq)
 
     return thr
 

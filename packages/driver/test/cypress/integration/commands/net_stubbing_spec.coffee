@@ -205,7 +205,6 @@ describe "src/cy/commands/net_stubbing", ->
         cy.route "/aaa", (req) ->
           expect(req.body).to.eq("foo-bar-baz")
 
-          req.reply(200, 'aight')
           done()
         .then ->
           xhr = new XMLHttpRequest()
@@ -250,6 +249,76 @@ describe "src/cy/commands/net_stubbing", ->
           })
 
           cy.get('body').should('contain.text', '"foo":"quux"')
+
+      it "can modify the request URL and headers", (done) ->
+        cy.route "/does-not-exist", (req) ->
+          expect(req.headers['foo']).to.eq('bar')
+
+          req.url = "http://localhost:3500/dump-headers"
+          req.headers['foo'] = 'quux'
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "/does-not-exist")
+          xhr.setRequestHeader('foo', 'bar')
+          xhr.send()
+
+          xhr.onload = =>
+            expect(xhr.responseText).to.contain('"foo":"quux"')
+
+            done()
+
+      it "can modify the request method", (done) ->
+        cy.route "/dump-method", (req) ->
+          expect(req.method).to.eq('POST')
+
+          req.method = 'PATCH'
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("POST", "/dump-method")
+          xhr.send()
+
+          xhr.onload = =>
+            expect(xhr.responseText).to.contain('request method: PATCH')
+
+            done()
+
+      it "can modify the request body", (done) ->
+        body = '{"foo":"bar"}'
+
+        cy.route "/post-only", (req) ->
+          expect(req.body).to.eq('quuz')
+
+          req.headers['content-type'] = 'application/json'
+          req.body = body
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("POST", "/post-only")
+          xhr.send("quuz")
+
+          xhr.onload = =>
+            expect(xhr.responseText).to.contain(body)
+
+            done()
+
+      it "can add a body to a request that does not have one", (done) ->
+        body = '{"foo":"bar"}'
+
+        cy.route "/post-only", (req) ->
+          expect(req.body).to.eq('')
+          expect(req.method).to.eq('GET')
+
+          req.method = "POST"
+          req.headers['content-type'] = 'application/json'
+          req.body = body
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "/post-only")
+          xhr.send()
+
+          xhr.onload = =>
+            expect(xhr.responseText).to.contain(body)
+
+            done()
 
     context "intercepting response", ->
       it "receives the original response in handler", (done) ->

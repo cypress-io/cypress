@@ -244,6 +244,15 @@ function _sendStaticResponse (res: ServerResponse, staticResponse: StaticRespons
 
 export function reset () {
   debug('resetting net_stubbing state')
+
+  // clean up requests that are still pending
+  for (const requestId in requests) {
+    const request = requests[requestId]
+
+    // TODO: try/catch?
+    request.res.end()
+  }
+
   requests = {}
   routes = []
 }
@@ -315,12 +324,16 @@ function _onProxiedRequest (route: BackendRoute | undefined, socket: any, req: P
 
   requests[requestId] = request
 
+  res.on('finish', () => {
+    debug('request/response finished, cleaning up %o', { requestId })
+    delete requests[requestId]
+  })
+
   const frame : NetEventFrames.HttpRequestReceived = {
     routeHandlerId: route.handlerId!,
     requestId,
     req: _.extend(_.pick(req, SERIALIZABLE_REQ_PROPS), {
       url: req.proxiedUrl,
-      // body: "not implemented... yet" // TODO: buffer the body here with the stream-buffer from net-retries
     }) as CyHttpMessages.IncomingRequest,
   }
 
@@ -350,6 +363,14 @@ function _onRequestContinue (frame: NetEventFrames.HttpRequestContinue, socket: 
 
   // modify the original paused request object using what the client returned
   _.assign(backendRequest.req, _.pick(frame.req, SERIALIZABLE_REQ_PROPS))
+
+  // proxiedUrl is used to initialize the new request
+  backendRequest.req.proxiedUrl = frame.req.url
+
+  // update content-length if available
+  if (backendRequest.req.headers['content-length'] && frame.req.body) {
+    backendRequest.req.headers['content-length'] = frame.req.body.length
+  }
 
   if (frame.hasResponseHandler) {
     backendRequest.sendResponseToDriver = true
@@ -445,23 +466,14 @@ function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
 
   debug('_onResponseContinue %o', { backendRequest, frame })
 
-  function cleanup () {
-    delete requests[frame.requestId]
-  }
-
   if (frame.staticResponse) {
     _sendStaticResponse(backendRequest.res, frame.staticResponse)
-
-    cleanup()
 
     return
   }
 
   // merge the changed response attributes with our response and continue
   _.assign(backendRequest.res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
-
-  cleanup()
-
   // TODO: do something with the changed body?
   backendRequest.continueResponse!()
 }
