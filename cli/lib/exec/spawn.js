@@ -142,7 +142,7 @@ module.exports = {
         //  child STDERR => process STDERR with additional filtering
         if (child.stdin) {
           debug('piping process STDIN into child STDIN')
-          child.stdin.pipe(process.stdin)
+          process.stdin.pipe(child.stdin)
         }
 
         if (child.stdout) {
