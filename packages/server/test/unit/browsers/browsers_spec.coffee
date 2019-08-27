@@ -23,6 +23,7 @@ describe "lib/browsers/index", ->
         throw new Error("should have failed")
       .catch (err) ->
         expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
+        expect(err.message).to.contain("'browserNotGonnaBeFound' was not found on your system")
 
   context ".open", ->
     it "throws an error if browser family doesn't exist", ->
@@ -35,6 +36,7 @@ describe "lib/browsers/index", ->
         throw new Error("should've failed")
       .catch (err) ->
         expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
+        expect(err.message).to.contain("'foo-bad-bang' was not found on your system")
 
     # it "calls onBrowserClose callback on close", ->
     #   onBrowserClose = sinon.stub()
