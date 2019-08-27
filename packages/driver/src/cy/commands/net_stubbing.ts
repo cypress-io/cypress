@@ -79,12 +79,19 @@ export declare namespace CyHttpMessages {
     httpVersion: string
   }
 
-  export interface IncomingResponse extends BaseMessage {
+  interface IncomingResponseError {
+    url: string
+    error: Error
+  }
+
+  export type IncomingResponseSuccess = BaseMessage & {
     statusCode: number
     statusMessage: string
   }
 
-  export interface IncomingHttpResponse extends IncomingResponse {
+  export type IncomingResponse = IncomingResponseSuccess | IncomingResponseError
+
+  export type IncomingHttpResponse = IncomingResponse & {
     send: (staticResponse?: StaticResponse) => void
     /**
      * Wait for `delayMs` milliseconds before sending the response to the client.
@@ -168,10 +175,12 @@ export declare namespace NetEventFrames {
     routeHandlerId: string
   }
 
+  // fired when HTTP proxy receives headers + body of request
   export interface HttpRequestReceived extends BaseHttp {
     req: CyHttpMessages.IncomingRequest
   }
 
+  // fired when driver is done modifying request and wishes to pass control back to the proxy
   export interface HttpRequestContinue extends BaseHttp {
     req?: CyHttpMessages.IncomingRequest
     staticResponse?: StaticResponse
@@ -179,10 +188,13 @@ export declare namespace NetEventFrames {
     tryNextRoute?: boolean
   }
 
+  // fired when a response is received and the driver has a req.reply callback registered
   export interface HttpResponseReceived extends BaseHttp {
-    res: CyHttpMessages.IncomingResponse
+    res: CyHttpMessages.IncomingResponse | CyHttpMessages.IncomingResponseError
   }
 
+  // fired when driver is done modifying response or driver callback completes,
+  // passes control back to proxy
   export interface HttpResponseContinue extends BaseHttp {
     res?: CyHttpMessages.IncomingResponse
     staticResponse?: StaticResponse

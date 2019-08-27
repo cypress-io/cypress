@@ -228,17 +228,17 @@ function _sendStaticResponse (res: ServerResponse, staticResponse: StaticRespons
     return
   }
 
-  if (staticResponse.headers) {
-    _.keys(staticResponse.headers).forEach((key) => {
-      res.setHeader(key, (<StaticResponse>staticResponse.headers)[key])
-    })
-  }
+  const statusCode = staticResponse.statusCode || 200
+  const headers = staticResponse.headers
+
+  res.writeHead(statusCode, headers || {})
+
+  res.flushHeaders()
 
   if (staticResponse.body) {
     res.write(staticResponse.body)
   }
 
-  res.statusCode = staticResponse.statusCode || 200
   res.end()
 }
 
@@ -351,6 +351,10 @@ function _onRequestContinue (frame: NetEventFrames.HttpRequestContinue, socket: 
   // modify the original paused request object using what the client returned
   _.assign(backendRequest.req, _.pick(frame.req, SERIALIZABLE_REQ_PROPS))
 
+  if (frame.hasResponseHandler) {
+    backendRequest.sendResponseToDriver = true
+  }
+
   if (frame.tryNextRoute) {
     // outgoing request has been modified, now pass this to the next available route handler
     const prevRoute = _.find(routes, { handlerId: frame.routeHandlerId })
@@ -371,11 +375,33 @@ function _onRequestContinue (frame: NetEventFrames.HttpRequestContinue, socket: 
     return
   }
 
-  if (frame.hasResponseHandler) {
-    backendRequest.sendResponseToDriver = true
+  backendRequest.continueRequest()
+}
+
+export function onProxiedResponseError (project: any, req: ProxyIncomingMessage, error: Error, cb: Function) {
+  const backendRequest = requests[req.requestId]
+
+  debug('onProxiedResponseError %o', { req, backendRequest })
+
+  if (!backendRequest || !backendRequest.sendResponseToDriver) {
+    // either the original request was not intercepted, or there's nothing for the driver to do with this response
+    return cb()
   }
 
-  backendRequest.continueRequest()
+  // this may get set back to `true` by another route
+  backendRequest.sendResponseToDriver = false
+  backendRequest.continueResponse = cb
+
+  const frame : NetEventFrames.HttpResponseReceived = {
+    routeHandlerId: backendRequest.route.handlerId!,
+    requestId: backendRequest.requestId,
+    res: {
+      url: req.proxiedUrl,
+      error,
+    },
+  }
+
+  _emit(project.server._socket, 'http:response:received', frame)
 }
 
 export function onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
@@ -389,12 +415,12 @@ export function onProxiedResponse (project: any, req: ProxyIncomingMessage, resS
 function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
   const backendRequest = requests[req.requestId]
 
+  debug('onProxiedResponse %o', { req, backendRequest })
+
   if (!backendRequest || !backendRequest.sendResponseToDriver) {
     // either the original request was not intercepted, or there's nothing for the driver to do with this response
     return cb()
   }
-
-  debug('onProxiedResponse %o', { req, backendRequest })
 
   // this may get set back to `true` by another route
   backendRequest.sendResponseToDriver = false
@@ -405,7 +431,7 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
     requestId: backendRequest.requestId,
     res: _.extend(_.pick(incomingRes, SERIALIZABLE_RES_PROPS), {
       url: req.proxiedUrl,
-    }) as CyHttpMessages.IncomingResponse,
+    }) as CyHttpMessages.IncomingResponseSuccess,
   }
 
   resStream.pipe(concatStream((resBody) => {
@@ -417,8 +443,16 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
 function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
   const backendRequest = requests[frame.requestId]
 
+  debug('_onResponseContinue %o', { backendRequest, frame })
+
+  function cleanup () {
+    delete requests[frame.requestId]
+  }
+
   if (frame.staticResponse) {
     _sendStaticResponse(backendRequest.res, frame.staticResponse)
+
+    cleanup()
 
     return
   }
@@ -426,6 +460,8 @@ function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
   // merge the changed response attributes with our response and continue
   _.assign(backendRequest.res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
 
-  // TODO: do something with the changed body
+  cleanup()
+
+  // TODO: do something with the changed body?
   backendRequest.continueResponse!()
 }

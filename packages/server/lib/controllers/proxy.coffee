@@ -275,7 +275,8 @@ module.exports = {
         err
       })
 
-      req.socket.destroy()
+      netStubbing.onProxiedResponseError project, req, err, =>
+        req.socket.destroy()
 
     onResponse = (str, incomingRes) =>
       netStubbing.onProxiedResponse project, req, str, incomingRes, =>

@@ -265,3 +265,43 @@ describe "src/cy/commands/net_stubbing", ->
           xhr = new XMLHttpRequest()
           xhr.open("GET", "/json-content-type")
           xhr.send()
+
+    context "intercepting response errors", ->
+      it "sends an error object to handler if host DNE", (done) ->
+        cy.route "/should-err", (req) ->
+          req.reply (res) ->
+            expect(res.error).to.include({
+              code: 'ECONNREFUSED',
+              port: 3333,
+            })
+            expect(res.url).to.eq("http://localhost:3333/should-err")
+
+            done()
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "http://localhost:3333/should-err")
+          xhr.send()
+
+      it "can send a successful response even if an error occurs", (done) ->
+        cy.route "/should-err", (req) ->
+          req.reply (res) ->
+            ## TODO: better API for this?
+            expect(res.error).to.exist
+
+            res.send({
+              statusCode: 200,
+              headers: {
+                'access-control-allow-origin': '*'
+              }
+              body: "everything is fine"
+            })
+        .then ->
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "http://localhost:3333/should-err")
+          xhr.send()
+
+          xhr.onload = =>
+            expect(xhr.responseText).to.eq("everything is fine")
+            expect(xhr.status).to.eq(200)
+
+            done()
