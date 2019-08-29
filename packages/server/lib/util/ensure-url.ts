@@ -58,9 +58,12 @@ export const isListening = (urlStr: string) => {
 
   if (process.env.HTTP_PROXY) {
     // cannot make arbitrary connections behind a proxy, attempt HTTP/HTTPS
+    // For some reason, TypeScript gets confused by the "agent" parameter
+    // and required double ts-ignore to allow it on local machines and on CI
     // @ts-ignore
     return rp({
       url: urlStr,
+      // @ts-ignore
       agent,
       proxy: null,
     })
