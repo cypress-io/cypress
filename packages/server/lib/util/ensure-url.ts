@@ -58,9 +58,9 @@ export const isListening = (urlStr: string) => {
 
   if (process.env.HTTP_PROXY) {
     // cannot make arbitrary connections behind a proxy, attempt HTTP/HTTPS
+    // @ts-ignore
     return rp({
       url: urlStr,
-      // @ts-ignore
       agent,
       proxy: null,
     })
