@@ -20,7 +20,7 @@ describe "lib/config", ->
 
   context "environment name check", ->
     it "throws an error for unknown CYPRESS_ENV", ->
-      @sandbox.stub(errors, "throw").withArgs("INVALID_CYPRESS_ENV", "foo-bar")
+      sinon.stub(errors, "throw").withArgs("INVALID_CYPRESS_ENV", "foo-bar")
       process.env.CYPRESS_ENV = "foo-bar"
       cfg = {
         projectRoot: "/foo/bar/"
@@ -30,7 +30,7 @@ describe "lib/config", ->
       expect(errors.throw).have.been.calledOnce
 
     it "allows known CYPRESS_ENV", ->
-      @sandbox.stub(errors, "throw")
+      sinon.stub(errors, "throw")
       process.env.CYPRESS_ENV = "test"
       cfg = {
         projectRoot: "/foo/bar/"
