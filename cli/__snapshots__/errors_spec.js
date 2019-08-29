@@ -32,6 +32,7 @@ exports['errors individual has the following errors 1'] = [
   "failedDownload",
   "failedUnzip",
   "invalidCacheDirectory",
+  "invalidCypressEnv",
   "invalidSmokeTestDisplayError",
   "missingApp",
   "missingDependency",
@@ -41,7 +42,6 @@ exports['errors individual has the following errors 1'] = [
   "removed",
   "smokeTestFailure",
   "unexpected",
-  "invalidCypressEnv",
   "versionMismatch"
 ]
 

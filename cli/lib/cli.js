@@ -201,7 +201,7 @@ module.exports = {
       debug('invalid CYPRESS_ENV value', process.env.CYPRESS_ENV)
 
       return errors.exitWithError(errors.errors.invalidCypressEnv)(
-        process.env.CYPRESS_ENV
+        `CYPRESS_ENV=${process.env.CYPRESS_ENV}`
       )
     }
 

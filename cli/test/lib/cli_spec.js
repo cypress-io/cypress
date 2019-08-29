@@ -91,7 +91,8 @@ describe('cli', () => {
     }
 
     const sanitizePlatform = (text) => {
-      return text.split(os.eol)
+      return text
+      .split(os.eol)
       .map(replacePlatform)
       .map(replaceCypressVersion)
       .join(os.eol)

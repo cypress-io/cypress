@@ -186,20 +186,10 @@ const unexpected = {
 
 const invalidCypressEnv = {
   description:
-    'Environment variable with reserved name "CYPRESS_ENV" was used.',
-  solution: 'Remove "CYPRESS_ENV" variable and run Cypress again.',
+    chalk.red('Environment variable with reserved name "CYPRESS_ENV" was used.'),
+  solution: chalk.red('Remove "CYPRESS_ENV" variable and run Cypress again.'),
   exitCode: 11,
 }
-
-// const getOsVersion = () => {
-//   if (os.platform() === 'linux') {
-//     return getos()
-//       .then(osInfo => [osInfo.dist, osInfo.release].join(' - '))
-//       .catch(() => os.release())
-//   }
-//     return Promise.resolve(os.release())
-
-// }
 
 const removed = {
   CYPRESS_BINARY_VERSION: {
