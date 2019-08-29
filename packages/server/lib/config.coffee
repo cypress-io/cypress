@@ -10,7 +10,7 @@ origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
-debug      = require("debug")("cypress:server:config")
+debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
 CYPRESS_ENV_PREFIX = "CYPRESS_"
@@ -272,7 +272,7 @@ module.exports = {
     config.env = @parseEnv(config, options.env, resolved)
 
     config.cypressEnv = process.env["CYPRESS_ENV"]
-    log("using CYPRESS_ENV %s", config.cypressEnv)
+    debug("using CYPRESS_ENV %s", config.cypressEnv)
     if not @isValidCypressEnvValue(config.cypressEnv)
       errors.throw("INVALID_CYPRESS_ENV", config.cypressEnv)
 
