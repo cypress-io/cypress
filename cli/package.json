@@ -75,7 +75,6 @@
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "chai-string": "1.4.0",
-    "clear-module": "^2.1.0",
     "dependency-check": "3.4.1",
     "dtslint": "0.9.0",
     "execa-wrap": "1.4.0",
