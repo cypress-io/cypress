@@ -11,7 +11,6 @@ const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('../support/snapshot')
 const execa = require('execa-wrap')
-const os = require('os')
 
 describe('cli', () => {
   require('mocha-banner').register()
@@ -79,21 +78,24 @@ describe('cli', () => {
      * Replaces line "Platform: ..." with "Platform: xxx"
      * @param {string} s
      */
-    const replacePlatform = (s) =>
-      s.replace(/Platform: .+/, 'Platform: xxx')
+    const replacePlatform = (s) => {
+      return s.replace(/Platform: .+/, 'Platform: xxx')
+    }
 
     /**
      * Replaces line "Cypress Version: ..." with "Cypress Version: 1.2.3"
      * @param {string} s
      */
-    const replaceCypressVersion = (s) =>
-      s.replace(/Cypress Version: .+/, 'Cypress Version: 1.2.3')
+    const replaceCypressVersion = (s) => {
+      return s.replace(/Cypress Version: .+/, 'Cypress Version: 1.2.3')
+    }
 
-    const sanitizePlatform = (text) =>
-      text.split(os.eol)
+    const sanitizePlatform = (text) => {
+      return text.split(os.eol)
       .map(replacePlatform)
       .map(replaceCypressVersion)
       .join(os.eol)
+    }
 
     it('allows staging environment', () => {
       const options = {
@@ -103,6 +105,7 @@ describe('cli', () => {
         // we are only interested in the exit code
         filter: ['code', 'stderr'],
       }
+
       return execa('bin/cypress', ['help'], options).then(snapshot)
     })
 
@@ -114,6 +117,7 @@ describe('cli', () => {
         // we are only interested in the exit code
         filter: ['code', 'stderr'],
       }
+
       return execa('bin/cypress', ['help'], options)
       .then(sanitizePlatform)
       .then(snapshot)

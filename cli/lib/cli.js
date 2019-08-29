@@ -28,7 +28,9 @@ const coerceFalse = (arg) => {
 const spaceDelimitedSpecsMsg = (files) => {
   logger.log()
   logger.warn(stripIndent`
-    ${logSymbols.warning} Warning: It looks like you're passing --spec a space-separated list of files:
+    ${
+  logSymbols.warning
+} Warning: It looks like you're passing --spec a space-separated list of files:
 
     "${files.join(' ')}"
 
@@ -55,7 +57,8 @@ const parseVariableOpts = (fnArgs, args) => {
     const nextOptOffset = _.findIndex(_.slice(args, argIndex), (arg) => {
       return _.startsWith(arg, '--')
     })
-    const endIndex = nextOptOffset !== -1 ? argIndex + nextOptOffset : args.length
+    const endIndex =
+      nextOptOffset !== -1 ? argIndex + nextOptOffset : args.length
 
     const maybeSpecs = _.slice(args, argIndex, endIndex)
     const extraSpecs = _.intersection(maybeSpecs, fnArgs)
@@ -71,11 +74,34 @@ const parseVariableOpts = (fnArgs, args) => {
 }
 
 const parseOpts = (opts) => {
-  opts = _.pick(opts,
-    'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
-    'port', 'env', 'cypressVersion', 'config', 'record', 'key',
-    'browser', 'detached', 'headed', 'global', 'dev', 'force', 'exit',
-    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId')
+  opts = _.pick(
+    opts,
+    'project',
+    'spec',
+    'reporter',
+    'reporterOptions',
+    'path',
+    'destination',
+    'port',
+    'env',
+    'cypressVersion',
+    'config',
+    'record',
+    'key',
+    'browser',
+    'detached',
+    'headed',
+    'global',
+    'dev',
+    'force',
+    'exit',
+    'cachePath',
+    'cacheList',
+    'cacheClear',
+    'parallel',
+    'group',
+    'ciBuildId'
+  )
 
   if (opts.exit) {
     opts = _.omit(opts, 'exit')
@@ -87,16 +113,23 @@ const parseOpts = (opts) => {
 }
 
 const descriptions = {
-  record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
-  key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
+  record:
+    'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
+  key:
+    'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   spec: 'runs a specific spec file. defaults to "all"',
-  reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
+  reporter:
+    'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
   port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
-  env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
-  config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
-  browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
-  browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
+  env:
+    'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
+  config:
+    'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
+  browserRunMode:
+    'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
+  browserOpenMode:
+    'path to a custom browser to be added to the list of available browsers in Cypress',
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
   global: 'force Cypress into global mode as if its globally installed',
@@ -109,11 +142,25 @@ const descriptions = {
   cacheList: 'list cached binary versions',
   cacheClear: 'delete all cached binaries',
   group: 'a named group for recorded runs in the Cypress dashboard',
-  parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
-  ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
+  parallel:
+    'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
+  ciBuildId:
+    'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help', 'cache']
+const knownCommands = [
+  'version',
+  'run',
+  'open',
+  'install',
+  'verify',
+  '-v',
+  '--version',
+  'help',
+  '-h',
+  '--help',
+  'cache',
+]
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -124,9 +171,11 @@ const text = (description) => {
 }
 
 function includesVersion (args) {
-  return _.includes(args, 'version') ||
+  return (
+    _.includes(args, 'version') ||
     _.includes(args, '--version') ||
     _.includes(args, '-v')
+  )
 }
 
 function showVersions () {
@@ -150,7 +199,10 @@ module.exports = {
 
     if (!util.isValidCypressEnvValue(process.env.CYPRESS_ENV)) {
       debug('invalid CYPRESS_ENV value', process.env.CYPRESS_ENV)
-      return errors.exitWithError(errors.errors.invalidCypressEnv)(process.env.CYPRESS_ENV)
+
+      return errors.exitWithError(errors.errors.invalidCypressEnv)(
+        process.env.CYPRESS_ENV
+      )
     }
 
     const program = new commander.Command()
@@ -183,7 +235,10 @@ module.exports = {
     .option('-k, --key <record-key>', text('key'))
     .option('-s, --spec <spec>', text('spec'))
     .option('-r, --reporter <reporter>', text('reporter'))
-    .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
+    .option(
+      '-o, --reporter-options <reporter-options>',
+      text('reporterOptions')
+    )
     .option('-p, --port <port>', text('port'))
     .option('-e, --env <env>', text('env'))
     .option('-c, --config <config>', text('config'))
@@ -224,7 +279,9 @@ module.exports = {
     program
     .command('install')
     .usage('[options]')
-    .description('Installs the Cypress executable matching this package\'s version')
+    .description(
+      'Installs the Cypress executable matching this package\'s version'
+    )
     .option('-f, --force', text('forceInstall'))
     .action((opts) => {
       require('./tasks/install')
@@ -235,7 +292,9 @@ module.exports = {
     program
     .command('verify')
     .usage('[options]')
-    .description('Verifies that Cypress is installed correctly and executable')
+    .description(
+      'Verifies that Cypress is installed correctly and executable'
+    )
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       const defaultOpts = { force: true, welcomeMessage: false }

@@ -134,6 +134,7 @@ function isValidCypressEnvValue (value) {
 
   // names of config environments, see "packages/server/config/app.yml"
   const names = ['development', 'test', 'staging', 'production']
+
   return _.includes(names, value)
 }
 
