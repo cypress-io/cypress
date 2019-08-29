@@ -28,6 +28,8 @@ niv.install("react-dom@15.6.1")
   app.use(require("morgan")({ format: "dev" }))
 
   app.use(require("cors")())
+
+
   app.use(require("compression")())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
@@ -54,6 +56,9 @@ niv.install("react-dom@15.6.1")
     fs.readFile path.join(__dirname, "../cypress/fixtures/sample.pdf"), (err, bytes) ->
       res.type("pdf")
       res.send(bytes)
+
+  app.get '/1mb', (req, res) ->
+    res.type('text').send('*'.repeat(1024 / 1024 * 1024))
 
   app.get "/basic_auth", (req, res) ->
     user = auth(req)

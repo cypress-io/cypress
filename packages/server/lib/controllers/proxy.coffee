@@ -279,8 +279,8 @@ module.exports = {
         req.socket.destroy()
 
     onResponse = (str, incomingRes) =>
-      netStubbing.onProxiedResponse project, req, str, incomingRes, =>
-        handleResponse(str, incomingRes)
+      netStubbing.onProxiedResponse project, req, str, incomingRes, (newStr) =>
+        handleResponse(newStr, incomingRes)
 
     handleResponse = (str, incomingRes) =>
       {headers, statusCode} = incomingRes

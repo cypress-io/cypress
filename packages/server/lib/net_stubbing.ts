@@ -48,6 +48,7 @@ interface BackendRequest {
   continueResponse?: Function
   req: ProxyIncomingMessage
   res: ServerResponse & { body?: string | any }
+  resStream: any
   /**
    * Should the response go to the driver, or should it be allowed to continue?
    */
@@ -238,6 +239,11 @@ function _sendStaticResponse (res: ServerResponse, staticResponse: StaticRespons
   res.flushHeaders()
 
   if (staticResponse.body) {
+    if (typeof staticResponse.body !== 'string') {
+      // staticResponse is a stream
+      return staticResponse.body.pipe(res)
+    }
+
     res.write(staticResponse.body)
   }
 
@@ -442,11 +448,12 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
 
   if (!backendRequest || !backendRequest.sendResponseToDriver) {
     // either the original request was not intercepted, or there's nothing for the driver to do with this response
-    return cb()
+    return cb(resStream)
   }
 
   // this may get set back to `true` by another route
   backendRequest.sendResponseToDriver = false
+  backendRequest.resStream = resStream
   backendRequest.continueResponse = cb
 
   const frame : NetEventFrames.HttpResponseReceived = {
@@ -467,34 +474,51 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
 function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
   const backendRequest = requests[frame.requestId]
 
-  debug('_onResponseContinue %o', { backendRequest, frame })
+  if (typeof backendRequest === 'undefined') {
+    return
+  }
 
-  if (frame.staticResponse) {
-    if (frame.staticResponse.destroySocket) {
-      backendRequest.res.destroy()
+  const { res } = backendRequest
 
-      return
+  debug('_onResponseContinue %o', { backendRequest: _.omit(backendRequest, 'res.body'), frame: _.omit(frame, 'res.body') })
+
+  function continueResponse () {
+    function throttleify (body) {
+      const throttleStr = new Throttle(frame.throttleKbps! * 1024)
+
+      throttleStr.write(body)
+      throttleStr.end()
+
+      return throttleStr
     }
 
-    // TODO: see if this can be cleaned up, this has converged to do the same thing
-    // in two similar ways
-    _.assign(backendRequest.res, _.pick(frame.staticResponse, SERIALIZABLE_RES_PROPS))
-  } else {
+    if (frame.staticResponse) {
+      if (frame.throttleKbps) {
+        frame.staticResponse.body = throttleify(frame.staticResponse.body)
+      }
+
+      return _sendStaticResponse(res, frame.staticResponse)
+    }
+
     // merge the changed response attributes with our response and continue
     _.assign(backendRequest.res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
+
+    if (frame.throttleKbps) {
+      backendRequest.resStream = throttleify(res.body)
+    }
+
+    // TODO: this won't quite work for onProxiedResponseError
+    // @ts-ignore
+    backendRequest.continueResponse(backendRequest.resStream)
   }
 
-  if (frame.throttleKbps) {
-    const throttleStr = new Throttle(frame.throttleKbps * 1024)
+  if (typeof frame.continueResponseAt === 'number') {
+    const delayMs = frame.continueResponseAt - Date.now()
 
-    throttleStr.write(backendRequest.res.body)
-
-    backendRequest.res.body = throttleStr
+    if (delayMs > 0) {
+      return setTimeout(continueResponse, delayMs)
+    }
   }
 
-  if (frame.delayMs) {
-    return setTimeout(backendRequest.continueResponse, frame.delayMs)
-  }
-
-  backendRequest.continueResponse()
+  return continueResponse()
 }

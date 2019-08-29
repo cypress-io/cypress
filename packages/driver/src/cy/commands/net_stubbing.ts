@@ -1,4 +1,5 @@
 import * as _ from 'lodash'
+import * as Promise from 'bluebird'
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
@@ -92,7 +93,7 @@ export declare namespace CyHttpMessages {
   export type IncomingResponse = IncomingResponseSuccess | IncomingResponseError
 
   export type IncomingHttpResponse = IncomingResponse & {
-    send: (staticResponse?: StaticResponse) => void
+    send: ((staticResponse?: StaticResponse) => void) | ((body: string, headers?: object) => void)
     /**
      * Wait for `delayMs` milliseconds before sending the response to the client.
      */
@@ -119,7 +120,7 @@ export declare namespace CyHttpMessages {
  * Describes a response that will be sent back to the client.
  */
 export interface StaticResponse {
-  body?: string
+  body?: string | any // TODO
   headers?: { [key: string]: string }
   statusCode?: number
   /**
@@ -178,7 +179,7 @@ export declare namespace NetEventFrames {
 
   // fired when driver is done modifying request and wishes to pass control back to the proxy
   export interface HttpRequestContinue extends BaseHttp {
-    req?: CyHttpMessages.IncomingRequest
+    req: CyHttpMessages.IncomingRequest
     staticResponse?: StaticResponse
     hasResponseHandler?: boolean
     tryNextRoute?: boolean
@@ -194,7 +195,8 @@ export declare namespace NetEventFrames {
   export interface HttpResponseContinue extends BaseHttp {
     res?: CyHttpMessages.IncomingResponse
     staticResponse?: StaticResponse
-    delayMs?: number
+    // Millisecond timestamp for when the response should continue
+    continueResponseAt?: number
     throttleKbps?: number
   }
 }
@@ -274,37 +276,36 @@ interface Request {
 let routes : { [key: string]: Route } = {}
 let requests : { [key: string]: Request } = {}
 
-function _addRoute (options: RouteMatcherOptions, handler: RouteHandler, emit: Function) : void {
-  const handlerId = _getUniqueId()
+function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHeaders) {
+  if (_.isNumber(statusCodeOrBody)) {
+    // statusCodeOrBody is a status code
+    const staticResponse : StaticResponse = {
+      statusCode: statusCodeOrBody,
+    }
 
-  const frame: NetEventFrames.AddRoute = {
-    handlerId,
-    routeMatcher: _annotateMatcherOptionsTypes(options),
+    if (!_.isUndefined(bodyOrHeaders)) {
+      staticResponse.body = bodyOrHeaders
+    }
+
+    if (_.isObject(maybeHeaders)) {
+      staticResponse.headers = maybeHeaders
+    }
+
+    return staticResponse
   }
 
-  switch (true) {
-    case _isHttpController(handler):
-      break
-    case _isWebSocketController(handler, options):
-      break
-    case typeof handler === 'string':
-      frame.staticResponse = { body: <string>handler }
-      break
-    case typeof handler === 'object':
-      // TODO: automatically JSONify staticResponse.body objects
-      frame.staticResponse = <StaticResponse>handler
-      break
-    default:
-      // TODO: warn that only string, object, HttpController, or WebSocketController allowed
-  }
+  if (_.isString(statusCodeOrBody) && !maybeHeaders) {
+    // statusCodeOrBody is body
+    const staticResponse : StaticResponse = {
+      body: statusCodeOrBody,
+    }
 
-  routes[handlerId] = {
-    options,
-    handler,
-    hitCount: 0,
-  }
+    if (_.isObject(bodyOrHeaders)) {
+      staticResponse.headers = bodyOrHeaders
+    }
 
-  emit('route:added', frame)
+    return staticResponse
+  }
 }
 
 export function registerCommands (Commands, Cypress, /** cy, state, config */) {
@@ -312,7 +313,40 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
   function _emit (eventName: string, ...args: any[]) {
     // all messages from driver to server are wrapped in backend:request
-    Cypress.backend('net', eventName, ...args)
+    return Cypress.backend('net', eventName, ...args) as Promise<any>
+  }
+
+  function _addRoute (options: RouteMatcherOptions, handler: RouteHandler) {
+    const handlerId = _getUniqueId()
+
+    const frame: NetEventFrames.AddRoute = {
+      handlerId,
+      routeMatcher: _annotateMatcherOptionsTypes(options),
+    }
+
+    switch (true) {
+      case _isHttpController(handler):
+        break
+      case _isWebSocketController(handler, options):
+        break
+      case typeof handler === 'string':
+        frame.staticResponse = { body: <string>handler }
+        break
+      case typeof handler === 'object':
+        // TODO: automatically JSONify staticResponse.body objects
+        frame.staticResponse = <StaticResponse>handler
+        break
+      default:
+        // TODO: warn that only string, object, HttpController, or WebSocketController allowed
+    }
+
+    routes[handlerId] = {
+      options,
+      handler,
+      hitCount: 0,
+    }
+
+    return _emit('route:added', frame)
   }
 
   function route (matcher: RouteMatcher, handler: RouteHandler) {
@@ -326,7 +360,8 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
       options = matcher
     }
 
-    _addRoute(options, handler, _emit)
+    return _addRoute(options, handler)
+    .thenReturn(null)
   }
 
   function server () : void {
@@ -337,7 +372,7 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
     const route = routes[frame.routeHandlerId]
     const { req, requestId, routeHandlerId } = frame
 
-    const continueFrame : NetEventFrames.HttpRequestContinue = {
+    const continueFrame : Partial<NetEventFrames.HttpRequestContinue> = {
       routeHandlerId,
       requestId,
     }
@@ -371,20 +406,9 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
       ...req,
       reply (responseHandler, maybeBody?, maybeHeaders?) {
         // TODO: this can only be called once
-        if (_.isNumber(responseHandler)) {
-          // responseHandler is a status code
-          const staticResponse : StaticResponse = {
-            statusCode: responseHandler,
-          }
+        const staticResponse = _parseStaticResponseShorthand(responseHandler, maybeBody, maybeHeaders)
 
-          if (!_.isUndefined(maybeBody)) {
-            staticResponse.body = maybeBody
-          }
-
-          if (!_.isUndefined(maybeHeaders)) {
-            staticResponse.headers = maybeHeaders
-          }
-
+        if (staticResponse) {
           responseHandler = staticResponse
         }
 
@@ -463,7 +487,13 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
     const userRes : CyHttpMessages.IncomingHttpResponse = {
       ...res,
-      send (staticResponse) {
+      send (staticResponse, maybeBody?, maybeHeaders?) {
+        const shorthand = _parseStaticResponseShorthand(staticResponse, maybeBody, maybeHeaders)
+
+        if (shorthand) {
+          staticResponse = shorthand
+        }
+
         if (staticResponse) {
           continueFrame.staticResponse = staticResponse
         }
@@ -471,7 +501,8 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
         return sendContinueFrame()
       },
       delay (delayMs) {
-        continueFrame.delayMs = delayMs
+        // reduce perceived delay by sending timestamp instead of offset
+        continueFrame.continueResponseAt = Date.now() + delayMs
 
         return this
       },
