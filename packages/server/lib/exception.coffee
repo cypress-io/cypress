@@ -1,7 +1,7 @@
 _        = require("lodash")
 Promise  = require("bluebird")
-winston  = require("winston")
 pkg      = require("@packages/root")
+path     = require("path")
 
 api      = require("./api")
 user     = require("./user")
@@ -10,11 +10,12 @@ system   = require("./util/system")
 
 ## strip everything but the file name to remove any sensitive
 ## data in the path
-pathRe = /'?((\/|\\|[a-z]:\\)[^\s']+)+'?/ig
+pathRe = /'?((\/|\\+|[a-z]:\\)[^\s']+)+'?/ig
+pathSepRe = /[\/\\]+/
 fileNameRe = /[^\s'/]+\.\w+:?\d*$/i
 stripPath = (text) ->
   (text or "").replace pathRe, (path) ->
-    fileName = _.last(path.split("/")) or ""
+    fileName = _.last(path.split(pathSepRe)) or ""
     "<stripped-path>#{fileName}"
 
 ## POST https://api.cypress.io/exceptions
@@ -46,9 +47,11 @@ module.exports = {
       user and user.authToken
 
   create: (err) ->
-    return Promise.resolve() if process.env["CYPRESS_ENV"] isnt "production"
+    if process.env["CYPRESS_ENV"] isnt "production" or
+       process.env["CYPRESS_CRASH_REPORTS"] is "0"
+      return Promise.resolve()
 
     Promise.join(@getBody(err), @getAuthToken())
     .spread (body, authToken) ->
-      api.createRaygunException(body, authToken)
+      api.createCrashReport(body, authToken)
 }

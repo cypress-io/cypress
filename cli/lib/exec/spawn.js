@@ -1,28 +1,58 @@
 const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
-const tty = require('tty')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
+const debugElectron = require('debug')('cypress:electron')
 
 const util = require('../util')
-const info = require('../tasks/info')
+const state = require('../tasks/state')
 const xvfb = require('./xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 
-const isXlibOrLibudevRe = /^(Xlib|libudev)/
+const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
+const isHighSierraWarningRe = /\*\*\* WARNING/
+const isRenderWorkerRe = /\.RenderWorker-/
 
-function needsStderrPipe (needsXvfb) {
-  return needsXvfb && os.platform() === 'linux'
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe]
+
+const isGarbageLineWarning = (str) => {
+  return _.some(GARBAGE_WARNINGS, (re) => {
+    return re.test(str)
+  })
+}
+
+function isPlatform (platform) {
+  return os.platform() === platform
+}
+
+function needsStderrPiped (needsXvfb) {
+  return _.some([
+    isPlatform('darwin'),
+
+    (needsXvfb && isPlatform('linux')),
+
+    util.isPossibleLinuxWithIncorrectDisplay(),
+  ])
+}
+
+function needsEverythingPipedDirectly () {
+  return isPlatform('win32')
 }
 
 function getStdio (needsXvfb) {
+  if (needsEverythingPipedDirectly()) {
+    return 'pipe'
+  }
+
   // https://github.com/cypress-io/cypress/issues/921
-  if (needsStderrPipe(needsXvfb)) {
+  // https://github.com/cypress-io/cypress/issues/1143
+  // https://github.com/cypress-io/cypress/issues/1745
+  if (needsStderrPiped(needsXvfb)) {
     // returning pipe here so we can massage stderr
     // and remove garbage from Xlib and libuv
-    // due to starting the XVFB process on linux
+    // due to starting the Xvfb process on linux
     return ['inherit', 'inherit', 'pipe']
   }
 
@@ -30,94 +60,181 @@ function getStdio (needsXvfb) {
 }
 
 module.exports = {
+  isGarbageLineWarning,
+
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
+    let executable = state.getPathToExecutable(state.getBinaryDir())
 
-    debug('needs XVFB?', needsXvfb)
+    if (util.getEnv('CYPRESS_RUN_BINARY')) {
+      executable = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
+    }
+
+    debug('needs to start own Xvfb?', needsXvfb)
 
     // always push cwd into the args
+    // which additionally acts as a signal to the
+    // binary that it was invoked through the NPM module
     args = [].concat(args, '--cwd', process.cwd())
 
     _.defaults(options, {
+      dev: false,
+      env: process.env,
       detached: false,
       stdio: getStdio(needsXvfb),
     })
 
-    const spawn = () => {
+    const spawn = (overrides = {}) => {
       return new Promise((resolve, reject) => {
-        let cypressPath = info.getPathToExecutable()
+        _.defaults(overrides, {
+          onStderrData: false,
+          electronLogging: false,
+        })
 
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          cypressPath = 'node'
-          args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
+          executable = 'node'
+          args.unshift(
+            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+          )
         }
 
-        debug('spawning Cypress %s', cypressPath)
-        debug('spawn args %j', args, options)
+        const { onStderrData, electronLogging } = overrides
+        const envOverrides = util.getEnvOverrides()
+        const electronArgs = _.clone(args)
+        const node11WindowsFix = isPlatform('win32')
 
         // strip dev out of child process options
-        options = _.omit(options, 'dev')
+        let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
 
-        // when running in electron in windows
-        // it never supports color but we're
-        // going to force it anyway as long
-        // as our parent cli process can support
-        // colors!
-        //
-        // also when we are in linux and using the 'pipe'
-        // option our process.stderr.isTTY will not be true
-        // which ends up disabling the colors =(
-        if (util.supportsColor()) {
-          process.env.FORCE_COLOR = 1
-          process.env.DEBUG_COLORS = 1
-          process.env.MOCHA_COLORS = 1
+        // figure out if we're going to be force enabling or disabling colors.
+        // also figure out whether we should force stdout and stderr into thinking
+        // it is a tty as opposed to a pipe.
+        stdioOptions.env = _.extend({}, stdioOptions.env, envOverrides)
+
+        if (node11WindowsFix) {
+          stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
         }
 
-        // if we needed to pipe stderr and we're currently
-        // a tty on stderr
-        if (needsStderrPipe(needsXvfb) && tty.isatty(2)) {
-          // then force stderr tty
-          //
-          // this is necessary because we want our child
-          // electron browser to behave _THE SAME WAY_ as
-          // if we aren't using pipe. pipe is necessary only
-          // to filter out garbage on stderr -____________-
-          process.env.FORCE_STDERR_TTY = 1
+        if (electronLogging) {
+          stdioOptions.env.ELECTRON_ENABLE_LOGGING = true
         }
 
-        const child = cp.spawn(cypressPath, args, options)
+        if (util.isPossibleLinuxWithIncorrectDisplay()) {
+          // make sure we use the latest DISPLAY variable if any
+          debug('passing DISPLAY', process.env.DISPLAY)
+          stdioOptions.env.DISPLAY = process.env.DISPLAY
+        }
+
+        debug('spawning Cypress with executable: %s', executable)
+        debug('spawn args %o %o', electronArgs, _.omit(stdioOptions, 'env'))
+
+        const child = cp.spawn(executable, electronArgs, stdioOptions)
+
         child.on('close', resolve)
         child.on('error', reject)
 
+        child.stdin && child.stdin.pipe(process.stdin)
+        child.stdout && child.stdout.pipe(process.stdout)
+
         // if this is defined then we are manually piping for linux
         // to filter out the garbage
-        child.stderr && child.stderr.on('data', (data) => {
-          // bail if this is a line from xlib or libudev
-          if (isXlibOrLibudevRe.test(data.toString())) {
+        child.stderr &&
+          child.stderr.on('data', (data) => {
+            const str = data.toString()
+
+            // bail if this is warning line garbage
+            if (isGarbageLineWarning(str)) {
+              return
+            }
+
+            // if we have a callback and this explictly returns
+            // false then bail
+            if (onStderrData && onStderrData(str) === false) {
+              return
+            }
+
+            // else pass it along!
+            process.stderr.write(data)
+          })
+
+        // https://github.com/cypress-io/cypress/issues/1841
+        // In some versions of node, it will throw on windows
+        // when you close the parent process after piping
+        // into the child process. unpiping does not seem
+        // to have any effect. so we're just catching the
+        // error here and not doing anything.
+        process.stdin.on('error', (err) => {
+          if (err.code === 'EPIPE') {
             return
           }
 
-          // else pass it along!
-          process.stderr.write(data)
+          throw err
         })
 
-        if (options.detached) {
+        if (stdioOptions.detached) {
           child.unref()
         }
       })
     }
 
-    const userFriendlySpawn = () =>
-      spawn().catch(throwFormErrorText(errors.unexpected))
-
-    if (needsXvfb) {
-      return xvfb.start()
+    const spawnInXvfb = () => {
+      return xvfb
+      .start()
       .then(userFriendlySpawn)
       .finally(xvfb.stop)
-    } else {
-      return userFriendlySpawn()
     }
+
+    const userFriendlySpawn = (linuxWithDisplayEnv) => {
+      debug('spawning, should retry on display problem?', Boolean(linuxWithDisplayEnv))
+
+      let brokenGtkDisplay
+
+      const overrides = {}
+
+      if (linuxWithDisplayEnv) {
+        _.extend(overrides, {
+          electronLogging: true,
+          onStderrData (str) {
+            // if we receive a broken pipe anywhere
+            // then we know that's why cypress exited early
+            if (util.isBrokenGtkDisplay(str)) {
+              brokenGtkDisplay = true
+            }
+
+            // we should attempt to always slurp up
+            // the stderr logs unless we've explicitly
+            // enabled the electron debug logging
+            if (!debugElectron.enabled) {
+              return false
+            }
+          },
+        })
+      }
+
+      return spawn(overrides)
+      .then((code) => {
+        if (code !== 0 && brokenGtkDisplay) {
+          util.logBrokenGtkDisplayWarning()
+
+          return spawnInXvfb()
+        }
+
+        return code
+      })
+      .catch(throwFormErrorText(errors.unexpected))
+    }
+
+    if (needsXvfb) {
+      return spawnInXvfb()
+    }
+
+    // if we are on linux and there's already a DISPLAY
+    // set, then we may need to rerun cypress after
+    // spawning our own Xvfb server
+    const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
+
+    return userFriendlySpawn(linuxWithDisplayEnv)
   },
 }

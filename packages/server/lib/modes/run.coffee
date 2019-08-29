@@ -1,59 +1,326 @@
 _          = require("lodash")
-uuid       = require("uuid")
+pkg        = require("@packages/root")
 path       = require("path")
 chalk      = require("chalk")
 human      = require("human-interval")
-Promise    = require("bluebird")
-pkg        = require("@packages/root")
 debug      = require("debug")("cypress:server:run")
+Promise    = require("bluebird")
+logSymbols = require("log-symbols")
+
 recordMode = require("./record")
-user       = require("../user")
-video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
+browsers   = require("../browsers")
 openProject = require("../open_project")
+videoCapture = require("../video_capture")
 Windows    = require("../gui/windows")
 fs         = require("../util/fs")
 env        = require("../util/env")
 trash      = require("../util/trash")
 random     = require("../util/random")
-progress   = require("../util/progress_bar")
+system     = require("../util/system")
+duration   = require("../util/duration")
 terminal   = require("../util/terminal")
-statsUtil  = require("../util/stats")
 specsUtil  = require("../util/specs")
 humanTime  = require("../util/human_time")
 electronApp = require("../util/electron_app")
+chromePolicyCheck = require("../util/chrome_policy_check")
 
-collectTestResults = (obj = {}) ->
+DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+
+color = (val, c) ->
+  chalk[c](val)
+
+gray = (val) ->
+  color(val, "gray")
+
+colorIf = (val, c) ->
+  if val is 0
+    val = "-"
+    c = "gray"
+
+  color(val, c)
+
+getSymbol = (num) ->
+  if num then logSymbols.error else logSymbols.success
+
+formatBrowser = (browser) ->
+  ## todo finish browser
+  _.compact([
+    browser.displayName,
+    browser.majorVersion,
+    browser.isHeadless and gray("(headless)")
+  ]).join(" ")
+
+formatFooterSummary = (results) ->
+  { totalFailed, runs } = results
+
+  ## pass or fail color
+  c = if totalFailed then "red" else "green"
+
+  phrase = do ->
+    ## if we have any specs failing...
+    if not totalFailed
+      return "All specs passed!"
+
+    ## number of specs
+    total = runs.length
+    failingRuns = _.filter(runs, "stats.failures").length
+    percent = Math.round(failingRuns / total * 100)
+
+    "#{failingRuns} of #{total} failed (#{percent}%)"
+
+  return [
+    color(phrase, c),
+    gray(duration.format(results.totalDuration)),
+    colorIf(results.totalTests, "reset"),
+    colorIf(results.totalPassed, "green"),
+    colorIf(totalFailed, "red"),
+    colorIf(results.totalPending, "cyan"),
+    colorIf(results.totalSkipped, "blue"),
+  ]
+
+formatSpecSummary = (name, failures) ->
+  [
+    getSymbol(failures),
+    color(name, "reset")
+  ]
+  .join(" ")
+
+formatRecordParams = (runUrl, parallel, group) ->
+  if runUrl
+    group or= false
+    "Group: #{group}, Parallel: #{Boolean(parallel)}"
+
+formatSpecPattern = (specPattern) ->
+  if specPattern
+    specPattern.join(", ")
+
+formatSpecs = (specs) ->
+  names = _.map(specs, "name")
+
+  ## 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
+  [
+    "#{names.length} found "
+    gray("("),
+    gray(names.join(', ')),
+    gray(")")
+  ]
+  .join("")
+
+displayRunStarting = (options = {}) ->
+  { specs, specPattern, browser, runUrl, parallel, group } = options
+
+  console.log("")
+
+  terminal.divider("=")
+
+  console.log("")
+
+  terminal.header("Run Starting", {
+    color: ["reset"]
+  })
+
+  console.log("")
+
+  table = terminal.table({
+    colWidths: [12, 88]
+    type: "outsideBorder"
+  })
+
+  data = _
+  .chain([
+    [gray("Cypress:"), pkg.version]
+    [gray("Browser:"), formatBrowser(browser)]
+    [gray("Specs:"), formatSpecs(specs)]
+    [gray("Searched:"), formatSpecPattern(specPattern)]
+    [gray("Params:"), formatRecordParams(runUrl, parallel, group)]
+    [gray("Run URL:"), runUrl]
+  ])
+  .filter(_.property(1))
+  .value()
+
+  table.push(data...)
+
+  console.log(table.toString())
+
+  console.log("")
+
+displaySpecHeader = (name, curr, total, estimated) ->
+  console.log("")
+
+  PADDING = 2
+
+  table = terminal.table({
+    colWidths: [80, 20]
+    colAligns: ["left", "right"]
+    type: "pageDivider"
+    style: {
+      "padding-left": PADDING
+    }
+  })
+
+  table.push(["", ""])
+  table.push([
+    "Running: " + gray(name + "..."),
+    gray("(#{curr} of #{total})")
+  ])
+
+  console.log(table.toString())
+
+  if estimated
+    estimatedLabel = " ".repeat(PADDING) + "Estimated:"
+    console.log(estimatedLabel, gray(humanTime.long(estimated)))
+
+collectTestResults = (obj = {}, estimated) ->
   {
+    name:        _.get(obj, 'spec.name')
     tests:       _.get(obj, 'stats.tests')
     passes:      _.get(obj, 'stats.passes')
     pending:     _.get(obj, 'stats.pending')
     failures:    _.get(obj, 'stats.failures')
     skipped:     _.get(obj, 'stats.skipped' )
-    duration:    humanTime(_.get(obj, 'stats.duration'))
+    duration:    humanTime.long(_.get(obj, 'stats.wallClockDuration'))
+    estimated:   estimated and humanTime.long(estimated)
     screenshots: obj.screenshots and obj.screenshots.length
     video:       Boolean(obj.video)
-    version:     pkg.version
   }
 
-allDone = ->
-  console.log("")
+renderSummaryTable = (runUrl) -> (results) ->
+  { runs } = results
+
   console.log("")
 
-  terminal.header("All Done", {
-    color: ["gray"]
+  terminal.divider("=")
+
+  console.log("")
+
+  terminal.header("Run Finished", {
+    color: ["reset"]
   })
 
-  console.log("")
+  if runs and runs.length
+    head =      ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
+    colAligns = ["left", "right", "right", "right", "right", "right", "right"]
+    colWidths = [39, 11, 10, 10, 10, 10, 10]
 
-getProjectId = (project, id) ->
+    table1 = terminal.table({
+      colAligns
+      colWidths
+      type: "noBorder"
+      head: _.map(head, gray)
+    })
+
+    table2 = terminal.table({
+      colAligns
+      colWidths
+      type: "border"
+    })
+
+    table3 = terminal.table({
+      colAligns
+      colWidths
+      type: "noBorder"
+      head: formatFooterSummary(results)
+      style: {
+        "padding-right": 2
+      }
+    })
+
+    _.each runs, (run) ->
+      { spec, stats } = run
+
+      ms = duration.format(stats.wallClockDuration)
+
+      table2.push([
+        formatSpecSummary(spec.name, stats.failures)
+        color(ms, "gray")
+        colorIf(stats.tests, "reset")
+        colorIf(stats.passes, "green"),
+        colorIf(stats.failures, "red"),
+        colorIf(stats.pending, "cyan"),
+        colorIf(stats.skipped, "blue")
+      ])
+
+    console.log("")
+    console.log("")
+    console.log(terminal.renderTables(table1, table2, table3))
+    console.log("")
+
+    if runUrl
+      console.log("")
+
+      table4 = terminal.table({
+        colWidths: [100]
+        type: "pageDivider"
+        style: {
+          "padding-left": 2
+        }
+      })
+
+      table4.push(["", ""])
+      table4.push(["Recorded Run: " + gray(runUrl)])
+
+      console.log(terminal.renderTables(table4))
+      console.log("")
+
+iterateThroughSpecs = (options = {}) ->
+  { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
+
+  serial = ->
+    Promise.mapSeries(specs, runEachSpec)
+
+  serialWithRecord = ->
+    Promise
+    .mapSeries specs, (spec, index, length) ->
+      beforeSpecRun(spec)
+      .then ({ estimated }) ->
+        runEachSpec(spec, index, length, estimated)
+      .tap (results) ->
+        afterSpecRun(spec, results, config)
+
+  parallelWithRecord = (runs) ->
+    beforeSpecRun()
+    .then ({ spec, claimedInstances, totalInstances, estimated }) ->
+      ## no more specs to run?
+      if not spec
+        ## then we're done!
+        return runs
+
+      ## find the actual spec object amongst
+      ## our specs array since the API sends us
+      ## the relative name
+      spec = _.find(specs, { relative: spec })
+
+      runEachSpec(spec, claimedInstances - 1, totalInstances, estimated)
+      .tap (results) ->
+        runs.push(results)
+
+        afterSpecRun(spec, results, config)
+      .then ->
+        ## recurse
+        parallelWithRecord(runs)
+
+  switch
+    when parallel
+      ## if we are running in parallel
+      ## then ask the server for the next spec
+      parallelWithRecord([])
+    when beforeSpecRun
+      ## else iterate serialially and record
+      ## the results of each spec
+      serialWithRecord()
+    else
+      ## else iterate in serial
+      serial()
+
+getProjectId = Promise.method (project, id) ->
   id ?= env.get("CYPRESS_PROJECT_ID")
 
   ## if we have an ID just use it
   if id
-    return Promise.resolve(id)
+    return id
 
   project
   .getProjectId()
@@ -77,6 +344,9 @@ writeOutput = (outputPath, results) ->
 
     fs.outputJsonAsync(outputPath, results)
 
+onWarning = (err) ->
+  console.log(chalk.yellow(err.message))
+
 openProjectCreate = (projectRoot, socketId, options) ->
   ## now open the project to boot the server
   ## putting our web client app in headless mode
@@ -86,10 +356,16 @@ openProjectCreate = (projectRoot, socketId, options) ->
     socketId
     morgan:       false
     report:       true
-    isTextTerminal:   options.isTextTerminal ? true
+    isTextTerminal: options.isTextTerminal
+    onWarning
     onError: (err) ->
-      console.log()
-      console.log(err.stack)
+      console.log("")
+      if err.details
+        console.log(err.message)
+        console.log("")
+        console.log(chalk.yellow(err.details))
+      else
+        console.log(err.stack)
       openProject.emit("exitEarlyWithErr", err.message)
   })
   .catch {portInUse: true}, (err) ->
@@ -114,6 +390,88 @@ createAndOpenProject = (socketId, options) ->
       projectId: getProjectId(project, projectId)
     })
 
+removeOldProfiles = ->
+  browsers.removeOldProfiles()
+  .catch (err) ->
+    ## dont make removing old browsers profiles break the build
+    errors.warning("CANNOT_REMOVE_OLD_BROWSER_PROFILES", err.stack)
+
+trashAssets = (config = {}) ->
+  if config.trashAssetsBeforeRuns isnt true
+    return Promise.resolve()
+
+  Promise.join(
+    trash.folder(config.videosFolder)
+    trash.folder(config.screenshotsFolder)
+  )
+  .catch (err) ->
+    ## dont make trashing assets fail the build
+    errors.warning("CANNOT_TRASH_ASSETS", err.stack)
+
+## if we've been told to record and we're not spawning a headed browser
+browserCanBeRecorded = (browser) ->
+  browser.name is "electron" and browser.isHeadless
+    
+createVideoRecording = (videoName) ->
+  outputDir = path.dirname(videoName)
+
+  fs
+  .ensureDirAsync(outputDir)
+  .then ->
+    videoCapture
+    .start(videoName, {
+      onError: (err) ->
+        ## catch video recording failures and log them out
+        ## but don't let this affect the run at all
+        errors.warning("VIDEO_RECORDING_FAILED", err.stack)
+    })
+
+getVideoRecordingDelay = (startedVideoCapture) ->
+  if startedVideoCapture
+    return DELAY_TO_LET_VIDEO_FINISH_MS
+
+  return 0
+    
+maybeStartVideoRecording = Promise.method (options = {}) ->
+  { spec, browser, video, videosFolder } = options
+
+  ## bail if we've been told not to capture
+  ## a video recording
+  if not video
+    return
+  
+  ## handle if this browser cannot actually
+  ## be recorded
+  if not browserCanBeRecorded(browser)
+    console.log("")
+
+    if browser.name is "electron" and browser.isHeaded
+      errors.warning("CANNOT_RECORD_VIDEO_HEADED")
+    else
+      errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name)
+
+    return
+
+  ## make sure we have a videsFolder
+  if not videosFolder
+    throw new Error("Missing videoFolder for recording")
+
+  videoPath = (suffix) ->
+    path.join(videosFolder, spec.name + suffix)
+
+  videoName  = videoPath(".mp4")
+  compressedVideoName = videoPath("-compressed.mp4")
+
+  @createVideoRecording(videoName)
+  .then (props = {}) ->
+    return {
+      videoName,
+      compressedVideoName,
+      endVideoCapture: props.endVideoCapture,
+      writeVideoFrame: props.writeVideoFrame,
+      startedVideoCapture: props.startedVideoCapture,
+    }
+    
 module.exports = {
   collectTestResults
 
@@ -123,25 +481,17 @@ module.exports = {
 
   openProjectCreate
 
-  createRecording: (name) ->
-    outputDir = path.dirname(name)
+  createVideoRecording
+  
+  getVideoRecordingDelay
 
-    fs.ensureDirAsync(outputDir)
-    .then ->
-      console.log("\nStarted video recording: #{chalk.cyan(name)}\n")
+  maybeStartVideoRecording
 
-      video.start(name, {
-        onError: (err) ->
-          ## catch video recording failures and log them out
-          ## but don't let this affect the run at all
-          errors.warning("VIDEO_RECORDING_FAILED", err.stack)
-      })
-
-  getElectronProps: (showGui, project, write) ->
-    obj = {
+  getElectronProps: (isHeaded, project, writeVideoFrame) ->
+    electronProps = {
       width:  1280
       height: 720
-      show:   showGui
+      show:   isHeaded
       onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
@@ -155,29 +505,54 @@ module.exports = {
         options.show = false
     }
 
-    if write
-      obj.recordFrameRate = 20
-      obj.onPaint = (event, dirty, image) ->
-        write(image.toJPEG(100))
+    if writeVideoFrame
+      electronProps.recordFrameRate = 20
+      electronProps.onPaint = (event, dirty, image) ->
+        writeVideoFrame(image.toJPEG(100))
 
-    obj
+    electronProps
 
-  displayStats: (obj = {}) ->
-    bgColor = if obj.failures then "bgRed" else "bgGreen"
-    color   = if obj.failures then "red"   else "green"
+  displayResults: (obj = {}, estimated) ->
+    results = collectTestResults(obj, estimated)
+
+    c = if results.failures then "red" else "green"
 
     console.log("")
 
-    terminal.header("Tests Finished", {
-      color: [color]
+    terminal.header("Results", {
+      color: [c]
     })
 
-    console.log("")
+    table = terminal.table({
+      type: "outsideBorder"
+    })
 
-    statsUtil.display(color, obj)
+    data = _.chain([
+      ["Tests:", results.tests]
+      ["Passing:", results.passes]
+      ["Failing:", results.failures]
+      ["Pending:", results.pending]
+      ["Skipped:", results.skipped]
+      ["Screenshots:", results.screenshots]
+      ["Video:", results.video]
+      ["Duration:", results.duration]
+      ["Estimated:", results.estimated] if estimated
+      ["Spec Ran:", results.name]
+    ])
+    .compact()
+    .map (arr) ->
+      [key, val] = arr
+
+      [color(key, "gray"), color(val, c)]
+    .value()
+
+    table.push(data...)
+
+    console.log("")
+    console.log(table.toString())
+    console.log("")
 
   displayScreenshots: (screenshots = []) ->
-    console.log("")
     console.log("")
 
     terminal.header("Screenshots", {color: ["yellow"]})
@@ -185,15 +560,17 @@ module.exports = {
     console.log("")
 
     format = (s) ->
-      dimensions = chalk.gray("(#{s.width}x#{s.height})")
+      dimensions = gray("(#{s.width}x#{s.height})")
 
       "  - #{s.path} #{dimensions}"
 
     screenshots.forEach (screenshot) ->
       console.log(format(screenshot))
 
+    console.log("")
+
   postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
-    debug("ending the video recording %o", { name })
+    debug("ending the video recording %o", { name, videoCompression, shouldUploadVideo })
 
     ## once this ended promises resolves
     ## then begin processing the file
@@ -204,7 +581,6 @@ module.exports = {
       return if videoCompression is false or shouldUploadVideo is false
 
       console.log("")
-      console.log("")
 
       terminal.header("Video", {
         color: ["cyan"]
@@ -212,30 +588,37 @@ module.exports = {
 
       console.log("")
 
-      # bar = progress.create("Post Processing Video")
-      console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression} CRF"))
+      console.log(
+        gray("  - Started processing:  "),
+        chalk.cyan("Compressing to #{videoCompression} CRF")
+      )
 
       started  = new Date
       progress = Date.now()
-      tenSecs = human("10 seconds")
+      throttle = env.get("VIDEO_COMPRESSION_THROTTLE") or human("10 seconds")
 
       onProgress = (float) ->
         switch
           when float is 1
             finished = new Date - started
-            duration = "(#{humanTime(finished)})"
-            console.log("  - Finished processing: ", chalk.cyan(name), chalk.gray(duration))
+            dur = "(#{humanTime.long(finished)})"
+            console.log(
+              gray("  - Finished processing: "),
+              chalk.cyan(name),
+              gray(dur)
+            )
+            console.log("")
 
-          when (new Date - progress) > tenSecs
+          when (new Date - progress) > throttle
             ## bump up the progress so we dont
             ## continuously get notifications
-            progress += tenSecs
+            progress += throttle
             percentage = Math.ceil(float * 100) + "%"
             console.log("  - Compression progress: ", chalk.cyan(percentage))
 
         # bar.tickTotal(float)
 
-      video.process(name, cname, videoCompression, onProgress)
+      videoCapture.process(name, cname, videoCompression, onProgress)
     .catch {recordingVideoFailed: true}, (err) ->
       ## dont do anything if this error occured because
       ## recording the video had already failed
@@ -246,29 +629,27 @@ module.exports = {
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   launchBrowser: (options = {}) ->
-    { browser, spec, write, headed, project, screenshots } = options
+    { browser, spec, writeVideoFrame, project, screenshots, projectRoot } = options
 
-    headed = !!headed
-
-    browserOpts = switch browser
+    browserOpts = switch browser.name
       when "electron"
-        @getElectronProps(headed, project, write)
+        @getElectronProps(browser.isHeaded, project, writeVideoFrame)
       else
         {}
 
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) =>
-        if message is "take:screenshot"
+        if message is "take:screenshot" and resp
           screenshots.push @screenshotMetadata(data, resp)
 
         resp
     }
 
-    browserOpts.projectRoot = options.projectRoot
+    browserOpts.projectRoot = projectRoot
 
-    openProject.launch(browser, spec.absolute, browserOpts)
+    openProject.launch(browser, spec, browserOpts)
 
-  listenForProjectEnd: (project, headed, exit) ->
+  listenForProjectEnd: (project, exit) ->
     new Promise (resolve) ->
       if exit is false
         resolve = (arg) ->
@@ -338,8 +719,12 @@ module.exports = {
               project.emit("exitEarlyWithErr", err.message)
 
   waitForSocketConnection: (project, id) ->
+    debug("waiting for socket connection... %o", { id })
+
     new Promise (resolve, reject) ->
       fn = (socketId) ->
+        debug("got socket connection %o", { id: socketId })
+
         if socketId is id
           ## remove the event listener if we've connected
           project.removeListener("socket:connected", fn)
@@ -352,9 +737,16 @@ module.exports = {
       project.on("socket:connected", fn)
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { project, headed, screenshots, started, end, name, cname, videoCompression, videoUploadOnPasses, exit, spec } = options
+    { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
 
-    @listenForProjectEnd(project, headed, exit)
+    ## https://github.com/cypress-io/cypress/issues/2370
+    ## delay 1 second if we're recording a video to give
+    ## the browser padding to render the final frames
+    ## to avoid chopping off the end of the video
+    delay = @getVideoRecordingDelay(startedVideoCapture)
+
+    @listenForProjectEnd(project, exit)
+    .delay(delay)
     .then (obj) =>
       _.defaults(obj, {
         error: null
@@ -365,20 +757,18 @@ module.exports = {
         reporterStats: null
       })
 
-      if end
-        obj.video = name
+      if startedVideoCapture
+        obj.video = videoName
 
       if screenshots
         obj.screenshots = screenshots
 
-      obj.spec = spec?.path
-
-      testResults = collectTestResults(obj)
+      obj.spec = spec
 
       finish = ->
         return obj
 
-      @displayStats(testResults)
+      @displayResults(obj, estimated)
 
       if screenshots and screenshots.length
         @displayScreenshots(screenshots)
@@ -390,13 +780,13 @@ module.exports = {
       hasFailingTests = _.get(stats, 'failures') > 0
 
       ## if we have a video recording
-      if started and tests and tests.length
+      if startedVideoCapture and tests and tests.length
         ## always set the video timestamp on tests
-        obj.tests = Reporter.setVideoTimestamp(started, tests)
+        obj.tests = Reporter.setVideoTimestamp(startedVideoCapture, tests)
 
       ## we should upload the video if we upload on passes (by default)
       ## or if we have any failures and have started the video
-      suv = Boolean(videoUploadOnPasses is true or (started and hasFailingTests))
+      suv = Boolean(videoUploadOnPasses is true or (startedVideoCapture and hasFailingTests))
 
       obj.shouldUploadVideo = suv
 
@@ -407,41 +797,31 @@ module.exports = {
       ## electron bug in windows
       openProject.closeBrowser()
       .then =>
-        if end
-          @postProcessRecording(end, name, cname, videoCompression, suv)
+        if endVideoCapture
+          @postProcessRecording(endVideoCapture, videoName, compressedVideoName, videoCompression, suv)
           .then(finish)
           ## TODO: add a catch here
         else
           finish()
 
-  trashAssets: (config = {}) ->
-    if config.trashAssetsBeforeHeadlessRuns is true
-      Promise.join(
-        trash.folder(config.videosFolder)
-        trash.folder(config.screenshotsFolder)
-      )
-      .catch (err) ->
-        ## dont make trashing assets fail the build
-        errors.warning("CANNOT_TRASH_ASSETS", err.stack)
-    else
-      Promise.resolve()
-
   screenshotMetadata: (data, resp) ->
-    ## TODO: update all of these properties
-    ## because we have a full array of tests
-    ## no need for testTitle
     {
-      screenshotId:  random.id()
+      screenshotId: random.id()
       name:      data.name ? null
       testId:    data.testId
       takenAt:   resp.takenAt
       path:      resp.path
-      height:    resp.height
-      width:     resp.width
+      height:    resp.dimensions.height
+      width:     resp.dimensions.width
     }
 
   runSpecs: (options = {}) ->
-    { config, outputPath, specs, beforeSpecRun, afterSpecRun } = options
+    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
+
+    isHeadless = browser.name is "electron" and not headed
+
+    browser.isHeadless = isHeadless
+    browser.isHeaded = not isHeadless
 
     results = {
       startedTestsAt: null
@@ -449,50 +829,56 @@ module.exports = {
       totalDuration: null
       totalSuites: null,
       totalTests: null,
-      totalFailures: null,
-      totalPasses: null,
+      totalFailed: null,
+      totalPassed: null,
       totalPending: null,
       totalSkipped: null,
-      runs: null
-      browserName: 'chrome',
-      browserVersion: '41.2.3.4',
-      osName: 'darwin',
-      osVersion: '1.2.3.4',
-      cypressVersion: '2.0.0',
-      config
+      runs: null,
+      browserPath: browser.path,
+      browserName: browser.name,
+      browserVersion: browser.version,
+      osName: sys.osName,
+      osVersion: sys.osVersion,
+      cypressVersion: pkg.version,
+      runUrl: runUrl,
+      config,
     }
 
-    runEachSpec = (spec) =>
-      Promise
-      .try ->
-        if beforeSpecRun
-          debug("before spec run %o", spec)
+    displayRunStarting({
+      specs
+      group
+      runUrl
+      browser
+      parallel
+      specPattern
+    })
 
-          beforeSpecRun(spec)
-      .then =>
-        @runSpec(spec, options)
+    runEachSpec = (spec, index, length, estimated) =>
+      displaySpecHeader(spec.name, index + 1, length, estimated)
+
+      @runSpec(spec, options, estimated)
       .get("results")
       .tap (results) ->
         debug("spec results %o", results)
 
-        if afterSpecRun
-          debug("after spec run %o", spec)
-
-          afterSpecRun(results, config)
-
-    Promise.mapSeries(specs, runEachSpec)
+    iterateThroughSpecs({
+      specs
+      config
+      parallel
+      runEachSpec
+      afterSpecRun
+      beforeSpecRun
+    })
     .then (runs = []) ->
       results.startedTestsAt = start = getRun(_.first(runs), "stats.wallClockStartedAt")
       results.endedTestsAt = end = getRun(_.last(runs), "stats.wallClockEndedAt")
       results.totalDuration = reduceRuns(runs, "stats.wallClockDuration")
-
       results.totalSuites = reduceRuns(runs, "stats.suites")
       results.totalTests = reduceRuns(runs, "stats.tests")
-      results.totalPasses = reduceRuns(runs, "stats.passes")
+      results.totalPassed = reduceRuns(runs, "stats.passes")
       results.totalPending = reduceRuns(runs, "stats.pending")
-      results.totalFailures = reduceRuns(runs, "stats.failures")
+      results.totalFailed = reduceRuns(runs, "stats.failures")
       results.totalSkipped = reduceRuns(runs, "stats.skipped")
-
       results.runs = runs
 
       debug("final results of all runs: %o", results)
@@ -500,14 +886,14 @@ module.exports = {
       writeOutput(outputPath, results)
       .return(results)
 
-  runSpec: (spec = {}, options = {}) ->
-    { project, headed, browser, videoRecording, videosFolder } = options
+  runSpec: (spec = {}, options = {}, estimated) ->
+    { project, browser } = options
 
-    browser ?= "electron"
+    { isHeadless } = browser
 
     debug("about to run spec %o", {
       spec
-      headed
+      isHeadless
       browser
     })
 
@@ -519,68 +905,45 @@ module.exports = {
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
 
-    ## if we've been told to record and we're not spawning a headed browser
-    browserCanBeRecorded = (name) ->
-      name is "electron" and not options.headed
+    @maybeStartVideoRecording({
+      spec,
+      browser,
+      video: options.video,
+      videosFolder: options.videosFolder,
+    })
+    .then (videoRecordProps = {}) =>
+      Promise.props({
+        results: @waitForTestsToFinishRunning({
+          spec
+          project
+          estimated
+          screenshots
+          videoName:            videoRecordProps.videoName 
+          compressedVideoName:  videoRecordProps.compressedVideoName
+          endVideoCapture:      videoRecordProps.endVideoCapture
+          startedVideoCapture:  videoRecordProps.startedVideoCapture
+          exit:                 options.exit
+          videoCompression:     options.videoCompression
+          videoUploadOnPasses:  options.videoUploadOnPasses
+        }),
 
-    if videoRecording
-      if browserCanBeRecorded(browser)
-        if not videosFolder
-          throw new Error("Missing videoFolder for recording")
-
-        name      = path.join(videosFolder, spec.name + ".mp4")
-        cname     = path.join(videosFolder, spec.name + "-compressed.mp4")
-        recording = @createRecording(name)
-      else
-        if browser is "electron" and options.headed
-          errors.warning("CANNOT_RECORD_VIDEO_HEADED")
-        else
-          errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser)
-
-    Promise.resolve(recording)
-    .then (props = {}) =>
-      ## extract the started + ended promises from recording
-      {start, end, write} = props
-
-      terminal.header("Tests Starting", {color: ["gray"]})
-
-      ## make sure we start the recording first
-      ## before doing anything
-      Promise.resolve(start)
-      .then (started) =>
-        Promise.props({
-          results: @waitForTestsToFinishRunning({
-            end
-            name
-            spec
-            cname
-            headed
-            started
-            project
-            screenshots
-            exit:                 options.exit
-            videoCompression:     options.videoCompression
-            videoUploadOnPasses:  options.videoUploadOnPasses
-          }),
-
-          connection: @waitForBrowserToConnect({
-            spec
-            write
-            headed
-            browser
-            project
-            screenshots
-            socketId:    options.socketId
-            webSecurity: options.webSecurity
-            projectRoot: options.projectRoot
-          })
+        connection: @waitForBrowserToConnect({
+          spec
+          project
+          browser
+          screenshots
+          writeVideoFrame: videoRecordProps.writeVideoFrame
+          socketId:    options.socketId
+          webSecurity: options.webSecurity
+          projectRoot: options.projectRoot
         })
+      })
 
   findSpecs: (config, specPattern) ->
     specsUtil.find(config, specPattern)
-    .tap (files = []) =>
+    .tap (specs = []) =>
       if debug.enabled
-        names = _.map(files, "name")
+        names = _.map(specs, "name")
         debug(
           "found '%d' specs using spec pattern '%s': %o",
           names.length,
@@ -592,12 +955,15 @@ module.exports = {
     debug("run mode ready with options %o", options)
 
     _.defaults(options, {
+      isTextTerminal: true
       browser: "electron"
     })
 
     socketId = random.id()
 
-    { projectRoot, record, key, browser } = options
+    { projectRoot, record, key, ciBuildId, parallel, group } = options
+
+    browserName = options.browser
 
     ## alias and coerce to null
     specPattern = options.spec ? null
@@ -611,50 +977,67 @@ module.exports = {
     .then ({ project, projectId, config }) =>
       ## if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
+      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
 
       if record
         recordMode.throwIfNoProjectId(projectId)
+        recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
+        recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
 
-      @findSpecs(config, specPattern)
-      .then (specs = []) =>
+      Promise.all([
+        system.info(),
+        browsers.ensureAndGetByNameOrPath(browserName),
+        @findSpecs(config, specPattern),
+        trashAssets(config),
+        removeOldProfiles()
+      ])
+      .spread (sys = {}, browser = {}, specs = []) =>
         ## return only what is return to the specPattern
         if specPattern
           specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
 
-        runAllSpecs = (beforeSpecRun, afterSpecRun) =>
-          if not specs.length
-            errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+        if not specs.length
+          errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
 
-          @trashAssets(config)
-          .then =>
-            @runSpecs({
-              beforeSpecRun
-              afterSpecRun
-              projectRoot
-              socketId
-              browser
-              project
-              config
-              specs
-              videosFolder:         config.videosFolder
-              videoRecording:       config.videoRecording
-              videoCompression:     config.videoCompression
-              videoUploadOnPasses:  config.videoUploadOnPasses
-              exit:                 options.exit
-              headed:               options.headed
-              outputPath:           options.outputPath
-            })
-          .finally(allDone)
+        if browser.family == 'chrome'
+          chromePolicyCheck.run(onWarning)
 
-        ## TODO: we may still want to capture
-        ## stdout even when no specs were found
+        runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) =>
+          @runSpecs({
+            beforeSpecRun
+            afterSpecRun
+            projectRoot
+            specPattern
+            socketId
+            parallel: parallelOverride
+            browser
+            project
+            runUrl
+            group
+            config
+            specs
+            sys
+            videosFolder:         config.videosFolder
+            video:                config.video
+            videoCompression:     config.videoCompression
+            videoUploadOnPasses:  config.videoUploadOnPasses
+            exit:                 options.exit
+            headed:               options.headed
+            outputPath:           options.outputPath
+          })
+          .tap(renderSummaryTable(runUrl))
+
         if record
           { projectName } = config
 
           recordMode.createRunAndRecordSpecs({
             key
+            sys
             specs
+            group
             browser
+            parallel
+            ciBuildId
             projectId
             projectRoot
             projectName
@@ -662,7 +1045,8 @@ module.exports = {
             runAllSpecs
           })
         else
-          runAllSpecs()
+          ## not recording, can't be parallel
+          runAllSpecs({}, false)
 
   run: (options) ->
     electronApp

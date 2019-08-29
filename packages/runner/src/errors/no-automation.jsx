@@ -2,7 +2,6 @@ import _ from 'lodash'
 import React from 'react'
 
 import Dropdown from '../dropdown/dropdown'
-import RunnerWrap from '../app/runner-wrap'
 
 const displayName = (name) => _.capitalize(name)
 
@@ -24,7 +23,7 @@ const noBrowsers = () => (
         We couldn't find any supported browsers capable of running Cypress on your machine.
       </small>
     </p>
-    <a href='https://www.google.com/chrome/browser/desktop' target='_blank' className='btn btn-primary btn-lg' rel='noopener noreferrer'>
+    <a href='https://www.google.com/chrome/browser/desktop' className='btn btn-primary btn-lg' target='_blank' rel='noopener noreferrer'>
       <i className='fa fa-chrome'></i>
       Download Chrome
     </a>
@@ -59,15 +58,15 @@ const browserPicker = (browsers, onLaunchBrowser) => {
 }
 
 export default ({ browsers, onLaunchBrowser }) => (
-  <RunnerWrap className='automation-failure'>
+  <div className='runner automation-failure'>
     <div className='automation-message'>
       <p>Whoops, we can't run your tests.</p>
       {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
       <div className='helper-line'>
-        <a className='helper-docs-link' href='https://on.cypress.io/guides/browser-management' target='_blank' rel='noopener noreferrer'>
+        <a className='helper-docs-link' href='https://on.cypress.io/launching-browsers' target='_blank'>
           <i className='fa fa-question-circle'></i> Why am I seeing this message?
         </a>
       </div>
     </div>
-  </RunnerWrap>
+  </div>
 )

@@ -5,8 +5,16 @@ namespace CypressLodashTests {
   })
 }
 
+namespace CypressMomentTests {
+  Cypress.moment() // $ExpectType Moment
+  Cypress.moment('1982-08-23') // $ExpectType Moment
+  Cypress.moment(Date()) // $ExpectType Moment
+  Cypress.moment(Date()).format() // $ExpectType string
+  Cypress.moment().startOf('week') // $ExpectType Moment
+}
+
 namespace CypressJqueryTests {
-  Cypress.$ // $ExpectType JQueryStatic<HTMLElement>
+  Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
   Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
 }
@@ -22,8 +30,6 @@ namespace CypressConfigTests {
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
 }
 
-Cypress.moment()
-
 namespace CypressEnvTests {
   // Just making sure these are valid - no real type safety
   Cypress.env('foo')
@@ -31,6 +37,17 @@ namespace CypressEnvTests {
   Cypress.env().foo
   Cypress.env({
     foo: 'bar'
+  })
+}
+
+namespace CypressIsCyTests {
+  Cypress.isCy(cy) // $ExpectType boolean
+  Cypress.isCy(undefined) // $ExpectType boolean
+
+  const chainer = cy.wrap("foo").then(function() {
+    if (Cypress.isCy(chainer)) {
+      chainer // $ExpectType Chainable<string>
+    }
   })
 }
 
@@ -72,6 +89,12 @@ namespace CypressLogsTest {
   log.get('$el') // $ExpectType JQuery<HTMLElement>
 }
 
+namespace CypressLocalStorageTest {
+  Cypress.LocalStorage.clear = function(keys) {
+    keys // $ExpectType string[] | undefined
+  }
+}
+
 cy.wrap({ foo: [1, 2, 3] })
   .its('foo')
   .each((s: number) => {
@@ -106,18 +129,37 @@ cy.wrap(['bar', 'baz'])
     first // $ExpectType any
   })
 
-cy.wrap({ foo: 'bar' })
-  .then(s => {
-    s // $ExpectType { foo: string; }
-    return s
+describe('then', () => {
+  it('should have the correct type signature', () => {
+    cy.wrap({ foo: 'bar' })
+      .then(s => {
+        s // $ExpectType { foo: string; }
+        return s
+      })
+      .then(s => {
+        s // $ExpectType { foo: string; }
+      })
+      .then(s => s.foo)
+      .then(s => {
+        s // $ExpectType string
+      })
   })
-  .then(s => {
-    s // $ExpectType { foo: string; }
+
+  it('should have the correct type signature with options', () => {
+    cy.wrap({ foo: 'bar' })
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType { foo: string; }
+        return s
+      })
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType { foo: string; }
+      })
+      .then({ timeout: 5000 }, s => s.foo)
+      .then({ timeout: 5000 }, s => {
+        s // $ExpectType string
+      })
   })
-  .then(s => s.foo)
-  .then(s => {
-    s // $ExpectType string
-  })
+})
 
 cy.wait(['@foo', '@bar'])
   .then(([first, second]) => {
@@ -149,7 +191,7 @@ cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
     })
   })
 
-  cy.get('something').should('have.length', 1)
+cy.get('something').should('have.length', 1)
 
 cy.stub().withArgs('').log(false).as('foo')
 
@@ -177,6 +219,12 @@ cy.get('body').within({ log: false }, body => {
   body // $ExpectType JQuery<HTMLBodyElement>
 })
 
+cy.get('body').within(() => {
+  cy.get('body', { withinSubject: null }).then(body => {
+    body // $ExpectType JQuery<HTMLBodyElement>
+  })
+})
+
 cy
   .get('body')
   .then(() => {
@@ -193,6 +241,18 @@ namespace CypressOnTests {
   })
 
   cy.on('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+}
+
+namespace CypressOnceTests {
+  Cypress.once('uncaught:exception', (error, runnable) => {
+    error // $ExpectType Error
+    runnable // $ExpectType IRunnable
+  })
+
+  cy.once('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
     runnable // $ExpectType IRunnable
   })
@@ -217,4 +277,43 @@ namespace CypressFilterTests {
       element // $ExpectType HTMLDivElement
       return true
     })
+}
+
+cy.screenshot('example-name')
+cy.screenshot('example', {log: false})
+cy.screenshot({log: false})
+cy.screenshot({
+  log: true,
+  blackout: []
+})
+cy.screenshot('example', {
+  log: true,
+  blackout: []
+})
+
+namespace CypressTriggerTests {
+  cy.get('something')
+    .trigger('click') // .trigger(eventName)
+    .trigger('click', 'center') // .trigger(eventName, position)
+    .trigger('click', { // .trigger(eventName, options)
+      arbitraryProperty: 0
+    })
+    .trigger('click', 0, 0) // .trigger(eventName, x, y)
+    .trigger('click', 'center', { // .trigger(eventName, position, options)
+      arbitraryProperty: 0
+    })
+    .trigger('click', 0, 0, { // .trigger(eventName, x, y, options)
+      arbitraryProperty: 0
+    })
+}
+
+const now = new Date(2019, 3, 2).getTime()
+cy.clock(now, ['Date'])
+
+namespace CypressContainsTests {
+  cy.contains('#app')
+  cy.contains('my text to find')
+  cy.contains('#app', 'my text to find')
+  cy.contains('#app', 'my text to find', {log: false, timeout: 100})
+  cy.contains('my text to find', {log: false, timeout: 100})
 }

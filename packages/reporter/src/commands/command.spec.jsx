@@ -3,7 +3,7 @@ import _ from 'lodash'
 import React from 'react'
 import sinon from 'sinon'
 
-import Command, { Aliases, AliasesReferences, Message } from './command'
+import Command, { Message } from './command'
 
 const longText = Array(110).join('-')
 const withMarkdown = '**this** is _markdown_'
@@ -40,76 +40,91 @@ describe('<Command />', () => {
   context('class names', () => {
     it('renders with the type class', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component).to.have.className('command-type-parent')
     })
 
     it('renders with the name class, whitespace converted to dashes', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component).to.have.className('command-name-The-name')
     })
 
     it('renders with the state class', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component).to.have.className('command-state-passed')
     })
 
     it('renders with the is-event class when an event', () => {
       const component = shallow(<Command model={model({ event: true })} />)
+
       expect(component).to.have.className('command-is-event')
     })
 
     it('renders with the is-invisible class when not visible', () => {
       const component = shallow(<Command model={model({ visible: false })} />)
+
       expect(component).to.have.className('command-is-invisible')
     })
 
     it('renders with the has-num-elements class when it has numElements', () => {
       const component = shallow(<Command model={model({ numElements: 1 })} />)
+
       expect(component).to.have.className('command-has-num-elements')
     })
 
     it('renders with the no-elements class when numElements is 0', () => {
       const component = shallow(<Command model={model({ numElements: 0 })} />)
+
       expect(component).to.have.className('no-elements')
     })
 
     it('renders with the multiple-elements class when numElements is more than 1', () => {
       const component = shallow(<Command model={model({ numElements: 2 })} />)
+
       expect(component).to.have.className('multiple-elements')
     })
 
     it('renders with the other-pinned class when another command is pinned', () => {
       const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c2' })} />)
+
       expect(component).to.have.className('command-other-pinned')
     })
 
     it('does not render with the other-pinned class when no command is pinned', () => {
       const component = shallow(<Command model={model()} appState={appStateStub()} />)
+
       expect(component).not.to.have.className('command-other-pinned')
     })
 
     it('does not render with the other-pinned class when it itself is pinned', () => {
       const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c1' })} />)
+
       expect(component).not.to.have.className('command-other-pinned')
     })
 
     it('renders with the is-pinned class when it itself is pinned', () => {
       const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c1' })} />)
+
       expect(component).to.have.className('command-is-pinned')
     })
 
     it('renders with the with-indicator class when it has a renderProps indicator', () => {
       const component = shallow(<Command model={model({ renderProps: { indicator: 'bad' } })} />)
+
       expect(component).to.have.className('command-with-indicator')
     })
 
     it('renders with the scaled class when it has a renderProps message over 100 chars long', () => {
       const component = shallow(<Command model={model({ displayMessage: longText })} />)
+
       expect(component).to.have.className('command-scaled')
     })
 
     it('does not render with the scaled class when it has a renderProps message less than 100 chars long', () => {
       const component = shallow(<Command model={model({ renderProps: { message: 'is short' } })} />)
+
       expect(component).not.to.have.className('command-scaled')
     })
   })
@@ -117,16 +132,19 @@ describe('<Command />', () => {
   context('name', () => {
     it('renders the name', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component.find('.command-method')).to.have.text('The name')
     })
 
     it('renders the display name if specified', () => {
       const component = shallow(<Command model={model({ displayName: 'The displayed name' })} />)
+
       expect(component.find('.command-method')).to.have.text('The displayed name')
     })
 
     it('renders the name or display name in parentheses if an event', () => {
       const component = shallow(<Command model={model({ event: true })} />)
+
       expect(component.find('.command-method')).to.have.text('(The name)')
     })
   })
@@ -134,93 +152,26 @@ describe('<Command />', () => {
   context('message', () => {
     it('renders the displayMessage', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain('The message')
     })
 
     it('does not truncate the message when over 100 chars', () => {
       const component = shallow(<Command model={model({ displayMessage: longText })} />)
+
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(longText)
     })
 
     it('renders markdown', () => {
       const component = shallow(<Command model={model({ displayMessage: withMarkdown })} />)
+
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(fromMarkdown)
     })
 
     it('includes the renderProps indicator as a class name when specified', () => {
       const component = shallow(<Command model={model({ renderProps: { indicator: 'bad' } })} />)
+
       expect(component.find(Message).first().shallow().find('.bad')).to.exist
-    })
-  })
-
-  context('aliases', () => {
-    context('message', () => {
-      let aliases
-
-      beforeEach(() => {
-        aliases = shallow(<Command model={model({ referencesAlias: ['barAlias', 'bazAlias'], aliasType: 'dom' })} />).find(AliasesReferences).shallow()
-      })
-
-      it('renders the aliases for each one it references', () => {
-        expect(aliases.find('.command-alias').length).to.equal(2)
-      })
-
-      it('renders the aliases with the right class', () => {
-        expect(aliases.find('.command-alias').first()).to.have.className('dom')
-      })
-
-      it('renders the aliases in the right format', () => {
-        expect(aliases.find('.command-alias').first()).to.have.text('@barAlias')
-        expect(aliases.find('.command-alias').last()).to.have.text('@bazAlias')
-      })
-
-      it('renders tooltip for each alias it references', () => {
-        expect(aliases.find('Tooltip').length).to.equal(2)
-      })
-
-      it('renders the right tooltip title for each alias it references', () => {
-        const tooltips = aliases.find('Tooltip')
-        expect(tooltips.first()).to.have.prop('title', 'Found an alias for: \'barAlias\'')
-        expect(tooltips.last()).to.have.prop('title', 'Found an alias for: \'bazAlias\'')
-      })
-    })
-
-    context('controls', () => {
-      let aliases
-
-      describe('any case / when there is a single alias', () => {
-        beforeEach(() => {
-          aliases = shallow(<Command model={model({ alias: 'fooAlias', aliasType: 'dom' })} />).find(Aliases).shallow()
-        })
-
-        it('renders the alias', () => {
-          expect(aliases.find('.command-alias').first()).to.have.text('fooAlias')
-        })
-
-        it('renders the alias with the alias type as a class', () => {
-          expect(aliases.find('.command-alias')).to.have.className('dom')
-        })
-
-        it('renders a tooltip for the alias', () => {
-          expect(aliases.find('Tooltip').first().find('.command-alias')).to.exist
-        })
-
-        it('renders the alias tooltip with the right title', () => {
-          expect(aliases.find('Tooltip').first()).to.have.prop('title', 'The message aliased as: \'fooAlias\'')
-        })
-      })
-
-      describe('when there are multiple aliases', () => {
-        beforeEach(() => {
-          aliases = shallow(<Command model={model({ alias: ['fooAlias', 'barAlias'], aliasType: 'dom' })} />).find(Aliases).shallow()
-        })
-
-        it('renders all the aliases', () => {
-          expect(aliases.find('.command-alias').length).to.equal(2)
-          expect(aliases.find('.command-alias').first()).to.have.text('fooAlias')
-          expect(aliases.find('.command-alias').last()).to.have.text('barAlias')
-        })
-      })
     })
   })
 
@@ -242,6 +193,7 @@ describe('<Command />', () => {
           runnablesStore={runnablesStore}
         />
       )
+
       component.find('FlashOnClick').simulate('click')
     })
 
@@ -259,7 +211,7 @@ describe('<Command />', () => {
 
     describe('clicking pin button again', () => {
       beforeEach(() => {
-        events.emit.reset()
+        events.emit.resetHistory()
         component.find('FlashOnClick').simulate('click')
       })
 
@@ -284,11 +236,13 @@ describe('<Command />', () => {
   context('invisible indicator', () => {
     it('renders a tooltip for the invisible indicator', () => {
       const component = shallow(<Command model={model({ visible: false })} />)
+
       expect(component.find('Tooltip').first().find('.command-invisible')).to.exist
     })
 
     it('renders the invisible indicator tooltip with the right title', () => {
       const component = shallow(<Command model={model({ visible: false })} />)
+
       expect(component.find('Tooltip').first()).to.have.prop('title', 'This element is not visible.')
     })
   })
@@ -296,16 +250,19 @@ describe('<Command />', () => {
   context('elements', () => {
     it('renders the number of elements', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
+
       expect(component.find('.num-elements')).to.have.text('3')
     })
 
     it('renders a tooltip for the number of elements', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
+
       expect(component.find('Tooltip').at(1).find('.num-elements')).to.exist
     })
 
     it('renders the number of elements tooltip with the right title', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
+
       expect(component.find('Tooltip').at(1)).to.have.prop('title', '3 matched elements')
     })
   })
@@ -313,16 +270,19 @@ describe('<Command />', () => {
   context('other contents', () => {
     it('renders a <FlashOnClick /> around the contents', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component.find('FlashOnClick')).to.exist
     })
 
     it('the <FlashOnClick /> has a pinned snapshot and console print message', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component.find('FlashOnClick')).to.have.prop('message', 'Printed output to your console')
     })
 
     it('renders the number', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component.find('.command-number')).to.have.text('1')
     })
   })
@@ -333,7 +293,7 @@ describe('<Command />', () => {
     let runnablesStore
     let command
 
-    before(() => {
+    beforeEach(() => {
       clock = sinon.useFakeTimers()
     })
 
@@ -345,10 +305,6 @@ describe('<Command />', () => {
         events={events}
         runnablesStore={runnablesStore}
       />)
-    })
-
-    after(() => {
-      clock.restore()
     })
 
     describe('on mouse over', () => {
@@ -436,31 +392,49 @@ describe('<Command />', () => {
 
     it('renders with command-has-duplicates class if it has duplicates', () => {
       const component = shallow(<Command model={model(withDuplicates)} />)
+
       expect(component).to.have.className('command-has-duplicates')
     })
 
     it('renders without command-has-duplicates class if no duplicates', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component).not.to.have.className('command-has-duplicates')
     })
 
     it('renders with command-is-duplicate class if it is a duplicate', () => {
       const component = shallow(<Command model={model({ isDuplicate: true })} />)
+
       expect(component).to.have.className('command-is-duplicate')
     })
 
     it('renders without command-is-duplicate class if it is not a duplicate', () => {
       const component = shallow(<Command model={model()} />)
+
       expect(component).not.to.have.className('command-is-duplicate')
+    })
+
+    it('num duplicates renders with has-alias class if command is an alias', () => {
+      const component = shallow(<Command model={model({ alias: 'foo' })} />)
+
+      expect(component.find('.num-duplicates')).to.have.className('has-alias')
+    })
+
+    it('num duplicates renders without has-alias class if command is not an alias', () => {
+      const component = shallow(<Command model={model()} />)
+
+      expect(component.find('.num-duplicates')).not.to.have.className('has-alias')
     })
 
     it('displays number of duplicates', () => {
       const component = shallow(<Command model={model({ hasDuplicates: true, numDuplicates: 5 })} />)
+
       expect(component.find('.num-duplicates')).to.have.text('5')
     })
 
     it('opens after clicking expander', () => {
       const component = shallow(<Command model={model(withDuplicates)} />)
+
       component.find('.command-expander').simulate('click', { stopPropagation: () => {} })
       expect(component).to.have.className('command-is-open')
     })

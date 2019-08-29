@@ -9,6 +9,16 @@ The actual example repo you're probably looking for is [the kitchen sink app her
 - Want to edit the `example` tests? -> edit it [here](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/examples) instead.
 - Want to edit the actual [https://example.cypress.io](https://example.cypress.io) website? edit it [here](https://github.com/cypress-io/cypress-example-kitchensink/tree/master/app) instead.
 
+## Updating the `example` app
+
+After [releasing a new version](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/CONTRIBUTING.md#deployment) on the [`cypress-example-kitchen-sink` repo](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/examples), you now want to update the `example`'s dependency to match the newly released version.
+
+1. Bump the `cypress-example-kitchensink` `devDependency` within this package's [`package.json`](https://github.com/cypress-io/cypress/blob/develop/packages/example/package.json).
+
+2. Run `npm install` and `npm run build` to build the app and spec files.
+
+3. Create a new pull-request following this repo's [pull request instructions](https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md#pull-requests).
+
 ## Developing
 
 ```bash
@@ -29,10 +39,4 @@ This copies the src files from [`cypress-example-kitchensink`](https://github.co
 
 ```bash
 npm run deploy
-```
-
-## Releasing
-
-```bash
-npm run release
 ```

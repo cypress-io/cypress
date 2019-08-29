@@ -190,7 +190,7 @@ describe "src/cy/commands/exec", ->
 
       it "can timeout from the backend's response", (done) ->
         err = new Error("timeout")
-        err.timedout = true
+        err.timedOut = true
 
         Cypress.backend.rejects(err)
 

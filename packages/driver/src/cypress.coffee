@@ -6,7 +6,6 @@ moment = require("moment")
 Promise = require("bluebird")
 sinon = require("sinon")
 lolex = require("lolex")
-bililiteRange = require("../vendor/bililiteRange")
 
 $dom = require("./dom")
 $errorMessages = require("./cypress/error_messages")
@@ -17,20 +16,28 @@ $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
 $SetterGetter = require("./cypress/setter_getter")
-$Keyboard = require("./cypress/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
+$Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
-  cy: "getStyles".split(" ")
+  cy: "detachDom getStyles".split(" ")
 }
+
+jqueryProxyFn = ->
+  if not @cy
+    $utils.throwErrByPath("miscellaneous.no_cy")
+
+  @cy.$$.apply(@cy, arguments)
+
+_.extend(jqueryProxyFn, $)
 
 ## provide the old interface and
 ## throw a deprecation message
@@ -95,11 +102,13 @@ class $Cypress
     if d = config.remote?.domainName
       document.domain = d
 
-    ## Cypress package version
-    @version = config.version
-    ## a few constants describing server environment
-    @platform = config.platform
+    ## a few static props for the host OS, browser
+    ## and the current version of Cypress
     @arch = config.arch
+    @spec = config.spec
+    @version = config.version
+    @browser = config.browser
+    @platform = config.platform
 
     ## normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
@@ -150,17 +159,18 @@ class $Cypress
   ## or parsed. we have not received any custom commands
   ## at this point
   onSpecWindow: (specWindow) ->
-    logFn = =>
-      @log.apply(@, arguments)
+    logFn = (args...) =>
+      @log.apply(@, args)
 
     ## create cy and expose globally
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
+    @isCy = @cy.isCy
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @state, @config, @log)
+    @Commands = $Commands.create(@, @cy, @state, @config)
 
     @events.proxyTo(@cy)
 
@@ -278,8 +288,17 @@ class $Cypress
           ## and the timings of after + afterEach hooks
           @emit("mocha", "test:after:run", args[0])
 
-      when "cy:test:set:state"
-        @emit("test:set:state", args...)
+      when "cy:before:all:screenshots"
+        @emit("before:all:screenshots", args...)
+
+      when "cy:before:screenshot"
+        @emit("before:screenshot", args...)
+
+      when "cy:after:screenshot"
+        @emit("after:screenshot", args...)
+
+      when "cy:after:all:screenshots"
+        @emit("after:all:screenshots", args...)
 
       when "command:log:added"
         @runner.addLog(args[0], @config("isInteractive"))
@@ -375,6 +394,9 @@ class $Cypress
       when "app:window:unload"
         @emit("window:unload", args[0])
 
+      when "app:css:modified"
+        @emit("css:modified", args[0])
+
       when "spec:script:error"
         @emit("script:error", args...)
 
@@ -431,11 +453,7 @@ class $Cypress
   addUtilityCommand: (key, fn) ->
     throwPrivateCommandInterface("addUtilityCommand")
 
-  $: ->
-    if not @cy
-      $utils.throwErrByPath("miscellaneous.no_cy")
-
-    @cy.$$.apply(@cy, arguments)
+  $: jqueryProxyFn
 
   ## attach to $Cypress to access
   ## all of the constructors
@@ -448,13 +466,13 @@ class $Cypress
   Commands: $Commands
   dom: $dom
   errorMessages: $errorMessages
-  Keyboard: $Keyboard
   Location: $Location
   Log: $Log
   LocalStorage: $LocalStorage
   Mocha: $Mocha
   Runner: $Runner
   Server: $Server
+  Screenshot: $Screenshot
   SelectorPlayground: $SelectorPlayground
   utils: $utils
   _: _
@@ -464,9 +482,6 @@ class $Cypress
   minimatch: minimatch
   sinon: sinon
   lolex: lolex
-  bililiteRange: bililiteRange
-
-  _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
   @create = (config) ->
     new $Cypress(config)

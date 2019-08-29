@@ -15,11 +15,13 @@ const renderComponent = ({ onClick = (() => {}) }) => {
 describe('<FlashOnClick />', () => {
   it('renders a tooltip with the specified message', () => {
     const component = renderComponent({})
+
     expect(component.find('Tooltip')).to.have.prop('title', 'Some message')
   })
 
   it('renders a tooltip around the content', () => {
     const component = renderComponent({})
+
     expect(component.find('Tooltip').find('.content')).to.exist
   })
 
@@ -28,7 +30,7 @@ describe('<FlashOnClick />', () => {
     let onClick
     let component
 
-    before(() => {
+    beforeEach(() => {
       clock = sinon.useFakeTimers()
     })
 
@@ -36,10 +38,6 @@ describe('<FlashOnClick />', () => {
       onClick = sinon.spy()
       component = renderComponent({ onClick })
       component.find('Tooltip').find('.content').simulate('click')
-    })
-
-    after(() => {
-      clock.restore()
     })
 
     it('calls props.onClick', () => {

@@ -1,92 +1,129 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
+import path from 'path'
 
 import localData from '../lib/local-data'
 import Spec from './spec-model'
+import Folder from './folder-model'
+
+const pathSeparatorRe = /[\\\/]/g
+
+export const allSpecsSpec = new Spec({
+  name: 'All Specs',
+  absolute: '__all',
+  relative: '__all',
+  displayName: 'Run all specs',
+})
+
+const formRelativePath = (spec) => {
+  return spec === allSpecsSpec ? spec.relative : path.join(spec.type, spec.name)
+}
+
+const pathsEqual = (path1, path2) => {
+  if (!path1 || !path2) return false
+
+  return path1.replace(pathSeparatorRe, '') === path2.replace(pathSeparatorRe, '')
+}
 
 export class SpecsStore {
-  @observable _specs = []
-  @observable error = null
-  @observable isLoading = false
+  @observable _files = []
   @observable chosenSpecPath
-  @observable filter = null
-
-  @computed get allSpecsChosen () {
-    return this.chosenSpecPath === '__all'
-  }
+  @observable error
+  @observable isLoading = false
+  @observable filter
 
   @computed get specs () {
-    return this._tree(this._specs)
+    return this._tree(this._files)
   }
 
   @action loading (bool) {
     this.isLoading = bool
   }
 
-  @action setSpecs (specs) {
-    this._specs = specs
+  @action setSpecs (specsByType) {
+    this._files = _.flatten(_.map(specsByType, (specs, type) => {
+      return _.map(specs, (spec) => {
+        return _.extend({}, spec, { type })
+      })
+    }))
 
     this.isLoading = false
   }
 
-  @action setChosenSpec (specPath) {
-    this.chosenSpecPath = specPath
+  @action setChosenSpec (spec) {
+    this.chosenSpecPath = spec ? formRelativePath(spec) : null
+  }
+
+  @action setChosenSpecByRelativePath (relativePath) {
+    this.chosenSpecPath = relativePath
   }
 
   @action setExpandSpecFolder (spec) {
     spec.setExpanded(!spec.isExpanded)
   }
 
-  @action setFilter (projectId, filter = null) {
-    localData.set(`specsFilter-${projectId}`, filter)
+  @action setFilter (project, filter = null) {
+    if (!filter) return this.clearFilter(project)
+
+    localData.set(this.getSpecsFilterId(project), filter)
 
     this.filter = filter
   }
 
-  @action clearFilter (projectId) {
-    localData.remove(`specsFilter-${projectId}`)
+  @action clearFilter (project) {
+    localData.remove(this.getSpecsFilterId(project))
 
     this.filter = null
   }
 
-  isChosenSpec (spec) {
-    return spec.name === this.chosenSpecPath || spec.path === this.chosenSpecPath
+  isChosen (spec) {
+    return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
   }
 
-  _tree (specsByType) {
-    let specs = _.flatten(_.map(specsByType, (specs, type) => {
-      return _.map(specs, (spec) => {
-        // add type (unit, integration, etc) to beginning
-        // and  change \\ to / for Windows
-        return _.extend({}, spec, {
-          name: `${type}/${spec.name.replace(/\\/g, '/')}`,
-        })
-      })
-    }))
+  getSpecsFilterId ({ id = '<no-id>', path = '' }) {
+    const shortenedPath = path.replace(/.*cypress/, 'cypress')
 
+    return `specsFilter-${id}-${shortenedPath}`
+  }
+
+  _tree (files) {
     if (this.filter) {
-      specs = _.filter(specs, (spec) => {
+      files = _.filter(files, (spec) => {
         return spec.name.toLowerCase().includes(this.filter.toLowerCase())
       })
     }
 
-    return _.reduce(specs, (root, file) => {
+    const tree = _.reduce(files, (root, file) => {
+      const segments = [file.type].concat(file.name.split(pathSeparatorRe))
+      const segmentsPassed = []
+
       let placeholder = root
-      const segments = file.name.split('/')
-      _.each(segments, (segment) => {
-        let spec = _.find(placeholder, { displayName: segment })
-        if (!spec) {
-          spec = new Spec({
-            name: file.name,
-            displayName: segment,
-            path: file.path,
-          })
-          placeholder.push(spec)
+
+      _.each(segments, (segment, i) => {
+        segmentsPassed.push(segment)
+        const currentPath = path.join(...segmentsPassed)
+        const isCurrentAFile = i === segments.length - 1
+        const props = { path: currentPath, displayName: segment }
+
+        let existing = _.find(placeholder, (file) => {
+          return pathsEqual(file.path, currentPath)
+        })
+
+        if (!existing) {
+          existing = isCurrentAFile ? new Spec(_.extend(file, props)) : new Folder(props)
+
+          placeholder.push(existing)
         }
-        placeholder = spec.children
+
+        if (!isCurrentAFile) {
+          placeholder = existing.children
+        }
       })
+
       return root
     }, [])
+
+    return tree
   }
 }
 

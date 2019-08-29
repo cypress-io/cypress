@@ -76,6 +76,13 @@ describe "src/cy/commands/actions/check", ->
 
       cy.get(checkbox).check()
 
+    it "does not require visibility with force: true", ->
+      checkbox = ":checkbox[name='birds']"
+      $(checkbox).last().hide()
+
+      cy.get(checkbox).check({force: true}).then ($checkbox) ->
+        expect($checkbox).to.be.checked
+
     it "can check a collection", ->
       cy.get("[name=colors]").check().then ($inputs) ->
         $inputs.each (i, el) ->
@@ -188,9 +195,12 @@ describe "src/cy/commands/actions/check", ->
         $("[name=colors][value=blue]").change -> done()
         cy.get("[name=colors]").check("blue")
 
-      it "emits focus event", (done) ->
-        $("[name=colors][value=blue]").focus -> done()
-        cy.get("[name=colors]").check("blue")
+      it "emits focus event", () ->
+        focus = false
+        $("[name=colors][value=blue]").focus -> focus = true
+        cy.get("[name=colors]")
+        .check("blue")
+        .then -> expect(focus).to.eq true
 
     describe "errors", ->
       beforeEach ->
@@ -553,7 +563,7 @@ describe "src/cy/commands/actions/check", ->
         checked = true
 
       cy.get(checkbox).uncheck().then ->
-        expect(checked).to.be.falsed
+        expect(checked).to.be.false
 
     it "can forcibly click even when being covered by another element", (done) ->
       checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo($("body"))

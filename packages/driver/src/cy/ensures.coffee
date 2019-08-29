@@ -1,8 +1,15 @@
 _ = require("lodash")
 $dom = require("../dom")
 $utils = require("../cypress/utils")
+$elements = require("../dom/elements")
 
 VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
+
+## TODO: in 4.0 we should accept a new validation type called 'elements'
+## which accepts an array of elements (and they all have to be elements!!)
+## this would fix the TODO below, and also ensure that commands understand
+## they may need to work with both element arrays, or specific items
+## such as a single element, a single document, or single window
 
 returnFalse = -> return false
 
@@ -105,9 +112,23 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
+    # readonly can only be applied to input/textarea
+    # not on checkboxes, radios, etc..
+    if $dom.isTextLike(subject) and subject.prop("readonly")
+      node = $dom.stringify(subject)
+
+      $utils.throwErrByPath("dom.readonly", {
+        onFail
+        args: { cmd, node }
+      })
+
   ensureVisibility = (subject, onFail) ->
     cmd = state("current").get("name")
 
+    # We overwrite the filter(":visible") in jquery
+    # packages/driver/src/config/jquery.coffee#L51
+    # So that this effectively calls our logic 
+    # for $dom.isVisible aka !$dom.isHidden
     if not (subject.length is subject.filter(":visible").length)
       reason = $dom.getReasonIsHidden(subject)
       node   = $dom.stringify(subject)
@@ -202,6 +223,39 @@ create = (state, expect) ->
 
     cy.ensureExistence($el)
 
+  ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, onFail) ->
+    cmd = state("current").get("name")
+    el = $el[0]
+    win = $dom.getWindowByElement(el)
+    value = win.getComputedStyle(el)[cssProperty]
+    if value is cssValue
+      elInherited = $elements.findParent el, (el, prevEl) ->
+        if win.getComputedStyle(el)[cssProperty] isnt cssValue
+          return prevEl
+    
+      element = $dom.stringify(el)
+      elementInherited = (el isnt elInherited) && $dom.stringify(elInherited)
+
+      consoleProps = {
+        'But it has CSS': "#{cssProperty}: #{cssValue}"
+      }
+
+      if elementInherited then _.extend(consoleProps, {
+        'Inherited From': elInherited
+      })
+
+      $utils.throwErrByPath("dom.pointer_events_none", {
+        onFail
+        args: {
+          cmd
+          element
+          elementInherited
+        }
+        errProps: {
+          consoleProps
+        }
+      })
+
   ensureDescendents = ($el1, $el2, onFail) ->
     cmd = state("current").get("name")
 
@@ -212,12 +266,22 @@ create = (state, expect) ->
         $utils.throwErrByPath("dom.covered", {
           onFail
           args: { cmd, element1, element2 }
+          errProps: {
+            consoleProps: {
+              "But its Covered By": $dom.getElements($el2)
+            }
+          }
         })
       else
         node = $dom.stringify($el1)
         $utils.throwErrByPath("dom.center_hidden", {
           onFail
           args: { cmd, node }
+          errProps: {
+            consoleProps: {
+              "But its Covered By": $dom.getElements($el2)
+            }
+          }
         })
 
   ensureValidPosition = (position, log) ->
@@ -256,6 +320,8 @@ create = (state, expect) ->
     ensureWindow
 
     ensureDocument
+
+    ensureElDoesNotHaveCSS
 
     ensureElementIsNotAnimating
 

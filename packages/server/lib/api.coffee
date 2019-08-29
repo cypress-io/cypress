@@ -1,23 +1,46 @@
 _          = require("lodash")
 os         = require("os")
-nmi        = require("node-machine-id")
+debug      = require("debug")("cypress:server:api")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 Promise    = require("bluebird")
+humanInterval = require("human-interval")
+agent      = require("@packages/network").agent
 pkg        = require("@packages/root")
-browsers   = require('./browsers')
+machineId  = require("./util/machine_id")
 routes     = require("./util/routes")
 system     = require("./util/system")
-debug      = require("debug")("cypress:server:api")
+cache      = require("./cache")
 
-## TODO: improve this, dont just use
-## requests because its way too verbose
-# if debug.enabled
-#   request.debug = true
+THIRTY_SECONDS = humanInterval("30 seconds")
+SIXTY_SECONDS = humanInterval("60 seconds")
+TWO_MINUTES = humanInterval("2 minutes")
+
+DELAYS = [
+  THIRTY_SECONDS
+  SIXTY_SECONDS
+  TWO_MINUTES
+]
+
+responseCache = {}
+
+if intervals = process.env.API_RETRY_INTERVALS
+  DELAYS = _
+  .chain(intervals)
+  .split(",")
+  .map(_.toNumber)
+  .value()
 
 rp = request.defaults (params = {}, callback) ->
+  if params.cacheable and resp = getCachedResponse(params)
+    debug("resolving with cached response for ", params.url)
+    return Promise.resolve(resp)
+
   _.defaults(params, {
+    agent: agent
+    proxy: null
     gzip: true
+    cacheable: false
   })
 
   headers = params.headers ?= {}
@@ -29,7 +52,28 @@ rp = request.defaults (params = {}, callback) ->
 
   method = params.method.toLowerCase()
 
+  # use %j argument to ensure deep nested properties are serialized
+  debug(
+    "request to url: %s with params: %j and token: %s",
+    "#{params.method} #{params.url}",
+    _.pick(params, "body", "headers"),
+    params.auth && params.auth.bearer
+  )
+
   request[method](params, callback)
+  .promise()
+  .tap (resp) ->
+    if params.cacheable
+      debug("caching response for ", params.url)
+      cacheResponse(resp, params)
+
+    debug("response %o", resp)
+
+cacheResponse = (resp, params) ->
+  responseCache[params.url] = resp
+
+getCachedResponse = (params) ->
+  responseCache[params.url]
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -45,14 +89,37 @@ tagError = (err) ->
   err.isApiError = true
   throw err
 
-machineId = ->
-  nmi.machineId()
-  .catch ->
-    return null
+## retry on timeouts, 5xx errors, or any error without a status code
+isRetriableError = (err) ->
+  (err instanceof Promise.TimeoutError) or
+  (500 <= err.statusCode < 600) or
+  not err.statusCode?
 
 module.exports = {
+  rp
+
   ping: ->
     rp.get(routes.ping())
+    .catch(tagError)
+
+  getMe: (authToken) ->
+    rp.get({
+      url: routes.me()
+      json: true
+      auth: {
+        bearer: authToken
+      }
+    })
+
+  getAuthUrls: ->
+    rp.get({
+      url: routes.auth(),
+      json: true
+      cacheable: true
+      headers: {
+        "x-route-version": "2"
+      }
+    })
     .catch(tagError)
 
   getOrgs: (authToken) ->
@@ -99,7 +166,7 @@ module.exports = {
         bearer: authToken
       }
       headers: {
-        "x-route-version": "2"
+        "x-route-version": "3"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -107,22 +174,25 @@ module.exports = {
 
   createRun: (options = {}) ->
     body = _.pick(options, [
-      "projectId"
-      "recordKey"
       "ci"
       "specs",
       "commit"
-      "platform"
-      "specPattern"
+      "group",
+      "platform",
+      "parallel",
+      "ciBuildId",
+      "projectId",
+      "recordKey",
+      "specPattern",
     ])
 
     rp.post({
       body
       url: routes.runs()
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? SIXTY_SECONDS
       headers: {
-        "x-route-version": "3"
+        "x-route-version": "4"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -133,7 +203,7 @@ module.exports = {
 
     body = _.pick(options, [
       "spec"
-      "planId"
+      "groupId"
       "machineId"
       "platform"
     ])
@@ -142,13 +212,11 @@ module.exports = {
       body
       url: routes.instances(runId)
       json: true
-      timeout: timeout ? 10000
+      timeout: timeout ? SIXTY_SECONDS
       headers: {
-        "x-route-version": "4"
+        "x-route-version": "5"
       }
     })
-    .promise()
-    .get("instanceId")
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
@@ -156,7 +224,7 @@ module.exports = {
     rp.put({
       url: routes.instanceStdout(options.instanceId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? SIXTY_SECONDS
       body: {
         stdout: options.stdout
       }
@@ -168,7 +236,7 @@ module.exports = {
     rp.put({
       url: routes.instance(options.instanceId)
       json: true
-      timeout: options.timeout ? 10000
+      timeout: options.timeout ? SIXTY_SECONDS
       headers: {
         "x-route-version": "2"
       }
@@ -187,7 +255,7 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
-  createRaygunException: (body, authToken, timeout = 3000) ->
+  createCrashReport: (body, authToken, timeout = 3000) ->
     rp.post({
       url: routes.exceptions()
       json: true
@@ -196,45 +264,27 @@ module.exports = {
         bearer: authToken
       }
     })
-    .promise()
     .timeout(timeout)
     .catch(tagError)
 
-  createSignin: (code) ->
-    machineId()
-    .then (id) ->
-      h = {
-        "x-route-version": "3"
-        "x-accept-terms": "true"
-      }
-
-      if id
-        h["x-machine-id"] = id
-
-      rp.post({
-        url: routes.signin({code: code})
-        json: true
-        headers: h
-      })
-      .catch errors.StatusCodeError, (err) ->
-        ## reset message to error which is a pure body
-        ## representation of what was sent back from
-        ## the API
-        err.message = err.error
-
-        throw err
-      .catch(tagError)
-
-  createSignout: (authToken) ->
-    rp.post({
-      url: routes.signout()
-      json: true
-      auth: {
-        bearer: authToken
-      }
-    })
-    .catch({statusCode: 401}, ->) ## do nothing on 401
-    .catch(tagError)
+  postLogout: (authToken) ->
+    Promise.join(
+      @getAuthUrls(),
+      machineId.machineId(),
+      (urls, machineId) ->
+        rp.post({
+          url: urls.dashboardLogoutUrl
+          json: true
+          auth: {
+            bearer: authToken
+          }
+          headers: {
+            "x-machine-id": machineId
+          }
+        })
+        .catch({statusCode: 401}, ->) ## do nothing on 401
+        .catch(tagError)
+  )
 
   createProject: (projectDetails, remoteOrigin, authToken) ->
     rp.post({
@@ -277,15 +327,6 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
     .catch(tagError)
 
-  getLoginUrl: ->
-    rp.get({
-      url: routes.auth(),
-      json: true
-    })
-    .promise()
-    .get("url")
-    .catch(tagError)
-
   _projectToken: (method, projectId, authToken) ->
     rp({
       method: method
@@ -298,7 +339,6 @@ module.exports = {
         "x-route-version": "2"
       }
     })
-    .promise()
     .get("apiToken")
     .catch(tagError)
 
@@ -308,4 +348,37 @@ module.exports = {
   updateProjectToken: (projectId, authToken) ->
     @_projectToken("put", projectId, authToken)
 
+  retryWithBackoff: (fn, options = {}) ->
+    ## for e2e testing purposes
+    if process.env.DISABLE_API_RETRIES
+      debug("api retries disabled")
+      return Promise.try(fn)
+
+    do attempt = (retryIndex = 0) ->
+      Promise
+      .try(fn)
+      .catch isRetriableError, (err) ->
+        if retryIndex > DELAYS.length
+          throw err
+
+        delay = DELAYS[retryIndex]
+
+        if options.onBeforeRetry
+          options.onBeforeRetry({
+            err
+            delay
+            retryIndex
+            total: DELAYS.length
+          })
+
+        retryIndex++
+
+        Promise
+        .delay(delay)
+        .then ->
+          debug("retry ##{retryIndex} after #{delay}ms")
+          attempt(retryIndex)
+
+  clearCache: () ->
+    responseCache = {}
 }

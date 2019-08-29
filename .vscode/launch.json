@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach by Process ID",
+      "processId": "${command:PickProcess}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test: active",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "test-debug-package"
+      ],
+      "args": [
+        "${file}"
+      ],
+      "port": 5566,
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "electron",
+      "port": 5567
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "dev-debug",
+      "port": 5566,
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev-debug"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "dev-debug w/ electron",
+      "configurations": ["dev-debug", "electron"]
+    }
+  ]
+}

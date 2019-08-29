@@ -5,6 +5,7 @@ path = require("path")
 Promise = require("bluebird")
 lockFile = Promise.promisifyAll(require("lockfile"))
 fs = require("#{root}lib/util/fs")
+env = require("#{root}lib/util/env")
 exit = require("#{root}lib/util/exit")
 FileUtil = require("#{root}lib/util/file")
 
@@ -12,6 +13,7 @@ describe "lib/util/file", ->
   beforeEach ->
     @dir = path.join(os.tmpdir(), "cypress", "file_spec")
     @path = path.join(@dir, "file.json")
+
     fs.removeAsync(@dir).catch ->
       ## ignore error if directory didn't exist in the first place
 
@@ -154,6 +156,14 @@ describe "lib/util/file", ->
       @fileUtil.get().catch ->
         expect(lockFile.unlockAsync).to.be.called
 
+    it "times out and carries on if unlocking times out", ->
+      sinon.stub(lockFile, "lockAsync").resolves()
+      sinon.stub(lockFile, "unlockAsync").callsFake -> Promise.delay(1e9)
+      sinon.stub(fs, "readJsonAsync").resolves({})
+      sinon.stub(env, "get").withArgs("FILE_UNLOCK_TIMEOUT").returns(100)
+
+      @fileUtil.get()
+
   context "#set", ->
     beforeEach ->
       @fileUtil = new FileUtil({path: @path})
@@ -249,11 +259,17 @@ describe "lib/util/file", ->
 
     it "unlocks file when finished removing", ->
       sinon.spy(lockFile, "unlockAsync")
-      @fileUtil.remove().then ->
+      @fileUtil.remove()
+      .then ->
         expect(lockFile.unlockAsync).to.be.called
 
     it "unlocks file even if removing fails", ->
       sinon.spy(lockFile, "unlockAsync")
       sinon.stub(fs, "removeAsync").rejects(new Error("fail!"))
-      @fileUtil.remove().catch ->
+
+      @fileUtil.remove()
+      .then ->
+        throw new Error("should have caught!")
+      .catch (err) ->
+        expect(err.message).to.eq("fail!")
         expect(lockFile.unlockAsync).to.be.called

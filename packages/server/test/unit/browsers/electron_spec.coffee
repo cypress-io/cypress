@@ -6,6 +6,7 @@ la = require("lazy-ass")
 check = require("check-more-types")
 
 menu = require("#{root}../lib/gui/menu")
+plugins = require("#{root}../lib/plugins")
 Windows = require("#{root}../lib/gui/windows")
 electron = require("#{root}../lib/browsers/electron")
 savedState = require("#{root}../lib/saved_state")
@@ -21,8 +22,10 @@ describe "lib/browsers/electron", ->
     }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
+      isDestroyed: -> false
       close: sinon.stub()
       loadURL: sinon.stub()
+      focusOnWebView: sinon.stub()
       webContents: {
         session: {
           cookies: {
@@ -37,6 +40,9 @@ describe "lib/browsers/electron", ->
   context ".open", ->
     beforeEach ->
       sinon.stub(electron, "_render").resolves(@win)
+      sinon.stub(plugins, "has")
+      sinon.stub(plugins, "execute")
+
       savedState()
       .then (state) =>
         la(check.fn(state.get), "state is missing .get to stub", state)
@@ -65,17 +71,53 @@ describe "lib/browsers/electron", ->
         expect(obj.kill).to.be.a("function")
         expect(obj.removeAllListeners).to.be.a("function")
 
+    it "registers onRequest automation middleware", ->
+      sinon.spy(@automation, "use")
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        expect(@automation.use).to.be.called
+        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
+
+    it "is noop when before:browser:launch yields null", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves(null)
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        options = electron._render.firstCall.args[2]
+
+        expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
+
+    ## https://github.com/cypress-io/cypress/issues/1992
+    it "it merges in options without removing essential options", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({foo: "bar"})
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        options = electron._render.firstCall.args[2]
+
+        expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
+
   context "._launch", ->
     beforeEach ->
       sinon.stub(menu, "set")
+      sinon.stub(electron, "_attachDebugger").resolves()
       sinon.stub(electron, "_clearCache").resolves()
       sinon.stub(electron, "_setProxy").resolves()
       sinon.stub(electron, "_setUserAgent")
 
-    it "sets dev tools in menu", ->
-      electron._launch(@win, @url, @options)
+    it "sets menu.set whether or not its in headless mode", ->
+      electron._launch(@win, @url, { show: true })
       .then ->
         expect(menu.set).to.be.calledWith({withDevTools: true})
+      .then =>
+        menu.set.reset()
+
+        electron._launch(@win, @url, { show: false })
+      .then ->
+        expect(menu.set).not.to.be.called
 
     it "sets user agent if options.userAgent", ->
       electron._launch(@win, @url, @options)
@@ -164,9 +206,15 @@ describe "lib/browsers/electron", ->
       })
 
     it ".onFocus", ->
-      opts = electron._defaultOptions("/foo", @state, @options)
+      opts = electron._defaultOptions("/foo", @state, { show: true })
       opts.onFocus()
       expect(menu.set).to.be.calledWith({withDevTools: true})
+
+      menu.set.reset()
+
+      opts = electron._defaultOptions("/foo", @state, { show: false })
+      opts.onFocus()
+      expect(menu.set).not.to.be.called
 
     describe ".onNewWindow", ->
       beforeEach ->
@@ -303,4 +351,5 @@ describe "lib/browsers/electron", ->
       .then ->
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: "proxy rules"
+          proxyBypassRules: "<-loopback>"
         })

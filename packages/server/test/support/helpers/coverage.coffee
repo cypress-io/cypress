@@ -12,7 +12,7 @@ writeOnExit = if coverageVar then null else projectRoot + "/coverage/coverage-co
 coffeeCoverage.register({
   instrumentor: "istanbul"
   basePath: projectRoot
-  exclude: ["/gulpfile.coffee", "/deploy", "/build", "/dist", "/tmp", "/test", "/spec", "/app", "/bower_components", "/cache", "/support", "/node_modules", "/.git", "/.cy", "/.vagrant", "/.projects"],
+  exclude: ["/gulpfile.coffee", "/deploy", "/build", "/dist", "/tmp", "/test", "/spec", "/app", "/bower_components", "/cache", "/support", "/node_modules", "/.git", "/.cy", "/.projects"],
   coverageVar: coverageVar
   writeOnExit: writeOnExit
   initAll: true
@@ -20,7 +20,7 @@ coffeeCoverage.register({
 
 ## using hack found here to prevent problems with
 ## coffee-coverage being replaced by modules which
-## use coffee-script/register
+## use coffeescript/register
 ## https://github.com/abresas/register-coffee-coverage/blob/master/index.js
 loader = require.extensions[".coffee"]
 

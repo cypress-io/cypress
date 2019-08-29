@@ -31,6 +31,7 @@ builtInCommands = [
   require("../cy/commands/querying")
   require("../cy/commands/request")
   require("../cy/commands/screenshot")
+  require("../cy/commands/task")
   require("../cy/commands/traversals")
   require("../cy/commands/waiting")
   require("../cy/commands/window")
@@ -46,7 +47,7 @@ getTypeByPrevSubject = (prevSubject) ->
     else
       "parent"
 
-create = (Cypress, cy, state, config, log) ->
+create = (Cypress, cy, state, config) ->
   ## create a single instance
   ## of commands
   commands = {}
@@ -72,7 +73,13 @@ create = (Cypress, cy, state, config, log) ->
     ## store the backup again now
     commandBackups[name] = original
 
-    originalFn = original.fn
+    originalFn = (args...) ->
+      current = state("current")
+      storedArgs = args
+      if current.get("type") is "child"
+        storedArgs = args.slice(1)
+      current.set("args", storedArgs)
+      original.fn(args...)
 
     overridden = _.clone(original)
     overridden.fn = (args...) ->
@@ -147,7 +154,7 @@ create = (Cypress, cy, state, config, log) ->
 
   ## perf loop
   for cmd in builtInCommands
-    cmd(Commands, Cypress, cy, state, config, log)
+    cmd(Commands, Cypress, cy, state, config)
 
   return Commands
 

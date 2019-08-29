@@ -135,6 +135,17 @@ describe "lib/project", ->
             }
           })
 
+    it "does not set cfg.isNewProject when cfg.isTextTerminal", ->
+      cfg = { isTextTerminal: true }
+
+      config.get.resolves(cfg)
+
+      sinon.stub(@project, "_setSavedState").resolves(cfg)
+
+      @project.getConfig({foo: "bar"})
+      .then (cfg) ->
+        expect(cfg).not.to.have.property("isNewProject")
+
   context "#open", ->
     beforeEach ->
       sinon.stub(@project, "watchSettingsAndStartWebsockets").resolves()
@@ -234,6 +245,18 @@ describe "lib/project", ->
     it "can close when server + watchers arent open", ->
       @project.close()
 
+  context "#reset", ->
+    beforeEach ->
+      @project = Project(@pristinePath)
+      @project.automation = { reset: sinon.stub() }
+      @project.server = { reset: sinon.stub() }
+
+    it "resets server + automation", ->
+      @project.reset()
+      .then =>
+        expect(@project.automation.reset).to.be.calledOnce
+        expect(@project.server.reset).to.be.calledOnce
+
   context "#getRuns", ->
     beforeEach ->
       @project = Project(@todosPath)
@@ -288,7 +311,7 @@ describe "lib/project", ->
       expect(@watch).to.be.calledWith("/path/to/cypress.env.json")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: ->done()})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -357,22 +380,28 @@ describe "lib/project", ->
 
     it "does nothing when {pluginsFile: false}", ->
       @config.pluginsFile = false
-      @project.watchPluginsFile(@config).then =>
+      @project.watchPluginsFile(@config, {}).then =>
         expect(@project.watchers.watchTree).not.to.be.called
 
     it "does nothing if pluginsFile does not exist", ->
       fs.pathExists.resolves(false)
-      @project.watchPluginsFile(@config).then =>
+      @project.watchPluginsFile(@config, {}).then =>
+        expect(@project.watchers.watchTree).not.to.be.called
+
+    it "does nothing if in run mode", ->
+      @project.watchPluginsFile(@config, {
+        isTextTerminal: true
+      }).then =>
         expect(@project.watchers.watchTree).not.to.be.called
 
     it "watches the pluginsFile", ->
-      @project.watchPluginsFile(@config).then =>
+      @project.watchPluginsFile(@config, {}).then =>
         expect(@project.watchers.watchTree).to.be.calledWith(@config.pluginsFile)
         expect(@project.watchers.watchTree.lastCall.args[1]).to.be.an("object")
         expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
 
     it "calls plugins.init when file changes", ->
-      @project.watchPluginsFile(@config).then =>
+      @project.watchPluginsFile(@config, {}).then =>
         @project.watchers.watchTree.firstCall.args[1].onChange()
         expect(plugins.init).to.be.calledWith(@config)
 

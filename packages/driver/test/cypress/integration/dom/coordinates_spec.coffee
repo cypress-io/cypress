@@ -32,12 +32,12 @@ describe "src/dom/coordinates", ->
         value: 20
       })
 
-      cy.stub(@$button.get(0), "getBoundingClientRect").returns({
+      cy.stub(@$button.get(0), "getClientRects").returns([{
         top: 100.9
         left: 60.9
         width: 50
         height: 40
-      })
+      }])
 
       { fromViewport, fromWindow } = Cypress.dom.getElementPositioning(@$button)
 
@@ -154,3 +154,36 @@ describe "src/dom/coordinates", ->
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(159)
         expect(obj.y).to.eq(124)
+
+  context "span spanning multiple lines", ->
+    it 'gets first dom rect in multiline text', ->
+      $ '
+      <div style="width:150px; margin-top:100px">
+      this is some long text with a single <span id="multiple" style="color:darkblue"> span that spans lines</span> making it tricky to click
+      </div>
+      '
+      .appendTo $ 'body'
+
+      $el = cy.$$("#multiple")
+      el = $el[0]
+
+      cy.stub(el, 'getClientRects', ->
+        [
+          {
+          top: 100
+          left: 100
+          width: 50
+          height: 40
+          },
+          {
+          top: 200
+          left: 50
+          width: 10
+          height: 10
+          }
+      ]
+
+      ).as 'getClientRects'
+      obj = Cypress.dom.getElementCoordinatesByPosition($el, 'center').fromViewport
+
+      expect({x: obj.x, y: obj.y}).to.deep.eq({x:125, y:120})

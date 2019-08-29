@@ -5,11 +5,11 @@ describe "config", ->
   ## this test to bomb
   it "times out looking for a missing element", ->
     append = (id) ->
-      el = Cypress.$("<span id='#{id}'>#{id}<span>")
+      $el = Cypress.$("<span id='#{id}'>#{id}<span>")
 
       setTimeout ->
         ## append the element after 2000ms
-        Cypress.$("body").append(el)
+        Cypress.$("body").append($el)
       , 2000
 
     cy

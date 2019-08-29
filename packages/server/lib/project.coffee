@@ -6,7 +6,7 @@ Promise     = require("bluebird")
 commitInfo  = require("@cypress/commit-info")
 la          = require("lazy-ass")
 check       = require("check-more-types")
-scaffoldLog = require("debug")("cypress:server:scaffold")
+scaffoldDebug = require("debug")("cypress:server:scaffold")
 debug       = require("debug")("cypress:server:project")
 cwd         = require("./cwd")
 api         = require("./api")
@@ -25,6 +25,7 @@ savedState  = require("./saved_state")
 Automation  = require("./automation")
 preprocessor = require("./plugins/preprocessor")
 fs          = require("./util/fs")
+keys        = require("./util/keys")
 settings    = require("./util/settings")
 specsUtil   = require("./util/specs")
 
@@ -39,15 +40,19 @@ class Project extends EE
 
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
+
     if not check.unemptyString(projectRoot)
       throw new Error("Expected project root path, not #{projectRoot}")
 
     @projectRoot = path.resolve(projectRoot)
     @watchers    = Watchers()
-    @server      = null
     @cfg         = null
+    @spec        = null
+    @browser     = null
+    @server      = null
     @memoryCheck = null
     @automation  = null
+
     debug("Project created %s", @projectRoot)
 
   open: (options = {}) ->
@@ -58,14 +63,17 @@ class Project extends EE
       report:       false
       onFocusTests: ->
       onError: ->
+      onWarning: ->
       onSettingsChanged: false
     }
 
     if process.env.CYPRESS_MEMORY
       logMemory = ->
-        console.debug("memory info", process.memoryUsage())
+        console.log("memory info", process.memoryUsage())
 
       @memoryCheck = setInterval(logMemory, 1000)
+
+    @onWarning = options.onWarning
 
     @getConfig(options)
     .tap (cfg) =>
@@ -84,7 +92,7 @@ class Project extends EE
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
-      @server.open(cfg, @)
+      @server.open(cfg, @, options.onWarning)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
@@ -146,7 +154,10 @@ class Project extends EE
   reset: ->
     debug("resetting project instance %s", @projectRoot)
 
+    @spec = @browser = null
+
     Promise.try =>
+      @automation?.reset()
       @server?.reset()
 
   close: ->
@@ -155,7 +166,7 @@ class Project extends EE
     if @memoryCheck
       clearInterval(@memoryCheck)
 
-    @cfg = null
+    @cfg = @spec = @browser = null
 
     Promise.join(
       @server?.close(),
@@ -174,7 +185,7 @@ class Project extends EE
 
   watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
-    if not cfg.pluginsFile
+    if not cfg.pluginsFile or options.isTextTerminal
       return Promise.resolve()
 
     fs.pathExists(cfg.pluginsFile)
@@ -196,7 +207,7 @@ class Project extends EE
 
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
-    ## watch anything
+    ## watch anything (like in run mode)
     return if not onSettingsChanged
 
     debug("watch settings files")
@@ -256,8 +267,7 @@ class Project extends EE
         @emit("socket:connected", id)
 
       onSetRunnables: (runnables) ->
-        debug("onSetRunnables")
-        debug("runnables", runnables)
+        debug("received runnables %o", runnables)
         reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
@@ -280,6 +290,13 @@ class Project extends EE
   changeToUrl: (url) ->
     @server.changeToUrl(url)
 
+  setCurrentSpecAndBrowser: (spec, browser) ->
+    @spec = spec
+    @browser = browser
+
+  getCurrentSpecAndBrowser: ->
+    _.pick(@, "spec", "browser")
+
   setBrowsers: (browsers = []) ->
     @getConfig()
     .then (cfg) ->
@@ -297,7 +314,12 @@ class Project extends EE
   ## with additional object "state" which are transient things like
   ## window width and height, DevTools open or not, etc.
   getConfig: (options = {}) =>
+    if @cfg
+      return Promise.resolve(@cfg)
+
     setNewProject = (cfg) =>
+      return if cfg.isTextTerminal
+
       ## decide if new project by asking scaffold
       ## and looking at previously saved user state
       if not cfg.integrationFolder
@@ -306,23 +328,19 @@ class Project extends EE
       @determineIsNewProject(cfg.integrationFolder)
       .then (untouchedScaffold) ->
         userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
-        scaffoldLog("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
+        scaffoldDebug("untouched scaffold #{untouchedScaffold} modal closed #{userHasSeenOnBoarding}")
         cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
-      .return(cfg)
-
-    if c = @cfg
-      return Promise.resolve(c)
 
     config.get(@projectRoot, options)
     .then (cfg) => @_setSavedState(cfg)
-    .then(setNewProject)
+    .tap(setNewProject)
 
   # forces saving of project's state by first merging with argument
   saveState: (stateChanges = {}) ->
     throw new Error("Missing project config") if not @cfg
     throw new Error("Missing project root") if not @projectRoot
     newState = _.merge({}, @cfg.state, stateChanges)
-    savedState(@projectRoot)
+    savedState(@projectRoot, @cfg.isTextTerminal)
     .then (state) ->
       state.set(newState)
     .then =>
@@ -330,27 +348,28 @@ class Project extends EE
       newState
 
   _setSavedState: (cfg) ->
-    savedState(@projectRoot)
+    debug("get saved state")
+    savedState(@projectRoot, cfg.isTextTerminal)
     .then (state) -> state.get()
     .then (state) ->
       cfg.state = state
       cfg
 
-  getSpecUrl: (spec) ->
+  getSpecUrl: (absoluteSpecPath) ->
     @getConfig()
     .then (cfg) =>
-      ## if we dont have a spec or its __all
-      if not spec or (spec is "__all")
+      ## if we dont have a absoluteSpecPath or its __all
+      if not absoluteSpecPath or (absoluteSpecPath is "__all")
         @normalizeSpecUrl(cfg.browserUrl, "/__all")
       else
         ## TODO:
         ## to handle both unit + integration tests we need
-        ## to figure out (based on the config) where this spec
+        ## to figure out (based on the config) where this absoluteSpecPath
         ## lives. does it live in the integrationFolder or
         ## the unit folder?
         ## once we determine that we can then prefix it correctly
         ## with either integration or unit
-        prefixedPath = @getPrefixedPathToSpec(cfg, spec)
+        prefixedPath = @getPrefixedPathToSpec(cfg, absoluteSpecPath)
         @normalizeSpecUrl(cfg.browserUrl, prefixedPath)
 
   getPrefixedPathToSpec: (cfg, pathToSpec, type = "integration") ->
@@ -500,7 +519,8 @@ class Project extends EE
     debug("get project statuses for #{clientProjects.length} projects")
     user.ensureAuthToken()
     .then (authToken) ->
-      debug("got auth token #{authToken}")
+      debug("got auth token: %o", { authToken: keys.hide(authToken) })
+
       api.getProjects(authToken).then (projects = []) ->
         debug("got #{projects.length} projects")
         projectsIndex = _.keyBy(projects, "id")
@@ -530,7 +550,8 @@ class Project extends EE
       return Promise.resolve(Project._mergeState(clientProject, "VALID"))
 
     user.ensureAuthToken().then (authToken) ->
-      debug("got auth token #{authToken}")
+      debug("got auth token: %o", { authToken: keys.hide(authToken) })
+
       Project._getProject(clientProject, authToken)
 
   @remove = (path) ->

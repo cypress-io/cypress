@@ -6,14 +6,14 @@ import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
 import events from '../lib/events'
-import { indent } from '../lib/util'
+import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
 import scroller from '../lib/scroller'
 
 import Hooks from '../hooks/hooks'
 import Agents from '../agents/agents'
 import Routes from '../routes/routes'
-import FlashOnClick from '../lib/flash-on-click'
+import TestError from '../errors/test-error'
 
 const NoCommands = observer(() => (
   <ul className='hooks-container'>
@@ -42,6 +42,7 @@ class Test extends Component {
     this._scrollIntoView()
 
     const cb = this.props.model.callbackAfterUpdate
+
     if (cb) {
       cb()
     }
@@ -57,7 +58,7 @@ class Test extends Component {
   }
 
   render () {
-    const { model } = this.props
+    const { events, model } = this.props
 
     if (!model.shouldRender) return null
 
@@ -69,8 +70,17 @@ class Test extends Component {
         style={{ paddingLeft: indent(model.level) }}
       >
         <div className='runnable-content-region'>
-          <i className='runnable-state fa'></i>
-          <span className='runnable-title'>{model.title}</span>
+          <i aria-hidden="true" className='runnable-state fa'></i>
+          <div
+            aria-expanded={this._shouldBeOpen() === true}
+            className='runnable-title'
+            onKeyPress={onEnterOrSpace(this._toggleOpen)}
+            role='button'
+            tabIndex='0'
+          >
+            {model.title}
+            <span className="visually-hidden">{model.state}</span>
+          </div>
           <div className='runnable-controls'>
             <Tooltip placement='top' title='One or more commands failed'>
               <i className='fa fa-warning'></i>
@@ -78,12 +88,7 @@ class Test extends Component {
           </div>
         </div>
         {this._contents()}
-        <FlashOnClick
-          message='Printed output to your console'
-          onClick={this._onErrorClick}
-        >
-          <pre className='test-error'>{model.err.displayMessage}</pre>
-        </FlashOnClick>
+        <TestError events={events} model={model} />
       </div>
     )
   }
@@ -97,7 +102,9 @@ class Test extends Component {
     return (
       <div
         className='runnable-instruments collapsible-content'
-        onClick={(e) => { e.stopPropagation() }}
+        onClick={(e) => {
+          e.stopPropagation()
+        }}
       >
         <Agents model={model} />
         <Routes model={model} />
@@ -128,11 +135,8 @@ class Test extends Component {
     }
   }
 
-  _onErrorClick = (e) => {
-    e.stopPropagation()
-    this.props.events.emit('show:error', this.props.model.id)
-  }
 }
 
 export { NoCommands }
+
 export default Test

@@ -15,8 +15,6 @@ recentlyCreatedWindow = false
 
 getUrl = (type) ->
   switch type
-    when "GITHUB_LOGIN"
-      user.getLoginUrl()
     when "INDEX"
       cyDesktop.getPathToIndex()
     else
@@ -31,6 +29,16 @@ getCookieUrl = (props) ->
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
+
+setWindowProxy = (win) ->
+  if not process.env.HTTP_PROXY
+    return
+
+  return new Promise (resolve) ->
+    win.webContents.session.setProxy({
+      proxyRules: process.env.HTTP_PROXY
+      proxyBypassRules: process.env.NO_PROXY
+    }, resolve)
 
 module.exports = {
   reset: ->
@@ -53,6 +61,9 @@ module.exports = {
 
     ## else hide all windows
     _.invoke windows, "hide"
+
+  focusMainWindow: ->
+    getByType('INDEX').show()
 
   getByWebContents: (webContents) ->
     BrowserWindow.fromWebContents(webContents)
@@ -142,6 +153,7 @@ module.exports = {
       onCrashed: ->
       onNewWindow: ->
       webPreferences:  {
+        partition:            null
         chromeWebSecurity:    true
         nodeIntegration:      false
         backgroundThrottling: false
@@ -158,6 +170,9 @@ module.exports = {
     if options.chromeWebSecurity is false
       options.webPreferences.webSecurity = false
 
+    if options.partition
+      options.webPreferences.partition = options.partition
+
     win = @_newBrowserWindow(options)
 
     win.on "blur", ->
@@ -170,6 +185,14 @@ module.exports = {
       win.removeAllListeners()
       options.onClose.apply(win, arguments)
 
+    ## the webview loses focus on navigation, so we
+    ## have to refocus it everytime top navigates in headless mode
+    ## https://github.com/cypress-io/cypress/issues/2190
+    if options.show is false
+      win.webContents.on "did-start-loading", ->
+        if not win.isDestroyed()
+          win.focusOnWebView()
+
     win.webContents.on "crashed", ->
       options.onCrashed.apply(win, arguments)
 
@@ -177,7 +200,7 @@ module.exports = {
       options.onNewWindow.apply(win, arguments)
 
     if ts = options.trackState
-      @trackState(projectRoot, win, ts)
+      @trackState(projectRoot, options.isTextTerminal, win, ts)
 
     ## open dev tools if they're true
     if options.devTools
@@ -187,9 +210,7 @@ module.exports = {
     if options.contextMenu
       ## adds context menu with copy, paste, inspect element, etc
       contextMenu({
-        ## don't show inspect element until this fix is released
-        ## and we upgrade electron: https://github.com/electron/electron/pull/8688
-        showInspectElement: false
+        showInspectElement: true
         window: win
       })
 
@@ -217,12 +238,7 @@ module.exports = {
     if win = getByType(options.type)
       win.show()
 
-      if options.type is "GITHUB_LOGIN"
-        err = new Error
-        err.alreadyOpen = true
-        return Promise.reject(err)
-      else
-        return Promise.resolve(win)
+      return Promise.resolve(win)
 
     recentlyCreatedWindow = true
 
@@ -230,29 +246,13 @@ module.exports = {
       width:  600
       height: 500
       show:   true
-      url:    getUrl(options.type)
       webPreferences: {
         preload: cwd("lib", "ipc", "ipc.js")
       }
     })
 
-    urlChanged = (url, resolve) ->
-      parsed = uri.parse(url, true)
-
-      if code = parsed.query.code
-        ## there is a bug with electron
-        ## crashing when attemping to
-        ## destroy this window synchronously
-        _.defer -> win.destroy()
-
-        resolve(code)
-
-    # if args.transparent and args.show
-    #   {width, height} = args
-
-    #   args.show = false
-    #   args.width = 0
-    #   args.height = 0
+    if not options.url
+      options.url = getUrl(options.type)
 
     win = @create(projectRoot, options)
 
@@ -268,38 +268,19 @@ module.exports = {
 
     ## enable our url to be a promise
     ## and wait for this to be resolved
-    Promise
-    .resolve(options.url)
-    .then (url) ->
-      # if width and height
-      #   ## width and height are truthy when
-      #   ## transparent: true is sent
-      #   win.webContents.once "dom-ready", ->
-      #     win.setSize(width, height)
-      #     win.show()
-
+    Promise.join(
+      options.url,
+      setWindowProxy(win)
+    )
+    .spread (url) ->
       ## navigate the window here!
       win.loadURL(url)
 
       ## reset this back to false
       recentlyCreatedWindow = false
+    .thenReturn(win)
 
-      if options.type is "GITHUB_LOGIN"
-        new Promise (resolve, reject) ->
-          win.once "closed", ->
-            err = new Error("Window closed by user")
-            err.windowClosed = true
-            reject(err)
-
-          win.webContents.on "will-navigate", (e, url) ->
-            urlChanged(url, resolve)
-
-          win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
-            urlChanged(newUrl, resolve)
-      else
-        return win
-
-  trackState: (projectRoot, win, keys) ->
+  trackState: (projectRoot, isTextTerminal, win, keys) ->
     isDestroyed = ->
       win.isDestroyed()
 
@@ -313,7 +294,7 @@ module.exports = {
       newState[keys.height] = height
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectRoot)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -325,7 +306,7 @@ module.exports = {
       newState = {}
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectRoot)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -333,14 +314,14 @@ module.exports = {
     win.webContents.on "devtools-opened", ->
       newState = {}
       newState[keys.devTools] = true
-      savedState(projectRoot)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 
     win.webContents.on "devtools-closed", ->
       newState = {}
       newState[keys.devTools] = false
-      savedState(projectRoot)
+      savedState(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 

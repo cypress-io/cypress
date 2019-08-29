@@ -4,7 +4,7 @@ This is the lib responsible for installing + building Electron. This enables us 
 
 It does this by using `symlinks` while in development.
 
-## Install
+## Installing
 
 The Desktop GUI's dependencies can be installed with:
 

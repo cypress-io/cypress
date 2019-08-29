@@ -11,9 +11,13 @@ require("./environment")
 
 _       = require("lodash")
 cp      = require("child_process")
+os      = require("os")
 path    = require("path")
 Promise = require("bluebird")
-debug   = require('debug')('cypress:server:cypress')
+debug   = require("debug")("cypress:server:cypress")
+
+warning = (code) ->
+  require("./errors").warning(code)
 
 exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
@@ -30,8 +34,8 @@ exitErr = (err) ->
   ## and potentially raygun
   ## and exit with 1
   debug('exiting with err', err)
-  
-  require("./errors").log(err)
+
+  require("./errors").logException(err)
   .then -> exit(1)
 
 module.exports = {
@@ -48,18 +52,31 @@ module.exports = {
       ## like in production and we shouldn't spawn a new
       ## process
       if @isCurrentlyRunningElectron()
+        ## if we weren't invoked from the CLI
+        ## then display a warning to the user
+        if not options.invokedFromCli
+          warning("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+        
         ## just run the gui code directly here
         ## and pass our options directly to main
         require("./modes")(mode, options)
       else
         new Promise (resolve) ->
           cypressElectron = require("@packages/electron")
+
           fn = (code) ->
-            ## juggle up the totalFailures since our outer
+            ## juggle up the totalFailed since our outer
             ## promise is expecting this object structure
             debug("electron finished with", code)
-            resolve({totalFailures: code})
-          cypressElectron.open(".", require("./util/args").toArray(options), fn)
+
+            if mode is "smokeTest"
+              return resolve(code)
+
+            resolve({totalFailed: code})
+
+          args = require("./util/args").toArray(options)
+          debug("electron open arguments %o", args)
+          cypressElectron.open(".", args, fn)
 
   openProject: (options) ->
     ## this code actually starts a project
@@ -108,58 +125,61 @@ module.exports = {
     #   require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
-    require("./logger").info("starting desktop app", args: argv)
+    debug("starting cypress with argv %o", argv)
+
+    options = require("./util/args").toObject(argv)
+
+    if options.runProject and not options.headed
+      # scale the electron browser window
+      # to force retina screens to not
+      # upsample their images when offscreen
+      # rendering
+      require("./util/electron_app").scale()
 
     ## make sure we have the appData folder
     require("./util/app_data").ensure()
     .then =>
-      options = require("./util/args").toObject(argv)
-
       ## else determine the mode by
       ## the passed in arguments / options
       ## and normalize this mode
-      switch
+      mode = switch
         when options.version
-          options.mode = "version"
+          "version"
 
         when options.smokeTest
-          options.mode = "smokeTest"
+          "smokeTest"
 
         when options.returnPkg
-          options.mode = "returnPkg"
+          "returnPkg"
 
         when options.logs
-          options.mode = "logs"
+          "logs"
 
         when options.clearLogs
-          options.mode = "clearLogs"
+          "clearLogs"
 
         when options.getKey
-          options.mode = "getKey"
+          "getKey"
 
         when options.generateKey
-          options.mode = "generateKey"
+          "generateKey"
 
         when options.exitWithCode?
-          options.mode = "exitWithCode"
+          "exitWithCode"
 
         when options.runProject
           ## go into headless mode when running
           ## until completion + exit
-          options.mode = "run"
+          "run"
 
         else
           ## set the default mode as interactive
-          options.mode ?= "interactive"
-
-      ## remove mode from options
-      mode    = options.mode
-      options = _.omit(options, "mode")
+          options.mode or "interactive"
 
       @startInMode(mode, options)
 
   startInMode: (mode, options) ->
-    debug("start in mode %s with options %j", mode, options)
+    debug("starting in mode %s", mode)
 
     switch mode
       when "version"
@@ -171,10 +191,16 @@ module.exports = {
         .catch(exitErr)
 
       when "smokeTest"
-        require("./modes/smoke_test")(options)
-        .then (pong) ->
-          console.log(pong)
-        .then(exit0)
+        @runElectron(mode, options)
+        .then (pong) =>
+          if not @isCurrentlyRunningElectron()
+            return pong
+
+          if pong is options.ping
+            return 0
+
+          return 1
+        .then(exit)
         .catch(exitErr)
 
       when "returnPkg"
@@ -219,9 +245,9 @@ module.exports = {
 
       when "run"
         ## run headlessly and exit
-        ## with num of totalFailures
+        ## with num of totalFailed
         @runElectron(mode, options)
-        .get("totalFailures")
+        .get("totalFailed")
         .then(exit)
         .catch(exitErr)
 

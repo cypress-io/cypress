@@ -1,21 +1,45 @@
 require("../lib/environment")
 
 global.root      = "../../"
-global.supertest = require("supertest-as-promised")
+global.supertest = require("supertest")
 global.nock      = require("nock")
 global.expect    = require("chai").expect
 global.mockery   = require("mockery")
 global.proxyquire = require("proxyquire")
 global.sinon     = require("sinon")
+_                = require("lodash")
 Promise          = require("bluebird")
 path             = require("path")
 cache            = require("../lib/cache")
 appData          = require("../lib/util/app_data")
-agent            = require("superagent")
 
 require("chai")
 .use(require("@cypress/sinon-chai"))
 .use(require("chai-uuid"))
+
+if process.env.UPDATE
+  throw new Error("You're using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
+
+if process.env.UPDATE_SNAPSHOT
+  throw new Error("You're using UPDATE_SNAPSHOT=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
+
+if process.env.UPDATE_SNAPSHOTS
+  throw new Error("You're using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
+
+hasOnly = false
+
+## hack for older version of mocha so that
+## snap-shot-it can find suite._onlyTests
+["it", "describe", "context"].forEach (prop) ->
+  backup = global[prop].only
+
+  global[prop].only = ->
+    hasOnly = true
+
+    backup.apply(@, arguments)
+
+originalEnv = process.env
+env = _.clone(process.env)
 
 sinon.usingPromise(Promise)
 
@@ -49,11 +73,20 @@ mockery.registerSubstitute(
 mockery.registerMock("original-fs", {})
 
 before ->
+  if hasOnly
+    @test.parent._onlyTests = [true]
+
   appData.ensure()
 
 beforeEach ->
+  @originalEnv = originalEnv
+
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
+
+  ## always clean up the cache
+  ## before each test
+  cache.remove()
 
 afterEach ->
   sinon.restore()
@@ -61,6 +94,4 @@ afterEach ->
   nock.cleanAll()
   nock.enableNetConnect()
 
-  ## always clean up the cache
-  ## after each test
-  cache.remove()
+  process.env = _.clone(env)

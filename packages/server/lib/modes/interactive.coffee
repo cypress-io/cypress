@@ -4,7 +4,6 @@ EE         = require("events")
 app        = require("electron").app
 image      = require("electron").nativeImage
 Promise    = require("bluebird")
-Position   = require("electron-positioner")
 cyIcons    = require("@cypress/icons")
 user       = require("../user")
 errors     = require("../errors")
@@ -83,7 +82,7 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    savedState(projectRoot)
+    savedState(projectRoot, false)
     .then (state) -> state.get()
     .then (state) =>
       Windows.open(projectRoot, @getWindowArgs(state, options))

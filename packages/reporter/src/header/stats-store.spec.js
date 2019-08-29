@@ -78,6 +78,7 @@ describe('stats store', () => {
   context('#incrementCount', () => {
     it('increments the count for the type specified', () => {
       const instance = new StatsStore()
+
       instance.incrementCount('passed')
       expect(instance.numPassed).to.equal(1)
       instance.incrementCount('pending')
@@ -90,6 +91,7 @@ describe('stats store', () => {
 
   context('#reset', () => {
     let instance
+
     beforeEach(() => {
       instance = new StatsStore()
     })
@@ -101,6 +103,7 @@ describe('stats store', () => {
         numFailed: 2,
         numPending: 3,
       })
+
       instance.reset()
       expect(instance.numPassed).to.equal(0)
       expect(instance.numFailed).to.equal(0)

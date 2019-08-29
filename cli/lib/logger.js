@@ -1,10 +1,11 @@
 const R = require('ramda')
 const chalk = require('chalk')
 
-// TODO: if this isnt the first log
-// then push a \n first above it
-// so messages are separated
 let logs = []
+
+const logLevel = () => {
+  return (process.env.npm_config_loglevel || 'notice')
+}
 
 const error = (...messages) => {
   logs.push(messages.join(' '))
@@ -12,11 +13,15 @@ const error = (...messages) => {
 }
 
 const warn = (...messages) => {
+  if (logLevel() === 'silent') return
+
   logs.push(messages.join(' '))
   console.log(chalk.yellow(...messages)) // eslint-disable-line no-console
 }
 
 const log = (...messages) => {
+  if (logLevel() === 'silent' || logLevel() === 'warn') return
+
   logs.push(messages.join(' '))
   console.log(...messages) // eslint-disable-line no-console
 }
@@ -25,6 +30,7 @@ const log = (...messages) => {
 // on each one to allow easy unit testing for specific message
 const logLines = (text) => {
   const lines = text.split('\n')
+
   R.forEach(log, lines)
 }
 
@@ -43,4 +49,5 @@ module.exports = {
   logLines,
   print,
   reset,
+  logLevel,
 }

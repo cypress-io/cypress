@@ -1,3 +1,4 @@
+_ = require("lodash")
 path = require("path")
 awspublish = require('gulp-awspublish')
 human = require("human-interval")
@@ -8,7 +9,7 @@ fs = require("fs")
 os = require("os")
 Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
-konfig  = require("../../../packages/server/lib/konfig")
+konfig = require('../../binary/get-config')()
 
 formHashFromEnvironment = () ->
   env = process.env
@@ -36,6 +37,9 @@ getS3Credentials = () ->
 
   la(check.unemptyString(config.bucket), 'missing AWS config bucket')
   la(check.unemptyString(config.folder), 'missing AWS config folder')
+  la(check.unemptyString(config.key), 'missing AWS key')
+  la(check.unemptyString(config.secret), 'missing AWS secret key')
+
   config
 
 getPublisher = (getAwsObj = getS3Credentials) ->
@@ -100,7 +104,7 @@ purgeDesktopAppFromCache = ({version, platform, zipName}) ->
   la(check.extension("zip", zipName),
     "zip filename should end with .zip", zipName)
 
-  osName = getUploadNameByOs(platform)
+  osName = getUploadNameByOsAndArch(platform)
   la(check.unemptyString(osName), "missing osName", osName)
   url = getDestktopUrl(version, osName, zipName)
   purgeCache(url)
@@ -116,15 +120,35 @@ purgeDesktopAppAllPlatforms = (version, zipName) ->
   Promise.mapSeries platforms, (platform) ->
     purgeDesktopAppFromCache({version, platform, zipName})
 
-getUploadNameByOs = (osName = os.platform()) ->
+# all architectures we are building test runner for
+validPlatformArchs = ["darwin-x64", "linux-x64", "win32-ia32", "win32-x64"]
+# simple check for platform-arch string
+# example: isValidPlatformArch("darwin") // FALSE
+isValidPlatformArch = check.oneOf(validPlatformArchs)
+
+getValidPlatformArchs = () -> validPlatformArchs
+
+getUploadNameByOsAndArch = (platform) ->
+  ## just hard code for now...
+  arch = os.arch()
+
   uploadNames = {
-    darwin: "osx64"
-    linux:  "linux64"
-    win32:  "win64"
+    darwin: {
+      "x64": "darwin-x64"
+    },
+    linux: {
+      "x64": "linux-x64"
+    },
+    win32: {
+      "x64": "win32-x64",
+      "ia32": "win32-ia32"
+    }
   }
-  name = uploadNames[osName]
+  name = _.get(uploadNames[platform], arch)
   if not name
-    throw new Error("Cannot find upload name for OS #{osName}")
+    throw new Error("Cannot find upload name for OS: '#{platform}' with arch: '#{arch}'")
+  la(isValidPlatformArch(name), "formed invalid platform", name, "from", platform, arch)
+
   name
 
 saveUrl = (filename) -> (url) ->
@@ -141,7 +165,10 @@ module.exports = {
   purgeCache,
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
-  getUploadNameByOs,
+  getUploadNameByOsAndArch,
+  validPlatformArchs,
+  getValidPlatformArchs,
+  isValidPlatformArch,
   saveUrl,
   formHashFromEnvironment
 }

@@ -4,14 +4,8 @@ sinonChai = require("sinon-chai")
 
 chai.use(sinonChai)
 
+global.sinon = sinon
 global.expect = chai.expect
-global.io = {
-  connect: ->
-    return {on: ->}
-}
-
-beforeEach ->
-  @sandbox = sinon.sandbox.create()
 
 afterEach ->
-  @sandbox.restore()
+  sinon.restore()

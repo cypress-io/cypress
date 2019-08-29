@@ -67,7 +67,7 @@ class SelectorPlayground extends Component {
             /><span>{'\''}</span>
             <span>)</span>
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-            <Tooltip title={model.infoHelp}>
+            <Tooltip title={model.infoHelp || ''}>
               <span className='info num-elements'>
                 {model.isValid ?
                   model.numElements :
@@ -76,7 +76,7 @@ class SelectorPlayground extends Component {
               </span>
             </Tooltip>
           </div>
-          <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
+          <Tooltip title={this.copyText || ''} updateCue={`${selectorText}${this.copyText}`}>
             <button
               ref={(node) => this._copyButton = node}
               className='copy-to-clipboard'
@@ -87,7 +87,7 @@ class SelectorPlayground extends Component {
               <i className='fa fa-copy' />
             </button>
           </Tooltip>
-          <Tooltip title={this.printText} updateCue={`${selectorText}${this.printText}`}>
+          <Tooltip title={this.printText || ''} updateCue={`${selectorText}${this.printText}`}>
             <button
               ref={(node) => this._printButton = node}
               className='print-to-console'
@@ -99,7 +99,7 @@ class SelectorPlayground extends Component {
             </button>
           </Tooltip>
         </div>
-        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank" rel="noopener noreferrer">
+        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank">
           <i className='fa fa-question-circle'></i>{' '}
           Learn more
         </a>
@@ -123,6 +123,7 @@ class SelectorPlayground extends Component {
       if (this.props.model.isEnabled) {
         this._focusAndSelectInputText()
       }
+
       this._previousIsEnabled = this.props.model.isEnabled
       this._previousMethod = this.props.model.method
     }
@@ -186,6 +187,7 @@ class SelectorPlayground extends Component {
     try {
       this.refs.copyText.select()
       const successful = document.execCommand('copy')
+
       this._setCopyText(successful ? 'Copied!' : 'Oops, unable to copy')
     } catch (err) {
       this._setCopyText('Oops, unable to copy')
@@ -223,6 +225,7 @@ class SelectorPlayground extends Component {
 
   _updateSelector = (e) => {
     const { model } = this.props
+
     model.setSelector(e.target.value)
     model.setShowingHighlight(true)
   }

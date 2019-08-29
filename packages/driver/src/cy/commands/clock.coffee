@@ -84,6 +84,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if ms? and not _.isNumber(ms)
           $utils.throwErrByPath("tick.invalid_argument", {args: {arg: JSON.stringify(ms)}})
 
+        ms ?= 0
+
         theLog = log("tick", "#{ms}ms", false, {
           "Now": clock.details().now + ms
           "Ticked": "#{ms} milliseconds"

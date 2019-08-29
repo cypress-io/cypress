@@ -1,8 +1,7 @@
 import React from 'react'
-import RunnerWrap from '../app/runner-wrap'
 
 export default ({ onReload }) => (
-  <RunnerWrap className='automation-failure'>
+  <div className='runner automation-failure'>
     <div className='automation-message automation-disconnected'>
       <p>Whoops, the Cypress Chrome extension has disconnected.</p>
       <p className='muted'>Cypress cannot run tests without this extension.</p>
@@ -10,11 +9,11 @@ export default ({ onReload }) => (
         <i className='fa fa-refresh'></i> Reload the Browser
       </button>
       <div className='helper-line'>
-        <a href='https://on.cypress.io/guides/browser-management' target='_blank' rel='noopener noreferrer'>
+        <a href='https://on.cypress.io/launching-browsers' target='_blank'>
           <i className='fa fa-question-circle'></i>
           Why am I seeing this message?
         </a>
       </div>
     </div>
-  </RunnerWrap>
+  </div>
 )

@@ -1,19 +1,19 @@
+<!-- Is this a question? Don't open an issue. Ask in our chat https://on.cypress.io/chat  -->
 
-<!-- Is this a question? Do not open an issue. Please ask your question in our chat https://gitter.im/cypress-io/cypress -->
+### Current behavior:
 
-### Current behavior: <!-- (images, stack traces, etc) -->
-
+<!-- images, stack traces, etc -->
 
 ### Desired behavior:
 
+<!-- A clear concise description of what you want to happen -->
 
-### Steps to reproduce:
+### Steps to reproduce: (app code and test code)
 
-<!-- Issues without reproducible steps might get closed. *Tip* You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then tell us the repo/branch to try. -->
+<!-- Issues without reproducible steps WILL BE CLOSED -->
 
-```js
+<!-- You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then tell us the repo/branch to try. -->
 
-```
+### Versions
 
-### Versions  <!-- (Cypress, operating system, browser) -->
-
+<!-- Cypress, operating system, browser -->

@@ -29,11 +29,12 @@ export default class Header extends Component {
             wrapperClassName='selector-playground-toggle-tooltip-wrapper'
           >
             <button
+              aria-label='Open Selector Playground'
               className='selector-playground-toggle'
               onClick={this._togglePlaygroundOpen}
               disabled={state.isLoading || state.isRunning}
             >
-              <i className='fa fa-crosshairs' />
+              <i aria-hidden="true" className='fa fa-crosshairs' />
             </button>
           </Tooltip>
           <div
@@ -64,7 +65,7 @@ export default class Header extends Component {
 }`}
               </pre>{/* eslint-enable indent */}
               <p>
-                <a href='https://on.cypress.io/viewport' target='_blank' rel="noopener noreferrer">
+                <a href='https://on.cypress.io/viewport' target='_blank'>
                   <i className='fa fa-info-circle'></i>
                   Read more about viewport here.
                 </a>
@@ -86,6 +87,7 @@ export default class Header extends Component {
       this.props.state.updateWindowDimensions({
         headerHeight: $(this.refs.header).outerHeight(),
       })
+
       this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     }
   }

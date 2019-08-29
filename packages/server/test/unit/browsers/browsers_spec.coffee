@@ -6,17 +6,38 @@ browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
 
 describe "lib/browsers/index", ->
-  context ".getByName", ->
+  context ".ensureAndGetByNameOrPath", ->
     it "returns browser by name", ->
       sinon.stub(utils, "getBrowsers").resolves([
         { name: "foo" }
         { name: "bar" }
       ])
 
-      browsers.getByName("foo").then (browser) ->
+      browsers.ensureAndGetByNameOrPath("foo")
+      .then (browser) ->
         expect(browser).to.deep.eq({ name: "foo" })
 
+    it "throws when no browser can be found", ->
+      browsers.ensureAndGetByNameOrPath("browserNotGonnaBeFound")
+      .then ->
+        throw new Error("should have failed")
+      .catch (err) ->
+        expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
+        expect(err.message).to.contain("'browserNotGonnaBeFound' was not found on your system")
+
   context ".open", ->
+    it "throws an error if browser family doesn't exist", ->
+      browsers.open({
+        name: 'foo-bad-bang'
+        family: 'foo-bad'
+      }, {
+        browsers: []
+      }).then ->
+        throw new Error("should've failed")
+      .catch (err) ->
+        expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
+        expect(err.message).to.contain("'foo-bad-bang' was not found on your system")
+
     # it "calls onBrowserClose callback on close", ->
     #   onBrowserClose = sinon.stub()
     #   browsers.launch("electron", @url, {onBrowserClose}).then ->

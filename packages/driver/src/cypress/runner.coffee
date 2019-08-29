@@ -1,6 +1,7 @@
 _ = require("lodash")
 moment = require("moment")
 Promise = require("bluebird")
+Pending = require("mocha/lib/pending")
 
 $Log = require("./log")
 $utils = require("./utils")
@@ -13,7 +14,7 @@ HOOKS = "beforeAll beforeEach afterEach afterAll".split(" ")
 TEST_BEFORE_RUN_EVENT = "runner:test:before:run"
 TEST_AFTER_RUN_EVENT = "runner:test:after:run"
 
-ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
+ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending".split(" ")
 RUNNABLE_LOGS    = "routes agents commands".split(" ")
 RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings".split(" ")
 
@@ -289,7 +290,7 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
         testAfterRun(test, Cypress)
 
         ## and now invoke next(err)
-        originalFn.apply(null, arguments)
+        originalFn.apply(window, arguments)
 
     switch name
       when "afterEach"
@@ -806,7 +807,7 @@ create = (specWindow, mocha, Cypress, cy) ->
       test.wallClockStartedAt ?= wallClockStartedAt
 
       ## if this isnt a hook, then the name is 'test'
-      hookName = getHookName(runnable) or "test"
+      hookName = if runnable.type is "hook" then getHookName(runnable) else "test"
 
       ## if we haven't yet fired this event for this test
       ## that means that we need to reset the previous state
@@ -861,6 +862,9 @@ create = (specWindow, mocha, Cypress, cy) ->
         ## attach error right now
         ## if we have one
         if err
+          if err instanceof Pending
+            err.isPending = true
+
           runnable.err = wrapErr(err)
 
         runnableAfterRunAsync(runnable, Cypress)

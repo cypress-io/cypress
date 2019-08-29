@@ -30,7 +30,7 @@ const createProps = () => ({
     },
   },
   state: new State(),
-  windowUtil: {
+  util: {
     hasSpecFile: sinon.stub(),
   },
 })
@@ -38,6 +38,7 @@ const createProps = () => ({
 describe('<Container />', () => {
   it('initializes the event manager when mounted', () => {
     const props = createProps()
+
     mount(<Container {...props} />)
     expect(props.eventManager.addGlobalListeners).to.have.been.called
     expect(props.eventManager.addGlobalListeners.firstCall.args[0]).to.equal(props.state)
@@ -50,6 +51,7 @@ describe('<Container />', () => {
 
     beforeEach(() => {
       const props = createProps()
+
       props.state.automation = automation.CONNECTING
       component = shallow(<Container {...props} />)
     })
@@ -115,7 +117,7 @@ describe('<Container />', () => {
     beforeEach(() => {
       props = createProps()
       props.state.automation = automation.CONNECTED
-      props.windowUtil.hasSpecFile.returns(false)
+      props.util.hasSpecFile.returns(false)
       component = shallow(<Container {...props} />)
     })
 
@@ -128,7 +130,7 @@ describe('<Container />', () => {
     })
 
     it('renders the app when hash changes with and has a spec file', () => {
-      props.windowUtil.hasSpecFile.returns(true)
+      props.util.hasSpecFile.returns(true)
       component.find(NoSpec).prop('onHashChange')()
       component.update()
       expect(component.find(App)).to.exist
@@ -142,7 +144,7 @@ describe('<Container />', () => {
     beforeEach(() => {
       props = createProps()
       props.state.automation = automation.CONNECTED
-      props.windowUtil.hasSpecFile.returns(true)
+      props.util.hasSpecFile.returns(true)
       component = shallow(<Container {...props} />)
     })
 

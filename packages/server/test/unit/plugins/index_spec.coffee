@@ -65,7 +65,7 @@ describe "lib/plugins/index", ->
 
         @ipc.on.withArgs("loaded").yields(@config, [{
           event: "some:event"
-          callbackId: 0
+          eventId: 0
         }])
         plugins.init({ pluginsFile: "cypress-plugin" })
 
@@ -77,7 +77,7 @@ describe "lib/plugins/index", ->
           expect(@ipc.send).to.be.calledWith(
             "execute",
             "some:event",
-            { callbackId: 0, invocationId: "00" }
+            { eventId: 0, invocationId: "00" }
             ["foo", "bar"]
           )
           expect(value).to.equal("value")
@@ -92,8 +92,7 @@ describe "lib/plugins/index", ->
           .catch (err) =>
             expect(err.message).to.contain("The plugins file is missing or invalid")
             expect(err.message).to.contain("path/to/pluginsFile.js")
-            expect(err.message).to.contain("The following error was thrown")
-            expect(err.message).to.contain("error message stack")
+            expect(err.details).to.contain("error message stack")
 
       context "PLUGINS_FUNCTION_ERROR", ->
         beforeEach ->
@@ -104,8 +103,7 @@ describe "lib/plugins/index", ->
           .catch (err) =>
             expect(err.message).to.contain("The function exported by the plugins file threw an error.")
             expect(err.message).to.contain("path/to/pluginsFile.js")
-            expect(err.message).to.contain("The following error was thrown:")
-            expect(err.message).to.contain("error message stack")
+            expect(err.details).to.contain("error message stack")
 
     describe "error message", ->
       beforeEach ->
@@ -130,14 +128,14 @@ describe "lib/plugins/index", ->
         expect(@onError).to.be.called
         expect(@onError.lastCall.args[0].title).to.equal("Error running plugin")
         expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin")
-        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+        expect(@onError.lastCall.args[0].details).to.include(@err.message)
 
       it "calls onError when ipc sends error", ->
         @ipc.on.withArgs("error").yield(@err)
         expect(@onError).to.be.called
         expect(@onError.lastCall.args[0].title).to.equal("Error running plugin")
         expect(@onError.lastCall.args[0].stack).to.include("The following error was thrown by a plugin")
-        expect(@onError.lastCall.args[0].stack).to.include(@err.message)
+        expect(@onError.lastCall.args[0].details).to.include(@err.message)
 
   context "#register", ->
     it "registers callback for event", ->

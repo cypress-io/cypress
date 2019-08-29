@@ -1,7 +1,11 @@
-require("./util/http_overrides")
 require("./util/fs")
 
 os      = require("os")
+##
+## NOTE
+##
+## by loading "./cwd" we are changing the current working directory
+## to the "packages/server" folder
 cwd     = require("./cwd")
 Promise = require("bluebird")
 
@@ -20,6 +24,14 @@ try
   app.commandLine.appendSwitch("disable-renderer-backgrounding", true)
   app.commandLine.appendSwitch("ignore-certificate-errors", true)
 
+  ## These flags are for webcam/WebRTC testing
+  ## https://github.com/cypress-io/cypress/issues/2704
+  app.commandLine.appendSwitch("use-fake-ui-for-media-stream")
+  app.commandLine.appendSwitch("use-fake-device-for-media-stream")
+
+  ## https://github.com/cypress-io/cypress/issues/2376
+  app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
+
   if os.platform() is "linux"
     app.disableHardwareAcceleration()
 
@@ -31,12 +43,15 @@ try
 ## or development as default
 env = process.env["CYPRESS_ENV"] or= pkg.env ? "development"
 
-Promise.config({
+config = {
   ## uses cancellation for automation timeouts
   cancellation: true
+}
 
+if env is "dev"
   ## enable long stack traces in dev
-  longStackTraces: env is "development"
-})
+  config.longStackTraces = true
+
+Promise.config(config)
 
 module.exports = env

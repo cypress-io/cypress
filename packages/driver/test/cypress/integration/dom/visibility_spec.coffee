@@ -13,7 +13,7 @@ describe "src/cypress/dom/visibility", ->
       fn = ->
         $dom.isHidden(null)
 
-      expect(fn).to.throw("Cypress.dom.isHidden() must be passed a basic DOM element.")
+      expect(fn).to.throw("Cypress.dom.isHidden() failed because it requires a DOM element. The subject received was: \'null\'")
 
   context "isVisible", ->
     it "exposes isVisible", ->
@@ -21,9 +21,9 @@ describe "src/cypress/dom/visibility", ->
 
     it "throws when not passed a DOM element", ->
       fn = ->
-        $dom.isVisible(null)
+        $dom.isVisible("form")
 
-      expect(fn).to.throw("Cypress.dom.isVisible() must be passed a basic DOM element.")
+      expect(fn).to.throw("Cypress.dom.isVisible() failed because it requires a DOM element. The subject received was: \'form\'")
 
   context "#isScrollable", ->
     beforeEach ->
@@ -116,9 +116,62 @@ describe "src/cypress/dom/visibility", ->
       @$visHidden  = add "<ul style='visibility: hidden;'></ul>"
       @$parentVisHidden = add "<div class='invis' style='visibility: hidden;'><button>parent visibility: hidden</button></div>"
       @$displayNone = add "<button style='display: none'>display: none</button>"
-      @$btnOpacity = add "<button style='opacity: 0'>opacity: 0</button>"
+      @$inputHidden = add "<input type='hidden' value='abcdef'>"
+      @$btnOpacity = add "<button style='opacity: 0;'>opacity: 0</button>"
       @$divNoWidth = add "<div style='width: 0; height: 100px;'>width: 0</div>"
       @$divNoHeight = add "<div style='width: 50px; height: 0px;'>height: 0</div>"
+
+      @$optionInSelect = add """
+        <select>
+          <option>Naruto</option>
+        </select>
+      """
+
+      @$optgroupInSelect = add """
+        <select>
+          <optgroup label='Shinobi'>
+            <option>Naruto</option>
+          </optgroup>
+        </select>
+      """
+
+      @$optionInHiddenSelect = add """
+        <select style='display: none'>
+          <option>Sasuke</option>
+        </select>
+      """
+
+      @$optionOutsideSelect = add """
+        <div style='display: none'>
+          <option id='option-hidden'>Sasuke</option>
+        </div>
+        <div>
+          <option id='option-visible'>Naruto</option>
+        </div>
+      """
+
+      @$optionHiddenInSelect = add """
+        <select>
+          <option>--Select--</option>
+          <option id="hidden-opt" style='display: none'>Sakura</option>
+        </select>
+      """
+
+      @$tableVisCollapse = add """
+        <table>
+          <tr>
+            <td>Naruto</td>
+            <td class='collapse' style='visibility: collapse;'>Sasuke</td>
+            <td>Sakura</td>
+          </tr>
+          <tr class='collapse' style='visibility: collapse;'>
+            <td>Kaguya</td>
+            <td><span id='collapse-span'>Madara</span></td>
+            <td>Orochimaro</td>
+          </tr>
+        </table>
+      """
+      
       @$parentNoWidth = add """
         <div style='width: 0; height: 100px; overflow: hidden;'>
           <div style='height: 500px; width: 500px;'>
@@ -238,6 +291,21 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
+      @$elOutOfParentWithFlexAndOverflowHiddenBounds = add """
+      <div style="display: flex; overflow: hidden;">
+        <div id="red" style="flex: 0 0 80%; background-color: red;">red</div>
+        <div id="green" style="flex: 0 0 80%; background-color: green;">green</div>
+        <div id="blue" style="background-color: blue;">blue</div>
+      </div>
+    """
+
+      @$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent = add """
+      <div style="border: 1px solid red; width: 200px; height: 200px; overflow: hidden;">
+        <div style="position: absolute; left: 300px; border: 1px solid blue; width: 200px; height: 200px;">
+          <span style="border: 1px solid green;">Hello</span>
+        </div>
+      """
+
       @$elOutOfAncestorOverflowAutoBounds = add """
         <div style='width: 100px; height: 100px; overflow: auto;'>
           <div style='width: 1000px; position: relative;'>
@@ -318,8 +386,41 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
-      add """
-        <div id="ancestorTransformMakesElOutOfBoundsOfAncestor" style='margin-left: 100px; overflow: hidden; width: 100px;'>
+      @$parentWithClipPathAbsolutePositionElOutsideClipPath = add """
+        <div style="position: absolute; clip-path: polygon(0 0, 0 0, 0 0, 0 0);">
+          <span>clip-path</span>
+        </div>
+      """
+
+      @$parentWithClipPathAbsolutePositionElInsideClipPath = add """
+        <div style="position: absolute; clip-path: circle(100%);">
+          <span>clip-path</span>
+        </div>
+      """
+
+      @$parentWithTransformScaleElOutsideScale = add """
+        <div style="transform: scale(0,0)">
+          <span>TRANSFORMERS</span>
+        </div>
+      """
+
+      @$parentWithTransformScaleElInsideScale = add """
+        <div style="transform: scale(1,1)">
+          <span>TRANSFORMERS</span>
+        </div>
+      """
+
+      @$parentsWithBackfaceVisibilityHidden = add """
+        <div style="position: absolute; width: 200px; height: 260px; background: red; backface-visibility: hidden;">
+          <span id="front">front</span>
+        </div>
+        <div style="position: absolute; width: 200px; height: 260px; background: blue; backface-visibility: hidden; transform: rotateY(180deg);">
+          <span id="back" >back</span>
+        </div>
+      """
+
+      @$ancestorTransformMakesElOutOfBoundsOfAncestor = add """
+        <div style='margin-left: 100px; overflow: hidden; width: 100px;'>
           <div style='transform: translateX(-100px); width: 200px;'>
             <div style='width: 100px;'>
               <span>out of ancestor's bounds due to ancestor translate</span>
@@ -328,13 +429,13 @@ describe "src/cypress/dom/visibility", ->
         </div>
       """
 
-      add """
-        <div id="ancestorTransformMakesElInBoundsOfAncestor" style='margin-left: 100px; overflow: hidden; width: 100px;'>
+      @$ancestorTransformMakesElInBoundsOfAncestor = add """
+        <div style='margin-left: 100px; overflow: hidden; width: 100px;'>
           <div style='transform: translateX(-100px); width: 300px;'>
             <div style='display: inline-block; width: 100px;'>
               <span>out of ancestor's bounds due to ancestor translate</span>
             </div>
-            <div style='display: inline-block; width: 100px;'>
+            <div id='inbounds' style='display: inline-block; width: 100px;'>
               <span>in ancestor's bounds due to ancestor translate</span>
             </div>
           </div>
@@ -346,144 +447,286 @@ describe "src/cypress/dom/visibility", ->
       # its factored in (window vs viewport) calculations
       scrollThisIntoView.get(1).scrollIntoView()
 
-    it "is hidden if .css(visibility) is hidden", ->
-      expect(@$visHidden.is(":hidden")).to.be.true
-      expect(@$visHidden.is(":visible")).to.be.false
+    describe "html or body", ->
+      it "is visible if html", ->
+        expect(cy.$$("html").is(":hidden")).to.be.false
+        expect(cy.$$("html").is(":visible")).to.be.true
 
-      expect(@$visHidden).to.be.hidden
-      expect(@$visHidden).to.not.be.visible
+        expect(cy.$$("html")).not.to.be.hidden
+        expect(cy.$$("html")).to.be.visible
 
-      cy.wrap(@$visHidden).should("be.hidden")
-      cy.wrap(@$visHidden).should("not.be.visible")
+        cy.wrap(cy.$$("html")).should("not.be.hidden")
+        cy.wrap(cy.$$("html")).should("be.visible")
 
-    it "is hidden if parents have .css(visibility) hidden", ->
-      expect(@$parentVisHidden.find("button").is(":hidden")).to.be.true
-      expect(@$parentVisHidden.find("button").is(":visible")).to.be.false
+      it "is visible if body", ->
+        expect(cy.$$("body").is(":hidden")).to.be.false
+        expect(cy.$$("body").is(":visible")).to.be.true
 
-      expect(@$parentVisHidden.find("button")).to.be.hidden
-      expect(@$parentVisHidden.find("button")).to.not.be.visible
+        expect(cy.$$("body")).not.to.be.hidden
+        expect(cy.$$("body")).to.be.visible
 
-      cy.wrap(@$parentVisHidden).find("button").should("be.hidden")
-      cy.wrap(@$parentVisHidden).find("button").should("not.be.visible")
+        cy.wrap(cy.$$("body")).should("not.be.hidden")
+        cy.wrap(cy.$$("body")).should("be.visible")
 
-    it "is visible if opacity is 0", ->
-      expect(@$btnOpacity.is(":hidden")).to.be.false
-      expect(@$btnOpacity.is(":visible")).to.be.true
+      it "is visible if display none on body or html", ->
+        cy.$$("html").css("display", "none")
+        cy.$$("body").css("display", "none")
 
-      expect(@$btnOpacity).not.to.be.hidden
-      expect(@$btnOpacity).to.be.visible
+        expect(cy.$$("html")).not.to.be.hidden
+        expect(cy.$$("html")).to.be.visible
 
-      cy.wrap(@$btnOpacity).should("not.be.hidden")
-      cy.wrap(@$btnOpacity).should("be.visible")
+        expect(cy.$$("body")).not.to.be.hidden
+        expect(cy.$$("body")).to.be.visible
 
-    it "is hidden if offsetWidth is 0", ->
-      expect(@$divNoWidth.is(":hidden")).to.be.true
-      expect(@$divNoWidth.is(":visible")).to.be.false
+    describe "css visibility", ->
+      it "is hidden if .css(visibility) is hidden", ->
+        expect(@$visHidden.is(":hidden")).to.be.true
+        expect(@$visHidden.is(":visible")).to.be.false
 
-      expect(@$divNoWidth).to.be.hidden
-      expect(@$divNoWidth).to.not.be.visible
+        expect(@$visHidden).to.be.hidden
+        expect(@$visHidden).to.not.be.visible
 
-      cy.wrap(@$divNoWidth).should("be.hidden")
-      cy.wrap(@$divNoWidth).should("not.be.visible")
+        cy.wrap(@$visHidden).should("be.hidden")
+        cy.wrap(@$visHidden).should("not.be.visible")
 
-    it "is hidden if parent has overflow: hidden and no width", ->
-      expect(@$parentNoWidth.find("span")).to.be.hidden
-      expect(@$parentNoWidth.find("span")).to.not.be.visible
+      it "is hidden if parents have .css(visibility) hidden", ->
+        expect(@$parentVisHidden.find("button").is(":hidden")).to.be.true
+        expect(@$parentVisHidden.find("button").is(":visible")).to.be.false
 
-    it "is hidden if parent has overflow: hidden and no height", ->
-      expect(@$parentNoHeight.find("span")).to.be.hidden
-      expect(@$parentNoHeight.find("span")).to.not.be.visible
+        expect(@$parentVisHidden.find("button")).to.be.hidden
+        expect(@$parentVisHidden.find("button")).to.not.be.visible
 
-    it "is visible when parent has positive dimensions even with overflow hidden", ->
-      expect(@$parentWithWidthHeightNoOverflow.find("span")).to.be.visible
-      expect(@$parentWithWidthHeightNoOverflow.find("span")).to.not.be.hidden
+        cy.wrap(@$parentVisHidden).find("button").should("be.hidden")
+        cy.wrap(@$parentVisHidden).find("button").should("not.be.visible")
 
-    it "is visible if child has position: absolute", ->
-      expect(@$childPosAbs.find("span")).to.be.visible
-      expect(@$childPosAbs.find("span")).not.be.hidden
+      it "is hidden if visibility collapse", ->
+        expect(@$tableVisCollapse.find("td.collapse")).to.be.hidden
+        expect(@$tableVisCollapse.find("td.collapse")).to.not.be.visible  
 
-    it "is visible if child has position: fixed", ->
-      expect(@$childPosFixed.find("button")).to.be.visible
-      expect(@$childPosFixed.find("button")).not.to.be.hidden
+        expect(@$tableVisCollapse.find("tr.collapse")).to.be.hidden
+        expect(@$tableVisCollapse.find("tr.collapse")).to.not.be.visible  
 
-    it "is visible if descendent from parent has position: fixed", ->
-      expect(@$descendentPosFixed.find("button")).to.be.visible
-      expect(@$descendentPosFixed.find("button")).not.to.be.hidden
+        expect(@$tableVisCollapse.find("tr.collapse td")).to.be.hidden
+        expect(@$tableVisCollapse.find("tr.collapse td")).to.not.be.visible  
 
-    it "is visible if has position: fixed and descendent is found", ->
-      expect(@$descendantInPosFixed.find("#descendantInPosFixed")).to.be.visible
-      expect(@$descendantInPosFixed.find("#descendantInPosFixed")).not.to.be.hidden
+      it "is hidden if parent has visibility collapse", ->
+        expect(@$tableVisCollapse.find("tr.collapse td")).to.be.hidden
+        expect(@$tableVisCollapse.find("tr.collapse td")).to.not.be.visible  
 
-    it "is hidden if position: fixed and covered up", ->
-      expect(@$coveredUpPosFixed.find("#coveredUpPosFixed")).to.be.hidden
-      expect(@$coveredUpPosFixed.find("#coveredUpPosFixed")).not.to.be.visible
+        expect(@$tableVisCollapse.find("#collapse-span")).to.be.hidden
+        expect(@$tableVisCollapse.find("#collapse-span")).to.not.be.visible  
 
-    it "is hidden if position: fixed and off screent", ->
-      expect(@$offScreenPosFixed).to.be.hidden
-      expect(@$offScreenPosFixed).not.to.be.visible
+      it "is hidden if input type hidden", ->
+        expect(@$inputHidden.is(":hidden")).to.be.true
+        expect(@$inputHidden.is(":visible")).to.be.false
 
-    it "is visible if descendent from parent has position: absolute", ->
-      expect(@$descendentPosAbs.find("span")).to.be.visible
-      expect(@$descendentPosAbs.find("span")).to.not.be.hidden
+        expect(@$inputHidden).to.be.hidden
+        expect(@$inputHidden).to.not.be.visible
 
-    it "is hidden if only the parent has position absolute", ->
-      expect(@$parentPosAbs.find("span")).to.be.hidden
-      expect(@$parentPosAbs.find("span")).to.not.be.visible
+        cy.wrap(@$inputHidden).should("be.hidden")
+        cy.wrap(@$inputHidden).should("not.be.visible")
 
-    it "is visible when parent doesnt have overflow hidden", ->
-      expect(@$parentNoWidthHeightOverflowAuto.find("span")).to.be.visible
-      expect(@$parentNoWidthHeightOverflowAuto.find("span")).to.not.be.hidden
+    describe "option and optgroup", ->
+      it "is visible if option in visible select", ->
+        expect(@$optionInSelect.find('option').is(":hidden")).to.be.false
+        expect(@$optionInSelect.find('option').is(":visible")).to.be.true
 
-    it "is hidden when parent overflow hidden and out of bounds to left", ->
-      expect(@$elOutOfParentBoundsToLeft.find("span")).to.be.hidden
+        expect(@$optionInSelect.find('option')).not.to.be.hidden
+        expect(@$optionInSelect.find('option')).to.be.visible
 
-    it "is hidden when parent overflow hidden and out of bounds to right", ->
-      expect(@$elOutOfParentBoundsToRight.find("span")).to.be.hidden
+        cy.wrap(@$optionInSelect.find('option')).should("not.be.hidden")
+        cy.wrap(@$optionInSelect.find('option')).should("be.visible")
 
-    it "is hidden when parent overflow hidden and out of bounds above", ->
-      expect(@$elOutOfParentBoundsAbove.find("span")).to.be.hidden
+      it "is visible if optgroup in visible select", ->
+        expect(@$optgroupInSelect.find('optgroup').is(":hidden")).to.be.false
+        expect(@$optgroupInSelect.find('optgroup').is(":visible")).to.be.true
 
-    it "is hidden when parent overflow hidden and out of bounds below", ->
-      expect(@$elOutOfParentBoundsBelow.find("span")).to.be.hidden
+        expect(@$optgroupInSelect.find('optgroup')).not.to.be.hidden
+        expect(@$optgroupInSelect.find('optgroup')).to.be.visible
 
-    it "is hidden when parent overflow-y hidden and out of bounds", ->
-      expect(@$elOutOfParentWithOverflowYHiddenBounds.find("span")).to.be.hidden
+        cy.wrap(@$optgroupInSelect.find('optgroup')).should("not.be.hidden")
+        cy.wrap(@$optgroupInSelect.find('optgroup')).should("be.visible")
 
-    it "is hidden when parent overflow-x hidden and out of bounds", ->
-      expect(@$elOutOfParentWithOverflowXHiddenBounds.find("span")).to.be.hidden
+      it "is hidden if option in hidden select", ->
+        expect(@$optionInHiddenSelect.find('option').is(":hidden")).to.be.true
+        expect(@$optionInHiddenSelect.find('option').is(":visible")).to.be.false
 
-    it "is hidden when parent is wide and ancestor is overflow auto", ->
-      expect(@$elOutOfAncestorOverflowAutoBounds.find("span")).to.be.hidden
+        expect(@$optionInHiddenSelect.find('option')).to.be.hidden
+        expect(@$optionInHiddenSelect.find('option')).not.to.be.visible
 
-    it "is hidden when parent overflow scroll and out of bounds", ->
-      expect(@$elOutOfScrollingParentBounds.find("span")).to.be.hidden
+        cy.wrap(@$optionInHiddenSelect.find('option')).should("be.hidden")
+        cy.wrap(@$optionInHiddenSelect.find('option')).should("not.be.visible")
 
-    it "is hidden when parent absolutely positioned and overflow hidden and out of bounds", ->
-      expect(@$elOutOfPosAbsParentsBounds.find("span")).to.be.hidden
+      it "is hidden if option is display none", ->
+        expect(@$optionHiddenInSelect.find('#hidden-opt').is(":hidden")).to.be.true
+        expect(@$optionHiddenInSelect.find('#hidden-opt').is(":visible")).to.be.false
 
-    it "is visible when parent absolutely positioned and overflow hidden and not out of bounds", ->
-      expect(@$elInPosAbsParentsBounds.find("span")).to.be.visible
+        expect(@$optionHiddenInSelect.find('#hidden-opt')).to.be.hidden
+        expect(@$optionHiddenInSelect.find('#hidden-opt')).not.to.be.visible
 
-    it "is visible when parent overflow hidden and not out of bounds", ->
-      expect(@$elInParentBounds.find("span")).to.be.visible
+        cy.wrap(@$optionHiddenInSelect.find('#hidden-opt')).should("be.hidden")
+        cy.wrap(@$optionHiddenInSelect.find('#hidden-opt')).should("not.be.visible")
 
-    it "is visible when ancestor is overflow hidden but more distant ancestor is the offset parent", ->
-      expect(@$elIsOutOfBoundsOfAncestorsOverflowButWithinRelativeAncestor.find("span")).to.be.visible
+      it "follows regular visibility logic if option outside of select", ->
+        expect(@$optionOutsideSelect.find('#option-hidden').is(":hidden")).to.be.true
+        expect(@$optionOutsideSelect.find('#option-hidden')).to.be.hidden
+        cy.wrap(@$optionOutsideSelect.find('#option-hidden')).should("be.hidden")
 
-    it "is hidden when relatively positioned outside ancestor with overflow hidden", ->
-      expect(@$elIsRelativeAndOutOfBoundsOfAncestorOverflow.find("span")).to.be.hidden
+        expect(@$optionOutsideSelect.find('#option-visible').is(":visible")).to.be.true
+        expect(@$optionOutsideSelect.find('#option-visible')).to.be.visible
+        cy.wrap(@$optionOutsideSelect.find('#option-visible')).should("be.visible")
+    
+    describe "opacity visible", ->
+      it "is visible if opacity is 0", ->
+        expect(@$btnOpacity.is(":hidden")).to.be.false
+        expect(@$btnOpacity.is(":visible")).to.be.true
 
-    it "is visible when el is relatively positioned outside ancestor that does not hide overflow", ->
-      expect(@$elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow.find("span")).to.be.visible
+        expect(@$btnOpacity).not.to.be.hidden
+        expect(@$btnOpacity).to.be.visible
 
-    it "is visible when parent is relatively positioned out of bounds but el is relatively positioned back in bounds", ->
-      expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
+        cy.wrap(@$btnOpacity).should("not.be.hidden")
+        cy.wrap(@$btnOpacity).should("be.visible")
 
-    it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
-      cy.get("#ancestorTransformMakesElOutOfBoundsOfAncestor span").should("be.hidden")
+    describe "width and height", ->
+      it "is hidden if offsetWidth is 0", ->
+        expect(@$divNoWidth.is(":hidden")).to.be.true
+        expect(@$divNoWidth.is(":visible")).to.be.false
 
-    it "is visible when in ancestor's bounds due to ancestor's transform", ->
-      cy.get("#ancestorTransformMakesElInBoundsOfAncestor span").eq(1).should("be.visible")
+        expect(@$divNoWidth).to.be.hidden
+        expect(@$divNoWidth).to.not.be.visible
+
+        cy.wrap(@$divNoWidth).should("be.hidden")
+        cy.wrap(@$divNoWidth).should("not.be.visible")
+
+      it "is hidden if parent has overflow: hidden and no width", ->
+        expect(@$parentNoWidth.find("span")).to.be.hidden
+        expect(@$parentNoWidth.find("span")).to.not.be.visible
+
+      it "is hidden if parent has overflow: hidden and no height", ->
+        expect(@$parentNoHeight.find("span")).to.be.hidden
+        expect(@$parentNoHeight.find("span")).to.not.be.visible
+
+      it "is visible when parent has positive dimensions even with overflow hidden", ->
+        expect(@$parentWithWidthHeightNoOverflow.find("span")).to.be.visible
+        expect(@$parentWithWidthHeightNoOverflow.find("span")).to.not.be.hidden
+
+    describe "css position", ->
+      it "is visible if child has position: absolute", ->
+        expect(@$childPosAbs.find("span")).to.be.visible
+        expect(@$childPosAbs.find("span")).not.be.hidden
+
+      it "is visible if child has position: fixed", ->
+        expect(@$childPosFixed.find("button")).to.be.visible
+        expect(@$childPosFixed.find("button")).not.to.be.hidden
+
+      it "is visible if descendent from parent has position: fixed", ->
+        expect(@$descendentPosFixed.find("button")).to.be.visible
+        expect(@$descendentPosFixed.find("button")).not.to.be.hidden
+
+      it "is visible if has position: fixed and descendent is found", ->
+        expect(@$descendantInPosFixed.find("#descendantInPosFixed")).to.be.visible
+        expect(@$descendantInPosFixed.find("#descendantInPosFixed")).not.to.be.hidden
+
+      it "is hidden if position: fixed and covered up", ->
+        expect(@$coveredUpPosFixed.find("#coveredUpPosFixed")).to.be.hidden
+        expect(@$coveredUpPosFixed.find("#coveredUpPosFixed")).not.to.be.visible
+
+      it "is hidden if position: fixed and off screent", ->
+        expect(@$offScreenPosFixed).to.be.hidden
+        expect(@$offScreenPosFixed).not.to.be.visible
+
+      it "is visible if descendent from parent has position: absolute", ->
+        expect(@$descendentPosAbs.find("span")).to.be.visible
+        expect(@$descendentPosAbs.find("span")).to.not.be.hidden
+
+      it "is hidden if only the parent has position absolute", ->
+        expect(@$parentPosAbs.find("span")).to.be.hidden
+        expect(@$parentPosAbs.find("span")).to.not.be.visible
+
+    describe "css overflow", ->
+      it "is visible when parent doesnt have overflow hidden", ->
+        expect(@$parentNoWidthHeightOverflowAuto.find("span")).to.be.visible
+        expect(@$parentNoWidthHeightOverflowAuto.find("span")).to.not.be.hidden
+
+      it "is hidden when parent overflow hidden and out of bounds to left", ->
+        expect(@$elOutOfParentBoundsToLeft.find("span")).to.be.hidden
+
+      it "is hidden when parent overflow hidden and out of bounds to right", ->
+        expect(@$elOutOfParentBoundsToRight.find("span")).to.be.hidden
+
+      it "is hidden when parent overflow hidden and out of bounds above", ->
+        expect(@$elOutOfParentBoundsAbove.find("span")).to.be.hidden
+
+      it "is hidden when parent overflow hidden and out of bounds below", ->
+        expect(@$elOutOfParentBoundsBelow.find("span")).to.be.hidden
+
+      it "is hidden when parent overflow-y hidden and out of bounds", ->
+        expect(@$elOutOfParentWithOverflowYHiddenBounds.find("span")).to.be.hidden
+
+      it "is hidden when parent overflow-x hidden and out of bounds", ->
+        expect(@$elOutOfParentWithOverflowXHiddenBounds.find("span")).to.be.hidden
+
+      it "is visible when parent overflow hidden but el in a closer parent with position absolute", ->
+        expect(@$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent.find("span")).to.be.visible
+
+      it "is hidden when parent flex and overflow hidden and el out of bounds", ->
+        expect(@$elOutOfParentWithFlexAndOverflowHiddenBounds.find("#red")).to.be.visible
+        expect(@$elOutOfParentWithFlexAndOverflowHiddenBounds.find("#green")).to.be.visible
+        expect(@$elOutOfParentWithFlexAndOverflowHiddenBounds.find("#blue")).to.be.hidden
+
+      it "is hidden when parent is wide and ancestor is overflow auto", ->
+        expect(@$elOutOfAncestorOverflowAutoBounds.find("span")).to.be.hidden
+
+      it "is hidden when parent overflow scroll and out of bounds", ->
+        expect(@$elOutOfScrollingParentBounds.find("span")).to.be.hidden
+
+      it "is hidden when parent absolutely positioned and overflow hidden and out of bounds", ->
+        expect(@$elOutOfPosAbsParentsBounds.find("span")).to.be.hidden
+
+      it "is visible when parent absolutely positioned and overflow hidden and not out of bounds", ->
+        expect(@$elInPosAbsParentsBounds.find("span")).to.be.visible
+
+      it "is visible when parent overflow hidden and not out of bounds", ->
+        expect(@$elInParentBounds.find("span")).to.be.visible
+
+      it "is visible when ancestor is overflow hidden but more distant ancestor is the offset parent", ->
+        expect(@$elIsOutOfBoundsOfAncestorsOverflowButWithinRelativeAncestor.find("span")).to.be.visible
+
+      it "is hidden when relatively positioned outside ancestor with overflow hidden", ->
+        expect(@$elIsRelativeAndOutOfBoundsOfAncestorOverflow.find("span")).to.be.hidden
+
+      it "is visible when el is relatively positioned outside ancestor that does not hide overflow", ->
+        expect(@$elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow.find("span")).to.be.visible
+
+      it "is visible when parent is relatively positioned out of bounds but el is relatively positioned back in bounds", ->
+        expect(@$parentOutOfBoundsButElInBounds.find("span")).to.be.visible
+
+    describe "css clip-path", ->
+      it.skip "is hidden when outside of parents clip-path", ->
+        expect(@$parentWithClipPathAbsolutePositionElOutsideClipPath.find("span")).to.be.hidden
+
+      it "is visible when inside of parents clip-path", ->
+        expect(@$parentWithClipPathAbsolutePositionElInsideClipPath.find("span")).to.be.visible
+
+    describe "css transform", ->
+      it.skip "is hidden when outside parents transform scale", ->
+        expect(@$parentWithTransformScaleElOutsideScale.find("span")).to.be.hidden
+
+      it "is visible when inside of parents transform scale", ->
+        expect(@$parentWithTransformScaleElInsideScale.find("span")).to.be.visible
+      
+      it "is hidden when out of ancestor's bounds due to ancestor's transform", ->
+        expect(@$ancestorTransformMakesElOutOfBoundsOfAncestor.find("span")).to.be.hidden
+
+      it "is visible when in ancestor's bounds due to ancestor's transform", ->
+        expect(@$ancestorTransformMakesElInBoundsOfAncestor.find("#inbounds")).to.be.visible
+
+    describe "css backface-visibility", ->
+      it "is visible when backface not visible", ->
+        expect(@$parentsWithBackfaceVisibilityHidden.find("#front")).to.be.visible
+
+      it.skip "is hidden when backface visible", ->
+        expect(@$parentsWithBackfaceVisibilityHidden.find("#back")).to.be.hidden
 
     describe "#getReasonIsHidden", ->
       beforeEach ->
@@ -501,6 +744,12 @@ describe "src/cypress/dom/visibility", ->
 
       it "has parent with 'visibility: hidden'", ->
         @reasonIs @$parentVisHidden.find("button"), "This element '<button>' is not visible because its parent '<div.invis>' has CSS property: 'visibility: hidden'"
+
+      it "has 'visibility: collapse'", ->
+        @reasonIs @$tableVisCollapse.find("td.collapse"), "This element '<td.collapse>' is not visible because it has CSS property: 'visibility: collapse'"
+
+      it "has parent with 'visibility: collapse'", ->
+        @reasonIs @$tableVisCollapse.find("tr.collapse td:first"), "This element '<td>' is not visible because its parent '<tr.collapse>' has CSS property: 'visibility: collapse'"
 
       it "has effective zero width", ->
         @reasonIs @$divNoWidth, "This element '<div>' is not visible because it has an effective width and height of: '0 x 100' pixels."

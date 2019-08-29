@@ -2,10 +2,22 @@ _             = require("lodash")
 EE            = require("events")
 Promise       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers:electron")
-plugins       = require("../plugins")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
+appData       = require("../util/app_data")
+plugins       = require("../plugins")
 savedState    = require("../saved_state")
+profileCleaner = require("../util/profile_cleaner")
+
+tryToCall = (win, method) ->
+  try
+    if not win.isDestroyed()
+      if _.isString(method)
+        win[method]()
+      else
+        method()
+  catch err
+    debug("got error calling window method:", err.stack)
 
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
@@ -20,6 +32,7 @@ module.exports = {
       minWidth: 100
       minHeight: 100
       contextMenu: true
+      partition: @_getPartition(options)
       trackState: {
         width: "browserWidth"
         height: "browserHeight"
@@ -28,7 +41,8 @@ module.exports = {
         devTools: "isBrowserDevToolsOpen"
       }
       onFocus: ->
-        menu.set({withDevTools: true})
+        if options.show
+          menu.set({withDevTools: true})
       onNewWindow: (e, url) ->
         _win = @
 
@@ -70,12 +84,14 @@ module.exports = {
     @_launch(win, url, options)
 
   _launch: (win, url, options) ->
-    menu.set({withDevTools: true})
-
-    debug("launching browser window to url %s with options %o", url, options)
+    if options.show
+      menu.set({withDevTools: true})
 
     Promise
     .try =>
+      if options.show is false
+        @_attachDebugger(win.webContents)
+
       if ua = options.userAgent
         @_setUserAgent(win.webContents, ua)
 
@@ -91,11 +107,39 @@ module.exports = {
       win.loadURL(url)
     .return(win)
 
+  _attachDebugger: (webContents) ->
+    try
+      webContents.debugger.attach()
+      debug("debugger attached")
+    catch err
+      debug("debugger attached failed %o", { err })
+
+    webContents.debugger.on "detach", (event, reason) ->
+      debug("debugger detached due to %o", { reason })
+
+    webContents.debugger.on "message", (event, method, params) ->
+      if method is "Console.messageAdded"
+        debug("console message: %o", params.message)
+
+    webContents.debugger.sendCommand("Console.enable")
+
+  _getPartition: (options) ->
+    if options.isTextTerminal
+      ## create dynamic persisted run
+      ## to enable parallelization
+      return "persist:run-#{process.pid}"
+
+    ## we're in interactive mode and always
+    ## use the same session
+    return "persist:interactive"
+
   _clearCache: (webContents) ->
+    debug("clearing cache")
     new Promise (resolve) ->
       webContents.session.clearCache(resolve)
 
   _setUserAgent: (webContents, userAgent) ->
+    debug("setting user agent to:", userAgent)
     ## set both because why not
     webContents.setUserAgent(userAgent)
     webContents.session.setUserAgent(userAgent)
@@ -104,20 +148,30 @@ module.exports = {
     new Promise (resolve) ->
       webContents.session.setProxy({
         proxyRules: proxyServer
+        ## this should really only be necessary when 
+        ## running Chromium versions >= 72
+        ## https://github.com/cypress-io/cypress/issues/1872
+        proxyBypassRules: "<-loopback>"
       }, resolve)
 
-  open: (browserName, url, options = {}, automation) ->
-    { projectRoot } = options
+  open: (browser, url, options = {}, automation) ->
+    { projectRoot, isTextTerminal } = options
 
-    savedState(projectRoot)
+    debug("open %o", { browser, url })
+
+    savedState(projectRoot, isTextTerminal)
     .then (state) ->
       state.get()
     .then (state) =>
+      debug("received saved state %o", state)
+
       ## get our electron default options
       options = @_defaultOptions(projectRoot, state, options)
 
       ## get the GUI window defaults now
       options = Windows.defaults(options)
+
+      debug("browser window options %o", _.omitBy(options, _.isFunction))
 
       Promise
       .try =>
@@ -126,14 +180,26 @@ module.exports = {
 
         plugins.execute("before:browser:launch", options.browser, options)
         .then (newOptions) ->
-          return newOptions ? options
+          if newOptions
+            debug("received new options from plugin event %o", newOptions)
+            _.extend(options, newOptions)
+
+          return options
     .then (options) =>
+      debug("launching browser window to url: %s", url)
+
       @_render(url, projectRoot, options)
       .then (win) =>
+        ## cause the webview to receive focus so that
+        ## native browser focus + blur events fire correctly
+        ## https://github.com/cypress-io/cypress/issues/1939
+        tryToCall(win, "focusOnWebView")
+
         a = Windows.automation(win)
 
         invoke = (method, data) =>
-          a[method](data)
+          tryToCall win, ->
+            a[method](data)
 
         automation.use({
           onRequest: (message, data) ->
@@ -156,22 +222,16 @@ module.exports = {
                 throw new Error("No automation handler registered for: '#{message}'")
         })
 
-        call = (method) ->
-          return ->
-            if not win.isDestroyed()
-              win[method]()
-
         events = new EE
 
         win.once "closed", ->
           debug("closed event fired")
 
-          call("removeAllListeners")
           events.emit("exit")
 
         return _.extend events, {
           browserWindow:      win
-          kill:               call("close")
-          removeAllListeners: call("removeAllListeners")
+          kill:               -> tryToCall(win, "close")
+          removeAllListeners: -> tryToCall(win, "removeAllListeners")
         }
 }

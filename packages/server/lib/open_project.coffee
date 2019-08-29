@@ -1,17 +1,20 @@
 _         = require("lodash")
+la        = require("lazy-ass")
+debug     = require("debug")("cypress:server:openproject")
 Promise   = require("bluebird")
+path      = require("path")
+chokidar  = require("chokidar")
 files     = require("./controllers/files")
 config    = require("./config")
 Project   = require("./project")
 browsers  = require("./browsers")
-specsUtil = require('./util/specs')
-log       = require('debug')("cypress:server:project")
+specsUtil = require("./util/specs")
 preprocessor = require("./plugins/preprocessor")
 
 create = ->
   openProject     = null
-  specIntervalId  = null
   relaunchBrowser = null
+  specsWatcher    = null
 
   reset = ->
     openProject     = null
@@ -41,13 +44,16 @@ create = ->
 
     getProject: -> openProject
 
-    launch: (browserName, spec, options = {}) ->
-      log("launching browser %s spec %s", browserName, spec)
+    launch: (browser, spec, options = {}) ->
+      debug("resetting project state, preparing to launch browser")
+
+      la(_.isPlainObject(browser), "expected browser object:", browser)
+
       ## reset to reset server and socket state because
       ## of potential domain changes, request buffers, etc
       @reset()
       .then ->
-        openProject.getSpecUrl(spec)
+        openProject.getSpecUrl(spec.absolute)
       .then (url) ->
         openProject.getConfig()
         .then (cfg) ->
@@ -60,6 +66,22 @@ create = ->
 
           options.url = url
 
+          options.isTextTerminal = cfg.isTextTerminal
+
+          ## if we don't have the isHeaded property
+          ## then we're in interactive mode and we
+          ## can assume its a headed browser
+          ## TODO: we should clean this up
+          if not _.has(browser, "isHeaded")
+            browser.isHeaded = true
+            browser.isHeadless = false
+
+          ## set the current browser object on options
+          ## so we can pass it down
+          options.browser = browser
+
+          openProject.setCurrentSpecAndBrowser(spec, browser)
+
           automation = openProject.getAutomation()
 
           ## use automation middleware if its
@@ -67,16 +89,29 @@ create = ->
           if am = options.automationMiddleware
             automation.use(am)
 
+          automation.use({
+            onBeforeRequest: (message, data) ->
+              if message is "take:screenshot"
+                data.specName = spec.name
+                data
+          })
+
           onBrowserClose = options.onBrowserClose
           options.onBrowserClose = ->
-            if spec
-              preprocessor.removeFile(spec, cfg)
+            if spec and spec.absolute
+              preprocessor.removeFile(spec.absolute, cfg)
+
             if onBrowserClose
               onBrowserClose()
 
           do relaunchBrowser = ->
-            log "launching project in browser #{browserName}"
-            browsers.open(browserName, options, automation)
+            debug(
+              "launching browser: %o, spec: %s",
+              browser,
+              spec.relative
+            )
+
+            browsers.open(browser, options, automation)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
@@ -93,17 +128,34 @@ create = ->
         currentSpecs = specs
         options.onChange(specs)
 
-      checkForSpecUpdates = =>
+      checkForSpecUpdates = _.debounce =>
         if not openProject
-          return @clearSpecInterval()
+          return @stopSpecsWatcher()
+
+        debug("check for spec updates")
 
         get()
         .then(sendIfChanged)
         .catch(options.onError)
+      , 250, { leading: true }
+
+      createSpecsWatcher = (cfg) ->
+        return if specsWatcher
+
+        debug("watch test files: %s in %s", cfg.testFiles, cfg.integrationFolder)
+
+        specsWatcher = chokidar.watch(cfg.testFiles, {
+          cwd: cfg.integrationFolder
+          ignored: cfg.ignoreTestFiles
+          ignoreInitial: true
+        })
+        specsWatcher.on("add", checkForSpecUpdates)
+        specsWatcher.on("unlink", checkForSpecUpdates)
 
       get = ->
         openProject.getConfig()
         .then (cfg) ->
+          createSpecsWatcher(cfg)
           specsUtil.find(cfg)
         .then (specs = []) ->
           ## TODO: put back 'integration' property
@@ -112,15 +164,13 @@ create = ->
             integration: specs
           }
 
-      specIntervalId = setInterval(checkForSpecUpdates, 2500)
-
       ## immediately check the first time around
       checkForSpecUpdates()
 
-    clearSpecInterval: ->
-      if specIntervalId
-        clearInterval(specIntervalId)
-        specIntervalId = null
+    stopSpecsWatcher: ->
+      debug("stop spec watcher")
+      Promise.try ->
+        specsWatcher?.close()
 
     closeBrowser: ->
       browsers.close()
@@ -136,8 +186,9 @@ create = ->
         return null
 
     close:  ->
-      log "closing opened project"
-      @clearSpecInterval()
+      debug("closing opened project")
+
+      @stopSpecsWatcher()
       @closeOpenProjectAndBrowsers()
 
     create: (path, args = {}, options = {}) ->
@@ -152,14 +203,11 @@ create = ->
 
       options = _.extend {}, args.config, options
 
-      browsers.get()
-      .then (b = []) ->
-        options.browsers = b
+      ## open the project and return
+      ## the config for the project instance
+      debug("opening project %s", path)
 
-        ## open the project and return
-        ## the config for the project instance
-        log("opening project %s", path)
-        openProject.open(options)
+      openProject.open(options)
       .return(@)
   }
 

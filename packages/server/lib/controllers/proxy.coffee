@@ -1,7 +1,8 @@
 _             = require("lodash")
 zlib          = require("zlib")
+charset       = require("charset")
 concat        = require("concat-stream")
-through       = require("through")
+iconv         = require("iconv-lite")
 Promise       = require("bluebird")
 accept        = require("http-accept")
 debug         = require("debug")("cypress:server:proxy")
@@ -11,11 +12,42 @@ buffers       = require("../util/buffers")
 rewriter      = require("../util/rewriter")
 blacklist     = require("../util/blacklist")
 conditional   = require("../util/conditional_stream")
-networkFailures = require("../util/network_failures")
+{ passthruStream } = require("../util/passthru_stream")
 
-redirectRe  = /^30(1|2|3|7|8)$/
+REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
+NO_BODY_STATUS_CODES = [204, 304]
 
 zlib = Promise.promisifyAll(zlib)
+
+zlibOptions = {
+  flush: zlib.Z_SYNC_FLUSH
+  finishFlush: zlib.Z_SYNC_FLUSH
+}
+
+## https://github.com/cypress-io/cypress/issues/1543
+getNodeCharsetFromResponse = (headers, body) ->
+  httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
+
+  debug("inferred charset from response %o", { httpCharset })
+
+  if iconv.encodingExists(httpCharset)
+    return httpCharset
+
+  ## browsers default to latin1
+  return "latin1"
+
+isGzipError = (err) ->
+  Object.prototype.hasOwnProperty.call(zlib.constants, err.code)
+
+## https://github.com/cypress-io/cypress/issues/4298
+## https://tools.ietf.org/html/rfc7230#section-3.3.3
+## HEAD, 1xx, 204, and 304 responses should never contain anything after headers
+responseMustHaveEmptyBody = (method, statusCode) ->
+  _.some([
+    _.includes(NO_BODY_STATUS_CODES, statusCode),
+    _.inRange(statusCode, 100, 200),
+    _.invoke(method, 'toLowerCase') == 'head',
+  ])
 
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
@@ -32,14 +64,21 @@ setCookie = (res, key, val, domainName) ->
 
   res.cookie(key, val, options)
 
+reqNeedsBasicAuthHeaders = (req, remoteState) ->
+  { auth, origin } = remoteState
+
+  auth &&
+    not req.headers["authorization"] &&
+      cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
+
 module.exports = {
-  handle: (req, res, config, getRemoteState, request) ->
+  handle: (req, res, config, getRemoteState, request, nodeProxy) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {
       url: req.url
       proxiedUrl: req.proxiedUrl
-      cookies: req.cookies
+      headers: req.headers
       remoteState
     })
 
@@ -75,16 +114,13 @@ module.exports = {
 
         return res.status(503).end()
 
-    thr = through (d) -> @queue(d)
+    thr = passthruStream()
 
     @getHttpContent(thr, req, res, remoteState, config, request)
     .pipe(res)
 
   getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
-    ## prepends req.url with remoteState.origin
-    remoteUrl = req.proxiedUrl
 
     isInitial = req.cookies["__cypress.initial"] is "true"
 
@@ -96,6 +132,13 @@ module.exports = {
 
       ## make sure the response includes string type
       contentType and contentType.includes(str)
+
+    resContentTypeIsJavaScript = (respHeaders) ->
+      _.some [
+        'application/javascript',
+        'application/x-javascript',
+        'text/javascript'
+      ].map(_.partial(resContentTypeIs, respHeaders))
 
     reqAcceptsHtml = ->
       ## don't inject if this is an XHR from jquery
@@ -113,11 +156,11 @@ module.exports = {
     resMatchesOriginPolicy = (respHeaders) ->
       switch remoteState.strategy
         when "http"
-          cors.urlMatchesOriginPolicyProps(remoteUrl, remoteState.props)
+          cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
         when "file"
-          remoteUrl.startsWith(remoteState.origin)
+          req.proxiedUrl.startsWith(remoteState.origin)
 
-    setCookies = (value) =>
+    setCookies = (value) ->
       ## dont modify any cookies if we're trying to clear
       ## the initial cookie and we're not injecting anything
       return if (not value) and (not wantsInjection)
@@ -127,92 +170,116 @@ module.exports = {
 
       setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
-    getErrorHtml = (err, filePath) =>
-      status = err.status ? 500
-
-      debug("request failed %o", { url: remoteUrl, status: status, err: err.message })
-
-      urlStr = filePath ? remoteUrl
-
-      networkFailures.get(err, urlStr, status, remoteState.strategy)
-
-    setBody = (str, statusCode, headers) =>
+    setBody = (str, statusCode, headers) ->
       ## set the status to whatever the incomingRes statusCode is
       res.status(statusCode)
 
       ## turn off __cypress.initial by setting false here
       setCookies(false, wantsInjection)
 
-      debug("received response for %o", {
-        url: remoteUrl
-        headers,
-        statusCode
-      })
-
       encoding = headers["content-encoding"]
 
       isGzipped = encoding and encoding.includes("gzip")
 
+      debug("received response for %o", {
+        url: req.proxiedUrl
+        headers,
+        statusCode,
+        isGzipped
+        wantsInjection,
+        wantsSecurityRemoved,
+      })
+
+      if responseMustHaveEmptyBody(req.method, statusCode)
+        return res.end()
+
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
-      if not wantsInjection
-        ## only rewrite if we should
-        if config.modifyObstructiveCode and wantsSecurityRemoved
-          str
-          ## only unzip when it is already gzipped
-          .pipe(conditional(isGzipped, zlib.createGunzip()))
-          .pipe(rewriter.security())
-          .pipe(conditional(isGzipped, zlib.createGzip()))
-          .pipe(thr)
-        else
-          str.pipe(thr)
-      else
-        rewrite = (body) =>
-          rewriter.html(body.toString(), remoteState.domainName, wantsInjection, config.modifyObstructiveCode)
+      if wantsInjection
+        rewrite = (body) ->
+          ## transparently decode their body to a node string and then re-encode
+          nodeCharset = getNodeCharsetFromResponse(headers, body)
+          body = rewriter.html(iconv.decode(body, nodeCharset), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          iconv.encode(body, nodeCharset)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
         ## a buffer
-        injection = concat (body) =>
+        injection = concat (body) ->
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
           if isGzipped
-            zlib.gunzipAsync(body)
+            zlib.gunzipAsync(body, zlibOptions)
             .then(rewrite)
             .then(zlib.gzipAsync)
             .then(thr.end)
-            .catch(endWithResponseErr)
+            ## if we have an error here there's nothing
+            ## to do but log it out and end the socket
+            ## because we cannot inject into content
+            ## that failed rewriting gzip
+            ## which is the same thing we do below
+            ## on regular proxied network requests
+            .catch(endWithNetworkErr)
           else
             thr.end rewrite(body)
 
         str.pipe(injection)
+      else
+        ## only rewrite if we should
+        if wantsSecurityRemoved
+          gunzip = zlib.createGunzip(zlibOptions)
+          gunzip.setEncoding("utf8")
 
-    endWithResponseErr = (err) ->
-      ## use res.statusCode if we have one
-      ## in the case of an ESOCKETTIMEDOUT
-      ## and we have the incomingRes headers
-      checkResStatus = ->
-        if res.headersSent
-          res.statusCode
+          onError = (err) ->
+            gzipError = isGzipError(err)
 
-      status = err.status ? checkResStatus() ? 500
+            debug("failed to proxy response %o", {
+              url: req.proxiedUrl
+              headers
+              statusCode
+              isGzipped
+              gzipError
+              wantsInjection
+              wantsSecurityRemoved
+              err
+            })
 
-      if not res.headersSent
-        res.removeHeader("Content-Encoding")
+            endWithNetworkErr(err)
 
-      str = through (d) -> @queue(d)
+          ## only unzip when it is already gzipped
+          return str
+          .pipe(conditional(isGzipped, gunzip))
+          .on("error", onError)
+          .pipe(rewriter.security())
+          .on("error", onError)
+          .pipe(conditional(isGzipped, zlib.createGzip()))
+          .on("error", onError)
+          .pipe(thr)
+          .on("error", onError)
 
-      onResponse(str, {
-        statusCode: status
-        headers: {
-          "content-type": "text/html"
-        }
+        return str.pipe(thr)
+
+    endWithNetworkErr = (err) ->
+      debug('request failed in proxy layer %o', {
+        res: _.pick(res, 'headersSent', 'statusCode', 'headers')
+        req: _.pick(req, 'url', 'proxiedUrl', 'headers', 'method')
+        err
       })
 
-      str.end(getErrorHtml(err))
+      req.socket.destroy()
 
     onResponse = (str, incomingRes) =>
       {headers, statusCode} = incomingRes
+
+      originalSetHeader = res.setHeader
+
+      ## express does all kinds of silly/nasty stuff to the content-type...
+      ## but we don't want to change it at all!
+      res.setHeader = (k, v) ->
+        if k == 'content-type'
+          v = incomingRes.headers['content-type']
+
+        originalSetHeader.call(res, k, v)
 
       wantsInjection ?= do ->
         return false if not resContentTypeIs(headers, "text/html")
@@ -225,8 +292,13 @@ module.exports = {
 
         return "partial"
 
-      wantsSecurityRemoved ?= do ->
-        resContentTypeIs(headers, "application/javascript")
+      wantsSecurityRemoved = do ->
+        ## we want to remove security IF we're doing a full injection
+        ## on the response or its a request for any javascript script tag
+        config.modifyObstructiveCode and (
+          (wantsInjection is "full") or
+            resContentTypeIsJavaScript(headers)
+        )
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
 
@@ -239,7 +311,7 @@ module.exports = {
           catch err
             ## noop
 
-      if redirectRe.test(statusCode)
+      if REDIRECT_STATUS_CODES.includes(statusCode)
         newUrl = headers.location
 
         ## set cookies to initial=true
@@ -249,34 +321,24 @@ module.exports = {
 
         ## finally redirect our user agent back to our domain
         ## by making this an absolute-path-relative redirect
-        res.redirect(statusCode, newUrl)
-      else
-        if headers["x-cypress-file-server-error"]
-          filePath = headers["x-cypress-file-path"]
-          wantsInjection or= "partial"
-          str = through (d) -> @queue(d)
-          setBody(str, statusCode, headers)
-          str.end(getErrorHtml({status: statusCode}, filePath))
-        else
-          setBody(str, statusCode, headers)
+        return res.redirect(statusCode, newUrl)
 
-    if obj = buffers.take(remoteUrl)
+      if headers["x-cypress-file-server-error"]
+        wantsInjection or= "partial"
+
+      setBody(str, statusCode, headers)
+
+    if obj = buffers.take(req.proxiedUrl)
       wantsInjection = "full"
-
-      ## if we already have an error
-      ## on our stream just immediately
-      ## end with this
-      if err = obj.stream.error
-        endWithResponseErr(err)
-      else
-        ## else listen for the error even which
-        ## could happen at any time
-        obj.stream.on("error", endWithResponseErr)
 
       onResponse(obj.stream, obj.response)
     else
-      # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
-      opts = {followRedirect: false, strictSSL: false}
+      opts = {
+        timeout: null
+        strictSSL: false
+        followRedirect: false
+        retryIntervals: [0, 100, 200, 200]
+      }
 
       ## strip unsupported accept-encoding headers
       encodings = accept.parser(req.headers["accept-encoding"]) ? []
@@ -292,21 +354,35 @@ module.exports = {
       if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
         opts.url = req.proxiedUrl.replace(remoteState.origin, remoteState.fileServer)
       else
-        opts.url = remoteUrl
+        opts.url = req.proxiedUrl
 
-      ## if we have auth headers and this request matches our origin policy
-      if (a = remoteState.auth) and resMatchesOriginPolicy()
-        ## and no existing Authentication headers
-        if not req.headers["authorization"]
-          base64 = new Buffer(a.username + ":" + a.password).toString("base64")
-          req.headers["authorization"] = "Basic #{base64}"
+      ## if we have auth headers and this request matches our origin
+      ## protection space and the user has not supplied auth headers
+      if reqNeedsBasicAuthHeaders(req, remoteState)
+        { auth } = remoteState
+
+        base64 = Buffer
+        .from(auth.username + ":" + auth.password)
+        .toString("base64")
+
+        req.headers["authorization"] = "Basic #{base64}"
 
       rq = request.create(opts)
 
-      rq.on("error", endWithResponseErr)
+      rq.on("error", endWithNetworkErr)
 
       rq.on "response", (incomingRes) ->
         onResponse(rq, incomingRes)
+
+      ## if our original request has been
+      ## aborted, then ensure we forward
+      ## this onto the proxied request
+      ## https://github.com/cypress-io/cypress/issues/2612
+      ## this can happen on permanent connections
+      ## like SSE, but also on any regular ol'
+      ## http request
+      req.on "aborted", ->
+        rq.abort()
 
       ## proxy the request body, content-type, headers
       ## to the new rq
@@ -318,7 +394,7 @@ module.exports = {
     return if res.headersSent
 
     ## omit problematic headers
-    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
+    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy", "connection"
 
     ## do not cache when we inject content into responses
     ## later on we should switch to an etag system so we dont

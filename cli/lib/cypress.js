@@ -10,6 +10,8 @@ const util = require('./util')
 
 const cypressModuleApi = {
   open (options = {}) {
+    options = util.normalizeModuleOptions(options)
+
     return open.start(options)
   },
 
@@ -30,6 +32,7 @@ const cypressModuleApi = {
               message: 'Could not find Cypress test run results',
             }
           }
+
           return output
         })
       })

@@ -1,6 +1,6 @@
-Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+====================================================================================================
 
-  (Tests Starting)
+  (Run Starting)
 Oops...we found an error preparing this test file:
 
   /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee
@@ -21,7 +21,7 @@ This occurred while Cypress was compiling and bundling your test code. This is u
 
 Fix the error in your code and re-run your tests.
 
-  (Tests Finished)
+  (Results)
 
   - Tests:           0
   - Passes:          0
@@ -36,7 +36,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (0 seconds)
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
-  (All Done)
+  (Run Finished)
