@@ -222,6 +222,18 @@ const _getType = function () {
   throw new Error('this should never happen, cannot get type')
 }
 
+const _getMaxLength = function () {
+  if (isInput(this)) {
+    return descriptor('HTMLInputElement', 'maxLength').get
+  }
+
+  if (isTextarea(this)) {
+    return descriptor('HTMLTextAreaElement', 'maxLength').get
+  }
+
+  throw new Error('this should never happen, cannot get maxLength')
+}
+
 const nativeGetters = {
   value: _getValue,
   isContentEditable: _isContentEditable,
@@ -232,6 +244,7 @@ const nativeGetters = {
   activeElement: descriptor('Document', 'activeElement').get,
   body: descriptor('Document', 'body').get,
   frameElement: Object.getOwnPropertyDescriptor(window, 'frameElement')!.get,
+  maxLength: _getMaxLength,
 }
 
 const nativeSetters = {

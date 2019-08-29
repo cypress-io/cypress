@@ -803,6 +803,36 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
+      it('borrows property getter from outer frame for input', () => {
+        const $input = cy.$$(':text:first')
+
+        $input.attr('maxlength', 5)
+        Object.defineProperty($input[0], 'maxLength', {
+          value: 2,
+        })
+
+        cy.get(':text:first')
+        .type('1234567890')
+        .then((input) => {
+          expect(input).to.have.value('12345')
+        })
+      })
+
+      it('borrows property getter from outer frame for textarea', () => {
+        const $input = cy.$$('textarea:first')
+
+        $input.attr('maxlength', 5)
+        Object.defineProperty($input[0], 'maxLength', {
+          value: 2,
+        })
+
+        cy.get('textarea:first')
+        .type('1234567890')
+        .then((input) => {
+          expect(input).to.have.value('12345')
+        })
+      })
+
       it('handles special characters', () => {
         const $input = cy.$$(':text:first')
 

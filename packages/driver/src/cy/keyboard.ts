@@ -265,8 +265,7 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
     }
 
     if (noneSelected) {
-      // const ml = $elements.getNativeProp(el, 'maxLength')
-      const ml = el.maxLength
+      const ml = $elements.getNativeProp(el, 'maxLength')
 
       //# maxlength is -1 by default when omitted
       //# but could also be null or undefined :-/
@@ -1078,7 +1077,6 @@ export default class Keyboard {
     }
 
     return (el: HTMLElement) => {
-      debug('replaceSelectionContents')
 
       if (!shouldUpdateValue(el, key)) {
         debug('skip typing key', false)
