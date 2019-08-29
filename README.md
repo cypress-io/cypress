@@ -68,5 +68,5 @@ Let the world know your project is using Cypress.io to test with this cool badge
 [![badge](https://img.shields.io/badge/cypress.io-tests-green.svg?style=shield)](https://cypress.io)
 
 ```
-[![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+[![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=shield)](https://cypress.io)
 ```
