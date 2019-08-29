@@ -128,6 +128,31 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
   return Promise.resolve(tasks.run())
 }
 
+const INSTALL_BINARY_TYPES = {
+  URL: (c) => /^https?:\/\/.*/.test(c),
+  FS: (c) => fs.pathExistsSync(c),
+  NUMERIC: (c) => /^\d+\.\d+\.\d+$/.test(c),
+  INVALID: () => {
+    throw new Error('Not Implemented')
+  },
+}
+
+const getNeedVersionType = (neededVersion) => {
+  if (INSTALL_BINARY_TYPES.URL(neededVersion)) {
+    return INSTALL_BINARY_TYPES.URL
+  }
+
+  if (INSTALL_BINARY_TYPES.NUMERIC(neededVersion)) {
+    return INSTALL_BINARY_TYPES.NUMERIC
+  }
+
+  if (INSTALL_BINARY_TYPES.FS(neededVersion)) {
+    return INSTALL_BINARY_TYPES.FS
+  }
+
+  return INSTALL_BINARY_TYPES.INVALID
+}
+
 const start = (options = {}) => {
 
   // handle deprecated / removed
@@ -180,6 +205,14 @@ const start = (options = {}) => {
       needVersion = envVarVersion
     }
   }
+
+  let needVersionType = getNeedVersionType(needVersion)
+
+  if (needVersionType === INSTALL_BINARY_TYPES.INVALID) {
+    return throwFormErrorText(errors.cypressInstallBinaryInvalid)(needVersion)
+  }
+
+  debug(`Identified CYPRESS_INSTALL_BINARY as type: ${needVersionType}`)
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
     const envCache = util.getEnv('CYPRESS_CACHE_FOLDER')
@@ -250,7 +283,7 @@ const start = (options = {}) => {
       return
     }
 
-    if (needVersion !== pkgVersion) {
+    if (needVersion !== pkgVersion && needVersionType === INSTALL_BINARY_TYPES.NUMERIC) {
       logger.log(
         chalk.yellow(stripIndent`
           ${logSymbols.warning} Warning: Forcing a binary version different than the default.
@@ -329,6 +362,8 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
+  getNeedVersionType,
+  INSTALL_BINARY_TYPES,
 }
 
 const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {

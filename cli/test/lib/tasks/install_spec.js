@@ -58,6 +58,34 @@ describe('/lib/tasks/install', function () {
       os.platform.returns('darwin')
     })
 
+    describe('identify CYPRESS_INSTALL_BINARY', function () {
+      it('when numeric version is given', function () {
+        expect(install.getNeedVersionType('1.2.3')).to.equal(install.INSTALL_BINARY_TYPES.NUMERIC)
+        expect(install.getNeedVersionType('11.2.3')).to.equal(install.INSTALL_BINARY_TYPES.NUMERIC)
+        expect(install.getNeedVersionType('1.22.3')).to.equal(install.INSTALL_BINARY_TYPES.NUMERIC)
+        expect(install.getNeedVersionType('1.2.33')).to.equal(install.INSTALL_BINARY_TYPES.NUMERIC)
+      })
+
+      it('when fs does not exist', function () {
+        sinon.stub(fs, 'pathExistsSync').withArgs('/file/existsnot').returns(false)
+        expect(install.getNeedVersionType('/file/existsnot')).to.equal(install.INSTALL_BINARY_TYPES.INVALID)
+      })
+
+      it('when fs does exist', function () {
+        sinon.stub(fs, 'pathExistsSync').withArgs('/file/exists').returns(true)
+        expect(install.getNeedVersionType('/file/exists')).to.equal(install.INSTALL_BINARY_TYPES.FS)
+      })
+
+      it('when url given', function () {
+        expect(install.getNeedVersionType('http://server/file.zip')).to.equal(install.INSTALL_BINARY_TYPES.URL)
+        expect(install.getNeedVersionType('https://server/file.zip')).to.equal(install.INSTALL_BINARY_TYPES.URL)
+      })
+
+      it('as faulty when not identifiable', function () {
+        expect(install.getNeedVersionType('\'https://someserver.com/file.zip\'')).to.equal(install.INSTALL_BINARY_TYPES.INVALID)
+      })
+    })
+
     describe('skips install', function () {
 
       it('when environment variable is set', function () {
@@ -107,6 +135,7 @@ describe('/lib/tasks/install', function () {
         process.env.CYPRESS_INSTALL_BINARY = version
         // internally, the variable should be trimmed and just filename checked
         sinon.stub(fs, 'pathExistsAsync').withArgs(filename).resolves(true)
+        sinon.stub(fs, 'pathExistsSync').withArgs(filename).returns(true)
 
         const installDir = state.getVersionDir()
 
@@ -129,6 +158,7 @@ describe('/lib/tasks/install', function () {
         // internally, the variable should be trimmed, double quotes removed
         //  and just filename checked against the file system
         sinon.stub(fs, 'pathExistsAsync').withArgs(filename).resolves(true)
+        sinon.stub(fs, 'pathExistsSync').withArgs(filename).returns(true)
 
         const installDir = state.getVersionDir()
 
@@ -146,6 +176,7 @@ describe('/lib/tasks/install', function () {
 
         process.env.CYPRESS_INSTALL_BINARY = version
         sinon.stub(fs, 'pathExistsAsync').withArgs(version).resolves(true)
+        sinon.stub(fs, 'pathExistsSync').withArgs(version).returns(true)
 
         const installDir = state.getVersionDir()
 
@@ -388,7 +419,7 @@ describe('/lib/tasks/install', function () {
         it('uses cache when correct version installed given URL', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('1.2.3')
-          process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
+          process.env.CYPRESS_INSTALL_BINARY = 'https://www.cypress.io/cannot-download/2.4.5'
 
           return install.start()
           .then(() => {
@@ -399,7 +430,7 @@ describe('/lib/tasks/install', function () {
         it('uses cache when mismatch version given URL ', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
-          process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
+          process.env.CYPRESS_INSTALL_BINARY = 'https://www.cypress.io/cannot-download/2.4.5'
 
           return install.start()
           .then(() => {
@@ -409,6 +440,7 @@ describe('/lib/tasks/install', function () {
 
         it('uses cache when correct version installed given Zip', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
+          sinon.stub(fs, 'pathExistsSync').withArgs('/path/to/zip.zip').returns(true)
 
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('1.2.3')
@@ -423,6 +455,7 @@ describe('/lib/tasks/install', function () {
 
         it('uses cache when mismatch version given Zip ', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
+          sinon.stub(fs, 'pathExistsSync').withArgs('/path/to/zip.zip').returns(true)
 
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')

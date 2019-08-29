@@ -159,6 +159,16 @@ const invalidCacheDirectory = {
   `,
 }
 
+const cypressInstallBinaryInvalid = {
+  description: 'Was not able to identify CYPRESS_INSTALL_BINARY as a semantic version, filesystem path or URL.',
+  solution: stripIndent`
+    The value can be one of:
+    - Semantic version of Cypress, numbers like x.y.z
+    - A path on the filesystem to an existing binary distribution
+    - A URL pointing at the binary distribtion
+  `,
+}
+
 const versionMismatch = {
   description: 'Installed version does not match package version.',
   solution: 'Install Cypress and verify app again',
@@ -338,5 +348,6 @@ module.exports = {
     removed,
     CYPRESS_RUN_BINARY,
     smokeTestFailure,
+    cypressInstallBinaryInvalid,
   },
 }

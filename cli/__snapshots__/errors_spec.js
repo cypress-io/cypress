@@ -29,6 +29,7 @@ Cypress Version: 1.2.3
 exports['errors individual has the following errors 1'] = [
   "CYPRESS_RUN_BINARY",
   "binaryNotExecutable",
+  "cypressInstallBinaryInvalid",
   "failedDownload",
   "failedUnzip",
   "invalidCacheDirectory",
