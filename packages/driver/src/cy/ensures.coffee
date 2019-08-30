@@ -101,7 +101,7 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
-  ensureReceivability = (subject, onFail) ->
+  ensureNotDisabled = (subject, onFail) ->
     cmd = state("current").get("name")
 
     if subject.prop("disabled")
@@ -328,7 +328,7 @@ create = (state, expect) ->
 
     ensureElementIsNotAnimating
 
-    ensureReceivability
+    ensureNotDisabled
 
     ensureVisibility
 

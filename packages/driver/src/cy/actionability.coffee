@@ -214,7 +214,7 @@ verify = (cy, $el, options, callbacks) ->
     ensure: {
       position: true,
       visibility: true,
-      receivability: true,
+      notDisabled: true,
       notCovered: true,
       notReadonly: false,
       custom: false
@@ -245,7 +245,7 @@ verify = (cy, $el, options, callbacks) ->
     runAllChecks = ->
       if force isnt true
         ## ensure its 'receivable'
-        if (options.ensure.receivability) then cy.ensureReceivability($el, _log)
+        if (options.ensure.notDisabled) then cy.ensureNotDisabled($el, _log)
 
         ## scroll the element into view
         $el.get(0).scrollIntoView()
