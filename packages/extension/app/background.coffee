@@ -1,3 +1,4 @@
+browser = require('webextension-polyfill')
 map     = require("lodash/map")
 pick    = require("lodash/pick")
 once    = require("lodash/once")
@@ -6,6 +7,7 @@ client  = require("./client")
 
 httpRe = /^http/
 
+debugger
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null

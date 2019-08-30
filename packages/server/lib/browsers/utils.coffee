@@ -5,7 +5,7 @@ fs       = require("../util/fs")
 extension = require("@packages/extension")
 appData  = require("../util/app_data")
 profileCleaner = require("../util/profile_cleaner")
-
+debug = require('debug')('cypress:server:browsers')
 PATH_TO_BROWSERS = appData.path("browsers")
 
 getBrowserPath = (browser) ->
@@ -88,7 +88,7 @@ module.exports = {
   launch: launcher.launch
 
   writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
-    require('debug')('cypress:server:browsers')(browser, isTextTerminal, proxyUrl)
+    debug('writing extension')
     # debug('writing extension to chrome browser')
     ## get the string bytes for the final extension file
     extension.setHostAndPath(proxyUrl, socketIoRoute)
@@ -99,6 +99,7 @@ module.exports = {
       ## copy the extension src to the extension dist
       copyExtension(pathToExtension, extensionDest)
       .then ->
+        debug('copied extension')
         ## and overwrite background.js with the final string bytes
         fs.writeFileAsync(extensionBg, str)
       .return(extensionDest)

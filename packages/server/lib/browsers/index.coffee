@@ -112,9 +112,9 @@ module.exports = {
         debug("browser opened")
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder
-
+        
         instance = i
-
+        debug('instance', instance)
         ## TODO: normalizing opening and closing / exiting
         ## so that there is a default for each browser but
         ## enable the browser to configure the interface

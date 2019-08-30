@@ -3,6 +3,7 @@ const Marionette = require('marionette-client')
 const Exception = require('marionette-client/lib/marionette/error')
 const Command = require('marionette-client/lib/marionette/message.js').Command
 const Promise = require('bluebird')
+const debug = require('debug')('cypress:server:browsers')
 
 const promisify = (fn) => {
   return (...args) => {
@@ -31,6 +32,8 @@ module.exports = {
   send,
 
   setup (extensions, url) {
+    debug('firefox: navigating page with webdriver')
+
     return connect()
     .then(() => {
       return send({

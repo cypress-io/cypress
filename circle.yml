@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node8.9.3-npm6.10.1-chrome75
+      - image: cypress/browsers:node8.9.3-npm6.10.1-chrome76-ff68
     environment:
       PLATFORM: linux
 
@@ -307,8 +307,8 @@ jobs:
           path: /tmp/cypress
 
   "server-performance-tests":
-      <<: *defaults
-      steps:
+    <<: *defaults
+    steps:
       - attach_workspace:
           at: ~/
       - run:
@@ -396,8 +396,8 @@ jobs:
           path: /tmp/cypress
 
   "server-e2e-tests-8":
-      <<: *defaults
-      steps:
+    <<: *defaults
+    steps:
       - attach_workspace:
           at: ~/
       - run:
@@ -406,7 +406,7 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
-  "driver-integration-tests-3x":
+  "driver-integration-tests-chrome-3x":
     <<: *defaults
     parallelism: 3
     steps:
@@ -424,6 +424,30 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
+          working_directory: packages/driver
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+
+  "driver-integration-tests-firefox-3x":
+    <<: *defaults
+    parallelism: 3
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm start
+          background: true
+          working_directory: packages/driver
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group 3x-driver-firefox --browser firefox
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -796,7 +820,10 @@ linux-workflow: &linux-workflow
     - server-e2e-tests-8:
         requires:
           - build
-    - driver-integration-tests-3x:
+    - driver-integration-tests-chrome-3x:
+        requires:
+          - build
+    - driver-integration-tests-firefox-3x:
         requires:
           - build
     - desktop-gui-integration-tests-2x:

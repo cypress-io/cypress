@@ -102,12 +102,14 @@ module.exports = {
     preferences = _.extend({}, defaultPreferences)
     extensions = []
 
+    debug('firefox open', options)
     if ps = options.proxyServer
       {hostname, port, protocol} = urlUtil.parse(ps)
       port ?= if protocol is "https:" then 443 else 80
       port = parseFloat(port)
 
       _.extend(preferences, {
+        "network.proxy.allow_hijacking_localhost": true
         "network.proxy.http": hostname
         "network.proxy.ssl": hostname
         "network.proxy.http_port": port
@@ -134,7 +136,7 @@ module.exports = {
     .then ->
       Promise.all([
         utils.ensureCleanCache(browserName)
-        utils.writeExtension(options.browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute)
+        utils.writeExtension(options.browser, options.visTextTerminal, options.proxyUrl, options.socketIoRoute)
         utils.ensureCleanCache(browserName)
       ])
     .spread (cacheDir, extensionDest, profileDir) ->
@@ -163,8 +165,8 @@ module.exports = {
       utils.launch(browserName, null, args)
     .then (browserInstance) ->
       firefoxUtil.setup(extensions, url)
-      # .then ->
-      #   return browserInstance
+      .then ->
+        return browserInstance
     .catch (err) ->
       debug("launch error:", err.stack)
       throw err

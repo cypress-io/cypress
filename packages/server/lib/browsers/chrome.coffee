@@ -130,6 +130,20 @@ module.exports = {
 
   _removeRootExtension
 
+  _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
+    ## get the string bytes for the final extension file
+    extension.setHostAndPath(proxyUrl, socketIoRoute)
+    .then (str) ->
+      extensionDest = utils.getExtensionDir(browser, isTextTerminal)
+      extensionBg   = path.join(extensionDest, "background.js")
+
+      ## copy the extension src to the extension dist
+      utils.copyExtension(pathToExtension, extensionDest)
+      .then ->
+        ## and overwrite background.js with the final string bytes
+        fs.writeFileAsync(extensionBg, str)
+      .return(extensionDest)
+
   _getArgs: (options = {}) ->
     _.defaults(options, {
       browser: {}
@@ -160,7 +174,7 @@ module.exports = {
     ## https://github.com/cypress-io/cypress/issues/2223
     { majorVersion } = options.browser
     if majorVersion in CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING
-      args.push("--disable-blink-features=RootLayerScrolling")
+       args.push("--disable-blink-features=RootLayerScrolling")
 
     ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
     ## https://github.com/cypress-io/cypress/issues/1872
@@ -187,7 +201,8 @@ module.exports = {
       ])
     .spread (cacheDir, args) =>
       Promise.all([
-        utils.writeExtension(
+        # utils.writeExtension(
+        @_writeExtension(
           browser,
           isTextTerminal,
           options.proxyUrl,
