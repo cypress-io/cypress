@@ -368,9 +368,9 @@ exports['cli CYPRESS_ENV catches environment "foo" 1'] = `
   code: 11
   stderr:
   -------
-  Environment variable with reserved name "CYPRESS_ENV" was used.
+  The environment variable with the reserved name "CYPRESS_ENV" is set.
 
-  Remove "CYPRESS_ENV" variable and run Cypress again.
+  Unset the "CYPRESS_ENV" environment variable and run Cypress again.
 
   ----------
 

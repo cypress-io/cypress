@@ -186,8 +186,8 @@ const unexpected = {
 
 const invalidCypressEnv = {
   description:
-    chalk.red('Environment variable with reserved name "CYPRESS_ENV" was used.'),
-  solution: chalk.red('Remove "CYPRESS_ENV" variable and run Cypress again.'),
+    chalk.red('The environment variable with the reserved name "CYPRESS_ENV" is set.'),
+  solution: chalk.red('Unset the "CYPRESS_ENV" environment variable and run Cypress again.'),
   exitCode: 11,
 }
 
