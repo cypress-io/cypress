@@ -1,3 +1,6 @@
+// this module is responsible for loading the plugins file
+// and running the exported function to register event handlers
+// and executing any tasks that the plugin registers
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
@@ -146,6 +149,7 @@ module.exports = (ipc, pluginsFile) => {
   }
 
   ipc.on('load', (config) => {
+    debug('plugins load file "%s"', pluginsFile)
     load(ipc, config, pluginsFile)
   })
 
