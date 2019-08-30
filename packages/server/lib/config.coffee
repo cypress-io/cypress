@@ -321,7 +321,7 @@ module.exports = {
     diffs = deepDiff(cfg, overrides, true)
     debug("config diffs %o", diffs)
 
-    userBrowserList = R.clone(diffs.browsers)
+    userBrowserList = diffs && diffs.browsers && R.clone(diffs.browsers)
 
     setResolvedOn = (resolvedObj, obj) ->
       _.each obj, (val, key) ->
@@ -352,6 +352,7 @@ module.exports = {
 
     # do not allow user to delete "browsers" list - otherwise how to run tests?
     if Array.isArray(userBrowserList)
+      debug("using user supplied list of browsers %o", userBrowserList)
       resolved.browsers = userBrowserList
 
     debug("resolved config with defaults %o", resolved)
