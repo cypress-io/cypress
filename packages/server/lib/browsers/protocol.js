@@ -67,7 +67,8 @@ const getWsTargetFor = (port) => {
     // const newTabTargetFields = { type: 'page', url: 'chrome://newtab/' }
     const newTabTargetFields = {
       type: 'page',
-      title: 'cypress-example-electron',
+      // title: 'cypress-example-electron',
+      title: '',
     }
     // const isThisTheTestAutomationPage = (target) => {
     //   return (
