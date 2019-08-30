@@ -7,10 +7,13 @@ import Container from './app/container'
 
 configure({ enforceActions: 'strict' })
 
-window.Runner = {
+const Runner = {
   start (el, config) {
     action('started', () => {
       const state = new State((config.state || {}).reporterWidth)
+
+      Runner.state = state
+      Runner.configureMobx = configure
 
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 
@@ -18,3 +21,5 @@ window.Runner = {
     })()
   },
 }
+
+window.Runner = Runner
