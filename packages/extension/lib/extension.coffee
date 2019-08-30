@@ -1,6 +1,7 @@
 fs         = require("fs")
 path       = require("path")
 Promise    = require("bluebird")
+{ getCookieUrl } = require('./util')
 
 fs = Promise.promisifyAll(fs)
 
@@ -24,5 +25,7 @@ module.exports = {
       str
       .replace("CHANGE_ME_HOST", host)
       .replace("CHANGE_ME_PATH", path)
+
+  getCookieUrl
 
 }

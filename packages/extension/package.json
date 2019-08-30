@@ -35,6 +35,7 @@
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-rename": "1.4.0",
+    "mock-require": "3.0.3",
     "run-sequence": "1.2.2",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",

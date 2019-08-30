@@ -4,6 +4,7 @@ pick    = require("lodash/pick")
 once    = require("lodash/once")
 Promise = require("bluebird")
 client  = require("./client")
+{ getCookieUrl } = require('../lib/util')
 
 httpRe = /^http/
 
@@ -67,9 +68,7 @@ connect = (host, path) ->
 automation = {
   connect
 
-  getUrl: (cookie = {}) ->
-    prefix = if cookie.secure then "https://" else "http://"
-    prefix + cookie.domain + cookie.path
+  getUrl: getCookieUrl
 
   clear: (filter = {}) ->
     clear = (cookie) =>
@@ -170,9 +169,13 @@ automation = {
   takeScreenshot: (fn) ->
     @lastFocusedWindow()
     .then (win) ->
-      browser.tabs.captureVisibleTab(win.id, {format: "png"})
-    .then (dataUrl) ->
-      fn(dataUrl)
+      new Promise (resolve, reject) ->
+        browser.tabs.captureVisibleTab win.id, {format: "png"}, (dataUrl) ->
+          if dataUrl
+            resolve(dataUrl)
+          else
+            reject(browser.runtime.lastError)
+    .then(fn)
 }
 
 module.exports = automation

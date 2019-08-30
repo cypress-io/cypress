@@ -1,14 +1,12 @@
 require("../spec_helper")
-
 _          = require("lodash")
 http       = require("http")
 socket     = require("@packages/socket")
 Promise    = require("bluebird")
-background = require("../../app/background")
+mockRequire = require('mock-require')
 
-PORT = 12345
 
-global.browser = {
+browser = {
   cookies: {
     set: ->
     getAll: ->
@@ -29,6 +27,12 @@ global.browser = {
     captureVisibleTab: ->
   }
 }
+
+mockRequire('webextension-polyfill', browser)
+
+background = require("../../app/background")
+
+PORT = 12345
 
 tab1 = {
   "active": false,
@@ -206,7 +210,7 @@ describe "app/background", ->
 
     it "filters out tabs that don't start with http", ->
       sinon.stub(browser.tabs, "query")
-      .yieldsAsync([tab3])
+      .resolves([tab3])
 
       background.query({
         string: "1234"
@@ -242,7 +246,7 @@ describe "app/background", ->
 
     it "rejects if no tabs were found", ->
       sinon.stub(browser.tabs, "query")
-      .yieldsAsync([])
+      .resolves([])
 
       background.query({
         string: "1234"
@@ -467,13 +471,15 @@ describe "app/background", ->
 
     describe "take:screenshot", ->
       beforeEach ->
-        sinon.stub(browser.windows, "getLastFocused").yieldsAsync({id: 1})
+        sinon.stub(browser.windows, "getLastFocused").resolves({id: 1})
 
       afterEach ->
         delete browser.runtime.lastError
 
       it "resolves with screenshot", (done) ->
-        sinon.stub(browser.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync("foobarbaz")
+        sinon.stub(browser.tabs, "captureVisibleTab")
+        .withArgs(1, {format: "png"})
+        .yieldsAsync("foobarbaz")
 
         @socket.on "automation:response", (id, obj = {}) ->
           expect(id).to.eq(123)
@@ -486,7 +492,7 @@ describe "app/background", ->
         browser.runtime.lastError = {message: "some error"}
         sinon.stub(browser.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync(undefined)
 
-        @socket.on "automation:response", (id, obj = {}) ->
+        @socket.on "automation:response", (id, obj) ->
           expect(id).to.eq(123)
           expect(obj.__error).to.eq("some error")
           done()
