@@ -150,6 +150,7 @@ module.exports = (ipc, pluginsFile) => {
 
   ipc.on('load', (config) => {
     debug('plugins load file "%s"', pluginsFile)
+    debug('passing config %o', config)
     load(ipc, config, pluginsFile)
   })
 
