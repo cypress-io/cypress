@@ -100,7 +100,7 @@ module.exports = {
       })
 
       if not browserLauncher = getBrowserLauncherByFamily(browser.family)
-        return throwBrowserNotFound(browser, options.browsers)
+        return throwBrowserNotFound(browser.name, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)

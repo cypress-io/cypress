@@ -542,6 +542,15 @@ describe "src/cy/commands/navigation", ->
         .then ->
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
 
+    it "does not support file:// protocol", (done) ->
+      Cypress.config("baseUrl", "")
+    
+      cy.on "fail", (err) ->
+        expect(err.message).to.contain("cy.visit() failed because the 'file://...' protocol is not supported by Cypress.")
+        done()
+    
+      cy.visit("file:///cypress/fixtures/generic.html")
+
     ## https://github.com/cypress-io/cypress/issues/1727
     it "can visit a page with undefined content type and html-shaped body", ->
       cy
