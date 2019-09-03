@@ -33,8 +33,10 @@ create = (state = {}) ->
     ## existing values may include references
     ## to values we no longer have access to.
     # window.debugger(2, true, true)
-    _.each obj, (v, k) ->
-      state[k] = v
+    # _.each obj, (v, k) ->
+    #   state[k] = v
+
+    _.extend(state, obj)
 
     return ret
 
