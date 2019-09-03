@@ -16,6 +16,37 @@ defaults = reset()
 
 validCaptures = ["fullPage", "viewport", "runner"]
 
+normalizePadding = (padding) ->
+  padding ||= 0
+
+  if _.isArray(padding)
+    # CSS shorthand
+    # See: https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties#Tricky_edge_cases
+    switch padding.length
+      when 1
+        top = right = bottom = left = padding[0]
+      when 2
+        top = bottom = padding[0]
+        right = left = padding[1]
+      when 3
+        top = padding[0]
+        right = left = padding[1]
+        bottom = padding[2]
+      when 4
+        top = padding[0]
+        right = padding[1]
+        bottom = padding[2]
+        left = padding[3]
+  else
+    top = right = bottom = left = padding
+
+  return [
+    top
+    right
+    bottom
+    left
+  ]
+
 validateAndSetBoolean = (props, values, cmd, log, option) ->
   value = props[option]
   if not value?
@@ -93,6 +124,21 @@ validate = (props, cmd, log) ->
       })
 
     values.clip = clip
+
+  if padding = props.padding
+    if not (
+      _.isFinite(padding) or
+      (_.isArray(padding) and
+        padding.length >= 1 and
+        padding.length <= 4 and
+        _.every(padding, _.isFinite))
+    )
+      $utils.throwErrByPath("screenshot.invalid_padding", {
+        log: log
+        args: { cmd: cmd, arg: $utils.stringify(padding) }
+      })
+    
+    values.padding = normalizePadding(padding)
 
   validateAndSetCallback(props, values, cmd, log, "onBeforeScreenshot")
   validateAndSetCallback(props, values, cmd, log, "onAfterScreenshot")

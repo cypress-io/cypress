@@ -134,13 +134,35 @@ takeFullPageScreenshot = (state, automationOptions) ->
   takeScrollingScreenshots(scrolls, win, state, automationOptions)
   .finally(resetScrollOverrides)
 
+applyPaddingToElementPositioning = (elPosition, automationOptions) ->
+  if not automationOptions.padding
+    return elPosition
+
+  [ paddingTop, paddingRight, paddingBottom, paddingLeft ] = automationOptions.padding
+
+  return {
+    width: elPosition.width + paddingLeft + paddingRight
+    height: elPosition.height + paddingTop + paddingBottom
+    fromViewport: {
+      top: elPosition.fromViewport.top - paddingTop
+      left: elPosition.fromViewport.left - paddingLeft
+      bottom: elPosition.fromViewport.bottom + paddingBottom
+    }
+    fromWindow: {
+      top: elPosition.fromWindow.top - paddingTop
+    }
+  }
+
 takeElementScreenshot = ($el, state, automationOptions) ->
   win = state("window")
   doc = state("document")
 
   resetScrollOverrides = scrollOverrides(win, doc)
 
-  elPosition = $dom.getElementPositioning($el)
+  elPosition = applyPaddingToElementPositioning(
+    $dom.getElementPositioning($el),
+    automationOptions
+  )
   viewportHeight = getViewportHeight(state)
   viewportWidth = getViewportWidth(state)
   numScreenshots = Math.ceil(elPosition.height / viewportHeight)
@@ -150,7 +172,10 @@ takeElementScreenshot = ($el, state, automationOptions) ->
   scrolls = _.map _.times(numScreenshots), (index) ->
     y = elPosition.fromWindow.top + (viewportHeight * index)
     afterScroll = ->
-      elPosition = $dom.getElementPositioning($el)
+      elPosition = applyPaddingToElementPositioning(
+        $dom.getElementPositioning($el),
+        automationOptions
+      )
       x = Math.min(viewportWidth, elPosition.fromViewport.left)
       width = Math.min(viewportWidth - x, elPosition.width)
 
@@ -198,6 +223,7 @@ getBlackout = ({ capture, blackout }) ->
 takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   {
     capture
+    padding
     clip
     disableTimersAndAnimations
     onBeforeScreenshot
@@ -246,6 +272,7 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       width: getViewportWidth(state)
       height: getViewportHeight(state)
     }
+    padding
     userClip: clip
     viewport: {
       width: window.innerWidth
@@ -323,7 +350,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       isWin = $dom.isWindow(subject)
 
-      screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip", "onBeforeScreenshot", "onAfterScreenshot")
+      screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "padding", "clip", "onBeforeScreenshot", "onAfterScreenshot")
       screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
 

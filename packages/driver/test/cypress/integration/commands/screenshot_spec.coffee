@@ -4,6 +4,9 @@ _ = Cypress._
 Promise = Cypress.Promise
 Screenshot = Cypress.Screenshot
 
+getViewportHeight = () ->
+  Math.min(cy.state("viewportHeight"), $(cy.state("window")).height())
+
 describe "src/cy/commands/screenshot", ->
   beforeEach ->
     cy.stub(Cypress, "automation").callThrough()
@@ -132,7 +135,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        args = _.omit(args, "clip", "userClip", "viewport", "takenPaths", "startTime")
+        args = _.omit(args, "padding", "clip", "userClip", "viewport", "takenPaths", "startTime")
         expect(args).to.eql({
           testId: runnable.id
           titles: [
@@ -168,7 +171,7 @@ describe "src/cy/commands/screenshot", ->
         .then ->
           expect(Cypress.automation.withArgs("take:screenshot")).to.be.calledOnce
           args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-          args = _.omit(args, "clip", "userClip", "viewport", "takenPaths", "startTime")
+          args = _.omit(args, "padding", "clip", "userClip", "viewport", "takenPaths", "startTime")
           expect(args).to.eql({
             testId: runnable.id
             titles: [
@@ -201,7 +204,7 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.automation).to.be.calledWith("take:screenshot")
         args = Cypress.automation.withArgs("take:screenshot").args[0][1]
-        args = _.omit(args, "clip", "userClip", "viewport", "takenPaths", "startTime")
+        args = _.omit(args, "padding", "clip", "userClip", "viewport", "takenPaths", "startTime")
         expect(args).to.eql({
           testId: runnable.id
           titles: [
@@ -516,17 +519,70 @@ describe "src/cy/commands/screenshot", ->
           expect(scrollTo.getCall(2).args.join(",")).to.equal("0,100")
 
       it "sends the right clip values for elements that need scrolling", ->
+        scrollTo = cy.spy(cy.state("window"), "scrollTo")
+
         cy.get(".tall-element").screenshot()
         .then ->
+          expect(scrollTo.getCall(0).args).to.eql([0, 140])
+
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].clip).to.eql({ x: 20, y: 0, width: 560, height: 200 })
           expect(take.args[1][1].clip).to.eql({ x: 20, y: 60, width: 560, height: 120 })
 
       it "sends the right clip values for elements that don't need scrolling", ->
+        scrollTo = cy.spy(cy.state("window"), "scrollTo")
+
         cy.get(".short-element").screenshot()
         .then ->
+          # even though we don't need to scroll, the implementation behaviour is to
+          # try to scroll until the element is at the top of the viewport.
+          expect(scrollTo.getCall(0).args).to.eql([0, 20])
+
           take = Cypress.automation.withArgs("take:screenshot")
           expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
+
+      it "applies padding to clip values for elements that need scrolling", ->
+        padding = 10
+
+        scrollTo = cy.spy(cy.state("window"), "scrollTo")
+
+        cy.get(".tall-element").screenshot({ padding })
+        .then ->
+          viewportHeight = getViewportHeight()
+          expect(scrollTo.getCall(0).args).to.eql([0, 140 - padding])
+          expect(scrollTo.getCall(1).args).to.eql([0, 140 + viewportHeight - padding ])
+
+          take = Cypress.automation.withArgs("take:screenshot")
+
+          expect(take.args[0][1].clip).to.eql({
+            x: 20 - padding,
+            y: 0,
+            width: 560 + padding * 2,
+            height: viewportHeight
+          })
+          expect(take.args[1][1].clip).to.eql({
+            x: 20 - padding,
+            y: 60 - padding,
+            width: 560 + padding * 2,
+            height: 120 + padding * 2
+          })
+
+      it "applies padding to clip values for elements that don't need scrolling", ->
+        padding = 10
+
+        scrollTo = cy.spy(cy.state("window"), "scrollTo")
+
+        cy.get(".short-element").screenshot({ padding })
+        .then ->
+          expect(scrollTo.getCall(0).args).to.eql([0, padding])
+
+          take = Cypress.automation.withArgs("take:screenshot")
+          expect(take.args[0][1].clip).to.eql({
+            x: 30,
+            y: 0,
+            width: 220,
+            height: 120
+          })
 
       it "works with cy.within()", ->
         cy.get(".short-element").within ->
@@ -652,20 +708,37 @@ describe "src/cy/commands/screenshot", ->
         cy.visit("/fixtures/screenshots.html")
         cy.get('.empty-element').screenshot()
 
+      it "throws if padding is not a number", (done) ->
+        @assertErrorMessage("cy.screenshot() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: 50px", done)
+        cy.screenshot({ padding: '50px' })
+
+      it "throws if padding is not an array of numbers", (done) ->
+        @assertErrorMessage("cy.screenshot() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: bad, bad, bad, bad", done)
+        cy.screenshot({ padding: ['bad', 'bad', 'bad', 'bad'] })
+
+      it "throws if padding is not an array with a length between 1 and 4", (done) ->
+        @assertErrorMessage("cy.screenshot() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: 20, 10, 20, 10, 50", done)
+        cy.screenshot({ padding: [20, 10, 20, 10, 50] })
+
+      it "throws if padding is a large negative number that causes a 0px tall element height", (done) ->
+        @assertErrorMessage("cy.screenshot() only works with a screenshot area whose height is greater than zero.", done)
+        cy.visit("/fixtures/screenshots.html")
+        cy.get('.tall-element').screenshot({ padding: -161 })
+
       it "throws if clip is not an object", (done) ->
-        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: true", done)
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: true", done)
         cy.screenshot({ clip: true })
 
       it "throws if clip is lacking proper keys", (done) ->
-        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {x: 5}", done)
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: {x: 5}", done)
         cy.screenshot({ clip: { x: 5 } })
 
       it "throws if clip has extraneous keys", (done) ->
-        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{5}", done)
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: Object{5}", done)
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
 
       it "throws if clip has non-number values", (done) ->
-        @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: Object{4}", done)
+        @assertErrorMessage("cy.screenshot() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: Object{4}", done)
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: "5" } })
 
       it "throws if element capture with multiple elements", (done) ->
