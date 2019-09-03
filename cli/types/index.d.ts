@@ -2170,11 +2170,19 @@ declare namespace Cypress {
     height: number
   }
 
+  type Padding =
+    | number
+    | [number]
+    | [number, number]
+    | [number, number, number]
+    | [number, number, number, number]
+
   interface ScreenshotOptions {
     blackout: string[]
     capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
+    padding: Padding
     scale: boolean
     beforeScreenshot(doc: Document): void
     afterScreenshot(doc: Document): void
