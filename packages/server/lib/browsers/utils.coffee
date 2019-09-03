@@ -106,11 +106,14 @@ module.exports = {
       # or add one in plugins.js file?
       # ! prefer plugins to cypress.json file
       browsers.concat({
-        name: "cypress-example-electron"
+        # name: "cypress-example-electron"
+        name: "electron-sandbox",
         family: "electron-app"
-        displayName: "cypress-example-electron"
+        # displayName: "cypress-example-electron"
+        displayName: "electron-sandbox",
         version: "0.0.0"
-        path: "/Users/gleb/git/cypress-example-electron/node_modules/.bin/electron"
+        # path: "/Users/gleb/git/cypress-example-electron/node_modules/.bin/electron"
+        path: "/Users/gleb/git/electron-sandbox/node_modules/.bin/electron"
         # path: "/Users/gleb/git/cypress-example-electron/node_modules/.bin/electro-fork"
         majorVersion: "99"
         info: "Electron.js app that supports the Cypress launcher"

@@ -69,7 +69,8 @@ electronAppLauncher.open = (browser, url, options = {}, automation) ->
 
   # TODO pass actual discovered start file
   # pathToMainElectronFile = '.'
-  pathToMainElectronFile = "/Users/gleb/git/cypress-example-electron/main.js"
+  # pathToMainElectronFile = "/Users/gleb/git/cypress-example-electron/main.js"
+  pathToMainElectronFile = "/Users/gleb/git/electron-sandbox/cypress.js"
 
   # cliArgs = R.clone(_defaultArgs)
   cliArgs = []
