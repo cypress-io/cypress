@@ -25,7 +25,7 @@ $Server = require("./cypress/server")
 $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
-# browserInfo = require("./cypress/browser")
+browserInfo = require("./cypress/browser")
 
 # tryCatch = (fn) ->
 #   try
@@ -141,7 +141,7 @@ class $Cypress
 
     config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state")
 
-    # _.extend(@, browserInfo(config))
+    _.extend(@, browserInfo(config))
 
     @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)
