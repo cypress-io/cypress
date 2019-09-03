@@ -96,8 +96,10 @@ module.exports = {
         @_setUserAgent(win.webContents, ua)
 
       setProxy = =>
-        if pacUrl = options.pacUrl
-          @_setPacUrl(win.webContents, pacUrl)
+        if ps = options.proxyServer
+          @_setProxy(win.webContents, ps)
+        # if pacUrl = options.pacUrl
+        #   @_setPacUrl(win.webContents, pacUrl)
 
       Promise.join(
         setProxy(),
@@ -144,7 +146,7 @@ module.exports = {
     webContents.setUserAgent(userAgent)
     webContents.session.setUserAgent(userAgent)
 
-  _setPacUrl: (webContents, pacUrl) ->
+  _setProxy: (webContents, proxyServer) ->
     new Promise (resolve) ->
       webContents.session.setProxy({
         proxyRules: proxyServer
@@ -152,8 +154,18 @@ module.exports = {
         ## running Chromium versions >= 72
         ## https://github.com/cypress-io/cypress/issues/1872
         proxyBypassRules: "<-loopback>"
-        pacScript: pacUrl
       }, resolve)
+
+  # _setPacUrl: (webContents, pacUrl) ->
+  #   new Promise (resolve) ->
+  #     webContents.session.setProxy({
+  #       proxyRules: proxyServer
+  #       ## this should really only be necessary when
+  #       ## running Chromium versions >= 72
+  #       ## https://github.com/cypress-io/cypress/issues/1872
+  #       proxyBypassRules: "<-loopback>"
+  #       pacScript: pacUrl
+  #     }, resolve)
 
   open: (browser, url, options = {}, automation) ->
     { projectRoot, isTextTerminal } = options
