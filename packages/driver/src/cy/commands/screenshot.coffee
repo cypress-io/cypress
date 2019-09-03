@@ -81,6 +81,12 @@ scrollOverrides = (win, doc) ->
       doc.body.style.overflowY = originalBodyOverflowY
     win.scrollTo(originalX, originalY)
 
+validateNumScreenshots = (numScreenshots, automationOptions) ->
+  if numScreenshots < 1
+    $utils.throwErrByPath("screenshot.invalid_height", {
+      log: automationOptions.log
+    })
+
 takeScrollingScreenshots = (scrolls, win, state, automationOptions) ->
   scrollAndTake = ({ y, clip, afterScroll }, index) ->
     win.scrollTo(0, y)
@@ -107,6 +113,8 @@ takeFullPageScreenshot = (state, automationOptions) ->
   docHeight = $(doc).height()
   viewportHeight = getViewportHeight(state)
   numScreenshots = Math.ceil(docHeight / viewportHeight)
+
+  validateNumScreenshots(numScreenshots, automationOptions)
 
   scrolls = _.map _.times(numScreenshots), (index) ->
     y = viewportHeight * index
@@ -136,6 +144,8 @@ takeElementScreenshot = ($el, state, automationOptions) ->
   viewportHeight = getViewportHeight(state)
   viewportWidth = getViewportWidth(state)
   numScreenshots = Math.ceil(elPosition.height / viewportHeight)
+
+  validateNumScreenshots(numScreenshots, automationOptions)
 
   scrolls = _.map _.times(numScreenshots), (index) ->
     y = elPosition.fromWindow.top + (viewportHeight * index)

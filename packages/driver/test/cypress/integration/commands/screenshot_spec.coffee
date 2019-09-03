@@ -647,6 +647,11 @@ describe "src/cy/commands/screenshot", ->
         @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: true", done)
         cy.screenshot({ blackout: [true] })
 
+      it "throws if there is a 0px tall element height", (done) ->
+        @assertErrorMessage("cy.screenshot() only works with a screenshot area whose height is greater than zero.", done)
+        cy.visit("/fixtures/screenshots.html")
+        cy.get('.empty-element').screenshot()
+
       it "throws if clip is not an object", (done) ->
         @assertErrorMessage("cy.screenshot() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: true", done)
         cy.screenshot({ clip: true })
