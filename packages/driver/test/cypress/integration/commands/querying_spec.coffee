@@ -1203,7 +1203,6 @@ describe "src/cy/commands/querying", ->
       cy.$$('<style> some-style-content {} </style>').appendTo(cy.$$('body'))
       cy.contains('some-style-content').should('not.match', 'style')
 
-
     it "finds the nearest element by :contains selector", ->
       cy.contains("li 0").then ($el) ->
         expect($el.length).to.eq(1)
