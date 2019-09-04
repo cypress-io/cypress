@@ -65,19 +65,19 @@ const getWsTargetFor = (port) => {
     // { title: 'Cypress', type: 'background_page', url: 'chrome-extension://...', ... }
     // { title: 'New Tab', type: 'page', url: 'chrome://newtab/', ...}
     // const newTabTargetFields = { type: 'page', url: 'chrome://newtab/' }
-    const newTabTargetFields = {
-      type: 'page',
-      // title: 'cypress-example-electron',
-      // title: '',
-      title: 'cypress.html',
-    }
-    // const isThisTheTestAutomationPage = (target) => {
-    //   return (
-    //     target.type === 'page' &&
-    //       target.title.startsWith('https://example.cypress.io')
-    //   )
+    // const newTabTargetFields = {
+    //   type: 'page',
+    //   // title: 'cypress-example-electron',
+    //   title: '',
+    //   // title: 'cypress.html',
     // }
-    const target = _.find(targets, newTabTargetFields)
+    const isThisTheTestAutomationPage = (target) => {
+      return (
+        target.type === 'page' &&
+        (target.title === '' || target.title === 'cypress.html')
+      )
+    }
+    const target = _.find(targets, isThisTheTestAutomationPage)
 
     la(target, 'could not find CRI target')
     debug('found CRI target %o', target)
