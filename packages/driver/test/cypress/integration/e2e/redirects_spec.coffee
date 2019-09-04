@@ -7,8 +7,7 @@ describe "redirection", ->
 
     return null
 
-  ## TODO: get this passing in chrome 76
-  context.skip "meta", ->
+  context "meta", ->
     it "binds to the new page after a timeout", ->
       cy
         .visit("/fixtures/meta-redirect-timeout.html")
@@ -35,7 +34,8 @@ describe "redirection", ->
           expect(@logs[2].get("name")).to.eq("page load")
           expect(@logs[3].get("name")).to.eq("new url")
 
-  context "javascript", ->
+  ## TODO: get this passing in chrome 76
+  context.skip "javascript", ->
     ## FIREFOX FIXME: logs doesn't include "page load"
     it "binds to the new page after a timeout", ->
       cy
