@@ -123,7 +123,7 @@ describe "src/cy/commands/window", ->
             expect(@logs[0].get("aliasType")).to.eq("primitive")
 
             expect(@logs[2].get("aliasType")).to.eq("primitive")
-            expect(@logs[2].get("referencesAlias")).to.eq("win")
+            expect(@logs[2].get("referencesAlias").name).to.eq("win")
 
       it "logs obj", ->
         cy.window().then ->
@@ -270,7 +270,7 @@ describe "src/cy/commands/window", ->
             expect(logs[0].get("aliasType")).to.eq("primitive")
 
             expect(logs[2].get("aliasType")).to.eq("primitive")
-            expect(logs[2].get("referencesAlias")).to.eq("doc")
+            expect(logs[2].get("referencesAlias").name).to.eq("doc")
 
       it "logs obj", ->
         cy.document().then ->
@@ -546,6 +546,20 @@ describe "src/cy/commands/window", ->
 
         cy.viewport("ipad-mini")
 
+      it "iphone-xr", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 896}
+          done()
+
+        cy.viewport("iphone-xr")
+
+      it "iphone-x", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 375, viewportHeight: 812}
+          done()
+
+        cy.viewport("iphone-x")
+
       it "iphone-6+", (done) ->
         cy.on "viewport:changed", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 736}
@@ -581,6 +595,20 @@ describe "src/cy/commands/window", ->
 
         cy.viewport("iphone-5", "portrait")
 
+      it "samsung-s10", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 360, viewportHeight: 760}
+          done()
+
+        cy.viewport("samsung-s10")
+
+      it "samsung-note9", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 846}
+          done()
+
+        cy.viewport("samsung-note9")
+
     context "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)
@@ -596,7 +624,7 @@ describe "src/cy/commands/window", ->
       it "throws with passed invalid preset", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() could not find a preset for: 'foo'. Available presets are: macbook-15, macbook-13, macbook-11, ipad-2, ipad-mini, iphone-6+, iphone-6, iphone-5, iphone-4, iphone-3"
+          expect(err.message).to.match /^cy.viewport\(\) could not find a preset for: 'foo'. Available presets are: /
           done()
 
         cy.viewport("foo")

@@ -23,18 +23,20 @@ describe "e2e launching browsers by path", ->
       project: Fixtures.projectPath("e2e")
       spec: "simple_spec.coffee"
       browser: '/this/aint/gonna/be/found'
-      snapshot: true
       expectedExitCode: 1
     })
+    .then (res) =>
+      expect(res.stdout).to.contain("We could not identify a known browser at the path you provided: `/this/aint/gonna/be/found`")
+      expect(res.code).to.eq(1)
 
   it "works with an installed browser path", ->
     launcher.detect().then (browsers) =>
       browsers.find (browser) =>
         browser.family == "chrome"
-    .then (browser) =>
+    .tap (browser) =>
       if !browser
         throw new Error("A 'chrome' family browser must be installed for this test")
-      browser.path
+    .get("path")
     ## turn binary browser names ("google-chrome") into their absolute paths
     ## so that server recognizes them as a path, not as a browser name
     .then (absPath)

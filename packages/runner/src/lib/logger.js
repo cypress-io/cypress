@@ -66,6 +66,7 @@ export default {
           this.log(`%c${key}`, 'color: blue', value)
         }
       })
+
       console.groupEnd()
     })
   },

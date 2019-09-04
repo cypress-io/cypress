@@ -1,1 +1,1 @@
-module.exports = require("./lib/socket")
+module.exports = require('./lib/socket')

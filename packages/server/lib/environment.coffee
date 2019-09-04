@@ -1,7 +1,11 @@
-require("./util/http_overrides")
 require("./util/fs")
 
 os      = require("os")
+##
+## NOTE
+##
+## by loading "./cwd" we are changing the current working directory
+## to the "packages/server" folder
 cwd     = require("./cwd")
 Promise = require("bluebird")
 
@@ -19,7 +23,7 @@ try
   app = require("electron").app
   app.commandLine.appendSwitch("disable-renderer-backgrounding", true)
   app.commandLine.appendSwitch("ignore-certificate-errors", true)
-  
+
   ## These flags are for webcam/WebRTC testing
   ## https://github.com/cypress-io/cypress/issues/2704
   app.commandLine.appendSwitch("use-fake-ui-for-media-stream")

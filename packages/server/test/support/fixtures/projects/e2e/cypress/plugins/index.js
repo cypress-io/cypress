@@ -3,16 +3,22 @@ const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
 
+const performance = require('../../../../test/support/helpers/performance')
+
 module.exports = (on) => {
   // save some time by only reading the originals once
   let cache = {}
+
   function getCachedImage (name) {
     const cachedImage = cache[name]
+
     if (cachedImage) return Promise.resolve(cachedImage)
 
     const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
+
     return Jimp.read(imagePath).then((image) => {
       cache[name] = image
+
       return image
     })
   }
@@ -52,6 +58,7 @@ module.exports = (on) => {
       }
 
       const comparePath = path.join(__dirname, '..', 'screenshots', `${b}.png`)
+
       return Promise.all([
         getCachedImage(a),
         Jimp.read(comparePath),
@@ -90,6 +97,25 @@ module.exports = (on) => {
 
         return null
       })
+    },
+
+    'record:fast_visit_spec' ({ percentiles, url, browser, currentRetry }) {
+      percentiles.forEach(([percent, percentile]) => {
+        console.log(`${percent}%\t of visits to ${url} finished in less than ${percentile}ms`)
+      })
+
+      const data = {
+        url,
+        browser,
+        currentRetry,
+        ...percentiles.reduce((acc, pair) => {
+          acc[pair[0]] = pair[1]
+          return acc
+        }, {})
+      }
+
+      return performance.track('fast_visit_spec percentiles', data)
+      .return(null)
     },
   })
 }

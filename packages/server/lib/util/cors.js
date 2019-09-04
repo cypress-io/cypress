@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const url = require('url')
+const uri = require('./uri')
 const debug = require('debug')('cypress:server:cors')
 const parseDomain = require('parse-domain')
 
@@ -45,16 +46,23 @@ module.exports = {
     return obj
   },
 
-  urlMatchesOriginPolicyProps (url, props) {
+  urlMatchesOriginPolicyProps (urlStr, props) {
     // take a shortcut here in the case
     // where remoteHostAndPort is null
     if (!props) {
       return false
     }
 
-    const parsedUrl = this.parseUrlIntoDomainTldPort(url)
+    const parsedUrl = this.parseUrlIntoDomainTldPort(urlStr)
 
     // does the parsedUrl match the parsedHost?
     return _.isEqual(parsedUrl, props)
+  },
+
+  urlMatchesOriginProtectionSpace (urlStr, origin) {
+    const normalizedUrl = uri.addDefaultPort(urlStr).format()
+    const normalizedOrigin = uri.addDefaultPort(origin).format()
+
+    return _.startsWith(normalizedUrl, normalizedOrigin)
   },
 }

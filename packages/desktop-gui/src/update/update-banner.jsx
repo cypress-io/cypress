@@ -33,7 +33,7 @@ class UpdateBanner extends Component {
     document.getElementsByTagName('html')[0].classList.add('has-updates')
 
     return (
-      <div id='updates-available'>
+      <div className='updates-available'>
         New updates are available
         <strong onClick={() => this._toggleModal(true)}>
           <i className='fa fa-download'></i>{' '}
@@ -84,7 +84,10 @@ class UpdateBanner extends Component {
           <span>Quit this app.</span>
         </li>
         <li>
-          <span>Run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
+          <span>If using npm, run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
+          <br/>
+          <span>If using yarn, run <code>yarn add cypress@{appStore.newVersion}</code></span>
+
         </li>
         <li>
           <span>Run <a href='#' onClick={this._openCyOpenDoc}><code>node_modules/.bin/cypress open</code></a> to open the new version.</span>

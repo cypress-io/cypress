@@ -44,6 +44,8 @@ describe "src/cy/commands/screenshot", ->
       .then ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
+      .finally ->
+        Cypress.config("isTextTerminal", true)
 
     it "is noop when no test.err", ->
       Cypress.config("isInteractive", false)
@@ -303,6 +305,11 @@ describe "src/cy/commands/screenshot", ->
           width: $(window.parent).width()
           height: $(window.parent).height()
         })
+
+    it "can handle window w/length > 1 as a subject", ->
+      cy.visit('/fixtures/dom.html')
+      cy.window().should('have.length.gt', 1)
+      .screenshot()
 
     describe "before/after events", ->
       beforeEach ->

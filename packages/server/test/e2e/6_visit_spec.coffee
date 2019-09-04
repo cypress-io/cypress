@@ -1,5 +1,4 @@
 useragent = require("express-useragent")
-Fixtures  = require("../support/helpers/fixtures")
 e2e       = require("../support/helpers/e2e")
 
 onServer = (app) ->
@@ -111,6 +110,25 @@ describe "e2e visit", ->
     it "calls onBeforeLoad when overwriting cy.visit", ->
       e2e.exec(@, {
         spec: "issue_2196_spec.coffee"
+      })
+
+  context "low responseTimeout, normal pageLoadTimeout", ->
+    e2e.setup({
+      settings: {
+        responseTimeout: 2000
+      }
+      servers: {
+        port: 3434,
+        static: true,
+        onServer: onServer
+      }
+    })
+
+    it "fails when response never ends", ->
+      e2e.exec(@, {
+        spec: "visit_response_never_ends_failing_spec.js",
+        snapshot: true,
+        expectedExitCode: 3
       })
 
   context "normal response timeouts", ->

@@ -5,12 +5,22 @@ $utils = require("../../cypress/utils")
 $Server = require("../../cypress/server")
 $Location = require("../../cypress/location")
 
-validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/i
-
 server = null
+
+tryDecodeUri = (uri) ->
+  try
+    return decodeURI(uri)
+  catch
+    return uri
 
 getServer = ->
   server ? unavailableErr()
+
+cancelPendingXhrs = ->
+  if server
+    server.cancelPendingXhrs()
+
+  return null
 
 reset = ->
   if server
@@ -128,6 +138,9 @@ startXhrServer = (cy, state, config) ->
             when xhr.aborted
               indicator = "aborted"
               "(aborted)"
+            when xhr.canceled
+              indicator = "aborted"
+              "(canceled)"
             when xhr.status > 0
               xhr.status
             else
@@ -136,9 +149,9 @@ startXhrServer = (cy, state, config) ->
 
           indicator ?= if /^2/.test(status) then "successful" else "bad"
 
-          {
+          return {
+            indicator,
             message: "#{xhr.method} #{status} #{stripOrigin(xhr.url)}"
-            indicator: indicator
           }
       })
 
@@ -180,6 +193,15 @@ startXhrServer = (cy, state, config) ->
       if log = logs[xhr.id]
         log.snapshot("aborted").error(err)
 
+    onXhrCancel: (xhr) ->
+      setResponse(state, xhr)
+
+      if log = logs[xhr.id]
+        log.snapshot("canceled").set({
+          ended: true,
+          state: "failed"
+        })
+
     onAnyAbort: (route, xhr) =>
       if route and _.isFunction(route.onAbort)
         route.onAbort.call(cy, xhr)
@@ -216,6 +238,13 @@ defaults = {
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
+
+  ## if our page is going away due to
+  ## a form submit / anchor click then
+  ## we need to cancel all pending
+  ## XHR's so the command log displays
+  ## correctly
+  Cypress.on("window:unload", cancelPendingXhrs)
 
   Cypress.on "test:before:run", ->
     ## reset the existing server
@@ -303,7 +332,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           when args.length is 2
             ## if our url actually matches an http method
             ## then we know the user doesn't want to stub this route
-            if _.isString(args[0]) and validHttpMethodsRe.test(args[0])
+            if _.isString(args[0]) and $utils.isValidHttpMethod(args[0])
               o.method = args[0]
               o.url    = args[1]
 
@@ -313,7 +342,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               o.response = args[1]
 
           when args.length is 3
-            if validHttpMethodsRe.test(args[0]) or isUrlLikeArgs(args[1], args[2])
+            if $utils.isValidHttpMethod(args[0]) or isUrlLikeArgs(args[1], args[2])
               o.method    = args[0]
               o.url       = args[1]
               o.response  = args[2]
@@ -341,7 +370,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if not (_.isString(options.url) or _.isRegExp(options.url))
           $utils.throwErrByPath "route.url_invalid"
 
-        if not validHttpMethodsRe.test(options.method)
+        if not $utils.isValidHttpMethod(options.method)
           $utils.throwErrByPath "route.method_invalid", {
             args: { method: o.method }
           }
@@ -380,6 +409,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## aliases subject
           options.response = aliasObj.subject
 
+        url = getUrl(options)
+
+        urlString = url.toString()
+
+        ## https://github.com/cypress-io/cypress/issues/2372
+        if (decodedUrl = tryDecodeUri(urlString)) and urlString != decodedUrl
+          $utils.warnByPath("route.url_percentencoding_warning", { args: { decodedUrl }})
+
         options.log = Cypress.log({
           name: "route"
           instrument: "route"
@@ -392,7 +429,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           numResponses: 0
           consoleProps: ->
             Method:   options.method
-            URL:      getUrl(options)
+            URL:      url
             Status:   options.status
             Response: options.response
             Alias:    options.alias

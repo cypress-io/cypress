@@ -1,24 +1,27 @@
 import { log } from '../log'
-import { trim, tap } from 'ramda'
+import { partial, trim, tap } from 'ramda'
 import { FoundBrowser, Browser } from '../types'
 import { notInstalledErr } from '../errors'
-import * as execa from 'execa'
+import execa from 'execa'
 
-function getLinuxBrowser(
+function getLinuxBrowser (
   name: string,
   binary: string,
   versionRegex: RegExp
 ): Promise<FoundBrowser> {
   const getVersion = (stdout: string) => {
     const m = versionRegex.exec(stdout)
+
     if (m) {
       return m[1]
     }
+
     log(
       'Could not extract version from %s using regex %s',
       stdout,
       versionRegex
     )
+
     throw notInstalledErr(binary)
   }
 
@@ -28,32 +31,32 @@ function getLinuxBrowser(
       binary,
       err.message
     )
+
     throw notInstalledErr(binary)
   }
 
   return getVersionString(binary)
-    .then(tap(log))
-    .then(getVersion)
-    .then((version: string) => {
-      return {
-        name,
-        version,
-        path: binary
-      } as FoundBrowser
-    })
-    .catch(logAndThrowError)
+  .then(getVersion)
+  .then((version: string) => {
+    return {
+      name,
+      version,
+      path: binary,
+    } as FoundBrowser
+  })
+  .catch(logAndThrowError)
 }
 
-export function getVersionString(path: string) {
-  const cmd = `${path} --version`
-  log('finding version string using command "%s"', cmd)
+export function getVersionString (path: string) {
+  log('finding version string using command "%s --version"', path)
+
   return execa
-    .shell(cmd)
-    .then(result => result.stdout)
-    .then(trim)
+  .stdout(path, ['--version'])
+  .then(trim)
+  .then(tap(partial(log, ['stdout: %s'])))
 }
 
-export function detect(browser: Browser) {
+export function detect (browser: Browser) {
   return getLinuxBrowser(
     browser.name,
     browser.binary as string,

@@ -39,6 +39,10 @@
       word-break: break-word;
       user-select: initial;
 
+      a {
+        text-decoration: underline;
+      }
+
       &:empty {
         display: none;
       }
@@ -56,7 +60,11 @@
       > .runnable-wrapper .runnable-controls i.fa-repeat {
         visibility: visible !important;
       }
+    }
 
+    &:focus {
+      outline: 1px dotted #6c6c6c;
+      outline-offset: -1px;
     }
 
     &.runnable-active {
@@ -70,7 +78,8 @@
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
-      width: 12px;
+      min-width: 12px;
+      height: 18px;
       text-align: center;
     }
 
@@ -149,6 +158,14 @@
       }
     }
 
+    &.suite > div > .runnable-wrapper:focus {
+      outline: 0;
+
+      .runnable-title {
+        outline: 1px dotted;
+      }
+    }
+
     &.runnable-passed > .runnable-wrapper {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
@@ -180,11 +197,23 @@
 
   .runnable-title {
     font-size: 12.5px;
+    min-width: $reporter-contents-min-width;
+    white-space: pre-line;
+
+    &:focus {
+      outline: 1px dotted #6c6c6c;
+    }
   }
 
   .runnable-content-region {
     overflow: auto;
     position: relative;
+    display: inline-flex;
+
+    &:focus {
+      outline: 1px dotted #6c6c6c;
+      outline-offset: 3px;
+    }
   }
 
   .suite > div > .runnable-wrapper,
@@ -219,6 +248,10 @@
 
   .test.runnable-failed .runnable-controls i {
     visibility: visible;
+  }
+
+  .collapsible-header {
+    display: flex;
   }
 
   .test > .runnable-wrapper > .collapsible > .collapsible-header {

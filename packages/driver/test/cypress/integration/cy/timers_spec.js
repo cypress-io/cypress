@@ -37,6 +37,23 @@ describe('driver/src/cy/timers', () => {
     })
   })
 
+  it('setTimeout can pass multiple parameters to the target function', () => {
+    cy
+    .log('setTimeout should call target with two parameters')
+    .window()
+    .then((win) => {
+      win.foo = null
+      win.setFoo = (bar, baz) => {
+        win.foo = bar + baz
+      }
+
+      win.setTimeout(win.setFoo, 0, 'bar', 'baz')
+
+      cy
+      .window().its('foo').should('eq', 'barbaz')
+    })
+  })
+
   it('setInterval is called through', () => {
     cy
     .log('setInterval should be called')
@@ -70,6 +87,26 @@ describe('driver/src/cy/timers', () => {
       })
       .wait(100)
       .window().its('bar').should('be.null')
+    })
+  })
+
+  it('setInterval can pass multiple parameters to the target function', () => {
+    cy
+    .log('setInterval should call target with two parameters')
+    .window()
+    .then((win) => {
+      win.foo = null
+      win.setFoo = (bar, baz) => {
+        win.foo = bar + baz
+      }
+
+      const id1 = win.setInterval(win.setFoo, 1, 'bar', 'baz')
+
+      cy
+      .window().its('foo').should('eq', 'barbaz')
+      .then(() => {
+        win.clearInterval(id1)
+      })
     })
   })
 
@@ -244,7 +281,7 @@ describe('driver/src/cy/timers', () => {
 
         expect(win.bar).to.eq('bar')
       })
-      .log('cancelling the timeout after timers are paused still cancels')
+      .log('canceling the timeout after timers are paused still cancels')
       .then(() => {
         win.bar = null
 

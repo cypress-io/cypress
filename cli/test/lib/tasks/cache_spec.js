@@ -6,7 +6,7 @@ const fs = require(`${lib}/fs`)
 const state = require(`${lib}/tasks/state`)
 const cache = require(`${lib}/tasks/cache`)
 const stdout = require('../../support/stdout')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 describe('lib/tasks/cache', () => {
   beforeEach(() => {
@@ -20,6 +20,7 @@ describe('lib/tasks/cache', () => {
         },
       },
     })
+
     sinon.stub(state, 'getCacheDir').returns('/.cache/Cypress')
     this.stdout = stdout.capture()
   })
@@ -37,15 +38,19 @@ describe('lib/tasks/cache', () => {
       expect(this.stdout.toString()).to.eql('/.cache/Cypress\n')
     })
   })
+
   describe('.clear', () => {
     it('deletes cache folder and everything inside it', () => {
       return cache.clear()
-      .then(() =>
-        fs.pathExistsAsync('/.cache/Cypress')
-        .then((exists) => expect(exists).to.eql(false))
-      )
+      .then(() => {
+        return fs.pathExistsAsync('/.cache/Cypress')
+        .then((exists) => {
+          return expect(exists).to.eql(false)
+        })
+      })
     })
   })
+
   describe('.list', () => {
     it('lists all versions of cached binary', () => {
       return cache.list()

@@ -9,15 +9,14 @@ http       = require("http")
 Promise    = require("bluebird")
 electron   = require("electron")
 commitInfo = require("@cypress/commit-info")
-isForkPr   = require("is-fork-pr")
 Fixtures   = require("../support/helpers/fixtures")
 snapshot   = require("snap-shot-it")
 stripAnsi  = require("strip-ansi")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
+argsUtil   = require("#{root}lib/util/args")
 fs         = require("#{root}lib/util/fs")
-connect    = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings   = require("#{root}lib/util/settings")
 Events     = require("#{root}lib/gui/events")
@@ -120,8 +119,13 @@ describe "lib/cypress", ->
     sinon.stub(launcher, "detect").resolves(TYPICAL_BROWSERS)
     sinon.stub(process, "exit")
     sinon.stub(Server.prototype, "reset")
+    sinon.stub(errors, "warning")
+    .callThrough()
+    .withArgs("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+    .returns(null)
+    
     sinon.spy(errors, "log")
-    sinon.spy(errors, "warning")
+    sinon.spy(errors, "logException")
     sinon.spy(console, "log")
 
     @expectExitWith = (code) =>
@@ -329,6 +333,16 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        @expectExitWith(0)
+
+    it "does not watch settings or plugins in run mode", ->
+      watch = sinon.spy(Watchers.prototype, "watch")
+      watchTree = sinon.spy(Watchers.prototype, "watchTree")
+
+      cypress.start(["--run-project=#{@pluginConfig}"])
+      .then =>
+        expect(watchTree).not.to.be.called
+        expect(watch).not.to.be.called
         @expectExitWith(0)
 
     it "scaffolds out integration and example specs if they do not exist when not runMode", ->
@@ -627,13 +641,6 @@ describe "lib/cypress", ->
         @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "screenshotOnHeadlessFailure")
         @expectExitWithErr("SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED", "You now configure this behavior in your test code")
 
-    it "logs error and exits when baseUrl cannot be verified", ->
-      settings.write(@todosPath, {baseUrl: "http://localhost:90874"})
-      .then =>
-        cypress.start(["--run-project=#{@todosPath}"])
-      .then =>
-        @expectExitWithErr("CANNOT_CONNECT_BASE_URL", "http://localhost:90874")
-
     ## TODO: make sure we have integration tests around this
     ## for headed projects!
     ## also make sure we test the rest of the integration functionality
@@ -804,8 +811,8 @@ describe "lib/cypress", ->
             @expectExitWith(0)
 
         it "electron", ->
-          write = sinon.stub()
-          videoCapture.start.returns({ write })
+          writeVideoFrame = sinon.stub()
+          videoCapture.start.returns({ writeVideoFrame })
 
           cypress.start([
             "--run-project=#{@pluginBrowser}"
@@ -841,7 +848,7 @@ describe "lib/cypress", ->
         server = http.createServer()
         server = Promise.promisifyAll(server)
 
-        server.listenAsync(5555)
+        server.listenAsync(5555, "127.0.0.1")
         .then =>
           cypress.start(["--run-project=#{@todosPath}", "--port=5555"])
         .then =>
@@ -866,6 +873,21 @@ describe "lib/cypress", ->
             foo: "bar"
             host: "http://localhost:8888"
             baz: "quux=dolor"
+          })
+
+          @expectExitWith(0)
+
+      it "parses environment variables with empty values", ->
+        cypress.start([
+          "--run-project=#{@todosPath}",
+          "--video=false"
+          "--env=FOO=,BAR=,BAZ=ipsum"
+        ])
+        .then =>
+          expect(openProject.getProject().cfg.env).to.deep.eq({
+            FOO: ''
+            BAR: ''
+            BAZ: 'ipsum'
           })
 
           @expectExitWith(0)
@@ -909,9 +931,10 @@ describe "lib/cypress", ->
       sinon.stub(env, "get").withArgs("CYPRESS_PROJECT_ID").returns(@projectId)
 
       cypress.start([
+        "--cwd=/foo/bar"
         "--run-project=#{@noScaffolding}",
         "--record",
-        "--key=token-123"
+        "--key=token-123",
       ])
       .then =>
         expect(api.createRun).to.be.calledWithMatch({projectId: @projectId})
@@ -924,8 +947,9 @@ describe "lib/cypress", ->
       .withArgs("CYPRESS_RECORD_KEY").returns("token")
 
       cypress.start([
+        "--cwd=/foo/bar"
         "--run-project=#{@noScaffolding}",
-        "--record"
+        "--record",
       ])
       .then =>
         expect(api.createRun).to.be.calledWithMatch({
@@ -976,7 +1000,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
-        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-group")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-group 1")
 
     it "errors and exits when using --parallel but ciBuildId could not be generated", ->
       sinon.stub(ciProvider, "provider").returns(null)
@@ -989,7 +1013,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
-        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel 1")
 
     it "errors and exits when using --parallel and --group but ciBuildId could not be generated", ->
       sinon.stub(ciProvider, "provider").returns(null)
@@ -1003,7 +1027,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("INDETERMINATE_CI_BUILD_ID")
-        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel-group")
+        snapshotConsoleLogs("INDETERMINATE_CI_BUILD_ID-parallel-group 1")
 
     it "errors and exits when using --ci-build-id with no group or parallelization", ->
       cypress.start([
@@ -1014,7 +1038,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("INCORRECT_CI_BUILD_ID_USAGE")
-        snapshotConsoleLogs("INCORRECT_CI_BUILD_ID_USAGE")
+        snapshotConsoleLogs("INCORRECT_CI_BUILD_ID_USAGE 1")
 
     it "errors and exits when using --ci-build-id without recording", ->
       cypress.start([
@@ -1023,7 +1047,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId 1")
 
     it "errors and exits when using --group without recording", ->
       cypress.start([
@@ -1032,7 +1056,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group 1")
 
     it "errors and exits when using --parallel without recording", ->
       cypress.start([
@@ -1041,7 +1065,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel 1")
 
     it "errors and exits when using --group and --parallel without recording", ->
       cypress.start([
@@ -1051,7 +1075,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
-        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group-parallel")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1")
 
     it "errors and exits when group name is not unique and explicitly passed ciBuildId", ->
       err = new Error()
@@ -1074,7 +1098,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
-        snapshotConsoleLogs("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE")
+        snapshotConsoleLogs("DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1")
 
     it "errors and exits when parallel group params are different", ->
       sinon.stub(system, "info").returns({
@@ -1108,7 +1132,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
-        snapshotConsoleLogs("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1")
 
     it "errors and exits when parallel is not allowed", ->
       err = new Error()
@@ -1132,7 +1156,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_PARALLEL_DISALLOWED")
-        snapshotConsoleLogs("DASHBOARD_PARALLEL_DISALLOWED")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_DISALLOWED 1")
 
     it "errors and exits when parallel is required", ->
       err = new Error()
@@ -1156,7 +1180,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_PARALLEL_REQUIRED")
-        snapshotConsoleLogs("DASHBOARD_PARALLEL_REQUIRED")
+        snapshotConsoleLogs("DASHBOARD_PARALLEL_REQUIRED 1")
 
     it "errors and exits when run is already complete", ->
       err = new Error()
@@ -1179,7 +1203,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_ALREADY_COMPLETE")
-        snapshotConsoleLogs("DASHBOARD_ALREADY_COMPLETE")
+        snapshotConsoleLogs("DASHBOARD_ALREADY_COMPLETE 1")
 
     it "errors and exits when run is stale", ->
       err = new Error()
@@ -1203,7 +1227,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @expectExitWithErr("DASHBOARD_STALE_RUN")
-        snapshotConsoleLogs("DASHBOARD_STALE_RUN")
+        snapshotConsoleLogs("DASHBOARD_STALE_RUN 1")
 
   context "--return-pkg", ->
     beforeEach ->
@@ -1371,6 +1395,23 @@ describe "lib/cypress", ->
         Events.handleEvent(options, bus, event, 123, "open:project", @todosPath)
       .then ->
         expect(event.sender.send.withArgs("response").firstCall.args[1].data).to.eql(warning)
+
+  context "--cwd", ->
+    beforeEach ->
+      errors.warning.restore()
+      sinon.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      sinon.stub(interactiveMode, "ready").resolves()
+      sinon.spy(errors, "warning")
+
+    it "shows warning if Cypress has been started directly", ->
+      cypress.start().then ->
+        expect(errors.warning).to.be.calledWith("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
+        expect(console.log).to.be.calledWithMatch("It looks like you are running the Cypress binary directly.")
+        expect(console.log).to.be.calledWithMatch("https://on.cypress.io/installing-cypress")
+
+    it "does not show warning if finds --cwd", ->
+      cypress.start(["--cwd=/foo/bar"]).then ->
+        expect(errors.warning).not.to.be.called
 
   context "no args", ->
     beforeEach ->

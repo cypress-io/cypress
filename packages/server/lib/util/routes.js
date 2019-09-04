@@ -17,9 +17,8 @@ const api_url = konfig('api_url')
 let routes = {
   api: '',
   auth: 'auth',
+  me: 'me',
   ping: 'ping',
-  signin: 'signin',
-  signout: 'signout',
   runs: 'runs',
   instances: 'runs/:id/instances',
   instance: 'instances/:id',
@@ -65,6 +64,6 @@ routes = _.reduce(routes, (memo, value, key) => {
 
   return memo
 }
-  , {})
+, {})
 
 module.exports = routes

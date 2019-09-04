@@ -302,6 +302,11 @@ ensureUniquePath = (withoutExt, extension, num = 0) ->
       return ensureUniquePath(withoutExt, extension, num += 1)
     return fullPath
 
+sanitizeToString = (title) ->
+  ## test titles may be values which aren't strings like
+  ## null or undefined - so convert before trying to sanitize
+  sanitize(_.toString(title))
+
 getPath = (data, ext, screenshotsFolder) ->
   specNames = (data.specName or "")
   .split(pathSeparatorRe)
@@ -309,7 +314,12 @@ getPath = (data, ext, screenshotsFolder) ->
   if data.name
     names = data.name.split(pathSeparatorRe).map(sanitize)
   else
-    names = [data.titles.map(sanitize).join(RUNNABLE_SEPARATOR)]
+    names = _
+    .chain(data.titles)
+    .map(sanitizeToString)
+    .join(RUNNABLE_SEPARATOR)
+    .concat([])
+    .value()
 
   # truncate file names to be less than 220 characters
   # to accomodate filename size limits

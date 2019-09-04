@@ -3,9 +3,11 @@ strip   = require("strip-ansi")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
-pluralize = require("pluralize")
 
 twoOrMoreNewLinesRe = /\n{2,}/
+
+isProduction = ->
+  process.env["CYPRESS_ENV"] is "production"
 
 listItems = (paths) ->
   _
@@ -24,6 +26,15 @@ displayFlags = (obj, mapper) ->
   .compact()
   .join("\n")
   .value()
+
+displayRetriesRemaining = (tries) ->
+  times = if tries is 1 then 'time' else 'times'
+
+  lastTryNewLine = if tries is 1 then "\n" else ""
+
+  chalk.gray(
+    "We will try connecting to it #{tries} more #{times}...#{lastTryNewLine}"
+  )
 
 warnIfExplicitCiBuildId = (ciBuildId) ->
   if not ciBuildId
@@ -127,7 +138,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We encountered an unexpected error talking to our servers.
 
-      We will retry #{arg1.tries} more #{pluralize('time', arg1.tries)} in #{arg1.delay}...
+      We will retry #{arg1.tries} more #{if arg1.tries is 1 then 'time' else 'times'} in #{arg1.delay}...
 
       The server's response was:
 
@@ -163,6 +174,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The server's response was:
 
       #{arg1.response}
+      """
+    when "DASHBOARD_UNKNOWN_CREATE_RUN_WARNING"
+      """
+      Warning from Cypress Dashboard: #{arg1.message}
+
+      Details:
+      #{JSON.stringify(arg1.props, null, 2)}
       """
     when "DASHBOARD_STALE_RUN"
       """
@@ -427,13 +445,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_RECORD_KEY_NOT_VALID"
       """
-      We failed trying to authenticate this project: #{chalk.blue(arg2)}
-
-      Your Record Key is invalid: #{chalk.yellow(arg1)}
+      Your Record Key #{chalk.yellow(arg1)} is not valid with this project: #{chalk.blue(arg2)}
 
       It may have been recently revoked by you or another user.
 
-      Please log into the Dashboard to see the updated token.
+      Please log into the Dashboard to see the valid record keys.
 
       https://on.cypress.io/dashboard/projects/#{arg2}
       """
@@ -627,20 +643,36 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CANNOT_CONNECT_BASE_URL"
       """
-      Cypress could not verify that the server set as your `baseUrl` is running:
-
-        > #{chalk.blue(arg1)}
-
-      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
+      Cypress failed to verify that your server is running.
 
       Please start this server and then run Cypress again.
       """
     when "CANNOT_CONNECT_BASE_URL_WARNING"
       """
-      Cypress could not verify that the server set as your `baseUrl` is running: #{arg1}
+      Cypress could not verify that this server is running:
 
-      Your tests likely make requests to this `baseUrl` and these tests will fail if you don't boot your server.
+        > #{chalk.blue(arg1)}
+
+      This server has been configured as your `baseUrl`, and tests will likely fail if it is not running.
       """
+    when "CANNOT_CONNECT_BASE_URL_RETRYING"
+      switch arg1.attempt
+        when 1
+          """
+          Cypress could not verify that this server is running:
+
+            > #{chalk.blue(arg1.baseUrl)}
+
+          We are verifying this server because it has been configured as your `baseUrl`.
+
+          Cypress automatically waits until your server is accessible before running tests.
+
+          #{displayRetriesRemaining(arg1.remaining)}
+          """
+        else
+          """
+          #{displayRetriesRemaining(arg1.remaining)}
+          """
     when "INVALID_REPORTER_NAME"
       """
       Could not load reporter by name: #{chalk.yellow(arg1.name)}
@@ -661,13 +693,23 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
       """
+    when "INVOKED_BINARY_OUTSIDE_NPM_MODULE"
+      """
+      It looks like you are running the Cypress binary directly.
+
+      This is not the recommended approach, and Cypress may not work correctly.
+
+      Please install the 'cypress' NPM package and follow the instructions here:
+      
+      https://on.cypress.io/installing-cypress
+      """
     when "DUPLICATE_TASK_KEY"
       """
       Warning: Multiple attempts to register the following task(s): #{chalk.blue(arg1)}. Only the last attempt will be registered.
       """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
 
       To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
@@ -675,7 +717,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
 
       Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
@@ -683,7 +725,31 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
 
       To upgrade your account, please visit your billing to upgrade to another billing plan.
 
@@ -721,6 +787,45 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1.link}
       """
+    when "FIXTURE_NOT_FOUND"
+      """
+      A fixture file could not be found at any of the following paths:
+
+       > #{arg1}
+       > #{arg1}{{extension}}
+
+      Cypress looked for these file extensions at the provided path:
+
+       > #{arg2.join(', ')}
+
+      Provide a path to an existing fixture file.
+      """
+    when "AUTH_COULD_NOT_LAUNCH_BROWSER"
+      """
+      Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
+
+      ```
+      #{arg1}
+      ```
+      """
+    when "AUTH_BROWSER_LAUNCHED"
+      """
+      Check your browser to continue logging in.
+      """
+    when "BAD_POLICY_WARNING"
+      """
+      Cypress detected policy settings on your computer that may cause issues.
+
+      The following policies were detected that may prevent Cypress from automating Chrome:
+
+       > #{arg1.join('\n > ')}
+
+      For more information, see https://on.cypress.io/bad-browser-policy
+      """
+    when "BAD_POLICY_WARNING_TOOLTIP"
+      """
+      Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
@@ -741,6 +846,8 @@ get = (type, arg1, arg2) ->
 warning = (type, arg1, arg2) ->
   err = get(type, arg1, arg2)
   log(err, "magenta")
+  
+  return null
 
 throwErr = (type, arg1, arg2) ->
   throw get(type, arg1, arg2)
@@ -768,26 +875,34 @@ clone = (err, options = {}) ->
   obj
 
 log = (err, color = "red") ->
-  Promise.try ->
-    console.log chalk[color](err.message)
-    if err.details
-      console.log("\n", chalk["yellow"](err.details))
+  console.log chalk[color](err.message)
 
-    ## bail if this error came from known
-    ## list of Cypress errors
-    return if isCypressErr(err)
+  if err.details
+    console.log("\n", chalk["yellow"](err.details))
 
-    console.log chalk[color](err.stack)
+  ## bail if this error came from known
+  ## list of Cypress errors
+  return if isCypressErr(err)
 
-    if process.env["CYPRESS_ENV"] is "production"
-      ## log this error to raygun since its not
-      ## a known error
-      require("./logger").createException(err).catch(->)
+  console.log chalk[color](err.stack)
 
+  return err
+  
+logException = Promise.method (err) ->
+  ## TODO: remove context here
+  if @log(err) and isProduction()
+    ## log this exception since 
+    ## its not a known error
+    return require("./logger")
+    .createException(err)
+    .catch(->)
+  
 module.exports = {
   get,
 
   log,
+
+  logException,
 
   clone,
 
