@@ -20,10 +20,20 @@ const strip = (html) => {
 const stripStream = () => {
   return pumpify(
     utf8Stream(),
-    replaceStream(topOrParentEqualityBeforeRe, '$1self'),
-    replaceStream(topOrParentEqualityAfterRe, 'self$2'),
-    replaceStream(topOrParentLocationOrFramesRe, '$1self$3$4'),
-    replaceStream(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
+    replaceStream(
+      [
+        topOrParentEqualityBeforeRe,
+        topOrParentEqualityAfterRe,
+        topOrParentLocationOrFramesRe,
+        jiraTopWindowGetterRe,
+      ],
+      [
+        '$1self',
+        'self$2',
+        '$1self$3$4',
+        '$1 || $2.parent.__Cypress__$3',
+      ]
+    )
   )
 }
 

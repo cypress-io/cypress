@@ -89,3 +89,7 @@ declare module 'proxy-from-env' {
 declare interface SymbolConstructor {
   for(str: string): SymbolConstructor
 }
+
+declare interface InternalStream {
+  queue(str: string | null): void
+}
