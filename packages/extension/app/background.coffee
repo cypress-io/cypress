@@ -169,13 +169,10 @@ automation = {
   takeScreenshot: (fn) ->
     @lastFocusedWindow()
     .then (win) ->
-      new Promise (resolve, reject) ->
-        browser.tabs.captureVisibleTab win.id, {format: "png"}, (dataUrl) ->
-          if dataUrl
-            resolve(dataUrl)
-          else
-            reject(browser.runtime.lastError)
+      browser.tabs.captureVisibleTab win.id, {format: "png"}
     .then(fn)
+    .catch ->
+      throw browser.runtime.lastError
 }
 
 module.exports = automation

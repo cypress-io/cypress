@@ -249,7 +249,7 @@ describe "src/cy/commands/actions/trigger", ->
         .prependTo(cy.$$("body"))
 
         $span = $("<span>span covering div</span>")
-        .css({ padding: 5, display: "inline-block", backgroundColor: "yellow" })
+        .css({ padding: 5, display: 'block', backgroundColor: "yellow" })
         .appendTo($btn)
 
         $btn.on "mouseover", -> mouseovers += 1

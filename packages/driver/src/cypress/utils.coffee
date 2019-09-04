@@ -93,7 +93,7 @@ module.exports = {
 
     ## Firefox stack does not include toString'd error, so normalize
     ## things by prepending it
-    if _.includes(stack, str)
+    if !_.includes(stack, str)
       stack = "#{str}\n#{stack}"
 
     ## append message

@@ -30,6 +30,7 @@ describe "src/cy/commands/screenshot", ->
 
   context "runnable:after:run:async", ->
     it "is noop when not isTextTerminal", ->
+      _isTextTerminal = Cypress.config("isTextTerminal")
       Cypress.config("isTextTerminal", false)
 
       cy.spy(Cypress, "action").log(false)
@@ -45,7 +46,7 @@ describe "src/cy/commands/screenshot", ->
         expect(Cypress.action).not.to.be.calledWith("cy:test:set:state")
         expect(Cypress.automation).not.to.be.called
       .finally ->
-        Cypress.config("isTextTerminal", true)
+        Cypress.config("isTextTerminal", _isTextTerminal)
 
     it "is noop when no test.err", ->
       Cypress.config("isInteractive", false)
