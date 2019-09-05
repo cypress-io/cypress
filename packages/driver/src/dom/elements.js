@@ -1,21 +1,3 @@
-/* eslint-disable
-    default-case,
-    no-case-declarations,
-    no-cond-assign,
-    no-const-assign,
-    no-dupe-keys,
-    no-undef,
-    one-var,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 const $jquery = require('./jquery')
@@ -181,7 +163,6 @@ const _getType = function () {
 
 const nativeGetters = {
   value: _getValue,
-  selectionStart: descriptor('HTMLInputElement', 'selectionStart').get,
   isContentEditable: _isContentEditable,
   isCollapsed: descriptor('Selection', 'isCollapsed').get,
   selectionStart: _getSelectionStart,
@@ -263,7 +244,7 @@ const setNativeProp = function (obj, prop, val) {
   if (!nativeProp) {
     const fns = _.keys(nativeSetters).join(', ')
 
-    throw new Error(`attempted to use a native setter prop called: ${fn}. Available props are: ${fns}`)
+    throw new Error(`attempted to use a native setter prop called: ${prop}. Available props are: ${fns}`)
   }
 
   let retProp = nativeProp.call(obj, val)
@@ -726,7 +707,7 @@ const getContainsSelector = (text, filter = '') => {
   const filters = filter.trim().split(',')
 
   const selectors = _.map(filters, (filter) => {
-    return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+    return `${filter}:not(script,style):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
   })
 
   return selectors.join()

@@ -1,4 +1,4 @@
-describe('WarningMessage', function () {
+describe('Warning Message', function () {
   beforeEach(function () {
     cy.fixture('specs').as('specs')
     this.warningObj = {
@@ -122,6 +122,14 @@ describe('WarningMessage', function () {
     .click().then(function () {
       expect(this.ipc.externalOpen).not.to.be.called
     })
+  })
+
+  it('displays warning above specs (issue #4912)', function () {
+    cy.shouldBeOnProjectSpecs().then(() => {
+      this.ipc.onProjectWarning.yield(null, this.warningObj)
+    })
+
+    cy.get('.specs').invoke('position').its('top').should('gt', 100)
   })
 
   context('with multiple warnings', function () {
