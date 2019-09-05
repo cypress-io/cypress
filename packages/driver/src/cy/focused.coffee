@@ -2,7 +2,6 @@ $dom = require("../dom")
 $window = require("../dom/window")
 $elements = require("../dom/elements")
 $actionability = require("./actionability")
-$visibility = require('../dom/visibility')
 
 create = (state) ->
 
@@ -147,11 +146,7 @@ create = (state) ->
     ## is always in focus
     $focused = getFocused()
 
-    if (
-      $elements.isFocusable($dom.wrap(el)) &&
-      (!$focused || $focused[0] isnt el) &&
-      !($visibility.parentHasDisplayNone($dom.wrap(el)) || $dom.wrap(el).css('visibility') is 'hidden')
-    )
+    if (!$focused || $focused[0] isnt el) && $elements.isFocusableAndNotHidden(el)
       fireFocus(el)
       return
 

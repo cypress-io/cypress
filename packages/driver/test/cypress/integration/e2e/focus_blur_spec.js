@@ -525,7 +525,6 @@ describe('polyfill programmatic blur events', () => {
     })
 
   })
-
 })
 
 describe('intercept blur methods correctly', () => {

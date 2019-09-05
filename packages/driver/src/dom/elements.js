@@ -4,6 +4,8 @@ const $jquery = require('./jquery')
 const $window = require('./window')
 const $document = require('./document')
 const $utils = require('../cypress/utils')
+const { wrap } = require('./jquery')
+const { parentHasDisplayNone } = require('./visibility')
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -360,6 +362,10 @@ const isFocusable = ($el) => {
   return _.some(focusable, (sel) => {
     return $el.is(sel)
   })
+}
+
+const isFocusableAndNotHidden = (el) => {
+  return isFocusable(wrap(el)) && !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
 }
 
 const isType = function ($el, type) {
@@ -813,7 +819,7 @@ const stringify = (el, form = 'long') => {
   })
 }
 
-module.exports = {
+_.extend(module.exports, {
   isElement,
 
   isSelector,
@@ -821,6 +827,8 @@ module.exports = {
   isScrollOrAuto,
 
   isFocusable,
+
+  isFocusableAndNotHidden,
 
   isAttached,
 
@@ -889,4 +897,4 @@ module.exports = {
   getFirstStickyPositionParent,
 
   getFirstScrollableParent,
-}
+})
