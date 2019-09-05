@@ -771,7 +771,7 @@ const getContainsSelector = (text, filter = '') => {
   const filters = filter.trim().split(',')
 
   const selectors = _.map(filters, (filter) => {
-    return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+    return `${filter}:not(script,style):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
   })
 
   return selectors.join()
