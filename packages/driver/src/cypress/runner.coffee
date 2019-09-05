@@ -2,6 +2,7 @@ _ = require("lodash")
 moment = require("moment")
 Promise = require("bluebird")
 Pending = require("mocha/lib/pending")
+debug = require("debug")("cypress:driver")
 
 $Log = require("./log")
 $utils = require("./utils")
@@ -63,6 +64,16 @@ RUNNABLE_PROPS   = "id title root hookName hookId err state failedFromHookId bod
 #     }}
 #   ]
 # }
+
+# Give a tree of test objects, extracts a tree of just names
+listTests = (rootSuite) ->
+  result = {}
+
+  result.title = rootSuite.title
+  result.tests = _.map(rootSuite.tests, "title")
+  result.suites = _.map(rootSuite.suites, listTests)
+
+  return result
 
 fire = (event, runnable, Cypress) ->
   runnable._fired ?= {}
@@ -348,6 +359,7 @@ getTestResults = (tests) ->
     obj
 
 normalizeAll = (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getTestId) ->
+  debug("normalizeAll", suite)
   hasTests = false
 
   ## only loop until we find the first test
@@ -759,20 +771,35 @@ create = (specWindow, mocha, Cypress, cy) ->
       )
 
     run: (fn) ->
-      _startTime ?= moment().toJSON()
+      debug("run!")
+      testTree = listTests(_runner.suite)
+      debug("tests", testTree)
 
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId)
+      # Cypress.action("runner:tests:filter:async", testTree)
+      Cypress.backend("filter:tests:async", testTree)
+      .then (results) ->
+        changedTestTree = results[0]
+        console.log('returned list of tests', changedTestTree)
+        console.log('is this an array?', Array.isArray(changedTestTree))
+        # TODO
+        # if changedTestTree is really different from testTree
+        # filter _runner.suite to match the changed object
+        # probably the user filtered tests or changed their order
 
-      _runner.run (failures) ->
-        ## if we happen to make it all the way through
-        ## the run, then just set _stopped to true here
-        _stopped = true
+        _startTime ?= moment().toJSON()
 
-        ## TODO this functions is not correctly
-        ## synchronized with the 'end' event that
-        ## we manage because of uncaught hook errors
-        if fn
-          fn(failures, getTestResults(_tests))
+        _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId)
+
+        _runner.run (failures) ->
+          ## if we happen to make it all the way through
+          ## the run, then just set _stopped to true here
+          _stopped = true
+
+          ## TODO this functions is not correctly
+          ## synchronized with the 'end' event that
+          ## we manage because of uncaught hook errors
+          if fn
+            fn(failures, getTestResults(_tests))
 
     onRunnableRun: (runnableRun, runnable, args) ->
       if not runnable.id

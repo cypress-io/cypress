@@ -263,6 +263,10 @@ class $Cypress
       when "mocha:runnable:run"
         @runner.onRunnableRun(args...)
 
+      when "runner:tests:filter:async"
+        # send the test filter request to the backend process
+        @emitThen("backend:request", "filter:tests:async", args...)
+
       when "runner:test:before:run"
         ## get back to a clean slate
         @cy.reset()

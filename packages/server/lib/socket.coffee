@@ -290,6 +290,9 @@ class Socket
 
         backendRequest = ->
           switch eventName
+            when "filter:tests:async"
+              console.log("tests")
+              Promise.resolve({})
             when "preserve:run:state"
               existingState = args[0]
               null
