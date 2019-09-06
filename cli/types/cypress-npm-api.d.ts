@@ -57,6 +57,11 @@ declare module 'cypress' {
      */
     defaultCommandTimeout: number,
     /**
+     * Time, in milliseconds, to wait after all commands are finished
+     * running before an async test times out
+     */
+    asyncTestTimeout: number,
+    /**
      * Time, in milliseconds, to wait for a system command to
      * finish executing during a `cy.exec()` command.
      */

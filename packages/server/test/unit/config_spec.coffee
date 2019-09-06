@@ -560,6 +560,9 @@ describe "lib/config", ->
     it "defaultCommandTimeout=4000", ->
       @defaults "defaultCommandTimeout", 4000
 
+    it "asyncTestTimeout=4000", ->
+      @defaults "asyncTestTimeout", 4000
+
     it "pageLoadTimeout=60000", ->
       @defaults "pageLoadTimeout", 60000
 
@@ -739,6 +742,7 @@ describe "lib/config", ->
             reporterOptions:            { value: null, from: "default" },
             baseUrl:                    { value: null, from: "default" },
             defaultCommandTimeout:      { value: 4000, from: "default" },
+            asyncTestTimeout:           { value: 4000, from: "default" },
             pageLoadTimeout:            { value: 60000, from: "default" },
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },
@@ -805,6 +809,7 @@ describe "lib/config", ->
             reporterOptions:            { value: null, from: "default" },
             baseUrl:                    { value: "http://localhost:8080", from: "config" },
             defaultCommandTimeout:      { value: 4000, from: "default" },
+            asyncTestTimeout:           { value: 4000, from: "default" },
             pageLoadTimeout:            { value: 60000, from: "default" },
             requestTimeout:             { value: 5000, from: "default" },
             responseTimeout:            { value: 30000, from: "default" },

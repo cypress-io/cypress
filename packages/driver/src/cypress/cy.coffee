@@ -1004,8 +1004,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       runnable.fn = ->
         restore()
 
-        timeout = config("defaultCommandTimeout")
 
+        # timeout = config("defaultCommandTimeout")
+        timeout = config('asyncTestTimeout')
+        console.log('timeout is', timeout)
         ## control timeouts on runnables ourselves
         if _.isFinite(timeout)
           timeouts.timeout(timeout)
