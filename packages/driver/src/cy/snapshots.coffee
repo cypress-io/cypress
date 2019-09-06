@@ -114,7 +114,13 @@ create = ($$, state) ->
 
   createSnapshot = (name, $elToHighlight) ->
     ## create a unique selector for this el
-    $elToHighlight.attr(HIGHLIGHT_ATTR, true) if $elToHighlight?.attr
+    ## but only IF the subject is truly an element. For example
+    ## we might be wrapping a primitive like "$([1, 2]).first()"
+    ## which arrives here as number 1
+    ## jQuery v2 allowed to silently try setting 1[HIGHLIGHT_ATTR] doing nothing
+    ## jQuery v3 runs in strict mode and throws an error if you attempt to set a property
+    canHaveAttributes = _.isElement($elToHighlight)
+    $elToHighlight.attr(HIGHLIGHT_ATTR, true) if canHaveAttributes and $elToHighlight?.attr
 
     ## TODO: throw error here if cy is undefined!
 
@@ -146,7 +152,7 @@ create = ($$, state) ->
     ## which would reduce memory, and some CPU operations
 
     ## now remove it after we clone
-    $elToHighlight.removeAttr(HIGHLIGHT_ATTR) if $elToHighlight?.removeAttr
+    $elToHighlight.removeAttr(HIGHLIGHT_ATTR) if canHaveAttributes and $elToHighlight?.removeAttr
 
     ## preserve attributes on the <html> tag
     htmlAttrs = getHtmlAttrs($$("html")[0])
