@@ -44,8 +44,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       fn = options
       options = {}
 
-    _.defaults options,
-      timeout: cy.timeout()
+    _.defaults options, {
+      timeout: Cypress.config('defaultCommandTimeout')
+    }
 
     ## clear the timeout since we are handling
     ## it ourselves
