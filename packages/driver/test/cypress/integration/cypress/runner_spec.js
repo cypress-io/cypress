@@ -1,37 +1,35 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const pending = [];
+const pending = []
 
-Cypress.on("test:after:run", function(test) {
-  if (test.state === "pending") {
-    return pending.push(test);
+Cypress.on('test:after:run', (test) => {
+  if (test.state === 'pending') {
+    return pending.push(test)
   }
-});
+})
 
-describe("src/cypress/runner", function() {
-  it('handles "double quotes" in test name', function(done) {
-    cy.once("log:added", function(log) {
-      expect(log.hookName).to.equal("test");
-      return done();
-    });
-    return cy.wrap({});
-  });
+describe('src/cypress/runner', () => {
+  it('handles "double quotes" in test name', (done) => {
+    cy.once('log:added', (log) => {
+      expect(log.hookName).to.equal('test')
 
-  return context("pending tests", function() {
-    it("is not pending", function() {});
+      return done()
+    })
 
-    it("is pending 1");
+    return cy.wrap({})
+  })
 
-    it("is pending 2");
+  context('pending tests', () => {
+    it('is not pending', () => {})
 
-    return it("has 2 pending tests", function() {
-      expect(pending).to.have.length(2);
+    it('is pending 1')
 
-      expect(pending[0].title).to.eq("is pending 1");
-      return expect(pending[1].title).to.eq("is pending 2");
-    });
-  });
-});
+    it('is pending 2')
+
+    it('has 2 pending tests', () => {
+      expect(pending).to.have.length(2)
+
+      expect(pending[0].title).to.eq('is pending 1')
+
+      expect(pending[1].title).to.eq('is pending 2')
+    })
+  })
+})
