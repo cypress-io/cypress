@@ -58,7 +58,7 @@ describe('src/cypress/runner', () => {
 
       // tt[cy.state('runnable').title]throwAfter(1000)
 
-      lastTimeout = throwAfter(300)
+      lastTimeout = throwAfter(500)
 
       runner.once('fail', (r) => {
         const runnable = cy.state('runnable')
@@ -94,6 +94,12 @@ describe('src/cypress/runner', () => {
     it('can timeout async test after cypress command', function (done) {
       this.timeout(100)
       cy.wait(0)
+    })
+
+    it('does not timeout during cypress command', function (done) {
+      this.timeout(100)
+      cy.wait(200)
+      cy.then(() => done())
     })
 
     it('defaults to 4000 mocha timeout for tests', function () {

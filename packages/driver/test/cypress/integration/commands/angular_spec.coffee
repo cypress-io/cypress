@@ -40,8 +40,7 @@ describe "src/cy/commands/angular", ->
 
           cy.ng("binding", "not-found")
 
-        it.only "cancels additional finds when aborted", (done) ->
-          console.log(@timeout())
+        it "cancels additional finds when aborted", (done) ->
           cy.stub(Cypress.runner, "stop")
 
           retry = _.after 2, =>
