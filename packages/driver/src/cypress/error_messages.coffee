@@ -624,24 +624,39 @@ module.exports = {
       You passed: #{format(staticResponse)}
     """
     warn_multiple_next_calls: ({ route, req }) -> """
-      next() was called multiple times in a request handler, but the request can only be passed on once, so any subsequent calls will be ignored.
+      next() was called multiple times in a request handler, but the request can only be passed on once, so this call was ignored.
 
       Route: #{format(route)}
 
       Intercepted request: #{format(req)}
     """
     warn_multiple_reply_calls: ({ route, req }) -> """
-      req.reply() was called multiple times in a request handler, but a request can only be replied to once, so any subsequent calls will be ignored.
+      req.reply() was called multiple times in a request handler, but a request can only be replied to once, so this call was ignored.
 
       Route: #{format(route)}
 
       Intercepted request: #{format(req)}
     """
     warn_multiple_send_calls: ({ res }) -> """
-      res.send() was called multiple times in a response handler, but the response can only be sent once, so any subsequent calls will be ignored.
+      res.send() was called multiple times in a response handler, but the response can only be sent once, so this call was ignored.
 
       Response: #{format(res)}
     """
+    warn_next_called_after_reply: ({ route, req }) -> """
+      next() was called after req.reply() in a request handler, but next() can not be called after the response has been started, so this call was ignored.
+
+      Route: #{format(route)}
+
+      Intercepted request: #{format(req)}
+    """
+    warn_reply_called_after_next: ({ route, req }) -> """
+      req.reply() was called after next() in a request handler, but req.reply() can not be called after the request has been passed on, so this call was ignored.
+
+      Route: #{format(route)}
+
+      Intercepted request: #{format(req)}
+    """
+
 
   ng:
     no_global: "Angular global (window.angular) was not found in your window. You cannot use #{cmd('ng')} methods without angular."

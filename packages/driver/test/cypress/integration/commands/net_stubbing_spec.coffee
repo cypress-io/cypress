@@ -388,6 +388,33 @@ describe "src/cy/commands/net_stubbing", ->
 
             done()
 
+      context "request handler chaining", ->
+        it "passes request through in order using next()", () ->
+          cy.route "/dump-method", (req, next) ->
+            expect(req.method).to.eq('GET')
+            req.method = 'POST'
+            next()
+          .route "/dump-method", (req, next) ->
+            expect(req.method).to.eq('POST')
+            req.method = 'PATCH'
+            next()
+          .route "/dump-method", (req) ->
+            expect(req.method).to.eq('PATCH')
+            req.reply()
+          .visit "/dump-method"
+          .contains "PATCH"
+
+        it "stops passing request through once req.reply called", () ->
+          cy.route "/dump-method", (req, next) ->
+            expect(req.method).to.eq('GET')
+            req.method = 'POST'
+            next()
+          .route "/dump-method", (req) ->
+            expect(req.method).to.eq('POST')
+            req.reply()
+          .visit "/dump-method"
+          .contains "POST"
+
       context "errors + warnings", ->
         it "warns if req.reply is called twice in req handler", (done) ->
           cy.spy(Cypress.utils, 'warnByPath')
@@ -412,21 +439,70 @@ describe "src/cy/commands/net_stubbing", ->
           cy.spy(Cypress.utils, 'warnByPath')
 
           cy.route "/dump-method", (req, next) ->
+            next()
+            next()
+          .then =>
+            xhr = new XMLHttpRequest
+            xhr.open("GET", "/dump-method")
+            xhr.send()
+
+            xhr.onload = =>
+              expect(Cypress.utils.warnByPath).to.be.calledOnce
+              expect(Cypress.utils.warnByPath).to.be.calledWithMatch("net_stubbing.warn_multiple_next_calls", {
+                args: {
+                  route: {
+                    "url": "/dump-method"
+                  },
+                  req: Cypress.sinon.match.any
+                }
+              })
+              done()
+
+        it "warns if next is called after req.reply in req handler", (done) ->
+          cy.spy(Cypress.utils, 'warnByPath')
+
+          cy.route "/dump-method", (req, next) ->
             req.reply()
             next()
-            next()
-          .visit("/dump-method")
           .then =>
-            expect(Cypress.utils.warnByPath).to.be.calledOnce
-            expect(Cypress.utils.warnByPath).to.be.calledWithMatch("net_stubbing.warn_multiple_next_calls", {
-              args: {
-                route: {
-                  "url": "/dump-method"
-                },
-                req: Cypress.sinon.match.any
-              }
-            })
-            done()
+            xhr = new XMLHttpRequest
+            xhr.open("GET", "/dump-method")
+            xhr.send()
+
+            xhr.onload = =>
+              expect(Cypress.utils.warnByPath).to.be.calledOnce
+              expect(Cypress.utils.warnByPath).to.be.calledWithMatch("net_stubbing.warn_next_called_after_reply", {
+                args: {
+                  route: {
+                    "url": "/dump-method"
+                  },
+                  req: Cypress.sinon.match.any
+                }
+              })
+              done()
+
+        it "warns if req.reply is called after next in req handler", (done) ->
+          cy.spy(Cypress.utils, 'warnByPath')
+
+          cy.route "/dump-method", (req, next) ->
+            next()
+            req.reply()
+          .then =>
+            xhr = new XMLHttpRequest
+            xhr.open("GET", "/dump-method")
+            xhr.send()
+
+            xhr.onload = =>
+              expect(Cypress.utils.warnByPath).to.be.calledOnce
+              expect(Cypress.utils.warnByPath).to.be.calledWithMatch("net_stubbing.warn_reply_called_after_next", {
+                args: {
+                  route: {
+                    "url": "/dump-method"
+                  },
+                  req: Cypress.sinon.match.any
+                }
+              })
+              done()
 
     context "intercepting response", ->
       it "receives the original response in handler", (done) ->
@@ -517,15 +593,14 @@ describe "src/cy/commands/net_stubbing", ->
         cy.route "/timeout", (req) =>
           req.reply (res) =>
             @start = Date.now()
-            ## TODO: support string notation here?
-            res.throttle(kbps).send({ statusCode: 200, body: payload })
+            res.throttle(kbps).send(payload)
         .then =>
           xhr = new XMLHttpRequest()
           xhr.open("GET", "/timeout")
           xhr.send()
 
           xhr.onload = =>
-            expect(Date.now() - @start).to.be.closeTo(expectedSeconds * 1000, 100)
+            expect(Date.now() - @start).to.be.closeTo(expectedSeconds * 1000, 250)
             expect(xhr.responseText).to.eq(payload)
             done()
 

@@ -406,8 +406,10 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
     let nextCalled = false
     let replyCalled = false
+    let continueSent = false
 
     const sendContinueFrame = () => {
+      continueSent = true
       // copy changeable attributes of userReq to req in frame
       // @ts-ignore
       continueFrame.req = {
@@ -430,6 +432,10 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
     const userReq : CyHttpMessages.IncomingHTTPRequest = {
       ...req,
       reply (responseHandler, maybeBody?, maybeHeaders?) {
+        if (nextCalled) {
+          return utils.warnByPath('net_stubbing.warn_reply_called_after_next', { args: { route: route.options, req } })
+        }
+
         if (replyCalled) {
           return utils.warnByPath('net_stubbing.warn_multiple_reply_calls', { args: { route: route.options, req } })
         }
@@ -439,6 +445,7 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
         const staticResponse = _parseStaticResponseShorthand(responseHandler, maybeBody, maybeHeaders)
 
         if (staticResponse) {
+          // TODO: _validateStaticResponse - but where does the error go?
           responseHandler = staticResponse
         }
 
@@ -458,6 +465,10 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
           // `replyHandler` is a StaticResponse
           continueFrame.staticResponse = <StaticResponse>responseHandler
         }
+
+        if (!continueSent) {
+          sendContinueFrame()
+        }
       },
       redirect (location, statusCode = 302) {
         userReq.reply({
@@ -474,8 +485,23 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
     const handler = route.handler as Function
 
+    if (!_.isFunction(handler)) {
+      return sendContinueFrame()
+    }
+
+    if (handler.length === 1) {
+      // did not consume next(), so continue synchronously
+      handler(userReq)
+
+      return sendContinueFrame()
+    }
+
     // next() can be called to pass this to the next route
     const next = () => {
+      if (replyCalled) {
+        return utils.warnByPath('net_stubbing.warn_next_called_after_reply', { args: { route: route.options, req } })
+      }
+
       if (nextCalled) {
         return utils.warnByPath('net_stubbing.warn_multiple_next_calls', { args: { route: route.options, req } })
       }
@@ -484,17 +510,6 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
       continueFrame.tryNextRoute = true
       sendContinueFrame()
-    }
-
-    if (!_.isFunction(handler)) {
-      return next()
-    }
-
-    if (handler.length === 1) {
-      // did not consume next(), so call it synchronously
-      handler(userReq)
-
-      return next()
     }
 
     // rely on handler to call next()
@@ -533,6 +548,7 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
         const shorthand = _parseStaticResponseShorthand(staticResponse, maybeBody, maybeHeaders)
 
         if (shorthand) {
+          // TODO: _validateStaticResponse - but where does the error go?
           staticResponse = shorthand
         }
 
