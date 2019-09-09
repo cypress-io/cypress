@@ -1,17 +1,3 @@
-# fs = require('fs-extra')
-
-# fs.ensureFileSync('./logFile.log')
-# logStream = fs.createWriteStream('./logFile.log', {flags: 'a'})
-
-# process.stdout.pipe(logStream)
-# process.stderr.pipe(logStream)
-
-# process.on('close', (code) ->
-#   console.log('child process exited with code ' + code)
-# )
-
-
-
 _            = require("lodash")
 exphbs       = require("express-handlebars")
 url          = require("url")

@@ -19,19 +19,22 @@ const promisify = (fn) => {
   }
 }
 
-const driver = new Marionette.Drivers.Tcp({})
-
-const connect = Promise.promisify(driver.connect.bind(driver))
-const driverSend = promisify(driver.send.bind(driver))
-
-const send = (data) => {
-  return driverSend(new Command(data))
-}
+let send
 
 module.exports = {
   send,
 
   setup (extensions, url) {
+
+    const driver = new Marionette.Drivers.Tcp({})
+
+    const connect = Promise.promisify(driver.connect.bind(driver))
+    const driverSend = promisify(driver.send.bind(driver))
+
+    send = (data) => {
+      return driverSend(new Command(data))
+    }
+
     debug('firefox: navigating page with webdriver')
 
     return connect()
