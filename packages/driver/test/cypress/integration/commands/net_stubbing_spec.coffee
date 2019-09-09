@@ -165,21 +165,89 @@ describe "src/cy/commands/net_stubbing", ->
 
         @testRoute(options, handler, expectedEvent, expectedRoute)
 
+      context "errors", ->
+        beforeEach ->
+          @logs = []
+
+          cy.on "log:added", (attrs, log) =>
+            @lastLog = log
+
+        context "with invalid handler", ->
+          [
+            false,
+            undefined,
+            null
+          ].forEach (handler) ->
+            name = String(handler)
+
+            it "#{name} fails", (done) ->
+              cy.on "fail", (err) =>
+                expect(err).to.eq(@lastLog.get('error'))
+                expect(err.message).to.contain("You passed: #{name}")
+                done()
+
+              cy.route('/', handler)
+
+        context "with invalid StaticResponse", ->
+          [
+            [ "destroySocket set but not alone", { destroySocket: true, body: "aaa" }, "must be the only option" ],
+            [ "body set to an object", { body: { a: 'b' } }, "must be a string" ],
+            [ "statusCode out of range", { statusCode: -1 }, "must be a number", ],
+            [ "headers invalid type", { headers: { a: { 1: 2 }}}, "must be a map" ]
+          ].forEach ([ name, handler, expectedErr ]) ->
+            it "#{name} fails", (done) ->
+              cy.on "fail", (err) =>
+                expect(err).to.eq(@lastLog.get('error'))
+                expect(err.message).to.contain(expectedErr)
+                expect(err.message).to.contain("You passed: #{JSON.stringify(handler, null, 2)}")
+                done()
+
+              cy.route('/', handler)
+
     context "stubbing with static responses", ->
-      it "works with static body as string", ->
+      it "can stub a response with static body as string", (done) ->
         cy.route({
           url: "*"
         }, "hello world")
+        .then =>
+          xhr = new XMLHttpRequest
+          xhr.open("GET", "/abc123")
+          xhr.send()
 
-        xhr = new XMLHttpRequest()
-        xhr.open("GET", "/abc123")
-        xhr.send()
+          xhr.onload = =>
+            expect(xhr.status).to.eq(200)
+            expect(xhr.responseText).to.eq("hello world")
+            done()
 
       it "can stub a cy.visit with static body", ->
         cy.route("/foo", "<html>hello cruel world</html>")
         .visit("/foo")
         .document()
         .should("contain.text", "hello cruel world")
+
+      it "can stub a response with an empty StaticResponse", (done) ->
+        cy.route("/", {})
+        .then =>
+          xhr = new XMLHttpRequest
+          xhr.open('GET', '/')
+          xhr.send()
+
+          xhr.onload = =>
+            expect(xhr.status).to.eq(200)
+            expect(xhr.responseText).to.eq("")
+            done()
+
+      it "can stub a response with a network error", (done) ->
+        cy.route("/", { destroySocket: true })
+        .then =>
+          xhr = new XMLHttpRequest
+          xhr.open('GET', '/')
+          xhr.send()
+
+          xhr.onerror = =>
+            expect(xhr.readyState).to.eq(4)
+            expect(xhr.status).to.eq(0)
+            done()
 
     context "stubbing with dynamic response", ->
       it "receives the original request in handler", (done) ->
@@ -320,6 +388,46 @@ describe "src/cy/commands/net_stubbing", ->
 
             done()
 
+      context "errors + warnings", ->
+        it "warns if req.reply is called twice in req handler", (done) ->
+          cy.spy(Cypress.utils, 'warnByPath')
+
+          cy.route "/dump-method", (req) ->
+            req.reply()
+            req.reply()
+          .visit("/dump-method")
+          .then =>
+            expect(Cypress.utils.warnByPath).to.be.calledOnce
+            expect(Cypress.utils.warnByPath).to.be.calledWithMatch("net_stubbing.warn_multiple_reply_calls", {
+              args: {
+                route: {
+                  "url": "/dump-method"
+                },
+                req: Cypress.sinon.match.any
+              }
+            })
+            done()
+
+        it "warns if next is called twice in req handler", (done) ->
+          cy.spy(Cypress.utils, 'warnByPath')
+
+          cy.route "/dump-method", (req, next) ->
+            req.reply()
+            next()
+            next()
+          .visit("/dump-method")
+          .then =>
+            expect(Cypress.utils.warnByPath).to.be.calledOnce
+            expect(Cypress.utils.warnByPath).to.be.calledWithMatch("net_stubbing.warn_multiple_next_calls", {
+              args: {
+                route: {
+                  "url": "/dump-method"
+                },
+                req: Cypress.sinon.match.any
+              }
+            })
+            done()
+
     context "intercepting response", ->
       it "receives the original response in handler", (done) ->
         cy.route "/json-content-type", (req) ->
@@ -349,7 +457,7 @@ describe "src/cy/commands/net_stubbing", ->
             expect(xhr.responseText).to.eq("X".repeat(1024 * 1024))
             done()
 
-      it "can delay a proxy response", (done) ->
+      it "can delay a proxy response using res.delay", (done) ->
         cy.route "/timeout", (req) =>
           req.reply (res) =>
             @start = Date.now()
@@ -364,7 +472,25 @@ describe "src/cy/commands/net_stubbing", ->
             expect(xhr.responseText).to.eq("delay worked")
             done()
 
-      it "can throttle a proxy response", (done) ->
+      it "can 'delay' a proxy response using setTimeout", (done) ->
+        cy.route "/timeout", (req) =>
+          req.reply (res) =>
+            @start = Date.now()
+
+            setTimeout =>
+              res.send("setTimeout worked")
+            , 1000
+        .then =>
+          xhr = new XMLHttpRequest()
+          xhr.open("GET", "/timeout")
+          xhr.send()
+
+          xhr.onload = =>
+            expect(Date.now() - @start).to.be.closeTo(1000, 100)
+            expect(xhr.responseText).to.eq("setTimeout worked")
+            done()
+
+      it "can throttle a proxy response using res.throttle", (done) ->
         cy.route "/1mb", (req) =>
           ## don't let gzip make response smaller and throw off the timing
           delete req.headers['accept-encoding']
@@ -383,7 +509,7 @@ describe "src/cy/commands/net_stubbing", ->
             expect(xhr.responseText).to.eq("X".repeat(1024 * 1024))
             done()
 
-      it "can throttle a static response", (done) ->
+      it "can throttle a static response using res.throttle", (done) ->
         payload = "A".repeat(10 * 1024)
         kbps = 10
         expectedSeconds = payload.length / (1024 * kbps)
@@ -424,6 +550,20 @@ describe "src/cy/commands/net_stubbing", ->
           xhr.onload = =>
             expect(Date.now() - @start).to.be.closeTo(expectedSeconds * 1000, 100)
             expect(xhr.responseText).to.eq(payload)
+            done()
+
+      context "errors + warnings", ->
+        it "warns if res.send is called twice in req handler", (done) ->
+          cy.spy(Cypress.utils, 'warnByPath')
+
+          cy.route "/dump-method", (req) ->
+            req.reply (res) ->
+              res.send()
+              res.send()
+          .visit("/dump-method")
+          .then =>
+            expect(Cypress.utils.warnByPath).to.be.calledOnce
+            expect(Cypress.utils.warnByPath).to.be.calledWithMatch("net_stubbing.warn_multiple_send_calls")
             done()
 
     context "intercepting response errors", ->

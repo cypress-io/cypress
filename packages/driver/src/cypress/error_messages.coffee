@@ -612,6 +612,37 @@ module.exports = {
       When this 'load' event occurs, Cypress will continue running commands.
     """
 
+  net_stubbing:
+    invalid_handler: ({ handler }) -> """
+      #{cmd('route')}'s `handler` argument must be a String, StaticResponse, HttpController function, or WebSocketController.
+
+      You passed: #{format(handler)}
+    """
+    invalid_static_response: ({ err, staticResponse }) -> """
+      An invalid StaticResponse was supplied to #{cmd('route')}. #{err.message}
+
+      You passed: #{format(staticResponse)}
+    """
+    warn_multiple_next_calls: ({ route, req }) -> """
+      next() was called multiple times in a request handler, but the request can only be passed on once, so any subsequent calls will be ignored.
+
+      Route: #{format(route)}
+
+      Intercepted request: #{format(req)}
+    """
+    warn_multiple_reply_calls: ({ route, req }) -> """
+      req.reply() was called multiple times in a request handler, but a request can only be replied to once, so any subsequent calls will be ignored.
+
+      Route: #{format(route)}
+
+      Intercepted request: #{format(req)}
+    """
+    warn_multiple_send_calls: ({ res }) -> """
+      res.send() was called multiple times in a response handler, but the response can only be sent once, so any subsequent calls will be ignored.
+
+      Response: #{format(res)}
+    """
+
   ng:
     no_global: "Angular global (window.angular) was not found in your window. You cannot use #{cmd('ng')} methods without angular."
 
@@ -1090,7 +1121,7 @@ module.exports = {
 
         #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
       """
-      
+
     specify_file_by_relative_path: """
       #{cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
 

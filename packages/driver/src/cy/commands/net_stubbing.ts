@@ -1,6 +1,8 @@
 import * as _ from 'lodash'
 import * as Promise from 'bluebird'
 
+const utils = require('../../cypress/utils')
+
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
   'body', // doesn't exist on the OG message, but will be attached by the backend
@@ -308,6 +310,26 @@ function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHe
   }
 }
 
+function _validateStaticResponse (staticResponse: StaticResponse): void {
+  const { body, statusCode, headers, destroySocket } = staticResponse
+
+  if (destroySocket && (body || statusCode || headers)) {
+    throw new Error('`destroySocket`, if passed, must be the only option in the StaticResponse.')
+  }
+
+  if (body && !_.isString(body)) {
+    throw new Error('`body` must be a string.')
+  }
+
+  if (statusCode && !(_.isNumber(statusCode) && _.inRange(statusCode, 0, 999))) {
+    throw new Error('`statusCode` must be a number between 0 and 999.')
+  }
+
+  if (headers && _.keys(_.omitBy(headers, _.isString))) {
+    throw new Error('`headers` must be a map of strings to strings.')
+  }
+}
+
 export function registerCommands (Commands, Cypress, /** cy, state, config */) {
   // TODO: figure out what to do for XHR compatibility
 
@@ -332,12 +354,17 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
       case typeof handler === 'string':
         frame.staticResponse = { body: <string>handler }
         break
-      case typeof handler === 'object':
-        // TODO: automatically JSONify staticResponse.body objects
+      case typeof handler === 'object' && !_.isNull(handler):
+        try {
+          _validateStaticResponse(<StaticResponse>handler)
+        } catch (err) {
+          return utils.throwErrByPath('net_stubbing.invalid_static_response', { args: { err, staticResponse: handler } })
+        }
+
         frame.staticResponse = <StaticResponse>handler
         break
       default:
-        // TODO: warn that only string, object, HttpController, or WebSocketController allowed
+        return utils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
     }
 
     routes[handlerId] = {
@@ -377,14 +404,10 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
       requestId,
     }
 
-    let continueSent = false
+    let nextCalled = false
+    let replyCalled = false
 
     const sendContinueFrame = () => {
-      if (continueSent) {
-        throw new Error('Cannot continue a request twice.')
-      }
-
-      continueSent = true
       // copy changeable attributes of userReq to req in frame
       // @ts-ignore
       continueFrame.req = {
@@ -402,10 +425,17 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
       return sendContinueFrame()
     }
 
+    route.hitCount++
+
     const userReq : CyHttpMessages.IncomingHTTPRequest = {
       ...req,
       reply (responseHandler, maybeBody?, maybeHeaders?) {
-        // TODO: this can only be called once
+        if (replyCalled) {
+          return utils.warnByPath('net_stubbing.warn_multiple_reply_calls', { args: { route: route.options, req } })
+        }
+
+        replyCalled = true
+
         const staticResponse = _parseStaticResponseShorthand(responseHandler, maybeBody, maybeHeaders)
 
         if (staticResponse) {
@@ -446,7 +476,12 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
     // next() can be called to pass this to the next route
     const next = () => {
-      // TODO: this can only be called once
+      if (nextCalled) {
+        return utils.warnByPath('net_stubbing.warn_multiple_next_calls', { args: { route: route.options, req } })
+      }
+
+      nextCalled = true
+
       continueFrame.tryNextRoute = true
       sendContinueFrame()
     }
@@ -469,6 +504,7 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
   function _onResponseReceived (frame: NetEventFrames.HttpResponseReceived) {
     const { res, requestId, routeHandlerId } = frame
     const request = requests[requestId]
+    let sendCalled = false
 
     const continueFrame : NetEventFrames.HttpResponseContinue = {
       routeHandlerId,
@@ -488,6 +524,12 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
     const userRes : CyHttpMessages.IncomingHttpResponse = {
       ...res,
       send (staticResponse, maybeBody?, maybeHeaders?) {
+        if (sendCalled) {
+          return utils.warnByPath('net_stubbing.warn_multiple_send_calls', { args: { res } })
+        }
+
+        sendCalled = true
+
         const shorthand = _parseStaticResponseShorthand(staticResponse, maybeBody, maybeHeaders)
 
         if (shorthand) {
