@@ -130,14 +130,9 @@ patchRunnableResetTimeout = ->
   Runnable::resetTimeout = ->
     runnable = @
 
-    console.log(@)
-    ms = 15000 #@timeout() or 1e9
+    ms = @timeout() or 1e9
 
-    # @clearTimeout()
-
-    # @timeout(10000)
-    # @_timeout = 5000
-
+    @clearTimeout()
 
     getErrPath = ->
       ## we've yield an explicit done callback
