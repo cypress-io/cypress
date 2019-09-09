@@ -3,9 +3,10 @@ import concatStream from 'concat-stream'
 import debugModule from 'debug'
 import { IncomingMessage, ServerResponse } from 'http'
 import minimatch from 'minimatch'
-import { Readable } from 'stream'
+import { PassThrough, Readable } from 'stream'
 import Throttle from 'throttle'
 import url from 'url'
+import zlib from 'zlib'
 // TODO: figure out the right way to make these types accessible in server and driver
 import {
   CyHttpMessages,
@@ -48,7 +49,7 @@ interface BackendRequest {
   continueResponse?: Function
   req: ProxyIncomingMessage
   res: ServerResponse & { body?: string | any }
-  resStream: any
+  resStream?: any
   /**
    * Should the response go to the driver, or should it be allowed to continue?
    */
@@ -82,6 +83,10 @@ function _getAllStringMatcherFields (options) {
       )
     )
   )
+}
+
+function _isResGzipped (res: ServerResponse) {
+  return res.headers['content-encoding'] === 'gzip'
 }
 
 function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
@@ -375,10 +380,15 @@ function _onRequestContinue (frame: NetEventFrames.HttpRequestContinue, socket: 
   // proxiedUrl is used to initialize the new request
   backendRequest.req.proxiedUrl = frame.req.url
 
+  // update problematic headers
   // update content-length if available
   if (backendRequest.req.headers['content-length'] && frame.req.body) {
     backendRequest.req.headers['content-length'] = frame.req.body.length
   }
+
+  // TODO: see if we should implement a way to override this
+  // prevent cached responses from being received
+  delete backendRequest.req.headers['if-none-match']
 
   if (frame.hasResponseHandler) {
     backendRequest.sendResponseToDriver = true
@@ -464,10 +474,24 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
     }) as CyHttpMessages.IncomingResponseSuccess,
   }
 
+  const res = frame.res as CyHttpMessages.IncomingResponseSuccess
+
+  function emit () {
+    _emit(project.server._socket, 'http:response:received', frame)
+  }
+
   resStream.pipe(concatStream((resBody) => {
     // @ts-ignore
-    frame.res.body = resBody.toString()
-    _emit(project.server._socket, 'http:response:received', frame)
+    if (_isResGzipped(incomingRes)) {
+      return zlib.gunzip(resBody, (err, extracted) => {
+        // TODO: handle encoding errors or just pass it on?
+        res.body = extracted.toString()
+        emit()
+      })
+    }
+
+    res.body = resBody.toString()
+    emit()
   }))
 }
 
@@ -481,6 +505,11 @@ function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
   const { res } = backendRequest
 
   debug('_onResponseContinue %o', { backendRequest: _.omit(backendRequest, 'res.body'), frame: _.omit(frame, 'res.body') })
+
+  debug({
+    // 'first 10 chars of backendRequest.res.body': backendRequest.res.body.slice(0, 10),
+    'first 10 chars of frame.res.body': _.get(frame, 'res.body', '').slice(0, 10),
+  })
 
   function continueResponse () {
     function throttleify (body) {
@@ -501,15 +530,34 @@ function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
     }
 
     // merge the changed response attributes with our response and continue
-    _.assign(backendRequest.res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
+    _.assign(res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
 
-    if (frame.throttleKbps) {
-      backendRequest.resStream = throttleify(res.body)
+    function sendBody (bodyBuffer) {
+      // transform the body string into stream format
+      if (frame.throttleKbps) {
+        backendRequest.resStream = throttleify(bodyBuffer)
+      } else {
+        const pt = new PassThrough()
+
+        pt.write(bodyBuffer)
+        pt.end()
+
+        backendRequest.resStream = pt
+      }
+
+      // TODO: this won't quite work for onProxiedResponseError?
+      // @ts-ignore
+      backendRequest.continueResponse(backendRequest.resStream)
     }
 
-    // TODO: this won't quite work for onProxiedResponseError
-    // @ts-ignore
-    backendRequest.continueResponse(backendRequest.resStream)
+    // regzip, if it should be
+    if (_isResGzipped(res)) {
+      return zlib.gzip(res.body, (err, body) => {
+        sendBody(body)
+      })
+    }
+
+    sendBody(res.body)
   }
 
   if (typeof frame.continueResponseAt === 'number') {

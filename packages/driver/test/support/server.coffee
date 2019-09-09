@@ -58,7 +58,7 @@ niv.install("react-dom@15.6.1")
       res.send(bytes)
 
   app.get '/1mb', (req, res) ->
-    res.type('text').send('*'.repeat(1024 / 1024 * 1024))
+    res.type('text').send('X'.repeat(1024 * 1024))
 
   app.get "/basic_auth", (req, res) ->
     user = auth(req)

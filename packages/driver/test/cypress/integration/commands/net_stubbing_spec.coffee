@@ -335,10 +335,8 @@ describe "src/cy/commands/net_stubbing", ->
           xhr.open("GET", "/json-content-type")
           xhr.send()
 
-      it.only "can intercept a large proxy response", (done) ->
+      it "can intercept a large proxy response", (done) ->
         cy.route "/1mb", (req) =>
-          delete req.headers['if-none-match'] ## TODO: handle 304's better than force disabling them
-
           req.reply (res) =>
             res.send()
         .then =>
@@ -347,7 +345,8 @@ describe "src/cy/commands/net_stubbing", ->
           xhr.send()
 
           xhr.onload = =>
-            expect(xhr.responseText).to.eq("B".repeat(1024 * 1024))
+            ## TODO: if this fails, browser totally locks up :S
+            expect(xhr.responseText).to.eq("X".repeat(1024 * 1024))
             done()
 
       it "can delay a proxy response", (done) ->
@@ -365,9 +364,10 @@ describe "src/cy/commands/net_stubbing", ->
             expect(xhr.responseText).to.eq("delay worked")
             done()
 
-      it.skip "can throttle a proxy response", (done) ->
+      it "can throttle a proxy response", (done) ->
         cy.route "/1mb", (req) =>
-          delete req.headers['if-none-match'] ## TODO: handle 304's better than force disabling them
+          ## don't let gzip make response smaller and throw off the timing
+          delete req.headers['accept-encoding']
 
           req.reply (res) =>
             @start = Date.now()
@@ -378,8 +378,9 @@ describe "src/cy/commands/net_stubbing", ->
           xhr.send()
 
           xhr.onload = =>
+            ## 1MB @ 1MB/s = ~1 second
             expect(Date.now() - @start).to.be.closeTo(1000, 250)
-            expect(xhr.responseText).to.eq("B".repeat(1024 * 1024))
+            expect(xhr.responseText).to.eq("X".repeat(1024 * 1024))
             done()
 
       it "can throttle a static response", (done) ->
@@ -388,8 +389,6 @@ describe "src/cy/commands/net_stubbing", ->
         expectedSeconds = payload.length / (1024 * kbps)
 
         cy.route "/timeout", (req) =>
-          delete req.headers['if-none-match'] ## TODO: handle 304's better than force disabling them
-
           req.reply (res) =>
             @start = Date.now()
             ## TODO: support string notation here?
@@ -414,8 +413,6 @@ describe "src/cy/commands/net_stubbing", ->
         expectedSeconds += delayMs/1000
 
         cy.route "/timeout", (req) =>
-          delete req.headers['if-none-match']
-
           req.reply (res) =>
             @start = Date.now()
             res.throttle(kbps).delay(delayMs).send({ statusCode: 200, body: payload })

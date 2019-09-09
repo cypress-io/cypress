@@ -202,6 +202,7 @@ module.exports = {
       if responseMustHaveEmptyBody(req.method, statusCode)
         return res.end()
 
+      ## TODO: move all of this into net_stubbing, so we don't have to double-gzip?
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
       if wantsInjection

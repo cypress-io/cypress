@@ -57,6 +57,10 @@ declare module 'https' {
   }
 }
 
+declare interface InternalStream {
+  queue(str: string | null): void
+}
+
 declare module 'net' {
   type family = 4 | 6
   type TCPSocket = {}
