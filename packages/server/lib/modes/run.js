@@ -1,75 +1,86 @@
-_          = require("lodash")
-pkg        = require("@packages/root")
-path       = require("path")
-chalk      = require("chalk")
-human      = require("human-interval")
-debug      = require("debug")("cypress:server:run")
-Promise    = require("bluebird")
-logSymbols = require("log-symbols")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _          = require("lodash");
+const pkg        = require("@packages/root");
+const path       = require("path");
+const chalk      = require("chalk");
+const human      = require("human-interval");
+const debug      = require("debug")("cypress:server:run");
+const Promise    = require("bluebird");
+const logSymbols = require("log-symbols");
 
-recordMode = require("./record")
-errors     = require("../errors")
-Project    = require("../project")
-Reporter   = require("../reporter")
-browsers   = require("../browsers")
-openProject = require("../open_project")
-videoCapture = require("../video_capture")
-Windows    = require("../gui/windows")
-fs         = require("../util/fs")
-env        = require("../util/env")
-trash      = require("../util/trash")
-random     = require("../util/random")
-system     = require("../util/system")
-duration   = require("../util/duration")
-terminal   = require("../util/terminal")
-specsUtil  = require("../util/specs")
-humanTime  = require("../util/human_time")
-electronApp = require("../util/electron_app")
-chromePolicyCheck = require("../util/chrome_policy_check")
+const recordMode = require("./record");
+const errors     = require("../errors");
+const Project    = require("../project");
+const Reporter   = require("../reporter");
+const browsers   = require("../browsers");
+const openProject = require("../open_project");
+const videoCapture = require("../video_capture");
+const Windows    = require("../gui/windows");
+const fs         = require("../util/fs");
+const env        = require("../util/env");
+const trash      = require("../util/trash");
+const random     = require("../util/random");
+const system     = require("../util/system");
+const duration   = require("../util/duration");
+const terminal   = require("../util/terminal");
+const specsUtil  = require("../util/specs");
+const humanTime  = require("../util/human_time");
+const electronApp = require("../util/electron_app");
+const chromePolicyCheck = require("../util/chrome_policy_check");
 
-DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+const DELAY_TO_LET_VIDEO_FINISH_MS = 1000;
 
-color = (val, c) ->
-  chalk[c](val)
+const color = (val, c) => chalk[c](val);
 
-gray = (val) ->
-  color(val, "gray")
+const gray = val => color(val, "gray");
 
-colorIf = (val, c) ->
-  if val is 0
-    val = "-"
-    c = "gray"
+const colorIf = function(val, c) {
+  if (val === 0) {
+    val = "-";
+    c = "gray";
+  }
 
-  color(val, c)
+  return color(val, c);
+};
 
-getSymbol = (num) ->
-  if num then logSymbols.error else logSymbols.success
+const getSymbol = function(num) {
+  if (num) { return logSymbols.error; } else { return logSymbols.success; }
+};
 
-formatBrowser = (browser) ->
-  ## todo finish browser
+const formatBrowser = browser =>
+  //# todo finish browser
   _.compact([
     browser.displayName,
     browser.majorVersion,
-    browser.isHeadless and gray("(headless)")
+    browser.isHeadless && gray("(headless)")
   ]).join(" ")
+;
 
-formatFooterSummary = (results) ->
-  { totalFailed, runs } = results
+const formatFooterSummary = function(results) {
+  const { totalFailed, runs } = results;
 
-  ## pass or fail color
-  c = if totalFailed then "red" else "green"
+  //# pass or fail color
+  const c = totalFailed ? "red" : "green";
 
-  phrase = do ->
-    ## if we have any specs failing...
-    if not totalFailed
-      return "All specs passed!"
+  const phrase = (function() {
+    //# if we have any specs failing...
+    if (!totalFailed) {
+      return "All specs passed!";
+    }
 
-    ## number of specs
-    total = runs.length
-    failingRuns = _.filter(runs, "stats.failures").length
-    percent = Math.round(failingRuns / total * 100)
+    //# number of specs
+    const total = runs.length;
+    const failingRuns = _.filter(runs, "stats.failures").length;
+    const percent = Math.round((failingRuns / total) * 100);
 
-    "#{failingRuns} of #{total} failed (#{percent}%)"
+    return `${failingRuns} of ${total} failed (${percent}%)`;
+  })();
 
   return [
     color(phrase, c),
@@ -79,754 +90,824 @@ formatFooterSummary = (results) ->
     colorIf(totalFailed, "red"),
     colorIf(results.totalPending, "cyan"),
     colorIf(results.totalSkipped, "blue"),
-  ]
+  ];
+};
 
-formatSpecSummary = (name, failures) ->
+const formatSpecSummary = (name, failures) =>
   [
     getSymbol(failures),
     color(name, "reset")
   ]
   .join(" ")
+;
 
-formatRecordParams = (runUrl, parallel, group) ->
-  if runUrl
-    group or= false
-    "Group: #{group}, Parallel: #{Boolean(parallel)}"
+const formatRecordParams = function(runUrl, parallel, group) {
+  if (runUrl) {
+    if (!group) { group = false; }
+    return `Group: ${group}, Parallel: ${Boolean(parallel)}`;
+  }
+};
 
-formatSpecPattern = (specPattern) ->
-  if specPattern
-    specPattern.join(", ")
+const formatSpecPattern = function(specPattern) {
+  if (specPattern) {
+    return specPattern.join(", ");
+  }
+};
 
-formatSpecs = (specs) ->
-  names = _.map(specs, "name")
+const formatSpecs = function(specs) {
+  const names = _.map(specs, "name");
 
-  ## 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-  [
-    "#{names.length} found "
+  //# 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
+  return [
+    `${names.length} found `,
     gray("("),
     gray(names.join(', ')),
     gray(")")
   ]
-  .join("")
+  .join("");
+};
 
-displayRunStarting = (options = {}) ->
-  { specs, specPattern, browser, runUrl, parallel, group } = options
+const displayRunStarting = function(options = {}) {
+  const { specs, specPattern, browser, runUrl, parallel, group } = options;
 
-  console.log("")
+  console.log("");
 
-  terminal.divider("=")
+  terminal.divider("=");
 
-  console.log("")
+  console.log("");
 
   terminal.header("Run Starting", {
     color: ["reset"]
-  })
+  });
 
-  console.log("")
+  console.log("");
 
-  table = terminal.table({
-    colWidths: [12, 88]
+  const table = terminal.table({
+    colWidths: [12, 88],
     type: "outsideBorder"
-  })
+  });
 
-  data = _
+  const data = _
   .chain([
-    [gray("Cypress:"), pkg.version]
-    [gray("Browser:"), formatBrowser(browser)]
-    [gray("Specs:"), formatSpecs(specs)]
-    [gray("Searched:"), formatSpecPattern(specPattern)]
-    [gray("Params:"), formatRecordParams(runUrl, parallel, group)]
+    [gray("Cypress:"), pkg.version],
+    [gray("Browser:"), formatBrowser(browser)],
+    [gray("Specs:"), formatSpecs(specs)],
+    [gray("Searched:"), formatSpecPattern(specPattern)],
+    [gray("Params:"), formatRecordParams(runUrl, parallel, group)],
     [gray("Run URL:"), runUrl]
   ])
   .filter(_.property(1))
-  .value()
+  .value();
 
-  table.push(data...)
+  table.push(...data);
 
-  console.log(table.toString())
+  console.log(table.toString());
 
-  console.log("")
+  return console.log("");
+};
 
-displaySpecHeader = (name, curr, total, estimated) ->
-  console.log("")
+const displaySpecHeader = function(name, curr, total, estimated) {
+  console.log("");
 
-  PADDING = 2
+  const PADDING = 2;
 
-  table = terminal.table({
-    colWidths: [80, 20]
-    colAligns: ["left", "right"]
-    type: "pageDivider"
+  const table = terminal.table({
+    colWidths: [80, 20],
+    colAligns: ["left", "right"],
+    type: "pageDivider",
     style: {
       "padding-left": PADDING
     }
-  })
+  });
 
-  table.push(["", ""])
+  table.push(["", ""]);
   table.push([
-    "Running: " + gray(name + "..."),
-    gray("(#{curr} of #{total})")
-  ])
+    `Running: ${gray(name + "...")}`,
+    gray(`(${curr} of ${total})`)
+  ]);
 
-  console.log(table.toString())
+  console.log(table.toString());
 
-  if estimated
-    estimatedLabel = " ".repeat(PADDING) + "Estimated:"
-    console.log(estimatedLabel, gray(humanTime.long(estimated)))
-
-collectTestResults = (obj = {}, estimated) ->
-  {
-    name:        _.get(obj, 'spec.name')
-    tests:       _.get(obj, 'stats.tests')
-    passes:      _.get(obj, 'stats.passes')
-    pending:     _.get(obj, 'stats.pending')
-    failures:    _.get(obj, 'stats.failures')
-    skipped:     _.get(obj, 'stats.skipped' )
-    duration:    humanTime.long(_.get(obj, 'stats.wallClockDuration'))
-    estimated:   estimated and humanTime.long(estimated)
-    screenshots: obj.screenshots and obj.screenshots.length
-    video:       Boolean(obj.video)
+  if (estimated) {
+    const estimatedLabel = " ".repeat(PADDING) + "Estimated:";
+    return console.log(estimatedLabel, gray(humanTime.long(estimated)));
   }
+};
 
-renderSummaryTable = (runUrl) -> (results) ->
-  { runs } = results
+const collectTestResults = (obj = {}, estimated) =>
+  ({
+    name:        _.get(obj, 'spec.name'),
+    tests:       _.get(obj, 'stats.tests'),
+    passes:      _.get(obj, 'stats.passes'),
+    pending:     _.get(obj, 'stats.pending'),
+    failures:    _.get(obj, 'stats.failures'),
+    skipped:     _.get(obj, 'stats.skipped' ),
+    duration:    humanTime.long(_.get(obj, 'stats.wallClockDuration')),
+    estimated:   estimated && humanTime.long(estimated),
+    screenshots: obj.screenshots && obj.screenshots.length,
+    video:       Boolean(obj.video)
+  })
+;
 
-  console.log("")
+const renderSummaryTable = runUrl => function(results) {
+  const { runs } = results;
 
-  terminal.divider("=")
+  console.log("");
 
-  console.log("")
+  terminal.divider("=");
+
+  console.log("");
 
   terminal.header("Run Finished", {
     color: ["reset"]
-  })
+  });
 
-  if runs and runs.length
-    head =      ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
-    colAligns = ["left", "right", "right", "right", "right", "right", "right"]
-    colWidths = [39, 11, 10, 10, 10, 10, 10]
+  if (runs && runs.length) {
+    const head =      ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"];
+    const colAligns = ["left", "right", "right", "right", "right", "right", "right"];
+    const colWidths = [39, 11, 10, 10, 10, 10, 10];
 
-    table1 = terminal.table({
-      colAligns
-      colWidths
-      type: "noBorder"
+    const table1 = terminal.table({
+      colAligns,
+      colWidths,
+      type: "noBorder",
       head: _.map(head, gray)
-    })
+    });
 
-    table2 = terminal.table({
-      colAligns
-      colWidths
+    const table2 = terminal.table({
+      colAligns,
+      colWidths,
       type: "border"
-    })
+    });
 
-    table3 = terminal.table({
-      colAligns
-      colWidths
-      type: "noBorder"
-      head: formatFooterSummary(results)
+    const table3 = terminal.table({
+      colAligns,
+      colWidths,
+      type: "noBorder",
+      head: formatFooterSummary(results),
       style: {
         "padding-right": 2
       }
-    })
+    });
 
-    _.each runs, (run) ->
-      { spec, stats } = run
+    _.each(runs, function(run) {
+      const { spec, stats } = run;
 
-      ms = duration.format(stats.wallClockDuration)
+      const ms = duration.format(stats.wallClockDuration);
 
-      table2.push([
-        formatSpecSummary(spec.name, stats.failures)
-        color(ms, "gray")
-        colorIf(stats.tests, "reset")
+      return table2.push([
+        formatSpecSummary(spec.name, stats.failures),
+        color(ms, "gray"),
+        colorIf(stats.tests, "reset"),
         colorIf(stats.passes, "green"),
         colorIf(stats.failures, "red"),
         colorIf(stats.pending, "cyan"),
         colorIf(stats.skipped, "blue")
-      ])
+      ]);
+    });
 
-    console.log("")
-    console.log("")
-    console.log(terminal.renderTables(table1, table2, table3))
-    console.log("")
+    console.log("");
+    console.log("");
+    console.log(terminal.renderTables(table1, table2, table3));
+    console.log("");
 
-    if runUrl
-      console.log("")
+    if (runUrl) {
+      console.log("");
 
-      table4 = terminal.table({
-        colWidths: [100]
-        type: "pageDivider"
+      const table4 = terminal.table({
+        colWidths: [100],
+        type: "pageDivider",
         style: {
           "padding-left": 2
         }
-      })
+      });
 
-      table4.push(["", ""])
-      table4.push(["Recorded Run: " + gray(runUrl)])
+      table4.push(["", ""]);
+      table4.push([`Recorded Run: ${gray(runUrl)}`]);
 
-      console.log(terminal.renderTables(table4))
-      console.log("")
+      console.log(terminal.renderTables(table4));
+      return console.log("");
+    }
+  }
+} ;
 
-iterateThroughSpecs = (options = {}) ->
-  { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
+const iterateThroughSpecs = function(options = {}) {
+  const { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options;
 
-  serial = ->
-    Promise.mapSeries(specs, runEachSpec)
+  const serial = () => Promise.mapSeries(specs, runEachSpec);
 
-  serialWithRecord = ->
+  const serialWithRecord = () =>
     Promise
-    .mapSeries specs, (spec, index, length) ->
+    .mapSeries(specs, (spec, index, length) =>
       beforeSpecRun(spec)
-      .then ({ estimated }) ->
-        runEachSpec(spec, index, length, estimated)
-      .tap (results) ->
-        afterSpecRun(spec, results, config)
+      .then(({ estimated }) => runEachSpec(spec, index, length, estimated)).tap(results => afterSpecRun(spec, results, config))
+    )
+  ;
 
-  parallelWithRecord = (runs) ->
+  var parallelWithRecord = runs =>
     beforeSpecRun()
-    .then ({ spec, claimedInstances, totalInstances, estimated }) ->
-      ## no more specs to run?
-      if not spec
-        ## then we're done!
-        return runs
+    .then(function({ spec, claimedInstances, totalInstances, estimated }) {
+      //# no more specs to run?
+      if (!spec) {
+        //# then we're done!
+        return runs;
+      }
 
-      ## find the actual spec object amongst
-      ## our specs array since the API sends us
-      ## the relative name
-      spec = _.find(specs, { relative: spec })
+      //# find the actual spec object amongst
+      //# our specs array since the API sends us
+      //# the relative name
+      spec = _.find(specs, { relative: spec });
 
-      runEachSpec(spec, claimedInstances - 1, totalInstances, estimated)
-      .tap (results) ->
-        runs.push(results)
+      return runEachSpec(spec, claimedInstances - 1, totalInstances, estimated)
+      .tap(function(results) {
+        runs.push(results);
 
-        afterSpecRun(spec, results, config)
-      .then ->
-        ## recurse
+        return afterSpecRun(spec, results, config);}).then(() =>
+        //# recurse
         parallelWithRecord(runs)
+      );
+    })
+  ;
 
-  switch
-    when parallel
-      ## if we are running in parallel
-      ## then ask the server for the next spec
-      parallelWithRecord([])
-    when beforeSpecRun
-      ## else iterate serialially and record
-      ## the results of each spec
-      serialWithRecord()
-    else
-      ## else iterate in serial
-      serial()
+  switch (false) {
+    case !parallel:
+      //# if we are running in parallel
+      //# then ask the server for the next spec
+      return parallelWithRecord([]);
+    case !beforeSpecRun:
+      //# else iterate serialially and record
+      //# the results of each spec
+      return serialWithRecord();
+    default:
+      //# else iterate in serial
+      return serial();
+  }
+};
 
-getProjectId = Promise.method (project, id) ->
-  id ?= env.get("CYPRESS_PROJECT_ID")
+const getProjectId = Promise.method(function(project, id) {
+  if (id == null) { id = env.get("CYPRESS_PROJECT_ID"); }
 
-  ## if we have an ID just use it
-  if id
-    return id
+  //# if we have an ID just use it
+  if (id) {
+    return id;
+  }
 
-  project
+  return project
   .getProjectId()
-  .catch ->
-    ## no id no problem
-    return null
+  .catch(() =>
+    //# no id no problem
+    null
+  );
+});
 
-reduceRuns = (runs, prop) ->
-  _.reduce runs, (memo, run) ->
-    memo += _.get(run, prop)
-  , 0
+const reduceRuns = (runs, prop) =>
+  _.reduce(runs, (memo, run) => memo += _.get(run, prop)
+  , 0)
+;
 
-getRun = (run, prop) ->
-  _.get(run, prop)
+const getRun = (run, prop) => _.get(run, prop);
 
-writeOutput = (outputPath, results) ->
-  Promise.try ->
-    return if not outputPath
+const writeOutput = (outputPath, results) =>
+  Promise.try(function() {
+    if (!outputPath) { return; }
 
-    debug("saving output results as %s", outputPath)
+    debug("saving output results as %s", outputPath);
 
-    fs.outputJsonAsync(outputPath, results)
-
-onWarning = (err) ->
-  console.log(chalk.yellow(err.message))
-
-openProjectCreate = (projectRoot, socketId, options) ->
-  ## now open the project to boot the server
-  ## putting our web client app in headless mode
-  ## - NO  display server logs (via morgan)
-  ## - YES display reporter results (via mocha reporter)
-  openProject.create(projectRoot, options, {
-    socketId
-    morgan:       false
-    report:       true
-    isTextTerminal: options.isTextTerminal
-    onWarning
-    onError: (err) ->
-      console.log("")
-      if err.details
-        console.log(err.message)
-        console.log("")
-        console.log(chalk.yellow(err.details))
-      else
-        console.log(err.stack)
-      openProject.emit("exitEarlyWithErr", err.message)
+    return fs.outputJsonAsync(outputPath, results);
   })
-  .catch {portInUse: true}, (err) ->
-    ## TODO: this needs to move to emit exitEarly
-    ## so we record the failure in CI
+;
+
+const onWarning = err => console.log(chalk.yellow(err.message));
+
+const openProjectCreate = (projectRoot, socketId, options) =>
+  //# now open the project to boot the server
+  //# putting our web client app in headless mode
+  //# - NO  display server logs (via morgan)
+  //# - YES display reporter results (via mocha reporter)
+  openProject.create(projectRoot, options, {
+    socketId,
+    morgan:       false,
+    report:       true,
+    isTextTerminal: options.isTextTerminal,
+    onWarning,
+    onError(err) {
+      console.log("");
+      if (err.details) {
+        console.log(err.message);
+        console.log("");
+        console.log(chalk.yellow(err.details));
+      } else {
+        console.log(err.stack);
+      }
+      return openProject.emit("exitEarlyWithErr", err.message);
+    }
+  })
+  .catch({portInUse: true}, err =>
+    //# TODO: this needs to move to emit exitEarly
+    //# so we record the failure in CI
     errors.throw("PORT_IN_USE_LONG", err.port)
+  )
+;
 
-createAndOpenProject = (socketId, options) ->
-  { projectRoot, projectId } = options
+const createAndOpenProject = function(socketId, options) {
+  const { projectRoot, projectId } = options;
 
-  Project
+  return Project
   .ensureExists(projectRoot)
-  .then ->
-    ## open this project without
-    ## adding it to the global cache
+  .then(() =>
+    //# open this project without
+    //# adding it to the global cache
     openProjectCreate(projectRoot, socketId, options)
-    .call("getProject")
-  .then (project) ->
+    .call("getProject")).then(project =>
     Promise.props({
-      project
-      config: project.getConfig()
+      project,
+      config: project.getConfig(),
       projectId: getProjectId(project, projectId)
     })
+  );
+};
 
-removeOldProfiles = ->
+const removeOldProfiles = () =>
   browsers.removeOldProfiles()
-  .catch (err) ->
-    ## dont make removing old browsers profiles break the build
+  .catch(err =>
+    //# dont make removing old browsers profiles break the build
     errors.warning("CANNOT_REMOVE_OLD_BROWSER_PROFILES", err.stack)
+  )
+;
 
-trashAssets = (config = {}) ->
-  if config.trashAssetsBeforeRuns isnt true
-    return Promise.resolve()
+const trashAssets = function(config = {}) {
+  if (config.trashAssetsBeforeRuns !== true) {
+    return Promise.resolve();
+  }
 
-  Promise.join(
-    trash.folder(config.videosFolder)
+  return Promise.join(
+    trash.folder(config.videosFolder),
     trash.folder(config.screenshotsFolder)
   )
-  .catch (err) ->
-    ## dont make trashing assets fail the build
+  .catch(err =>
+    //# dont make trashing assets fail the build
     errors.warning("CANNOT_TRASH_ASSETS", err.stack)
+  );
+};
 
-## if we've been told to record and we're not spawning a headed browser
-browserCanBeRecorded = (browser) ->
-  browser.name is "electron" and browser.isHeadless
+//# if we've been told to record and we're not spawning a headed browser
+const browserCanBeRecorded = browser => (browser.name === "electron") && browser.isHeadless;
     
-createVideoRecording = (videoName) ->
-  outputDir = path.dirname(videoName)
+const createVideoRecording = function(videoName) {
+  const outputDir = path.dirname(videoName);
 
-  fs
+  return fs
   .ensureDirAsync(outputDir)
-  .then ->
+  .then(() =>
     videoCapture
     .start(videoName, {
-      onError: (err) ->
-        ## catch video recording failures and log them out
-        ## but don't let this affect the run at all
-        errors.warning("VIDEO_RECORDING_FAILED", err.stack)
+      onError(err) {
+        //# catch video recording failures and log them out
+        //# but don't let this affect the run at all
+        return errors.warning("VIDEO_RECORDING_FAILED", err.stack);
+      }
     })
+  );
+};
 
-getVideoRecordingDelay = (startedVideoCapture) ->
-  if startedVideoCapture
-    return DELAY_TO_LET_VIDEO_FINISH_MS
+const getVideoRecordingDelay = function(startedVideoCapture) {
+  if (startedVideoCapture) {
+    return DELAY_TO_LET_VIDEO_FINISH_MS;
+  }
 
-  return 0
+  return 0;
+};
     
-maybeStartVideoRecording = Promise.method (options = {}) ->
-  { spec, browser, video, videosFolder } = options
+const maybeStartVideoRecording = Promise.method(function(options = {}) {
+  const { spec, browser, video, videosFolder } = options;
 
-  ## bail if we've been told not to capture
-  ## a video recording
-  if not video
-    return
+  //# bail if we've been told not to capture
+  //# a video recording
+  if (!video) {
+    return;
+  }
   
-  ## handle if this browser cannot actually
-  ## be recorded
-  if not browserCanBeRecorded(browser)
-    console.log("")
+  //# handle if this browser cannot actually
+  //# be recorded
+  if (!browserCanBeRecorded(browser)) {
+    console.log("");
 
-    if browser.name is "electron" and browser.isHeaded
-      errors.warning("CANNOT_RECORD_VIDEO_HEADED")
-    else
-      errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name)
+    if ((browser.name === "electron") && browser.isHeaded) {
+      errors.warning("CANNOT_RECORD_VIDEO_HEADED");
+    } else {
+      errors.warning("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER", browser.name);
+    }
 
-    return
+    return;
+  }
 
-  ## make sure we have a videsFolder
-  if not videosFolder
-    throw new Error("Missing videoFolder for recording")
+  //# make sure we have a videsFolder
+  if (!videosFolder) {
+    throw new Error("Missing videoFolder for recording");
+  }
 
-  videoPath = (suffix) ->
-    path.join(videosFolder, spec.name + suffix)
+  const videoPath = suffix => path.join(videosFolder, spec.name + suffix);
 
-  videoName  = videoPath(".mp4")
-  compressedVideoName = videoPath("-compressed.mp4")
+  const videoName  = videoPath(".mp4");
+  const compressedVideoName = videoPath("-compressed.mp4");
 
-  @createVideoRecording(videoName)
-  .then (props = {}) ->
-    return {
+  return this.createVideoRecording(videoName)
+  .then((props = {}) =>
+    ({
       videoName,
       compressedVideoName,
       endVideoCapture: props.endVideoCapture,
       writeVideoFrame: props.writeVideoFrame,
       startedVideoCapture: props.startedVideoCapture,
-    }
+    }));});
     
 module.exports = {
-  collectTestResults
+  collectTestResults,
 
-  getProjectId
+  getProjectId,
 
-  writeOutput
+  writeOutput,
 
-  openProjectCreate
+  openProjectCreate,
 
-  createVideoRecording
+  createVideoRecording,
   
-  getVideoRecordingDelay
+  getVideoRecordingDelay,
 
-  maybeStartVideoRecording
+  maybeStartVideoRecording,
 
-  getElectronProps: (isHeaded, project, writeVideoFrame) ->
-    electronProps = {
-      width:  1280
-      height: 720
-      show:   isHeaded
-      onCrashed: ->
-        err = errors.get("RENDERER_CRASHED")
-        errors.log(err)
+  getElectronProps(isHeaded, project, writeVideoFrame) {
+    const electronProps = {
+      width:  1280,
+      height: 720,
+      show:   isHeaded,
+      onCrashed() {
+        const err = errors.get("RENDERER_CRASHED");
+        errors.log(err);
 
-        project.emit("exitEarlyWithErr", err.message)
-      onNewWindow: (e, url, frameName, disposition, options) ->
-        ## force new windows to automatically open with show: false
-        ## this prevents window.open inside of javascript client code
-        ## to cause a new BrowserWindow instance to open
-        ## https://github.com/cypress-io/cypress/issues/123
-        options.show = false
+        return project.emit("exitEarlyWithErr", err.message);
+      },
+      onNewWindow(e, url, frameName, disposition, options) {
+        //# force new windows to automatically open with show: false
+        //# this prevents window.open inside of javascript client code
+        //# to cause a new BrowserWindow instance to open
+        //# https://github.com/cypress-io/cypress/issues/123
+        return options.show = false;
+      }
+    };
+
+    if (writeVideoFrame) {
+      electronProps.recordFrameRate = 20;
+      electronProps.onPaint = (event, dirty, image) => writeVideoFrame(image.toJPEG(100));
     }
 
-    if writeVideoFrame
-      electronProps.recordFrameRate = 20
-      electronProps.onPaint = (event, dirty, image) ->
-        writeVideoFrame(image.toJPEG(100))
+    return electronProps;
+  },
 
-    electronProps
+  displayResults(obj = {}, estimated) {
+    const results = collectTestResults(obj, estimated);
 
-  displayResults: (obj = {}, estimated) ->
-    results = collectTestResults(obj, estimated)
+    const c = results.failures ? "red" : "green";
 
-    c = if results.failures then "red" else "green"
-
-    console.log("")
+    console.log("");
 
     terminal.header("Results", {
       color: [c]
-    })
+    });
 
-    table = terminal.table({
+    const table = terminal.table({
       type: "outsideBorder"
-    })
+    });
 
-    data = _.chain([
-      ["Tests:", results.tests]
-      ["Passing:", results.passes]
-      ["Failing:", results.failures]
-      ["Pending:", results.pending]
-      ["Skipped:", results.skipped]
-      ["Screenshots:", results.screenshots]
-      ["Video:", results.video]
-      ["Duration:", results.duration]
-      ["Estimated:", results.estimated] if estimated
+    const data = _.chain([
+      ["Tests:", results.tests],
+      ["Passing:", results.passes],
+      ["Failing:", results.failures],
+      ["Pending:", results.pending],
+      ["Skipped:", results.skipped],
+      ["Screenshots:", results.screenshots],
+      ["Video:", results.video],
+      ["Duration:", results.duration],
+      estimated ? ["Estimated:", results.estimated] : undefined,
       ["Spec Ran:", results.name]
     ])
     .compact()
-    .map (arr) ->
-      [key, val] = arr
+    .map(function(arr) {
+      const [key, val] = arr;
 
-      [color(key, "gray"), color(val, c)]
-    .value()
+      return [color(key, "gray"), color(val, c)];})
+    .value();
 
-    table.push(data...)
+    table.push(...data);
 
-    console.log("")
-    console.log(table.toString())
-    console.log("")
+    console.log("");
+    console.log(table.toString());
+    return console.log("");
+  },
 
-  displayScreenshots: (screenshots = []) ->
-    console.log("")
+  displayScreenshots(screenshots = []) {
+    console.log("");
 
-    terminal.header("Screenshots", {color: ["yellow"]})
+    terminal.header("Screenshots", {color: ["yellow"]});
 
-    console.log("")
+    console.log("");
 
-    format = (s) ->
-      dimensions = gray("(#{s.width}x#{s.height})")
+    const format = function(s) {
+      const dimensions = gray(`(${s.width}x${s.height})`);
 
-      "  - #{s.path} #{dimensions}"
+      return `  - ${s.path} ${dimensions}`;
+    };
 
-    screenshots.forEach (screenshot) ->
-      console.log(format(screenshot))
+    screenshots.forEach(screenshot => console.log(format(screenshot)));
 
-    console.log("")
+    return console.log("");
+  },
 
-  postProcessRecording: (end, name, cname, videoCompression, shouldUploadVideo) ->
-    debug("ending the video recording %o", { name, videoCompression, shouldUploadVideo })
+  postProcessRecording(end, name, cname, videoCompression, shouldUploadVideo) {
+    debug("ending the video recording %o", { name, videoCompression, shouldUploadVideo });
 
-    ## once this ended promises resolves
-    ## then begin processing the file
-    end()
-    .then ->
-      ## dont process anything if videoCompress is off
-      ## or we've been told not to upload the video
-      return if videoCompression is false or shouldUploadVideo is false
+    //# once this ended promises resolves
+    //# then begin processing the file
+    return end()
+    .then(function() {
+      //# dont process anything if videoCompress is off
+      //# or we've been told not to upload the video
+      if ((videoCompression === false) || (shouldUploadVideo === false)) { return; }
 
-      console.log("")
+      console.log("");
 
       terminal.header("Video", {
         color: ["cyan"]
-      })
+      });
 
-      console.log("")
+      console.log("");
 
       console.log(
         gray("  - Started processing:  "),
-        chalk.cyan("Compressing to #{videoCompression} CRF")
-      )
+        chalk.cyan(`Compressing to ${videoCompression} CRF`)
+      );
 
-      started  = new Date
-      progress = Date.now()
-      throttle = env.get("VIDEO_COMPRESSION_THROTTLE") or human("10 seconds")
+      const started  = new Date;
+      let progress = Date.now();
+      const throttle = env.get("VIDEO_COMPRESSION_THROTTLE") || human("10 seconds");
 
-      onProgress = (float) ->
-        switch
-          when float is 1
-            finished = new Date - started
-            dur = "(#{humanTime.long(finished)})"
+      const onProgress = function(float) {
+        switch (false) {
+          case float !== 1:
+            var finished = new Date - started;
+            var dur = `(${humanTime.long(finished)})`;
             console.log(
               gray("  - Finished processing: "),
               chalk.cyan(name),
               gray(dur)
-            )
-            console.log("")
+            );
+            return console.log("");
 
-          when (new Date - progress) > throttle
-            ## bump up the progress so we dont
-            ## continuously get notifications
-            progress += throttle
-            percentage = Math.ceil(float * 100) + "%"
-            console.log("  - Compression progress: ", chalk.cyan(percentage))
+          case (new Date - progress) <= throttle:
+            //# bump up the progress so we dont
+            //# continuously get notifications
+            progress += throttle;
+            var percentage = Math.ceil(float * 100) + "%";
+            return console.log("  - Compression progress: ", chalk.cyan(percentage));
+        }
+      };
 
-        # bar.tickTotal(float)
+        // bar.tickTotal(float)
 
-      videoCapture.process(name, cname, videoCompression, onProgress)
-    .catch {recordingVideoFailed: true}, (err) ->
-      ## dont do anything if this error occured because
-      ## recording the video had already failed
-      return
-    .catch (err) ->
-      ## log that post processing was attempted
-      ## but failed and dont let this change the run exit code
+      return videoCapture.process(name, cname, videoCompression, onProgress);}).catch({recordingVideoFailed: true}, function(err) {
+      //# dont do anything if this error occured because
+      //# recording the video had already failed
+      
+    }).catch(err =>
+      //# log that post processing was attempted
+      //# but failed and dont let this change the run exit code
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
+    );
+  },
 
-  launchBrowser: (options = {}) ->
-    { browser, spec, writeVideoFrame, project, screenshots, projectRoot } = options
+  launchBrowser(options = {}) {
+    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot } = options;
 
-    browserOpts = switch browser.name
-      when "electron"
-        @getElectronProps(browser.isHeaded, project, writeVideoFrame)
-      else
-        {}
+    const browserOpts = (() => { switch (browser.name) {
+      case "electron":
+        return this.getElectronProps(browser.isHeaded, project, writeVideoFrame);
+      default:
+        return {};
+    } })();
 
     browserOpts.automationMiddleware = {
-      onAfterResponse: (message, data, resp) =>
-        if message is "take:screenshot" and resp
-          screenshots.push @screenshotMetadata(data, resp)
-
-        resp
-    }
-
-    browserOpts.projectRoot = projectRoot
-
-    openProject.launch(browser, spec, browserOpts)
-
-  listenForProjectEnd: (project, exit) ->
-    new Promise (resolve) ->
-      if exit is false
-        resolve = (arg) ->
-          console.log("not exiting due to options.exit being false")
-
-      onEarlyExit = (errMsg) ->
-        ## probably should say we ended
-        ## early too: (Ended Early: true)
-        ## in the stats
-        obj = {
-          error: errors.stripAnsi(errMsg)
-          stats: {
-            failures: 1
-            tests: 0
-            passes: 0
-            pending: 0
-            suites: 0
-            skipped: 0
-            wallClockDuration: 0
-            wallClockStartedAt: (new Date()).toJSON()
-            wallClockEndedAt: (new Date()).toJSON()
-          }
+      onAfterResponse: (message, data, resp) => {
+        if ((message === "take:screenshot") && resp) {
+          screenshots.push(this.screenshotMetadata(data, resp));
         }
 
-        resolve(obj)
+        return resp;
+      }
+    };
 
-      onEnd = (obj) ->
-        resolve(obj)
+    browserOpts.projectRoot = projectRoot;
 
-      ## when our project fires its end event
-      ## resolve the promise
-      project.once("end", onEnd)
-      project.once("exitEarlyWithErr", onEarlyExit)
+    return openProject.launch(browser, spec, browserOpts);
+  },
 
-  waitForBrowserToConnect: (options = {}) ->
-    { project, socketId, timeout } = options
+  listenForProjectEnd(project, exit) {
+    return new Promise(function(resolve) {
+      if (exit === false) {
+        resolve = arg => console.log("not exiting due to options.exit being false");
+      }
 
-    attempts = 0
+      const onEarlyExit = function(errMsg) {
+        //# probably should say we ended
+        //# early too: (Ended Early: true)
+        //# in the stats
+        const obj = {
+          error: errors.stripAnsi(errMsg),
+          stats: {
+            failures: 1,
+            tests: 0,
+            passes: 0,
+            pending: 0,
+            suites: 0,
+            skipped: 0,
+            wallClockDuration: 0,
+            wallClockStartedAt: (new Date()).toJSON(),
+            wallClockEndedAt: (new Date()).toJSON()
+          }
+        };
 
-    do waitForBrowserToConnect = =>
-      Promise.join(
-        @waitForSocketConnection(project, socketId)
-        @launchBrowser(options)
+        return resolve(obj);
+      };
+
+      const onEnd = obj => resolve(obj);
+
+      //# when our project fires its end event
+      //# resolve the promise
+      project.once("end", onEnd);
+      return project.once("exitEarlyWithErr", onEarlyExit);
+    });
+  },
+
+  waitForBrowserToConnect(options = {}) {
+    let waitForBrowserToConnect;
+    const { project, socketId, timeout } = options;
+
+    let attempts = 0;
+
+    return (waitForBrowserToConnect = () => {
+      return Promise.join(
+        this.waitForSocketConnection(project, socketId),
+        this.launchBrowser(options)
       )
-      .timeout(timeout ? 30000)
-      .catch Promise.TimeoutError, (err) =>
-        attempts += 1
+      .timeout(timeout != null ? timeout : 30000)
+      .catch(Promise.TimeoutError, err => {
+        attempts += 1;
 
-        console.log("")
+        console.log("");
 
-        ## always first close the open browsers
-        ## before retrying or dieing
-        openProject.closeBrowser()
-        .then ->
-          switch attempts
-            ## try again up to 3 attempts
-            when 1, 2
-              word = if attempts is 1 then "Retrying..." else "Retrying again..."
-              errors.warning("TESTS_DID_NOT_START_RETRYING", word)
+        //# always first close the open browsers
+        //# before retrying or dieing
+        return openProject.closeBrowser()
+        .then(function() {
+          switch (attempts) {
+            //# try again up to 3 attempts
+            case 1: case 2:
+              var word = attempts === 1 ? "Retrying..." : "Retrying again...";
+              errors.warning("TESTS_DID_NOT_START_RETRYING", word);
 
-              waitForBrowserToConnect()
+              return waitForBrowserToConnect();
 
-            else
-              err = errors.get("TESTS_DID_NOT_START_FAILED")
-              errors.log(err)
+            default:
+              err = errors.get("TESTS_DID_NOT_START_FAILED");
+              errors.log(err);
 
-              project.emit("exitEarlyWithErr", err.message)
+              return project.emit("exitEarlyWithErr", err.message);
+          }
+        });
+      });
+    })();
+  },
 
-  waitForSocketConnection: (project, id) ->
-    debug("waiting for socket connection... %o", { id })
+  waitForSocketConnection(project, id) {
+    debug("waiting for socket connection... %o", { id });
 
-    new Promise (resolve, reject) ->
-      fn = (socketId) ->
-        debug("got socket connection %o", { id: socketId })
+    return new Promise(function(resolve, reject) {
+      var fn = function(socketId) {
+        debug("got socket connection %o", { id: socketId });
 
-        if socketId is id
-          ## remove the event listener if we've connected
-          project.removeListener("socket:connected", fn)
+        if (socketId === id) {
+          //# remove the event listener if we've connected
+          project.removeListener("socket:connected", fn);
 
-          ## resolve the promise
-          resolve()
+          //# resolve the promise
+          return resolve();
+        }
+      };
 
-      ## when a socket connects verify this
-      ## is the one that matches our id!
-      project.on("socket:connected", fn)
+      //# when a socket connects verify this
+      //# is the one that matches our id!
+      return project.on("socket:connected", fn);
+    });
+  },
 
-  waitForTestsToFinishRunning: (options = {}) ->
-    { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
+  waitForTestsToFinishRunning(options = {}) {
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options;
 
-    ## https://github.com/cypress-io/cypress/issues/2370
-    ## delay 1 second if we're recording a video to give
-    ## the browser padding to render the final frames
-    ## to avoid chopping off the end of the video
-    delay = @getVideoRecordingDelay(startedVideoCapture)
+    //# https://github.com/cypress-io/cypress/issues/2370
+    //# delay 1 second if we're recording a video to give
+    //# the browser padding to render the final frames
+    //# to avoid chopping off the end of the video
+    const delay = this.getVideoRecordingDelay(startedVideoCapture);
 
-    @listenForProjectEnd(project, exit)
+    return this.listenForProjectEnd(project, exit)
     .delay(delay)
-    .then (obj) =>
+    .then(obj => {
       _.defaults(obj, {
-        error: null
-        hooks: null
-        tests: null
-        video: null
-        screenshots: null
+        error: null,
+        hooks: null,
+        tests: null,
+        video: null,
+        screenshots: null,
         reporterStats: null
-      })
+      });
 
-      if startedVideoCapture
-        obj.video = videoName
+      if (startedVideoCapture) {
+        obj.video = videoName;
+      }
 
-      if screenshots
-        obj.screenshots = screenshots
+      if (screenshots) {
+        obj.screenshots = screenshots;
+      }
 
-      obj.spec = spec
+      obj.spec = spec;
 
-      finish = ->
-        return obj
+      const finish = () => obj;
 
-      @displayResults(obj, estimated)
+      this.displayResults(obj, estimated);
 
-      if screenshots and screenshots.length
-        @displayScreenshots(screenshots)
+      if (screenshots && screenshots.length) {
+        this.displayScreenshots(screenshots);
+      }
 
-      { tests, stats } = obj
+      const { tests, stats } = obj;
 
-      failingTests = _.filter(tests, { state: "failed" })
+      const failingTests = _.filter(tests, { state: "failed" });
 
-      hasFailingTests = _.get(stats, 'failures') > 0
+      const hasFailingTests = _.get(stats, 'failures') > 0;
 
-      ## if we have a video recording
-      if startedVideoCapture and tests and tests.length
-        ## always set the video timestamp on tests
-        obj.tests = Reporter.setVideoTimestamp(startedVideoCapture, tests)
+      //# if we have a video recording
+      if (startedVideoCapture && tests && tests.length) {
+        //# always set the video timestamp on tests
+        obj.tests = Reporter.setVideoTimestamp(startedVideoCapture, tests);
+      }
 
-      ## we should upload the video if we upload on passes (by default)
-      ## or if we have any failures and have started the video
-      suv = Boolean(videoUploadOnPasses is true or (startedVideoCapture and hasFailingTests))
+      //# we should upload the video if we upload on passes (by default)
+      //# or if we have any failures and have started the video
+      const suv = Boolean((videoUploadOnPasses === true) || (startedVideoCapture && hasFailingTests));
 
-      obj.shouldUploadVideo = suv
+      obj.shouldUploadVideo = suv;
 
-      debug("attempting to close the browser")
+      debug("attempting to close the browser");
 
-      ## always close the browser now as opposed to letting
-      ## it exit naturally with the parent process due to
-      ## electron bug in windows
-      openProject.closeBrowser()
-      .then =>
-        if endVideoCapture
-          @postProcessRecording(endVideoCapture, videoName, compressedVideoName, videoCompression, suv)
-          .then(finish)
-          ## TODO: add a catch here
-        else
-          finish()
+      //# always close the browser now as opposed to letting
+      //# it exit naturally with the parent process due to
+      //# electron bug in windows
+      return openProject.closeBrowser()
+      .then(() => {
+        if (endVideoCapture) {
+          return this.postProcessRecording(endVideoCapture, videoName, compressedVideoName, videoCompression, suv)
+          .then(finish);
+          //# TODO: add a catch here
+        } else {
+          return finish();
+        }
+      });
+    });
+  },
 
-  screenshotMetadata: (data, resp) ->
-    {
-      screenshotId: random.id()
-      name:      data.name ? null
-      testId:    data.testId
-      takenAt:   resp.takenAt
-      path:      resp.path
-      height:    resp.dimensions.height
+  screenshotMetadata(data, resp) {
+    return {
+      screenshotId: random.id(),
+      name:      data.name != null ? data.name : null,
+      testId:    data.testId,
+      takenAt:   resp.takenAt,
+      path:      resp.path,
+      height:    resp.dimensions.height,
       width:     resp.dimensions.width
-    }
+    };
+  },
 
-  runSpecs: (options = {}) ->
-    { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
+  runSpecs(options = {}) {
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options;
 
-    isHeadless = browser.name is "electron" and not headed
+    const isHeadless = (browser.name === "electron") && !headed;
 
-    browser.isHeadless = isHeadless
-    browser.isHeaded = not isHeadless
+    browser.isHeadless = isHeadless;
+    browser.isHeaded = !isHeadless;
 
-    results = {
-      startedTestsAt: null
-      endedTestsAt: null
-      totalDuration: null
+    const results = {
+      startedTestsAt: null,
+      endedTestsAt: null,
+      totalDuration: null,
       totalSuites: null,
       totalTests: null,
       totalFailed: null,
@@ -840,218 +921,237 @@ module.exports = {
       osName: sys.osName,
       osVersion: sys.osVersion,
       cypressVersion: pkg.version,
-      runUrl: runUrl,
+      runUrl,
       config,
-    }
+    };
 
     displayRunStarting({
-      specs
-      group
-      runUrl
-      browser
-      parallel
+      specs,
+      group,
+      runUrl,
+      browser,
+      parallel,
       specPattern
-    })
+    });
 
-    runEachSpec = (spec, index, length, estimated) =>
-      displaySpecHeader(spec.name, index + 1, length, estimated)
+    const runEachSpec = (spec, index, length, estimated) => {
+      displaySpecHeader(spec.name, index + 1, length, estimated);
 
-      @runSpec(spec, options, estimated)
+      return this.runSpec(spec, options, estimated)
       .get("results")
-      .tap (results) ->
-        debug("spec results %o", results)
+      .tap(results => debug("spec results %o", results));
+    };
 
-    iterateThroughSpecs({
-      specs
-      config
-      parallel
-      runEachSpec
-      afterSpecRun
+    return iterateThroughSpecs({
+      specs,
+      config,
+      parallel,
+      runEachSpec,
+      afterSpecRun,
       beforeSpecRun
     })
-    .then (runs = []) ->
-      results.startedTestsAt = start = getRun(_.first(runs), "stats.wallClockStartedAt")
-      results.endedTestsAt = end = getRun(_.last(runs), "stats.wallClockEndedAt")
-      results.totalDuration = reduceRuns(runs, "stats.wallClockDuration")
-      results.totalSuites = reduceRuns(runs, "stats.suites")
-      results.totalTests = reduceRuns(runs, "stats.tests")
-      results.totalPassed = reduceRuns(runs, "stats.passes")
-      results.totalPending = reduceRuns(runs, "stats.pending")
-      results.totalFailed = reduceRuns(runs, "stats.failures")
-      results.totalSkipped = reduceRuns(runs, "stats.skipped")
-      results.runs = runs
+    .then(function(runs = []) {
+      let end, start;
+      results.startedTestsAt = (start = getRun(_.first(runs), "stats.wallClockStartedAt"));
+      results.endedTestsAt = (end = getRun(_.last(runs), "stats.wallClockEndedAt"));
+      results.totalDuration = reduceRuns(runs, "stats.wallClockDuration");
+      results.totalSuites = reduceRuns(runs, "stats.suites");
+      results.totalTests = reduceRuns(runs, "stats.tests");
+      results.totalPassed = reduceRuns(runs, "stats.passes");
+      results.totalPending = reduceRuns(runs, "stats.pending");
+      results.totalFailed = reduceRuns(runs, "stats.failures");
+      results.totalSkipped = reduceRuns(runs, "stats.skipped");
+      results.runs = runs;
 
-      debug("final results of all runs: %o", results)
+      debug("final results of all runs: %o", results);
 
-      writeOutput(outputPath, results)
-      .return(results)
+      return writeOutput(outputPath, results)
+      .return(results);
+    });
+  },
 
-  runSpec: (spec = {}, options = {}, estimated) ->
-    { project, browser } = options
+  runSpec(spec = {}, options = {}, estimated) {
+    const { project, browser } = options;
 
-    { isHeadless } = browser
+    const { isHeadless } = browser;
 
     debug("about to run spec %o", {
-      spec
-      isHeadless
+      spec,
+      isHeadless,
       browser
-    })
+    });
 
-    screenshots = []
+    const screenshots = [];
 
-    ## we know we're done running headlessly
-    ## when the renderer has connected and
-    ## finishes running all of the tests.
-    ## we're using an event emitter interface
-    ## to gracefully handle this in promise land
+    //# we know we're done running headlessly
+    //# when the renderer has connected and
+    //# finishes running all of the tests.
+    //# we're using an event emitter interface
+    //# to gracefully handle this in promise land
 
-    @maybeStartVideoRecording({
+    return this.maybeStartVideoRecording({
       spec,
       browser,
       video: options.video,
       videosFolder: options.videosFolder,
     })
-    .then (videoRecordProps = {}) =>
-      Promise.props({
-        results: @waitForTestsToFinishRunning({
-          spec
-          project
-          estimated
-          screenshots
-          videoName:            videoRecordProps.videoName 
-          compressedVideoName:  videoRecordProps.compressedVideoName
-          endVideoCapture:      videoRecordProps.endVideoCapture
-          startedVideoCapture:  videoRecordProps.startedVideoCapture
-          exit:                 options.exit
-          videoCompression:     options.videoCompression
+    .then((videoRecordProps = {}) => {
+      return Promise.props({
+        results: this.waitForTestsToFinishRunning({
+          spec,
+          project,
+          estimated,
+          screenshots,
+          videoName:            videoRecordProps.videoName, 
+          compressedVideoName:  videoRecordProps.compressedVideoName,
+          endVideoCapture:      videoRecordProps.endVideoCapture,
+          startedVideoCapture:  videoRecordProps.startedVideoCapture,
+          exit:                 options.exit,
+          videoCompression:     options.videoCompression,
           videoUploadOnPasses:  options.videoUploadOnPasses
         }),
 
-        connection: @waitForBrowserToConnect({
-          spec
-          project
-          browser
-          screenshots
-          writeVideoFrame: videoRecordProps.writeVideoFrame
-          socketId:    options.socketId
-          webSecurity: options.webSecurity
+        connection: this.waitForBrowserToConnect({
+          spec,
+          project,
+          browser,
+          screenshots,
+          writeVideoFrame: videoRecordProps.writeVideoFrame,
+          socketId:    options.socketId,
+          webSecurity: options.webSecurity,
           projectRoot: options.projectRoot
         })
-      })
+      });
+    });
+  },
 
-  findSpecs: (config, specPattern) ->
-    specsUtil.find(config, specPattern)
-    .tap (specs = []) =>
-      if debug.enabled
-        names = _.map(specs, "name")
-        debug(
+  findSpecs(config, specPattern) {
+    return specsUtil.find(config, specPattern)
+    .tap((specs = []) => {
+      if (debug.enabled) {
+        const names = _.map(specs, "name");
+        return debug(
           "found '%d' specs using spec pattern '%s': %o",
           names.length,
           specPattern,
           names
-        )
+        );
+      }
+    });
+  },
 
-  ready: (options = {}) ->
-    debug("run mode ready with options %o", options)
+  ready(options = {}) {
+    debug("run mode ready with options %o", options);
 
     _.defaults(options, {
-      isTextTerminal: true
+      isTextTerminal: true,
       browser: "electron"
-    })
+    });
 
-    socketId = random.id()
+    const socketId = random.id();
 
-    { projectRoot, record, key, ciBuildId, parallel, group } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group } = options;
 
-    browserName = options.browser
+    const browserName = options.browser;
 
-    ## alias and coerce to null
-    specPattern = options.spec ? null
+    //# alias and coerce to null
+    let specPattern = options.spec != null ? options.spec : null;
 
-    ## warn if we're using deprecated --ci flag
-    recordMode.warnIfCiFlag(options.ci)
+    //# warn if we're using deprecated --ci flag
+    recordMode.warnIfCiFlag(options.ci);
 
-    ## ensure the project exists
-    ## and open up the project
-    createAndOpenProject(socketId, options)
-    .then ({ project, projectId, config }) =>
-      ## if we have a project id and a key but record hasnt been given
-      recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
-      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
+    //# ensure the project exists
+    //# and open up the project
+    return createAndOpenProject(socketId, options)
+    .then(({ project, projectId, config }) => {
+      //# if we have a project id and a key but record hasnt been given
+      recordMode.warnIfProjectIdButNoRecordOption(projectId, options);
+      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group);
 
-      if record
-        recordMode.throwIfNoProjectId(projectId)
-        recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
-        recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
+      if (record) {
+        recordMode.throwIfNoProjectId(projectId);
+        recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group);
+        recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group);
+      }
 
-      Promise.all([
+      return Promise.all([
         system.info(),
         browsers.ensureAndGetByNameOrPath(browserName),
-        @findSpecs(config, specPattern),
+        this.findSpecs(config, specPattern),
         trashAssets(config),
         removeOldProfiles()
       ])
-      .spread (sys = {}, browser = {}, specs = []) =>
-        ## return only what is return to the specPattern
-        if specPattern
-          specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+      .spread((sys = {}, browser = {}, specs = []) => {
+        //# return only what is return to the specPattern
+        if (specPattern) {
+          specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot);
+        }
 
-        if not specs.length
-          errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+        if (!specs.length) {
+          errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern);
+        }
 
-        if browser.family == 'chrome'
-          chromePolicyCheck.run(onWarning)
+        if (browser.family === 'chrome') {
+          chromePolicyCheck.run(onWarning);
+        }
 
-        runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) =>
-          @runSpecs({
-            beforeSpecRun
-            afterSpecRun
-            projectRoot
-            specPattern
-            socketId
-            parallel: parallelOverride
-            browser
-            project
-            runUrl
-            group
-            config
-            specs
-            sys
-            videosFolder:         config.videosFolder
-            video:                config.video
-            videoCompression:     config.videoCompression
-            videoUploadOnPasses:  config.videoUploadOnPasses
-            exit:                 options.exit
-            headed:               options.headed
+        const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl }, parallelOverride = parallel) => {
+          return this.runSpecs({
+            beforeSpecRun,
+            afterSpecRun,
+            projectRoot,
+            specPattern,
+            socketId,
+            parallel: parallelOverride,
+            browser,
+            project,
+            runUrl,
+            group,
+            config,
+            specs,
+            sys,
+            videosFolder:         config.videosFolder,
+            video:                config.video,
+            videoCompression:     config.videoCompression,
+            videoUploadOnPasses:  config.videoUploadOnPasses,
+            exit:                 options.exit,
+            headed:               options.headed,
             outputPath:           options.outputPath
           })
-          .tap(renderSummaryTable(runUrl))
+          .tap(renderSummaryTable(runUrl));
+        };
 
-        if record
-          { projectName } = config
+        if (record) {
+          const { projectName } = config;
 
-          recordMode.createRunAndRecordSpecs({
-            key
-            sys
-            specs
-            group
-            browser
-            parallel
-            ciBuildId
-            projectId
-            projectRoot
-            projectName
-            specPattern
+          return recordMode.createRunAndRecordSpecs({
+            key,
+            sys,
+            specs,
+            group,
+            browser,
+            parallel,
+            ciBuildId,
+            projectId,
+            projectRoot,
+            projectName,
+            specPattern,
             runAllSpecs
-          })
-        else
-          ## not recording, can't be parallel
-          runAllSpecs({}, false)
+          });
+        } else {
+          //# not recording, can't be parallel
+          return runAllSpecs({}, false);
+        }
+      });
+    });
+  },
 
-  run: (options) ->
-    electronApp
+  run(options) {
+    return electronApp
     .ready()
-    .then =>
-      @ready(options)
+    .then(() => {
+      return this.ready(options);
+    });
+  }
 
-}
+};
