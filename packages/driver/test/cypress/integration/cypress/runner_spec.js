@@ -55,9 +55,6 @@ describe('src/cypress/runner', () => {
     const getTest = (r) => r && r.ctx.currentTest || r
 
     beforeEach(() => {
-
-      // tt[cy.state('runnable').title]throwAfter(1000)
-
       lastTimeout = throwAfter(500)
 
       runner.once('fail', (r) => {
@@ -74,10 +71,6 @@ describe('src/cypress/runner', () => {
 
         test.error = null
         test.state = 'passed'
-
-        // .error = null
-        // debugger
-        // debugger
 
         return false
       })
@@ -109,8 +102,6 @@ describe('src/cypress/runner', () => {
     describe('hooks can timeout and share timeout with test', function () {
       beforeEach((done) => {
         this.ctx.test.timeout(100)
-
-        // expect(this.timeout()).eq(100)
       })
 
       it('should timeout on hook', () => {})
@@ -120,8 +111,6 @@ describe('src/cypress/runner', () => {
       beforeEach((done) => {
         cy.wait(0)
         this.ctx.test.timeout(100)
-
-        // expect(this.timeout()).eq(2000)
       })
 
       it('should timeout on hook', () => {})
