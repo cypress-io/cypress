@@ -149,6 +149,7 @@ describe "src/cy/commands/navigation", ->
             expect(win.foo).to.be.undefined
 
       it "throws when reload times out", (done) ->
+        cy.timeout(1000)
         locReload = cy.spy(Cypress.utils, "locReload")
 
         cy
@@ -327,6 +328,7 @@ describe "src/cy/commands/navigation", ->
 
       ## FIREFOX FIXME: hangs
       it "throws when go times out", (done) ->
+        cy.timeout(1000)
         cy
           .visit("/timeout?ms=100")
           .visit("/fixtures/jquery.html")
