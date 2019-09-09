@@ -10,7 +10,7 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
       if not options._runnableTimeout
-        runnableTimeout = options.timeout ? Cypress.config('defaultCommandTimeout') #timeout()
+        runnableTimeout = options.timeout ? timeout()
         clearTimeout()
 
       current = state("current")

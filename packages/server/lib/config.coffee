@@ -59,7 +59,7 @@ configKeys = toWords """
   projectId                       videosFolder
   reporter
   reporterOptions
-  ignoreTestFiles                 asyncTestTimeout
+  ignoreTestFiles
   testFiles                       defaultCommandTimeout
   trashAssetsBeforeRuns           execTimeout
   userAgent                       pageLoadTimeout
@@ -98,7 +98,6 @@ CONFIG_DEFAULTS = {
   ignoreTestFiles:               "*.hot-update.js"
   testFiles:                     "**/*.*"
   defaultCommandTimeout:         4000
-  asyncTestTimeout:              4000
   requestTimeout:                5000
   responseTimeout:               30000
   pageLoadTimeout:               60000
@@ -137,7 +136,6 @@ validationRules = {
   modifyObstructiveCode: v.isBoolean
   chromeWebSecurity: v.isBoolean
   defaultCommandTimeout: v.isNumber
-  asyncTestTimeout: v.isNumber
   env: v.isPlainObject
   execTimeout: v.isNumber
   fileServerFolder: v.isString

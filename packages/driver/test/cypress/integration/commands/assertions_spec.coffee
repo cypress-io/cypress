@@ -353,8 +353,7 @@ describe "src/cy/commands/assertions", ->
           done("cy.should was supposed to fail")
 
       it "throws when the subject eventually isnt in the DOM", (done) ->
-        # cy.timeout(200)
-        Cypress.config('defaultCommandTimeout', 200)
+        cy.timeout(200)
 
         button = cy.$$("button:first")
 

@@ -57,11 +57,6 @@
       "default": 4000,
       "description": "Time, in milliseconds, to wait until most DOM based commands are considered timed out"
     },
-    "asyncTestTimeout": {
-      "type": "number",
-      "default": 4000,
-      "description": "Time, in milliseconds, to wait after all commands are finished running before an async test times out"
-    },
     "execTimeout": {
       "type": "number",
       "default": 60000,

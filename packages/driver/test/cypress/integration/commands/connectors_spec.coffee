@@ -1136,8 +1136,7 @@ describe "src/cy/commands/connectors", ->
           cy.wrap(fn).its("bar", "baz").should("eq", "baz")
 
         it "resets traversalErr and throws the right assertion", (done) ->
-          # cy.timeout(200)
-          Cypress.config('defaultCommandTimeout', 200)
+          cy.timeout(200)
 
           obj = {}
 
