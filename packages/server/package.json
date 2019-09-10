@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@cypress/browserify-preprocessor": "1.1.2",
-    "@cypress/commit-info": "2.1.4",
+    "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.5.4",
     "@cypress/icons": "0.7.0",
     "@ffmpeg-installer/ffmpeg": "1.0.19",

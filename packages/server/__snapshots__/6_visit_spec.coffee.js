@@ -818,11 +818,6 @@ Error: ESOCKETTIMEDOUT
     1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
 
 
-`
-
-exports['e2e visit resolves visits quickly in chrome (headed) 1'] = `
-
-====================================================================================================
 
   (Run Starting)
 
