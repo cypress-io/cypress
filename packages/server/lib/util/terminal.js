@@ -14,8 +14,8 @@
  */
 const _ = require('lodash')
 const chalk = require('chalk')
-const Table = require('cli-table2')
-const utils = require('cli-table2/src/utils')
+const Table = require('cli-table3')
+const utils = require('cli-table3/src/utils')
 const widestLine = require('widest-line')
 const terminalSize = require('./terminal-size')
 
