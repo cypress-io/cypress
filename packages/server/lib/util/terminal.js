@@ -1,17 +1,4 @@
-/* eslint-disable
-    brace-style,
-    default-case,
-    no-cond-assign,
-    no-console,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-console */
 const _ = require('lodash')
 const chalk = require('chalk')
 const Table = require('cli-table2')
@@ -22,10 +9,9 @@ const terminalSize = require('./terminal-size')
 const MAXIMUM_SIZE = 100
 const EXPECTED_SUM = 100
 
-const getMaximumColumns = () =>
-//# get the maximum amount of columns
-//# that can fit in the terminal
-{
+const getMaximumColumns = () => {
+  // get the maximum amount of columns
+  // that can fit in the terminal
   return Math.min(MAXIMUM_SIZE, terminalSize.get().columns)
 }
 
@@ -39,30 +25,26 @@ const getBordersLength = (left, right) => {
 }
 
 const convertDecimalsToNumber = function (colWidths, cols) {
-  let diff
-  const sum = _.sum(colWidths)
+  // const sum = _.sum(colWidths)
 
-  if (sum !== EXPECTED_SUM) {
-    throw new Error(`Expected colWidths array to sum to: ${EXPECTED_SUM}, instead got: ${sum}`)
-  }
-
-  [50, 10, 25]
+  // if (sum !== EXPECTED_SUM) {
+  //   throw new Error(`Expected colWidths array to sum to: ${EXPECTED_SUM}, instead got: ${sum}`)
+  // }
 
   const widths = _.map(colWidths, (width) => {
-    //# easier to deal with numbers than floats...
+    // easier to deal with numbers than floats...
     const num = (cols * width) / EXPECTED_SUM
 
     return Math.floor(num)
   })
 
   const total = _.sum(widths)
+  const diff = cols - total
 
-  //# if we got a sum less than the total
-  //# columns, then add the difference to
-  //# the first element in the array of widths
-  if ((diff = cols - total) > 0) {
-    const first = widths[0]
-
+  // if we got a sum less than the total
+  // columns, then add the difference to
+  // the first element in the array of widths
+  if (diff > 0) {
     widths[0] += diff
   }
 
@@ -141,6 +123,7 @@ const getChars = function (type) {
         'right-mid': '',
         'middle': '',
       }
+    default: throw new Error(`Table chars type: "${type}" is not supported`)
   }
 }
 
@@ -151,13 +134,11 @@ const wrapBordersInGray = (chars) => {
     }
 
     return char
-
   })
 }
 
 const table = function (options = {}) {
   const { colWidths, type } = options
-
   const defaults = utils.mergeOptions({})
 
   let chars = _.defaults(getChars(type), defaults.chars)
@@ -179,8 +160,8 @@ const table = function (options = {}) {
   options.chars = wrapBordersInGray(chars)
 
   if (colWidths) {
-    //# subtract borders to get the actual size
-    //# so it displaces a maximum number of columns
+    // subtract borders to get the actual size
+    // so it displaces a maximum number of columns
     const cols = getMaximumColumns() - borders
 
     options.colWidths = convertDecimalsToNumber(colWidths, cols)
@@ -190,16 +171,14 @@ const table = function (options = {}) {
 }
 
 const header = function (message, options = {}) {
-  let c
-
   _.defaults(options, {
     color: null,
   })
 
   message = `  (${chalk.underline.bold(message)})`
 
-  if (c = options.color) {
-    const colors = [].concat(c)
+  if (options.color) {
+    const colors = [].concat(options.color)
 
     message = _.reduce(colors, (memo, color) => {
       return chalk[color](memo)
@@ -207,15 +186,14 @@ const header = function (message, options = {}) {
     , message)
   }
 
-  return console.log(message)
+  console.log(message)
 }
 
 const divider = function (symbol, color = 'gray') {
   const cols = getMaximumColumns()
-
   const str = symbol.repeat(cols)
 
-  return console.log(chalk[color](str))
+  console.log(chalk[color](str))
 }
 
 module.exports = {
@@ -230,5 +208,4 @@ module.exports = {
   getMaximumColumns,
 
   convertDecimalsToNumber,
-
 }
