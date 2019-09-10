@@ -28,6 +28,8 @@ const electronApp = require('../util/electron_app')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+const MIN_SPEC_COL_WIDTH = 38
+const MIN_SPEC_NEW_LINE_WIDTH = 35
 
 const color = (val, c) => {
   return chalk[c](val)
@@ -63,13 +65,13 @@ const formatBrowser = (browser) => {
   ]).join(' ')
 }
 
-const formatFooterSummary = function (results) {
+const formatFooterSummary = (results) => {
   const { totalFailed, runs } = results
 
   // pass or fail color
   const c = totalFailed ? 'red' : 'green'
 
-  const phrase = (function () {
+  const phrase = (() => {
     // if we have any specs failing...
     if (!totalFailed) {
       return 'All specs passed!'
@@ -84,7 +86,7 @@ const formatFooterSummary = function (results) {
   })()
 
   return [
-    color(phrase, c),
+    { colSpan: 2, content: color(phrase, c) },
     gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
     colorIf(results.totalPassed, 'green'),
@@ -94,12 +96,25 @@ const formatFooterSummary = function (results) {
   ]
 }
 
-const formatSpecSummary = (name, failures) => {
-  return [
-    getSymbol(failures),
-    color(name, 'reset'),
-  ]
-  .join(' ')
+const addNewlines = (str, length) => {
+  let result = ''
+
+  while (str.length > 0) {
+    result += `${str.substring(0, length)}\n`
+    str = str.substring(length)
+  }
+
+  return result.substring(0, result.length - 1)
+}
+
+const formatSymbolSummary = (failures) => {
+  return `${getSymbol(failures)}`
+}
+
+const formatSpecSummary = (name) => {
+  const nameWithNewLines = addNewlines(name, MIN_SPEC_NEW_LINE_WIDTH)
+
+  return `${color(nameWithNewLines, 'reset')}`
 }
 
 const formatRecordParams = function (runUrl, parallel, group) {
@@ -229,15 +244,22 @@ const renderSummaryTable = (runUrl) => {
     })
 
     if (runs && runs.length) {
-      const head = ['  Spec', '', 'Tests', 'Passing', 'Failing', 'Pending', 'Skipped']
-      const colAligns = ['left', 'right', 'right', 'right', 'right', 'right', 'right']
-      const colWidths = [39, 11, 10, 10, 10, 10, 10]
+      const colAligns = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right']
+      const colWidths = [1, MIN_SPEC_COL_WIDTH, 11, 10, 10, 10, 10, 10]
 
       const table1 = terminal.table({
         colAligns,
         colWidths,
         type: 'noBorder',
-        head: _.map(head, gray),
+        head: [
+          { colSpan: 2, content: gray('Spec') },
+          '',
+          gray('Tests'),
+          gray('Passing'),
+          gray('Failing'),
+          gray('Pending'),
+          gray('Skipped'),
+        ],
       })
 
       const table2 = terminal.table({
@@ -262,7 +284,8 @@ const renderSummaryTable = (runUrl) => {
         const ms = duration.format(stats.wallClockDuration)
 
         return table2.push([
-          formatSpecSummary(spec.name, stats.failures),
+          formatSymbolSummary(stats.failures),
+          formatSpecSummary(spec.name),
           color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),

@@ -397,3 +397,134 @@ A video will not be recorded when using this browser.
 
 
 `
+
+exports['e2e stdout displays fullname of nested specfile 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      3 found (nested-1/nested-2/nested-3/spec.coffee, nested-1/nested-2/nested-3/stdou… │
+  │ Searched:   cypress/integration/nested-1/nested-2/nested-3/*                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: nested-1/nested-2/nested-3/spec.coffee...                                       (1 of 3) 
+
+
+  stdout_specfile_display_spec
+    ✓ passes
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────────────────┐
+  │ Tests:        1                                      │
+  │ Passing:      1                                      │
+  │ Failing:      0                                      │
+  │ Pending:      0                                      │
+  │ Skipped:      0                                      │
+  │ Screenshots:  0                                      │
+  │ Video:        true                                   │
+  │ Duration:     X seconds                              │
+  │ Spec Ran:     nested-1/nested-2/nested-3/spec.coffee │
+  └──────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/nested-1/nested-2/nested-3/abc123.mp4 (X seconds)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: nested-1/nested-2/nested-3/stdout_specfile_display_spec.coffee...               (2 of 3) 
+
+
+  stdout_specfile_display_spec
+    ✓ passes
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                              │
+  │ Passing:      1                                                              │
+  │ Failing:      0                                                              │
+  │ Pending:      0                                                              │
+  │ Skipped:      0                                                              │
+  │ Screenshots:  0                                                              │
+  │ Video:        true                                                           │
+  │ Duration:     X seconds                                                      │
+  │ Spec Ran:     nested-1/nested-2/nested-3/stdout_specfile_display_spec.coffee │
+  └──────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/nested-1/nested-2/nested-3/abc123.mp4 (X seconds)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: nested-1/nested-2/nested-3/stdout_specfile.coffee...                            (3 of 3) 
+
+
+  stdout_specfile_display_spec
+    ✓ passes
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                 │
+  │ Passing:      1                                                 │
+  │ Failing:      0                                                 │
+  │ Pending:      0                                                 │
+  │ Skipped:      0                                                 │
+  │ Screenshots:  0                                                 │
+  │ Video:        true                                              │
+  │ Duration:     X seconds                                         │
+  │ Spec Ran:     nested-1/nested-2/nested-3/stdout_specfile.coffee │
+  └─────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/nested-1/nested-2/nested-3/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ nested-1/nested-2/nested-3/spec.coff…     XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔ nested-1/nested-2/nested-3/stdout_sp…     XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔ nested-1/nested-2/nested-3/stdout_sp…     XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        3        3        -        -        -  
+
+
+`
