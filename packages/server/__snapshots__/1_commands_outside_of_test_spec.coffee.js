@@ -128,12 +128,6 @@ We dynamically generated a new test to display this failure.
   - /foo/bar/.projects/e2e/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -205,12 +199,6 @@ We dynamically generated a new test to display this failure.
   (Screenshots)
 
   - /foo/bar/.projects/e2e/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
 ====================================================================================================

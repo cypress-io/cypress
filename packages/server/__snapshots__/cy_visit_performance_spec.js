@@ -1,4 +1,4 @@
-exports['e2e user agent passes on chrome 1'] = `
+exports['cy.visit performance tests pass in chrome 1'] = `
 
 ====================================================================================================
 
@@ -7,19 +7,48 @@ exports['e2e user agent passes on chrome 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (user_agent_spec.coffee)                                                   │
-  │ Searched:   cypress/integration/user_agent_spec.coffee                                         │
+  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
+  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: user_agent_spec.coffee...                                                       (1 of 1) 
+  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
 
-
-  user agent
-    ✓ is set on visits
-    ✓ is set on requests
+  on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: close
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: keep-alive
 
 
   2 passing
@@ -36,7 +65,7 @@ exports['e2e user agent passes on chrome 1'] = `
   │ Screenshots:  0                      │
   │ Video:        true                   │
   │ Duration:     X seconds              │
-  │ Spec Ran:     user_agent_spec.coffee │
+  │ Spec Ran:     fast_visit_spec.coffee │
   └──────────────────────────────────────┘
 
 
@@ -47,14 +76,14 @@ exports['e2e user agent passes on chrome 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ user_agent_spec.coffee                    XX:XX        2        2        -        -        - │
+  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 
 
 `
 
-exports['e2e user agent passes on electron 1'] = `
+exports['cy.visit performance tests pass in electron 1'] = `
 
 ====================================================================================================
 
@@ -63,19 +92,49 @@ exports['e2e user agent passes on electron 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (user_agent_spec.coffee)                                                   │
-  │ Searched:   cypress/integration/user_agent_spec.coffee                                         │
+  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
+  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: user_agent_spec.coffee...                                                       (1 of 1) 
+  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
 
 
-  user agent
-    ✓ is set on visits
-    ✓ is set on requests
+  on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: close
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: keep-alive
 
 
   2 passing
@@ -92,7 +151,7 @@ exports['e2e user agent passes on electron 1'] = `
   │ Screenshots:  0                      │
   │ Video:        true                   │
   │ Duration:     X seconds              │
-  │ Spec Ran:     user_agent_spec.coffee │
+  │ Spec Ran:     fast_visit_spec.coffee │
   └──────────────────────────────────────┘
 
 
@@ -109,7 +168,7 @@ exports['e2e user agent passes on electron 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ user_agent_spec.coffee                    XX:XX        2        2        -        -        - │
+  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     All specs passed!                           XX:XX        2        2        -        -        -  
 

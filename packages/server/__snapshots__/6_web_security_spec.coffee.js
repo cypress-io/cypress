@@ -185,6 +185,9 @@ exports['e2e web security when disabled passes 1'] = `
                                                                                                     
   Running: web_security_spec.coffee...                                                     (1 of 1) 
 
+Timed out waiting for the browser to connect. Retrying...
+The automation client disconnected. Cannot continue running tests.
+
 
   web security
     ✓ fails when clicking <a> to another origin
@@ -208,12 +211,6 @@ exports['e2e web security when disabled passes 1'] = `
   │ Duration:     X seconds                │
   │ Spec Ran:     web_security_spec.coffee │
   └────────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
 ====================================================================================================

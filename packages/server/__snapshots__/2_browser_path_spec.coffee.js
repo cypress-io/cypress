@@ -37,12 +37,6 @@ exports['e2e launching browsers by path works with an installed browser path 1']
   └──────────────────────────────────┘
 
 
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
 ====================================================================================================
 
   (Run Finished)

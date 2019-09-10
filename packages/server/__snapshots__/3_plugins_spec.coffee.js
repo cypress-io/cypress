@@ -219,12 +219,6 @@ exports['e2e plugins works with user extensions 1'] = `
   └───────────────────────────────┘
 
 
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/plugin-extension/cypress/videos/abc123.mp4 (X seconds)
-
-
 ====================================================================================================
 
   (Run Finished)
