@@ -88,9 +88,11 @@ class Project extends EE
     .then (cfg) =>
       @_initPlugins(cfg, options)
       .then (modifiedCfg) ->
-        debug("plugin config yielded:", modifiedCfg)
+        debug("plugin config yielded: %o", modifiedCfg)
 
-        return config.updateWithPluginValues(cfg, modifiedCfg)
+        updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+        debug("updated config: %o", modifiedCfg)
+        return updatedConfig
     .then (cfg) =>
       @server.open(cfg, @, options.onWarning)
       .spread (port, warning) =>

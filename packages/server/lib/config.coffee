@@ -1,4 +1,5 @@
 _        = require("lodash")
+R        = require("ramda")
 path     = require("path")
 Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
@@ -46,6 +47,7 @@ folders = toWords """
   videosFolder
 """
 
+# Public configuration properties, like "cypress.json" fields
 configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
@@ -72,10 +74,16 @@ configKeys = toWords """
   waitForAnimations
 """
 
+# Deprecated and retired public configuration properties
 breakingConfigKeys = toWords """
   videoRecording
   screenshotOnHeadlessFailure
   trashAssetsBeforeHeadlessRuns
+"""
+
+# Internal configuration properties the user should be able to overwrite
+systemConfigKeys = toWords """
+  browsers
 """
 
 CONFIG_DEFAULTS = {
@@ -208,7 +216,8 @@ module.exports = {
   getConfigKeys: -> configKeys
 
   whitelist: (obj = {}) ->
-    _.pick(obj, configKeys.concat(breakingConfigKeys))
+    propertyNames = configKeys.concat(breakingConfigKeys).concat(systemConfigKeys)
+    _.pick(obj, propertyNames)
 
   get: (projectRoot, options = {}) ->
     Promise.all([
@@ -244,6 +253,7 @@ module.exports = {
     resolved = {}
 
     _.extend config, _.pick(options, "morgan", "isTextTerminal", "socketId", "report", "browsers")
+    debug("merged config with options, got %o", config)
 
     _
     .chain(@whitelist(options))
@@ -309,6 +319,9 @@ module.exports = {
     ## diff the overrides with cfg
     ## including nested objects (env)
     diffs = deepDiff(cfg, overrides, true)
+    debug("config diffs %o", diffs)
+
+    userBrowserList = diffs && diffs.browsers && R.clone(diffs.browsers)
 
     setResolvedOn = (resolvedObj, obj) ->
       _.each obj, (val, key) ->
@@ -327,9 +340,24 @@ module.exports = {
     ## and change the resolved values of cfg
     ## to point to the plugin
     setResolvedOn(cfg.resolved, diffs)
+    debug("resolved config object %o", cfg.resolved)
 
     ## merge cfg into overrides
-    _.defaultsDeep(diffs, cfg)
+    resolved = _.defaultsDeep(diffs, cfg)
+
+    ## Take a special care with some system properties the
+    ## user should be able to modify. For example, if the plugins file
+    ## modifes detected browsers, the _.defaultsDeep merges it back
+    ## and we need to use the user's value
+
+    # do not allow user to delete "browsers" list - otherwise how to run tests?
+    if Array.isArray(userBrowserList)
+      debug("using user supplied list of browsers %o", userBrowserList)
+      resolved.browsers = userBrowserList
+
+    debug("resolved config with defaults %o", resolved)
+
+    return resolved
 
   resolveConfigValues: (config, defaults, resolved = {}) ->
     ## pick out only the keys found in configKeys
