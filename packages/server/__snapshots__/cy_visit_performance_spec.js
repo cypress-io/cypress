@@ -81,11 +81,11 @@ histogram line
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
+  │ ✔  fast_visit_spec.coffee                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -106,7 +106,7 @@ exports['cy.visit performance tests pass in electron 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+  Running:  fast_visit_spec.coffee...                                                       (1 of 1)
 
 
   on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX

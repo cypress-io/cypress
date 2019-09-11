@@ -72,7 +72,7 @@ exports['e2e commands outside of test [chrome] fails on cy commands 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: commands_outside_of_test_spec.coffee...                                         (1 of 1) 
+  Running:  commands_outside_of_test_spec.coffee...                                         (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -140,11 +140,11 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ commands_outside_of_test_spec.coffee      XX:XX        1        -        1        -        - │
+  │ ✖  commands_outside_of_test_spec.coffee     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
