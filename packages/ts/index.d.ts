@@ -1,6 +1,8 @@
 // missing type definitions for libraries
 // https://glebbahmutov.com/blog/trying-typescript/#manual-types-for-3rd-party-libraries
 
+/// <reference path="../../cli/types/sinon/index.d.ts" />
+
 declare module '@cypress/get-windows-proxy' {
   type ProxyConfig = {
     httpProxy: string
@@ -22,7 +24,7 @@ declare namespace Cypress {
     routes: {
       [routeHandlerId: string]: any
     }
-    sinon: Sinon
+    sinon: sinon.SinonStatic
     utils: CypressUtils
   }
 }
