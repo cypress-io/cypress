@@ -73,7 +73,7 @@ reqNeedsBasicAuthHeaders = (req, remoteState) ->
       cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, request, nodeProxy, project) ->
+  handle: (req, res, config, getRemoteState, request, project) ->
     remoteState = getRemoteState()
 
     debug("handling proxied request %o", {

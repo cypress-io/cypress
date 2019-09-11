@@ -9,16 +9,18 @@ import url from 'url'
 import zlib from 'zlib'
 // TODO: figure out the right way to make these types accessible in server and driver
 import {
-  CyHttpMessages,
   NetEventFrames,
   AnnotatedRouteMatcherOptions,
-  RouteMatcherOptions,
   DICT_STRING_MATCHER_FIELDS,
   STRING_MATCHER_FIELDS,
   SERIALIZABLE_REQ_PROPS,
   SERIALIZABLE_RES_PROPS,
-  StaticResponse,
 } from '../../driver/src/cy/commands/net_stubbing'
+import {
+  CyHttpMessages,
+  RouteMatcherOptions,
+  StaticResponse,
+} from '../../../cli/types/cy-net-stubbing'
 
 interface BackendRoute {
   routeMatcher: RouteMatcherOptions
@@ -229,7 +231,7 @@ function _emit (socket: any, eventName: string, data: any) {
   socket.toDriver('net:event', eventName, data)
 }
 
-function _sendStaticResponse (res: ServerResponse, staticResponse: StaticResponse) {
+function _sendStaticResponse (res: ServerResponse, staticResponse: StaticResponse, resStream?: Readable) {
   if (staticResponse.destroySocket) {
     res.connection.destroy()
     res.destroy()
@@ -244,12 +246,12 @@ function _sendStaticResponse (res: ServerResponse, staticResponse: StaticRespons
 
   res.flushHeaders()
 
-  if (staticResponse.body) {
-    if (typeof staticResponse.body !== 'string') {
-      // staticResponse is a stream
-      return staticResponse.body.pipe(res)
-    }
+  if (resStream) {
+    // ignore staticResponse.body
+    return resStream.pipe(res)
+  }
 
+  if (staticResponse.body) {
     res.write(staticResponse.body)
   }
 
@@ -473,10 +475,10 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
     requestId: backendRequest.requestId,
     res: _.extend(_.pick(incomingRes, SERIALIZABLE_RES_PROPS), {
       url: req.proxiedUrl,
-    }) as CyHttpMessages.IncomingResponseSuccess,
+    }) as CyHttpMessages.IncomingResponse,
   }
 
-  const res = frame.res as CyHttpMessages.IncomingResponseSuccess
+  const res = frame.res as CyHttpMessages.IncomingResponse
 
   function emit () {
     _emit(project.server._socket, 'http:response:received', frame)
@@ -525,7 +527,7 @@ function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
 
     if (frame.staticResponse) {
       if (frame.throttleKbps) {
-        frame.staticResponse.body = throttleify(frame.staticResponse.body)
+        return _sendStaticResponse(res, frame.staticResponse, throttleify(frame.staticResponse.body))
       }
 
       return _sendStaticResponse(res, frame.staticResponse)

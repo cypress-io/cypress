@@ -11,6 +11,7 @@
 /// <reference path="./cy-bluebird.d.ts" />
 /// <reference path="./cy-moment.d.ts" />
 /// <reference path="./cy-minimatch.d.ts" />
+/// <reference path="./cy-net-stubbing.d.ts" />
 /// <reference path="./cy-chai.d.ts" />
 /// <reference path="./lodash/index.d.ts" />
 /// <reference path="./sinon/index.d.ts" />
@@ -1159,6 +1160,21 @@ declare namespace Cypress {
      */
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
+    /**
+     * Use `cy.route()` to manage the behavior of network requests.
+     *
+     * @see https://on.cypress.io/route
+     * @example
+     *    cy.route('http://localhost:7777/*', "hello world!")
+     * @example
+     *    cy.route({
+     *      method: 'POST',
+     *      hostname: 'example.com'
+     *    }, (req) => {
+     *      req.body = "new request body"
+     *    })
+     */
+    route(url: CyNetStubbing.RouteMatcher, response?: CyNetStubbing.RouteHandler): Chainable<null>
     /**
      * Use `cy.route()` to manage the behavior of network requests.
      *

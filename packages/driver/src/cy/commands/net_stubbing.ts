@@ -1,5 +1,16 @@
 import * as _ from 'lodash'
 import * as Promise from 'bluebird'
+import {
+  CyHttpMessages,
+  RouteHandler,
+  RouteMatcherOptionsGeneric,
+  RouteMatcherOptions,
+  RouteMatcher,
+  StaticResponse,
+  HttpRequestInterceptor,
+  WebSocketController,
+  HttpResponseInterceptor,
+} from '../../../../../cli/types/cy-net-stubbing'
 
 const utils = require('../../cypress/utils')
 
@@ -21,144 +32,18 @@ export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
 
 export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
 
-type GlobPattern = string
-type StringMatcher = GlobPattern | RegExp
-type DictMatcher<T> = { [key: string]: T }
-type NumberMatcher = number | number[] // list of acceptable numbers
-
+/**
+ * Serializable `StringMatcher` type.
+ */
 interface AnnotatedStringMatcher {
   type: 'regex' | 'glob'
   value: string
 }
 
-// all HTTP requests have some basic information
-// users would use a `RouteMatcher` to "subscribe" to a certain subset of requests
-
-// no callbacks are supported in matchers - helps cut down on un-needed back-and-forth
-// websocket requests to match requests - they are all static
-
-// then, the route is handled by a `RouteHandler`, which will either return a static response
-// or send a callback to the driver, where it will be handled
-
-// if no `RouteHandler` is set, it just passes through after following the options
-/** Types for Route Matching **/
-
-type RouteMatcher = StringMatcher | RouteMatcherOptions
-
-interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions {
-  auth?: { username: S, password: S }
-  headers?: DictMatcher<S>
-  hostname?: S
-  https?: boolean // serve this over HTTPS
-  method?: S // defaults to GET
-  path?: S // includes query params
-  pathname?: S // does not include query params
-  port?: NumberMatcher
-  query?: DictMatcher<S> // match querystring values
-  url?: S
-  webSocket?: boolean
-}
-
-export type RouteMatcherOptions = RouteMatcherOptionsGeneric<StringMatcher>
-
-export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedStringMatcher>
-
-type CompatXHRHandler = (xhr: XMLHttpRequest /** ? */) => void
-
-interface RouteMatcherCompatOptions {
-  onRequest?: CompatXHRHandler
-  onResponse?: CompatXHRHandler
-  response?: string | object
-}
-
-/** Types for Route Responses **/
-export declare namespace CyHttpMessages {
-  interface BaseMessage {
-    // as much stuff from `incomingmessage` as makes sense to serialize and send
-    body: any
-    headers: { [key: string]: string }
-    url: string
-    method: string
-    httpVersion: string
-  }
-
-  interface IncomingResponseError {
-    url: string
-    error: Error
-  }
-
-  export type IncomingResponseSuccess = BaseMessage & {
-    statusCode: number
-    statusMessage: string
-  }
-
-  export type IncomingResponse = IncomingResponseSuccess | IncomingResponseError
-
-  export type IncomingHttpResponse = IncomingResponse & {
-    send: ((staticResponse?: StaticResponse) => void) | ((body: string, headers?: object) => void)
-    /**
-     * Wait for `delayMs` milliseconds before sending the response to the client.
-     */
-    delay: (delayMs: number) => IncomingHttpResponse
-    /**
-     * Serve the response at a maximum of `throttleKbps` kilobytes per second.
-     */
-    throttle: (throttleKbps: number) => IncomingHttpResponse
-  }
-
-  export interface IncomingRequest extends BaseMessage {
-
-  }
-
-  export interface IncomingHTTPRequest extends IncomingRequest {
-    destroy: () => void
-    // if `responseOrInterceptor` is undefined, just forward the modified request to the destination
-    reply: (responseOrInterceptor?: StaticResponse | CyResponseInterceptor) => void
-    redirect: (location: string, statusCode: 301 | 302 | 303 | 307 | number) => void
-  }
-}
-
 /**
- * Describes a response that will be sent back to the client.
+ * Serializable `RouteMatcherOptions` type.
  */
-export interface StaticResponse {
-  body?: string | any // TODO
-  headers?: { [key: string]: string }
-  statusCode?: number
-  /**
-   * If `destroySocket` is truthy, Cypress will destroy the connection to the browser and send no response.
-   *
-   * Useful for simulating a server that is not reachable.
-   */
-  destroySocket?: boolean
-}
-
-type CyResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse, send?: () => void) => void
-
-type HTTPController = (req: CyHttpMessages.IncomingHTTPRequest, next: () => void) => void
-
-interface CyWebSocket {
-
-}
-
-interface CyWebSocketFrame {
-
-}
-
-interface WebSocketController {
-  onConnect?: (req: CyHttpMessages.IncomingRequest, socket: CyWebSocket) => void
-  onIncomingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
-  onOutgoingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
-  onDisconnect?: (socket: CyWebSocket) => void
-
-  transport: 'socket.io' // socket.io client over websockets
-              | 'socket.io-longpolling' // socket.io client via longpolling
-              | 'websockets' // vanilla websockets server
-}
-
-type RouteHandlerController = HTTPController | WebSocketController
-
-type RouteHandler = string | object | RouteHandlerController
+export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedStringMatcher>
 
 /** Types for messages between driver and server */
 
@@ -189,7 +74,7 @@ export declare namespace NetEventFrames {
 
   // fired when a response is received and the driver has a req.reply callback registered
   export interface HttpResponseReceived extends BaseHttp {
-    res: CyHttpMessages.IncomingResponse | CyHttpMessages.IncomingResponseError
+    res: CyHttpMessages.IncomingResponse
   }
 
   // fired when driver is done modifying response or driver callback completes,
@@ -253,7 +138,7 @@ function _getUniqueId () {
   return `${Number(new Date()).toString()}-${_.uniqueId()}`
 }
 
-function _isHttpController (obj) : obj is HTTPController {
+function _isHttpRequestInterceptor (obj) : obj is HttpRequestInterceptor {
   return typeof obj === 'function'
 }
 
@@ -272,7 +157,7 @@ interface Route {
 }
 
 interface Request {
-  responseHandler: CyResponseInterceptor
+  responseHandler: HttpResponseInterceptor
 }
 
 let routes : { [key: string]: Route } = {}
@@ -347,14 +232,17 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
     }
 
     switch (true) {
-      case _isHttpController(handler):
+      case _isHttpRequestInterceptor(handler):
         break
       case _isWebSocketController(handler, options):
         break
-      case typeof handler === 'string':
+      case _.isUndefined(handler):
+        // TODO: handle this, for when users just want to alias/wait on route
+        break
+      case _.isString(handler):
         frame.staticResponse = { body: <string>handler }
         break
-      case typeof handler === 'object' && !_.isNull(handler):
+      case _.isObjectLike(handler):
         try {
           _validateStaticResponse(<StaticResponse>handler)
         } catch (err) {
@@ -429,7 +317,7 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
     route.hitCount++
 
-    const userReq : CyHttpMessages.IncomingHTTPRequest = {
+    const userReq : CyHttpMessages.IncomingHttpRequest = {
       ...req,
       reply (responseHandler, maybeBody?, maybeHeaders?) {
         if (nextCalled) {
@@ -538,7 +426,7 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
     const userRes : CyHttpMessages.IncomingHttpResponse = {
       ...res,
-      send (staticResponse, maybeBody?, maybeHeaders?) {
+      send (staticResponse?, maybeBody?, maybeHeaders?) {
         if (sendCalled) {
           return utils.warnByPath('net_stubbing.warn_multiple_send_calls', { args: { res } })
         }

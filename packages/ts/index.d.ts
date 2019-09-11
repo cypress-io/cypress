@@ -10,6 +10,23 @@ declare module '@cypress/get-windows-proxy' {
   export = getWindowsProxy
 }
 
+/**
+ * For properties on `Cypress` and `cy` that are not intended for public use.
+ */
+declare namespace Cypress {
+  interface CypressUtils {
+    warnByPath: (path: string, obj: any) => void
+  }
+
+  export interface Cypress {
+    routes: {
+      [routeHandlerId: string]: any
+    }
+    sinon: Sinon
+    utils: CypressUtils
+  }
+}
+
 declare module 'http' {
   import { Socket } from 'net'
   import { Url } from 'url'
