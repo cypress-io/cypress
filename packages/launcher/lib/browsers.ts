@@ -53,6 +53,8 @@ export function launch (
   }
 
   if (log.enabled) {
+    // you can see STDOUT and STDERR messages from the launched browser
+    // by enable debug logs, see "./log"
     options.stdio = 'inherit'
   }
 

@@ -14,9 +14,6 @@ chrome = require("./chrome")
 electronAppLauncher = R.clone(chrome)
 _defaultArgs = electronAppLauncher.defaultArgs
 
-# TODO find the Electron app and main.js equivalent file to launch
-# something like "<electron path> ."
-
 # TODO remove duplicate code, the cookie normalization taken from PR
 # https://github.com/cypress-io/cypress/blob/1fdca23e446cfae6031ca7773ccaf9a8e8faa6f2/packages/server/lib/browsers/electron.coffee#L267
 
@@ -61,21 +58,13 @@ getAllCookies = (data) ->
         !data.name || data.name == cookie.name
       ])
 
-# TODO find the name and the version of the app from "package.json" file?
 electronAppLauncher.name = "electron-app"
 electronAppLauncher.open = (browser, url, options = {}, automation) ->
-  # TODO overwrite the url to load with local host for experimentation
-  # url = "http://localhost:5556/__/#/tests/integration/spec.js"
+  # requires peer install of @cypress/electron-plugin
+  pathToMainElectronFile = require.resolve("@cypress/electron-plugin")
+  debug("pathToMainElectronFile %s", pathToMainElectronFile)
 
-  # TODO pass actual discovered start file
-  # pathToMainElectronFile = '.'
-  # pathToMainElectronFile = "/Users/gleb/git/cypress-example-electron/main.js"
-  pathToMainElectronFile = "/Users/gleb/git/electron-sandbox/cypress.js"
-
-  # cliArgs = R.clone(_defaultArgs)
   cliArgs = []
-  cliArgs.push("--cypress-runner-url=#{url}")
-  # cliArgs.push("--inspect=5858")
   electronAppLauncher.defaultArgs = cliArgs
   # pass the real url to load later
   options.loadUrl = url
