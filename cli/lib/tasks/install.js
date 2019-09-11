@@ -250,7 +250,7 @@ const start = (options = {}) => {
       return
     }
 
-    if (needVersion !== pkgVersion) {
+    if (needVersion !== pkgVersion && util.isSemver(needVersion)) {
       logger.log(
         chalk.yellow(stripIndent`
           ${logSymbols.warning} Warning: Forcing a binary version different than the default.
