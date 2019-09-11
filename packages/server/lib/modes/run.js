@@ -21,6 +21,7 @@ const trash = require('../util/trash')
 const random = require('../util/random')
 const system = require('../util/system')
 const duration = require('../util/duration')
+const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
 const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
@@ -28,8 +29,7 @@ const electronApp = require('../util/electron_app')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
-const MIN_SPEC_COL_WIDTH = 38
-const MIN_SPEC_NEW_LINE_WIDTH = 35
+const MIN_SPEC_COL_WIDTH = 39
 
 const color = (val, c) => {
   return chalk[c](val)
@@ -86,7 +86,13 @@ const formatFooterSummary = (results) => {
   })()
 
   return [
-    { colSpan: 2, content: color(phrase, c) },
+    {
+      style: { 'padding-left': 1 },
+      content: formatSymbolSummary(totalFailed),
+    },
+    {
+      content: color(phrase, c),
+    },
     gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
     colorIf(results.totalPassed, 'green'),
@@ -96,25 +102,17 @@ const formatFooterSummary = (results) => {
   ]
 }
 
-const addNewlines = (str, length) => {
-  let result = ''
-
-  while (str.length > 0) {
-    result += `${str.substring(0, length)}\n`
-    str = str.substring(length)
-  }
-
-  return result.substring(0, result.length - 1)
-}
-
 const formatSymbolSummary = (failures) => {
   return `${getSymbol(failures)}`
 }
 
-const formatSpecSummary = (name) => {
-  const nameWithNewLines = addNewlines(name, MIN_SPEC_NEW_LINE_WIDTH)
+const formatPath = (name, n, colour = 'reset') => {
+  let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
 
-  return `${color(nameWithNewLines, 'reset')}`
+  // remove the last newline char
+  nameWithNewLines = nameWithNewLines.substring(0, nameWithNewLines.length - 1)
+
+  return `${color(nameWithNewLines, colour)}`
 }
 
 const formatRecordParams = function (runUrl, parallel, group) {
@@ -129,7 +127,7 @@ const formatRecordParams = function (runUrl, parallel, group) {
 
 const formatSpecPattern = function (specPattern) {
   if (specPattern) {
-    return specPattern.join(', ')
+    return formatPath(specPattern.join(', '), 80)
   }
 }
 
@@ -137,13 +135,15 @@ const formatSpecs = function (specs) {
   const names = _.map(specs, 'name')
 
   // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-  return [
+  const stringifiedSpecs = [
     `${names.length} found `,
     gray('('),
     gray(names.join(', ')),
     gray(')'),
   ]
   .join('')
+
+  return formatPath(stringifiedSpecs, 80)
 }
 
 const displayRunStarting = function (options = {}) {
@@ -191,8 +191,8 @@ const displaySpecHeader = function (name, curr, total, estimated) {
   const PADDING = 2
 
   const table = terminal.table({
-    colWidths: [80, 20],
-    colAligns: ['left', 'right'],
+    colWidths: [12, 68, 20],
+    colAligns: ['left', 'left', 'right'],
     type: 'pageDivider',
     style: {
       'padding-left': PADDING,
@@ -201,7 +201,8 @@ const displaySpecHeader = function (name, curr, total, estimated) {
 
   table.push(['', ''])
   table.push([
-    `Running: ${gray(`${name}...`)}`,
+    'Running:',
+    `${formatPath(name, 65, 'gray')}...`,
     gray(`(${curr} of ${total})`),
   ])
 
@@ -252,7 +253,8 @@ const renderSummaryTable = (runUrl) => {
         colWidths,
         type: 'noBorder',
         head: [
-          { colSpan: 2, content: gray('Spec') },
+          '',
+          gray('Spec'),
           '',
           gray('Tests'),
           gray('Passing'),
@@ -260,6 +262,7 @@ const renderSummaryTable = (runUrl) => {
           gray('Pending'),
           gray('Skipped'),
         ],
+        style: { 'padding-right': 1, 'padding-left': 0 },
       })
 
       const table2 = terminal.table({
@@ -274,6 +277,7 @@ const renderSummaryTable = (runUrl) => {
         type: 'noBorder',
         head: formatFooterSummary(results),
         style: {
+          'padding-left': 0,
           'padding-right': 2,
         },
       })
@@ -284,8 +288,14 @@ const renderSummaryTable = (runUrl) => {
         const ms = duration.format(stats.wallClockDuration)
 
         return table2.push([
-          formatSymbolSummary(stats.failures),
-          formatSpecSummary(spec.name),
+          {
+            style: { 'padding-right': 0 },
+            content: formatSymbolSummary(stats.failures),
+          },
+          {
+            style: { 'padding-left': 0, 'padding-right': 0 },
+            content: formatPath(spec.name, 34),
+          },
           color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),
@@ -645,7 +655,7 @@ module.exports = {
       ['Video:', results.video],
       ['Duration:', results.duration],
       estimated ? ['Estimated:', results.estimated] : undefined,
-      ['Spec Ran:', results.name],
+      ['Spec Ran:', formatPath(results.name, 80)],
     ])
     .compact()
     .map((arr) => {
