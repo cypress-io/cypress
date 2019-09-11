@@ -29,7 +29,6 @@ const electronApp = require('../util/electron_app')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
-const MIN_SPEC_COL_WIDTH = 39
 
 const color = (val, c) => {
   return chalk[c](val)
@@ -90,9 +89,7 @@ const formatFooterSummary = (results) => {
       style: { 'padding-left': 1 },
       content: formatSymbolSummary(totalFailed),
     },
-    {
-      content: color(phrase, c),
-    },
+    color(phrase, c),
     gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
     colorIf(results.totalPassed, 'green'),
@@ -246,7 +243,7 @@ const renderSummaryTable = (runUrl) => {
 
     if (runs && runs.length) {
       const colAligns = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right']
-      const colWidths = [1, MIN_SPEC_COL_WIDTH, 11, 10, 10, 10, 10, 10]
+      const colWidths = [1, 40, 11, 10, 10, 10, 10, 10]
 
       const table1 = terminal.table({
         colAligns,
@@ -262,7 +259,7 @@ const renderSummaryTable = (runUrl) => {
           gray('Pending'),
           gray('Skipped'),
         ],
-        style: { 'padding-right': 1, 'padding-left': 0 },
+        style: { 'padding-left': 0 },
       })
 
       const table2 = terminal.table({
@@ -288,13 +285,10 @@ const renderSummaryTable = (runUrl) => {
         const ms = duration.format(stats.wallClockDuration)
 
         return table2.push([
+          formatSymbolSummary(stats.failures),
           {
             style: { 'padding-right': 0 },
-            content: formatSymbolSummary(stats.failures),
-          },
-          {
-            style: { 'padding-left': 0, 'padding-right': 0 },
-            content: formatPath(spec.name, 34),
+            content: formatPath(spec.name, 36),
           },
           color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
