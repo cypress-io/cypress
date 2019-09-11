@@ -14,7 +14,7 @@ exports['e2e stdout displays errors from failures 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: stdout_failing_spec.coffee...                                                   (1 of 1) 
+  Running:    stdout_failing_spec.coffee...                                                (1 of 1) 
 
 
   stdout_failing_spec
@@ -128,11 +128,11 @@ The internal Cypress web server responded with:
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ stdout_failing_spec.coffee                XX:XX        5        2        3        -        - │
+  │ ✖  stdout_failing_spec.coffee               XX:XX        5        2        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        5        2        3        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        5        2        3        -        -  
 
 
 `
@@ -153,7 +153,7 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: stdout_exit_early_failing_spec.coffee...                                        (1 of 1) 
+  Running:    stdout_exit_early_failing_spec.coffee...                                     (1 of 1) 
 
 Oops...we found an error preparing this test file:
 
@@ -199,11 +199,12 @@ Fix the error in your code and re-run your tests.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ stdout_exit_early_failing_spec.coffee     XX:XX        -        -        1        -        - │
+  │ ✖  stdout_exit_early_failing_spec.coffe     XX:XX        -        -        1        -        - │
+  │    e                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `
@@ -224,7 +225,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: stdout_passing_spec.coffee...                                                   (1 of 1) 
+  Running:    stdout_passing_spec.coffee...                                                (1 of 1) 
 
 
   stdout_passing_spec
@@ -271,11 +272,11 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ stdout_passing_spec.coffee                XX:XX        8        8        -        -        - │
+  │ ✔  stdout_passing_spec.coffee               XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        8        8        -        -        -  
+    ✔  All specs passed!                        XX:XX        8        8        -        -        -  
 
 
 `
@@ -296,7 +297,7 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_spec.coffee...                                                           (1 of 1) 
+  Running:    simple_spec.coffee...                                                        (1 of 1) 
 
 Warning: Cypress can only record videos when running headlessly.
 
@@ -330,11 +331,11 @@ A video will not be recorded when using this mode.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
+  │ ✔  simple_spec.coffee                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -355,7 +356,7 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_spec.coffee...                                                           (1 of 1) 
+  Running:    simple_spec.coffee...                                                        (1 of 1) 
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -389,11 +390,11 @@ A video will not be recorded when using this browser.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
+  │ ✔  simple_spec.coffee                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -407,14 +408,16 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (nested-1/nested-2/nested-3/spec.coffee, nested-1/nested-2/nested-3/stdou… │
+  │ Specs:      3 found (nested-1/nested-2/nested-3/spec.coffee, nested-1/nested-2/nested-3/stdo   │
+  │             ut_specfile_display_spec_with_a_really_long_name_that_never_has_a_line_break_or_   │
+  │             new_line.coffee, nested-1/nested-2/nested-3/stdout_specfile.coffee)                │
   │ Searched:   cypress/integration/nested-1/nested-2/nested-3/*                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: nested-1/nested-2/nested-3/spec.coffee...                                       (1 of 3) 
+  Running:    nested-1/nested-2/nested-3/spec.coffee...                                    (1 of 3) 
 
 
   stdout_specfile_display_spec
@@ -447,7 +450,8 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: nested-1/nested-2/nested-3/stdout_specfile_display_spec.coffee...               (2 of 3) 
+  Running:    nested-1/nested-2/nested-3/stdout_specfile_display_spec_with_a_re            (2 of 3) 
+              ally_long_name_that_never_has_a_line_break_or_new_line.coffee...                      
 
 
   stdout_specfile_display_spec
@@ -459,17 +463,18 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                              │
-  │ Passing:      1                                                              │
-  │ Failing:      0                                                              │
-  │ Pending:      0                                                              │
-  │ Skipped:      0                                                              │
-  │ Screenshots:  0                                                              │
-  │ Video:        true                                                           │
-  │ Duration:     X seconds                                                      │
-  │ Spec Ran:     nested-1/nested-2/nested-3/stdout_specfile_display_spec.coffee │
-  └──────────────────────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     nested-1/nested-2/nested-3/stdout_specfile_display_spec_with_a_really_long_name_ │
+  │               that_never_has_a_line_break_or_new_line.coffee                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
@@ -480,7 +485,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: nested-1/nested-2/nested-3/stdout_specfile.coffee...                            (3 of 3) 
+  Running:    nested-1/nested-2/nested-3/stdout_specfile.coffee...                         (3 of 3) 
 
 
   stdout_specfile_display_spec
@@ -516,15 +521,20 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ nested-1/nested-2/nested-3/spec.coff…     XX:XX        1        1        -        -        - │
+  │ ✔  nested-1/nested-2/nested-3/spec.coff     XX:XX        1        1        -        -        - │
+  │    ee                                                                                          │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔ nested-1/nested-2/nested-3/stdout_sp…     XX:XX        1        1        -        -        - │
+  │ ✔  nested-1/nested-2/nested-3/stdout_sp     XX:XX        1        1        -        -        - │
+  │    ecfile_display_spec_with_a_really_lo                                                        │
+  │    ng_name_that_never_has_a_line_break_                                                        │
+  │    or_new_line.coffee                                                                          │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔ nested-1/nested-2/nested-3/stdout_sp…     XX:XX        1        1        -        -        - │
+  │ ✔  nested-1/nested-2/nested-3/stdout_sp     XX:XX        1        1        -        -        - │
+  │    ecfile.coffee                                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `
