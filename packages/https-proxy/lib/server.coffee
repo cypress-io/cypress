@@ -13,6 +13,7 @@ url          = require("url")
 fs = Promise.promisifyAll(fs)
 
 sslServers    = {}
+sslIpServers  = {}
 sslSemaphores = {}
 
 ## https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_record
@@ -24,7 +25,7 @@ SSL_RECORD_TYPES = [
 class Server
   constructor: (@_ca, @_port, @_options) ->
     @_onError = null
-    @_ipServers = {}
+    @_ipServers = sslIpServers
 
   connect: (req, browserSocket, head, options = {}) ->
     ## don't buffer writes - thanks a lot, Nagle
@@ -226,60 +227,62 @@ class Server
       @_sniServer.addContext(hostname, data)
 
       return @_sniPort
-
-  ## browsers will not do SNI for an IP address, so we need to serve
-  ## 1 HTTPS server per IP
-  ## https://github.com/cypress-io/cypress/issues/771
-  _getServerPortForIp: (ip, data) =>
-    if server = @_ipServers[ip]
-      return server.address().port
-
-    new Promise (resolve) =>
-      @_ipServers[ip] = server = https.createServer(data)
+  
+  _listenHttpsServer: (data) ->
+    new Promise (resolve, reject) =>
+      server = https.createServer(data)
 
       allowDestroy(server)
 
+      server.once "error", reject
       server.on "upgrade", @_onUpgrade.bind(@, @_options.onUpgrade)
       server.on "request", @_onRequest.bind(@, @_options.onRequest)
-      server.listen 0, '127.0.0.1', =>
+      
+      server.listen 0, '127.0.0.1', ->
         port = server.address().port
 
-        debug("Created HTTPS Proxy for IP %s on port %s", ip, port)
+        server.removeListener("error", reject)
+        
+        resolve({ server, port })
 
-        resolve(port)
+  ## browsers will not do SNI for an IP address
+  ## so we need to serve 1 HTTPS server per IP
+  ## https://github.com/cypress-io/cypress/issues/771
+  _getServerPortForIp: (ip, data) =>
+    if server = sslIpServers[ip]
+      return server.address().port
+
+    @_listenHttpsServer(data)
+    .then ({ server, port }) ->
+      sslIpServers[ip] = server
+
+      debug("Created IP HTTPS Proxy Server", { port, ip })
+
+      return port
 
   listen: ->
-    new Promise (resolve) =>
-      @_onError = @_options.onError
+    @_onError = @_options.onError
 
-      @_sniServer = https.createServer({})
+    @_listenHttpsServer({})
+    .tap ({ server, port}) =>
+      @_sniPort = port
+      @_sniServer = server
 
-      allowDestroy(@_sniServer)
-
-      @_sniServer.on "upgrade", @_onUpgrade.bind(@, @_options.onUpgrade)
-      @_sniServer.on "request", @_onRequest.bind(@, @_options.onRequest)
-      @_sniServer.listen 0, '127.0.0.1', =>
-        ## store the port of our current sniServer
-        @_sniPort = @_sniServer.address().port
-
-        debug("Created SNI HTTPS Proxy on port %s", @_sniPort)
-
-        resolve()
+      debug("Created SNI HTTPS Proxy Server", { port })
 
   close: ->
     close = =>
-      servers = _.values(@_ipServers).concat([@_sniServer])
+      servers = _.values(sslIpServers).concat(@_sniServer)
       Promise.map servers, (server) ->
-        Promise.fromCallback (cb) ->
-          server.destroy(cb)
+        Promise.fromCallback(server.destroy)
 
     close()
-    .finally ->
-      sslServers = {}
+    .finally(module.exports.reset)
 
 module.exports = {
   reset: ->
     sslServers = {}
+    sslIpServers = {}
 
   create: (ca, port, options = {}) ->
     srv = new Server(ca, port, options)

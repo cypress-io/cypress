@@ -701,7 +701,6 @@ class Server
       @_fileServer?.close()
       @_httpsProxy?.close()
     )
-    .catch { message: "Not running" }, _.noop
     .then =>
       ## reset any middleware
       @_middleware = null

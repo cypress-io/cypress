@@ -132,6 +132,7 @@ describe "Proxy", ->
       url: "http://localhost:8080/"
       proxy: "http://localhost:3333"
     })
+
     .then (html) ->
       expect(html).to.include("http server")
 
@@ -159,14 +160,9 @@ describe "Proxy", ->
       @sandbox.spy(@proxy, "_generateMissingCertificates")
       @sandbox.spy(@proxy, "_getServerPortForIp")
 
-      remove = (folder, file) =>
-        fs.removeAsync(path.join(folder, file))
-
       Promise.all([
         httpsServer.start(8445),
-        remove(@proxy._ca.certsFolder, '127.0.0.1.pem'),
-        remove(@proxy._ca.keysFolder, '127.0.0.1.key'),
-        remove(@proxy._ca.keysFolder, '127.0.0.1.public.key')
+        @proxy._ca.removeAll()
       ])
       .then =>
         request({
