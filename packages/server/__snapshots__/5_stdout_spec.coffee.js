@@ -14,7 +14,7 @@ exports['e2e stdout displays errors from failures 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:    stdout_failing_spec.coffee...                                                (1 of 1) 
+  Running:  stdout_failing_spec.coffee...                                                   (1 of 1)
 
 
   stdout_failing_spec
@@ -153,7 +153,7 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:    stdout_exit_early_failing_spec.coffee...                                     (1 of 1) 
+  Running:  stdout_exit_early_failing_spec.coffee...                                        (1 of 1)
 
 Oops...we found an error preparing this test file:
 
@@ -225,7 +225,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:    stdout_passing_spec.coffee...                                                (1 of 1) 
+  Running:  stdout_passing_spec.coffee...                                                   (1 of 1)
 
 
   stdout_passing_spec
@@ -297,7 +297,7 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:    simple_spec.coffee...                                                        (1 of 1) 
+  Running:  simple_spec.coffee...                                                           (1 of 1)
 
 Warning: Cypress can only record videos when running headlessly.
 
@@ -356,7 +356,7 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:    simple_spec.coffee...                                                        (1 of 1) 
+  Running:  simple_spec.coffee...                                                           (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -417,7 +417,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:    nested-1/nested-2/nested-3/spec.coffee...                                    (1 of 3) 
+  Running:  nested-1/nested-2/nested-3/spec.coffee...                                       (1 of 3)
 
 
   stdout_specfile_display_spec
@@ -450,8 +450,8 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:    nested-1/nested-2/nested-3/stdout_specfile_display_spec_with_a_re            (2 of 3) 
-              ally_long_name_that_never_has_a_line_break_or_new_line.coffee...                      
+  Running:  nested-1/nested-2/nested-3/stdout_specfile_display_spec_with_a_real             (2 of 3)
+            ly_long_name_that_never_has_a_line_break_or_new_line.coffee...                          
 
 
   stdout_specfile_display_spec
@@ -485,7 +485,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:    nested-1/nested-2/nested-3/stdout_specfile.coffee...                         (3 of 3) 
+  Running:  nested-1/nested-2/nested-3/stdout_specfile.coffee...                            (3 of 3)
 
 
   stdout_specfile_display_spec

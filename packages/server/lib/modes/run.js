@@ -188,18 +188,22 @@ const displaySpecHeader = function (name, curr, total, estimated) {
   const PADDING = 2
 
   const table = terminal.table({
-    colWidths: [12, 68, 20],
+    colWidths: [10, 70, 20],
     colAligns: ['left', 'left', 'right'],
     type: 'pageDivider',
     style: {
       'padding-left': PADDING,
+      'padding-right': 0,
     },
   })
 
   table.push(['', ''])
   table.push([
     'Running:',
-    `${formatPath(name, 65, 'gray')}...`,
+    {
+      style: { 'padding-left': 0 },
+      content: `${formatPath(name, 67, 'gray')}...`,
+    },
     gray(`(${curr} of ${total})`),
   ])
 
