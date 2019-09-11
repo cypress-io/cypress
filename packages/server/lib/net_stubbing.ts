@@ -26,7 +26,7 @@ interface BackendRoute {
   staticResponse?: StaticResponse
 }
 
-interface ProxyIncomingMessage extends IncomingMessage {
+export interface ProxyIncomingMessage extends IncomingMessage {
   proxiedUrl: string
   webSocket: boolean // TODO: populate
   requestId: string
@@ -49,6 +49,7 @@ interface BackendRequest {
   continueResponse?: Function
   req: ProxyIncomingMessage
   res: ServerResponse & { body?: string | any }
+  incomingRes?: IncomingMessage
   resStream?: any
   /**
    * Should the response go to the driver, or should it be allowed to continue?
@@ -85,7 +86,7 @@ function _getAllStringMatcherFields (options) {
   )
 }
 
-function _isResGzipped (res: ServerResponse) {
+function _isResGzipped (res: IncomingMessage) {
   return res.headers['content-encoding'] === 'gzip'
 }
 
@@ -128,7 +129,7 @@ function _getRouteForRequest (req: ProxyIncomingMessage, prevRoute?: BackendRout
   })
 }
 
-export function _getMatchableForRequest (req) {
+export function _getMatchableForRequest (req: ProxyIncomingMessage) {
   let matchable : any = _.pick(req, ['headers', 'method', 'webSocket'])
 
   const authorization = req.headers['authorization']
@@ -463,6 +464,7 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
 
   // this may get set back to `true` by another route
   backendRequest.sendResponseToDriver = false
+  backendRequest.incomingRes = incomingRes
   backendRequest.resStream = resStream
   backendRequest.continueResponse = cb
 
@@ -551,7 +553,7 @@ function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
     }
 
     // regzip, if it should be
-    if (_isResGzipped(res)) {
+    if (_isResGzipped(backendRequest.incomingRes)) {
       return zlib.gzip(res.body, (err, body) => {
         sendBody(body)
       })

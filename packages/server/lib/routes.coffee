@@ -15,7 +15,7 @@ files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 staticCtrl  = require("./controllers/static")
 
-module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
+module.exports = (app, config, request, getRemoteState, project) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
@@ -71,7 +71,7 @@ module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
     })
 
   app.all "*", (req, res, next) ->
-    proxy.handle(req, res, config, getRemoteState, request, nodeProxy, project)
+    proxy.handle(req, res, config, getRemoteState, request, project)
 
   ## when we experience uncaught errors
   ## during routing just log them out to
