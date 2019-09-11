@@ -25,12 +25,6 @@ const getBordersLength = (left, right) => {
 }
 
 const convertDecimalsToNumber = function (colWidths, cols) {
-  // const sum = _.sum(colWidths)
-
-  // if (sum !== EXPECTED_SUM) {
-  //   throw new Error(`Expected colWidths array to sum to: ${EXPECTED_SUM}, instead got: ${sum}`)
-  // }
-
   const widths = _.map(colWidths, (width) => {
     // easier to deal with numbers than floats...
     const num = (cols * width) / EXPECTED_SUM
