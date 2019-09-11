@@ -286,10 +286,7 @@ const renderSummaryTable = (runUrl) => {
 
         return table2.push([
           formatSymbolSummary(stats.failures),
-          {
-            style: { 'padding-right': 0 },
-            content: formatPath(spec.name, 36),
-          },
+          formatPath(spec.name, 36),
           color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),
