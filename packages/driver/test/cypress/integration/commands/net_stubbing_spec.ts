@@ -243,6 +243,7 @@ describe('src/cy/commands/net_stubbing', function () {
                 done()
               })
 
+              // @ts-ignore - this should error
               cy.route('/', handler)
             })
           })
