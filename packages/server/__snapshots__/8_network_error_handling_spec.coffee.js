@@ -33,7 +33,7 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: https_passthru_spec.js...                                                       (1 of 1) 
+  Running:  https_passthru_spec.js...                                                       (1 of 1)
 
 
   https passthru retries
@@ -70,11 +70,11 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ https_passthru_spec.js                    XX:XX        2        2        -        -        - │
+  │ ✔  https_passthru_spec.js                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -95,7 +95,7 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: https_passthru_spec.js...                                                       (1 of 1) 
+  Running:  https_passthru_spec.js...                                                       (1 of 1)
 
 
   https passthru retries
@@ -132,11 +132,11 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ https_passthru_spec.js                    XX:XX        2        2        -        -        - │
+  │ ✔  https_passthru_spec.js                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -157,7 +157,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: network_error_304_handling_spec.js...                                           (1 of 1) 
+  Running:  network_error_304_handling_spec.js...                                           (1 of 1)
 
 
   network error 304 handling
@@ -193,11 +193,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ network_error_304_handling_spec.js        XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -218,7 +218,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: network_error_304_handling_spec.js...                                           (1 of 1) 
+  Running:  network_error_304_handling_spec.js...                                           (1 of 1)
 
 
   network error 304 handling
@@ -254,11 +254,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ network_error_304_handling_spec.js        XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -279,7 +279,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: network_error_304_handling_spec.js...                                           (1 of 1) 
+  Running:  network_error_304_handling_spec.js...                                           (1 of 1)
 
 
   network error 304 handling
@@ -315,11 +315,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ network_error_304_handling_spec.js        XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

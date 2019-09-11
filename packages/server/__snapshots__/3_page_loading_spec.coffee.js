@@ -14,7 +14,7 @@ exports['e2e page_loading passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: page_loading_spec.coffee...                                                     (1 of 1) 
+  Running:  page_loading_spec.coffee...                                                     (1 of 1)
 
 
   page_loading
@@ -52,11 +52,11 @@ exports['e2e page_loading passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ page_loading_spec.coffee                  XX:XX        2        2        -        -        - │
+  │ ✔  page_loading_spec.coffee                 XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

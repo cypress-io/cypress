@@ -14,7 +14,7 @@ exports['e2e commands outside of test passes on passing assertions 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: assertions_passing_outside_of_test_spec.coffee...                               (1 of 1) 
+  Running:  assertions_passing_outside_of_test_spec.coffee...                               (1 of 1)
 
 
   0 passing
@@ -46,11 +46,12 @@ exports['e2e commands outside of test passes on passing assertions 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ assertions_passing_outside_of_test_s…     XX:XX        -        -        -        -        - │
+  │ ✔  assertions_passing_outside_of_test_s     XX:XX        -        -        -        -        - │
+  │    pec.coffee                                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        -        -        -        -        -  
+    ✔  All specs passed!                        XX:XX        -        -        -        -        -  
 
 
 `
@@ -164,7 +165,7 @@ exports['e2e commands outside of test [chrome] fails on failing assertions 1'] =
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: assertions_failing_outside_of_test_spec.coffee...                               (1 of 1) 
+  Running:  assertions_failing_outside_of_test_spec.coffee...                               (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -218,11 +219,12 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ assertions_failing_outside_of_test_s…     XX:XX        1        -        1        -        - │
+  │ ✖  assertions_failing_outside_of_test_s     XX:XX        1        -        1        -        - │
+  │    pec.coffee                                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

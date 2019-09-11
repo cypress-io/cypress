@@ -14,7 +14,7 @@ exports['e2e baseUrl https passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: base_url_spec.coffee...                                                         (1 of 1) 
+  Running:  base_url_spec.coffee...                                                         (1 of 1)
 
 
   base url
@@ -50,11 +50,11 @@ exports['e2e baseUrl https passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ base_url_spec.coffee                      XX:XX        1        1        -        -        - │
+  │ ✔  base_url_spec.coffee                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -75,7 +75,7 @@ exports['e2e baseUrl http passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: base_url_spec.coffee...                                                         (1 of 1) 
+  Running:  base_url_spec.coffee...                                                         (1 of 1)
 
 
   base url
@@ -111,11 +111,11 @@ exports['e2e baseUrl http passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ base_url_spec.coffee                      XX:XX        1        1        -        -        - │
+  │ ✔  base_url_spec.coffee                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

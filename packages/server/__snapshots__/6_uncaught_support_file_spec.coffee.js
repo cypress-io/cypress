@@ -13,7 +13,7 @@ exports['e2e uncaught support file errors failing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: spec.coffee...                                                                  (1 of 1) 
+  Running:  spec.coffee...                                                                  (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -70,11 +70,11 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ spec.coffee                               XX:XX        1        -        1        -        - │
+  │ ✖  spec.coffee                              XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

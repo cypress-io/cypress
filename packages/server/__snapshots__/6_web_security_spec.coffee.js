@@ -14,7 +14,7 @@ exports['e2e web security when enabled fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: web_security_spec.coffee...                                                     (1 of 1) 
+  Running:  web_security_spec.coffee...                                                     (1 of 1)
 
 
   web security
@@ -158,11 +158,11 @@ https://on.cypress.io/cross-origin-violation
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ web_security_spec.coffee                  XX:XX        3        -        3        -        - │
+  │ ✖  web_security_spec.coffee                 XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
 
 
 `
@@ -183,7 +183,7 @@ exports['e2e web security when disabled passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: web_security_spec.coffee...                                                     (1 of 1) 
+  Running:  web_security_spec.coffee...                                                     (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -221,11 +221,11 @@ A video will not be recorded when using this browser.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ web_security_spec.coffee                  XX:XX        3        3        -        -        - │
+  │ ✔  web_security_spec.coffee                 XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `

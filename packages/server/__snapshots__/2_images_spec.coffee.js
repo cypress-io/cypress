@@ -14,7 +14,7 @@ exports['e2e images passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: images_spec.coffee...                                                           (1 of 1) 
+  Running:  images_spec.coffee...                                                           (1 of 1)
 
 
   images
@@ -51,11 +51,11 @@ exports['e2e images passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ images_spec.coffee                        XX:XX        2        2        -        -        - │
+  │ ✔  images_spec.coffee                       XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

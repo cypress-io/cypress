@@ -14,7 +14,7 @@ exports['e2e config passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: config_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  config_passing_spec.coffee...                                                   (1 of 1)
 
 
   Cypress static methods + props
@@ -54,11 +54,11 @@ exports['e2e config passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ config_passing_spec.coffee                XX:XX        5        5        -        -        - │
+  │ ✔  config_passing_spec.coffee               XX:XX        5        5        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        5        5        -        -        -  
+    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
 
 
 `
@@ -79,7 +79,7 @@ exports['e2e config fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: config_failing_spec.coffee...                                                   (1 of 1) 
+  Running:  config_failing_spec.coffee...                                                   (1 of 1)
 
 
   config
@@ -140,11 +140,11 @@ exports['e2e config fails 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ config_failing_spec.coffee                XX:XX        1        -        1        -        - │
+  │ ✖  config_failing_spec.coffee               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

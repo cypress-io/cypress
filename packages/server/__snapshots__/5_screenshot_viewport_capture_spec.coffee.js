@@ -14,7 +14,7 @@ exports['e2e screenshot viewport capture passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: screenshot_viewport_capture_spec.coffee...                                      (1 of 1) 
+  Running:  screenshot_viewport_capture_spec.coffee...                                      (1 of 1)
 
 
   ✓ takes consistent viewport captures
@@ -78,11 +78,12 @@ exports['e2e screenshot viewport capture passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ screenshot_viewport_capture_spec.cof…     XX:XX        1        1        -        -        - │
+  │ ✔  screenshot_viewport_capture_spec.cof     XX:XX        1        1        -        -        - │
+  │    fee                                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

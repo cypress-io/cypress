@@ -14,7 +14,7 @@ exports['e2e domain passing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: domain_2_spec.coffee...                                                         (1 of 2) 
+  Running:  domain_2_spec.coffee...                                                         (1 of 2)
 
 
   localhost
@@ -53,7 +53,7 @@ exports['e2e domain passing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: domain_spec.coffee...                                                           (2 of 2) 
+  Running:  domain_spec.coffee...                                                           (2 of 2)
 
 
   localhost
@@ -95,13 +95,13 @@ exports['e2e domain passing 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ domain_2_spec.coffee                      XX:XX        3        3        -        -        - │
+  │ ✔  domain_2_spec.coffee                     XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔ domain_spec.coffee                        XX:XX        3        3        -        -        - │
+  │ ✔  domain_spec.coffee                       XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        6        6        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `

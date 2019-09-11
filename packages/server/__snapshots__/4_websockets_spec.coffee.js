@@ -14,7 +14,7 @@ exports['e2e websockets passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: websockets_spec.coffee...                                                       (1 of 1) 
+  Running:  websockets_spec.coffee...                                                       (1 of 1)
 
 
   websockets
@@ -50,11 +50,11 @@ exports['e2e websockets passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ websockets_spec.coffee                    XX:XX        1        1        -        -        - │
+  │ ✔  websockets_spec.coffee                   XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

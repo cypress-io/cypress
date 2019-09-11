@@ -14,7 +14,7 @@ exports['e2e cache passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: cache_spec.coffee...                                                            (1 of 1) 
+  Running:  cache_spec.coffee...                                                            (1 of 1)
 
 
   caching
@@ -53,11 +53,11 @@ exports['e2e cache passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ cache_spec.coffee                         XX:XX        4        4        -        -        - │
+  │ ✔  cache_spec.coffee                        XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        4        4        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `

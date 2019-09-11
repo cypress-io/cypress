@@ -14,7 +14,7 @@ exports['e2e forms <form> submissions passes with http on localhost 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_multipart_spec.coffee...                                        (1 of 1) 
+  Running:  form_submission_multipart_spec.coffee...                                        (1 of 1)
 
 
   <form> submissions
@@ -57,11 +57,12 @@ exports['e2e forms <form> submissions passes with http on localhost 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ form_submission_multipart_spec.coffee     XX:XX        7        7        -        -        - │
+  │ ✔  form_submission_multipart_spec.coffe     XX:XX        7        7        -        -        - │
+  │    e                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        7        7        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
@@ -82,7 +83,7 @@ exports['e2e forms <form> submissions passes with https on localhost 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_multipart_spec.coffee...                                        (1 of 1) 
+  Running:  form_submission_multipart_spec.coffee...                                        (1 of 1)
 
 
   <form> submissions
@@ -125,11 +126,12 @@ exports['e2e forms <form> submissions passes with https on localhost 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ form_submission_multipart_spec.coffee     XX:XX        7        7        -        -        - │
+  │ ✔  form_submission_multipart_spec.coffe     XX:XX        7        7        -        -        - │
+  │    e                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        7        7        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
@@ -150,7 +152,7 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_failing_spec.coffee...                                          (1 of 1) 
+  Running:  form_submission_failing_spec.coffee...                                          (1 of 1)
 
 
   form submission fails
@@ -212,11 +214,11 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ form_submission_failing_spec.coffee       XX:XX        1        -        1        -        - │
+  │ ✖  form_submission_failing_spec.coffee      XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -237,7 +239,7 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_passing_spec.coffee...                                          (1 of 1) 
+  Running:  form_submission_passing_spec.coffee...                                          (1 of 1)
 
 
   form submissions
@@ -274,11 +276,11 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ form_submission_passing_spec.coffee       XX:XX        2        2        -        -        - │
+  │ ✔  form_submission_passing_spec.coffee      XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

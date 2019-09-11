@@ -14,7 +14,7 @@ exports['e2e iframes passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: iframe_spec.coffee...                                                           (1 of 1) 
+  Running:  iframe_spec.coffee...                                                           (1 of 1)
 
 
   iframes
@@ -56,11 +56,11 @@ exports['e2e iframes passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ iframe_spec.coffee                        XX:XX        7        7        -        -        - │
+  │ ✔  iframe_spec.coffee                       XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        7        7        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `

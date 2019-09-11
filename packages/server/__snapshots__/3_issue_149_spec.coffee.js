@@ -14,7 +14,7 @@ exports['e2e issue 149 failing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: issue_149_spec.coffee...                                                        (1 of 1) 
+  Running:  issue_149_spec.coffee...                                                        (1 of 1)
 
 
   1) fails
@@ -61,11 +61,11 @@ exports['e2e issue 149 failing 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ issue_149_spec.coffee                     XX:XX        2        1        1        -        - │
+  │ ✖  issue_149_spec.coffee                    XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        1        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        1        1        -        -  
 
 
 `

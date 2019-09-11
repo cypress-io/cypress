@@ -14,7 +14,7 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: browserify_babel_es2015_passing_spec.coffee...                                  (1 of 1) 
+  Running:  browserify_babel_es2015_passing_spec.coffee...                                  (1 of 1)
 
 
   imports work
@@ -52,11 +52,12 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ browserify_babel_es2015_passing_spec…     XX:XX        3        3        -        -        - │
+  │ ✔  browserify_babel_es2015_passing_spec     XX:XX        3        3        -        -        - │
+  │    .coffee                                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `
@@ -77,7 +78,7 @@ exports['e2e browserify, babel, es2015 fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: browserify_babel_es2015_failing_spec.js...                                      (1 of 1) 
+  Running:  browserify_babel_es2015_failing_spec.js...                                      (1 of 1)
 
 Oops...we found an error preparing this test file:
 
@@ -124,11 +125,12 @@ Fix the error in your code and re-run your tests.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ browserify_babel_es2015_failing_spec…     XX:XX        -        -        1        -        - │
+  │ ✖  browserify_babel_es2015_failing_spec     XX:XX        -        -        1        -        - │
+  │    .js                                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `

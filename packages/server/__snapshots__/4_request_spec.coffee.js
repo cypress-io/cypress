@@ -14,7 +14,7 @@ exports['e2e requests passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_spec.coffee...                                                          (1 of 1) 
+  Running:  request_spec.coffee...                                                          (1 of 1)
 
 
   redirects + requests
@@ -61,11 +61,11 @@ exports['e2e requests passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ request_spec.coffee                       XX:XX       12       12        -        -        - │
+  │ ✔  request_spec.coffee                      XX:XX       12       12        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       12       12        -        -        -  
+    ✔  All specs passed!                        XX:XX       12       12        -        -        -  
 
 
 `
@@ -86,7 +86,7 @@ exports['e2e requests fails when network immediately fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_http_network_error_failing_spec.coffee...                               (1 of 1) 
+  Running:  request_http_network_error_failing_spec.coffee...                               (1 of 1)
 
 
   when network connection cannot be established
@@ -191,11 +191,12 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ request_http_network_error_failing_s…     XX:XX        1        -        1        -        - │
+  │ ✖  request_http_network_error_failing_s     XX:XX        1        -        1        -        - │
+  │    pec.coffee                                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -216,7 +217,7 @@ exports['e2e requests fails on status code 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_status_code_failing_spec.coffee...                                      (1 of 1) 
+  Running:  request_status_code_failing_spec.coffee...                                      (1 of 1)
 
 
   when status code isnt 2xx or 3xx
@@ -315,11 +316,12 @@ Body: Service Unavailable
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ request_status_code_failing_spec.cof…     XX:XX        1        -        1        -        - │
+  │ ✖  request_status_code_failing_spec.cof     XX:XX        1        -        1        -        - │
+  │    fee                                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

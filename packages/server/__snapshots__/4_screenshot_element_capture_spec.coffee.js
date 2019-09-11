@@ -14,7 +14,7 @@ exports['e2e screenshot element capture passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: screenshot_element_capture_spec.coffee...                                       (1 of 1) 
+  Running:  screenshot_element_capture_spec.coffee...                                       (1 of 1)
 
 
   ✓ takes consistent element captures
@@ -63,11 +63,12 @@ exports['e2e screenshot element capture passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ screenshot_element_capture_spec.coff…     XX:XX        1        1        -        -        - │
+  │ ✔  screenshot_element_capture_spec.coff     XX:XX        1        1        -        -        - │
+  │    ee                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

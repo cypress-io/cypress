@@ -14,7 +14,7 @@ exports['e2e return value failing1 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: return_value_spec.coffee...                                                     (1 of 1) 
+  Running:  return_value_spec.coffee...                                                     (1 of 1)
 
 
   1) errors when invoking commands and return a different value
@@ -120,11 +120,11 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ return_value_spec.coffee                  XX:XX        2        -        2        -        - │
+  │ ✖  return_value_spec.coffee                 XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 
 
 `

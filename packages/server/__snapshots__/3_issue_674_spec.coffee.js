@@ -14,7 +14,7 @@ exports['e2e issue 674 fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: issue_674_spec.coffee...                                                        (1 of 1) 
+  Running:  issue_674_spec.coffee...                                                        (1 of 1)
 
 
   issue 674
@@ -72,11 +72,11 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ issue_674_spec.coffee                     XX:XX        1        -        1        -        - │
+  │ ✖  issue_674_spec.coffee                    XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

@@ -14,7 +14,7 @@ exports['e2e blacklist passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: blacklist_hosts_spec.coffee...                                                  (1 of 1) 
+  Running:  blacklist_hosts_spec.coffee...                                                  (1 of 1)
 
 
   blacklist
@@ -50,11 +50,11 @@ exports['e2e blacklist passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ blacklist_hosts_spec.coffee               XX:XX        1        1        -        -        - │
+  │ ✔  blacklist_hosts_spec.coffee              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

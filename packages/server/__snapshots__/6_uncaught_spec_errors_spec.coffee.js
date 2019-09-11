@@ -14,7 +14,7 @@ exports['e2e uncaught errors failing1 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_synchronous_before_tests_parsed.coffee...                              (1 of 1) 
+  Running:  uncaught_synchronous_before_tests_parsed.coffee...                              (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -71,11 +71,12 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_synchronous_before_tests_pa…     XX:XX        1        -        1        -        - │
+  │ ✖  uncaught_synchronous_before_tests_pa     XX:XX        1        -        1        -        - │
+  │    rsed.coffee                                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -96,7 +97,7 @@ exports['e2e uncaught errors failing2 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_synchronous_during_hook_spec.coffee...                                 (1 of 1) 
+  Running:  uncaught_synchronous_during_hook_spec.coffee...                                 (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -154,11 +155,12 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_synchronous_during_hook_spe…     XX:XX        1        -        1        -        - │
+  │ ✖  uncaught_synchronous_during_hook_spe     XX:XX        1        -        1        -        - │
+  │    c.coffee                                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -179,7 +181,7 @@ exports['e2e uncaught errors failing3 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_during_test_spec.coffee...                                             (1 of 1) 
+  Running:  uncaught_during_test_spec.coffee...                                             (1 of 1)
 
 
   foo
@@ -231,11 +233,11 @@ When Cypress detects uncaught errors originating from your test code it will aut
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_during_test_spec.coffee          XX:XX        1        -        1        -        - │
+  │ ✖  uncaught_during_test_spec.coffee         XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -256,7 +258,7 @@ exports['e2e uncaught errors failing4 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_during_hook_spec.coffee...                                             (1 of 1) 
+  Running:  uncaught_during_hook_spec.coffee...                                             (1 of 1)
 
 
   foo
@@ -313,11 +315,11 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_during_hook_spec.coffee          XX:XX        2        1        1        -        - │
+  │ ✖  uncaught_during_hook_spec.coffee         XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        1        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        1        1        -        -  
 
 
 `
@@ -338,7 +340,7 @@ exports['e2e uncaught errors failing5 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: caught_async_sync_test_spec.coffee...                                           (1 of 1) 
+  Running:  caught_async_sync_test_spec.coffee...                                           (1 of 1)
 
 
   foo
@@ -408,11 +410,11 @@ exports['e2e uncaught errors failing5 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ caught_async_sync_test_spec.coffee        XX:XX        8        4        4        -        - │
+  │ ✖  caught_async_sync_test_spec.coffee       XX:XX        8        4        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        8        4        4        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        8        4        4        -        -  
 
 
 `

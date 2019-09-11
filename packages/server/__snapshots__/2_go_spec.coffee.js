@@ -14,7 +14,7 @@ exports['e2e go passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: go_spec.coffee...                                                               (1 of 1) 
+  Running:  go_spec.coffee...                                                               (1 of 1)
 
 
   cy.go
@@ -51,11 +51,11 @@ exports['e2e go passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ go_spec.coffee                            XX:XX        2        2        -        -        - │
+  │ ✔  go_spec.coffee                           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

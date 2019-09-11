@@ -14,7 +14,7 @@ exports['e2e server sent events passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: server_sent_events_spec.coffee...                                               (1 of 1) 
+  Running:  server_sent_events_spec.coffee...                                               (1 of 1)
 
 
   server sent events
@@ -51,11 +51,11 @@ exports['e2e server sent events passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ server_sent_events_spec.coffee            XX:XX        2        2        -        -        - │
+  │ ✔  server_sent_events_spec.coffee           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

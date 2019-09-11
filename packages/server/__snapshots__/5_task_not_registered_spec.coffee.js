@@ -14,7 +14,7 @@ exports['e2e task fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: task_not_registered_spec.coffee...                                              (1 of 1) 
+  Running:  task_not_registered_spec.coffee...                                              (1 of 1)
 
 
   1) fails because the 'task' event is not registered in plugins file
@@ -79,11 +79,11 @@ https://on.cypress.io/api/task
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ task_not_registered_spec.coffee           XX:XX        1        -        1        -        - │
+  │ ✖  task_not_registered_spec.coffee          XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

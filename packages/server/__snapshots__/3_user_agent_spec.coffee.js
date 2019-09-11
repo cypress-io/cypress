@@ -14,7 +14,7 @@ exports['e2e user agent passes on chrome 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: user_agent_spec.coffee...                                                       (1 of 1) 
+  Running:  user_agent_spec.coffee...                                                       (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -51,11 +51,11 @@ A video will not be recorded when using this browser.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ user_agent_spec.coffee                    XX:XX        2        2        -        -        - │
+  │ ✔  user_agent_spec.coffee                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -76,7 +76,7 @@ exports['e2e user agent passes on electron 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: user_agent_spec.coffee...                                                       (1 of 1) 
+  Running:  user_agent_spec.coffee...                                                       (1 of 1)
 
 
   user agent
@@ -113,11 +113,11 @@ exports['e2e user agent passes on electron 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ user_agent_spec.coffee                    XX:XX        2        2        -        -        - │
+  │ ✔  user_agent_spec.coffee                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

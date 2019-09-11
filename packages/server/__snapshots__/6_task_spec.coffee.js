@@ -15,7 +15,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: multiple_task_registrations_spec.coffee...                                      (1 of 1) 
+  Running:  multiple_task_registrations_spec.coffee...                                      (1 of 1)
 
 
   ✓ merges task events
@@ -49,11 +49,12 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ multiple_task_registrations_spec.cof…     XX:XX        1        1        -        -        - │
+  │ ✔  multiple_task_registrations_spec.cof     XX:XX        1        1        -        -        - │
+  │    fee                                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -74,7 +75,7 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: task_spec.coffee...                                                             (1 of 1) 
+  Running:  task_spec.coffee...                                                             (1 of 1)
 
 
   1) throws when task returns undefined
@@ -181,11 +182,11 @@ https://on.cypress.io/api/task
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ task_spec.coffee                          XX:XX        2        -        2        -        - │
+  │ ✖  task_spec.coffee                         XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 
 
 `

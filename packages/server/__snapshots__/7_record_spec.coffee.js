@@ -7,7 +7,8 @@ exports['e2e record passing passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
+  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.cof   │
+  │             fee, record_uncaught_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record*                                                        │
   │ Params:     Group: false, Parallel: false                                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
@@ -16,7 +17,7 @@ exports['e2e record passing passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_error_spec.coffee...                                                     (1 of 4) 
+  Running:  record_error_spec.coffee...                                                     (1 of 4)
   Estimated: 8 seconds
 
 Oops...we found an error preparing this test file:
@@ -62,7 +63,7 @@ Fix the error in your code and re-run your tests.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_fail_spec.coffee...                                                      (2 of 4) 
+  Running:  record_fail_spec.coffee...                                                      (2 of 4)
   Estimated: 8 seconds
 
 
@@ -116,7 +117,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (3 of 4) 
+  Running:  record_pass_spec.coffee...                                                      (3 of 4)
   Estimated: 8 seconds
 
 
@@ -156,7 +157,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_uncaught_spec.coffee...                                                  (4 of 4) 
+  Running:  record_uncaught_spec.coffee...                                                  (4 of 4)
   Estimated: 8 seconds
 
 
@@ -220,17 +221,17 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ record_error_spec.coffee                  XX:XX        -        -        1        -        - │
+  │ ✖  record_error_spec.coffee                 XX:XX        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_fail_spec.coffee                   XX:XX        2        -        1        -        1 │
+  │ ✖  record_fail_spec.coffee                  XX:XX        2        -        1        -        1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_uncaught_spec.coffee               XX:XX        1        -        1        -        - │
+  │ ✖  record_uncaught_spec.coffee              XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    3 of 4 failed (75%)                         XX:XX        5        1        3        1        1  
+    ✖  3 of 4 failed (75%)                      XX:XX        5        1        3        1        1  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -278,7 +279,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
 
 
   record pass
@@ -315,11 +316,11 @@ StatusCodeError: 500 - "Internal Server Error"
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 `
@@ -349,7 +350,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
 
 
   record pass
@@ -386,11 +387,11 @@ StatusCodeError: 500 - "Internal Server Error"
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -418,7 +419,7 @@ exports['e2e record api interaction errors update instance does not update insta
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -467,11 +468,11 @@ StatusCodeError: 500 - "Internal Server Error"
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -499,7 +500,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -549,11 +550,11 @@ StatusCodeError: 500 - "Internal Server Error"
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -620,7 +621,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -663,11 +664,11 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -695,7 +696,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -745,11 +746,11 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -800,7 +801,7 @@ This error will not alter the exit code.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
 
 
   record pass
@@ -837,11 +838,11 @@ This error will not alter the exit code.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 `
@@ -855,7 +856,8 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
+  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.cof   │
+  │             fee, record_uncaught_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record*                                                        │
   │ Params:     Group: prod-e2e, Parallel: true                                                    │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
@@ -864,7 +866,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 4) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 4)
   Estimated: 1 second
 
 
@@ -907,11 +909,11 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -930,7 +932,8 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
+  │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.cof   │
+  │             fee, record_uncaught_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record*                                                        │
   │ Params:     Group: prod-e2e, Parallel: true                                                    │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
@@ -939,7 +942,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_error_spec.coffee...                                                     (2 of 4) 
+  Running:  record_error_spec.coffee...                                                     (2 of 4)
   Estimated: 1 second
 
 Oops...we found an error preparing this test file:
@@ -985,7 +988,7 @@ Fix the error in your code and re-run your tests.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_fail_spec.coffee...                                                      (3 of 4) 
+  Running:  record_fail_spec.coffee...                                                      (3 of 4)
   Estimated: 2 seconds
 
 
@@ -1039,7 +1042,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_uncaught_spec.coffee...                                                  (4 of 4) 
+  Running:  record_uncaught_spec.coffee...                                                  (4 of 4)
   Estimated: 3 seconds
 
 
@@ -1103,15 +1106,15 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ record_error_spec.coffee                  XX:XX        -        -        1        -        - │
+  │ ✖  record_error_spec.coffee                 XX:XX        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_fail_spec.coffee                   XX:XX        2        -        1        -        1 │
+  │ ✖  record_fail_spec.coffee                  XX:XX        2        -        1        -        1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖ record_uncaught_spec.coffee               XX:XX        1        -        1        -        - │
+  │ ✖  record_uncaught_spec.coffee              XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    3 of 3 failed (100%)                        XX:XX        3        -        3        -        1  
+    ✖  3 of 3 failed (100%)                     XX:XX        3        -        3        -        1  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1177,7 +1180,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
 
 
   record pass
@@ -1214,11 +1217,11 @@ StatusCodeError: 500 - "Internal Server Error"
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 `
@@ -1283,7 +1286,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 5 seconds
 
 
@@ -1378,7 +1381,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 5 seconds
 
 
@@ -1421,11 +1424,11 @@ StatusCodeError: 500 - "Internal Server Error"
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1458,7 +1461,7 @@ This error will not alter the exit code.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
 
 
   record pass
@@ -1495,11 +1498,11 @@ This error will not alter the exit code.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 `
@@ -1578,7 +1581,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -1621,11 +1624,11 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1658,7 +1661,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -1701,11 +1704,11 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1738,7 +1741,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -1781,11 +1784,11 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1818,7 +1821,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -1861,11 +1864,11 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1898,7 +1901,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -1941,11 +1944,11 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1978,7 +1981,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -2021,11 +2024,11 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -2062,7 +2065,7 @@ Details:
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Running:  record_pass_spec.coffee...                                                      (1 of 1)
   Estimated: 8 seconds
 
 
@@ -2105,11 +2108,11 @@ Details:
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  │ ✔  record_pass_spec.coffee                  XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        1        -        1        -  
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────

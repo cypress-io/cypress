@@ -14,7 +14,7 @@ exports['e2e subdomain passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: subdomain_spec.coffee...                                                        (1 of 1) 
+  Running:  subdomain_spec.coffee...                                                        (1 of 1)
 
 
   subdomains
@@ -59,11 +59,11 @@ exports['e2e subdomain passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ subdomain_spec.coffee                     XX:XX        9        7        -        2        - │
+  │ ✔  subdomain_spec.coffee                    XX:XX        9        7        -        2        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        9        7        -        2        -  
+    ✔  All specs passed!                        XX:XX        9        7        -        2        -  
 
 
 `

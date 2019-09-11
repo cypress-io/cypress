@@ -14,7 +14,7 @@ exports['e2e xhr passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: xhr_spec.coffee...                                                              (1 of 1) 
+  Running:  xhr_spec.coffee...                                                              (1 of 1)
 
 
   xhrs
@@ -58,11 +58,11 @@ exports['e2e xhr passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ xhr_spec.coffee                           XX:XX        8        8        -        -        - │
+  │ ✔  xhr_spec.coffee                          XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        8        8        -        -        -  
+    ✔  All specs passed!                        XX:XX        8        8        -        -        -  
 
 
 `

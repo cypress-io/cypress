@@ -14,7 +14,7 @@ exports['e2e screenshot in nested spec passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: nested-1/nested-2/screenshot_nested_file_spec.coffee...                         (1 of 1) 
+  Running:  nested-1/nested-2/screenshot_nested_file_spec.coffee...                         (1 of 1)
 
 
   ✓ nests the file based on spec path
@@ -53,11 +53,12 @@ exports['e2e screenshot in nested spec passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ nested-1/nested-2/screenshot_nested_…     XX:XX        1        1        -        -        - │
+  │ ✔  nested-1/nested-2/screenshot_nested_     XX:XX        1        1        -        -        - │
+  │    file_spec.coffee                                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

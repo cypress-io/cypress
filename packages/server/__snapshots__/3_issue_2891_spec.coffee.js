@@ -14,7 +14,7 @@ exports['e2e issue 2891 passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: default_layout_spec.js...                                                       (1 of 1) 
+  Running:  default_layout_spec.js...                                                       (1 of 1)
 
 
   ✓ works
@@ -48,11 +48,11 @@ exports['e2e issue 2891 passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ default_layout_spec.js                    XX:XX        1        1        -        -        - │
+  │ ✔  default_layout_spec.js                   XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

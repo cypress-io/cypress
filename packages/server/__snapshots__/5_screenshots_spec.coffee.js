@@ -14,7 +14,7 @@ exports['e2e screenshots passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: screenshots_spec.coffee...                                                      (1 of 1) 
+  Running:  screenshots_spec.coffee...                                                      (1 of 1)
 
 
   taking screenshots
@@ -135,11 +135,11 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                   XX:XX       22       17        4        1        - │
+  │ ✖  screenshots_spec.coffee                  XX:XX       22       17        4        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       22       17        4        1        -  
+    ✖  1 of 1 failed (100%)                     XX:XX       22       17        4        1        -  
 
 
 `

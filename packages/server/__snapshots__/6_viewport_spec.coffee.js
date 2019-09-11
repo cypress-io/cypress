@@ -14,7 +14,7 @@ exports['e2e viewport passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: viewport_spec.coffee...                                                         (1 of 1) 
+  Running:  viewport_spec.coffee...                                                         (1 of 1)
 
 
   viewport
@@ -52,11 +52,11 @@ exports['e2e viewport passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ viewport_spec.coffee                      XX:XX        3        3        -        -        - │
+  │ ✔  viewport_spec.coffee                     XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `

@@ -30,7 +30,7 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  simple_passing_spec.coffee...                                                   (1 of 1)
 
   (Results)
 
@@ -58,11 +58,11 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
+  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -83,7 +83,7 @@ exports['e2e reporters supports local custom reporter 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  simple_passing_spec.coffee...                                                   (1 of 1)
 passes
 finished!
 
@@ -113,11 +113,11 @@ finished!
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
+  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -138,7 +138,7 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  simple_passing_spec.coffee...                                                   (1 of 1)
 [mochawesome] Generating report files...
 
 
@@ -180,11 +180,11 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
+  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -205,7 +205,7 @@ exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom repor
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_failing_hook_spec.coffee...                                              (1 of 1) 
+  Running:  simple_failing_hook_spec.coffee...                                              (1 of 1)
 [mochawesome] Generating report files...
 
 
@@ -292,11 +292,11 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ simple_failing_hook_spec.coffee           XX:XX        6        1        3        1        1 │
+  │ ✖  simple_failing_hook_spec.coffee          XX:XX        6        1        3        1        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
+    ✖  1 of 1 failed (100%)                     XX:XX        6        1        3        1        1  
 
 
 `
@@ -317,7 +317,7 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  simple_passing_spec.coffee...                                                   (1 of 1)
 
 
   simple passing spec
@@ -357,11 +357,11 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
+  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -382,7 +382,7 @@ exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom repor
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_failing_hook_spec.coffee...                                              (1 of 1) 
+  Running:  simple_failing_hook_spec.coffee...                                              (1 of 1)
 
 
   simple failing hook spec
@@ -467,11 +467,11 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ simple_failing_hook_spec.coffee           XX:XX        6        1        3        1        1 │
+  │ ✖  simple_failing_hook_spec.coffee          XX:XX        6        1        3        1        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
+    ✖  1 of 1 failed (100%)                     XX:XX        6        1        3        1        1  
 
 
 `
@@ -492,7 +492,7 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  simple_passing_spec.coffee...                                                   (1 of 1)
 
 
   simple passing spec
@@ -532,11 +532,11 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
+  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -557,7 +557,7 @@ exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom repor
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_failing_hook_spec.coffee...                                              (1 of 1) 
+  Running:  simple_failing_hook_spec.coffee...                                              (1 of 1)
 
 
   simple failing hook spec
@@ -642,11 +642,11 @@ Because this error occurred during a 'after all' hook we are skipping the remain
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ simple_failing_hook_spec.coffee           XX:XX        6        1        3        1        1 │
+  │ ✖  simple_failing_hook_spec.coffee          XX:XX        6        1        3        1        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        6        1        3        1        1  
+    ✖  1 of 1 failed (100%)                     XX:XX        6        1        3        1        1  
 
 
 `
@@ -714,7 +714,7 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  simple_passing_spec.coffee...                                                   (1 of 1)
 ##teamcity[testSuiteStarted name='top suite' flowId='12345']
 ##teamcity[testSuiteStarted name='simple passing spec' flowId='12345']
 ##teamcity[testStarted name='passes' captureStandardOutput='true' flowId='12345']
@@ -748,11 +748,11 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_passing_spec.coffee                XX:XX        1        1        -        -        - │
+  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

@@ -14,7 +14,7 @@ exports['e2e plugins fails when spec does not exist 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: spec.js...                                                                      (1 of 1) 
+  Running:  spec.js...                                                                      (1 of 1)
 
 Oops...we found an error preparing this test file:
 
@@ -57,11 +57,11 @@ Fix the error in your code and re-run your tests.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ spec.js                                   XX:XX        -        -        1        -        - │
+  │ ✖  spec.js                                  XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `

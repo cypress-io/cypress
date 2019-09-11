@@ -14,7 +14,7 @@ exports['e2e promises failing1 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: promises_spec.coffee...                                                         (1 of 1) 
+  Running:  promises_spec.coffee...                                                         (1 of 1)
 
 
   1) catches regular promise errors
@@ -67,11 +67,11 @@ exports['e2e promises failing1 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ promises_spec.coffee                      XX:XX        2        -        2        -        - │
+  │ ✖  promises_spec.coffee                     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 
 
 `

@@ -14,7 +14,7 @@ exports['e2e js error handling fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: js_error_handling_failing_spec.coffee...                                        (1 of 1) 
+  Running:  js_error_handling_failing_spec.coffee...                                        (1 of 1)
 
 
   s1
@@ -138,11 +138,12 @@ https://on.cypress.io/uncaught-exception-from-application
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                               Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ js_error_handling_failing_spec.coffee     XX:XX        8        3        5        -        - │
+  │ ✖  js_error_handling_failing_spec.coffe     XX:XX        8        3        5        -        - │
+  │    e                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        8        3        5        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        8        3        5        -        -  
 
 
 `
