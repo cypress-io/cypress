@@ -135,12 +135,12 @@ const formatSpecs = function (specs) {
   const stringifiedSpecs = [
     `${names.length} found `,
     gray('('),
-    gray(names.join(', ')),
+    formatPath((names.join(', ')), 80, 'gray'),
     gray(')'),
   ]
   .join('')
 
-  return formatPath(stringifiedSpecs, 80)
+  return stringifiedSpecs
 }
 
 const displayRunStarting = function (options = {}) {
@@ -650,7 +650,7 @@ module.exports = {
       ['Video:', results.video],
       ['Duration:', results.duration],
       estimated ? ['Estimated:', results.estimated] : undefined,
-      ['Spec Ran:', formatPath(results.name, 80)],
+      ['Spec Ran:', formatPath(results.name, 80, c)],
     ])
     .compact()
     .map((arr) => {
