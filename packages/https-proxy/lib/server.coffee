@@ -22,7 +22,7 @@ SSL_RECORD_TYPES = [
   128, 0 ## TODO: what do these unknown types mean?
 ]
 
-onError: (err) ->
+onError = (err) ->
   ## these need to be caught to avoid crashing but do not affect anything
   debug('server error %o', { err })
 
