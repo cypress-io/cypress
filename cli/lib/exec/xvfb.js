@@ -8,7 +8,7 @@ const { throwFormErrorText, errors } = require('../errors')
 const util = require('../util')
 
 const xvfb = Promise.promisifyAll(new Xvfb({
-  timeout: 5000, // milliseconds
+  timeout: 30000, // milliseconds
   onStderrData (data) {
     if (debugXvfb.enabled) {
       debugXvfb(data.toString())
