@@ -86,7 +86,11 @@ const formatFooterSummary = (results) => {
 
   return [
     {
-      style: { 'padding-left': 1 },
+      style: {
+        'padding-left': 0,
+        'padding-right': 0,
+      },
+      truncate: '',
       content: formatSymbolSummary(totalFailed),
     },
     color(phrase, c),
@@ -100,7 +104,7 @@ const formatFooterSummary = (results) => {
 }
 
 const formatSymbolSummary = (failures) => {
-  return `${getSymbol(failures)}`
+  return getSymbol(failures)
 }
 
 const formatPath = (name, n, colour = 'reset') => {
@@ -244,14 +248,21 @@ const renderSummaryTable = (runUrl) => {
 
     if (runs && runs.length) {
       const colAligns = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right']
-      const colWidths = [1, 40, 11, 10, 10, 10, 10, 10]
+      const colWidths = [3, 36, 11, 10, 10, 10, 10, 10]
 
       const table1 = terminal.table({
         colAligns,
         colWidths,
         type: 'noBorder',
         head: [
-          '',
+          {
+            truncate: '',
+            content: '',
+            style: {
+              'padding-left': 0,
+              'padding-right': 0,
+            },
+          },
           gray('Spec'),
           '',
           gray('Tests'),
@@ -269,14 +280,17 @@ const renderSummaryTable = (runUrl) => {
         type: 'border',
       })
 
+      const PADDING_LEFT = 1
+      const PADDING_RIGHT = 1
+
       const table3 = terminal.table({
         colAligns,
         colWidths,
         type: 'noBorder',
         head: formatFooterSummary(results),
         style: {
-          'padding-left': 0,
-          'padding-right': 2,
+          'padding-left': PADDING_LEFT,
+          'padding-right': PADDING_RIGHT,
         },
       })
 
@@ -286,8 +300,16 @@ const renderSummaryTable = (runUrl) => {
         const ms = duration.format(stats.wallClockDuration)
 
         return table2.push([
-          formatSymbolSummary(stats.failures),
-          formatPath(spec.name, 36),
+          {
+            content: formatSymbolSummary(stats.failures),
+          },
+          {
+            style: {
+              'padding-left': 0,
+            },
+            // width - padding-left - padding-right - newline.length
+            content: formatPath(spec.name, colWidths[1] - PADDING_LEFT - PADDING_RIGHT - 1),
+          },
           color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),

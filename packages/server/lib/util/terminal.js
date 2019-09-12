@@ -25,6 +25,12 @@ const getBordersLength = (left, right) => {
 }
 
 const convertDecimalsToNumber = function (colWidths, cols) {
+  const sum = _.sum(colWidths)
+
+  if (sum !== EXPECTED_SUM) {
+    throw new Error(`Expected colWidths array to sum to: ${EXPECTED_SUM}, instead got: ${sum}`)
+  }
+
   const widths = _.map(colWidths, (width) => {
     // easier to deal with numbers than floats...
     const num = (cols * width) / EXPECTED_SUM
@@ -117,6 +123,26 @@ const getChars = function (type) {
         'right-mid': '',
         'middle': '',
       }
+    case 'allBorders':
+      return {
+        // this is default from cli-table mostly just for debugging,
+        // if you want to see where borders would be drawn
+        'top': '─',
+        'top-mid': '┬',
+        'top-left': '┌',
+        'top-right': '┐',
+        'bottom': '─',
+        'bottom-mid': '┴',
+        'bottom-left': '└',
+        'bottom-right': '┘',
+        'left': '│',
+        'left-mid': '├',
+        'mid': '─',
+        'mid-mid': '┼',
+        'right': '│',
+        'right-mid': '┤',
+        'middle': '│',
+      }
     default: throw new Error(`Table chars type: "${type}" is not supported`)
   }
 }
@@ -132,7 +158,7 @@ const wrapBordersInGray = (chars) => {
 }
 
 const table = function (options = {}) {
-  const { colWidths, type } = options
+  let { colWidths, type } = options
   const defaults = utils.mergeOptions({})
 
   let chars = _.defaults(getChars(type), defaults.chars)
@@ -149,16 +175,35 @@ const table = function (options = {}) {
 
   ({ chars } = options)
 
-  const borders = getBordersLength(chars.left, chars.right)
-
   options.chars = wrapBordersInGray(chars)
 
   if (colWidths) {
-    // subtract borders to get the actual size
-    // so it displaces a maximum number of columns
-    const cols = getMaximumColumns() - borders
+    const bordersLength = getBordersLength(chars.left, chars.right)
 
-    options.colWidths = convertDecimalsToNumber(colWidths, cols)
+    if (bordersLength > 0) {
+      // subtract borders to get the actual size
+      // so it displaces a maximum number of columns
+      // const cols = getMaximumColumns() - bordersLength
+
+      // redistribute the columns to account for borders on each side...
+      // and subtract from the largest width cell
+      const largestCellWidth = _.max(colWidths)
+      const index = _.indexOf(colWidths, largestCellWidth)
+
+      colWidths = _.clone(colWidths)
+
+      colWidths[index] = largestCellWidth - bordersLength
+
+      // const lastIndex = colWidths.length - 1
+
+      // colWidths[0] = colWidths[0] + chars.left.length
+      // colWidths[lastIndex] = colWidths[lastIndex] + chars.right.length
+
+      options.colWidths = colWidths
+
+      // options.colWidths = convertDecimalsToNumber(colWidths, cols)
+    }
+
   }
 
   return new Table(options)
