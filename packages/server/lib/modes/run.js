@@ -106,9 +106,6 @@ const formatSymbolSummary = (failures) => {
 const formatPath = (name, n, colour = 'reset') => {
   let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
 
-  // remove the last newline char
-  nameWithNewLines = nameWithNewLines.substring(0, nameWithNewLines.length - 1)
-
   return `${color(nameWithNewLines, colour)}`
 }
 
