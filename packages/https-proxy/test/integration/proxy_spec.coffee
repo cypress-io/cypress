@@ -179,7 +179,8 @@ describe "Proxy", ->
         })
       .then =>
         expect(@proxy._ipServers["127.0.0.1"]).to.be.an.instanceOf(https.Server)
-        expect(@proxy._getServerPortForIp).to.be.calledWith('127.0.0.1', sinon.match.any)
+        expect(@proxy._getServerPortForIp).to.be.calledWith('127.0.0.1').and.be.calledOnce
+        expect(@proxy._generateMissingCertificates).to.be.calledTwice
 
   context "closing", ->
     it "resets sslServers and can reopen", ->
