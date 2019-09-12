@@ -10,6 +10,7 @@ morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
+stripAnsi    = require("strip-ansi")
 debug        = require("debug")("cypress:support:e2e")
 httpsProxy   = require("@packages/https-proxy")
 Fixtures     = require("./fixtures")
@@ -76,7 +77,13 @@ replaceUploadingResults = (orig, match..., offset, string) ->
 normalizeStdout = (str, options = {}) ->
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
-  str = str
+  ## and strip all of the ansi codes so that our 
+  ## snapshots are not filled with garbage.
+  ## TODO: we actually *do* want to leave in the ansi
+  ## codes in the snapshot - but create a utility that
+  ## allows us to easily preview the ansi encoded strings
+  ## to verify they are correct
+  str = stripAnsi(str)
   .split(pathUpToProjectName)
     .join("/foo/bar/.projects")
   .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
@@ -369,13 +376,18 @@ module.exports = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
-          ## FYI: color will already be disabled
-          ## because we are piping the child process
           COLUMNS: 100
           LINES: 24
         })
         .defaults({
+          ## FYI: color will be disabled
+          ## because we are piping the child process
+          ## so we forcibly enable them like the CLI does
+          ## TODO: remove this when we route the e2e tests
+          ## through the CLI
+          FORCE_COLOR: "1"
           DEBUG_COLORS: "1"
+          MOCHA_COLORS: true
 
           ## prevent any Compression progress
           ## messages from showing up
