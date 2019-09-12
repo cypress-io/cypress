@@ -22,6 +22,10 @@ SSL_RECORD_TYPES = [
   128, 0 ## TODO: what do these unknown types mean?
 ]
 
+onError: (err) ->
+  ## these need to be caught to avoid crashing but do not affect anything
+  debug('server error %o', { err })
+
 class Server
   constructor: (@_ca, @_port, @_options) ->
     @_onError = null
@@ -98,10 +102,6 @@ class Server
       res.statusCode = 500
       res.end()
     .pipe(res)
-
-  _onServerError: (err) ->
-    ## these need to be caught to avoid crashing but do not affect anything
-    debug('server error %o', { err })
 
   _getProxyForUrl: (urlStr) ->
     port = Number(_.get(url.parse(urlStr), 'port'))
@@ -246,7 +246,7 @@ class Server
         port = server.address().port
 
         server.removeListener("error", reject)
-        server.on "error", @_onServerError
+        server.on "error", onError
 
         resolve({ server, port })
 
@@ -280,7 +280,7 @@ class Server
       servers = _.values(sslIpServers).concat(@_sniServer)
       Promise.map servers, (server) =>
         Promise.fromCallback(server.destroy)
-        .catch @_onServerError
+        .catch onError
 
     close()
     .finally(module.exports.reset)
