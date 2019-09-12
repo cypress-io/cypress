@@ -4,6 +4,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 _           = require("lodash")
 DebugProxy  = require("@cypress/debugging-proxy")
+fs          = require("fs-extra")
+https       = require("https")
 net         = require("net")
 network     = require("@packages/network")
 path        = require("path")
@@ -130,6 +132,7 @@ describe "Proxy", ->
       url: "http://localhost:8080/"
       proxy: "http://localhost:3333"
     })
+
     .then (html) ->
       expect(html).to.include("http server")
 
@@ -151,6 +154,33 @@ describe "Proxy", ->
           url: "https://localhost:8443/"
           proxy: "http://localhost:3333"
         })
+
+    ## https://github.com/cypress-io/cypress/issues/771
+    it "generates certs and can proxy requests for HTTPS requests to IPs", ->
+      @sandbox.spy(@proxy, "_generateMissingCertificates")
+      @sandbox.spy(@proxy, "_getServerPortForIp")
+
+      Promise.all([
+        httpsServer.start(8445),
+        @proxy._ca.removeAll()
+      ])
+      .then =>
+        request({
+          strictSSL: false
+          url: "https://127.0.0.1:8445/"
+          proxy: "http://localhost:3333"
+        })
+      .then =>
+        ## this should not stand up its own https server
+        request({
+          strictSSL: false
+          url: "https://localhost:8443/"
+          proxy: "http://localhost:3333"
+        })
+      .then =>
+        expect(@proxy._ipServers["127.0.0.1"]).to.be.an.instanceOf(https.Server)
+        expect(@proxy._getServerPortForIp).to.be.calledWith('127.0.0.1').and.be.calledOnce
+        expect(@proxy._generateMissingCertificates).to.be.calledTwice
 
   context "closing", ->
     it "resets sslServers and can reopen", ->
@@ -256,7 +286,7 @@ describe "Proxy", ->
       })
       .then =>
         throw new Error('should not succeed')
-      .catch { message: 'Error: socket hang up' }, =>
+      .catch { message: "Error: socket hang up" }, =>
         expect(createProxyConn).to.not.be.called
         expect(createSocket).to.be.calledWith({
           port: @proxy._sniPort

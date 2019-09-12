@@ -67,36 +67,26 @@ describe "Server", ->
             }
             rp(options)
 
-          open = =>
-            Promise.all([
-              ## open our https server
-              httpsServer.start(8443),
+          return Promise.all([
+            ## open our https server
+            httpsServer.start(8443),
 
-              ## and open our cypress server
-              @server = Server()
+            ## and open our cypress server
+            @server = Server()
 
-              @server.open(cfg)
-              .spread (port) =>
-                if initialUrl
-                  @server._onDomainSet(initialUrl)
+            @server.open(cfg)
+            .spread (port) =>
+              if initialUrl
+                @server._onDomainSet(initialUrl)
 
-                @srv = @server.getHttpServer()
+              @srv = @server.getHttpServer()
 
-                # @session = new (Session({app: @srv}))
+              # @session = new (Session({app: @srv}))
 
-                @proxy = "http://localhost:" + port
+              @proxy = "http://localhost:" + port
 
-                @fileServer = @server._fileServer.address()
-            ])
-
-          if @server
-            Promise.join(
-              httpsServer.stop()
-              @server.close()
-            )
-            .then(open)
-          else
-            open()
+              @fileServer = @server._fileServer.address()
+          ])
 
     afterEach ->
       nock.cleanAll()
