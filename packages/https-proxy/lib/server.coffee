@@ -99,6 +99,10 @@ class Server
       res.end()
     .pipe(res)
 
+  _onServerError: (err) ->
+    ## these need to be caught to avoid crashing but do not affect anything
+    debug('server error %o', { err })
+
   _getProxyForUrl: (urlStr) ->
     port = Number(_.get(url.parse(urlStr), 'port'))
 
@@ -227,7 +231,7 @@ class Server
       @_sniServer.addContext(hostname, data)
 
       return @_sniPort
-  
+
   _listenHttpsServer: (data) ->
     new Promise (resolve, reject) =>
       server = https.createServer(data)
@@ -237,12 +241,13 @@ class Server
       server.once "error", reject
       server.on "upgrade", @_onUpgrade.bind(@, @_options.onUpgrade)
       server.on "request", @_onRequest.bind(@, @_options.onRequest)
-      
-      server.listen 0, '127.0.0.1', ->
+
+      server.listen 0, '127.0.0.1', =>
         port = server.address().port
 
         server.removeListener("error", reject)
-        
+        server.on "error", @_onServerError
+
         resolve({ server, port })
 
   ## browsers will not do SNI for an IP address
@@ -273,8 +278,9 @@ class Server
   close: ->
     close = =>
       servers = _.values(sslIpServers).concat(@_sniServer)
-      Promise.map servers, (server) ->
+      Promise.map servers, (server) =>
         Promise.fromCallback(server.destroy)
+        .catch @_onServerError
 
     close()
     .finally(module.exports.reset)
