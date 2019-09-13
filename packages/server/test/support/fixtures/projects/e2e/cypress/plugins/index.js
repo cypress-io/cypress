@@ -3,7 +3,7 @@ const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
 
-const performance = require('../../../../../helpers/performance')
+const performance = require('../../../../test/support/helpers/performance')
 
 module.exports = (on) => {
   // save some time by only reading the originals once
