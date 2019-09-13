@@ -718,9 +718,10 @@ describe('intercept blur methods correctly', () => {
       `).appendTo(cy.$$('body'))
 
       cy.get('area')
-      // NOTE: should be.visible needed for firefox, otherwise element is shown as 'hidden'
-      .should('be.visible')
-      .focus().should('have.focus')
+      // NOTE: wait needed for firefox, otherwise element is not yet ready/loaded
+      .wait(100)
+      .focus()
+      .should('have.focus')
 
     })
 
