@@ -513,7 +513,8 @@ describe "src/cy/commands/actions/trigger", ->
         $button = cy.$$("<button />").css({width:200,height:100}).prependTo(cy.$$("body"))
         onMouseover = (e) ->
           expect(e.clientX).to.equal(8)
-          expect(e.clientY).to.equal(0)
+          ## NOTE: firefox leaves 1px on top of element on scroll, so add top offset
+          expect(e.clientY).to.equal(0 + Math.ceil(e.target.getBoundingClientRect().top))
           done()
 
         $button.on("mouseover", onMouseover)
@@ -525,7 +526,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         onMouseover = (e) ->
           expect(e.clientX).to.equal(207)
-          expect(e.clientY).to.equal(0)
+          expect(e.clientY).to.equal(0 + Math.ceil(e.target.getBoundingClientRect().top))
           done()
 
         $button.on("mouseover", onMouseover)
@@ -574,7 +575,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         onMouseover = (e) ->
           expect(e.clientX).to.equal(83)
-          expect(e.clientY).to.equal(78)
+          expect(e.clientY).to.equal(78 + Math.ceil(e.target.getBoundingClientRect().top))
           done()
 
         $button.on("mouseover", onMouseover)
@@ -586,7 +587,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         onMouseover = (e) ->
           expect(e.clientX).to.equal(83)
-          expect(e.clientY).to.equal(78)
+          expect(e.clientY).to.equal(78 + Math.ceil(e.target.getBoundingClientRect().top))
           done()
 
         $button.on("mouseover", onMouseover)

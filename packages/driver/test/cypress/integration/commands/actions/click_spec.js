@@ -566,7 +566,8 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       cy.get('[contenteditable]:first')
-      .invoke('html', '').click()
+      // prevent contenteditable from disappearing (dont set to empty)
+      .invoke('html', '<br>').click()
       .then(($el) => {
         const el = $el.get(0)
         const range = el.ownerDocument.getSelection().getRangeAt(0)
@@ -1012,11 +1013,10 @@ describe('src/cy/commands/actions/click', () => {
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const $btn = cy.$$('button:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-
-        cy.spy(cy, 'ensureElementIsNotAnimating')
+        cy.stub(cy, 'ensureElementIsNotAnimating').callThrough()
 
         cy.get('button:first').click({ animationDistanceThreshold: 1000 }).then(() => {
+          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromWindow, fromWindow])
@@ -1030,11 +1030,10 @@ describe('src/cy/commands/actions/click', () => {
 
         const $btn = cy.$$('button:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get('button:first').click().then(() => {
+          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromWindow, fromWindow])

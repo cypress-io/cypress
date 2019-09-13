@@ -117,6 +117,11 @@ chai.use (chai, u) ->
         ## replace object with our formatted one
         assert._obj = $dom.stringify(obj, "short")
 
+      ## FIXME: (firefox) find a better way to prevent tunneling into Window objects,
+      ##   which leads to cross-origin errors and perf issues.
+      args[3] && args[3].view && args[3].view = null
+      args[4] && args[4].view && args[4].view = null
+
       msg = getMessage.call(@, assert, args)
 
       ## restore the real obj if we changed it

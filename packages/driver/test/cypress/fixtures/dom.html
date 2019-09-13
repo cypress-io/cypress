@@ -6,9 +6,57 @@
   <body>
     <div id="dom">
       <style>
+
+        button,
+        input,
+        optgroup,
+        select,
+        textarea {
+          font-family: inherit; /* 1 */
+          font-size: 100%; /* 1 */
+          line-height: 1.15; /* 1 */
+          margin: 2px 0;
+          /* border: 0px outset; */
+          border: 2px outset;
+          padding:0
+        }
+
+        /**
+        * Show the overflow in IE.
+        * 1. Show the overflow in Edge.
+        */
+
+        button,
+        input { /* 1 */
+          overflow: visible;
+        }
+        button {
+          padding: 1px 6px;
+
+        }
+        /**
+        * Remove the inheritance of text transform in Edge, Firefox, and IE.
+        * 1. Remove the inheritance of text transform in Firefox.
+        */
+
+        button,
+        select { /* 1 */
+          text-transform: none;
+        }
+
+        /**
+        * Correct the inability to style clickable types in iOS and Safari.
+        */
+
+        button,
+        [type="button"],
+        [type="reset"],
+        [type="submit"] {
+          -webkit-appearance: button;
+        }
+
         :focus {
           background-color: red;
-          border: 1px solid black;
         }
         #overflow-auto-container {
           width: 100px;

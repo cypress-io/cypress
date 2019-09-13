@@ -328,7 +328,7 @@ describe "src/cypress/dom/visibility", ->
         <div style='width: 100px; height: 100px; overflow: hidden; position: relative; top: 700px; left: 700px;'>
           <div style='position: absolute;'>
             <div style='position: absolute;'>
-              <span style='position: absolute; left: -300px; top: 0px;'>out of bounds, parent position: absolute</span>
+              <span style='position: absolute; left: -300px; top: 0px; width: 250px'>out of bounds, parent position: absolute</span>
             </div>
           </div>
         </div>

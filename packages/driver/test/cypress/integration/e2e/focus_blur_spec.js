@@ -46,7 +46,7 @@ const chaiSubset = require('chai-subset')
 chai.use(chaiSubset)
 
 const windowHasFocus = function () {
-  if (document.hasFocus()) return true
+  if (top.document.hasFocus()) return true
 
   let hasFocus = false
 
@@ -532,22 +532,46 @@ describe('intercept blur methods correctly', () => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
       // cy.$$('input:first').focus()
       // cy.$$('body').focus()
-      cy.state('document').onselectionchange = cy.stub().as('selectionchange')
+      top.focus()
+      cy.state('document').onselectionchange = cy.stub()
+      .as('selectionchange')
+
+      let called = false
+
+      cy.get('@selectionchange').then((v) => {
+        v.callsFake(function () {
+          // debugger
+          if (called) return
+
+          called = true
+          Cypress.log({ message: 'reset mock', state: 'passed' })
+          setImmediate(() => v.reset())
+        })
+      })
+
+      cy.$$('input:first')[0].focus()
+
+      cy.wait(10).get('@selectionchange').should('not.be.called')
+
     })
   })
 
   it('focus  <a>', () => {
     const $el = cy.$$('<a href="#">foo</a>')
 
-    //
     $el.appendTo(cy.$$('body'))
-    // cy.$$('input').focus()
 
-    // $el[0].focus()
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    cy.wait(0).get('@selectionchange').should('not.be.called')
+    if (Cypress.browser.family === 'firefox') {
+
+      cy.wait(0).get('@selectionchange').should('be.called')
+
+      return
+    }
+
+    cy.wait(10).get('@selectionchange').should('not.be.called')
 
   })
 
@@ -559,7 +583,14 @@ describe('intercept blur methods correctly', () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    cy.wait(0).get('@selectionchange').should('not.be.called')
+    if (Cypress.browser.family === 'firefox') {
+
+      cy.wait(0).get('@selectionchange').should('be.called')
+
+      return
+    }
+
+    cy.wait(10).get('@selectionchange').should('not.be.called')
 
   })
 
@@ -571,7 +602,14 @@ describe('intercept blur methods correctly', () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    cy.wait(0).get('@selectionchange').should('not.be.called')
+    if (Cypress.browser.family === 'firefox') {
+
+      cy.wait(0).get('@selectionchange').should('be.called')
+
+      return
+    }
+
+    cy.wait(10).get('@selectionchange').should('not.be.called')
 
   })
 
@@ -592,8 +630,13 @@ describe('intercept blur methods correctly', () => {
 
     $el.appendTo(cy.$$('body'))
     $el[0].focus()
-    cy.wrap($el[0]).focus()
-    .should('have.focus')
+
+    if (Cypress.browser.family === 'firefox') {
+
+      cy.wait(0).get('@selectionchange').should('be.called')
+
+      return
+    }
 
     cy.wait(0).get('@selectionchange').should('not.be.called')
 
@@ -607,7 +650,7 @@ describe('intercept blur methods correctly', () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    cy.get('@selectionchange').should('be.calledOnce')
+    cy.get('@selectionchange').should('be.called')
 
   })
 
@@ -615,11 +658,11 @@ describe('intercept blur methods correctly', () => {
     const $el = cy.$$('<div contenteditable>contenteditable</div>')
 
     $el.appendTo(cy.$$('body'))
-    $el[0].focus()
-    cy.wrap($el[0]).focus()
-    .should('have.focus')
 
-    cy.get('@selectionchange').should('be.calledOnce')
+    $el[0].focus()
+
+    cy.get('@selectionchange').should('be.called')
+
   })
 
   it('cannot focus a [contenteditable] child', () => {
@@ -674,7 +717,10 @@ describe('intercept blur methods correctly', () => {
       <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
       `).appendTo(cy.$$('body'))
 
-      cy.get('area').focus().should('have.focus')
+      cy.get('area')
+      // NOTE: should be.visible needed for firefox, otherwise element is shown as 'hidden'
+      .should('be.visible')
+      .focus().should('have.focus')
 
     })
 

@@ -195,7 +195,7 @@ getCoordinatesForEl = (cy, $el, options) ->
     $dom.getElementCoordinatesByPositionRelativeToXY($el, options.x, options.y)
   else
     # Cypress.dom.getElementCoordinatesByPosition($el, options.position)
-    $dom.getElementCoordinatesByPosition($el, options.position)
+    return $dom.getElementCoordinatesByPosition($el, options.position)
 
 ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
   ## if we dont have at least 2 points
