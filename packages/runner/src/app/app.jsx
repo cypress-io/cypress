@@ -152,11 +152,8 @@ class App extends Component {
       containerNode.className += ' screenshotting'
 
       if (!config.scale) {
-        const $window = $(window)
-        const $iframesSizeNode = $(iframesSizeNode)
-
-        iframesSizeNode.style.width = `${Math.min($window.width(), $iframesSizeNode.width())}px`
-        iframesSizeNode.style.height = `${Math.min($window.height(), $iframesSizeNode.height())}px`
+        iframesSizeNode.style.width = `${Math.min(window.innerWidth, iframesSizeNode.offsetWidth)}px`
+        iframesSizeNode.style.height = `${Math.min(window.innerHeight, iframesSizeNode.offsetHeight)}px`
         iframesSizeNode.style.transform = null
       }
 

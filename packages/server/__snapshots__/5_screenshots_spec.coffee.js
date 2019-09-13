@@ -31,6 +31,7 @@ exports['e2e screenshots passes 1'] = `
     ✓ retries each screenshot for up to  XX:XX
     ✓ ensures unique paths for non-named screenshots
     2) ensures unique paths when there's a non-named screenshot and a failure
+    ✓ properly resizes the AUT iframe
     - doesn't take a screenshot for a pending test
     clipping
       ✓ can clip app screenshots
@@ -47,7 +48,7 @@ exports['e2e screenshots passes 1'] = `
       ✓ takes another screenshot
 
 
-  17 passing
+  18 passing
   1 pending
   5 failing
 
@@ -83,12 +84,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────────┐
-  │ Tests:        22                      │
-  │ Passing:      17                      │
+  │ Tests:        23                      │
+  │ Passing:      18                      │
   │ Failing:      4                       │
   │ Pending:      1                       │
   │ Skipped:      0                       │
-  │ Screenshots:  25                      │
+  │ Screenshots:  26                      │
   │ Video:        true                    │
   │ Duration:     X seconds               │
   │ Spec Ran:     screenshots_spec.coffee │
@@ -113,6 +114,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths for non-named screenshots (2).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure.png (1000x660)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/aut-resize.png (1000x2000)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/app-clip.png (100x50)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/runner-clip.png (120x60)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.coffee/fullPage-clip.png (140x70)
@@ -137,9 +139,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.coffee                   XX:XX       22       17        4        1        - │
+  │ ✖ screenshots_spec.coffee                   XX:XX       23       18        4        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       22       17        4        1        -  
+    1 of 1 failed (100%)                        XX:XX       23       18        4        1        -  
 
 
 `

@@ -56,14 +56,18 @@ describe "taking screenshots", ->
       .screenshot("color-check", { capture: "runner" })
       .task("ensure:pixel:color", {
         devicePixelRatio
-        coords: [1, 0]
-        color: [255, 255, 255] ## white
+        colors: [{
+          coords: [1, 0]
+          color: [255, 255, 255] ## white
+        }]
         name: "screenshots_spec.coffee/color-check"
       })
       .task("ensure:pixel:color", {
         devicePixelRatio
-        coords: [0, 1]
-        color: [255, 255, 255] ## white
+        colors: [{
+          coords: [0, 1]
+          color: [255, 255, 255] ## white
+        }]
         name: "screenshots_spec.coffee/color-check"
       })
 
@@ -160,6 +164,35 @@ describe "taking screenshots", ->
   it "ensures unique paths when there's a non-named screenshot and a failure", ->
     cy.screenshot({ capture: "viewport" }).then ->
       throw new Error("failing on purpose")
+
+  it "properly resizes the AUT iframe", ->
+    ## ensures that the aut iframe is not undersized by making sure the screenshot
+    ## is completely white and doesn't have the black background showing
+    cy
+    .visit("http://localhost:3322/color/white")
+    .screenshot("aut-resize")
+    .task("ensure:pixel:color", {
+      devicePixelRatio
+      colors: [
+        {
+          coords: [5, 5]
+          color: [255, 255, 255] ## white
+        }
+        {
+          coords: [1275, 5]
+          color: [255, 255, 255] ## white
+        }
+        {
+          coords: [5, 715]
+          color: [255, 255, 255] ## white
+        }
+        {
+          coords: [1275, 715]
+          color: [255, 255, 255] ## white
+        }
+      ]
+      name: "screenshots_spec.coffee/aut-resize"
+    })
 
   describe "clipping", ->
     it "can clip app screenshots", ->
