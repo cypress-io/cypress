@@ -622,6 +622,22 @@ jobs:
             - npm-package-url.json
             - cypress.tgz
 
+  "post-beta-install-comment":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: /tmp/urls
+      - run: ls -la /tmp/urls
+      - run: cat /tmp/urls/*.json
+      - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm /tmp/urls/npm-package-url.json \
+              --binary /tmp/urls/binary-url.json
+
   "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
@@ -632,6 +648,7 @@ jobs:
       - run: ls -la /tmp/urls
       - run: cat /tmp/urls/*.json
       - run: mkdir /tmp/testing
+      # quickly install and verify Cypress can run
       - run:
           name: create dummy package
           working_directory: /tmp/testing
@@ -648,12 +665,7 @@ jobs:
           name: Verify Cypress binary
           working_directory: /tmp/testing
           command: $(npm bin)/cypress verify
-      - run:
-          name: Post pre-release install comment
-          command: |
-            node scripts/add-install-comment.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json
+      # then run it against other projects
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
@@ -838,6 +850,14 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build
+    - post-beta-install-comment:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - build-npm-package
+          - build-binary
     - test-binary-and-npm-against-other-projects:
         filters:
           branches:
@@ -925,6 +945,18 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+        requires:
+          - Mac NPM package
+          - Mac binary
+
+    - post-beta-install-comment:
+        name: Post Mac beta install comment
+        executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+              - test-example-repos-on-mac-4526
         requires:
           - Mac NPM package
           - Mac binary
