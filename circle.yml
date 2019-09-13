@@ -956,7 +956,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - test-example-repos-on-mac-4526
+              - test-electron-app-4964
         requires:
           - Mac NPM package
           - Mac binary
@@ -968,7 +968,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - test-example-repos-on-mac-4526
         requires:
           - Mac NPM package
           - Mac binary
