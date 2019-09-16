@@ -1,3 +1,7 @@
+const startingIndex = Cypress.browser.family === 'firefox' ? 1 : 0
+
+const timerNumber = (n) => n + startingIndex
+
 describe('driver/src/cy/timers', () => {
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
@@ -16,7 +20,7 @@ describe('driver/src/cy/timers', () => {
 
       // the timer id is 1 by default since
       // timers increment and always start at 0
-      expect(id1).to.eq(1)
+      expect(id1).to.eq(timerNumber(1))
 
       cy
       .window().its('bar').should('eq', 'bar')
@@ -26,7 +30,7 @@ describe('driver/src/cy/timers', () => {
 
         const id2 = win.setTimeout(win.setBar, 2)
 
-        expect(id2).to.eq(2)
+        expect(id2).to.eq(timerNumber(2))
 
         const ret = win.clearTimeout(id2)
 
@@ -67,7 +71,7 @@ describe('driver/src/cy/timers', () => {
 
       // the timer id is 1 by default since
       // timers increment and always start at 0
-      expect(id1).to.eq(1)
+      expect(id1).to.eq(timerNumber(1))
 
       cy
       .window().its('bar').should('eq', 'bar')
@@ -79,7 +83,7 @@ describe('driver/src/cy/timers', () => {
 
         const id2 = win.setInterval(win.setBar, 2)
 
-        expect(id2).to.eq(2)
+        expect(id2).to.eq(timerNumber(2))
 
         const ret = win.clearInterval(id2)
 
@@ -220,7 +224,7 @@ describe('driver/src/cy/timers', () => {
 
       const id1 = win.setTimeout(win.setBar, 1)
 
-      expect(id1).to.eq(1)
+      expect(id1).to.eq(timerNumber(1))
 
       cy
       .wait(100)
@@ -240,7 +244,7 @@ describe('driver/src/cy/timers', () => {
 
         const id2 = win.setTimeout(win.setBar, 1)
 
-        expect(id2).to.eq(2)
+        expect(id2).to.eq(timerNumber(2))
 
         const ret = win.clearTimeout(id2)
 
@@ -268,7 +272,7 @@ describe('driver/src/cy/timers', () => {
 
       // the timer id is 1 by default since
       // timers increment and always start at 0
-      expect(id1).to.eq(1)
+      expect(id1).to.eq(timerNumber(1))
 
       cy.pauseTimers(true)
 
@@ -287,7 +291,7 @@ describe('driver/src/cy/timers', () => {
 
         const id2 = win.setInterval(win.setBar, 10)
 
-        expect(id2).to.eq(2)
+        expect(id2).to.eq(timerNumber(2))
 
         cy.pauseTimers(true)
 

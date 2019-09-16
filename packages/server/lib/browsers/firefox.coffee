@@ -28,6 +28,7 @@ defaultPreferences = {
   ## Disable intalling any distribution add-ons.
   "extensions.installDistroAddons": false
 
+  "app.normandy.api_url": ''
   ## https://github.com/SeleniumHQ/selenium/blob/master/javascript/firefox-driver/webdriver.json
   "app.update.auto": false
   "app.update.enabled": false
@@ -53,6 +54,7 @@ defaultPreferences = {
   "datareporting.healthreport.logging.consoleEnabled": false
   "datareporting.policy.dataSubmissionEnabled": false
   "datareporting.policy.dataSubmissionPolicyAccepted": false
+  "datareporting.policy.dataSubmissionPolicyBypassNotification": false
   "devtools.errorconsole.enabled": true
   "dom.disable_open_during_load": false
   "extensions.autoDisableScopes": 10
@@ -93,6 +95,19 @@ defaultPreferences = {
   "startup.homepage_welcome_url.additional": "about:blank"
   "webdriver_accept_untrusted_certs": true
   "webdriver_assume_untrusted_issuer": true
+  ## prevent going into safe mode after crash
+  "toolkit.startup.max_resumed_crashes": -1
+  "geo.provider.testing": true
+
+  ## allow playing videos w/o user interaction
+  "media.autoplay.default": 0
+
+  "browser.safebrowsing.blockedURIs.enabled": false
+  "browser.safebrowsing.downloads.enabled": false
+  "browser.safebrowsing.passwords.enabled": false
+  "browser.safebrowsing.malware.enabled": false
+  "browser.safebrowsing.phishing.enabled": false
+
 }
 
 module.exports = {
