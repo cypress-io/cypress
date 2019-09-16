@@ -1196,6 +1196,14 @@ describe "src/cy/commands/querying", ->
       cy.contains("DOM Fixture").then ($el) ->
         expect($el).not.to.match("title")
 
+    it 'will not find script elements', ->
+      cy.$$('<script>// some-script-content </script>').appendTo(cy.$$('body'))
+      cy.contains('some-script-content').should('not.match', 'script')
+
+    it 'will not find style elements', ->
+      cy.$$('<style> some-style-content {} </style>').appendTo(cy.$$('body'))
+      cy.contains('some-style-content').should('not.match', 'style')
+
     it "finds the nearest element by :contains selector", ->
       cy.contains("li 0").then ($el) ->
         expect($el.length).to.eq(1)

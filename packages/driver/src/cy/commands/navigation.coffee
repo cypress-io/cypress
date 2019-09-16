@@ -72,6 +72,14 @@ cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
     }
   })
 
+specifyFileByRelativePath = (url, log) ->
+  $utils.throwErrByPath("visit.specify_file_by_relative_path", {
+    onFail: log
+    args: {
+      attemptedUrl: url
+    }
+  })
+
 aboutBlank = (win) ->
   new Promise (resolve) ->
     cy.once("window:load", resolve)
@@ -603,6 +611,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         existing = $utils.locExisting()
 
         ## TODO: $Location.resolve(existing.origin, url)
+        
+        if $Location.isLocalFileUrl(url)
+          return specifyFileByRelativePath(url, options._log)
 
         ## in the case we are visiting a relative url
         ## then prepend the existing origin to it
