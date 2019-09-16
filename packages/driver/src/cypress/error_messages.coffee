@@ -6,7 +6,7 @@ divider = (num, char) ->
 format = (data) ->
   switch
     when _.isString(data)
-      _.truncate(data, { length: 100 })
+      _.truncate(data, { length: 2000 })
     when _.isObject(data)
       JSON.stringify(data, null, 2)
     else
