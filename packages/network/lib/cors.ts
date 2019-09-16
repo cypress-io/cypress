@@ -1,32 +1,43 @@
-const _ = require('lodash')
-const url = require('url')
-const uri = require('./uri')
-const debug = require('debug')('cypress:server:cors')
-const parseDomain = require('parse-domain')
+import _ from 'lodash'
+import * as uri from './uri'
+import debugModule from 'debug'
+import _parseDomain, { ParsedDomain } from 'parse-domain'
+
+const debug = debugModule('cypress:network:cors')
 
 const ipAddressRe = /^[\d\.]+$/
 
-function getSuperDomain (url) {
+type ParsedHost = {
+  port?: string
+  tld?: string
+  domain?: string
+}
+
+export function getSuperDomain (url) {
   const parsed = parseUrlIntoDomainTldPort(url)
 
   return _.compact([parsed.domain, parsed.tld]).join('.')
 }
 
-function _parseDomain (domain, options = {}) {
-  return parseDomain(domain, _.defaults(options, {
+export function parseDomain (domain: string, options = {}) {
+  return _parseDomain(domain, _.defaults(options, {
     privateTlds: true,
     customTlds: ipAddressRe,
   }))
 }
 
-function parseUrlIntoDomainTldPort (str) {
-  let { hostname, port, protocol } = url.parse(str)
+export function parseUrlIntoDomainTldPort (str) {
+  let { hostname, port, protocol } = uri.parse(str)
 
-  if (port == null) {
+  if (!hostname) {
+    hostname = ''
+  }
+
+  if (!port) {
     port = protocol === 'https:' ? '443' : '80'
   }
 
-  let parsed = _parseDomain(hostname)
+  let parsed : Partial<ParsedDomain> | null = parseDomain(hostname)
 
   // if we couldn't get a parsed domain
   if (!parsed) {
@@ -43,46 +54,33 @@ function parseUrlIntoDomainTldPort (str) {
     }
   }
 
-  const obj = {}
+  const obj: ParsedHost = {}
 
   obj.port = port
   obj.tld = parsed.tld
   obj.domain = parsed.domain
-  // obj.protocol = protocol
 
   debug('Parsed URL %o', obj)
 
   return obj
 }
 
-function urlMatchesOriginPolicyProps (urlStr, props) {
+export function urlMatchesOriginPolicyProps (urlStr, props) {
   // take a shortcut here in the case
   // where remoteHostAndPort is null
   if (!props) {
     return false
   }
 
-  const parsedUrl = this.parseUrlIntoDomainTldPort(urlStr)
+  const parsedUrl = parseUrlIntoDomainTldPort(urlStr)
 
   // does the parsedUrl match the parsedHost?
   return _.isEqual(parsedUrl, props)
 }
 
-function urlMatchesOriginProtectionSpace (urlStr, origin) {
+export function urlMatchesOriginProtectionSpace (urlStr, origin) {
   const normalizedUrl = uri.addDefaultPort(urlStr).format()
   const normalizedOrigin = uri.addDefaultPort(origin).format()
 
   return _.startsWith(normalizedUrl, normalizedOrigin)
-}
-
-module.exports = {
-  parseUrlIntoDomainTldPort,
-
-  parseDomain: _parseDomain,
-
-  getSuperDomain,
-
-  urlMatchesOriginPolicyProps,
-
-  urlMatchesOriginProtectionSpace,
 }

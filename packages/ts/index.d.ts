@@ -89,3 +89,9 @@ declare module 'proxy-from-env' {
 declare interface SymbolConstructor {
   for(str: string): SymbolConstructor
 }
+
+declare module 'url' {
+  interface UrlWithStringQuery {
+    format(): string
+  }
+}

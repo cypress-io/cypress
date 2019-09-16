@@ -5,8 +5,8 @@
 // node's url formatting algorithm (which acts pretty unexpectedly)
 // - https://nodejs.org/api/url.html#url_url_format_urlobject
 
-const _ = require('lodash')
-const url = require('url')
+import _ from 'lodash'
+import url from 'url'
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
@@ -25,9 +25,9 @@ const parseClone = (urlObject) => {
   return url.parse(_.clone(urlObject))
 }
 
-const parse = url.parse
+export const parse = url.parse
 
-const stripProtocolAndDefaultPorts = function (urlToCheck) {
+export function stripProtocolAndDefaultPorts (urlToCheck) {
   // grab host which is 'hostname:port' only
   const { host, hostname, port } = url.parse(urlToCheck)
 
@@ -41,20 +41,18 @@ const stripProtocolAndDefaultPorts = function (urlToCheck) {
   return host
 }
 
-const removePort = (urlObject) => {
+export function removePort (urlObject) {
   const parsed = parseClone(urlObject)
 
-  // set host to null else
-  // url.format(...) will ignore
-  // the port property
+  // set host to undefined else url.format(...) will ignore the port property
   // https://nodejs.org/api/url.html#url_url_format_urlobject
-  parsed.host = null
-  parsed.port = null
+  parsed.host = undefined
+  parsed.port = undefined
 
   return parsed
 }
 
-const removeDefaultPort = function (urlToCheck) {
+export function removeDefaultPort (urlToCheck) {
   let parsed = parseClone(urlToCheck)
 
   if (portIsDefault(parsed.port)) {
@@ -64,33 +62,19 @@ const removeDefaultPort = function (urlToCheck) {
   return parsed
 }
 
-const addDefaultPort = function (urlToCheck) {
+export function addDefaultPort (urlToCheck) {
   const parsed = parseClone(urlToCheck)
 
   if (!parsed.port) {
     // unset host...
     // see above for reasoning
-    parsed.host = null
-    parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]
+    parsed.host = undefined
+    parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol || 'http:']
   }
 
   return parsed
 }
 
-const getPath = (urlToCheck) => {
+export function getPath (urlToCheck) {
   return url.parse(urlToCheck).path
-}
-
-module.exports = {
-  parse,
-
-  getPath,
-
-  removePort,
-
-  addDefaultPort,
-
-  removeDefaultPort,
-
-  stripProtocolAndDefaultPorts,
 }

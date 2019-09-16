@@ -262,7 +262,7 @@ jobs:
       - run: npm run all test -- --package https-proxy
       - run: npm run all test -- --package launcher
       - run: npm run all test -- --package network
-      # how to pass Mocha reporter through zunder?
+      - run: npm run all test -- --package proxy
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
       - run: npm run all test -- --package socket

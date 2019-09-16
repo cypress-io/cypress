@@ -14,14 +14,11 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
-agent        = require("@packages/network").agent
-cors         = require("./util/cors")
-uri          = require("./util/uri")
+{ agent, blacklist, cors, uri } = require("@packages/network")
+{ NetworkProxy } = require("@packages/proxy")
 origin       = require("./util/origin")
 ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
-buffers      = require("./util/buffers")
-blacklist    = require("./util/blacklist")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
@@ -132,25 +129,23 @@ class Server
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
-      ## always reset any buffers
-      ## TODO: change buffers to be an instance
-      ## here and pass this dependency around
-      buffers.reset()
-
       app = @createExpressApp(config.morgan)
 
       logger.setSettings(config)
 
       ## generate our request instance
       ## and set the responseTimeout
+      ## TODO: might not be needed anymore
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
 
       getRemoteState = => @_getRemoteState()
 
+      @_networkProxy = new NetworkProxy({ config, getRemoteState })
+
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
+      @createRoutes(app, config, @_request, getRemoteState, project, @_networkProxy)
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -366,7 +361,7 @@ class Server
       ## then just respond with its details
       ## so we are idempotant and do not make
       ## another request
-      if obj = buffers.getByOriginalUrl(urlStr)
+      if obj = @_networkProxy.getHttpBuffer(urlStr)
         debug("got previous request buffer for url:", urlStr)
 
         ## reset the cookies from the buffer on the browser
@@ -482,7 +477,7 @@ class Server
 
                   responseBufferStream.end(responseBuffer)
 
-                  buffers.set({
+                  @_networkProxy.setHttpBuffer({
                     url: newUrl
                     stream: responseBufferStream
                     details
@@ -651,7 +646,7 @@ class Server
       socket.end() if socket.writable
 
   reset: ->
-    buffers.reset()
+    @_networkProxy?.reset()
 
     @_onDomainSet(@_baseUrl ? "<root>")
 

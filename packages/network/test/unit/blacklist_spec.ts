@@ -1,6 +1,5 @@
-require('../spec_helper')
-
-const blacklist = require(`${root}lib/util/blacklist`)
+import { blacklist } from '../..'
+import { expect } from 'chai'
 
 const hosts = [
   '*.google.com',
@@ -26,7 +25,7 @@ const matchesHost = (url, host) => {
   expect(blacklist.matches(url, hosts)).to.eq(host)
 }
 
-describe('lib/util/blacklist', () => {
+describe('lib/blacklist', () => {
   it('handles hosts, ports, wildcards', () => {
     matchesArray('https://mail.google.com/foo', true)
     matchesArray('https://shop.apple.com/bar', true)

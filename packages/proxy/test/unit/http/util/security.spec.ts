@@ -1,11 +1,10 @@
-require('../spec_helper')
-
-const _ = require('lodash')
-const rp = require('request-promise')
-const concat = require('concat-stream')
-const fs = require(`${root}lib/util/fs`)
-const security = require(`${root}lib/util/security`)
-const Fixtures = require(`${root}test/support/helpers/fixtures`)
+import _ from 'lodash'
+import concat from 'concat-stream'
+import { expect } from 'chai'
+import fs from 'fs'
+import Promise from 'bluebird'
+import rp from 'request-promise'
+import * as security from '../../../../lib/http/util/security'
 
 const original = `\
 <html>
@@ -137,7 +136,7 @@ const expected = `\
 </html>\
 `
 
-describe('lib/util/security', () => {
+describe('http/util/security', () => {
   context('.strip', () => {
     it('replaces obstructive code', () => {
       expect(security.strip(original)).to.eq(expected)
@@ -220,27 +219,27 @@ function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&f
         vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
         hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
       })
-      .value()
+      .value() as unknown as typeof libs
 
-      return _.each(libs, (url, lib) => {
+      _.each(libs, (url, lib) => {
         it(`does not alter code from: '${lib}'`, function () {
-          nock.enableNetConnect()
-
           this.timeout(10000)
 
-          const pathToLib = Fixtures.path(`server/libs/${lib}`)
+          const pathToLib = `/tmp/${lib}`
 
           const downloadFile = () => {
             return rp(url)
             .then((resp) => {
-              return fs
-              .outputFileAsync(pathToLib, resp)
+              return Promise.fromCallback((cb) => {
+                fs.writeFile(pathToLib, resp, cb)
+              })
               .return(resp)
             })
           }
 
-          return fs
-          .readFileAsync(pathToLib, 'utf8')
+          return Promise.fromCallback((cb) => {
+            fs.readFile(pathToLib, 'utf8', cb)
+          })
           .catch(downloadFile)
           .then((libCode) => {
             let stripped = security.strip(libCode)
@@ -261,7 +260,6 @@ function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&f
             try {
               expect(stripped).to.eq(libCode)
             } catch (err) {
-              fs.outputFileSync(`${pathToLib}Diff`, stripped)
               throw new Error(`code from '${lib}' was different`)
             }
           })
@@ -277,10 +275,10 @@ function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&f
       const replacer = security.stripStream()
 
       replacer.pipe(concat({ encoding: 'string' }, (str) => {
-        str = str.trim()
+        const string = str.toString().trim()
 
         try {
-          expect(str).to.eq(expected)
+          expect(string).to.eq(expected)
 
           done()
         } catch (err) {

@@ -2394,8 +2394,7 @@ describe "Routes", ->
             "Cookie": "__cypress.initial=false"
           }
 
-          if type?
-            headers["Accept"] = type
+          headers["Accept"] = type
 
           @rp({
             url: "http://www.google.com/iframe"

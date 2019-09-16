@@ -1,22 +1,12 @@
-/* eslint-disable
-    default-case,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const inject = require('./inject')
-const security = require('./security')
+import * as inject from './inject'
+import { strip, stripStream } from './security'
 
 const doctypeRe = /(<\!doctype.*?>)/i
 const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
 
-const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRemoved) {
+export function html (html: string, domainName: string, wantsInjection, wantsSecurityRemoved) {
   const replace = (re, str) => {
     return html.replace(re, str)
   }
@@ -27,13 +17,15 @@ const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRem
         return inject.full(domainName)
       case 'partial':
         return inject.partial(domainName)
+      default:
+        return
     }
   })()
 
-  //# strip clickjacking and framebusting
-  //# from the HTML if we've been told to
+  // strip clickjacking and framebusting
+  // from the HTML if we've been told to
   if (wantsSecurityRemoved) {
-    html = security.strip(html)
+    html = strip(html)
   }
 
   switch (false) {
@@ -55,8 +47,4 @@ const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRem
   }
 }
 
-module.exports = {
-  html: rewriteHtml,
-
-  security: security.stripStream,
-}
+export const security = stripStream

@@ -1,12 +1,12 @@
-const _ = require('lodash')
-const minimatch = require('minimatch')
-const uri = require('./uri')
+import _ from 'lodash'
+import minimatch from 'minimatch'
+import { stripProtocolAndDefaultPorts } from './uri'
 
-const matches = function (urlToCheck, blacklistHosts) {
-  //# normalize into flat array
+export function matches (urlToCheck, blacklistHosts) {
+  // normalize into flat array
   blacklistHosts = [].concat(blacklistHosts)
 
-  urlToCheck = uri.stripProtocolAndDefaultPorts(urlToCheck)
+  urlToCheck = stripProtocolAndDefaultPorts(urlToCheck)
 
   // use minimatch against the url
   // to see if any match
@@ -15,8 +15,4 @@ const matches = function (urlToCheck, blacklistHosts) {
   }
 
   return _.find(blacklistHosts, matchUrl)
-}
-
-module.exports = {
-  matches,
 }
