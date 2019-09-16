@@ -112,9 +112,12 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
+  ensureNotReadonly = (subject, onFail) ->
+    cmd = state("current").get("name")
+
     # readonly can only be applied to input/textarea
     # not on checkboxes, radios, etc..
-    if $dom.isTextLike(subject) and subject.prop("readonly")
+    if $dom.isTextLike(subject.get(0)) and subject.prop("readonly")
       node = $dom.stringify(subject)
 
       $utils.throwErrByPath("dom.readonly", {
@@ -127,7 +130,7 @@ create = (state, expect) ->
 
     # We overwrite the filter(":visible") in jquery
     # packages/driver/src/config/jquery.coffee#L51
-    # So that this effectively calls our logic 
+    # So that this effectively calls our logic
     # for $dom.isVisible aka !$dom.isHidden
     if not (subject.length is subject.filter(":visible").length)
       reason = $dom.getReasonIsHidden(subject)
@@ -338,6 +341,8 @@ create = (state, expect) ->
     ensureValidPosition
 
     ensureScrollability
+
+    ensureNotReadonly
   }
 
 module.exports = {

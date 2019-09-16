@@ -17,7 +17,7 @@ interface RequestOptionsWithProxy extends http.RequestOptions {
 }
 
 type FamilyCache = {
-  [host: string] : 4 | 6
+  [host: string]: 4 | 6
 }
 
 export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {

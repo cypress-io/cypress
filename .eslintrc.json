@@ -5,5 +5,22 @@
   "extends": [
     "plugin:@cypress/dev/general"
   ],
-  "rules": {}
+  "rules": {
+    "indent": "off",
+    "@typescript-eslint/indent": [
+      "error",
+      2,
+      {
+        "SwitchCase": 1,
+        "MemberExpression": 0
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "none"
+      }
+    ],
+    "@typescript-eslint/type-annotation-spacing": "error"
+  }
 }

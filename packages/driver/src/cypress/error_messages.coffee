@@ -124,8 +124,8 @@ module.exports = {
     invalid_argument: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
 
   click:
-    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
-    on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
+    multiple_elements: "#{cmd('{{cmd}}')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
+    on_select_element: "#{cmd('{{cmd}}')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
 
   clock:
     already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
@@ -205,6 +205,15 @@ module.exports = {
       """
     disabled: """
       #{cmd('{{cmd}}')} failed because this element is disabled:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+    """
+    readonly: """
+      #{cmd('{{cmd}}')} failed because this element is readonly:
 
       {{node}}
 
@@ -918,6 +927,7 @@ module.exports = {
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
+    invalid_dateTime: "Typing into a datetime input with #{cmd('type')} requires a valid datetime with the format 'yyyy-MM-ddThh:mm', for example '2017-06-01T08:30'. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
     not_on_typeable_element: """
       #{cmd('type')} failed because it requires a valid typeable element.
@@ -926,7 +936,16 @@ module.exports = {
 
         > {{node}}
 
-      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
+      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, any focusable 'element', or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
+    """
+    not_actionable_textlike: """
+      #{cmd('type')} failed because it targeted a disabled element.
+
+      The element typed into was:
+
+        > {{node}}
+
+      You should ensure the element does not have an attribute named 'disabled' before typing into it.
     """
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
     wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"

@@ -22,178 +22,179 @@ if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reload
 
 process.env.NODE_ENV = env
 
-const config: webpack.Configuration = {
-  mode: 'none',
-  node: {
-    fs: 'empty',
-    child_process: 'empty',
-    net: 'empty',
-    tls: 'empty',
-    module: 'empty',
-  },
-  resolve: {
-    extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
-  },
+const getCommonConfig = (): webpack.Configuration => {
+  return {
+    mode: 'none',
+    node: {
+      fs: 'empty',
+      child_process: 'empty',
+      net: 'empty',
+      tls: 'empty',
+      module: 'empty',
+    },
+    resolve: {
+      extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
+    },
 
-  stats: {
-    errors: true,
-    warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
-    warnings: true,
-    all: false,
-    builtAt: true,
-    colors: true,
-    modules: true,
-    maxModules: 20,
-    excludeModules: /main.scss/,
-    timings: true,
-  },
+    stats: {
+      errors: true,
+      warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
+      warnings: true,
+      all: false,
+      builtAt: true,
+      colors: true,
+      modules: true,
+      maxModules: 20,
+      excludeModules: /main.scss/,
+      timings: true,
+    },
 
-  module: {
-    rules: [
-      {
-        test: /\.coffee/,
-        exclude: /node_modules/,
-        use: {
-          loader: require.resolve('coffee-loader'),
-        },
-      },
-      {
-        test: /\.(ts|js|jsx|tsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: require.resolve('babel-loader'),
-          options: {
-            plugins: [
-              // "istanbul",
-              [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
-              [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
-            ],
-            presets: [
-              require.resolve('@babel/preset-env'),
-              require.resolve('@babel/preset-react'),
-              require.resolve('@babel/preset-typescript'),
-            ],
-            babelrc: false,
+    module: {
+      rules: [
+        {
+          test: /\.coffee/,
+          exclude: /node_modules/,
+          use: {
+            loader: require.resolve('coffee-loader'),
           },
         },
-      },
-      {
-        test: /\.s?css$/,
-        exclude: /node_modules/,
-        use: [
-          { loader: MiniCSSExtractWebpackPlugin.loader },
-        ],
-      },
-      {
-        test: /\.s?css$/,
-        exclude: /node_modules/,
-        enforce: 'pre',
-        use: [
-          {
-            loader: require.resolve('css-loader'),
-            options: {
-              // sourceMap: true,
-              modules: false,
-            },
-          }, // translates CSS into CommonJS
-          {
-            loader: require.resolve('postcss-loader'),
+        {
+          test: /\.(ts|js|jsx|tsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: require.resolve('babel-loader'),
             options: {
               plugins: [
-                require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
+              // "istanbul",
+                [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
+                [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
               ],
+              presets: [
+                require.resolve('@babel/preset-env'),
+                require.resolve('@babel/preset-react'),
+                require.resolve('@babel/preset-typescript'),
+              ],
+              babelrc: false,
             },
           },
-          {
-            loader: require.resolve('resolve-url-loader'),
-          },
-          {
-            loader: require.resolve('sass-loader'),
-            options: {
-              sourceMap: true,
-              importer (...args) {
-                args[0] = args[0].replace(/\\/g, '/')
-                args[1] = args[1].replace(/\\/g, '/')
-
-                return sassGlobImporter.apply(this, args)
+        },
+        {
+          test: /\.s?css$/,
+          exclude: /node_modules/,
+          use: [
+            { loader: MiniCSSExtractWebpackPlugin.loader },
+          ],
+        },
+        {
+          test: /\.s?css$/,
+          exclude: /node_modules/,
+          enforce: 'pre',
+          use: [
+            {
+              loader: require.resolve('css-loader'),
+              options: {
+              // sourceMap: true,
+                modules: false,
+              },
+            }, // translates CSS into CommonJS
+            {
+              loader: require.resolve('postcss-loader'),
+              options: {
+                plugins: [
+                  require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
+                ],
               },
             },
-          }, // compiles Sass to CSS, using Node Sass by default
-        ],
-      },
-      {
-        test: /\.(eot|svg|ttf|woff|woff2)$/,
-        use: [
-          {
-            loader: require.resolve('file-loader'),
-            options: {
-              name: './fonts/[name].[ext]',
+            {
+              loader: require.resolve('resolve-url-loader'),
             },
-          },
-        ],
-      },
-      {
-        test: /\.(png)$/,
-        use: [
-          {
-            loader: require.resolve('file-loader'),
-            options: {
-              name: './img/[name].[ext]',
+            {
+              loader: require.resolve('sass-loader'),
+              options: {
+                sourceMap: true,
+                importer (...args) {
+                  args[0] = args[0].replace(/\\/g, '/')
+                  args[1] = args[1].replace(/\\/g, '/')
+
+                  return sassGlobImporter.apply(this, args)
+                },
+              },
+            }, // compiles Sass to CSS, using Node Sass by default
+          ],
+        },
+        {
+          test: /\.(eot|svg|ttf|woff|woff2)$/,
+          use: [
+            {
+              loader: require.resolve('file-loader'),
+              options: {
+                name: './fonts/[name].[ext]',
+              },
             },
-          },
-        ],
-      },
-    ],
-  },
+          ],
+        },
+        {
+          test: /\.(png)$/,
+          use: [
+            {
+              loader: require.resolve('file-loader'),
+              options: {
+                name: './img/[name].[ext]',
+              },
+            },
+          ],
+        },
+      ],
+    },
 
-  optimization: {
-    usedExports: true,
-    providedExports: true,
-    sideEffects: true,
-    namedChunks: true,
-    namedModules: true,
-    removeAvailableModules: true,
-    mergeDuplicateChunks: true,
-    flagIncludedChunks: true,
-    removeEmptyChunks: true,
-  },
+    optimization: {
+      usedExports: true,
+      providedExports: true,
+      sideEffects: true,
+      namedChunks: true,
+      namedModules: true,
+      removeAvailableModules: true,
+      mergeDuplicateChunks: true,
+      flagIncludedChunks: true,
+      removeEmptyChunks: true,
+    },
 
-  plugins: [
-    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
-    new MiniCSSExtractWebpackPlugin(),
+    plugins: [
+      new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
+      new MiniCSSExtractWebpackPlugin(),
 
-    // Enable source maps / eval maps
-    // 'EvalDevtoolModulePlugin' is used in development
-    //    because it is fast and maps to filenames while showing compiled source
-    // 'SourceMapDevToolPlugin' is used in production for the same reasons as 'eval', but it
-    //    shows full source and does not cause crossorigin errors like 'eval' (in Chromium < 63)
-    // files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
+      // Enable source maps / eval maps
+      // 'EvalDevtoolModulePlugin' is used in development
+      //    because it is fast and maps to filenames while showing compiled source
+      // 'SourceMapDevToolPlugin' is used in production for the same reasons as 'eval', but it
+      //    shows full source and does not cause crossorigin errors like 'eval' (in Chromium < 63)
+      // files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
 
-    // other sourcemap options:
-    // [new webpack.SourceMapDevToolPlugin({
-    //   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-    //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
-    // })] :
+      // other sourcemap options:
+      // [new webpack.SourceMapDevToolPlugin({
+      //   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+      //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
+      // })] :
 
-    ...(env === 'production' ?
-      [
-        new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') }),
-      ] :
-      [
+      ...(env === 'production' ?
+        [
+          new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') }),
+        ] :
+        [
         // @ts-ignore
-        new webpack.EvalDevToolModulePlugin({
-          moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-          fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
-        }),
-      ]
-    ),
-    ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost' })] : []),
-  ],
+          new webpack.EvalDevToolModulePlugin({
+            moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+            fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
+          }),
+        ]
+      ),
+      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost' })] : []),
+    ],
 
-  cache: true,
-
+    cache: true,
+  }
 }
 
-export default config
+export default getCommonConfig
 
 export { HtmlWebpackPlugin }

@@ -4,6 +4,8 @@ methods = require("methods")
 moment = require("moment")
 Promise = require("bluebird")
 
+UsKeyboardLayout = require('../cypress/UsKeyboardLayout')
+
 $jquery = require("../dom/jquery")
 $Location = require("./location")
 $errorMessages = require("./error_messages")
@@ -375,6 +377,8 @@ module.exports = {
           values
 
     run(0)
+
+  keyboardMappings: UsKeyboardLayout.keyboardMappings
 
   memoize: (func, cacheInstance = new Map()) ->
     memoized = (args...) ->

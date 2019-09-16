@@ -61,7 +61,7 @@ export default class Header extends Component {
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{state.defaults.width}px</strong> by <strong>{state.defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>
               <p>Additionally you can override the default viewport dimensions by specifying these values in your <code>cypress.json</code>.</p>
               <pre>{/* eslint-disable indent */}
-{`{
+                {`{
   "viewportWidth": ${state.defaults.width},
   "viewportHeight": ${state.defaults.height}
 }`}

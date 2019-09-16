@@ -14,7 +14,7 @@ $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
 $Mouse = require("../cy/mouse")
-$Keyboard = require("../cy/keyboard")
+$Keyboard = require("../cy/keyboard").default
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -82,8 +82,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
-  keyboard = $Keyboard.create(state)
-  mouse = $Mouse.create(state, keyboard)
+  keyboard = new $Keyboard(state)
+  mouse = $Mouse.create(state, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -166,9 +166,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.SVGElement.prototype.blur = ->
         focused.interceptBlur(@)
-
-      contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(@)
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
@@ -652,7 +649,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
 
-    devices: {
+    internal: {
       mouse: mouse
       keyboard: keyboard
     }
@@ -680,6 +677,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
+    ensureNotReadonly: ensures.ensureNotReadonly
     ensureReceivability: ensures.ensureReceivability
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
