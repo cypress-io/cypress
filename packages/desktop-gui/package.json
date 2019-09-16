@@ -19,7 +19,7 @@
   "devDependencies": {
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.32.2",
-    "@cypress/react-tooltip": "0.5.2",
+    "@cypress/react-tooltip": "0.5.3",
     "bin-up": "1.2.0",
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",

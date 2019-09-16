@@ -22,7 +22,7 @@
     "watch": "npm run build -- --watch --progress"
   },
   "devDependencies": {
-    "@cypress/react-tooltip": "0.5.2",
+    "@cypress/react-tooltip": "0.5.3",
     "@types/enzyme": "3.9.1",
     "bin-up": "1.2.0",
     "chai": "3.5.0",
