@@ -156,3 +156,15 @@ describe "e2e requests", ->
         .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
         .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
     })
+
+  it "prints long http props on fail", ->
+    e2e.exec(@, {
+      spec: "request_long_http_props_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+      onStdout: (stdout) ->
+        stdout
+        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
+    })
