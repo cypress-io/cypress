@@ -1,16 +1,11 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-require("../spec_helper");
+require('../spec_helper')
 
-const _ = require("lodash");
-const rp = require("request-promise");
-const concat = require("concat-stream");
-const fs = require(`${root}lib/util/fs`);
-const security = require(`${root}lib/util/security`);
-const Fixtures = require(`${root}test/support/helpers/fixtures`);
+const _ = require('lodash')
+const rp = require('request-promise')
+const concat = require('concat-stream')
+const fs = require(`${root}lib/util/fs`)
+const security = require(`${root}lib/util/security`)
+const Fixtures = require(`${root}test/support/helpers/fixtures`)
 
 const original = `\
 <html>
@@ -75,7 +70,7 @@ const original = `\
     </script>
   </body>
 </html>\
-`;
+`
 
 const expected = `\
 <html>
@@ -140,42 +135,44 @@ const expected = `\
     </script>
   </body>
 </html>\
-`;
+`
 
-describe("lib/util/security", function() {
-  context(".strip", function() {
-    it("replaces obstructive code", () => expect(security.strip(original)).to.eq(expected));
+describe('lib/util/security', () => {
+  context('.strip', () => {
+    it('replaces obstructive code', () => {
+      expect(security.strip(original)).to.eq(expected)
+    })
 
-    it("replaces jira window getter", function() {
+    it('replaces jira window getter', () => {
       const jira = `\
 for (; !function (n) {
   return n === n.parent
 }(n)\
-`;
+`
 
       const jira2 = `\
 function(n){for(;!function(l){return l===l.parent}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}\
-`;
+`
 
       expect(security.strip(jira)).to.eq(`\
 for (; !function (n) {
   return n === n.parent || n.parent.__Cypress__
 }(n)\
-`);
+`)
 
-      return expect(security.strip(jira2)).to.eq(`\
+      expect(security.strip(jira2)).to.eq(`\
 function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}\
-`);
-    });
+`)
+    })
 
-    return describe("libs", function() {
-      //# go out and download all of these libs and ensure
-      //# that we can run them through the security strip
-      //# and that they are not modified!
+    describe('libs', () => {
+      // go out and download all of these libs and ensure
+      // that we can run them through the security strip
+      // and that they are not modified!
 
-      const cdnUrl = "https://cdnjs.cloudflare.com/ajax/libs";
+      const cdnUrl = 'https://cdnjs.cloudflare.com/ajax/libs'
 
-      const needsDash = ["backbone", "underscore"];
+      const needsDash = ['backbone', 'underscore']
 
       let libs = {
         jquery: `${cdnUrl}/jquery/3.3.1/jquery.js`,
@@ -194,23 +191,23 @@ function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&f
         foundation: `${cdnUrl}/foundation/6.4.3/js/foundation.js`,
         require: `${cdnUrl}/require.js/2.3.5/require.js`,
         rxjs: `${cdnUrl}/rxjs/5.5.6/Rx.js`,
-        bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`
-      };
+        bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`,
+      }
 
       libs = _
       .chain(libs)
       .clone()
-      .reduce(function(memo, url, lib) {
-        memo[lib] = url;
-        memo[lib + "Min"] = url
-          .replace(/js$/, "min.js")
-          .replace(/css$/, "min.css");
+      .reduce((memo, url, lib) => {
+        memo[lib] = url
+        memo[`${lib}Min`] = url
+        .replace(/js$/, 'min.js')
+        .replace(/css$/, 'min.css')
 
         if (needsDash.includes(lib)) {
-          memo[lib + "Min"] = url.replace("min", "-min");
+          memo[`${lib}Min`] = url.replace('min', '-min')
         }
 
-        return memo;
+        return memo
       }
       , {})
       .extend({
@@ -220,79 +217,82 @@ function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&f
         emberProd: `${cdnUrl}/ember.js/2.18.2/ember.prod.js`,
         reactDev: `${cdnUrl}/react/16.2.0/umd/react.development.js`,
         reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
-        vendorBundle: "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js",
-        hugeApp: "https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js"
+        vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
+        hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
       })
-      .value();
+      .value()
 
-      return _.each(libs, (url, lib) =>
-        it(`does not alter code from: '${lib}'`, function() {
-          nock.enableNetConnect();
+      return _.each(libs, (url, lib) => {
+        it(`does not alter code from: '${lib}'`, function () {
+          nock.enableNetConnect()
 
-          this.timeout(10000);
+          this.timeout(10000)
 
-          const pathToLib = Fixtures.path(`server/libs/${lib}`);
+          const pathToLib = Fixtures.path(`server/libs/${lib}`)
 
-          const downloadFile = () =>
-            rp(url)
-            .then(resp =>
-              fs
+          const downloadFile = () => {
+            return rp(url)
+            .then((resp) => {
+              return fs
               .outputFileAsync(pathToLib, resp)
               .return(resp)
-            )
-          ;
-          return fs
-          .readFileAsync(pathToLib, "utf8")
-          .catch(downloadFile)
-          .then(function(libCode) {
-            let stripped = security.strip(libCode);
-            //# nothing should have changed!
+            })
+          }
 
-            //# TODO: this is currently failing but we're
-            //# going to accept this for now and make this
-            //# test pass, but need to refactor to using
-            //# inline expressions and change the strategy
-            //# for removing obstructive code
-            if (lib === "hugeApp") {
+          return fs
+          .readFileAsync(pathToLib, 'utf8')
+          .catch(downloadFile)
+          .then((libCode) => {
+            let stripped = security.strip(libCode)
+            // nothing should have changed!
+
+            // TODO: this is currently failing but we're
+            // going to accept this for now and make this
+            // test pass, but need to refactor to using
+            // inline expressions and change the strategy
+            // for removing obstructive code
+            if (lib === 'hugeApp') {
               stripped = stripped.replace(
-                "window.self !== window.self",
-                "window.self !== window.top"
-              );
+                'window.self !== window.self',
+                'window.self !== window.top'
+              )
             }
 
             try {
-              return expect(stripped).to.eq(libCode);
+              expect(stripped).to.eq(libCode)
             } catch (err) {
-              fs.outputFileSync(pathToLib + "Diff", stripped);
-              throw new Error(`code from '${lib}' was different`);
+              fs.outputFileSync(`${pathToLib}Diff`, stripped)
+              throw new Error(`code from '${lib}' was different`)
             }
-          });
+          })
         })
-      );
-    });
-  });
+      })
+    })
+  })
 
-  return context(".stripStream", () =>
-    it("replaces obstructive code", function(done) {
-      const haystacks = original.split("\n");
+  context('.stripStream', () => {
+    it('replaces obstructive code', (done) => {
+      const haystacks = original.split('\n')
 
-      const replacer = security.stripStream();
+      const replacer = security.stripStream()
 
-      replacer.pipe(concat({encoding: "string"}, function(str) {
-        str = str.trim();
+      replacer.pipe(concat({ encoding: 'string' }, (str) => {
+        str = str.trim()
 
         try {
-          expect(str).to.eq(expected);
-          return done();
+          expect(str).to.eq(expected)
+
+          done()
         } catch (err) {
-          return done(err);
+          done(err)
         }
+      }))
+
+      haystacks.forEach((haystack) => {
+        replacer.write(`${haystack}\n`)
       })
-      );
 
-      haystacks.forEach(haystack => replacer.write(haystack + "\n"));
-
-      return replacer.end();
+      replacer.end()
     })
-  );
-});
+  })
+})

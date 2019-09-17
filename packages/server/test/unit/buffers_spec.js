@@ -1,78 +1,77 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-require("../spec_helper");
+require('../spec_helper')
 
-const buffers = require(`${root}lib/util/buffers`);
+const buffers = require(`${root}lib/util/buffers`)
 
-describe("lib/util/buffers", function() {
-  beforeEach(() => buffers.reset());
+describe('lib/util/buffers', () => {
+  beforeEach(() => {
+    buffers.reset()
+  })
 
-  afterEach(() => buffers.reset());
+  afterEach(() => {
+    buffers.reset()
+  })
 
-  context("#get", function() {
-    it("returns buffer by url", function() {
-      const obj = {url: "foo"};
+  context('#get', () => {
+    it('returns buffer by url', () => {
+      const obj = { url: 'foo' }
 
-      buffers.set(obj);
+      buffers.set(obj)
 
-      const buffer = buffers.get("foo");
+      const buffer = buffers.get('foo')
 
-      return expect(buffer).to.deep.eq(obj);
-    });
-
-    return it("falls back to setting the port when buffer could not be found", function() {
-      const obj = {url: "https://www.google.com/"};
-
-      buffers.set(obj);
-
-      const buffer = buffers.get("https://www.google.com:443/");
-
-      return expect(buffer).to.deep.eq(obj);
-    });
-  });
-
-  context("#getByOriginalUrl", () =>
-    it("returns buffer by originalUrl", function() {
-      const obj = {originalUrl: "foo"};
-
-      buffers.set(obj);
-
-      const buffer = buffers.getByOriginalUrl("foo");
-
-      return expect(buffer).to.deep.eq(obj);
+      expect(buffer).to.deep.eq(obj)
     })
-  );
 
-  return context("#take", function() {
-    it("removes the found buffer", function() {
-      const obj = {url: "https://www.google.com/"};
+    it('falls back to setting the port when buffer could not be found', () => {
+      const obj = { url: 'https://www.google.com/' }
 
-      buffers.set(obj);
+      buffers.set(obj)
 
-      expect(buffers.all()).to.have.length(1);
+      const buffer = buffers.get('https://www.google.com:443/')
 
-      const buffer = buffers.take("https://www.google.com:443/");
+      expect(buffer).to.deep.eq(obj)
+    })
+  })
 
-      expect(buffer).to.deep.eq(obj);
+  context('#getByOriginalUrl', () => {
+    it('returns buffer by originalUrl', () => {
+      const obj = { originalUrl: 'foo' }
 
-      return expect(buffers.all()).to.have.length(0);
-    });
+      buffers.set(obj)
 
-    return it("does not remove anything when not found", function() {
-      const obj = {url: "https://www.google.com/"};
+      const buffer = buffers.getByOriginalUrl('foo')
 
-      buffers.set(obj);
+      expect(buffer).to.deep.eq(obj)
+    })
+  })
 
-      expect(buffers.all()).to.have.length(1);
+  context('#take', () => {
+    it('removes the found buffer', () => {
+      const obj = { url: 'https://www.google.com/' }
 
-      const buffer = buffers.take("asdf");
+      buffers.set(obj)
 
-      expect(buffer).to.be.undefined;
+      expect(buffers.all()).to.have.length(1)
 
-      return expect(buffers.all()).to.have.length(1);
-    });
-  });
-});
+      const buffer = buffers.take('https://www.google.com:443/')
+
+      expect(buffer).to.deep.eq(obj)
+
+      expect(buffers.all()).to.have.length(0)
+    })
+
+    it('does not remove anything when not found', () => {
+      const obj = { url: 'https://www.google.com/' }
+
+      buffers.set(obj)
+
+      expect(buffers.all()).to.have.length(1)
+
+      const buffer = buffers.take('asdf')
+
+      expect(buffer).to.be.undefined
+
+      expect(buffers.all()).to.have.length(1)
+    })
+  })
+})
