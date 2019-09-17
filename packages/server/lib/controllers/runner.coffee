@@ -37,8 +37,6 @@ module.exports = {
   handleSourceMappings: (req, res) ->
     pathToFile = runner.getPathToSourceMappings()
 
-
-
     send(req, pathToFile)
     .pipe(res)
 }

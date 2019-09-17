@@ -275,10 +275,11 @@ chai.use (chai, u) ->
 
       assertFn(passed, message, value, actual, expected, err)
 
-      stack = (new specWindow.Error()).stack
-      err = $errUtils.addCodeFrameToErr(err, stack)
+      if err
+        stack = (new specWindow.Error()).stack
+        err = $errUtils.addCodeFrameToErr(err, stack)
 
-      throw err if err
+        throw err
 
   overrideExpect = ->
     ## only override assertions for this specific

@@ -126,7 +126,9 @@ export default class Iframes extends Component {
       }).appendTo($container)
 
       $specIframe.prop('src', specSrc).one('load', () => {
-        resolve($autIframe)
+        $specIframe[0].contentWindow.__onSpecIframeReady = () => {
+          resolve($autIframe)
+        }
       })
     })
   }

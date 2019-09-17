@@ -150,9 +150,6 @@ class $Cypress
 
     @cy.initialize($autIframe)
 
-  onSourceMap: (file, sourceMapBase64) ->
-    $sourceMapUtils.initialize(file, sourceMapBase64)
-
   run: (fn) ->
     $errUtils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
@@ -163,23 +160,44 @@ class $Cypress
   ## specs or support files have been downloaded
   ## or parsed. we have not received any custom commands
   ## at this point
-  onSpecWindow: (specWindow) ->
+  onSpecWindow: (specWindow, specs) ->
     logFn = (args...) =>
       @log.apply(@, args)
 
-    ## create cy and expose globally
-    @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
-    @isCy = @cy.isCy
-    @log = $Log.create(@, @cy, @state, @config)
-    @mocha = $Mocha.create(specWindow, @)
-    @runner = $Runner.create(specWindow, @mocha, @, @cy)
+    Promise.mapSeries specs, (spec) =>
+      return new Promise (resolve, reject) ->
+        xhr = new specWindow.XMLHttpRequest()
+        xhr.onload = ->
+          resolve([spec, @responseText])
 
-    ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @state, @config)
+        xhr.onerror = (e) ->
+          ## TODO: get details from `e` and pass them in
+          reject(new Error("Fetching spec #{spec} failed"))
 
-    @events.proxyTo(@cy)
+        xhr.open("GET", spec.relativeUrl)
+        xhr.send()
+    .then (results) =>
+      ## create cy and expose globally
+      @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
+      @isCy = @cy.isCy
+      @log = $Log.create(@, @cy, @state, @config)
+      @mocha = $Mocha.create(specWindow, @)
+      @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
-    return null
+      ## wire up command create to cy
+      @Commands = $Commands.create(@, @cy, @state, @config)
+
+      @events.proxyTo(@cy)
+
+      Promise.mapSeries results, ([spec, contents]) ->
+        spec.fullyQualifiedUrl = "#{window.top.location.origin}#{spec.relativeUrl}"
+        specWindow.eval("#{contents}\n//# sourceURL=#{spec.relativeUrl}")
+        $sourceMapUtils.extractSourceMap(spec, contents)
+    .delay(1)
+    .then ->
+      specWindow.__onSpecIframeReady()
+
+      return null
 
   action: (eventName, args...) ->
     ## normalizes all the various ways

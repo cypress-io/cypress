@@ -57,9 +57,13 @@ module.exports = {
       getSpecs()
 
   prepareForBrowser: (filePath, projectRoot) ->
-    filePath = path.relative(projectRoot, filePath)
+    relativeFilePath = path.relative(projectRoot, filePath)
 
-    @getTestUrl(filePath)
+    JSON.stringify({
+      absolute: filePath
+      relative: relativeFilePath
+      relativeUrl: @getTestUrl(relativeFilePath)
+    })
 
   getTestUrl: (file) ->
     "/__cypress/tests?p=#{file}"

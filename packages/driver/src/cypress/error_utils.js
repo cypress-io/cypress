@@ -254,6 +254,13 @@ const getCodeFrame = (sourceCode, { line, column, source: file }) => {
   }
 }
 
+const getSourceDetails = (generatedDetails) => {
+  // stack-utils removes the // in http:// for some reason, so put it back
+  const file = generatedDetails.file.replace(/(https?):/, '$1://')
+
+  return $sourceMapUtils.getSourcePosition(file, generatedDetails)
+}
+
 const getCodeFrameFromStack = (stack, lineIndex = 0) => {
   const generatedStackLineDetails = getStackLineDetails(stack, lineIndex)
 
@@ -313,21 +320,67 @@ const getObjValueByPath = (obj, keyPath) => {
   return val
 }
 
-const getStackLineDetails = (stackString, lineIndex = 0, cwd) => {
-  const stack = new StackUtils({ cwd })
+const getCleanedStackLines = (stackUtil, stack) => {
+  return stackUtil.clean(stack).split('\n')
+}
 
-  let line
+const getStackLineDetails = (stack, lineIndex = 0) => {
+  const stackUtil = new StackUtils()
+  const line = getCleanedStackLines(stackUtil, stack)[lineIndex]
 
-  if (stackString) {
-    line = stack.clean(stackString).split('\n')[lineIndex]
-  }
+  return stackUtil.parseLine(line)
+}
 
-  return stack.parseLine(line)
+const translateStackLine = (stackUtil, stackLine) => {
+  const generatedDetails = stackUtil.parseLine(stackLine)
+
+  if (!generatedDetails) return stackLine
+
+  const sourceDetails = getSourceDetails(generatedDetails)
+
+  if (!sourceDetails) return stackLine
+
+  const { source, line, column } = sourceDetails
+
+  return `at ${generatedDetails.function} (${source}:${line}:${column})`
+}
+
+const stackLineRegex = /^\s*at /
+
+// returns tuple of [message, stack]
+const splitStack = (stack) => {
+  const lines = stack.split('\n')
+
+  return _.reduce(lines, (memo, line) => {
+    if (memo.messageEnded || stackLineRegex.test(line)) {
+      memo.messageEnded = true
+      memo[1].push(line)
+    } else {
+      memo[0].push(line)
+    }
+
+    return memo
+  }, [[], []])
+}
+
+const getSourceStack = (stack = '') => {
+  const [messageLines, stackLines] = splitStack(stack)
+  const stackUtil = new StackUtils()
+  const cleanedLines = getCleanedStackLines(stackUtil, stackLines)
+  const translated = _.map(cleanedLines, (line) => {
+    return translateStackLine(stackUtil, line)
+  })
+
+  return messageLines.concat(translated).join('\n')
 }
 
 //// all errors flow through this function before they're finally thrown
 //// or used to reject promises
 const processErr = (errObj = {}, config) => {
+  if (errObj.stack) {
+    errObj.stack = getSourceStack(errObj.stack)
+  }
+
   if (config('isInteractive') || !errObj.docsUrl) {
     return errObj
   }
@@ -359,4 +412,5 @@ module.exports = {
   getObjValueByPath,
   getStackLineDetails,
   processErr,
+  getSourceStack,
 }
