@@ -126,7 +126,7 @@ describe('src/cy/commands/actions/type', () => {
       cy.get('#contenteditable')
       .type(' foo')
       .then(($div) => {
-        expect($div.get(0).innerText).to.eq((`${oldText} foo`))
+        expect(trimInnerText($div)).to.eq((`${oldText} foo`))
       })
     })
 
@@ -317,11 +317,10 @@ describe('src/cy/commands/actions/type', () => {
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const $txt = cy.$$(':text:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
+          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromWindow, fromWindow])
@@ -335,11 +334,10 @@ describe('src/cy/commands/actions/type', () => {
 
         const $txt = cy.$$(':text:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get(':text:first').type('foo').then(() => {
+          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromWindow, fromWindow])
@@ -482,28 +480,22 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       it('receives keydown and keyup for other special characters and keypress for enter and regular characters', function () {
-        const keydowns = []
-        const keyups = []
-        const keypresses = []
+        const keydowns = cy.stub()
+        const keyups = cy.stub()
+        const keypresses = cy.stub()
 
-        this.$div.keydown((e) => {
-          return keydowns.push(e)
-        })
+        this.$div.keydown(keydowns)
 
-        this.$div.keypress((e) => {
-          return keypresses.push(e)
-        })
+        this.$div.keypress(keypresses)
 
-        this.$div.keyup((e) => {
-          return keyups.push(e)
-        })
+        this.$div.keyup(keyups)
 
         cy.get('#tabindex').type('f{leftarrow}{rightarrow}{enter}')
         .then(() => {
-          expect(keydowns).to.have.length(4)
-          expect(keypresses).to.have.length(2)
+          expect(keydowns).callCount(4)
+          expect(keypresses).callCount(2)
 
-          expect(keyups).to.have.length(4)
+          expect(keyups).callCount(4)
         })
       })
     })
@@ -633,16 +625,16 @@ describe('src/cy/commands/actions/type', () => {
       it('receives textInput event', (done) => {
         const $txt = cy.$$(':text:first')
 
-        $txt.on('textInput', (e) => {
-          const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'charCode', 'data', 'detail', 'keyCode', 'layerX', 'layerY', 'pageX', 'pageY', 'type', 'view', 'which')
-
-          expect(obj).to.deep.eq({
+        $txt[0].addEventListener('textInput', (e) => {
+          // const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'charCode', 'data', 'detail', 'keyCode', 'layerX', 'layerY', 'pageX', 'pageY', 'type', 'view', 'which')
+          // console.log(e)
+          expect(_.toPlainObject(e)).to.include({
             bubbles: true,
             cancelable: true,
             data: 'a',
             detail: 0,
             type: 'textInput',
-            view: cy.state('window'),
+            // view: cy.state('window'),
             which: 0,
           })
 
@@ -1700,9 +1692,12 @@ describe('src/cy/commands/actions/type', () => {
         it('can backspace a selection range of characters', () => {
           // select the 'ar' characters
           cy
-          .get(':text:first').invoke('val', 'bar').focus().then(($input) => {
+          .get(':text:first').invoke('val', 'bar')
+          .focus()
+          .should(($input) => {
             $input.get(0).setSelectionRange(1, 3)
-          }).get(':text:first').type('{backspace}').then(($input) => {
+          })
+          .type('{backspace}').then(($input) => {
             expect($input).to.have.value('b')
           })
         })
@@ -5029,6 +5024,7 @@ https://on.cypress.io/type`)
           padding: 5,
           display: 'inline-block',
           backgroundColor: 'yellow',
+          width: '120px',
         })
         .prependTo(cy.$$('body'))
 

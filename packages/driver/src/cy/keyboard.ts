@@ -13,6 +13,9 @@ import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/types'
 
 const debug = Debug('cypress:driver:keyboard')
 
+const isSingleDigitRe = /^\d$/
+const isStartingDigitRe = /^\d/
+
 export interface keyboardModifiers {
   alt: boolean
   ctrl: boolean
@@ -253,7 +256,7 @@ const shouldIgnoreEvent = <
   return options[eventName] === false
 }
 
-const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
+const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: {prevChar?: string, chars: string}) => {
   if (!key.text) return true
 
   const bounds = $selection.getSelectionBounds(el)
@@ -262,6 +265,30 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
     if ($elements.isReadOnlyInputOrTextarea(el)) {
       return false
+    }
+
+    const isDigit = isSingleDigitRe.test(key.key)
+    const isNumberInputType = $elements.isInput(el) && $elements.isType(el, 'number')
+
+    if (isNumberInputType) {
+      const { selectionStart } = el
+      const valueLength = $elements.getNativeProp(el, 'value').length
+      const isDigitsInText = isStartingDigitRe.test(options.chars)
+      const isValidCharacter = (key.key === '.') || ((key.key === '-') && valueLength)
+      const { prevChar } = options
+
+      if (!isDigit && (isDigitsInText || !isValidCharacter || (selectionStart !== 0))) {
+        options.prevChar = key.key
+
+        return
+      }
+
+      //# only type '.' and '-' if it is the first symbol and there already is a value, or if
+      //# '.' or '-' are appended to a digit. If not, value cannot be set.
+      if (isDigit && ((prevChar === '.') || ((prevChar === '-') && !valueLength))) {
+        options.prevChar = key.key
+        key.text = prevChar + key.key
+      }
     }
 
     if (noneSelected) {
@@ -893,7 +920,8 @@ export default class Keyboard {
     let event: Event
 
     debug('event options:', eventType, eventOptions)
-    if (eventConstructor === 'TextEvent') {
+    if (eventConstructor === 'TextEvent' && win[eventConstructor]) {
+
       event = document.createEvent('TextEvent')
       // @ts-ignore
       event.initTextEvent(
@@ -1065,7 +1093,7 @@ export default class Keyboard {
     this.fireSimulatedEvent(el, 'keyup', key, options)
   }
 
-  getSimulatedDefaultForKey (key: KeyDetails) {
+  getSimulatedDefaultForKey (key: KeyDetails, options: any) {
     debug('getSimulatedDefaultForKey', key.key)
     if (key.simulatedDefault) return key.simulatedDefault
 
@@ -1078,7 +1106,7 @@ export default class Keyboard {
 
     return (el: HTMLElement) => {
 
-      if (!shouldUpdateValue(el, key)) {
+      if (!shouldUpdateValue(el, key, options)) {
         debug('skip typing key', false)
         key.events.input = false
 
@@ -1113,7 +1141,7 @@ export default class Keyboard {
 
   performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {
     debug('performSimulatedDefault', key.key)
-    const simulatedDefault = this.getSimulatedDefaultForKey(key)
+    const simulatedDefault = this.getSimulatedDefaultForKey(key, options)
 
     // const isBody = $elements.isBody(el)
     // const isFocusable = $elements.isFocusable($dom.wrap(el))
@@ -1142,7 +1170,8 @@ export default class Keyboard {
       return
     }
 
-    return simulatedDefault(el, key, options)
+    return
+    // return simulatedDefault(el, key, options)
   }
 
   static toModifiersEventOptions = toModifiersEventOptions
