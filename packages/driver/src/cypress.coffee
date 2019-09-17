@@ -164,7 +164,20 @@ class $Cypress
     logFn = (args...) =>
       @log.apply(@, args)
 
-    Promise.mapSeries specs, (spec) =>
+    ## create cy and expose globally
+    @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
+    @isCy = @cy.isCy
+    @log = $Log.create(@, @cy, @state, @config)
+    @mocha = $Mocha.create(specWindow, @)
+    @runner = $Runner.create(specWindow, @mocha, @, @cy)
+
+    ## wire up command create to cy
+    @Commands = $Commands.create(@, @cy, @state, @config)
+
+    @events.proxyTo(@cy)
+
+    Promise
+    .map specs, (spec) ->
       return new Promise (resolve, reject) ->
         xhr = new specWindow.XMLHttpRequest()
         xhr.onload = ->
@@ -176,25 +189,15 @@ class $Cypress
 
         xhr.open("GET", spec.relativeUrl)
         xhr.send()
-    .then (results) =>
-      ## create cy and expose globally
-      @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
-      @isCy = @cy.isCy
-      @log = $Log.create(@, @cy, @state, @config)
-      @mocha = $Mocha.create(specWindow, @)
-      @runner = $Runner.create(specWindow, @mocha, @, @cy)
+    .map ([spec, contents]) ->
+      spec.fullyQualifiedUrl = "#{window.top.location.origin}#{spec.relativeUrl}"
 
-      ## wire up command create to cy
-      @Commands = $Commands.create(@, @cy, @state, @config)
-
-      @events.proxyTo(@cy)
-
-      Promise.mapSeries results, ([spec, contents]) ->
-        spec.fullyQualifiedUrl = "#{window.top.location.origin}#{spec.relativeUrl}"
+      $sourceMapUtils.extractSourceMap(spec, contents)
+      .return([spec, contents])
+    .then (results = []) ->
+      _.each results, ([spec, contents]) ->
         specWindow.eval("#{contents}\n//# sourceURL=#{spec.relativeUrl}")
-        $sourceMapUtils.extractSourceMap(spec, contents)
-    .delay(1)
-    .then ->
+
       specWindow.__onSpecIframeReady()
 
       return null

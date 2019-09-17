@@ -1,4 +1,5 @@
 const { SourceMapConsumer } = require('source-map')
+const Promise = require('bluebird')
 
 const baseSourceMapRegex = '\\s*[@#]\\s*sourceMappingURL\\s*=\\s*([^\\s]*)(?![\\S\\s]*sourceMappingURL)'
 const regexCommentStyle1 = new RegExp(`/\\*${baseSourceMapRegex}\\s*\\*/`) // matches /* ... */ comments
@@ -14,27 +15,25 @@ const initialize = (file, sourceMapBase64) => {
 
   const sourceMap = base64toJson(sourceMapBase64)
 
-  return (new SourceMapConsumer(sourceMap)).then((consumer) => {
-    sourceMapConsumers[file.relativeUrl] = {
+  return Promise.resolve(new SourceMapConsumer(sourceMap)).then((consumer) => {
+    const data = sourceMapConsumers[file.relativeUrl] = {
       consumer,
       file,
     }
+
+    return data
   })
 }
 
 const extractSourceMap = (file, fileContents) => {
   const sourceMapMatch = fileContents.match(regexCommentStyle1) || fileContents.match(regexCommentStyle2)
 
-  if (!sourceMapMatch) {
-    return
-  }
+  if (!sourceMapMatch) return Promise.resolve(null)
 
   const url = sourceMapMatch[1]
   const dataUrlMatch = url.match(regexDataUrl)
 
-  if (!dataUrlMatch) {
-    return
-  }
+  if (!dataUrlMatch) return Promise.resolve(null)
 
   const sourceMapBase64 = dataUrlMatch[1]
 
