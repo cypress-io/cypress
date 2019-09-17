@@ -4,34 +4,12 @@ import http from 'http'
 import https from 'https'
 import Io from '@packages/socket'
 import Promise from 'bluebird'
+import { allowDestroy } from '../../lib/allow-destroy'
 
 export interface AsyncServer {
   closeAsync: () => Promise<void>
   destroyAsync: () => Promise<void>
   listenAsync: (port) => Promise<void>
-}
-
-function addDestroy (server: http.Server | https.Server) {
-  let connections = []
-
-  function trackConn (conn) {
-    connections.push(conn)
-
-    conn.on('close', () => {
-      connections = connections.filter((connection) => connection !== conn)
-    })
-  }
-
-  server.on('connection', trackConn)
-  server.on('secureConnection', trackConn)
-
-  // @ts-ignore Property 'destroy' does not exist on type 'Server'.
-  server.destroy = function (cb) {
-    server.close(cb)
-    connections.map((connection) => connection.destroy())
-  }
-
-  return server
 }
 
 function createExpressApp () {
@@ -72,14 +50,14 @@ export class Servers {
     )
     .spread((app: Express.Application, [cert, key]: string[]) => {
       this.httpServer = Promise.promisifyAll(
-        addDestroy(http.createServer(app))
+        allowDestroy(http.createServer(app))
       ) as http.Server & AsyncServer
 
       this.wsServer = Io.server(this.httpServer)
 
       this.https = { cert, key }
       this.httpsServer = Promise.promisifyAll(
-        addDestroy(https.createServer(this.https, <http.RequestListener>app))
+        allowDestroy(https.createServer(this.https, <http.RequestListener>app))
       ) as https.Server & AsyncServer
 
       this.wssServer = Io.server(this.httpsServer)

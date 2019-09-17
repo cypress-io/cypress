@@ -1,4 +1,4 @@
-exports['e2e config passes 1'] = `
+exports['cy.visit performance tests pass in chrome 1'] = `
 
 ====================================================================================================
 
@@ -7,48 +7,73 @@ exports['e2e config passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_passing_spec.coffee                                     │
+  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
+  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: config_passing_spec.coffee...                                                   (1 of 1) 
+  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+
+Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
 
 
-  Cypress static methods + props
-    ✓ .version
-    ✓ .platform
-    ✓ .arch
-    ✓ .browser
-    ✓ .spec
-    .env
-      ✓ doesn't die on <script> tags
+  on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: close
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: keep-alive
 
 
-  6 passing
+  2 passing
 
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        6                          │
-  │ Passing:      6                          │
-  │ Failing:      0                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  0                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     config_passing_spec.coffee │
-  └──────────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  ┌──────────────────────────────────────┐
+  │ Tests:        2                      │
+  │ Passing:      2                      │
+  │ Failing:      0                      │
+  │ Pending:      0                      │
+  │ Skipped:      0                      │
+  │ Screenshots:  0                      │
+  │ Video:        false                  │
+  │ Duration:     X seconds              │
+  │ Spec Ran:     fast_visit_spec.coffee │
+  └──────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -58,14 +83,14 @@ exports['e2e config passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ config_passing_spec.coffee                XX:XX        6        6        -        -        - │
+  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        6        6        -        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 
 `
 
-exports['e2e config fails 1'] = `
+exports['cy.visit performance tests pass in electron 1'] = `
 
 ====================================================================================================
 
@@ -74,61 +99,67 @@ exports['e2e config fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_failing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_failing_spec.coffee                                     │
+  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
+  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: config_failing_spec.coffee...                                                   (1 of 1) 
+  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
 
 
-  config
-    1) times out looking for a missing element
+  on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: close
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+histogram line
+    ✓ with connection: keep-alive
 
 
-  0 passing
-  1 failing
-
-  1) config times out looking for a missing element:
-     CypressError: Timed out retrying: Expected to find element: '#bar', but never found it.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-
-
+  2 passing
 
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        1                          │
-  │ Passing:      0                          │
-  │ Failing:      1                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  1                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     config_failing_spec.coffee │
-  └──────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  - /foo/bar/.projects/e2e/cypress/screenshots/config_failing_spec.coffee/config -- times out looking for a missing element (failed).png (1280x720)
+  ┌──────────────────────────────────────┐
+  │ Tests:        2                      │
+  │ Passing:      2                      │
+  │ Failing:      0                      │
+  │ Pending:      0                      │
+  │ Skipped:      0                      │
+  │ Screenshots:  0                      │
+  │ Video:        true                   │
+  │ Duration:     X seconds              │
+  │ Spec Ran:     fast_visit_spec.coffee │
+  └──────────────────────────────────────┘
 
 
   (Video)
@@ -144,9 +175,9 @@ exports['e2e config fails 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ config_failing_spec.coffee                XX:XX        1        -        1        -        - │
+  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    All specs passed!                           XX:XX        2        2        -        -        -  
 
 
 `

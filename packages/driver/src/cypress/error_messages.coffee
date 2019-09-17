@@ -1005,6 +1005,7 @@ module.exports = {
     invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
     invalid_method: "#{cmd('visit')} was called with an invalid method: '{{method}}'. Method can only be GET or POST."
     invalid_headers: "#{cmd('visit')} requires the 'headers' option to be an object."
+    invalid_qs: "#{cmd('visit')} requires the 'qs' option to be an object, but received: '{{qs}}'"
     no_duplicate_url: """
       #{cmd('visit')} must be called with only one URL. You specified two URLs:
 
@@ -1096,6 +1097,16 @@ module.exports = {
         However, you can likely use #{cmd('request')} instead of #{cmd('visit')}.
 
         #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
+      """
+
+    specify_file_by_relative_path: """
+      #{cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
+
+      To visit a local file, you can pass in the relative path to the file from the `projectRoot` (Note: if the configuration value `baseUrl` is set, the supplied path will be resolved from the `baseUrl` instead of `projectRoot`)
+
+      https://docs.cypress.io/api/commands/visit.html
+
+      https://docs.cypress.io/api/cypress-api/config.html
       """
 
   wait:
