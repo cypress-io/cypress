@@ -43,7 +43,7 @@ describe "e2e stdout", ->
       expectedExitCode: 0
     })
 
-  it "displays fullname of nested specfile", ->
+  it.only "displays fullname of nested specfile", ->
     e2e.exec(@, {
       port: 2020
       snapshot: true

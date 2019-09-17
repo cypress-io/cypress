@@ -183,6 +183,21 @@ describe "src/cypress/location", ->
       obj = Location.create(urls.signin)
       expect(obj.toString()).to.eq("http://localhost:2020/signin")
 
+  context ".mergeUrlWithParams", ->
+    beforeEach ->
+      @url = (str, expected, params) ->
+        url = Location.mergeUrlWithParams(str, params)
+        expect(url).to.eq(expected)
+
+    it "merges params into a URL", ->
+      @url "http://example.com/a", "http://example.com/a?foo=bar", { foo: 'bar' }
+
+    it "overrides existing queryparams", ->
+      @url "http://example.com/a?foo=quux", "http://example.com/a?foo=bar", { foo: 'bar' }
+
+    it "appends and overrides existing queryparams", ->
+      @url "http://example.com/a?foo=quux", "http://example.com/a?foo=bar&baz=quuz", { foo: 'bar', baz: 'quuz' }
+
   context ".normalize", ->
     beforeEach ->
       @url = (source, expected) ->
