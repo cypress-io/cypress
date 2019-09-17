@@ -55,6 +55,16 @@ const getSymbol = function (num) {
   return logSymbols.success
 }
 
+const getWidth = (table, index) => {
+  // get the true width of a table's column,
+  // based off of calculated table options for that column
+  const columnWidth = table.options.colWidths[index]
+
+  if (columnWidth) {
+    return columnWidth - (table.options.style['padding-left'] + table.options.style['padding-right'])
+  }
+}
+
 const formatBrowser = (browser) => {
   // TODO: finish browser
   return _.compact([
@@ -85,14 +95,7 @@ const formatFooterSummary = (results) => {
   })()
 
   return [
-    {
-      style: {
-        'padding-left': 0,
-        'padding-right': 0,
-      },
-      truncate: '',
-      content: formatSymbolSummary(totalFailed),
-    },
+    formatSymbolSummary(totalFailed),
     color(phrase, c),
     gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
@@ -108,9 +111,14 @@ const formatSymbolSummary = (failures) => {
 }
 
 const formatPath = (name, n, colour = 'reset') => {
-  let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
+  // add newLines at each n char and colorize the path
+  if (n) {
+    let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
 
-  return `${color(nameWithNewLines, colour)}`
+    return `${color(nameWithNewLines, colour)}`
+  }
+
+  return `${color(name, colour)}`
 }
 
 const formatRecordParams = function (runUrl, parallel, group) {
@@ -121,27 +129,6 @@ const formatRecordParams = function (runUrl, parallel, group) {
 
     return `Group: ${group}, Parallel: ${Boolean(parallel)}`
   }
-}
-
-const formatSpecPattern = function (specPattern) {
-  if (specPattern) {
-    return formatPath(specPattern.join(', '), 80)
-  }
-}
-
-const formatSpecs = function (specs) {
-  const names = _.map(specs, 'name')
-
-  // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-  const stringifiedSpecs = [
-    `${names.length} found `,
-    gray('('),
-    formatPath((names.join(', ')), 80, 'gray'),
-    gray(')'),
-  ]
-  .join('')
-
-  return stringifiedSpecs
 }
 
 const displayRunStarting = function (options = {}) {
@@ -164,6 +151,30 @@ const displayRunStarting = function (options = {}) {
     type: 'outsideBorder',
   })
 
+  const formatSpecPattern = () => {
+    // foo.spec.js, bar.spec.js, baz.spec.js
+    // also inserts newlines at col width
+    if (specPattern) {
+      return formatPath(specPattern.join(', '), getWidth(table, 1))
+    }
+  }
+
+  const formatSpecs = (specs) => {
+    // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
+    const names = _.map(specs, 'name')
+    const specsTruncated = _.truncate(names.join(', '), { length: 250 })
+
+    const stringifiedSpecs = [
+      `${names.length} found `,
+      '(',
+      specsTruncated,
+      ')',
+    ]
+    .join('')
+
+    return formatPath(stringifiedSpecs, getWidth(table, 1))
+  }
+
   const data = _
   .chain([
     [gray('Cypress:'), pkg.version],
@@ -171,7 +182,7 @@ const displayRunStarting = function (options = {}) {
     [gray('Specs:'), formatSpecs(specs)],
     [gray('Searched:'), formatSpecPattern(specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group)],
-    [gray('Run URL:'), runUrl],
+    [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
   ])
   .filter(_.property(1))
   .value()
@@ -201,10 +212,7 @@ const displaySpecHeader = function (name, curr, total, estimated) {
   table.push(['', ''])
   table.push([
     'Running:',
-    {
-      style: { 'padding-left': 0 },
-      content: `${formatPath(name, 67, 'gray')}...`,
-    },
+    `${formatPath(name, getWidth(table, 1), 'gray')}`,
     gray(`(${curr} of ${total})`),
   ])
 
@@ -248,21 +256,14 @@ const renderSummaryTable = (runUrl) => {
 
     if (runs && runs.length) {
       const colAligns = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right']
-      const colWidths = [3, 36, 11, 10, 10, 10, 10, 10]
+      const colWidths = [3, 41, 11, 9, 9, 9, 9, 9]
 
       const table1 = terminal.table({
         colAligns,
         colWidths,
         type: 'noBorder',
         head: [
-          {
-            truncate: '',
-            content: '',
-            style: {
-              'padding-left': 0,
-              'padding-right': 0,
-            },
-          },
+          '',
           gray('Spec'),
           '',
           gray('Tests'),
@@ -271,7 +272,6 @@ const renderSummaryTable = (runUrl) => {
           gray('Pending'),
           gray('Skipped'),
         ],
-        style: { 'padding-left': 0 },
       })
 
       const table2 = terminal.table({
@@ -280,18 +280,11 @@ const renderSummaryTable = (runUrl) => {
         type: 'border',
       })
 
-      const PADDING_LEFT = 1
-      const PADDING_RIGHT = 1
-
       const table3 = terminal.table({
         colAligns,
         colWidths,
         type: 'noBorder',
         head: formatFooterSummary(results),
-        style: {
-          'padding-left': PADDING_LEFT,
-          'padding-right': PADDING_RIGHT,
-        },
       })
 
       _.each(runs, (run) => {
@@ -300,16 +293,8 @@ const renderSummaryTable = (runUrl) => {
         const ms = duration.format(stats.wallClockDuration)
 
         return table2.push([
-          {
-            content: formatSymbolSummary(stats.failures),
-          },
-          {
-            style: {
-              'padding-left': 0,
-            },
-            // width - padding-left - padding-right - newline.length
-            content: formatPath(spec.name, colWidths[1] - PADDING_LEFT - PADDING_RIGHT - 1),
-          },
+          formatSymbolSummary(stats.failures),
+          formatPath(spec.name, getWidth(table2, 1)),
           color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),
@@ -336,7 +321,7 @@ const renderSummaryTable = (runUrl) => {
         })
 
         table4.push(['', ''])
-        table4.push([`Recorded Run: ${gray(runUrl)}`])
+        table4.push([`Recorded Run: ${formatPath(runUrl, getWidth(table4, 0), 'gray')}`])
 
         console.log(terminal.renderTables(table4))
 
@@ -656,6 +641,7 @@ module.exports = {
     })
 
     const table = terminal.table({
+      colWidths: [14, 86],
       type: 'outsideBorder',
     })
 
@@ -669,7 +655,7 @@ module.exports = {
       ['Video:', results.video],
       ['Duration:', results.duration],
       estimated ? ['Estimated:', results.estimated] : undefined,
-      ['Spec Ran:', formatPath(results.name, 80, c)],
+      ['Spec Ran:', formatPath(results.name, getWidth(table, 1), c)],
     ])
     .compact()
     .map((arr) => {
@@ -683,8 +669,7 @@ module.exports = {
 
     console.log('')
     console.log(table.toString())
-
-    return console.log('')
+    console.log('')
   },
 
   displayScreenshots (screenshots = []) {
@@ -694,17 +679,36 @@ module.exports = {
 
     console.log('')
 
-    const format = function (s) {
-      const dimensions = gray(`(${s.width}x${s.height})`)
-
-      return `  - ${s.path} ${dimensions}`
-    }
-
-    screenshots.forEach((screenshot) => {
-      console.log(format(screenshot))
+    const table = terminal.table({
+      colWidths: [3, 82, 15],
+      colAligns: ['left', 'left', 'right'],
+      type: 'noBorder',
+      style: {
+        'padding-right': 0,
+      },
+      chars: {
+        'left': ' ',
+      },
     })
 
-    return console.log('')
+    screenshots.forEach((screenshot) => {
+      const dimensions = gray(`(${screenshot.width}x${screenshot.height})`)
+
+      table.push([
+        '-',
+        formatPath(`${screenshot.path}`, getWidth(table, 1)),
+        {
+          content: gray(dimensions),
+          style: {
+            'padding-right': -1,
+          },
+        },
+      ])
+    })
+
+    console.log(table.toString())
+
+    console.log('')
   },
 
   postProcessRecording (end, name, cname, videoCompression, shouldUploadVideo) {
@@ -742,13 +746,32 @@ module.exports = {
           const finished = new Date - started
           const dur = `(${humanTime.long(finished)})`
 
-          console.log(
-            gray('  - Finished processing: '),
-            chalk.cyan(name),
-            gray(dur)
-          )
+          const table = terminal.table({
+            colWidths: [23, 62, 15],
+            colAligns: ['left', 'left', 'right'],
+            type: 'noBorder',
+            style: {
+              'padding-right': 0,
+            },
+            chars: {
+              'left': ' ',
+            },
+          })
 
-          return console.log('')
+          table.push([
+            gray('- Finished processing:'),
+            `${formatPath(name, getWidth(table, 1), 'cyan')}`,
+            {
+              content: gray(dur),
+              style: {
+                'padding-right': -1,
+              },
+            },
+          ])
+
+          console.log(table.toString())
+
+          console.log('')
         }
 
         if ((new Date - progress) > throttle) {
@@ -757,7 +780,7 @@ module.exports = {
           progress += throttle
           const percentage = `${Math.ceil(float * 100)}%`
 
-          return console.log('  - Compression progress: ', chalk.cyan(percentage))
+          console.log('    Compression progress: ', chalk.cyan(percentage))
         }
       }
 

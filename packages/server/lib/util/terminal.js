@@ -24,33 +24,6 @@ const getBordersLength = (left, right) => {
   .value()
 }
 
-const convertDecimalsToNumber = function (colWidths, cols) {
-  const sum = _.sum(colWidths)
-
-  if (sum !== EXPECTED_SUM) {
-    throw new Error(`Expected colWidths array to sum to: ${EXPECTED_SUM}, instead got: ${sum}`)
-  }
-
-  const widths = _.map(colWidths, (width) => {
-    // easier to deal with numbers than floats...
-    const num = (cols * width) / EXPECTED_SUM
-
-    return Math.floor(num)
-  })
-
-  const total = _.sum(widths)
-  const diff = cols - total
-
-  // if we got a sum less than the total
-  // columns, then add the difference to
-  // the first element in the array of widths
-  if (diff > 0) {
-    widths[0] += diff
-  }
-
-  return widths
-}
-
 const renderTables = (...tables) => {
   return _
   .chain([])
@@ -70,6 +43,7 @@ const getChars = function (type) {
         'left-mid': '  ├',
         'middle': '',
         'mid-mid': '',
+        'right': '│',
         'bottom-mid': '',
         'bottom-left': '  └',
       }
@@ -84,7 +58,7 @@ const getChars = function (type) {
         'middle': '',
         'mid': '',
         'mid-mid': '',
-        'right': '',
+        'right': ' ',
         'right-mid': '',
         'bottom': '',
         'bottom-left': '',
@@ -175,36 +149,30 @@ const table = function (options = {}) {
 
   ({ chars } = options)
 
-  options.chars = wrapBordersInGray(chars)
-
   if (colWidths) {
+    const sum = _.sum(colWidths)
+
+    if (sum !== EXPECTED_SUM) {
+      throw new Error(`Expected colWidths array to sum to: ${EXPECTED_SUM}, instead got: ${sum}`)
+    }
+
     const bordersLength = getBordersLength(chars.left, chars.right)
 
     if (bordersLength > 0) {
-      // subtract borders to get the actual size
-      // so it displaces a maximum number of columns
-      // const cols = getMaximumColumns() - bordersLength
-
       // redistribute the columns to account for borders on each side...
-      // and subtract from the largest width cell
+      // and subtract  borders size from the largest width cell
       const largestCellWidth = _.max(colWidths)
+
       const index = _.indexOf(colWidths, largestCellWidth)
 
       colWidths = _.clone(colWidths)
 
       colWidths[index] = largestCellWidth - bordersLength
-
-      // const lastIndex = colWidths.length - 1
-
-      // colWidths[0] = colWidths[0] + chars.left.length
-      // colWidths[lastIndex] = colWidths[lastIndex] + chars.right.length
-
       options.colWidths = colWidths
-
-      // options.colWidths = convertDecimalsToNumber(colWidths, cols)
     }
-
   }
+
+  options.chars = wrapBordersInGray(chars)
 
   return new Table(options)
 }
@@ -245,6 +213,4 @@ module.exports = {
   renderTables,
 
   getMaximumColumns,
-
-  convertDecimalsToNumber,
 }
