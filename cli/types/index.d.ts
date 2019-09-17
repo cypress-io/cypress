@@ -60,6 +60,7 @@ declare namespace Cypress {
     path: string
     isHeaded: boolean
     isHeadless: boolean
+    family: string
   }
 
   interface LocalStorage {
