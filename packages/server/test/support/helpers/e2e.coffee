@@ -48,6 +48,10 @@ replaceBrowserName = (str, key, customBrowserPath, browserName, version, headles
   ## this ensures we add whitespace so the border is not shifted
   key + customBrowserPath + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
 
+replaceStringWithXs = (str) ->
+  ## foobarbaz -> XXXXXXXXX
+  return _.padEnd("X", str.length, "X")
+
 replaceDurationSeconds = (str, p1, p2, p3, p4) ->
   ## get the padding for the existing duration
   lengthOfExistingDuration = _.sum([p2?.length or 0, p3.length, p4.length])
@@ -77,18 +81,27 @@ replaceUploadingResults = (orig, match..., offset, string) ->
 normalizeStdout = (str, options = {}) ->
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
+  str = str
+  ## /Users/jane/........../ -> /XXXXXXXXXX/
+  .replace(new RegExp(pathUpToProjectName, 'g'), replaceStringWithXs)
   .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
   .replace(browserNameVersionRe, replaceBrowserName)
   .replace(/\s\(\d+([ms]|ms)\)/g, "") ## numbers in parenths
-  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) ## durations in tables
+   ## 12:35 -> XX:XX
+  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
+  ## Cypress: 2.1.0 -> Cypress: 1.2.3
+  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") 
+  ## 15 seconds -> XX seconds
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
-  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) ## replace duration='1589'
+  ## duration='1589' -> duraction='XXXX'
+  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) 
+  ## (15 seconds) -> (X seconds)
   .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
   .replace(/\r/g, "")
-  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
+  ## replaces multiple lines of uploading results (since order not guaranteed)
+  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) 
 
   if options.browser isnt undefined and options.browser isnt 'electron'
     str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") ## screenshot dimensions
