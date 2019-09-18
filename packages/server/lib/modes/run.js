@@ -733,7 +733,7 @@ module.exports = {
       console.log('')
 
       console.log(
-        gray('  - Started processing:  '),
+        gray('  - Started processing: '),
         chalk.cyan(`Compressing to ${videoCompression} CRF`)
       )
 
