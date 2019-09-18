@@ -12,7 +12,7 @@ Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
 - lib/reporter.coffee
 - lib/project.coffee
-- lib/modes/run.coffee
+- lib/modes/run.js
 - lib/modes/index.coffee
 - lib/cypress.coffee
 - index.js
