@@ -31,16 +31,18 @@ function replaceStream (patterns: RegExp | RegExp[], replacements: string | stri
 
     tail = tail + chunk
 
-    let replacementEndIndex
+    let replacementEndIndex = 0
 
-    (patterns as RegExp[]).forEach((pattern, i) => {
+    ;(patterns as RegExp[]).forEach((pattern, i) => {
       const replacement = replacements[i]
 
       tail = tail.replace(pattern, function replacer (match) {
         // ugly, but necessary due to bizarre function signature of String#replace
         const offset = arguments[arguments.length - 2] // eslint-disable-line prefer-rest-params
 
-        replacementEndIndex = offset + replacement.length
+        if (offset + replacement.length > replacementEndIndex) {
+          replacementEndIndex = offset + replacement.length
+        }
 
         return match.replace(pattern, replacement)
       })
