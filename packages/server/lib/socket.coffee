@@ -14,6 +14,7 @@ fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
 preprocessor  = require("./plugins/preprocessor")
+openEditor = require('open-editor')
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -334,6 +335,13 @@ class Socket
 
       socket.on "external:open", (url) ->
         require("electron").shell.openExternal(url)
+
+      socket.on "open:file", (fileDetails) ->
+        ## TODO: can we open to specific line & column
+        # require("electron").shell.openItem(fileDetails.file)
+        openEditor([].concat(fileDetails), {
+          editor: 'vscode',
+        })
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>

@@ -4,6 +4,7 @@ export default class Err {
   @observable name = ''
   @observable message = ''
   @observable stack = ''
+  @observable sourceMappedStack = ''
   @observable mdMessage = ''
   @observable docsUrl = ''
   @observable templateType = ''
@@ -30,6 +31,7 @@ export default class Err {
     this.message = props.message
     this.mdMessage = props.mdMessage || props.message
     this.stack = props.stack
+    this.sourceMappedStack = props.sourceMappedStack
     this.docsUrl = props.docsUrl
     this.templateType = props.templateType
     this.codeFrames = props.codeFrames

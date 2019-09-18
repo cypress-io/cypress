@@ -562,11 +562,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     state("index", queue.length)
 
   fail = (err, runnable) ->
+    ## TODO: can we move both processErr calls here?
     stopped = true
 
-    stack = state("current")?.get("invocationStack")
-    if stack
-      err = $errUtils.addCodeFrameToErr(err, stack)
+    if not err.codeFrames
+      stack = state("current")?.get("invocationStack")
+      ## TODO: this won't work correctly if it's an error in a .then
+      err = $errUtils.addCodeFrameToErr(err, stack or err.stack)
 
     ## store the error on state now
     state("error", err)

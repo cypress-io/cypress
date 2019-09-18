@@ -17,9 +17,21 @@ class TestError extends Component {
       return message ? md.renderInline(message) : ''
     }
 
-    const { err } = this.props.model
+    const { err, title } = this.props.model
 
     if (!err.displayMessage) return null
+
+    console.log(`Test:%c ${title}`, 'font-weight: bold;')
+    console.error(err.stack)
+
+    // console.group(this.props.model.title)
+    // console.error(err.stack)
+    // console.groupEnd()
+
+    const newErr = new Error('foo')
+
+    // console.warn(newErr)
+    // console.warn(newErr.stack)
 
     return (
       <div className='runnable-err-wrapper'>
@@ -45,12 +57,16 @@ class TestError extends Component {
               headerClass='runnable-err-stack-expander'
               contentClass='runnable-err-stack-trace'
             >
-              {err.stack}
+              {err.sourceMappedStack || err.stack}
             </Collapsible> :
             null
           }
           {_.map(err.codeFrames, (codeFrame) => (
-            <ErrorCodeFrame key={`${codeFrame.file}:${codeFrame.column}:${codeFrame.line}`} codeFrame={codeFrame} />
+            <ErrorCodeFrame
+              key={`${codeFrame.file}:${codeFrame.column}:${codeFrame.line}`}
+              codeFrame={codeFrame}
+              onOpenFile={this.props.onOpenFile}
+            />
           ))}
         </div>
       </div>

@@ -7,7 +7,7 @@ const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
 const $sourceMapUtils = require('./source_map_utils')
 
-const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrames'.split(' ')
+const ERROR_PROPS = 'message type name stack sourceMappedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrames'.split(' ')
 
 const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
@@ -240,6 +240,9 @@ const getLanguageFromExtension = (filePath) => {
 }
 
 const getCodeFrame = (sourceCode, { line, column, source: file }) => {
+  // add 1 to column because it looks better in code frame
+  // since column is 0-based
+  column++
   const location = { start: { line, column } }
   const frame = codeFrameColumns(sourceCode, location)
 
@@ -371,14 +374,14 @@ const getSourceStack = (stack = '') => {
     return translateStackLine(stackUtil, line)
   })
 
-  return messageLines.concat(translated).join('\n')
+  return messageLines.concat(translated).join('\n    ')
 }
 
 //// all errors flow through this function before they're finally thrown
 //// or used to reject promises
 const processErr = (errObj = {}, config) => {
   if (errObj.stack) {
-    errObj.stack = getSourceStack(errObj.stack)
+    errObj.sourceMappedStack = getSourceStack(errObj.stack)
   }
 
   if (config('isInteractive') || !errObj.docsUrl) {

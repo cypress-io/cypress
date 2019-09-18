@@ -42,7 +42,7 @@ class Runnable extends Component {
         onMouseOver={this._hover(true)}
         onMouseOut={this._hover(false)}
       >
-        {model.type === 'test' ? <Test model={model} /> : <Suite model={model} />}
+        {model.type === 'test' ? <Test model={model} config={this.props.config} /> : <Suite model={model} />}
       </li>
     )
   }

@@ -534,25 +534,25 @@ describe "driver/src/cypress/error_utils", ->
   context ".getStackLineDetails", ->
     it "pulls detailed information from stack line", ->
       stack = """Error: foo
-      at baz (/foo/bar/cypress/integration/cypress/error_utils_spec.coffee:100:10)
-      at bar (/foo/bar/cypress/integration/cypress/error_utils_spec.coffee:102:12)
-      at foo (/foo/bar/cypress/integration/cypress/error_utils_spec.coffee:104:14)
+      at baz (cypress/integration/cypress/error_utils_spec.coffee:100:10)
+      at bar (cypress/integration/cypress/error_utils_spec.coffee:102:12)
+      at foo (cypress/integration/cypress/error_utils_spec.coffee:104:14)
       """
 
-      expect($errUtils.getStackLineDetails(stack, 0, "/foo/bar")).to.eql({
+      expect($errUtils.getStackLineDetails(stack, 0)).to.eql({
         file: "cypress/integration/cypress/error_utils_spec.coffee"
         function: "baz"
         line: 100
         column: 10
       })
-      expect($errUtils.getStackLineDetails(stack, 1, "/foo/bar")).to.eql({
+      expect($errUtils.getStackLineDetails(stack, 1)).to.eql({
         file: "cypress/integration/cypress/error_utils_spec.coffee"
         function: "bar"
         line: 102
         column: 12
       })
 
-  context.only ".getSourceStack", ->
+  context ".getSourceStack", ->
     beforeEach ->
       cy.stub($sourceMapUtils, "getSourcePosition").returns({
         source: 'some_other_file.ts'

@@ -69,6 +69,7 @@ class Reporter extends Component {
           runnablesStore={this.props.runnablesStore}
           scroller={this.props.scroller}
           specPath={this.props.specPath}
+          config={this.props.config}
         />
       </div>
     )

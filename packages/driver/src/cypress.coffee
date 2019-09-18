@@ -26,6 +26,7 @@ $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 $errUtils = require("./cypress/error_utils")
+$specUtils = require("./cypress/spec_utils")
 $sourceMapUtils = require("./cypress/source_map_utils")
 
 proxies = {
@@ -72,6 +73,8 @@ class $Cypress
     @runner   = null
     @Commands = null
     @_RESUMED_AT_TEST = null
+    @$autIframe = null
+    @onSpecReady = null
 
     @events = $Events.extend(@)
 
@@ -143,12 +146,9 @@ class $Cypress
 
     @action("cypress:config", config)
 
-  initialize: ($autIframe) ->
-    ## push down the options
-    ## to the runner
-    @mocha.options(@runner)
-
-    @cy.initialize($autIframe)
+  initialize: ({ $autIframe, onSpecReady }) ->
+    @$autIframe = $autIframe
+    @onSpecReady = onSpecReady
 
   run: (fn) ->
     $errUtils.throwErrByPath("miscellaneous.no_runner") if not @runner
@@ -176,31 +176,17 @@ class $Cypress
 
     @events.proxyTo(@cy)
 
-    Promise
-    .map specs, (spec) ->
-      return new Promise (resolve, reject) ->
-        xhr = new specWindow.XMLHttpRequest()
-        xhr.onload = ->
-          resolve([spec, @responseText])
+    $specUtils.runSpecs(specWindow, specs)
+    .catch (err) =>
+      err = $errUtils.addCodeFrameToErr(err, err.stack)
+      @runner.onScriptError(err)
+    .then =>
+      ## push down the options to the runner
+      @mocha.options(@runner)
 
-        xhr.onerror = (e) ->
-          ## TODO: get details from `e` and pass them in
-          reject(new Error("Fetching spec #{spec} failed"))
+      @cy.initialize(@$autIframe)
 
-        xhr.open("GET", spec.relativeUrl)
-        xhr.send()
-    .map ([spec, contents]) ->
-      spec.fullyQualifiedUrl = "#{window.top.location.origin}#{spec.relativeUrl}"
-
-      $sourceMapUtils.extractSourceMap(spec, contents)
-      .return([spec, contents])
-    .then (results = []) ->
-      _.each results, ([spec, contents]) ->
-        specWindow.eval("#{contents}\n//# sourceURL=#{spec.relativeUrl}")
-
-      specWindow.__onSpecIframeReady()
-
-      return null
+      @onSpecReady()
 
   action: (eventName, args...) ->
     ## normalizes all the various ways

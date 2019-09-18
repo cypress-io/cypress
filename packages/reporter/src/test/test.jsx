@@ -110,7 +110,7 @@ class Test extends Component {
         <div className='runnable-commands-region'>
           {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
         </div>
-        <TestError events={events} model={model} />
+        <TestError events={events} model={model} onOpenFile={this._openFile} />
       </div>
     )
   }
@@ -133,6 +133,14 @@ class Test extends Component {
     } else {
       this.isOpen = !this.isOpen
     }
+  }
+
+  _openFile = ({ file, column, line }) => {
+    events.emit('open:file', {
+      column,
+      line,
+      file: `${this.props.config.projectRoot}/${file}`,
+    })
   }
 }
 

@@ -13,12 +13,7 @@
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        var specs = [
-          {{#each specs}}
-            {{{this}}},
-          {{/each}}
-        ];
-        return Cypress.onSpecWindow(window, specs);
+        return Cypress.onSpecWindow(window, {{{specs}}});
       })(window.opener || window.parent);
     </script>
   </body>

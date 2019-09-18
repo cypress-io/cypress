@@ -147,6 +147,10 @@ export default {
     localBus.on('external:open', (url) => {
       runner.emit('external:open', url)
     })
+
+    localBus.on('open:file', (fileDetails) => {
+      runner.emit('open:file', fileDetails)
+    })
   },
 
   emit (event, ...args) {

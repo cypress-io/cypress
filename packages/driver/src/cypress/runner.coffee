@@ -624,9 +624,7 @@ create = (specWindow, mocha, Cypress, cy) ->
   _runner = mocha.getRunner()
   _runner.suite = mocha.getRootSuite()
 
-  specWindow.onerror = ->
-    err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
-
+  onScriptError = (err) ->
     ## err will not be returned if cy can associate this
     ## uncaught exception to an existing runnable
     return true if not err
@@ -658,6 +656,11 @@ create = (specWindow, mocha, Cypress, cy) ->
     ## return undefined so the browser does its default
     ## uncaught exception behavior (logging to console)
     return undefined
+
+  specWindow.onerror = ->
+    err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
+
+    onScriptError(err)
 
   ## hold onto the _runnables for faster lookup later
   _stopped = false
@@ -711,6 +714,8 @@ create = (specWindow, mocha, Cypress, cy) ->
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
+    onScriptError
+
     grep: (re) ->
       if arguments.length
         _runner._grep = re

@@ -13,15 +13,15 @@ const noTestsError = (specPath) => ({
   message: 'We could not detect any tests in the above file. Write some tests and re-run.',
 })
 
-const RunnablesList = observer(({ runnables }) => (
+const RunnablesList = observer(({ runnables, config }) => (
   <div className='wrap'>
     <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} config={config} />)}
     </ul>
   </div>
 ))
 
-function content ({ isReady, runnables }, specPath, error) {
+function content ({ isReady, runnables }, specPath, error, config) {
   if (!isReady) return null
 
   // show error if there are no tests, but only if there
@@ -30,7 +30,7 @@ function content ({ isReady, runnables }, specPath, error) {
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
+  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} config={config} />
 }
 
 @observer
@@ -40,7 +40,7 @@ class Runnables extends Component {
 
     return (
       <div ref='container' className='container'>
-        {content(runnablesStore, specPath, error)}
+        {content(runnablesStore, specPath, error, this.props.config)}
       </div>
     )
   }

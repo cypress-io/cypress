@@ -29,7 +29,7 @@ module.exports = {
           domain:       getRemoteState().domainName
           # stylesheets:  @getStylesheets(config)
           javascripts:  js
-          specs:        specs
+          specs:        JSON.stringify(specs)
         }
 
   getSpecs: (spec, config) ->
@@ -59,11 +59,11 @@ module.exports = {
   prepareForBrowser: (filePath, projectRoot) ->
     relativeFilePath = path.relative(projectRoot, filePath)
 
-    JSON.stringify({
+    {
       absolute: filePath
       relative: relativeFilePath
       relativeUrl: @getTestUrl(relativeFilePath)
-    })
+    }
 
   getTestUrl: (file) ->
     "/__cypress/tests?p=#{file}"

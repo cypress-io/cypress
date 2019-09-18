@@ -16,7 +16,7 @@ const initialize = (file, sourceMapBase64) => {
   const sourceMap = base64toJson(sourceMapBase64)
 
   return Promise.resolve(new SourceMapConsumer(sourceMap)).then((consumer) => {
-    const data = sourceMapConsumers[file.relativeUrl] = {
+    const data = sourceMapConsumers[file.fullyQualifiedUrl] = {
       consumer,
       file,
     }
