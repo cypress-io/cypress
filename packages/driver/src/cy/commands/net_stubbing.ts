@@ -1,5 +1,4 @@
 import * as _ from 'lodash'
-import * as Promise from 'bluebird'
 import {
   CyHttpMessages,
   RouteHandler,
@@ -13,6 +12,32 @@ import {
 } from '../../../../../cli/types/cy-net-stubbing'
 
 const utils = require('../../cypress/utils')
+
+interface Route {
+  alias?: string
+  log: Cypress.Log
+  options: RouteMatcherOptions
+  handler: RouteHandler
+  hitCount: number
+  requests: { [key: string]: Request }
+}
+
+interface Request {
+  req: CyHttpMessages.IncomingRequest
+  responseHandler?: HttpResponseInterceptor
+  state: RequestState
+  log: Cypress.Log
+}
+
+enum RequestState {
+  Received,
+  Intercepted,
+  ResponseReceived,
+  ResponseIntercepted,
+  Completed
+}
+
+let routes : { [key: string]: Route } = {}
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
@@ -62,6 +87,10 @@ export declare namespace NetEventFrames {
   // fired when HTTP proxy receives headers + body of request
   export interface HttpRequestReceived extends BaseHttp {
     req: CyHttpMessages.IncomingRequest
+    /**
+     * Is the proxy expecting the driver to send `HttpRequestContinue`?
+     */
+    notificationOnly: boolean
   }
 
   // fired when driver is done modifying request and wishes to pass control back to the proxy
@@ -85,6 +114,11 @@ export declare namespace NetEventFrames {
     // Millisecond timestamp for when the response should continue
     continueResponseAt?: number
     throttleKbps?: number
+  }
+
+  // fired when a response has been sent completely by the server to an intercepted request
+  export interface HttpRequestComplete extends BaseHttp {
+
   }
 }
 
@@ -134,6 +168,18 @@ function _annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
   return ret
 }
 
+function _getRoute (routeHandlerId: string) {
+  return routes[routeHandlerId]
+}
+
+function _getRequest (routeHandlerId: string, requestId: string) {
+  const route = _getRoute(routeHandlerId)
+
+  if (route) {
+    return route.requests[requestId]
+  }
+}
+
 function _getUniqueId () {
   return `${Number(new Date()).toString()}-${_.uniqueId()}`
 }
@@ -149,19 +195,6 @@ function _isWebSocketController (obj, options) : obj is WebSocketController {
 function _isRegExp (obj) : obj is RegExp {
   return obj && (obj instanceof RegExp || obj.__proto__ === RegExp.prototype || obj.__proto__.constructor.name === 'RegExp')
 }
-
-interface Route {
-  options: RouteMatcherOptions
-  handler: RouteHandler
-  hitCount: number
-}
-
-interface Request {
-  responseHandler: HttpResponseInterceptor
-}
-
-let routes : { [key: string]: Route } = {}
-let requests : { [key: string]: Request } = {}
 
 function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHeaders) {
   if (_.isNumber(statusCodeOrBody)) {
@@ -215,26 +248,110 @@ function _validateStaticResponse (staticResponse: StaticResponse): void {
   }
 }
 
-export function registerCommands (Commands, Cypress, /** cy, state, config */) {
+export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, /** state, config */) {
   // TODO: figure out what to do for XHR compatibility
 
   function _emit (eventName: string, ...args: any[]) {
     // all messages from driver to server are wrapped in backend:request
-    return Cypress.backend('net', eventName, ...args) as Promise<any>
+    return Cypress.backend('net', eventName, ...args)
   }
 
-  function _addRoute (options: RouteMatcherOptions, handler: RouteHandler) {
+  function _getNewRouteLog (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse) {
+    let obj : Partial<Cypress.LogConfig> = {
+      name: 'route',
+      instrument: 'route',
+      isStubbed,
+      numResponses: 0,
+      response: staticResponse ? (staticResponse.body || '< empty body >') : (isStubbed ? '< callback function >' : '< passthrough >'),
+      consoleProps: () => {
+        return {
+          Method: obj.method,
+          URL: obj.url,
+          Status: obj.status,
+          'Route Matcher': matcher,
+          'Static Response': staticResponse,
+          Alias: alias,
+        }
+      },
+    }
+
+    ;['method', 'url'].forEach((k) => {
+      if (matcher[k]) {
+        obj[k] = String(matcher[k]) // stringify RegExp
+      } else {
+        obj[k] = '*'
+      }
+    })
+
+    if (staticResponse) {
+      if (staticResponse.statusCode) {
+        obj.status = staticResponse.statusCode
+      } else {
+        obj.status = 200
+      }
+
+      if (staticResponse.body) {
+        obj.response = staticResponse.body
+      } else {
+        obj.response = '<empty body>'
+      }
+    }
+
+    if (!obj.response) {
+      if (isStubbed) {
+        obj.response = '<callback function'
+      } else {
+        obj.response = '<passthrough>'
+      }
+    }
+
+    if (alias) {
+      obj.alias = alias
+    }
+
+    return Cypress.log(obj)
+  }
+
+  function _getRequestLog (route: Route, request: Omit<Request, 'log'>) {
+    return Cypress.log({
+      name: 'xhr',
+      displayName: 'stubbed route',
+      alias: route.alias,
+      aliasType: 'route',
+      type: 'parent',
+      event: true,
+      consoleProps: () => {
+        return {
+          Alias: route.alias,
+          Method: request.req.method,
+          URL: request.req.url,
+          Matched: route.options,
+          Handler: route.handler,
+        }
+      },
+      renderProps: () => {
+        return {
+          indicator: request.state === RequestState.Completed ? 'successful' : 'pending',
+          message: `${request.req.url} ${RequestState[request.state]}`,
+        }
+      },
+    })
+  }
+
+  function _addRoute (matcher: RouteMatcherOptions, handler: RouteHandler) {
     const handlerId = _getUniqueId()
+
+    const alias = cy.getNextAlias()
 
     const frame: NetEventFrames.AddRoute = {
       handlerId,
-      routeMatcher: _annotateMatcherOptionsTypes(options),
+      routeMatcher: _annotateMatcherOptionsTypes(matcher),
     }
 
     switch (true) {
       case _isHttpRequestInterceptor(handler):
         break
-      case _isWebSocketController(handler, options):
+      case _isWebSocketController(handler, matcher):
         break
       case _.isUndefined(handler):
         // TODO: handle this, for when users just want to alias/wait on route
@@ -256,9 +373,11 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
     }
 
     routes[handlerId] = {
-      options,
+      log: _getNewRouteLog(matcher, !!handler, alias, frame.staticResponse),
+      options: matcher,
       handler,
       hitCount: 0,
+      requests: {},
     }
 
     return _emit('route:added', frame)
@@ -284,8 +403,24 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
   }
 
   function _onRequestReceived (frame: NetEventFrames.HttpRequestReceived) {
-    const route = routes[frame.routeHandlerId]
+    const route = _getRoute(frame.routeHandlerId)
     const { req, requestId, routeHandlerId } = frame
+
+    const request : Partial<Request> = {
+      req,
+      state: RequestState.Received,
+    }
+
+    request.log = _getRequestLog(route, request as Omit<Request, 'log'>)
+    request.log.snapshot('request')
+
+    // TODO: this misnomer is a holdover from XHR, should be numRequests
+    route.log.set('numResponses', route.log.get('numResponses') + 1)
+    route.requests[requestId] = request as Request
+
+    if (frame.notificationOnly) {
+      return
+    }
 
     const continueFrame : Partial<NetEventFrames.HttpRequestContinue> = {
       routeHandlerId,
@@ -298,6 +433,9 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
     const sendContinueFrame = () => {
       continueSent = true
+
+      request.state = RequestState.Intercepted
+
       // copy changeable attributes of userReq to req in frame
       // @ts-ignore
       continueFrame.req = {
@@ -339,9 +477,7 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
         if (_.isFunction(responseHandler)) {
           // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-          requests[requestId] = {
-            responseHandler,
-          }
+          request.responseHandler = responseHandler
 
           // signals server to send a http:response:received
           continueFrame.hasResponseHandler = true
@@ -406,8 +542,11 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
 
   function _onResponseReceived (frame: NetEventFrames.HttpResponseReceived) {
     const { res, requestId, routeHandlerId } = frame
-    const request = requests[requestId]
+    const request = _getRequest(frame.routeHandlerId, frame.requestId)
+
     let sendCalled = false
+
+    request.state = RequestState.ResponseReceived
 
     const continueFrame : NetEventFrames.HttpResponseContinue = {
       routeHandlerId,
@@ -420,6 +559,8 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
       continueFrame.res = {
         ..._.pick(userRes, SERIALIZABLE_RES_PROPS),
       }
+
+      request.state = RequestState.ResponseIntercepted
 
       _emit('http:response:continue', continueFrame)
     }
@@ -470,19 +611,32 @@ export function registerCommands (Commands, Cypress, /** cy, state, config */) {
     request.responseHandler(userRes)
   }
 
+  function _onRequestComplete (frame: NetEventFrames.HttpRequestComplete) {
+    const request = _getRequest(frame.routeHandlerId, frame.requestId)
+
+    if (!request) {
+      return
+    }
+
+    request.state = RequestState.Completed
+    request.log.snapshot('response').end()
+  }
+
   Cypress.on('test:before:run', () => {
-    // wipe out callbacks and routes when tests start
-    routes = {}
-    Cypress.routes = routes
+    // wipe out callbacks, requests, and routes when tests start
+    Cypress.routes = routes = {}
   })
 
-  Cypress.on('net:event', (eventName, ...args) => {
+  Cypress.on('net:event', (eventName, frame: any /** TODO: interfaceof NetEventFrames */) => {
     switch (eventName) {
       case 'http:request:received':
-        _onRequestReceived(<NetEventFrames.HttpRequestReceived>args[0])
+        _onRequestReceived(<NetEventFrames.HttpRequestReceived>frame)
         break
       case 'http:response:received':
-        _onResponseReceived(<NetEventFrames.HttpResponseReceived>args[0])
+        _onResponseReceived(<NetEventFrames.HttpResponseReceived>frame)
+        break
+      case 'http:request:complete':
+        _onRequestComplete(<NetEventFrames.HttpRequestComplete>frame)
         break
       case 'ws:connect':
         break

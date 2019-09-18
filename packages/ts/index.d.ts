@@ -20,12 +20,43 @@ declare namespace Cypress {
     warnByPath: (path: string, obj: any) => void
   }
 
-  export interface Cypress {
+  interface Actions {
+    (action: 'net:event', frame: any)
+  }
+
+  interface cy {
+    /**
+     * If `as` is chained to the current command, return the alias name used.
+     */
+    getNextAlias: () => Optional<string>
+  }
+
+  interface Cypress {
+    backend: (eventName: string, ...args: any[]) => Promise<any>
     routes: {
       [routeHandlerId: string]: any
     }
     sinon: sinon.SinonStatic
     utils: CypressUtils
+  }
+
+  interface LogConfig {
+    message?: string
+    instrument?: 'route'
+    isStubbed?: boolean
+    alias?: string
+    aliasType?: 'route'
+    type?: 'parent'
+    event?: boolean
+    method?: string
+    url?: string
+    status?: number
+    numResponses?: number
+    response?: string
+    renderProps?: () => {
+      indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
+      message?: string
+    }
   }
 }
 

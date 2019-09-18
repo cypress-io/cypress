@@ -266,7 +266,10 @@ export function reset () {
     const request = requests[requestId]
 
     // TODO: try/catch?
-    request.res.end()
+    request.res.removeAllListeners('finish')
+    request.res.removeAllListeners('error')
+    request.res.on('error', _.noop)
+    request.res.destroy()
   }
 
   requests = {}
@@ -319,13 +322,19 @@ function _onProxiedRequest (route: BackendRoute | undefined, socket: any, req: P
     return cb()
   }
 
-  if (route.staticResponse) {
-    _sendStaticResponse(res, route.staticResponse)
-
-    return // don't call cb since we've satisfied the response here
+  const requestId = _.uniqueId('interceptedRequest')
+  const frame : NetEventFrames.HttpRequestReceived = {
+    routeHandlerId: route.handlerId!,
+    requestId,
+    req: _.extend(_.pick(req, SERIALIZABLE_REQ_PROPS), {
+      url: req.proxiedUrl,
+    }) as CyHttpMessages.IncomingRequest,
+    notificationOnly: !!route.staticResponse,
   }
 
-  const requestId = _.uniqueId('interceptedRequest')
+  function emit () {
+    _emit(socket, 'http:request:received', frame)
+  }
 
   const request : BackendRequest = {
     requestId,
@@ -340,21 +349,21 @@ function _onProxiedRequest (route: BackendRoute | undefined, socket: any, req: P
 
   requests[requestId] = request
 
-  res.on('finish', () => {
+  res.once('finish', () => {
+    _emit(socket, 'http:request:complete', {
+      requestId,
+      routeHandlerId: route.handlerId!,
+    })
+
     debug('request/response finished, cleaning up %o', { requestId })
     delete requests[requestId]
   })
 
-  const frame : NetEventFrames.HttpRequestReceived = {
-    routeHandlerId: route.handlerId!,
-    requestId,
-    req: _.extend(_.pick(req, SERIALIZABLE_REQ_PROPS), {
-      url: req.proxiedUrl,
-    }) as CyHttpMessages.IncomingRequest,
-  }
+  if (route.staticResponse) {
+    emit()
+    _sendStaticResponse(res, route.staticResponse)
 
-  function emit () {
-    _emit(socket, 'http:request:received', frame)
+    return // don't call cb since we've satisfied the response here
   }
 
   // if we already have a body, just emit
