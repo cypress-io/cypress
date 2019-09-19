@@ -255,7 +255,7 @@ function _sendStaticResponse (res: ServerResponse, staticResponse: StaticRespons
     res.write(staticResponse.body)
   }
 
-  res.end()
+  return res.end()
 }
 
 export function reset () {
@@ -498,6 +498,7 @@ function _onProxiedResponse (project: any, req: ProxyIncomingMessage, resStream:
     if (_isResGzipped(incomingRes)) {
       return zlib.gunzip(resBody, (err, extracted) => {
         // TODO: handle encoding errors or just pass it on?
+        debug('gunzip error', { err })
         res.body = extracted.toString()
         emit()
       })
@@ -564,8 +565,9 @@ function _onResponseContinue (frame: NetEventFrames.HttpResponseContinue) {
     }
 
     // regzip, if it should be
-    if (_isResGzipped(backendRequest.incomingRes)) {
+    if (_isResGzipped(backendRequest.incomingRes!)) {
       return zlib.gzip(res.body, (err, body) => {
+        debug('gzip error', { err })
         sendBody(body)
       })
     }

@@ -1,6 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
+{ waitForRoute } = require("./net_stubbing")
 $utils = require("../../cypress/utils")
 
 getNumRequests = (state, alias) =>
@@ -85,7 +86,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       {alias, command} = aliasObj
 
       str = _.compact([alias, str2]).join(".")
- 
+
       type = cy.getXhrTypeByAlias(str)
 
       [ index, num ] = getNumRequests(state, alias)
@@ -115,26 +116,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## create shallow copy of each options object
       ## but slice out the error since we may set
       ## the error related to a previous xhr
-      timeout = options.timeout
-      requestTimeout = options.requestTimeout ? timeout
-      responseTimeout = options.responseTimeout ? timeout
+      options = _.omit(options, "_runnableTimeout")
+      options.timeout = options["#{type}Timeout"] ? options.timeout
 
-      waitForRequest = ->
-        options = _.omit(options, "_runnableTimeout")
-        options.timeout = requestTimeout ? Cypress.config("requestTimeout")
-        checkForXhr(alias, "request", index, num, options)
-
-      waitForResponse = ->
-        options = _.omit(options, "_runnableTimeout")
-        options.timeout = responseTimeout ? Cypress.config("responseTimeout")
-        checkForXhr(alias, "response", index, num, options)
-
-      ## if we were only waiting for the request
-      ## then resolve immediately do not wait for response
-      if type is "request"
-        waitForRequest()
-      else
-        waitForRequest().then(waitForResponse)
+      waitForRoute(alias, cy, state, str2, options)
 
     Promise
     .map [].concat(str), (str) ->
