@@ -2,6 +2,84 @@ const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
 
+const _it = it
+
+function overrideIt (fn) {
+  it = fn()
+  it['only'] = fn('only')
+  it['skip'] = fn('skip')
+}
+
+overrideIt(function (subFn) {
+  return function (...args) {
+
+    const origIt = subFn ? _it[subFn] : _it
+
+    if (args.length > 2 && _.isObject(args[1])) {
+      const opts = _.defaults({}, args[1], {
+        browsers: '*',
+      })
+
+      const mochaArgs = [args[0], args[2]]
+
+      // return origIt.apply(this, mochaArgs)
+
+      if (!shouldRunBrowser(opts.browsers, Cypress.browser.family)) {
+        mochaArgs[0] = `[browser skip (${opts.browsers})]${mochaArgs[0]}`
+
+        if (subFn === 'only') {
+          mochaArgs[1] = function () {
+            this.skip()
+          }
+
+          return origIt.apply(this, mochaArgs)
+        }
+
+        return _it['skip'].apply(this, mochaArgs)
+
+      }
+
+      return origIt.apply(this, mochaArgs)
+    }
+
+    return origIt.apply(this, args)
+
+  }
+})
+
+const shouldRunBrowser = (browserlist, browser) => {
+
+  // return true
+  let allEnabled = false
+  const exclude = []
+  const include = []
+
+  browserlist.split(/\s+,\s+/).forEach((v) => {
+
+    if (v === '*') {
+      allEnabled = true
+
+      return
+    }
+
+    if (v.includes('!')) {
+      allEnabled = true
+      exclude.push(v.slice(1))
+
+      return
+    }
+
+    include.push(v)
+  })
+
+  if (!allEnabled) {
+    return include.includes(browser)
+  }
+
+  return !exclude.includes(browser)
+
+}
+
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
 // this differently
@@ -10,7 +88,7 @@ const trimInnerText = ($el) => {
 }
 
 describe('src/cy/commands/actions/type', () => {
-  before(() => {
+  before(function () {
     cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
@@ -626,8 +704,9 @@ describe('src/cy/commands/actions/type', () => {
         const $txt = cy.$$(':text:first')
 
         $txt[0].addEventListener('textInput', (e) => {
-          // const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'charCode', 'data', 'detail', 'keyCode', 'layerX', 'layerY', 'pageX', 'pageY', 'type', 'view', 'which')
-          // console.log(e)
+          // FIXME: (firefox) firefox cannot access window objects else throw cross-origin error
+          expect(Object.prototype.toString.call(e.view)).eq('[object Window]')
+          e.view = null
           expect(_.toPlainObject(e)).to.include({
             bubbles: true,
             cancelable: true,
@@ -1463,7 +1542,7 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
-        it('can type into [contenteditable] with existing <p>', () => {
+        it('can type into [contenteditable] with existing text', () => {
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<p>foo</p>'
 
           cy.get('[contenteditable]:first')
@@ -1476,16 +1555,17 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('collapses selection to start on {leftarrow}', () => {
-          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
+          cy.$$('[contenteditable]:first').get(0).innerHTML = 'bar'
 
           cy.get('[contenteditable]:first')
-          .type('{selectall}{leftarrow}foo').then(($div) => {
+          .type('{selectall}{leftarrow}foo')
+          .then(($div) => {
             expect(trimInnerText($div)).to.eql('foobar')
           })
         })
 
         it('collapses selection to end on {rightarrow}', () => {
-          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
+          cy.$$('[contenteditable]:first').get(0).innerHTML = 'bar'
 
           cy.get('[contenteditable]:first')
           .type('{selectall}{leftarrow}foo{selectall}{rightarrow}baz').then(($div) => {
@@ -1497,12 +1577,14 @@ describe('src/cy/commands/actions/type', () => {
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<div><br></div>'
 
           cy.get('[contenteditable]:first')
-          .type('foobar').then(($div) => {
-            expect($div.get(0).innerHTML).to.eql('<div>foobar</div>')
+          .type('foobar')
+
+          .then(($div) => {
+            expect(trimInnerText($div)).eq('foobar')
           })
         })
 
-        it('can type into an iframe with designmode = \'on\'', () => {
+        it(`can type into an iframe with designmode = 'on'`, () => {
           // append a new iframe to the body
           cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
           .appendTo(cy.$$('body'))
@@ -2190,7 +2272,8 @@ describe('src/cy/commands/actions/type', () => {
                       '<div>baz</div>'
 
           cy.get('[contenteditable]:first')
-          .type('{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33').then(($div) => {
+          .type('{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33')
+          .then(($div) => {
             expect(trimInnerText($div)).to.eql('foo22\nb11ar\nbaz33')
           })
         })
@@ -2222,7 +2305,8 @@ describe('src/cy/commands/actions/type', () => {
           cy.$$('textarea:first').get(0).value = 'foo\nbar\nbaz'
 
           cy.get('textarea:first')
-          .type('{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33').should('have.value', 'foo22\nb11ar\nbaz33')
+          .type('{leftarrow}{leftarrow}{uparrow}11{uparrow}22{downarrow}{downarrow}33')
+          .should('have.value', 'foo22\nb11ar\nbaz33')
         })
 
         it('increments input[type=number]', () => {
@@ -2309,6 +2393,12 @@ describe('src/cy/commands/actions/type', () => {
 
           cy.get('[contenteditable]:first')
           .type('{downarrow}22').then(($div) => {
+            if (Cypress.browser.family === 'firefox') {
+              expect(trimInnerText($div)).to.eq('foo22\nbar\nbaz')
+
+              return
+            }
+
             expect(trimInnerText($div)).to.eql('foo\n22bar\nbaz')
           })
         })
@@ -2400,15 +2490,20 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
-        it('inserts new line into [contenteditable] ', () => {
+        it('inserts new line into [contenteditable] ', function () {
           cy.get('#input-types [contenteditable]:first').invoke('text', 'foo')
           .type('bar{enter}baz{enter}{enter}{enter}quux').then(function ($div) {
             const conditionalNewLines = '\n\n'.repeat(this.multiplierNumNewLines)
 
+            if (Cypress.browser.family === 'firefox') {
+              expect(trimInnerText($div)).to.eql(`foobar\nbaz\n\n\nquux`)
+              expect($div.get(0).textContent).to.eql('foobarbazquux')
+
+              return
+            }
+
             expect(trimInnerText($div)).to.eql(`foobar\nbaz${conditionalNewLines}\nquux`)
             expect($div.get(0).textContent).to.eql('foobarbazquux')
-
-            expect($div.get(0).innerHTML).to.eql('foobar<div>baz</div><div><br></div><div><br></div><div>quux</div>')
           })
         })
 
@@ -2417,8 +2512,6 @@ describe('src/cy/commands/actions/type', () => {
           .type('bar{leftarrow}{enter}baz{leftarrow}{enter}quux').then(($div) => {
             expect(trimInnerText($div)).to.eql('fooba\nba\nquuxzr')
             expect($div.get(0).textContent).to.eql('foobabaquuxzr')
-
-            expect($div.get(0).innerHTML).to.eql('fooba<div>ba</div><div>quuxzr</div>')
           })
         })
       })
@@ -3349,7 +3442,9 @@ describe('src/cy/commands/actions/type', () => {
 
           sel.addRange(range)
 
-          cy.get('div:contains(bar):last').type('new text').should('have.prop', 'innerText', 'new text')
+          cy.get('div:contains(bar):last').type('new text').should(($el) => {
+            expect(trimInnerText($el)).eq('new text')
+          })
         })
       })
 
@@ -3464,18 +3559,16 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('can wrap cursor to next line in [contenteditable] with {rightarrow} and empty lines', function () {
+      it('can wrap cursor to next line in [contenteditable] with {rightarrow} and empty lines', () => {
         const $el = cy.$$('[contenteditable]:first')
         const el = $el.get(0)
 
-        el.innerHTML = `${'<div><br></div>'.repeat(4)}<div>end</div>`
-
-        const newLines = '\n\n\n'.repeat(this.multiplierNumNewLines)
+        el.innerText = `${'\n'.repeat(4)}end`
 
         cy.get('[contenteditable]:first')
         .type('{selectall}{leftarrow}')
         .type(`foobar${'{rightarrow}'.repeat(6)}[_I_]`).then(() => {
-          expect(trimInnerText($el)).to.eql(`foobar${newLines}\nen[_I_]d`)
+          expect(trimInnerText($el)).to.eql(`foobar\n\n\n\nen[_I_]d`)
         })
       })
 

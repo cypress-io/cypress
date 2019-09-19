@@ -348,12 +348,12 @@ const validateTyping = (
   let isDateTime = false
 
   if ($elements.isInput(el)) {
-    isDate = $dom.isType(el, 'date')
-    isTime = $dom.isType(el, 'time')
-    isMonth = $dom.isType(el, 'month')
-    isWeek = $dom.isType(el, 'week')
+    isDate = $elements.isAttrType(el, 'date')
+    isTime = $elements.isAttrType(el, 'time')
+    isMonth = $elements.isAttrType(el, 'month')
+    isWeek = $elements.isAttrType(el, 'week')
     isDateTime =
-      $dom.isType(el, 'datetime') || $dom.isType(el, 'datetime-local')
+      $elements.isAttrType(el, 'datetime') || $elements.isAttrType(el, 'datetime-local')
   }
 
   const isFocusable = $elements.isFocusable($el)

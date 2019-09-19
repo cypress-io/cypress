@@ -344,7 +344,7 @@ const isNeedSingleValueChangeInputElement = (el: HTMLElement): el is HTMLSingleV
     return false
   }
 
-  return inputTypeNeedSingleValueChangeRe.test(el.type)
+  return inputTypeNeedSingleValueChangeRe.test((el.getAttribute('type') || '').toLocaleLowerCase())
 }
 
 const canSetSelectionRangeElement = (el): el is HTMLElementCanSetSelectionRange => {
@@ -363,7 +363,7 @@ const getTagName = (el) => {
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
 const isContentEditable = (el: any): el is HTMLContentEditableElement => {
-  return getNativeProp(el, 'isContentEditable')
+  return getNativeProp(el, 'isContentEditable') || $document.getDocumentFromElement(el).designMode === 'on'
 }
 
 const isTextarea = (el): el is HTMLTextAreaElement => {
@@ -505,6 +505,16 @@ const isType = function (el: HTMLInputElement | HTMLInputElement[] | JQuery<HTML
   }
 
   return elType === type
+}
+
+const isAttrType = function (el: HTMLInputElement, type: string) {
+  const elType = (el.getAttribute('type') || '').toLowerCase()
+
+  if (elType === type) {
+    return true
+  }
+
+  return false
 }
 
 const isScrollOrAuto = (prop) => {
@@ -1079,6 +1089,7 @@ export {
   isIframe,
   isTextarea,
   isType,
+  isAttrType,
   isFocused,
   isFocusedOrInFocused,
   isInputAllowingImplicitFormSubmission,

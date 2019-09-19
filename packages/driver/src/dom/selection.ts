@@ -304,7 +304,15 @@ const moveCursorLeft = function (el) {
   if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    return $elements.callNativeMethod(selection, 'modify', 'move', 'backward', 'character')
+    if (selection.isCollapsed) {
+      return $elements.callNativeMethod(selection, 'modify', 'move', 'backward', 'character')
+
+    }
+
+    selection.collapseToStart()
+
+    return
+    // console.log('sdfasfsafasdf')
   }
 }
 
@@ -378,8 +386,45 @@ const _moveCursorUpOrDown = function (el, up) {
     return
   }
 
-  if ($elements.isTextarea(el) || $elements.isContentEditable(el)) {
+  const isTextarea = $elements.isTextarea(el)
+
+  if (isTextarea && Cypress.browser.family === 'firefox') {
+    const val = $elements.getNativeProp(el as HTMLTextAreaElement, 'value')
+    const bounds = _getSelectionBoundsFromTextarea(el as HTMLTextAreaElement)
+    let toPos
+
+    if (up) {
+      const partial = val.slice(0, bounds.start)
+      const lastEOL = partial.lastIndexOf('\n')
+      const offset = partial.length - lastEOL - 1
+      const SOL = partial.slice(0, lastEOL).lastIndexOf('\n') + 1
+      const toLineLen = partial.slice(SOL, lastEOL).length
+
+      toPos = SOL + Math.min(toLineLen, offset)
+
+      // const baseLen = arr.slice(0, -2).join().length - 1
+      // toPos = baseLen + arr.slice(-1)[0].length
+    } else {
+      const partial = val.slice(bounds.end)
+      const arr = partial.split('\n')
+      const baseLen = arr.slice(0, 1).join('\n').length + bounds.end
+
+      toPos = baseLen + (bounds.end - val.slice(0, bounds.end).lastIndexOf('\n'))
+    }
+
+    setSelectionRange(el, toPos, toPos)
+
+    return
+  }
+
+  if (isTextarea || $elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
+
+    if (Cypress.browser.family === 'firefox' && !selection.isCollapsed) {
+      up ? selection.collapseToStart() : selection.collapseToEnd()
+
+      return
+    }
 
     return $elements.callNativeMethod(selection, 'modify',
       'move',
@@ -396,9 +441,53 @@ const moveCursorToLineEnd = (el) => {
   return _moveCursorToLineStartOrEnd(el, false)
 }
 
-const _moveCursorToLineStartOrEnd = function (el, toStart) {
-  if ($elements.isContentEditable(el) || $elements.isInput(el) || $elements.isTextarea(el)) {
+const _moveCursorToLineStartOrEnd = function (el: HTMLElement, toStart) {
+  const isInput = $elements.isInput(el)
+  const isTextarea = $elements.isTextarea(el)
+  const isInputOrTextArea = isInput || isTextarea
+
+  if ($elements.isContentEditable(el) || isInputOrTextArea) {
     const selection = _getSelectionByEl(el)
+
+    if (Cypress.browser.family === 'firefox' && isInputOrTextArea) {
+      if (isInput) {
+        let toPos = 0
+
+        if (!toStart) {
+          toPos = $elements.getNativeProp(el as HTMLInputElement, 'value').length
+        }
+
+        setSelectionRange(el, toPos, toPos)
+
+        return
+      }
+      // const doc = $document.getDocumentFromElement(el)
+      // console.log(doc.activeElement)
+      // $elements.callNativeMethod(doc, 'execCommand', 'selectall', false)
+      // $elements.callNativeMethod(el, 'select')
+      // _getSelectionByEl(el).ca
+      // toStart ? _getSelectionByEl(el).collapseToStart : _getSelectionByEl(el).collapseToEnd()
+
+      if (isTextarea) {
+        const bounds = _getSelectionBoundsFromTextarea(el)
+        const value = $elements.getNativeProp(el as HTMLTextAreaElement, 'value')
+        let toPos: number
+
+        if (toStart) {
+          toPos = value.slice(0, bounds.start).lastIndexOf('\n') + 1
+        } else {
+          const valSlice = value.slice(bounds.end)
+          const EOLNewline = valSlice.indexOf('\n')
+          const EOL = EOLNewline === -1 ? valSlice.length : EOLNewline
+
+          toPos = bounds.end + EOL
+        }
+
+        setSelectionRange(el, toPos, toPos)
+
+        return
+      }
+    }
 
     // the selection.modify API is non-standard, may work differently in other browsers, and is not in IE11.
     // https://developer.mozilla.org/en-US/docs/Web/API/Selection/modify
