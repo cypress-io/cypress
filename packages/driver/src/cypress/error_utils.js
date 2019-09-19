@@ -371,10 +371,10 @@ const getSourceStack = (stack = '') => {
   const stackUtil = new StackUtils()
   const cleanedLines = getCleanedStackLines(stackUtil, stackLines)
   const translated = _.map(cleanedLines, (line) => {
-    return translateStackLine(stackUtil, line)
+    return `    ${translateStackLine(stackUtil, line)}`
   })
 
-  return messageLines.concat(translated).join('\n    ')
+  return messageLines.concat(translated).join('\n')
 }
 
 //// all errors flow through this function before they're finally thrown

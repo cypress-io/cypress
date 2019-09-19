@@ -17,21 +17,9 @@ class TestError extends Component {
       return message ? md.renderInline(message) : ''
     }
 
-    const { err, title } = this.props.model
+    const { err } = this.props.model
 
     if (!err.displayMessage) return null
-
-    console.log(`Test:%c ${title}`, 'font-weight: bold;')
-    console.error(err.stack)
-
-    // console.group(this.props.model.title)
-    // console.error(err.stack)
-    // console.groupEnd()
-
-    const newErr = new Error('foo')
-
-    // console.warn(newErr)
-    // console.warn(newErr.stack)
 
     return (
       <div className='runnable-err-wrapper'>

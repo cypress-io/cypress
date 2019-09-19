@@ -26,7 +26,7 @@ $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 $errUtils = require("./cypress/error_utils")
-$specUtils = require("./cypress/spec_utils")
+$scriptUtils = require("./cypress/script_utils")
 $sourceMapUtils = require("./cypress/source_map_utils")
 
 proxies = {
@@ -176,7 +176,7 @@ class $Cypress
 
     @events.proxyTo(@cy)
 
-    $specUtils.runSpecs(specWindow, specs)
+    $scriptUtils.runScripts(specWindow, specs)
     .catch (err) =>
       err = $errUtils.addCodeFrameToErr(err, err.stack)
       @runner.onScriptError(err)
