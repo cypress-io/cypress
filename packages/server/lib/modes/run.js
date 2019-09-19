@@ -102,13 +102,17 @@ const formatSpecSummary = (name, failures) => {
   .join(' ')
 }
 
-const formatRecordParams = function (runUrl, parallel, group) {
+const formatRecordParams = function (runUrl, parallel, group, tag) {
   if (runUrl) {
     if (!group) {
       group = false
     }
 
-    return `Group: ${group}, Parallel: ${Boolean(parallel)}`
+    if (!tag) {
+      tag = false
+    }
+
+    return `Tag: ${tag}, Group: ${group}, Parallel: ${Boolean(parallel)}`
   }
 }
 
@@ -132,7 +136,7 @@ const formatSpecs = function (specs) {
 }
 
 const displayRunStarting = function (options = {}) {
-  const { specs, specPattern, browser, runUrl, parallel, group } = options
+  const { specs, specPattern, browser, runUrl, parallel, group, tag } = options
 
   console.log('')
 
@@ -157,7 +161,7 @@ const displayRunStarting = function (options = {}) {
     [gray('Browser:'), formatBrowser(browser)],
     [gray('Specs:'), formatSpecs(specs)],
     [gray('Searched:'), formatSpecPattern(specPattern)],
-    [gray('Params:'), formatRecordParams(runUrl, parallel, group)],
+    [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
     [gray('Run URL:'), runUrl],
   ])
   .filter(_.property(1))
@@ -945,7 +949,7 @@ module.exports = {
   },
 
   runSpecs (options = {}) {
-    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
 
     const isHeadless = (browser.name === 'electron') && !headed
 
@@ -976,6 +980,7 @@ module.exports = {
     displayRunStarting({
       specs,
       group,
+      tag,
       runUrl,
       browser,
       parallel,
@@ -1100,7 +1105,7 @@ module.exports = {
 
     const socketId = random.id()
 
-    const { projectRoot, record, key, ciBuildId, parallel, group } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, tag } = options
 
     const browserName = options.browser
 
@@ -1116,7 +1121,7 @@ module.exports = {
     .then(({ project, projectId, config }) => {
       // if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
-      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
+      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
       if (record) {
         recordMode.throwIfNoProjectId(projectId)
@@ -1160,6 +1165,7 @@ module.exports = {
             config,
             specs,
             sys,
+            tag,
             videosFolder: config.videosFolder,
             video: config.video,
             videoCompression: config.videoCompression,
@@ -1179,6 +1185,7 @@ module.exports = {
             sys,
             specs,
             group,
+            tag,
             browser,
             parallel,
             ciBuildId,

@@ -1052,6 +1052,7 @@ describe "lib/cypress", ->
     it "errors and exits when using --group without recording", ->
       cypress.start([
         "--run-project=#{@recordPath}",
+        "--tag=nightly",
         "--group=e2e-tests",
       ])
       .then =>
@@ -1070,6 +1071,7 @@ describe "lib/cypress", ->
     it "errors and exits when using --group and --parallel without recording", ->
       cypress.start([
         "--run-project=#{@recordPath}",
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--parallel",
       ])
@@ -1175,6 +1177,7 @@ describe "lib/cypress", ->
         "--record"
         "--key=token-123",
         "--parallel"
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1198,6 +1201,7 @@ describe "lib/cypress", ->
         "--run-project=#{@recordPath}",
         "--record"
         "--key=token-123",
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1222,6 +1226,7 @@ describe "lib/cypress", ->
         "--record"
         "--key=token-123",
         "--parallel"
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])

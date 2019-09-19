@@ -52,6 +52,13 @@ describe "lib/util/args", ->
       options = @setup("--run-project", "foo", "--spec", "'cypress/integration/foo_spec.js'")
       expect(options.spec[0]).to.eq("#{cwd}/cypress/integration/foo_spec.js")
 
+  context "--tag", ->
+    it "converts to array", ->
+      options = @setup("--run-project", "foo", "--tag", "nightly,production,build")
+      expect(options.tag[0]).to.eq("nightly")
+      expect(options.tag[1]).to.eq("production")
+      expect(options.tag[2]).to.eq("build")
+
   context "--port", ->
     it "converts to Number", ->
       options = @setup("--port", "8080")

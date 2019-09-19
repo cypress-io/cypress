@@ -166,6 +166,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       There is likely something wrong with the request.
 
       #{displayFlags(arg1.flags, {
+        tag: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -191,6 +192,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       You cannot parallelize a run that has been complete for that long.
 
       #{displayFlags(arg1, {
+        tag: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -207,6 +209,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
       #{displayFlags(arg1, {
+        tag: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -221,6 +224,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
+        tag: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -237,6 +241,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
+        tag: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -309,10 +314,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "RECORD_PARAMS_WITHOUT_RECORDING"
       """
-      You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+      You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
       #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
+        tag: "--tag",
         group: "--group",
         parallel: "--parallel"
       })}
