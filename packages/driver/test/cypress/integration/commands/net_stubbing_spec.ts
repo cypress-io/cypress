@@ -1,5 +1,4 @@
-const _ = Cypress._
-const sinon = Cypress.sinon
+const { $, _, sinon, state } = Cypress
 
 describe('src/cy/commands/net_stubbing', function () {
   context('#route', function () {
@@ -7,17 +6,18 @@ describe('src/cy/commands/net_stubbing', function () {
       beforeEach(function () {
         // we don't use cy.spy() because it causes an infinite loop with logging events
         this.sandbox = sinon.createSandbox()
-        this.emit = this.sandbox.spy(Cypress, 'emit').withArgs('backend:request', 'net', 'route:added', sinon.match.any)
+        this.emit = this.sandbox.spy(Cypress, 'emit').withArgs('backend:request', 'net', 'route:added')
 
         this.testRoute = function (options, handler, expectedEvent, expectedRoute) {
           cy.route(options, handler).then(function () {
-            const handlerId = _.findKey(Cypress.routes, { handler })
-            const route = Cypress.routes[handlerId]
+            const handlerId = _.findKey(state('routes'), { handler })
+            const route = state('routes')[handlerId]
 
             expectedEvent.handlerId = handlerId
             expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
 
-            expect(route).to.deep.eq(expectedRoute)
+            expect(route.handler).to.deep.eq(expectedRoute.handler)
+            expect(route.options).to.deep.eq(expectedRoute.options)
           })
         }
       })
@@ -44,7 +44,6 @@ describe('src/cy/commands/net_stubbing', function () {
         const expectedRoute = {
           options: { url },
           handler,
-          hitCount: 0,
         }
 
         this.testRoute(url, handler, expectedEvent, expectedRoute)
@@ -68,7 +67,6 @@ describe('src/cy/commands/net_stubbing', function () {
         const expectedRoute = {
           options: { url },
           handler,
-          hitCount: 0,
         }
 
         this.testRoute(url, handler, expectedEvent, expectedRoute)
@@ -163,7 +161,6 @@ describe('src/cy/commands/net_stubbing', function () {
         const expectedRoute = {
           options,
           handler,
-          hitCount: 0,
         }
 
         this.testRoute(options, handler, expectedEvent, expectedRoute)
@@ -864,6 +861,177 @@ describe('src/cy/commands/net_stubbing', function () {
             done()
           }
         })
+      })
+    })
+
+    context('waiting and aliasing', function () {
+      it('can wait on a single response using "alias"', function () {
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar')
+      })
+
+      it('can timeout waiting on a single response using "alias"', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('No response ever occurred.')
+          done()
+        })
+
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar.3', { timeout: 100 })
+      })
+
+      it('can wait on a single response using "alias.response"', function () {
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar.response')
+      })
+
+      it('can timeout waiting on a single response using "alias.response"', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('No response ever occurred.')
+          done()
+        })
+
+        cy.route('/foo', _.noop)
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar.response', { timeout: 100 })
+      })
+
+      it('can wait on a single request using "alias.request"', function () {
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar.request')
+      })
+
+      it('can timeout waiting on a single request using "alias.request"', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('No request ever occurred.')
+          done()
+        })
+
+        cy.route('/foo')
+        .as('foo.bar')
+        .wait('@foo.bar.request', { timeout: 100 })
+      })
+
+      it('can wait on the 3rd request using "alias.request.3"', function () {
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          _.times(3, () => {
+            $.get('/foo')
+          })
+        })
+        .wait('@foo.bar.3')
+      })
+
+      it('can timeout waiting on the 3rd request using "alias.request.3"', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('No response ever occurred.')
+          done()
+        })
+
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          _.times(2, () => {
+            $.get('/foo')
+          })
+        })
+        .wait('@foo.bar.3', { timeout: 100 })
+      })
+
+      it('can incrementally wait on responses', function () {
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar')
+      })
+
+      it('can timeout incrementally waiting on responses', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('for the 2nd response to the route')
+          done()
+        })
+
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar')
+        .wait('@foo.bar', { timeout: 100 })
+      })
+
+      it('can incrementally wait on requests', function () {
+        cy.route('/foo', (req) => {
+          req.reply(_.noop) // only request will be received, no response
+        })
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar.request')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar.request')
+      })
+
+      it('can timeout incrementally waiting on requests', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('for the 2nd request to the route')
+          done()
+        })
+
+        cy.route('/foo', (req) => {
+          req.reply(_.noop) // only request will be received, no response
+        })
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar.request')
+        .wait('@foo.bar.request', { timeout: 100 })
+      })
+
+      // TODO: the ordinals here are off
+      it.skip('can wait for things that do not make sense but are technically true', function () {
+        cy.route('/foo')
+        .as('foo.bar')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@foo.bar.1')
+        .wait('@foo.bar.1') // still only asserting on the 1st response
+        .wait('@foo.bar.request') // now waiting for the next request
+      })
+
+      context('errors', function () {
+
       })
     })
   })

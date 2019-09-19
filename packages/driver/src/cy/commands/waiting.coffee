@@ -1,6 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
+{ waitForRoute } = require("./net_stubbing")
 $utils = require("../../cypress/utils")
 
 getNumRequests = (state, alias) =>
@@ -43,29 +44,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         aliasType: "route"
       })
 
-    checkForXhr = (alias, type, index, num, options) ->
-      options.type = type
-
-      ## append .type to the alias
-      xhr = cy.getIndexedXhrByAlias(alias + "." + type, index)
-
-      ## return our xhr object
-      return Promise.resolve(xhr) if xhr
-
-      options.error = $utils.errMessageByPath "wait.timed_out", {
-        timeout: options.timeout
-        alias
-        num
-        type
-      }
-
-      args = arguments
-
-      cy.retry ->
-        checkForXhr.apply(window, args)
-      , options
-
-    waitForXhr = (str, options) ->
+    waitForRouteAlias = (str, options) ->
       ## we always want to strip everything after the last '.'
       ## since we support alias property 'request'
       if _.indexOf(str, ".") == -1 ||
@@ -85,7 +64,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       {alias, command} = aliasObj
 
       str = _.compact([alias, str2]).join(".")
- 
+
       type = cy.getXhrTypeByAlias(str)
 
       [ index, num ] = getNumRequests(state, alias)
@@ -112,36 +91,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           args: { alias }
         })
 
-      ## create shallow copy of each options object
-      ## but slice out the error since we may set
-      ## the error related to a previous xhr
-      timeout = options.timeout
-      requestTimeout = options.requestTimeout ? timeout
-      responseTimeout = options.responseTimeout ? timeout
+      options.timeout = options["#{type}Timeout"] || options.timeout || cy.timeout()
 
-      waitForRequest = ->
-        options = _.omit(options, "_runnableTimeout")
-        options.timeout = requestTimeout ? Cypress.config("requestTimeout")
-        checkForXhr(alias, "request", index, num, options)
+      options.error = $utils.errMessageByPath "wait.timed_out", {
+        timeout: options.timeout
+        alias
+        num
+        type
+      }
 
-      waitForResponse = ->
-        options = _.omit(options, "_runnableTimeout")
-        options.timeout = responseTimeout ? Cypress.config("responseTimeout")
-        checkForXhr(alias, "response", index, num, options)
-
-      ## if we were only waiting for the request
-      ## then resolve immediately do not wait for response
-      if type is "request"
-        waitForRequest()
-      else
-        waitForRequest().then(waitForResponse)
+      waitForRoute(alias, cy, state, str2, options)
 
     Promise
     .map [].concat(str), (str) ->
       ## we may get back an xhr value instead
       ## of a promise, so we have to wrap this
       ## in another promise :-(
-      waitForXhr(str, _.omit(options, "error"))
+      waitForRouteAlias(str, _.omit(options, "error", "_runnableTimeout"))
     .then (responses) ->
       ## if we only asked to wait for one alias
       ## then return that, else return the array of xhr responses

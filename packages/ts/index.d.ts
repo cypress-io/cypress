@@ -29,6 +29,7 @@ declare namespace Cypress {
      * If `as` is chained to the current command, return the alias name used.
      */
     getNextAlias: () => Optional<string>
+    retry: (fn: () => any, opts: any) => any
   }
 
   interface Cypress {
