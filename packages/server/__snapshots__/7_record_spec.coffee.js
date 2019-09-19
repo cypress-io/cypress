@@ -9,7 +9,7 @@ exports['e2e record passing passes 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
   │ Searched:   cypress/integration/record*                                                        │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -335,7 +335,7 @@ exports['e2e record api interaction errors create instance does not update insta
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -411,7 +411,7 @@ exports['e2e record api interaction errors update instance does not update insta
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -492,7 +492,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -613,7 +613,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -688,7 +688,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -857,7 +857,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
   │ Searched:   cypress/integration/record*                                                        │
-  │ Params:     Group: prod-e2e, Parallel: true                                                    │
+  │ Params:     Tag: false, Group: prod-e2e, Parallel: true                                        │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -932,7 +932,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coff… │
   │ Searched:   cypress/integration/record*                                                        │
-  │ Params:     Group: prod-e2e, Parallel: true                                                    │
+  │ Params:     Tag: false, Group: prod-e2e, Parallel: true                                        │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1248,7 +1248,7 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: foo, Parallel: true                                                         │
+  │ Params:     Tag: false, Group: foo, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1276,7 +1276,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: foo, Parallel: true                                                         │
+  │ Params:     Tag: false, Group: foo, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1364,7 +1364,7 @@ StatusCodeError: 500 - "Internal Server Error"
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: foo, Parallel: true                                                         │
+  │ Params:     Tag: false, Group: foo, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1571,7 +1571,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1651,7 +1651,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1731,7 +1731,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1811,7 +1811,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1891,7 +1891,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1971,7 +1971,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2055,7 +2055,7 @@ Details:
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Group: false, Parallel: false                                                      │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
