@@ -1,6 +1,5 @@
 _            = require("lodash")
-{ agent, connect } = require("@packages/network")
-allowDestroy = require("server-destroy-vvo")
+{ agent, allowDestroy, connect } = require("@packages/network")
 debug        = require("debug")("cypress:https-proxy")
 fs           = require("fs-extra")
 getProxyForUrl = require("proxy-from-env").getProxyForUrl
@@ -14,6 +13,7 @@ url          = require("url")
 fs = Promise.promisifyAll(fs)
 
 sslServers    = {}
+sslIpServers  = {}
 sslSemaphores = {}
 
 ## https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_record
@@ -22,9 +22,14 @@ SSL_RECORD_TYPES = [
   128, 0 ## TODO: what do these unknown types mean?
 ]
 
+onError = (err) ->
+  ## these need to be caught to avoid crashing but do not affect anything
+  debug('server error %o', { err })
+
 class Server
-  constructor: (@_ca, @_port) ->
+  constructor: (@_ca, @_port, @_options) ->
     @_onError = null
+    @_ipServers = sslIpServers
 
   connect: (req, browserSocket, head, options = {}) ->
     ## don't buffer writes - thanks a lot, Nagle
@@ -217,50 +222,78 @@ class Server
 
   _getPortFor: (hostname) ->
     @_getCertificatePathsFor(hostname)
-
     .catch (err) =>
       @_generateMissingCertificates(hostname)
-
     .then (data = {}) =>
+      if net.isIP(hostname)
+        return @_getServerPortForIp(hostname, data)
+
       @_sniServer.addContext(hostname, data)
 
       return @_sniPort
 
-  listen: (options = {}) ->
-    new Promise (resolve) =>
-      @_onError = options.onError
+  _listenHttpsServer: (data) ->
+    new Promise (resolve, reject) =>
+      server = https.createServer(data)
 
-      @_sniServer = https.createServer({})
+      allowDestroy(server)
 
-      allowDestroy(@_sniServer)
+      server.once "error", reject
+      server.on "upgrade", @_onUpgrade.bind(@, @_options.onUpgrade)
+      server.on "request", @_onRequest.bind(@, @_options.onRequest)
 
-      @_sniServer.on "upgrade", @_onUpgrade.bind(@, options.onUpgrade)
-      @_sniServer.on "request", @_onRequest.bind(@, options.onRequest)
-      @_sniServer.listen 0, '127.0.0.1', =>
-        ## store the port of our current sniServer
-        @_sniPort = @_sniServer.address().port
+      server.listen 0, '127.0.0.1', =>
+        port = server.address().port
 
-        debug("Created SNI HTTPS Proxy on port %s", @_sniPort)
+        server.removeListener("error", reject)
+        server.on "error", onError
 
-        resolve()
+        resolve({ server, port })
+
+  ## browsers will not do SNI for an IP address
+  ## so we need to serve 1 HTTPS server per IP
+  ## https://github.com/cypress-io/cypress/issues/771
+  _getServerPortForIp: (ip, data) =>
+    if server = sslIpServers[ip]
+      return server.address().port
+
+    @_listenHttpsServer(data)
+    .then ({ server, port }) ->
+      sslIpServers[ip] = server
+
+      debug("Created IP HTTPS Proxy Server", { port, ip })
+
+      return port
+
+  listen: ->
+    @_onError = @_options.onError
+
+    @_listenHttpsServer({})
+    .tap ({ server, port}) =>
+      @_sniPort = port
+      @_sniServer = server
+
+      debug("Created SNI HTTPS Proxy Server", { port })
 
   close: ->
     close = =>
-      new Promise (resolve) =>
-        @_sniServer.destroy(resolve)
+      servers = _.values(sslIpServers).concat(@_sniServer)
+      Promise.map servers, (server) =>
+        Promise.fromCallback(server.destroy)
+        .catch onError
 
     close()
-    .finally ->
-      sslServers = {}
+    .finally(module.exports.reset)
 
 module.exports = {
   reset: ->
     sslServers = {}
+    sslIpServers = {}
 
   create: (ca, port, options = {}) ->
-    srv = new Server(ca, port)
+    srv = new Server(ca, port, options)
 
     srv
-    .listen(options)
+    .listen()
     .return(srv)
 }

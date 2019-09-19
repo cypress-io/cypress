@@ -15,6 +15,7 @@ import {
   regenerateRequestHead, CombinedAgent,
 } from '../../lib/agent'
 import { AsyncServer, Servers } from '../support/servers'
+import { allowDestroy } from '../../lib/allow-destroy'
 
 const expect = chai.expect
 
@@ -273,9 +274,11 @@ describe('lib/agent', function () {
 
       it('#createUpstreamProxyConnection throws when connection is accepted then closed', function () {
         const proxy = Bluebird.promisifyAll(
-          net.createServer((socket) => {
-            socket.end()
-          })
+          allowDestroy(
+            net.createServer((socket) => {
+              socket.end()
+            })
+          )
         ) as net.Server & AsyncServer
 
         const proxyPort = PROXY_PORT + 2
