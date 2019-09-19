@@ -483,7 +483,7 @@ module.exports = (options = {}) ->
 
     contentTypeIsJson: (response) ->
       ## TODO: use https://github.com/jshttp/type-is for this
-      response?.headers?["content-type"]?.includes("application/json")
+      response?.headers?["content-type"]?.endsWith("json")
 
     parseJsonBody: (body) ->
       try
