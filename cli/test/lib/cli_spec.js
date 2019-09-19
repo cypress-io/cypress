@@ -172,13 +172,6 @@ describe('cli', () => {
       expect(run.start).to.be.calledWith({ port: '7878' })
     })
 
-    it('calls run with spec', () => {
-      this.exec('run --spec cypress/integration/foo_spec.js')
-      expect(run.start).to.be.calledWith({
-        spec: 'cypress/integration/foo_spec.js',
-      })
-    })
-
     it('calls run with port with -p arg', () => {
       this.exec('run -p 8989')
       expect(run.start).to.be.calledWith({ port: '8989' })
@@ -248,18 +241,51 @@ describe('cli', () => {
       expect(run.start).to.be.calledWith({ group: 'staging' })
     })
 
-    it('calls run with space-separated --specs', () => {
+    it('calls run with spec', () => {
+      this.exec('run --spec cypress/integration/foo_spec.js')
+      expect(run.start).to.be.calledWith({
+        spec: 'cypress/integration/foo_spec.js',
+      })
+    })
+
+    it('calls run with space-separated --spec', () => {
       this.exec('run --spec a b c d e f g')
       expect(run.start).to.be.calledWith({ spec: 'a,b,c,d,e,f,g' })
       this.exec('run --dev bang --spec foo bar baz -P ./')
       expect(run.start).to.be.calledWithMatch({ spec: 'foo,bar,baz' })
     })
 
-    it('warns with space-separated --specs', (done) => {
+    it('warns with space-separated --spec', (done) => {
       sinon.spy(logger, 'warn')
       this.exec('run --spec a b c d e f g --dev')
       snapshot(logger.warn.getCall(0).args[0])
       done()
+    })
+
+    it('calls run with --tag', () => {
+      this.exec('run --tag nightly')
+      expect(run.start).to.be.calledWith({ tag: 'nightly' })
+    })
+
+    it('calls run with space-separated --tag', () => {
+      this.exec('run --tag a b c d e f g')
+      expect(run.start).to.be.calledWith({ tag: 'a,b,c,d,e,f,g' })
+      this.exec('run --dev bang --tag foo bar baz -P ./')
+      expect(run.start).to.be.calledWithMatch({ tag: 'foo,bar,baz' })
+    })
+
+    it('warns with space-separated --tag', (done) => {
+      sinon.spy(logger, 'warn')
+      this.exec('run --tag a b c d e f g --dev')
+      snapshot(logger.warn.getCall(0).args[0])
+      done()
+    })
+
+    it('calls run with space-separated --tag and --spec', () => {
+      this.exec('run --tag a b c d e f g --spec h i j k l')
+      expect(run.start).to.be.calledWith({ tag: 'a,b,c,d,e,f,g', spec: 'h,i,j,k,l' })
+      this.exec('run --dev bang --tag foo bar baz -P ./ --spec fizz buzz --headed false')
+      expect(run.start).to.be.calledWithMatch({ tag: 'foo,bar,baz', spec: 'fizz,buzz' })
     })
   })
 

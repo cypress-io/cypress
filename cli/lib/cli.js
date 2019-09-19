@@ -24,46 +24,61 @@ const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const spaceDelimitedSpecsMsg = (files) => {
-  logger.log()
-  logger.warn(stripIndent`
-    ${logSymbols.warning} Warning: It looks like you're passing --spec a space-separated list of files:
+const spaceDelimitedArgsMsg = (flag, args) => {
+  let msg = `
+    ${logSymbols.warning} Warning: It looks like you're passing --${flag} a space-separated list of arguments:
 
-    "${files.join(' ')}"
+    "${args.join(' ')}"
 
     This will work, but it's not recommended.
 
+    If you are trying to pass multiple arguments, separate them with commas instead:
+      cypress run --${flag} arg1,arg2,arg3
+  `
+
+  if (flag === 'spec') {
+    msg += `
     The most common cause of this warning is using an unescaped glob pattern. If you are
     trying to pass a glob pattern, escape it using quotes:
       cypress run --spec "**/*.spec.js"
+    `
+  }
 
-    If you are trying to pass multiple spec filenames, separate them by commas instead:
-      cypress run --spec spec1,spec2,spec3
-  `)
-
+  logger.log()
+  logger.warn(stripIndent(msg))
   logger.log()
 }
 
 const parseVariableOpts = (fnArgs, args) => {
   const opts = fnArgs.pop()
 
-  if (fnArgs.length && opts.spec) {
-    // this will capture space-delimited specs after --spec spec1 but before the next option
+  if (fnArgs.length && (opts.spec || opts.tag)) {
+    // this will capture space-delimited args after
+    // flags that could have possible multiple args
+    // but before the next option
+    // --spec spec1 spec2 or --tag foo bar
 
-    const argIndex = _.indexOf(args, '--spec') + 2
-    const nextOptOffset = _.findIndex(_.slice(args, argIndex), (arg) => {
-      return _.startsWith(arg, '--')
+    const multiArgFlags = _.compact([
+      opts.spec ? 'spec' : opts.spec,
+      opts.tag ? 'tag' : opts.tag,
+    ])
+
+    _.forEach(multiArgFlags, (flag) => {
+      const argIndex = _.indexOf(args, `--${flag}`) + 2
+      const nextOptOffset = _.findIndex(_.slice(args, argIndex), (arg) => {
+        return _.startsWith(arg, '--')
+      })
+      const endIndex = nextOptOffset !== -1 ? argIndex + nextOptOffset : args.length
+
+      const maybeArgs = _.slice(args, argIndex, endIndex)
+      const extraArgs = _.intersection(maybeArgs, fnArgs)
+
+      if (extraArgs.length) {
+        opts[flag] = [opts[flag]].concat(extraArgs)
+        spaceDelimitedArgsMsg(flag, opts[flag])
+        opts[flag] = opts[flag].join(',')
+      }
     })
-    const endIndex = nextOptOffset !== -1 ? argIndex + nextOptOffset : args.length
-
-    const maybeSpecs = _.slice(args, argIndex, endIndex)
-    const extraSpecs = _.intersection(maybeSpecs, fnArgs)
-
-    if (extraSpecs.length) {
-      opts.spec = [opts.spec].concat(extraSpecs)
-      spaceDelimitedSpecsMsg(opts.spec)
-      opts.spec = opts.spec.join(',')
-    }
   }
 
   return parseOpts(opts)

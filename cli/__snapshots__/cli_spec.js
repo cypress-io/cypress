@@ -8,21 +8,6 @@ Cypress package version: 1.2.3
 Cypress binary version: not installed
 `
 
-exports['cli cypress run warns with space-separated --specs 1'] = `
-[33m⚠[39m Warning: It looks like you're passing --spec a space-separated list of files:
-
-"a b c d e f g"
-
-This will work, but it's not recommended.
-
-The most common cause of this warning is using an unescaped glob pattern. If you are
-trying to pass a glob pattern, escape it using quotes:
-  cypress run --spec "**/*.spec.js"
-
-If you are trying to pass multiple spec filenames, separate them by commas instead:
-  cypress run --spec spec1,spec2,spec3
-`
-
 exports['cli help command shows help 1'] = `
 
   command: bin/cypress help
@@ -354,4 +339,30 @@ exports['shows help for run --foo 1'] = `
   
   -------
   
+`
+
+exports['cli cypress run warns with space-separated --spec 1'] = `
+[33m⚠[39m Warning: It looks like you're passing --spec a space-separated list of arguments:
+
+"a b c d e f g"
+
+This will work, but it's not recommended.
+
+If you are trying to pass multiple arguments, separate them with commas instead:
+  cypress run --spec arg1,arg2,arg3
+  
+The most common cause of this warning is using an unescaped glob pattern. If you are
+trying to pass a glob pattern, escape it using quotes:
+  cypress run --spec "**/*.spec.js"
+`
+
+exports['cli cypress run warns with space-separated --tag 1'] = `
+[33m⚠[39m Warning: It looks like you're passing --tag a space-separated list of arguments:
+
+"a b c d e f g"
+
+This will work, but it's not recommended.
+
+If you are trying to pass multiple arguments, separate them with commas instead:
+  cypress run --tag arg1,arg2,arg3
 `
