@@ -345,6 +345,7 @@ exports['shows help for run --foo 1'] = `
     -r, --reporter <reporter>                  runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"
     -o, --reporter-options <reporter-options>  options for the mocha reporter. defaults to "null"
     -s, --spec <spec>                          runs specific spec file(s). defaults to "all"
+    -t, --tag <tag>                            named tag(s) for recorded runs in the Cypress Dashboard
     --dev                                      runs cypress in development and bypasses binary check
     -h, --help                                 output usage information
   -------
