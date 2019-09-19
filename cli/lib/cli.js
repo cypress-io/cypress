@@ -71,10 +71,11 @@ const parseVariableOpts = (fnArgs, args) => {
 
 const parseOpts = (opts) => {
   opts = _.pick(opts,
-    'project', 'spec', 'reporter', 'reporterOptions', 'path', 'destination',
-    'port', 'env', 'cypressVersion', 'config', 'record', 'key',
-    'browser', 'detached', 'headed', 'global', 'dev', 'force', 'exit',
-    'cachePath', 'cacheList', 'cacheClear', 'parallel', 'group', 'ciBuildId')
+    'browser', 'cachePath', 'cacheList', 'cacheClear', 'ciBuildId',
+    'config', 'cypressVersion', 'destination', 'detached', 'dev',
+    'exit', 'env', 'force', 'global', 'group', 'headed', 'key', 'path',
+    'parallel', 'port', 'project', 'reporter', 'reporterOptions',
+    'record', 'spec', 'tag')
 
   if (opts.exit) {
     opts = _.omit(opts, 'exit')
@@ -86,33 +87,33 @@ const parseOpts = (opts) => {
 }
 
 const descriptions = {
-  record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
+  browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
+  browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
+  cacheClear: 'delete all cached binaries',
+  cacheList: 'list cached binary versions',
+  cachePath: 'print the path to the binary cache',
+  ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
+  config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
+  detached: 'runs Cypress application in detached mode',
+  dev: 'runs cypress in development and bypasses binary check',
+  env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
+  exit: 'keep the browser open after tests finish',
+  forceInstall: 'force install the Cypress binary',
+  global: 'force Cypress into global mode as if its globally installed',
+  group: 'a named group for recorded runs in the Cypress Dashboard',
+  headed: 'displays the Electron browser instead of running headlessly',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
-  spec: 'runs a specific spec file. defaults to "all"',
+  parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
+  port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
+  project: 'path to the project',
+  record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
-  port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
-  env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
-  config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
-  browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
-  browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
-  detached: 'runs Cypress application in detached mode',
-  project: 'path to the project',
-  global: 'force Cypress into global mode as if its globally installed',
+  spec: 'runs specific spec file(s). defaults to "all"',
   version: 'prints Cypress version',
-  headed: 'displays the Electron browser instead of running headlessly',
-  dev: 'runs cypress in development and bypasses binary check',
-  forceInstall: 'force install the Cypress binary',
-  exit: 'keep the browser open after tests finish',
-  cachePath: 'print the path to the binary cache',
-  cacheList: 'list cached binary versions',
-  cacheClear: 'delete all cached binaries',
-  group: 'a named group for recorded runs in the Cypress dashboard',
-  parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
-  ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
 }
 
-const knownCommands = ['version', 'run', 'open', 'install', 'verify', '-v', '--version', 'help', '-h', '--help', 'cache']
+const knownCommands = ['cache', 'help', '-h', '--help', 'install', 'open', 'run', 'verify', '-v', '--version', 'version']
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -149,7 +150,7 @@ module.exports = {
 
     const program = new commander.Command()
 
-    // bug in commaner not printing name
+    // bug in commander not printing name
     // in usage help docs
     program._name = 'cypress'
 
@@ -172,21 +173,21 @@ module.exports = {
     .command('run')
     .usage('[options]')
     .description('Runs Cypress tests from the CLI without the GUI')
-    .option('--record [bool]', text('record'), coerceFalse)
-    .option('--headed', text('headed'))
+    .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
+    .option('--ci-build-id <id>', text('ciBuildId'))
+    .option('-c, --config <config>', text('config'))
+    .option('-e, --env <env>', text('env'))
+    .option('--group <name>', text('group'))
     .option('-k, --key <record-key>', text('key'))
-    .option('-s, --spec <spec>', text('spec'))
+    .option('--headed', text('headed'))
+    .option('--no-exit', text('exit'))
+    .option('--parallel', text('parallel'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('--record [bool]', text('record'), coerceFalse)
     .option('-r, --reporter <reporter>', text('reporter'))
     .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
-    .option('-p, --port <port>', text('port'))
-    .option('-e, --env <env>', text('env'))
-    .option('-c, --config <config>', text('config'))
-    .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
-    .option('-P, --project <project-path>', text('project'))
-    .option('--parallel', text('parallel'))
-    .option('--group <name>', text('group'))
-    .option('--ci-build-id <id>', text('ciBuildId'))
-    .option('--no-exit', text('exit'))
+    .option('-s, --spec <spec>', text('spec'))
     .option('--dev', text('dev'), coerceFalse)
     .action((...fnArgs) => {
       debug('running Cypress')
@@ -200,13 +201,13 @@ module.exports = {
     .command('open')
     .usage('[options]')
     .description('Opens Cypress in the interactive GUI.')
-    .option('-p, --port <port>', text('port'))
-    .option('-e, --env <env>', text('env'))
+    .option('-b, --browser <browser-path>', text('browserOpenMode'))
     .option('-c, --config <config>', text('config'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
-    .option('-b, --browser <browser-path>', text('browserOpenMode'))
-    .option('-P, --project <project-path>', text('project'))
+    .option('-e, --env <env>', text('env'))
     .option('--global', text('global'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('opening Cypress')

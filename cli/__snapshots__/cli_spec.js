@@ -293,13 +293,13 @@ exports['shows help for open --foo 1'] = `
 
   Options:
 
-    -p, --port <port>             runs Cypress on a specific port. overrides any value in cypress.json.
-    -e, --env <env>               sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
+    -b, --browser <browser-path>  path to a custom browser to be added to the list of available browsers in Cypress
     -c, --config <config>         sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
     -d, --detached [bool]         runs Cypress application in detached mode
-    -b, --browser <browser-path>  path to a custom browser to be added to the list of available browsers in Cypress
-    -P, --project <project-path>  path to the project
+    -e, --env <env>               sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     --global                      force Cypress into global mode as if its globally installed
+    -p, --port <port>             runs Cypress on a specific port. overrides any value in cypress.json.
+    -P, --project <project-path>  path to the project
     --dev                         runs cypress in development and bypasses binary check
     -h, --help                    output usage information
   -------
@@ -330,21 +330,21 @@ exports['shows help for run --foo 1'] = `
 
   Options:
 
-    --record [bool]                            records the run. sends test results, screenshots and videos to your Cypress Dashboard.
-    --headed                                   displays the Electron browser instead of running headlessly
+    -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
+    --ci-build-id <id>                         the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
+    -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
+    -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
+    --group <name>                             a named group for recorded runs in the Cypress dashboard
     -k, --key <record-key>                     your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.
-    -s, --spec <spec>                          runs a specific spec file. defaults to "all"
+    --headed                                   displays the Electron browser instead of running headlessly
+    --no-exit                                  keep the browser open after tests finish
+    --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
+    -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
+    -P, --project <project-path>               path to the project
+    --record [bool]                            records the run. sends test results, screenshots and videos to your Cypress Dashboard.
     -r, --reporter <reporter>                  runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"
     -o, --reporter-options <reporter-options>  options for the mocha reporter. defaults to "null"
-    -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
-    -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
-    -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
-    -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
-    -P, --project <project-path>               path to the project
-    --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
-    --group <name>                             a named group for recorded runs in the Cypress dashboard
-    --ci-build-id <id>                         the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
-    --no-exit                                  keep the browser open after tests finish
+    -s, --spec <spec>                          runs a specific spec file. defaults to "all"
     --dev                                      runs cypress in development and bypasses binary check
     -h, --help                                 output usage information
   -------
