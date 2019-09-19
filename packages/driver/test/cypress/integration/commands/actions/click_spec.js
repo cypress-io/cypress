@@ -380,28 +380,6 @@ describe('src/cy/commands/actions/click', () => {
       cy.contains('button').click()
     })
 
-    it('events when element removed on pointerdown', () => {
-      const btn = cy.$$('button:first')
-      const div = cy.$$('div#tabindex')
-
-      attachFocusListeners({ btn })
-      attachMouseClickListeners({ btn, div })
-      attachMouseHoverListeners({ div })
-
-      btn.on('pointerdown', () => {
-        // synchronously remove this button
-
-        btn.remove()
-      })
-
-      // return
-      cy.contains('button').click()
-
-      cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
-      cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
-      cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
-    })
-
     it('events when element removed on pointerover', () => {
       const btn = cy.$$('button:first')
       const div = cy.$$('div#tabindex')
@@ -443,27 +421,6 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
       cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
       cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
-    })
-
-    it('events when element removed on pointerover', () => {
-      const btn = cy.$$('button:first')
-      const div = cy.$$('div#tabindex')
-
-      // attachFocusListeners({ btn })
-      attachMouseClickListeners({ btn, div })
-      attachMouseHoverListeners({ btn, div })
-
-      btn.on('pointerover', () => {
-        // synchronously remove this button
-
-        btn.remove()
-      })
-
-      cy.contains('button').click()
-
-      cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalled)
-      cy.getAll('btn', 'pointerdown mousedown mouseover mouseenter').each(shouldNotBeCalled)
-      cy.getAll('div', 'pointerover pointerenter pointerdown mousedown pointerup mouseup click').each(shouldBeCalled)
     })
 
     it('does not fire a click when element has been removed on mouseup', () => {
@@ -1035,8 +992,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#button-covered-in-nav').click()
         .then(() => {
           expect(scrolled).to.deep.eq(['element', 'element', 'window'])
-          expect(spy.args[0][0]).property('clientX').closeTo(60, 2)
-          expect(spy.args[0][0]).property('clientY').eq(68)
+          expect(spy.args[0][0]).property('clientX').closeTo(61, 2)
+          expect(spy.args[0][0]).property('clientY').eq(70)
         })
       })
 
@@ -2807,8 +2764,8 @@ describe('src/cy/commands/actions/click', () => {
             'Applied To': {},
             'Elements': 1,
             'Coords': {
-              'x': 34,
-              'y': 548,
+              'x': 58,
+              'y': 595,
             },
             'Options': {
               'multiple': true,
@@ -3248,8 +3205,8 @@ describe('src/cy/commands/actions/click', () => {
             'Applied To': {},
             'Elements': 1,
             'Coords': {
-              'x': 34,
-              'y': 548,
+              'x': 58,
+              'y': 595,
             },
             'table': {},
           })
