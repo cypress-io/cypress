@@ -16,8 +16,6 @@ declare module '@cypress/get-windows-proxy' {
  * For properties on `Cypress` and `cy` that are not intended for public use.
  */
 declare namespace Cypress {
-  type Route = any // todo: fix
-
   interface CypressUtils {
     warnByPath: (path: string, obj: any) => void
   }
@@ -31,22 +29,18 @@ declare namespace Cypress {
      * If `as` is chained to the current command, return the alias name used.
      */
     getNextAlias: () => Optional<string>
-    retry: (cb: () => void, options: any) => boolean
   }
 
   interface Cypress {
     backend: (eventName: string, ...args: any[]) => Promise<any>
-    on: (str: string, cb: any) => any
     routes: {
       [routeHandlerId: string]: any
     }
     sinon: sinon.SinonStatic
     utils: CypressUtils
-    log: any // TODO: Cypress.Log
   }
 
   interface LogConfig {
-    name?: string
     message?: string
     instrument?: 'route'
     isStubbed?: boolean
@@ -59,15 +53,10 @@ declare namespace Cypress {
     status?: number
     numResponses?: number
     response?: string
-    consoleProps?: () => object
     renderProps?: () => {
       indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
       message?: string
     }
-  }
-
-  interface State {
-    (key: 'routes', val?: { [key: string]: Route }): { [key: string]: Route }
   }
 }
 

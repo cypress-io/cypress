@@ -1,9 +1,6 @@
 import * as _ from 'lodash'
 import {
   CyHttpMessages,
-  Request,
-  RequestState,
-  Route,
   RouteHandler,
   RouteMatcherOptionsGeneric,
   RouteMatcherOptions,
@@ -11,9 +8,36 @@ import {
   StaticResponse,
   HttpRequestInterceptor,
   WebSocketController,
+  HttpResponseInterceptor,
 } from '../../../../../cli/types/cy-net-stubbing'
 
 const utils = require('../../cypress/utils')
+
+interface Route {
+  alias?: string
+  log: Cypress.Log
+  options: RouteMatcherOptions
+  handler: RouteHandler
+  hitCount: number
+  requests: { [key: string]: Request }
+}
+
+interface Request {
+  req: CyHttpMessages.IncomingRequest
+  responseHandler?: HttpResponseInterceptor
+  state: RequestState
+  log: Cypress.Log
+}
+
+enum RequestState {
+  Received,
+  Intercepted,
+  ResponseReceived,
+  ResponseIntercepted,
+  Completed
+}
+
+let routes : { [key: string]: Route } = {}
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
@@ -144,6 +168,18 @@ function _annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
   return ret
 }
 
+function _getRoute (routeHandlerId: string) {
+  return routes[routeHandlerId]
+}
+
+function _getRequest (routeHandlerId: string, requestId: string) {
+  const route = _getRoute(routeHandlerId)
+
+  if (route) {
+    return route.requests[requestId]
+  }
+}
+
 function _getUniqueId () {
   return `${Number(new Date()).toString()}-${_.uniqueId()}`
 }
@@ -190,8 +226,6 @@ function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHe
 
     return staticResponse
   }
-
-  return
 }
 
 function _validateStaticResponse (staticResponse: StaticResponse): void {
@@ -214,59 +248,7 @@ function _validateStaticResponse (staticResponse: StaticResponse): void {
   }
 }
 
-export function waitForRoute (alias: string, cy: Cypress.cy, state: Cypress.State, specifier: 'request' | 'response' | string, options: any) {
-  // if they didn't specify what to wait on, they want to wait on a response
-  if (!specifier) {
-    specifier = 'response'
-  }
-
-  if (!/\d+|request|response/.test(specifier)) {
-    throw new Error('bad specifier')
-    // TODO: throw good error
-  }
-
-  // 1. Get route with this alias.
-  // @ts-ignore
-  const route : Route = _.find(state('routes'), { alias })
-
-  return cy.retry(() => {
-    // 2. Find the first request without responseWaited/requestWaited/with the correct index
-    let i = 0
-    const request = _.find(route.requests, (request) => {
-      i++
-      switch (specifier) {
-        case 'request':
-          return !request.requestWaited
-        case 'response':
-          return !request.responseWaited
-        default:
-          return i === Number(specifier)
-      }
-    })
-
-    if (!request) {
-      return
-    }
-
-    // 3. Determine if it's ready
-    if (request.state >= RequestState.Intercepted) {
-      request.requestWaited = true
-      if (specifier === 'request') {
-        return Promise.resolve(request)
-      }
-    }
-
-    if (request.state >= RequestState.ResponseIntercepted) {
-      request.responseWaited = true
-
-      return Promise.resolve(request)
-    }
-
-    return
-  }, options)
-}
-
-export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State, /*  config */) {
+export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, /** state, config */) {
   // TODO: figure out what to do for XHR compatibility
 
   function _emit (eventName: string, ...args: any[]) {
@@ -356,18 +338,6 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     })
   }
 
-  function _getRoute (routeHandlerId: string): Optional<Route> {
-    return state('routes')[routeHandlerId]
-  }
-
-  function _getRequest (routeHandlerId: string, requestId: string): Optional<Request> {
-    const route = _getRoute(routeHandlerId)
-
-    if (route) {
-      return route.requests[requestId]
-    }
-  }
-
   function _addRoute (matcher: RouteMatcherOptions, handler: RouteHandler) {
     const handlerId = _getUniqueId()
 
@@ -402,7 +372,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         return utils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
     }
 
-    state('routes')[handlerId] = {
+    routes[handlerId] = {
       log: _getNewRouteLog(matcher, !!handler, alias, frame.staticResponse),
       options: matcher,
       handler,
@@ -429,20 +399,39 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
   }
 
   function server () : void {
-    // TODO: deprecate?
+
   }
 
   function _onRequestReceived (frame: NetEventFrames.HttpRequestReceived) {
     const route = _getRoute(frame.routeHandlerId)
+    const { req, requestId, routeHandlerId } = frame
+
+    const request : Partial<Request> = {
+      req,
+      state: RequestState.Received,
+    }
+
+    request.log = _getRequestLog(route, request as Omit<Request, 'log'>)
+    request.log.snapshot('request')
+
+    // TODO: this misnomer is a holdover from XHR, should be numRequests
+    route.log.set('numResponses', route.log.get('numResponses') + 1)
+    route.requests[requestId] = request as Request
+
+    if (frame.notificationOnly) {
+      return
+    }
+
+    const continueFrame : Partial<NetEventFrames.HttpRequestContinue> = {
+      routeHandlerId,
+      requestId,
+    }
+
     let nextCalled = false
     let replyCalled = false
     let continueSent = false
 
     const sendContinueFrame = () => {
-      if (frame.notificationOnly) {
-        return
-      }
-
       continueSent = true
 
       request.state = RequestState.Intercepted
@@ -457,35 +446,12 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     }
 
     if (!route) {
-      return sendContinueFrame()
-    }
-
-    const { req, requestId, routeHandlerId } = frame
-
-    const request : Partial<Request> = {
-      req,
-      state: RequestState.Received,
-    }
-
-    request.log = _getRequestLog(route, request as Omit<Request, 'log'>)
-    request.log.snapshot('request')
-
-    const continueFrame : Partial<NetEventFrames.HttpRequestContinue> = {
-      routeHandlerId,
-      requestId,
-    }
-
-    if (!route) {
       // TODO: remove this logging once we're done
       // eslint-disable-next-line no-console
       console.log('no handler for HttpRequestReceived', { frame })
 
       return sendContinueFrame()
     }
-
-    // TODO: this misnomer is a holdover from XHR, should be numRequests
-    route.log.set('numResponses', route.log.get('numResponses') + 1)
-    route.requests[requestId] = request as Request
 
     route.hitCount++
 
@@ -580,6 +546,8 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
     let sendCalled = false
 
+    request.state = RequestState.ResponseReceived
+
     const continueFrame : NetEventFrames.HttpResponseContinue = {
       routeHandlerId,
       requestId,
@@ -592,9 +560,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         ..._.pick(userRes, SERIALIZABLE_RES_PROPS),
       }
 
-      if (request) {
-        request.state = RequestState.ResponseIntercepted
-      }
+      request.state = RequestState.ResponseIntercepted
 
       _emit('http:response:continue', continueFrame)
     }
@@ -634,15 +600,13 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       },
     }
 
-    if (!request || !request.responseHandler) {
+    if (!request) {
       // TODO: remove this logging once we're done
       // eslint-disable-next-line no-console
-      console.log('no handler for HttpResponseReceived', { frame, request })
+      console.log('no handler for HttpResponseReceived', { frame })
 
       return sendContinueFrame()
     }
-
-    request.state = RequestState.ResponseReceived
 
     request.responseHandler(userRes)
   }
@@ -660,7 +624,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
   Cypress.on('test:before:run', () => {
     // wipe out callbacks, requests, and routes when tests start
-    state('routes', {})
+    Cypress.routes = routes = {}
   })
 
   Cypress.on('net:event', (eventName, frame: any /** TODO: interfaceof NetEventFrames */) => {

@@ -75,38 +75,6 @@ export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse,
  */
 export type NumberMatcher = number | number[]
 
-export interface Request {
-  req: CyHttpMessages.IncomingRequest
-  responseHandler?: HttpResponseInterceptor
-  /**
-   * Was `cy.wait()` used to wait on the response to this request?
-   */
-  responseWaited: boolean
-    /**
-   * Was `cy.wait()` used to wait on this request?
-   */
-  requestWaited: boolean
-  state: RequestState
-  log: any // TODO: Cypress.Log
-}
-
-export enum RequestState {
-  Received,
-  Intercepted,
-  ResponseReceived,
-  ResponseIntercepted,
-  Completed
-}
-
-export interface Route {
-  alias?: string
-  log: any // TODO: Cypress.Log
-  options: RouteMatcherOptions
-  handler: RouteHandler
-  hitCount: number
-  requests: { [key: string]: Request }
-}
-
 /**
  * A `RouteMatcher` describes a filter for HTTP requests.
  */
@@ -205,3 +173,5 @@ export interface WebSocketController {
               | 'socket.io-longpolling' // socket.io client via longpolling
               | 'websockets' // vanilla websockets server
 }
+
+export as namespace CyNetStubbing

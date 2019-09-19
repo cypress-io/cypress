@@ -32,7 +32,7 @@ const config: webpack.Configuration = {
     module: 'empty',
   },
   resolve: {
-    extensions: ['.d.ts', '.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
+    extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
   },
 
   stats: {
@@ -71,7 +71,7 @@ const config: webpack.Configuration = {
             presets: [
               require.resolve('@babel/preset-env'),
               require.resolve('@babel/preset-react'),
-              [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
+              require.resolve('@babel/preset-typescript'),
             ],
             babelrc: false,
           },
