@@ -334,7 +334,7 @@ exports['shows help for run --foo 1'] = `
     --ci-build-id <id>                         the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
-    --group <name>                             a named group for recorded runs in the Cypress dashboard
+    --group <name>                             a named group for recorded runs in the Cypress Dashboard
     -k, --key <record-key>                     your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.
     --headed                                   displays the Electron browser instead of running headlessly
     --no-exit                                  keep the browser open after tests finish
@@ -344,7 +344,7 @@ exports['shows help for run --foo 1'] = `
     --record [bool]                            records the run. sends test results, screenshots and videos to your Cypress Dashboard.
     -r, --reporter <reporter>                  runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"
     -o, --reporter-options <reporter-options>  options for the mocha reporter. defaults to "null"
-    -s, --spec <spec>                          runs a specific spec file. defaults to "all"
+    -s, --spec <spec>                          runs specific spec file(s). defaults to "all"
     --dev                                      runs cypress in development and bypasses binary check
     -h, --help                                 output usage information
   -------
