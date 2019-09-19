@@ -92,6 +92,10 @@ const processRunOptions = (options = {}) => {
     args.push('--spec', options.spec)
   }
 
+  if (options.tag) {
+    args.push('--tag', options.tag)
+  }
+
   return args
 }
 

@@ -110,6 +110,7 @@ const descriptions = {
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
   spec: 'runs specific spec file(s). defaults to "all"',
+  tag: 'named tag(s) for recorded runs in the Cypress Dashboard',
   version: 'prints Cypress version',
 }
 
@@ -188,6 +189,7 @@ module.exports = {
     .option('-r, --reporter <reporter>', text('reporter'))
     .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
     .option('-s, --spec <spec>', text('spec'))
+    .option('-t, --tag <tag>', text('tag'))
     .option('--dev', text('dev'), coerceFalse)
     .action((...fnArgs) => {
       debug('running Cypress')
