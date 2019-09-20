@@ -812,7 +812,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           fn.apply(runnableCtx(name), args)
 
       cy[name] = (args...) ->
-        invocationStack = (new specWindow.Error()).stack
+        invocationStack = (new specWindow.Error("command invocation stack")).stack
 
         ensures.ensureRunnable(name)
 

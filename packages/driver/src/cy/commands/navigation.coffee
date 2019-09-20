@@ -73,7 +73,7 @@ cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
   })
 
 specifyFileByRelativePath = (url, log) ->
-  $utils.throwErrByPath("visit.specify_file_by_relative_path", {
+  $errUtils.throwErrByPath("visit.specify_file_by_relative_path", {
     onFail: log
     args: {
       attemptedUrl: url
@@ -524,7 +524,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       if !_.isUndefined(options.qs) and not _.isObject(options.qs)
-        $utils.throwErrByPath("visit.invalid_qs", { args: { qs: String(options.qs) }})
+        $errUtils.throwErrByPath("visit.invalid_qs", { args: { qs: String(options.qs) }})
 
       if options.retryOnStatusCodeFailure and not options.failOnStatusCode
         $errUtils.throwErrByPath("visit.status_code_flags_invalid")

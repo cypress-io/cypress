@@ -17,7 +17,7 @@ class $Chainer
       invocationStack = if @useInitialStack
         @invocationStack
       else
-        (new @specWindow.Error()).stack
+        (new @specWindow.Error("command invocation stack")).stack
 
       ## call back the original function with our new args
       ## pass args an as array and not a destructured invocation

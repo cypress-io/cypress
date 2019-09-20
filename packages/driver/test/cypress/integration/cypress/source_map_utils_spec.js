@@ -75,7 +75,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('provides source contents for given file', () => {
-      const contents = getSourceContents(file1.relativeUrl)
+      const contents = getSourceContents(file1.fullyQualifiedUrl)
 
       expect(contents).to.equal(testContent)
     })
@@ -85,7 +85,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('returns null if file does not have source map', () => {
-      expect(getSourceContents(file2.relativeUrl)).to.be.null
+      expect(getSourceContents(file2.fullyQualifiedUrl)).to.be.null
     })
   })
 
@@ -95,7 +95,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('returns source position for generated position', () => {
-      const position = getSourcePosition(file1.relativeUrl, { line: 1, column: 2 })
+      const position = getSourcePosition(file1.fullyQualifiedUrl, { line: 1, column: 2 })
 
       expect(_.pick(position, 'line', 'column')).to.eql({ line: 1, column: 0 })
     })

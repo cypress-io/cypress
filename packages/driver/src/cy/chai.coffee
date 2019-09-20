@@ -276,7 +276,7 @@ chai.use (chai, u) ->
       assertFn(passed, message, value, actual, expected, err)
 
       if err
-        stack = (new specWindow.Error()).stack
+        stack = (new specWindow.Error("assertion invocation stack")).stack
         err = $errUtils.addCodeFrameToErr(err, stack)
 
         throw err
