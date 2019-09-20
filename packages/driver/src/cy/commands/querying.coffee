@@ -209,7 +209,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el?.length
         if  typeof options isnt 'object' then $utils.throwErrByPath "get.invalid_options", {
-          args: {options, optionType: "#{typeof options}"}
+          arg: options
         }
         else options._log.set({$el: $el})
 
