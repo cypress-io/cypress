@@ -1174,6 +1174,20 @@ describe "src/cy/commands/querying", ->
           .route(/users/, {}).as("getUsers")
           .get("@getUsers.all ")
 
+      it "throws when options property is a string", (done) -> 
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "expected bar to be of type object, instead got string"
+          done()
+        
+        cy.get('foo', 'bar')
+      
+      it "throws when options property is a number", (done) -> 
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "expected 42 to be of type object, instead got number"
+          done()
+        
+        cy.get('foo', 42)
+        
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button").hide()
 
