@@ -135,12 +135,25 @@ module.exports = {
         child.on('close', resolve)
         child.on('error', reject)
 
-        child.stdin && child.stdin.pipe(process.stdin)
-        child.stdout && child.stdout.pipe(process.stdout)
+        // if stdio options is set to 'pipe', then
+        //   we should set up pipes:
+        //  process STDIN (read stream) => child STDIN (writeable)
+        //  child STDOUT => process STDOUT
+        //  child STDERR => process STDERR with additional filtering
+        if (child.stdin) {
+          debug('piping process STDIN into child STDIN')
+          process.stdin.pipe(child.stdin)
+        }
+
+        if (child.stdout) {
+          debug('piping child STDOUT to process STDOUT')
+          child.stdout.pipe(process.stdout)
+        }
 
         // if this is defined then we are manually piping for linux
         // to filter out the garbage
-        child.stderr &&
+        if (child.stderr) {
+          debug('piping child STDERR to process STDERR')
           child.stderr.on('data', (data) => {
             const str = data.toString()
 
@@ -158,6 +171,7 @@ module.exports = {
             // else pass it along!
             process.stderr.write(data)
           })
+        }
 
         // https://github.com/cypress-io/cypress/issues/1841
         // In some versions of node, it will throw on windows
