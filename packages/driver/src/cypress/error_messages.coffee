@@ -933,7 +933,7 @@ module.exports = {
     method_invalid: {
       message: "#{cmd('route')} was called with an invalid method: `{{method}}`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser."
       docsUrl: "https://on.cypress.io/route"
-    } 
+    }
     response_invalid: {
       message: "#{cmd('route')} cannot accept an `undefined` or `null` response. It must be set to something, even an empty string will work."
       docsUrl: "https://on.cypress.io/route"
@@ -1066,11 +1066,11 @@ module.exports = {
     }
     defaults_invalid_priority: {
       message: "`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`"
-      docsUrl: "https://on.cypress.io/selector-playground-api" 
+      docsUrl: "https://on.cypress.io/selector-playground-api"
     }
     defaults_invalid_on_element: {
       message: "`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`"
-      docsUrl: "https://on.cypress.io/selector-playground-api" 
+      docsUrl: "https://on.cypress.io/selector-playground-api"
     }
 
   server:
@@ -1220,7 +1220,7 @@ module.exports = {
     }
     multiple_elements: {
       message: "#{cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements."
-      docsUrl: "https://on.cypress.io/trigger" 
+      docsUrl: "https://on.cypress.io/trigger"
     }
 
   type:
@@ -1334,15 +1334,15 @@ module.exports = {
     }
     empty_string: {
       message: "#{cmd('viewport')} cannot be passed an empty string."
-      docsUrl: "https://on.cypress.io/viewport" 
+      docsUrl: "https://on.cypress.io/viewport"
     }
     invalid_orientation: {
       message: "#{cmd('viewport')} can only accept `{{all}}` as valid orientations. Your orientation was: `{{orientation}}`"
-      docsUrl: "https://on.cypress.io/viewport" 
+      docsUrl: "https://on.cypress.io/viewport"
     }
     missing_preset: {
       message: "#{cmd('viewport')} could not find a preset for: `{{preset}}`. Available presets are: {{presets}}"
-      docsUrl: "https://on.cypress.io/viewport" 
+      docsUrl: "https://on.cypress.io/viewport"
     }
 
   visit:
@@ -1374,6 +1374,10 @@ module.exports = {
       message: "#{cmd('visit')} requires the `headers` option to be an object."
       docsUrl: "https://on.cypress.io/visit"
     }
+    invalid_qs: {
+      message: "#{cmd('visit')} requires the `qs` option to be an object, but received: `{{qs}}`"
+      docsUrl: "https://on.cypress.io/visit"
+    }
     no_duplicate_url: {
       message: """
         #{cmd('visit')} must be called with only one `url`. You specified two urls:
@@ -1381,7 +1385,7 @@ module.exports = {
         `url` from the `url` parameter: {{url}}
       """
       docsUrl: "https://on.cypress.io/visit"
-    } 
+    }
     cannot_visit_2nd_domain: {
       message: """
         #{cmd('visit')} failed because you are attempting to visit a second unique domain.
@@ -1469,7 +1473,7 @@ module.exports = {
 
         #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
       """
-      
+
     specify_file_by_relative_path: """
       #{cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
 

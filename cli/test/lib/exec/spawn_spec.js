@@ -39,7 +39,10 @@ describe('lib/exec/spawn', function () {
       },
     }
 
-    sinon.stub(process, 'stdin').value(new EE)
+    // process.stdin is both an event emitter and a readable stream
+    this.processStdin = new EE()
+    this.processStdin.pipe = sinon.stub().returns(undefined)
+    sinon.stub(process, 'stdin').value(this.processStdin)
     sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
     sinon.stub(xvfb, 'start').resolves()
     sinon.stub(xvfb, 'stop').resolves()
@@ -292,6 +295,9 @@ describe('lib/exec/spawn', function () {
       return spawn.start()
       .then(() => {
         expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq('pipe')
+        // parent process STDIN was piped to child process STDIN
+        expect(this.processStdin.pipe, 'process.stdin').to.have.been.calledOnce
+        .and.to.have.been.calledWith(this.spawnedProcess.stdin)
       })
     })
 
