@@ -101,6 +101,7 @@ module.exports = (on) => {
 
     'record:fast_visit_spec' ({ percentiles, url, browser, currentRetry }) {
       percentiles.forEach(([percent, percentile]) => {
+        // eslint-disable-next-line no-console
         console.log(`${percent}%\t of visits to ${url} finished in less than ${percentile}ms`)
       })
 
@@ -110,8 +111,9 @@ module.exports = (on) => {
         currentRetry,
         ...percentiles.reduce((acc, pair) => {
           acc[pair[0]] = pair[1]
+
           return acc
-        }, {})
+        }, {}),
       }
 
       return performance.track('fast_visit_spec percentiles', data)
