@@ -217,8 +217,9 @@ class $Location
       memo
     , [_.trimEnd(from, "/")]
     ## If there is a query string and last is an empty string, don't append a /
-    if not last.includes("/") and paths.some((path) -> reQueryParam.test(path)) then paths.join("")
-    else paths.join("/")
+    if not last.includes("/") and paths.some((path) -> reQueryParam.test(path)) 
+      return paths.join("")
+    return paths.join("/")
 
   @resolve = (from, to) ->
     ## if to is fully qualified then
