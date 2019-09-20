@@ -208,8 +208,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el?.length
-
-        options._log.set({$el: $el})
+        if  typeof options isnt 'object' then $utils.throwErrByPath "get.invalid_options", {
+          args: {options, optionType: "#{typeof options}"}
+        }
+        else options._log.set({$el: $el})
 
       getElements = ->
         ## attempt to query for the elements by withinSubject context
