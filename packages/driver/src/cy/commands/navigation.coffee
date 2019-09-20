@@ -304,15 +304,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         when not resp.isOkStatusCode
           err = new Error
           err.gotResponse = true
-          _.extend(err, resp)
-
+          _.extend(err, resp, { originalUrl: url});
           throw err
 
         when not resp.isHtml
           ## throw invalid contentType error
           err = new Error
           err.invalidContentType = true
-          _.extend(err, resp)
+          _.extend(err, resp, { originalUrl: url});
 
           throw err
 
@@ -549,7 +548,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       url = $Location.normalize(url)
-
       if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
 
@@ -557,7 +555,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         url = $Location.mergeUrlWithParams(url, qs)
 
       cleanup = null
-
       ## clear the current timeout
       cy.clearTimeout("visit")
 
@@ -627,7 +624,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           remoteUrl = $Location.fullyQualifyUrl(url)
 
         remote = $Location.create(remoteUrl ? url)
-
         ## reset auth options if we have them
         if a = remote.authObj
           options.auth = a
@@ -759,6 +755,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             when err.gotResponse, err.invalidContentType
               visitFailedByErr err, err.originalUrl, ->
                 args = {
+                  err: err
                   url:         err.originalUrl
                   path:        err.filePath
                   status:      err.status
@@ -775,7 +772,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
                   when err.invalidContentType
                     "visit.loading_invalid_content_type"
-
                 $utils.throwErrByPath(msg, {
                   onFail: options._log
                   args: args

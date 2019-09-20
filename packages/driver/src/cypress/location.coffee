@@ -21,6 +21,7 @@ reHttp = /^https?:\/\//
 reWww = /^www/
 reFile = /^file:\/\//
 reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
+reQueryParam = /[?&].[^/]+=/
 
 class $Location
   constructor: (remote) ->
@@ -141,6 +142,7 @@ class $Location
     ## aws.amazon.com/bucket/foo
     ## foo.bar.co.uk
     ## foo.bar.co.uk/asdf
+    url = "/#{url}"
     url = url.split("/")[0].split(".")
     url.length is 3 or url.length is 4
 
@@ -214,8 +216,9 @@ class $Location
         memo.push _.trim(segment, "/")
       memo
     , [_.trimEnd(from, "/")]
-
-    paths.join("/")
+    ## If there is a query string and last is an empty string, don't append a /
+    if not last.includes("/") and paths.some((path) -> reQueryParam.test(path)) then paths.join("")
+    else paths.join("/")
 
   @resolve = (from, to) ->
     ## if to is fully qualified then
