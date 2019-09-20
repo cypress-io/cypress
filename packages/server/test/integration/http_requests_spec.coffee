@@ -36,6 +36,11 @@ zlib = Promise.promisifyAll(zlib)
 ## force supertest-session to use promises provided in supertest
 session = proxyquire("supertest-session", {supertest: supertest})
 
+absolutePathRegex = /"\/[^{}]*?\.projects/g
+
+replaceAbsolutePaths = (path) ->
+  path.replace(absolutePathRegex, "\"/<path-to-project>")
+
 removeWhitespace = (c) ->
   c = str.clean(c)
   c = str.lines(c).join(" ")
@@ -813,7 +818,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
       it "can send back all tests", ->
@@ -823,7 +828,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
     describe "no-server", ->
@@ -844,7 +849,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
     describe "no-server with supportFile: false", ->
@@ -864,7 +869,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
     describe "e2e", ->
@@ -884,7 +889,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
     describe "ids", ->
@@ -900,7 +905,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
       it "can send back all tests", ->
@@ -910,7 +915,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
   context "GET *", ->
@@ -1901,7 +1906,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
       it "injects even when head tag is missing", ->
@@ -1922,7 +1927,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
           expect(body).to.eq contents
 
       it "injects when head is capitalized", ->
@@ -2159,7 +2164,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = replaceAbsolutePaths(removeWhitespace(res.body))
             expect(body).to.eq contents
 
       it "injects into https://www.google.com", ->
@@ -2220,7 +2225,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = replaceAbsolutePaths(removeWhitespace(res.body))
             expect(body).to.eq contents.replace("localhost", "foobar.com")
 
       it "continues to inject on the same https superdomain but different subdomain", ->
@@ -2239,7 +2244,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = replaceAbsolutePaths(removeWhitespace(res.body))
             expect(body).to.eq contents.replace("localhost", "foobar.com")
 
       it "injects document.domain on https requests to same superdomain but different subdomain", ->
@@ -2259,7 +2264,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = replaceAbsolutePaths(removeWhitespace(res.body))
             expect(body).to.eq "<html><head> <script type='text/javascript'> document.domain = 'foobar.com'; </script></head><body>https server</body></html>"
 
       it "injects document.domain on other http requests", ->
@@ -2279,7 +2284,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
 
           expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
 
@@ -2300,7 +2305,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
 
           expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
 
@@ -2378,7 +2383,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = replaceAbsolutePaths(removeWhitespace(res.body))
 
           expect(body).to.eq("<html><head></head></html>")
 
@@ -2404,7 +2409,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = replaceAbsolutePaths(removeWhitespace(res.body))
 
             expect(body).to.eq("<html><head></head></html>")
 

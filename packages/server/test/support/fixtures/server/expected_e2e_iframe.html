@@ -13,7 +13,7 @@
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.onSpecWindow(window, [{"absolute":"/Users/chrisbreiding/Dev/cypress/cypress/packages/server/.projects/e2e/cypress/support/commands.js","relative":"cypress/support/commands.js","relativeUrl":"/__cypress/tests?p=cypress/support/commands.js"},{"absolute":"/Users/chrisbreiding/Dev/cypress/cypress/packages/server/.projects/e2e/cypress/integration/app_spec.coffee","relative":"cypress/integration/app_spec.coffee","relativeUrl":"/__cypress/tests?p=cypress/integration/app_spec.coffee"}]);
+        return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/e2e/cypress/support/commands.js","relative":"cypress/support/commands.js","relativeUrl":"/__cypress/tests?p=cypress/support/commands.js"},{"absolute":"/<path-to-project>/e2e/cypress/integration/app_spec.coffee","relative":"cypress/integration/app_spec.coffee","relativeUrl":"/__cypress/tests?p=cypress/integration/app_spec.coffee"}]);
       })(window.opener || window.parent);
     </script>
   </body>

@@ -13,7 +13,7 @@
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.onSpecWindow(window, [{"absolute":"/Users/chrisbreiding/Dev/cypress/cypress/packages/server/.projects/no-server/my-tests/test1.js","relative":"my-tests/test1.js","relativeUrl":"/__cypress/tests?p=my-tests/test1.js"}]);
+        return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/no-server/my-tests/test1.js","relative":"my-tests/test1.js","relativeUrl":"/__cypress/tests?p=my-tests/test1.js"}]);
       })(window.opener || window.parent);
     </script>
   </body>
