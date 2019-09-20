@@ -1,4 +1,3 @@
-import Promise from 'bluebird'
 import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'

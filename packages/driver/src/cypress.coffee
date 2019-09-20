@@ -160,7 +160,7 @@ class $Cypress
   ## specs or support files have been downloaded
   ## or parsed. we have not received any custom commands
   ## at this point
-  onSpecWindow: (specWindow, specs) ->
+  onSpecWindow: (specWindow, scripts) ->
     logFn = (args...) =>
       @log.apply(@, args)
 
@@ -176,7 +176,7 @@ class $Cypress
 
     @events.proxyTo(@cy)
 
-    $scriptUtils.runScripts(specWindow, specs)
+    $scriptUtils.runScripts(specWindow, scripts)
     .catch (err) =>
       err = $errUtils.addCodeFrameToErr(err, err.stack)
       @runner.onScriptError(err)
