@@ -13,7 +13,7 @@
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.onSpecWindow(window, {{{specs}}});
+        return Cypress.onSpecWindow(window, {{{scripts}}});
       })(window.opener || window.parent);
     </script>
   </body>

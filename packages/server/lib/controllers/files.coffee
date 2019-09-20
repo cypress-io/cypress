@@ -28,8 +28,7 @@ module.exports = {
           title:        @getTitle(test)
           domain:       getRemoteState().domainName
           # stylesheets:  @getStylesheets(config)
-          javascripts:  js
-          specs:        JSON.stringify(specs)
+          scripts:  JSON.stringify(js.concat(specs))
         }
 
   getSpecs: (spec, config) ->
