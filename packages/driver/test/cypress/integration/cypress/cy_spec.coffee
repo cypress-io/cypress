@@ -109,8 +109,7 @@ describe "driver/src/cypress/cy", ->
       .then ->
         invocationStack = cy.queue.find({ name: "get" }).get("invocationStack")
         expect(invocationStack).to.include("command invocation stack")
-        expect(invocationStack).to.include("as get") ## might be browser-specific
-        expect(invocationStack).to.include("cypress_runner.js")
+        expect(invocationStack).to.include("cy_spec.coffee")
 
     it "stores invocation stack for chained command", ->
       cy
@@ -119,8 +118,7 @@ describe "driver/src/cypress/cy", ->
       .then ->
         invocationStack = cy.queue.find({ name: "find" }).get("invocationStack")
         expect(invocationStack).to.include("command invocation stack")
-        expect(invocationStack).to.include("as find") ## might be browser-specific
-        expect(invocationStack).to.include("cypress_runner.js")
+        expect(invocationStack).to.include("cy_spec.coffee")
 
   context "custom commands", ->
     beforeEach ->
@@ -162,8 +160,7 @@ describe "driver/src/cypress/cy", ->
         .then ->
           invocationStack = cy.queue.find({ name: "getInput" }).get("invocationStack")
           expect(invocationStack).to.include("command invocation stack")
-          expect(invocationStack).to.include("as getInput") ## might be browser-specific
-          expect(invocationStack).to.include("cypress_runner.js")
+          expect(invocationStack).to.include("cy_spec.coffee")
 
       it "stores invocation stack for chained command", ->
         cy
@@ -172,8 +169,7 @@ describe "driver/src/cypress/cy", ->
         .then ->
           invocationStack = cy.queue.find({ name: "findInput" }).get("invocationStack")
           expect(invocationStack).to.include("command invocation stack")
-          expect(invocationStack).to.include("as findInput") ## might be browser-specific
-          expect(invocationStack).to.include("cypress_runner.js")
+          expect(invocationStack).to.include("cy_spec.coffee")
 
     describe "parent commands", ->
       it "ignores existing subject", ->

@@ -624,7 +624,7 @@ describe "src/cy/commands/window", ->
       it "throws with passed invalid preset", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.match /^\`cy.viewport\(\)\` could not find a preset for: 'foo'. Available presets are: /
+          expect(err.message).to.match /^\`cy.viewport\(\)\` could not find a preset for: `foo`. Available presets are: /
           expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
