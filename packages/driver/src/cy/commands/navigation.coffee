@@ -755,7 +755,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             when err.gotResponse, err.invalidContentType
               visitFailedByErr err, err.originalUrl, ->
                 args = {
-                  err: err
                   url:         err.originalUrl
                   path:        err.filePath
                   status:      err.status
