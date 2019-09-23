@@ -270,6 +270,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: ["optional", "window", "document", "element"] }, {
     contains: (subject, filter, text, options = {}) ->
+      console.log(subject)
       ## nuke our subject if its present but not an element.
       ## in these cases its either window or document but
       ## we dont care.
@@ -418,7 +419,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## within.  when that command runs we'll
       ## know to remove withinSubject
       next = cy.state("current").get("next")
-
+      console.log(next)
       ## backup the current withinSubject
       ## this prevents a bug where we null out
       ## withinSubject when there are nested .withins()
@@ -447,7 +448,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## exact same 'next' command, then this prevents accidentally
         ## resetting withinSubject more than once.  If they point
         ## to differnet 'next's then its okay
+        console.log(next)
+        console.log(obj)
+        console.log(cy.state("subject"))
+        console.log(cy.state("nextWithinSubject"))
+        console.log(cy.state("chainerId"))
         if next isnt cy.state("nextWithinSubject")
+          console.log('setting within subject')
+          console.log(prevWithinSubject)
           cy.state("withinSubject", prevWithinSubject or null)
           cy.state("nextWithinSubject", next)
 
@@ -465,6 +473,5 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           cleanup()
 
           cy.state("withinSubject", null)
-
       return subject
   })

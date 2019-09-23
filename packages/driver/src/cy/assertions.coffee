@@ -60,9 +60,8 @@ create = (state, queue, retryFn) ->
   getUpcomingAssertions = ->
     current = state("current")
     index   = state("index") + 1
-
+    chainerId = current.attributes.chainerId
     assertions = []
-
     ## grab the rest of the queue'd commands
     for cmd in queue.slice(index).get()
       ## don't break on utilities, just skip over them
@@ -71,11 +70,11 @@ create = (state, queue, retryFn) ->
 
       ## grab all of the queued commands which are
       ## assertions and match our current chainerId
-      if cmd.is("assertion")
+      if cmd.is("assertion") and cmd.attributes.chainerId is chainerId
         assertions.push(cmd)
       else
         break
-
+    console.log(assertions)
     assertions
 
   injectAssertionFns = (cmds) ->
@@ -110,6 +109,7 @@ create = (state, queue, retryFn) ->
     cmds = getUpcomingAssertions()
 
     state("upcomingAssertions", cmds)
+    console.log(cmds)
 
     ## we're applying the default assertion in the
     ## case where there are no upcoming assertion commands
