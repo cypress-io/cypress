@@ -199,7 +199,6 @@ class $Location
     if baseUrl and (not @isFullyQualifiedUrl(url))
       ## prepend the root url to it
       url = @join(baseUrl, url)
-    console.log(url)
     @fullyQualifyUrl(url)
 
   @isAbsoluteRelative = (segment) ->
