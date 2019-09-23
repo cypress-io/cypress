@@ -73,6 +73,58 @@ describe('cli', () => {
     })
   })
 
+  context('CYPRESS_ENV', () => {
+    /**
+     * Replaces line "Platform: ..." with "Platform: xxx"
+     * @param {string} s
+     */
+    const replacePlatform = (s) => {
+      return s.replace(/Platform: .+/, 'Platform: xxx')
+    }
+
+    /**
+     * Replaces line "Cypress Version: ..." with "Cypress Version: 1.2.3"
+     * @param {string} s
+     */
+    const replaceCypressVersion = (s) => {
+      return s.replace(/Cypress Version: .+/, 'Cypress Version: 1.2.3')
+    }
+
+    const sanitizePlatform = (text) => {
+      return text
+      .split(os.eol)
+      .map(replacePlatform)
+      .map(replaceCypressVersion)
+      .join(os.eol)
+    }
+
+    it('allows staging environment', () => {
+      const options = {
+        env: {
+          CYPRESS_ENV: 'staging',
+        },
+        // we are only interested in the exit code
+        filter: ['code', 'stderr'],
+      }
+
+      return execa('bin/cypress', ['help'], options).then(snapshot)
+    })
+
+    it('catches environment "foo"', () => {
+      const options = {
+        env: {
+          CYPRESS_ENV: 'foo',
+        },
+        // we are only interested in the exit code
+        filter: ['code', 'stderr'],
+      }
+
+      return execa('bin/cypress', ['help'], options)
+      .then(sanitizePlatform)
+      .then(snapshot)
+    })
+  })
+
   context('cypress version', () => {
     const binaryDir = '/binary/dir'
 
