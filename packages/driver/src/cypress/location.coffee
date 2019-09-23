@@ -217,7 +217,7 @@ class $Location
     , [_.trimEnd(from, "/")]
     ## https://github.com/cypress-io/cypress/issues/2101
     ## If there is a query string and last is an empty string, don't append a /
-    if not last.includes("/") and paths.some((path) -> reQueryParam.test(path)) 
+    if last is "" and paths.some((path) -> reQueryParam.test(path)) 
       return paths.join("")
     return paths.join("/")
 
