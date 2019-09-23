@@ -9,8 +9,6 @@ $expr = $.expr[":"]
 
 $contains = $expr.contains
 
-typeIsArray = Array.isArray || ( value ) -> return {}.toString.call( value ) is '[object Array]'
-
 restoreContains = ->
   $expr.contains = $contains
 
@@ -70,8 +68,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     get: (selector, options = {}) ->
       ctx = @
-      ## can't get this error output any nicer as far as I know
-      if options is null or (typeIsArray options) or typeof options isnt 'object' then return $utils.throwErrByPath "get.invalid_options", {
+      
+      if options is null or Array.isArray(options) or typeof options isnt 'object' then return $utils.throwErrByPath "get.invalid_options", {
           args: { options  }
       }
       _.defaults(options, {
