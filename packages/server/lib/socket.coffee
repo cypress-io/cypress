@@ -8,7 +8,7 @@ open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
-netStubbing   = require("./net_stubbing")
+netStubbing   = require("@packages/net-stubbing/server")
 task          = require("./task")
 files         = require("./files")
 fixture       = require("./fixture")
@@ -310,7 +310,7 @@ class Socket
             when "write:file"
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "net"
-              netStubbing.onDriverEvent(@, args...)
+              netStubbing.onNetEvent(@, args...)
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"

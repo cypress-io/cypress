@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-{ waitForRoute } = require("./net_stubbing")
+{ waitForRoute } = require("@packages/net-stubbing/driver")
 $utils = require("../../cypress/utils")
 
 getNumRequests = (state, alias) =>

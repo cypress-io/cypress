@@ -1,138 +1,28 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
+
+import {
+  RequestState,
+  Route,
+  Request,
+} from './types'
 import {
   CyHttpMessages,
   RouteHandler,
-  RouteMatcherOptionsGeneric,
   RouteMatcherOptions,
   RouteMatcher,
   StaticResponse,
   HttpRequestInterceptor,
   WebSocketController,
-  HttpResponseInterceptor,
-} from '../../../../../cli/types/cy-net-stubbing'
+  STRING_MATCHER_FIELDS,
+  DICT_STRING_MATCHER_FIELDS,
+  SERIALIZABLE_REQ_PROPS,
+  SERIALIZABLE_RES_PROPS,
+  AnnotatedRouteMatcherOptions,
+  AnnotatedStringMatcher,
+  NetEventFrames,
+} from '../types'
 
 const utils = require('../../cypress/utils')
-
-declare global {
-  namespace Cypress {
-    interface State {
-      (k: 'routes', v?: RouteMap): RouteMap
-    }
-  }
-}
-
-interface Route {
-  alias?: string
-  log: Cypress.Log
-  options: RouteMatcherOptions
-  handler: RouteHandler
-  hitCount: number
-  requests: { [key: string]: Request }
-}
-
-type RouteMap = { [key: string]: Route }
-
-interface Request {
-  req: CyHttpMessages.IncomingRequest
-  responseHandler?: HttpResponseInterceptor
-  state: RequestState
-  log: Cypress.Log
-  requestWaited: boolean
-  responseWaited: boolean
-}
-
-enum RequestState {
-  Received,
-  Intercepted,
-  ResponseReceived,
-  ResponseIntercepted,
-  Completed
-}
-
-export const SERIALIZABLE_REQ_PROPS = [
-  'headers',
-  'body', // doesn't exist on the OG message, but will be attached by the backend
-  'url',
-  'method',
-  'httpVersion',
-]
-
-export const SERIALIZABLE_RES_PROPS = _.concat(
-  SERIALIZABLE_REQ_PROPS,
-  'statusCode',
-  'statusMessage'
-)
-
-export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
-
-export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
-
-/**
- * Serializable `StringMatcher` type.
- */
-interface AnnotatedStringMatcher {
-  type: 'regex' | 'glob'
-  value: string
-}
-
-/**
- * Serializable `RouteMatcherOptions` type.
- */
-export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedStringMatcher>
-
-/** Types for messages between driver and server */
-
-export declare namespace NetEventFrames {
-  export interface AddRoute {
-    routeMatcher: AnnotatedRouteMatcherOptions
-    staticResponse?: StaticResponse
-    handlerId?: string
-  }
-
-  interface BaseHttp {
-    requestId: string
-    routeHandlerId: string
-  }
-
-  // fired when HTTP proxy receives headers + body of request
-  export interface HttpRequestReceived extends BaseHttp {
-    req: CyHttpMessages.IncomingRequest
-    /**
-     * Is the proxy expecting the driver to send `HttpRequestContinue`?
-     */
-    notificationOnly: boolean
-  }
-
-  // fired when driver is done modifying request and wishes to pass control back to the proxy
-  export interface HttpRequestContinue extends BaseHttp {
-    req: CyHttpMessages.IncomingRequest
-    staticResponse?: StaticResponse
-    hasResponseHandler?: boolean
-    tryNextRoute?: boolean
-  }
-
-  // fired when a response is received and the driver has a req.reply callback registered
-  export interface HttpResponseReceived extends BaseHttp {
-    res: CyHttpMessages.IncomingResponse
-  }
-
-  // fired when driver is done modifying response or driver callback completes,
-  // passes control back to proxy
-  export interface HttpResponseContinue extends BaseHttp {
-    res?: CyHttpMessages.IncomingResponse
-    staticResponse?: StaticResponse
-    // Millisecond timestamp for when the response should continue
-    continueResponseAt?: number
-    throttleKbps?: number
-  }
-
-  // fired when a response has been sent completely by the server to an intercepted request
-  export interface HttpRequestComplete extends BaseHttp {
-
-  }
-}
-
-/** Driver Commands **/
 
 /**
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
@@ -244,62 +134,6 @@ function _validateStaticResponse (staticResponse: StaticResponse): void {
   if (headers && _.keys(_.omitBy(headers, _.isString))) {
     throw new Error('`headers` must be a map of strings to strings.')
   }
-}
-
-export function waitForRoute (alias: string, cy: Cypress.cy, state: Cypress.State, specifier: 'request' | 'response' | string, options: any) {
-  // if they didn't specify what to wait on, they want to wait on a response
-  if (!specifier) {
-    specifier = 'response'
-  }
-
-  if (!/\d+|request|response/.test(specifier)) {
-    throw new Error('bad specifier')
-    // TODO: throw good error
-  }
-
-  // 1. Get route with this alias.
-  // @ts-ignore
-  const route : Route = _.find(state('routes'), { alias })
-
-  function retry () {
-    return cy.retry(() => {
-      // 2. Find the first request without responseWaited/requestWaited/with the correct index
-      let i = 0
-      const request = _.find(route.requests, (request) => {
-        i++
-        switch (specifier) {
-          case 'request':
-            return !request.requestWaited
-          case 'response':
-            return !request.responseWaited
-          default:
-            return i === Number(specifier)
-        }
-      })
-
-      if (!request) {
-        return retry()
-      }
-
-      // 3. Determine if it's ready based on the specifier
-      if (request.state >= RequestState.Intercepted) {
-        request.requestWaited = true
-        if (specifier === 'request') {
-          return Promise.resolve(request)
-        }
-      }
-
-      if (request.state >= RequestState.ResponseIntercepted) {
-        request.responseWaited = true
-
-        return Promise.resolve(request)
-      }
-
-      return retry()
-    }, options)
-  }
-
-  return retry()
 }
 
 export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State /* config */) {

@@ -2,6 +2,7 @@ _ = require("lodash")
 $utils = require("./utils")
 
 builtInCommands = [
+  require("@packages/net-stubbing/driver").registerCommands
   require("../cy/commands/actions/check")
   require("../cy/commands/actions/click")
   require("../cy/commands/actions/focus")
@@ -26,7 +27,6 @@ builtInCommands = [
   require("../cy/commands/local_storage")
   require("../cy/commands/location")
   require("../cy/commands/misc")
-  require("../cy/commands/net_stubbing").registerCommands
   require("../cy/commands/popups")
   require("../cy/commands/navigation")
   require("../cy/commands/querying")

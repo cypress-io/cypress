@@ -14,7 +14,8 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
-agent        = require("@packages/network").agent
+{ agent }    = require("@packages/network")
+{ NetStubbingState } = require("@packages/net-stubbing/server")
 cors         = require("./util/cors")
 uri          = require("./util/uri")
 origin       = require("./util/origin")
@@ -145,6 +146,8 @@ class Server
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
+
+      @_netStubbingState = NetStubbingState()
 
       getRemoteState = => @_getRemoteState()
 
@@ -729,6 +732,7 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.netStubbingState = @_netStubbingState
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
