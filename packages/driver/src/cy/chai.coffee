@@ -4,6 +4,7 @@ _ = require("lodash")
 $ = require("jquery")
 chai = require("chai")
 sinonChai = require("@cypress/sinon-chai")
+{prettyFormat, setPrintComplextValueHook} = require('@packages/pretty-format/src')
 
 $dom = require("../dom")
 $utils = require("../cypress/utils")
@@ -33,6 +34,15 @@ getMessage = null
 chaiUtils = null
 
 chai.use(sinonChai)
+
+
+getType = (val) ->
+  match = /\[object (.*)\]/.exec(Object.prototype.toString.call(val))
+  return match && match[1]
+
+setPrintComplextValueHook (val) ->
+  if getType(val) is 'Window'
+    return '[window]'
 
 chai.use (chai, u) ->
   chaiUtils = u
@@ -67,7 +77,9 @@ chai.use (chai, u) ->
   lengthProto  = chai.Assertion::__methods.length.method
   containProto = chai.Assertion::__methods.contain.method
   existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
-  getMessage   = chaiUtils.getMessage
+  objDisplay   = chai.util.objDisplay
+  getMessage   = chai.util.getMessage
+  inspect = chai.util.inspect
 
   removeOrKeepSingleQuotesBetweenStars = (message) ->
     ## remove any single quotes between our **, preserving escaped quotes
@@ -95,8 +107,9 @@ chai.use (chai, u) ->
     , []
 
   restoreAsserts = ->
-    chaiUtils.getMessage = getMessage
-
+    chai.util.inspect = inspect
+    chai.util.getMessage = getMessage
+    chai.util.objDisplay = objDisplay
     chai.Assertion::assert = assertProto
     chai.Assertion::match = matchProto
     chai.Assertion::__methods.length.method = lengthProto
@@ -104,10 +117,52 @@ chai.use (chai, u) ->
 
     Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
 
-  overrideChaiAsserts = (assertFn) ->
-    _this = @
 
+
+  overrideChaiInspect = () ->
+    chai.util.inspect = ->
+      prettyFormat(...arguments)
+
+  overrideChaiObjDisplay = ->
+    chai.util.objDisplay = (obj) ->
+      console.log('overriden objDisplay')
+      str = chai.util.inspect(obj)
+      type = Object::toString.call(obj)
+      if chai.config.truncateThreshold and str.length >= chai.config.truncateThreshold
+        if type == '[object Function]'
+          if !obj.name or obj.name == '' then '[Function]' else '[Function: ' + obj.name + ']'
+        else if type == '[object Array]'
+          '[ Array(' + obj.length + ') ]'
+        else if type == '[object Object]'
+          keys = Object.keys(obj)
+          kstr = if keys.length > 2 then keys.splice(0, 2).join(', ') + ', ...' else keys.join(', ')
+          '{ Object (' + kstr + ') }'
+        else
+          str
+      else
+        str
+
+  overrideChaiAsserts = (assertFn) ->
     chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
+
+    _origGetmessage = (obj, args) ->
+      negate = chaiUtils.flag(obj, 'negate')
+      val = chaiUtils.flag(obj, 'object')
+      expected = args[3]
+      actual = chaiUtils.getActual(obj, args)
+      msg = (if negate then args[2] else args[1])
+      flagMsg = chaiUtils.flag(obj, 'message')
+
+      if typeof msg is "function"
+        msg = msg()
+
+      msg = msg || ''
+      msg = msg
+        .replace(/#\{this\}/g, -> chaiUtils.objDisplay(val))
+        .replace(/#\{act\}/g, -> chaiUtils.objDisplay(actual))
+        .replace(/#\{exp\}/g, -> chaiUtils.objDisplay(expected))
+
+      return (if flagMsg then flagMsg   + ': ' + msg else msg)
 
     chaiUtils.getMessage = (assert, args) ->
       obj = assert._obj
@@ -122,7 +177,7 @@ chai.use (chai, u) ->
       args[3] && args[3].view && args[3].view = null
       args[4] && args[4].view && args[4].view = null
 
-      msg = getMessage.call(@, assert, args)
+      msg = _origGetmessage.call(@, assert, args)
 
       ## restore the real obj if we changed it
       if obj isnt assert._obj
@@ -319,7 +374,8 @@ chai.use (chai, u) ->
     # restoreOverrides()
     restoreAsserts()
 
-    # overrideChai()
+    overrideChaiInspect()
+    overrideChaiObjDisplay()
     overrideChaiAsserts(assertFn)
 
     return setSpecWindowGlobals(specWindow)

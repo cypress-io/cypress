@@ -382,7 +382,8 @@ describe('src/cy/commands/actions/click', () => {
 
     it('events when element removed on pointerover', () => {
       const btn = cy.$$('button:first')
-      const div = cy.$$('div#tabindex')
+      const div = cy.$$('<div tabindex="true" style="height:80px"></div>').insertAfter(btn)
+      // const div = cy.$$('div#tabindex')
 
       // attachFocusListeners({ btn })
       attachMouseClickListeners({ btn, div })
@@ -403,7 +404,7 @@ describe('src/cy/commands/actions/click', () => {
 
     it('events when element removed on pointerdown', () => {
       const btn = cy.$$('button:first')
-      const div = cy.$$('div#tabindex')
+      const div = cy.$$('<div tabindex="true" style="height:80px"></div>').insertAfter(btn)
 
       attachFocusListeners({ btn })
       attachMouseClickListeners({ btn, div })
@@ -652,7 +653,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('places cursor at the end of [contenteditable]', () => {
-
       cy.get('[contenteditable]:first')
       .invoke('html', '<div><br></div>').click()
       .then(($el) => {
@@ -967,6 +967,10 @@ describe('src/cy/commands/actions/click', () => {
         const spy = cy.spy().as('mousedown')
 
         $('<button>button covered</button>')
+        .css({
+          height: 24,
+          width: 110,
+        })
         .attr('id', 'button-covered-in-nav')
         .appendTo(cy.$$('#fixed-nav-test'))
         .mousedown(spy)
@@ -992,8 +996,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#button-covered-in-nav').click()
         .then(() => {
           expect(scrolled).to.deep.eq(['element', 'element', 'window'])
-          expect(spy.args[0][0]).property('clientX').closeTo(61, 2)
-          expect(spy.args[0][0]).property('clientY').eq(70)
+          expect(spy.args[0][0]).property('clientX').closeTo(63, 1)
+          expect(spy.args[0][0]).property('clientY').closeTo(70, 2)
         })
       })
 
@@ -2754,6 +2758,8 @@ describe('src/cy/commands/actions/click', () => {
 
         })
 
+        const midpoint = getMidPoint(cy.$$('button')[0])
+
         cy.get('button').first().dblclick().then(function () {
           const { lastLog } = this
 
@@ -2763,10 +2769,7 @@ describe('src/cy/commands/actions/click', () => {
             'Command': 'dblclick',
             'Applied To': {},
             'Elements': 1,
-            'Coords': {
-              'x': 58,
-              'y': 595,
-            },
+            'Coords': midpoint,
             'Options': {
               'multiple': true,
             },
@@ -2940,7 +2943,7 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    it('can rightclick disabled', () => {
+    it('can rightclick disabled with force', () => {
       const el = cy.$$('input:first')
 
       el.get(0).disabled = true
@@ -2952,7 +2955,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('input:first').rightclick({ force: true })
 
       cy.getAll('el', 'mousedown contextmenu mouseup').each(shouldNotBeCalled)
-      cy.getAll('el', 'pointerdown pointerup').each(shouldBeCalled)
+      cy.getAll('el', 'pointerdown pointerup').each(shouldNotBeCalled)
     })
 
     it('rightclick cancel contextmenu', () => {
@@ -3023,7 +3026,7 @@ describe('src/cy/commands/actions/click', () => {
 
     it('rightclick remove el on mouseover', () => {
       const el = cy.$$('button:first')
-      const el2 = cy.$$('div#tabindex')
+      const el2 = cy.$$('<div tabindex="true" style="height:80px"></div>').insertAfter(el)
 
       el.on('mouseover', () => el.get(0).remove())
 
@@ -3033,7 +3036,7 @@ describe('src/cy/commands/actions/click', () => {
       attachContextmenuListeners({ el, el2 })
 
       cy.get('button:first').rightclick().should('not.exist')
-      cy.get(el2.selector).should('have.focus')
+      cy.wrap(el2).should('have.focus')
 
       cy.getAll('el', 'pointerover mouseover').each(shouldBeCalledOnce)
       cy.getAll('el', 'pointerdown mousedown pointerup mouseup contextmenu').each(shouldNotBeCalled)
@@ -3195,6 +3198,8 @@ describe('src/cy/commands/actions/click', () => {
 
         })
 
+        const midpoint = getMidPoint(cy.$$('button')[0])
+
         cy.get('button').first().rightclick().then(function () {
           const { lastLog } = this
 
@@ -3204,10 +3209,7 @@ describe('src/cy/commands/actions/click', () => {
             'Command': 'rightclick',
             'Applied To': {},
             'Elements': 1,
-            'Coords': {
-              'x': 58,
-              'y': 595,
-            },
+            'Coords': midpoint,
             'table': {},
           })
 
@@ -3341,16 +3343,53 @@ describe('mouse state', () => {
 
     describe('mouseout', () => {
       it('can move mouse from a div to another div', () => {
+
+        const coordsChrome = {
+          clientX: 492,
+          clientY: 9,
+          layerX: 492,
+          layerY: 215,
+          pageX: 492,
+          pageY: 215,
+          screenX: 492,
+          screenY: 9,
+          x: 492,
+          y: 9,
+        }
+
+        const coordsFirefox = {
+          clientX: 494,
+          clientY: 10,
+          // layerX: 492,
+          // layerY: 215,
+          pageX: 494,
+          pageY: 226,
+          screenX: 494,
+          screenY: 10,
+          x: 494,
+          y: 10,
+        }
+
+        let coords
+
+        switch (Cypress.browser.family) {
+          case 'firefox':
+            coords = coordsFirefox
+            break
+          default:
+            coords = coordsChrome
+            break
+        }
+
         const mouseout = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
+            ...coords,
             altKey: false,
             bubbles: true,
             button: 0,
             buttons: 0,
             cancelBubble: false,
             cancelable: true,
-            clientX: 492,
-            clientY: 9,
             composed: true,
             ctrlKey: false,
             currentTarget: cy.$$('div.item')[0],
@@ -3359,41 +3398,31 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
-            layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
-            pageY: 215,
             relatedTarget: cy.$$('div.item')[1],
             returnValue: true,
-            screenX: 492,
-            screenY: 9,
             shiftKey: false,
-            sourceCapabilities: null,
             target: cy.$$('div.item')[0],
             // not in firefox?
             // toElement: cy.$$('div.item')[1],
             type: 'mouseout',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
-            y: 9,
           })
         }).as('mouseout')
         const mouseleave = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
+            ...coords,
             altKey: false,
             bubbles: false,
             button: 0,
             buttons: 0,
             cancelBubble: false,
             cancelable: false,
-            clientX: 492,
-            clientY: 9,
             composed: true,
             ctrlKey: false,
             currentTarget: cy.$$('div.item')[0],
@@ -3402,41 +3431,31 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
-            layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
-            pageY: 215,
             relatedTarget: cy.$$('div.item')[1],
             returnValue: true,
-            screenX: 492,
-            screenY: 9,
             shiftKey: false,
-            sourceCapabilities: null,
             target: cy.$$('div.item')[0],
             // not in firefox?
             // toElement: cy.$$('div.item')[1],
             type: 'mouseleave',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
-            y: 9,
           })
         }).as('mouseleave')
         const pointerout = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
+            ...coords,
             altKey: false,
             bubbles: true,
             button: -1,
             buttons: 0,
             cancelBubble: false,
             cancelable: true,
-            clientX: 492,
-            clientY: 9,
             composed: true,
             ctrlKey: false,
             currentTarget: cy.$$('div.item')[0],
@@ -3445,41 +3464,31 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
-            layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
-            pageY: 215,
             relatedTarget: cy.$$('div.item')[1],
             returnValue: true,
-            screenX: 492,
-            screenY: 9,
             shiftKey: false,
-            sourceCapabilities: null,
             target: cy.$$('div.item')[0],
             // not in firefox?
             // toElement: cy.$$('div.item')[1],
             type: 'pointerout',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
-            y: 9,
           })
         }).as('pointerout')
         const pointerleave = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
+            ...coords,
             altKey: false,
             bubbles: false,
             button: -1,
             buttons: 0,
             cancelBubble: false,
             cancelable: false,
-            clientX: 492,
-            clientY: 9,
             composed: true,
             ctrlKey: false,
             currentTarget: cy.$$('div.item')[0],
@@ -3488,41 +3497,31 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
-            layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
-            pageY: 215,
             relatedTarget: cy.$$('div.item')[1],
             returnValue: true,
-            screenX: 492,
-            screenY: 9,
             shiftKey: false,
-            sourceCapabilities: null,
             target: cy.$$('div.item')[0],
             // not in firefox?
             // toElement: cy.$$('div.item')[1],
             type: 'pointerleave',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
-            y: 9,
           })
         }).as('pointerleave')
         const mouseover = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
+            ...coords,
             altKey: false,
             bubbles: true,
             button: 0,
             buttons: 0,
             cancelBubble: false,
             cancelable: true,
-            clientX: 492,
-            clientY: 9,
             composed: true,
             ctrlKey: false,
             currentTarget: cy.$$('div.item')[1],
@@ -3531,41 +3530,31 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
-            layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
-            pageY: 215,
             relatedTarget: cy.$$('div.item')[0],
             returnValue: true,
-            screenX: 492,
-            screenY: 9,
             shiftKey: false,
-            sourceCapabilities: null,
             target: cy.$$('div.item')[1],
             // not in Firefox
             // toElement: cy.$$('div.item')[1],
             type: 'mouseover',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
-            y: 9,
           })
         }).as('mouseover')
         const mouseenter = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
+            ...coords,
             altKey: false,
             bubbles: false,
             button: 0,
             buttons: 0,
             cancelBubble: false,
             cancelable: false,
-            clientX: 492,
-            clientY: 9,
             composed: true,
             ctrlKey: false,
             currentTarget: cy.$$('div.item')[1],
@@ -3574,41 +3563,31 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
-            layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
-            pageY: 215,
             relatedTarget: cy.$$('div.item')[0],
             returnValue: true,
-            screenX: 492,
-            screenY: 9,
             shiftKey: false,
-            sourceCapabilities: null,
             target: cy.$$('div.item')[1],
             // not in Firefox
             // toElement: cy.$$('div.item')[1],
             type: 'mouseenter',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
-            y: 9,
           })
         }).as('mouseenter')
         const pointerover = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
+            ...coords,
             altKey: false,
             bubbles: true,
             button: -1,
             buttons: 0,
             cancelBubble: false,
             cancelable: true,
-            clientX: 492,
-            clientY: 9,
             composed: true,
             ctrlKey: false,
             currentTarget: cy.$$('div.item')[1],
@@ -3617,41 +3596,31 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
-            layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
-            pageY: 215,
             relatedTarget: cy.$$('div.item')[0],
             returnValue: true,
-            screenX: 492,
-            screenY: 9,
             shiftKey: false,
-            sourceCapabilities: null,
             target: cy.$$('div.item')[1],
             // not in Firefox
             // toElement: cy.$$('div.item')[1],
             type: 'pointerover',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
-            y: 9,
           })
         }).as('pointerover')
         const pointerenter = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
+            ...coords,
             altKey: false,
             bubbles: false,
             button: -1,
             buttons: 0,
             cancelBubble: false,
             cancelable: false,
-            clientX: 492,
-            clientY: 9,
             composed: true,
             ctrlKey: false,
             currentTarget: cy.$$('div.item')[1],
@@ -3660,29 +3629,20 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
-            layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
-            pageY: 215,
             relatedTarget: cy.$$('div.item')[0],
             returnValue: true,
-            screenX: 492,
-            screenY: 9,
             shiftKey: false,
-            sourceCapabilities: null,
             target: cy.$$('div.item')[1],
             // not in Firefox
             // toElement: cy.$$('div.item')[1],
             type: 'pointerenter',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
-            y: 9,
           })
         }).as('pointerenter')
 
@@ -3789,9 +3749,8 @@ describe('mouse state', () => {
     it('handles disabled attr', () => {
       const btn = cy.$$(/*html*/'<input id=\'btn\'>').appendTo(cy.$$('body'))
 
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
-      })
+      attachMouseClickListeners({ btn })
+      attachMouseHoverListeners({ btn })
 
       btn.on('pointerover', () => {
         btn.attr('disabled', true)
@@ -3799,12 +3758,32 @@ describe('mouse state', () => {
 
       cy.get('#btn').click()
 
-      cy.getAll('@pointerover @pointerenter @pointerdown @pointerup').each((stub) => {
-        expect(stub).to.be.calledOnce
+      if (Cypress.browser.family === 'firefox') {
+        cy.getAll('btn', 'pointerdown pointerup').each((stub) => {
+          expect(stub).not.be.calledOnce
+        })
+
+        cy.getAll('btn', 'mouseover mouseenter').each((stub) => {
+          expect(stub).calledOnce
+        })
+
+      } else {
+        cy.getAll('btn', 'pointerdown pointerup').each((stub) => {
+          expect(stub).to.be.calledOnce
+        })
+
+        cy.getAll('btn', 'mouseover mouseenter').each((stub) => {
+          expect(stub).to.not.be.called
+        })
+
+      }
+
+      cy.getAll('btn', 'mousedown mouseup click').each((stub) => {
+        expect(stub).to.not.be.called
       })
 
-      cy.getAll('@mouseover @mouseenter @mousedown @mouseup @click').each((stub) => {
-        expect(stub).to.not.be.called
+      cy.getAll('btn', 'pointerover pointerenter').each((stub) => {
+        expect(stub).to.be.calledOnce
       })
 
     })
@@ -3812,9 +3791,7 @@ describe('mouse state', () => {
     it('handles disabled attr added on mousedown', () => {
       const btn = cy.$$(/*html*/'<input id=\'btn\'>').appendTo(cy.$$('body'))
 
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
-      })
+      attachMouseClickListeners({ btn })
 
       btn.on('mousedown', () => {
         btn.attr('disabled', true)
@@ -3822,11 +3799,13 @@ describe('mouse state', () => {
 
       cy.get('#btn').click()
 
-      cy.getAll('@pointerdown @mousedown @pointerup').each((stub) => {
-        expect(stub).to.be.calledOnce
-      })
+      if (Cypress.browser.family === 'firefox') {
+        cy.getAll('btn', 'pointerdown mousedown').each(shouldBeCalledOnce)
+      } else {
+        cy.getAll('btn', 'pointerdown mousedown pointerup').each(shouldBeCalledOnce)
+      }
 
-      cy.getAll('@mouseup @click').each((stub) => {
+      cy.getAll('btn', 'mouseup click').each((stub) => {
         expect(stub).to.not.be.calledOnce
       })
     })
@@ -3893,11 +3872,12 @@ describe('mouse state', () => {
         expect(stub).to.not.be.called
       })
 
-      // on disabled inputs, pointer events are still fired
-      cy.getAll('@pointerdown @pointerup').each((stub) => {
-        expect(stub).to.be.called
-      })
-
+      // Chrome: on disabled inputs, pointer events are still fired
+      if (Cypress.browser.family === 'chrome') {
+        cy.getAll('@pointerdown @pointerup').each(shouldBeCalledOnce)
+      } else {
+        cy.getAll('@pointerdown @pointerup').each(shouldNotBeCalled)
+      }
     })
 
     it('can target new element after mousedown sequence', () => {
@@ -4033,3 +4013,11 @@ const shouldBeCalled = (stub) => _wrapLogFalse(stub).should('be.called')
 const shouldBeCalledOnce = (stub) => _wrapLogFalse(stub).should('be.calledOnce')
 const shouldBeCalledNth = (num) => (stub) => _wrapLogFalse(stub).should('have.callCount', num)
 const shouldNotBeCalled = (stub) => _wrapLogFalse(stub).should('not.be.called')
+
+const getMidPoint = (el) => {
+  const box = el.getBoundingClientRect()
+  const midX = box.left + box.width / 2
+  const midY = box.top + box.height / 2
+
+  return { x: midX, y: midY }
+}

@@ -80,7 +80,7 @@ const create = (state, focused) => {
      */
     _mouseMoveEvents (el, coords) {
 
-      // events are not fired on disabled elements, so we don't have to take that into account
+      // in chrome, only certain events are not fired on disabled elements, so we need to account for this
       const win = $dom.getWindowByElement(el)
       const { x, y } = coords
 
@@ -576,9 +576,18 @@ const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = f
 }
 
 const sendPointerup = (el, evtOptions) => {
+
+  if (el.disabled) {
+    return {}
+  }
+
   return sendPointerEvent(el, evtOptions, 'pointerup', true, true)
 }
 const sendPointerdown = (el, evtOptions) => {
+  if (el.disabled) {
+    return {}
+  }
+
   return sendPointerEvent(el, evtOptions, 'pointerdown', true, true)
 }
 const sendPointermove = (el, evtOptions) => {
@@ -598,9 +607,19 @@ const sendPointerout = (el, evtOptions) => {
 }
 
 const sendMouseup = (el, evtOptions) => {
+
+  if (el.disabled) {
+    return {}
+  }
+
   return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
 }
 const sendMousedown = (el, evtOptions) => {
+
+  if (el.disabled) {
+    return {}
+  }
+
   return sendMouseEvent(el, evtOptions, 'mousedown', true, true)
 }
 const sendMousemove = (el, evtOptions) => {
@@ -619,12 +638,27 @@ const sendMouseout = (el, evtOptions) => {
   return sendMouseEvent(el, evtOptions, 'mouseout', true, true)
 }
 const sendClick = (el, evtOptions) => {
+
+  if (el.disabled) {
+    return {}
+  }
+
   return sendMouseEvent(el, evtOptions, 'click', true, true)
 }
 const sendDblclick = (el, evtOptions) => {
+
+  if (el.disabled) {
+    return {}
+  }
+
   return sendMouseEvent(el, evtOptions, 'dblclick', true, true)
 }
 const sendContextmenu = (el, evtOptions) => {
+
+  if (el.disabled) {
+    return {}
+  }
+
   return sendMouseEvent(el, evtOptions, 'contextmenu', true, true)
 }
 
