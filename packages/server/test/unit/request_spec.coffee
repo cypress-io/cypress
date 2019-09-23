@@ -449,6 +449,20 @@ describe "lib/request", ->
       .then (resp) ->
         expect(resp.body).to.deep.eq({status: "ok"})
 
+    it "parses response body as json if content-type application/vnd.api+json response headers", ->
+      nock("http://localhost:8080")
+      .get("/status.json")
+      .reply(200, JSON.stringify({status: "ok"}), {
+        "Content-Type": "application/vnd.api+json"
+      })
+
+      request.sendPromise({}, @fn, {
+        url: "http://localhost:8080/status.json"
+        cookies: false
+      })
+      .then (resp) ->
+        expect(resp.body).to.deep.eq({status: "ok"})
+
     it "revives from parsing bad json", ->
       nock("http://localhost:8080")
       .get("/status.json")
