@@ -1173,20 +1173,13 @@ describe "src/cy/commands/querying", ->
           .server()
           .route(/users/, {}).as("getUsers")
           .get("@getUsers.all ")
-
-      it "throws when options property is not an object", (done) -> 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "expected bar to be of type object, instead got string"
-          done()
-        
-        cy.get('foo', 'bar') 
-      _.each ["", [], 1, null, undefined], (value) =>
+      _.each ["", "foo", [], 1, null ], (value) =>
         it "throws when options property is not an object. Such as: #{value}", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.include "only accepts an options object for its second argument. You passed #{value}"
             done()
 
-          cy.get("foo", value)
+          cy.get("foobar", value)
           
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button").hide()

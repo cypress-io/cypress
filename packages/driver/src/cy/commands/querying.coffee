@@ -9,6 +9,8 @@ $expr = $.expr[":"]
 
 $contains = $expr.contains
 
+typeIsArray = Array.isArray || ( value ) -> return {}.toString.call( value ) is '[object Array]'
+
 restoreContains = ->
   $expr.contains = $contains
 
@@ -68,7 +70,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     get: (selector, options = {}) ->
       ctx = @
-
+      ## can't get this error output any nicer as far as I know
+      if options is null or (typeIsArray options) or typeof options isnt 'object' then return $utils.throwErrByPath "get.invalid_options", {
+          args: { options  }
+      }
       _.defaults(options, {
         retry: true
         withinSubject: cy.state("withinSubject")
@@ -78,7 +83,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       consoleProps = {}
-
       start = (aliasType) ->
         return if options.log is false
 
@@ -208,10 +212,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         consoleProps.Yielded = $dom.getElements($el)
         consoleProps.Elements = $el?.length
-        if  typeof options isnt 'object' then $utils.throwErrByPath "get.invalid_options", {
-          arg: options
-        }
-        else options._log.set({$el: $el})
+
+        options._log.set({$el: $el})
 
       getElements = ->
         ## attempt to query for the elements by withinSubject context
