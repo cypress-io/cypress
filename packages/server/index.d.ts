@@ -28,6 +28,4 @@ export namespace CyServer {
   export interface Socket {}
 }
 
-export as namespace CyServer
-
-export = CyServer
+export default CyServer

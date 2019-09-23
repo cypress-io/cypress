@@ -29,11 +29,11 @@ export interface BackendRequest {
   /**
    * A callback that can be used to send the response through the proxy.
    */
-  continueResponse?: Function
+  continueResponse?: (newResStream?: Readable) => void
+  getResBodyStream?: () => Readable
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
   incomingRes?: IncomingMessage
-  resStream?: Readable
   /**
    * Should the response go to the driver, or should it be allowed to continue?
    */

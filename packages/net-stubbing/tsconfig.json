@@ -1,8 +1,6 @@
 {
   "extends": "../ts/tsconfig.json",
-  "compilerOptions": {
-    "types": [
-      "./lib/types.ts"
-    ]
-  }
+  "files": [
+    "./../ts/index.d.ts"
+  ]
 }

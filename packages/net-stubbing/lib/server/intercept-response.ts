@@ -4,7 +4,6 @@ import debugModule from 'debug'
 import { IncomingMessage } from 'http'
 import { PassThrough, Readable } from 'stream'
 import ThrottleStream from 'throttle'
-import zlib from 'zlib'
 
 import {
   CypressIncomingRequest,
@@ -19,35 +18,26 @@ import {
 } from '../types'
 import {
   emit,
-  isResGzipped,
   sendStaticResponse,
 } from './util'
 
 const debug = debugModule('cypress:net-stubbing:server:intercept-response')
 
-export function InterceptResponse (state: NetStubbingState, project: any, req: CypressIncomingRequest, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
-  try {
-    return _onProxiedResponse(state, project, req, resStream, incomingRes, cb)
-  } catch (err) {
-    debug('error in onProxiedResponse: %o', { err, req, resStream, incomingRes, routes: state.routes })
-  }
-}
-
-function _onProxiedResponse (state: NetStubbingState, project: any, req: CypressIncomingRequest, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
+export function InterceptResponse (state: NetStubbingState, project: any, req: CypressIncomingRequest, getResBodyStream: () => Readable, incomingRes: IncomingMessage, continueResponse: (newResStream?: Readable) => void) {
   const backendRequest = state.requests[req.requestId]
 
   debug('onProxiedResponse %o', { req, backendRequest })
 
   if (!backendRequest || !backendRequest.sendResponseToDriver) {
     // either the original request was not intercepted, or there's nothing for the driver to do with this response
-    return cb(resStream)
+    return continueResponse()
   }
 
   // this may get set back to `true` by another route
   backendRequest.sendResponseToDriver = false
   backendRequest.incomingRes = incomingRes
-  backendRequest.resStream = resStream
-  backendRequest.continueResponse = cb
+  backendRequest.getResBodyStream = getResBodyStream
+  backendRequest.continueResponse = continueResponse
 
   const frame : NetEventFrames.HttpResponseReceived = {
     routeHandlerId: backendRequest.route.handlerId!,
@@ -63,16 +53,7 @@ function _onProxiedResponse (state: NetStubbingState, project: any, req: Cypress
     emit(project.server._socket, 'http:response:received', frame)
   }
 
-  resStream.pipe(concatStream((resBody) => {
-    // @ts-ignore
-    if (isResGzipped(incomingRes)) {
-      return zlib.gunzip(resBody, (err, extracted) => {
-        // TODO: handle encoding errors or just pass it on?
-        res.body = extracted.toString()
-        emitReceived()
-      })
-    }
-
+  getResBodyStream().pipe(concatStream((resBody) => {
     res.body = resBody.toString()
     emitReceived()
   }))
@@ -95,6 +76,8 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
   })
 
   function continueResponse () {
+    let newResStream : Optional<Readable>
+
     function throttleify (body) {
       const throttleStr = new ThrottleStream(frame.throttleKbps! * 1024)
 
@@ -118,29 +101,22 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
     function sendBody (bodyBuffer) {
       // transform the body string into stream format
       if (frame.throttleKbps) {
-        backendRequest.resStream = throttleify(bodyBuffer)
+        newResStream = throttleify(bodyBuffer)
       } else {
         const pt = new PassThrough()
 
         pt.write(bodyBuffer)
         pt.end()
 
-        backendRequest.resStream = pt
+        newResStream = pt
       }
 
       // TODO: this won't quite work for onProxiedResponseError?
       // @ts-ignore
-      backendRequest.continueResponse(backendRequest.resStream)
+      backendRequest.continueResponse(newResStream)
     }
 
-    // regzip, if it should be
-    if (isResGzipped(backendRequest.incomingRes)) {
-      return zlib.gzip(res.body, (err, body) => {
-        sendBody(body)
-      })
-    }
-
-    sendBody(res.body)
+    return sendBody(res.body)
   }
 
   if (typeof frame.continueResponseAt === 'number') {

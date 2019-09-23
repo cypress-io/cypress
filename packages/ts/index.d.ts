@@ -12,55 +12,6 @@ declare module '@cypress/get-windows-proxy' {
   export = getWindowsProxy
 }
 
-/**
- * For properties on `Cypress` and `cy` that are not intended for public use.
- */
-declare namespace Cypress {
-  interface CypressUtils {
-    warnByPath: (path: string, obj: any) => void
-  }
-
-  interface Actions {
-    (action: 'net:event', frame: any)
-  }
-
-  interface cy {
-    /**
-     * If `as` is chained to the current command, return the alias name used.
-     */
-    getNextAlias: () => Optional<string>
-    retry: (fn: () => any, opts: any) => any
-  }
-
-  interface Cypress {
-    backend: (eventName: string, ...args: any[]) => Promise<any>
-    routes: {
-      [routeHandlerId: string]: any
-    }
-    sinon: sinon.SinonStatic
-    utils: CypressUtils
-  }
-
-  interface LogConfig {
-    message?: string
-    instrument?: 'route'
-    isStubbed?: boolean
-    alias?: string
-    aliasType?: 'route'
-    type?: 'parent'
-    event?: boolean
-    method?: string
-    url?: string
-    status?: number
-    numResponses?: number
-    response?: string
-    renderProps?: () => {
-      indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
-      message?: string
-    }
-  }
-}
-
 declare module 'http' {
   import { Socket } from 'net'
   import { Url } from 'url'

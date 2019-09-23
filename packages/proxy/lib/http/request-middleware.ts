@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import CyServer from '@packages/server'
 import { blacklist, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing/server'
 import debugModule from 'debug'
@@ -109,7 +110,7 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }: CyServer.RemoteState) 
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   const remoteState = this.getRemoteState()
 
-  if (reqNeedsBasicAuthHeaders(this.req, remoteState)) {
+  if (remoteState.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
     const { auth } = remoteState
     const base64 = Buffer.from(`${auth.username}:${auth.password}`).toString('base64')
 

@@ -7,11 +7,23 @@ import debugModule from 'debug'
 import { HttpMiddleware } from '.'
 import iconv from 'iconv-lite'
 import { IncomingMessage, IncomingHttpHeaders } from 'http'
+import { InterceptResponse } from '@packages/net-stubbing/server'
 import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
 
 export type ResponseMiddleware = HttpMiddleware<{
+  /**
+   * Before using `res.incomingResStream`, `prepareResStream` can be used
+   * to remove any encoding that prevents it from being returned as plain text.
+   *
+   * This is done as-needed to avoid unnecessary g(un)zipping.
+   */
+  makeResStreamPlainText: () => void
+  /**
+   * Has the `incomingResStream` already been gunzipped?
+   */
+  isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
 }>
@@ -119,7 +131,41 @@ const LogResponse: ResponseMiddleware = function () {
   this.next()
 }
 
-const PatchExpressSetHeader: ResponseMiddleware = function () {
+const AttachPlainTextStreamFn : ResponseMiddleware = function () {
+  this.makeResStreamPlainText = () => {
+    if (!this.isGunzipped && resIsGzipped(this.incomingRes) && (this.res.wantsInjection || this.res.wantsSecurityRemoved)) {
+      debug('gunzipping response body')
+
+      const gunzip = zlib.createGunzip(zlibOptions)
+
+      this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
+
+      this.skipMiddleware('GzipBody')
+    }
+  }
+
+  this.next()
+}
+
+const NetStubbingIntercept : ResponseMiddleware = function () {
+  const getResBodyStream = () => {
+    this.makeResStreamPlainText()
+
+    return this.incomingResStream
+  }
+
+  const next = (newResStream?: Readable) => {
+    if (newResStream) {
+      this.incomingResStream = newResStream
+    }
+
+    this.next()
+  }
+
+  InterceptResponse(this.netStubbingState, this.socket, this.req, getResBodyStream, this.incomingRes, next)
+}
+
+const PatchExpressSetHeader : ResponseMiddleware = function () {
   const originalSetHeader = this.res.setHeader
 
   // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
@@ -251,21 +297,7 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeGunzipBody: ResponseMiddleware = function () {
-  if (resIsGzipped(this.incomingRes) && (this.res.wantsInjection || this.res.wantsSecurityRemoved)) {
-    debug('ungzipping response body')
-
-    const gunzip = zlib.createGunzip(zlibOptions)
-
-    this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
-  } else {
-    this.skipMiddleware('GzipBody') // not needed anymore
-  }
-
-  this.next()
-}
-
-const MaybeInjectHtml: ResponseMiddleware = function () {
+const MaybeInjectHtml : ResponseMiddleware = function () {
   if (!this.res.wantsInjection) {
     return this.next()
   }
@@ -273,6 +305,8 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
   this.skipMiddleware('MaybeRemoveSecurity') // we only want to do one or the other
 
   debug('injecting into HTML')
+
+  this.makeResStreamPlainText()
 
   this.incomingResStream.pipe(concatStream((body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
@@ -297,6 +331,8 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
   debug('removing JS framebusting code')
 
+  this.makeResStreamPlainText()
+
   this.incomingResStream.setEncoding('utf8')
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security()).on('error', this.onError)
   this.next()
@@ -316,6 +352,8 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
 
 export default {
   LogResponse,
+  AttachPlainTextStreamFn,
+  NetStubbingIntercept,
   PatchExpressSetHeader,
   SetInjectionLevel,
   OmitProblematicHeaders,
@@ -325,7 +363,6 @@ export default {
   CopyResponseStatusCode,
   ClearCyInitialCookie,
   MaybeEndWithEmptyBody,
-  MaybeGunzipBody,
   MaybeInjectHtml,
   MaybeRemoveSecurity,
   GzipBody,

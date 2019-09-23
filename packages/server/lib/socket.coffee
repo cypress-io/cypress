@@ -8,14 +8,13 @@ open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
-netStubbing   = require("@packages/net-stubbing/server")
 task          = require("./task")
 files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
-netStubbing   = require("./net_stubbing")
 preprocessor  = require("./plugins/preprocessor")
+netStubbing   = require("@packages/net-stubbing/server")
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -316,7 +315,7 @@ class Socket
             when "write:file"
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
             when "net"
-              netStubbing.onNetEvent(@, args...)
+              netStubbing.onNetEvent(options.netStubbingState, @, args...)
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"
@@ -349,7 +348,7 @@ class Socket
         require("electron").shell.openExternal(url)
 
       socket.on "test:before:run:async", =>
-        netStubbing.reset()
+        netStubbing.onBeforeTestRun(options.netStubbingState)
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>

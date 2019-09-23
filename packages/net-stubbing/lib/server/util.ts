@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import debugModule from 'debug'
-import { ServerResponse, IncomingMessage } from 'http'
+import { ServerResponse } from 'http'
 import { StaticResponse } from '../external-types'
 import {
   RouteMatcherOptionsGeneric,
@@ -38,10 +38,6 @@ export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<a
   )
 }
 
-export function isResGzipped (res: IncomingMessage) {
-  return res.headers['content-encoding'] === 'gzip'
-}
-
 export function sendStaticResponse (res: ServerResponse, staticResponse: StaticResponse, resStream?: Readable) {
   if (staticResponse.destroySocket) {
     res.connection.destroy()
@@ -67,4 +63,6 @@ export function sendStaticResponse (res: ServerResponse, staticResponse: StaticR
   }
 
   res.end()
+
+  return
 }

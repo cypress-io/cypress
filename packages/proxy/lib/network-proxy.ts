@@ -1,18 +1,9 @@
-import { Http, HttpMiddlewareStacks } from './http'
-import CyServer from '@packages/server'
-import { NetStubbingState } from '@packages/net-stubbing/server'
+import { Http, ServerCtx } from './http'
 
 export class NetworkProxy {
   http: Http
 
-  constructor (opts: {
-    config: CyServer.Config
-    getRemoteState: CyServer.getRemoteState
-    middleware?: HttpMiddlewareStacks
-    netStubbingState: NetStubbingState
-    request: any
-    socket: CyServer.Socket
-  }) {
+  constructor (opts: ServerCtx) {
     this.http = new Http(opts)
   }
 

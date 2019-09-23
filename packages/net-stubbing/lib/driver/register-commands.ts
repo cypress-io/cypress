@@ -22,8 +22,6 @@ import {
   NetEventFrames,
 } from '../types'
 
-const utils = require('../../cypress/utils')
-
 /**
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
  */
@@ -114,6 +112,8 @@ function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHe
 
     return staticResponse
   }
+
+  return
 }
 
 function _validateStaticResponse (staticResponse: StaticResponse): void {
@@ -137,6 +137,7 @@ function _validateStaticResponse (staticResponse: StaticResponse): void {
 }
 
 export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State /* config */) {
+  const { utils } = Cypress
   // TODO: figure out what to do for XHR compatibility
 
   function _emit (eventName: string, ...args: any[]) {
@@ -263,13 +264,17 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         try {
           _validateStaticResponse(<StaticResponse>handler)
         } catch (err) {
-          return utils.throwErrByPath('net_stubbing.invalid_static_response', { args: { err, staticResponse: handler } })
+          utils.throwErrByPath('net_stubbing.invalid_static_response', { args: { err, staticResponse: handler } })
+
+          return Promise.resolve()
         }
 
         frame.staticResponse = <StaticResponse>handler
         break
       default:
-        return utils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
+        utils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
+
+        return Promise.resolve()
     }
 
     state('routes')[handlerId] = {
@@ -299,7 +304,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     }
 
     return _addRoute(options, handler)
-    .thenReturn(null)
+    .then(() => null)
   }
 
   function server () : void {

@@ -7,7 +7,7 @@
     "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@babel/preset-env": "7.5.4",
     "@babel/preset-react": "7.0.0",
-    "@babel/preset-typescript": "7.3.3",
+    "@babel/preset-typescript": "7.6.0",
     "@babel/register": "7.4.4",
     "@types/copy-webpack-plugin": "5.0.0",
     "@types/html-webpack-plugin": "3.2.0",
