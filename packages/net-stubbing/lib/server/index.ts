@@ -9,6 +9,8 @@ export { InterceptRequest } from './intercept-request'
 
 export { InterceptResponse } from './intercept-response'
 
-import { State } from './state'
+export { NetStubbingState } from './types'
 
-export const NetStubbingState = State
+import { state } from './state'
+
+export const netStubbingState = state

@@ -7,8 +7,10 @@ import ThrottleStream from 'throttle'
 import zlib from 'zlib'
 
 import {
+  CypressIncomingRequest,
+} from '@packages/proxy'
+import {
   NetStubbingState,
-  ProxyIncomingMessage,
 } from './types'
 import {
   CyHttpMessages,
@@ -23,7 +25,7 @@ import {
 
 const debug = debugModule('cypress:net-stubbing:server:intercept-response')
 
-export function InterceptResponse (state: NetStubbingState, project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
+export function InterceptResponse (state: NetStubbingState, project: any, req: CypressIncomingRequest, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
   try {
     return _onProxiedResponse(state, project, req, resStream, incomingRes, cb)
   } catch (err) {
@@ -31,7 +33,7 @@ export function InterceptResponse (state: NetStubbingState, project: any, req: P
   }
 }
 
-function _onProxiedResponse (state: NetStubbingState, project: any, req: ProxyIncomingMessage, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
+function _onProxiedResponse (state: NetStubbingState, project: any, req: CypressIncomingRequest, resStream: Readable, incomingRes: IncomingMessage, cb: Function) {
   const backendRequest = state.requests[req.requestId]
 
   debug('onProxiedResponse %o', { req, backendRequest })

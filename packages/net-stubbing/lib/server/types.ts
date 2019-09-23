@@ -1,7 +1,10 @@
+import { IncomingMessage } from 'http'
+import { Readable } from 'stream'
+
 import {
-  IncomingMessage,
-  ServerResponse,
-} from 'http'
+  CypressIncomingRequest,
+  CypressOutgoingResponse,
+} from '@packages/proxy'
 import {
   RouteMatcherOptions,
   StaticResponse,
@@ -11,16 +14,6 @@ export interface BackendRoute {
   routeMatcher: RouteMatcherOptions
   handlerId?: string
   staticResponse?: StaticResponse
-}
-
-export interface ProxyIncomingMessage extends IncomingMessage {
-  headers: {
-    [k: string]: string
-  }
-  proxiedUrl: string
-  webSocket: boolean // TODO: populate
-  requestId: string
-  body?: string
 }
 
 export interface BackendRequest {
@@ -37,10 +30,10 @@ export interface BackendRequest {
    * A callback that can be used to send the response through the proxy.
    */
   continueResponse?: Function
-  req: ProxyIncomingMessage
-  res: ServerResponse & { body?: string | any }
+  req: CypressIncomingRequest
+  res: CypressOutgoingResponse
   incomingRes?: IncomingMessage
-  resStream?: any
+  resStream?: Readable
   /**
    * Should the response go to the driver, or should it be allowed to continue?
    */

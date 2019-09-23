@@ -1,11 +1,17 @@
 import _ from 'lodash'
+import CyServer from '@packages/server'
+import {
+  CypressIncomingRequest,
+  CypressOutgoingResponse,
+} from '@packages/proxy'
 import debugModule from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { IncomingMessage } from 'http'
+import { NetStubbingState } from '@packages/net-stubbing/server'
 import Promise from 'bluebird'
 import { Readable } from 'stream'
-import { Request, Response } from 'express'
+import { Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 
@@ -19,36 +25,32 @@ export enum HttpStages {
 
 export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
 
-export type CypressRequest = Request & {
-  // TODO: what's this difference from req.url? is it only for non-proxied requests?
-  proxiedUrl: string
-  abort: () => void
-}
-
-type MiddlewareStacks = {
+export type HttpMiddlewareStacks = {
   [stage in HttpStages]: {
     [name: string]: HttpMiddleware<any>
   }
 }
 
-export type CypressResponse = Response & {
-  isInitial: null | boolean
-  wantsInjection: 'full' | 'partial' | false
-  wantsSecurityRemoved: null | boolean
-}
-
 type HttpMiddlewareCtx<T> = {
-  req: CypressRequest
-  res: CypressResponse
+  req: CypressIncomingRequest
+  res: CypressOutgoingResponse
 
-  middleware: MiddlewareStacks
+  middleware: HttpMiddlewareStacks
 } & T
 
-const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
+type ServerCtx = Readonly<{
+  config: CyServer.Config
+  getRemoteState: CyServer.getRemoteState
+  netStubbingState: NetStubbingState
+  middleware: HttpMiddlewareStacks
+  socket: CyServer.Socket
+}>
+
+const READONLY_MIDDLEWARE_KEYS : (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getRemoteState',
-  'request',
+  'netStubbingState',
   'next',
   'end',
   'onResponse',
@@ -56,11 +58,8 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'skipMiddleware',
 ]
 
-type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & Readonly<{
+type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
   buffers: HttpBuffers
-  config: any
-  getRemoteState: () => any
-  request: any
 
   next: () => void
   /**
@@ -172,22 +171,17 @@ export function _runStage (type: HttpStages, ctx: any) {
 
 export class Http {
   buffers: HttpBuffers
-  config: any
+  config: CyServer.Config
   getRemoteState: () => any
-  middleware: MiddlewareStacks
+  middleware: HttpMiddlewareStacks
+  netStubbingState: NetStubbingState
   request: any
+  socket: CyServer.Socket
 
-  constructor (opts: {
-    config: any
-    getRemoteState: () => any
-    middleware?: MiddlewareStacks
-    request: any
-  }) {
+  constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
 
-    this.config = opts.config
-    this.getRemoteState = opts.getRemoteState
-    this.request = opts.request
+    _.assign(this, opts)
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = {
@@ -195,8 +189,6 @@ export class Http {
         [HttpStages.IncomingResponse]: ResponseMiddleware,
         [HttpStages.Error]: ErrorMiddleware,
       }
-    } else {
-      this.middleware = opts.middleware
     }
   }
 
@@ -210,6 +202,8 @@ export class Http {
       getRemoteState: this.getRemoteState,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
+      netStubbingState: this.netStubbingState,
+      socket: this.socket,
     }
 
     return _runStage(HttpStages.IncomingRequest, ctx)

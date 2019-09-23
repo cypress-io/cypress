@@ -12,15 +12,9 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
-{ NetStubbingState } = require("@packages/net-stubbing/server")
-{
-  agent,
-  blacklist,
-  concatStream,
-  cors,
-  uri
-} = require("@packages/network")
+{ agent, blacklist, concatStream, cors, uri } = require("@packages/network")
 { NetworkProxy } = require("@packages/proxy")
+{ netStubbingState } = require("@packages/net-stubbing/server")
 origin       = require("./util/origin")
 ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
@@ -144,17 +138,23 @@ class Server
       @_nodeProxy = httpProxy.createProxyServer()
       @_xhrServer = XhrServer.create()
 
-      @_netStubbingState = NetStubbingState()
-
       getRemoteState = => @_getRemoteState()
 
-      @_networkProxy = new NetworkProxy({ config, getRemoteState, request: @_request })
+      @createNetworkProxy(config, getRemoteState)
 
       @createHosts(config.hosts)
 
       @createRoutes(app, config, @_request, getRemoteState, project, @_networkProxy)
 
       @createServer(app, config, project, @_request, onWarning)
+
+  createNetworkProxy: (config, getRemoteState) ->
+    @_netStubbingState = netStubbingState()
+
+    @_networkProxy = new NetworkProxy({
+      config,
+      getRemoteState,
+    })
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->

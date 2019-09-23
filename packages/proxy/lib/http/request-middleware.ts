@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { blacklist, cors } from '@packages/network'
+import { InterceptRequest } from '@packages/net-stubbing/server'
 import debugModule from 'debug'
 import { HttpMiddleware } from '.'
 
@@ -15,6 +16,10 @@ const LogRequest: RequestMiddleware = function () {
   })
 
   this.next()
+}
+
+const NetStubbingIntercept : RequestMiddleware = function () {
+  InterceptRequest(this.netStubbingState, this.socket, this.req, this.res, this.next)
 }
 
 const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
@@ -96,7 +101,7 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   this.next()
 }
 
-function reqNeedsBasicAuthHeaders (req, { auth, origin }) {
+function reqNeedsBasicAuthHeaders (req, { auth, origin }: CyServer.RemoteState) {
   //if we have auth headers, this request matches our origin, protection space, and the user has not supplied auth headers
   return auth && !req.headers['authorization'] && cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }
@@ -146,6 +151,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
+  NetStubbingIntercept,
   RedirectToClientRouteIfUnloaded,
   RedirectToClientRouteIfNotProxied,
   EndRequestsToBlacklistedHosts,

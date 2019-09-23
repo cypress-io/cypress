@@ -2,8 +2,9 @@ import _ from 'lodash'
 import charset from 'charset'
 import { CookieOptions } from 'express'
 import { cors, concatStream } from '@packages/network'
-import { CypressRequest, CypressResponse, HttpMiddleware } from '.'
+import { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
+import { HttpMiddleware } from '.'
 import iconv from 'iconv-lite'
 import { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { PassThrough, Readable } from 'stream'
@@ -36,7 +37,7 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer)
   return 'latin1'
 }
 
-function reqMatchesOriginPolicy (req: CypressRequest, remoteState) {
+function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
     return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
   }
@@ -48,7 +49,7 @@ function reqMatchesOriginPolicy (req: CypressRequest, remoteState) {
   return false
 }
 
-function reqWillRenderHtml (req: CypressRequest) {
+function reqWillRenderHtml (req: CypressIncomingRequest) {
   // will this request be rendered in the browser, necessitating injection?
   // https://github.com/cypress-io/cypress/issues/288
 
@@ -83,12 +84,12 @@ function resIsGzipped (res: IncomingMessage) {
 // HEAD, 1xx, 204, and 304 responses should never contain anything after headers
 const NO_BODY_STATUS_CODES = [204, 304]
 
-function responseMustHaveEmptyBody (req: CypressRequest, res: IncomingMessage) {
+function responseMustHaveEmptyBody (req: CypressIncomingRequest, res: IncomingMessage) {
   return _.some([_.includes(NO_BODY_STATUS_CODES, res.statusCode), _.invoke(req.method, 'toLowerCase') === 'head'])
 }
 
-function setCookie (res: CypressResponse, k: string, v: string, domain: string) {
-  let opts: CookieOptions = { domain }
+function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
+  let opts : CookieOptions = { domain }
 
   if (!v) {
     v = ''
@@ -99,7 +100,7 @@ function setCookie (res: CypressResponse, k: string, v: string, domain: string) 
   return res.cookie(k, v, opts)
 }
 
-function setInitialCookie (res: CypressResponse, remoteState: any, value) {
+function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value) {
   // dont modify any cookies if we're trying to clear the initial cookie and we're not injecting anything
   // dont set the cookies if we're not on the initial request
   if ((!value && !res.wantsInjection) || !res.isInitial) {

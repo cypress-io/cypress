@@ -2,11 +2,13 @@ import _ from 'lodash'
 import concatStream from 'concat-stream'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
-import { ServerResponse } from 'http'
 import url from 'url'
 
 import {
-  ProxyIncomingMessage,
+  CypressIncomingRequest,
+  CypressOutgoingResponse,
+} from '@packages/proxy'
+import {
   BackendRoute,
   BackendRequest,
   NetStubbingState,
@@ -25,7 +27,7 @@ const debug = debugModule('cypress:net-stubbing:server:intercept-request')
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
 // TOOD: optimize to short-circuit on route not match
-export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: ProxyIncomingMessage) {
+export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: CypressIncomingRequest) {
   const matchable = _getMatchableForRequest(req)
 
   let match = true
@@ -86,7 +88,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: ProxyIn
   return match
 }
 
-export function _getMatchableForRequest (req: ProxyIncomingMessage) {
+export function _getMatchableForRequest (req: CypressIncomingRequest) {
   let matchable : any = _.pick(req, ['headers', 'method', 'webSocket'])
 
   const authorization = req.headers['authorization']
@@ -116,7 +118,7 @@ export function _getMatchableForRequest (req: ProxyIncomingMessage) {
   return matchable
 }
 
-function _getRouteForRequest (routes: BackendRoute[], req: ProxyIncomingMessage, prevRoute?: BackendRoute) {
+function _getRouteForRequest (routes: BackendRoute[], req: CypressIncomingRequest, prevRoute?: BackendRoute) {
   const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
 
   return _.find(possibleRoutes, (route) => {
@@ -131,7 +133,7 @@ function _getRouteForRequest (routes: BackendRoute[], req: ProxyIncomingMessage,
  * @param res
  * @param cb Can be called to resume the proxy's normal behavior. If `res` is not handled and this is not called, the request will hang.
  */
-export function InterceptRequest (state: NetStubbingState, project: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
+export function InterceptRequest (state: NetStubbingState, project: any, req: CypressIncomingRequest, res: CypressOutgoingResponse, cb: Function) {
   const route = _getRouteForRequest(state.routes, req)
 
   try {
@@ -141,7 +143,7 @@ export function InterceptRequest (state: NetStubbingState, project: any, req: Pr
   }
 }
 
-function _onProxiedRequest (state: NetStubbingState, route: BackendRoute | undefined, socket: any, req: ProxyIncomingMessage, res: ServerResponse, cb: Function) {
+function _onProxiedRequest (state: NetStubbingState, route: BackendRoute | undefined, socket: any, req: CypressIncomingRequest, res: CypressOutgoingResponse, cb: Function) {
   if (!route) {
     // not intercepted, carry on normally...
     return cb()

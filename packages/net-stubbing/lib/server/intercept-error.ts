@@ -1,15 +1,13 @@
 import debugModule from 'debug'
 
-import {
-  NetStubbingState,
-  ProxyIncomingMessage,
-} from './types'
+import { CypressIncomingRequest } from '@packages/proxy'
+import { NetStubbingState } from './types'
 import { NetEventFrames } from '../types'
 import { emit } from './util'
 
 const debug = debugModule('cypress:net-stubbing:server:intercept-error')
 
-export function InterceptError (state: NetStubbingState, project: any, req: ProxyIncomingMessage, error: Error, cb: Function) {
+export function InterceptError (state: NetStubbingState, project: any, req: CypressIncomingRequest, error: Error, cb: Function) {
   const backendRequest = state.requests[req.requestId]
 
   debug('onProxiedResponseError %o', { req, backendRequest })
