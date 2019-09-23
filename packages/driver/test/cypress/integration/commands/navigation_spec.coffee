@@ -553,7 +553,7 @@ describe "src/cy/commands/navigation", ->
       Cypress.config("baseUrl", "")
 
       cy.on "fail", (err) ->
-        expect(err.message).to.contain("cy.visit() failed because the 'file://...' protocol is not supported by Cypress.")
+        expect(err.message).to.contain("`cy.visit()` failed because the 'file://...' protocol is not supported by Cypress.")
         done()
 
       cy.visit("file:///cypress/fixtures/generic.html")
@@ -1090,7 +1090,7 @@ describe "src/cy/commands/navigation", ->
 
         it "throws when qs is #{str}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.contain "cy.visit() requires the 'qs' option to be an object, but received: '#{str}'"
+            expect(err.message).to.contain "`cy.visit()` requires the `qs` option to be an object, but received: `#{str}`"
             done()
 
           cy.visit({

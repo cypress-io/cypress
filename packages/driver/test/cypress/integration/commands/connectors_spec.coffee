@@ -477,8 +477,8 @@ describe "src/cy/commands/connectors", ->
                 memo + num
               , 0
             math: {
-              sum: =>
-                @obj.sum.apply(@obj, arguments)
+              sum: (args...) =>
+                @obj.sum(args...)
             }
           }
 
