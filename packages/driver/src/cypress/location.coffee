@@ -199,7 +199,7 @@ class $Location
     if baseUrl and (not @isFullyQualifiedUrl(url))
       ## prepend the root url to it
       url = @join(baseUrl, url)
-
+    console.log(url)
     @fullyQualifyUrl(url)
 
   @isAbsoluteRelative = (segment) ->
@@ -216,6 +216,7 @@ class $Location
         memo.push _.trim(segment, "/")
       memo
     , [_.trimEnd(from, "/")]
+    ## https://github.com/cypress-io/cypress/issues/2101
     ## If there is a query string and last is an empty string, don't append a /
     if not last.includes("/") and paths.some((path) -> reQueryParam.test(path)) 
       return paths.join("")

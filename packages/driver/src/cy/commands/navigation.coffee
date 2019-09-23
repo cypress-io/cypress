@@ -304,15 +304,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         when not resp.isOkStatusCode
           err = new Error
           err.gotResponse = true
-          _.extend(err, resp, { originalUrl: url});
+          _.extend(err, resp);
           throw err
 
         when not resp.isHtml
           ## throw invalid contentType error
           err = new Error
           err.invalidContentType = true
-          _.extend(err, resp, { originalUrl: url});
-
+          _.extend(err, resp);
           throw err
 
         else
@@ -550,7 +549,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       url = $Location.normalize(url)
       if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
-
       if qs = options.qs
         url = $Location.mergeUrlWithParams(url, qs)
 

@@ -284,14 +284,18 @@ describe "src/cypress/location", ->
       url = @normalize("timeout?ms=1000")
       url = Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/timeout?ms=1000"
-    it "handles query param in baseUrl https://github.com/cypress-io/cypress/issues/2101", ->
+
+    ## https://github.com/cypress-io/cypress/issues/2101
+    it "handles query param in baseUrl", ->
       url = @normalize("")
       url = Location.qualifyWithBaseUrl("http://localhost:3500/?foo=bar", "")
       expect(url).to.eq "http://localhost:3500/?foo=bar"
+
     it "handles query param with two dots https://github.com/cypress-io/cypress/issues/5090", ->
       url = @normalize("?foo=..")
       url = Location.qualifyWithBaseUrl("http://localhost:3500/", url)
       expect(url).to.eq "http://localhost:3500/?foo=.."
+      
     it "does not strip off path", ->
       url = @normalize("fixtures/sinon.html")
       url = Location.fullyQualifyUrl(url)
