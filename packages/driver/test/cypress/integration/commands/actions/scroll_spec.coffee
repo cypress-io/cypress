@@ -87,7 +87,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("topLeft").then () ->
+        cy.get("#scroll-to-both").scrollTo("topLeft").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -95,7 +95,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("top").then () ->
+        cy.get("#scroll-to-both").scrollTo("top").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
@@ -103,7 +103,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("topRight").then () ->
+        cy.get("#scroll-to-both").scrollTo("topRight").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100))
 
@@ -111,7 +111,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("left").then () ->
+        cy.get("#scroll-to-both").scrollTo("left").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -119,7 +119,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("center").then () ->
+        cy.get("#scroll-to-both").scrollTo("center").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
@@ -127,7 +127,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("right").then () ->
+        cy.get("#scroll-to-both").scrollTo("right").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100))
 
@@ -135,7 +135,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("bottomLeft").then () ->
+        cy.get("#scroll-to-both").scrollTo("bottomLeft").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100))
           expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -143,7 +143,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("bottom").then () ->
+        cy.get("#scroll-to-both").scrollTo("bottom").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100))
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
@@ -151,7 +151,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("bottomRight").then () ->
+        cy.get("#scroll-to-both").scrollTo("bottomRight").should ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100))
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100))
 
@@ -160,7 +160,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo(300, 150).then ($el) ->
+        cy.get("#scroll-to-both").scrollTo(300, 150).should ($el) ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(150)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
 
@@ -168,7 +168,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo(0, 150).then ($el) ->
+        cy.get("#scroll-to-both").scrollTo(0, 150).should ($el) ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(150)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -176,7 +176,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo(150, 0).then ($el) ->
+        cy.get("#scroll-to-both").scrollTo(150, 0).should ($el) ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(150)
 
@@ -184,7 +184,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("300px", "150px").then ($el) ->
+        cy.get("#scroll-to-both").scrollTo("300px", "150px").should ($el) ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(150)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
 
@@ -192,7 +192,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("50%", "50%").then ($el) ->
+        cy.get("#scroll-to-both").scrollTo("50%", "50%").should ($el) ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
@@ -200,7 +200,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("0%", "50%").then ($el) ->
+        cy.get("#scroll-to-both").scrollTo("0%", "50%").should ($el) ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -208,7 +208,7 @@ describe "src/cy/commands/actions/scroll", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        cy.get("#scroll-to-both").scrollTo("50%", "0%").then ($el) ->
+        cy.get("#scroll-to-both").scrollTo("50%", "0%").should ($el) ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
