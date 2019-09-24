@@ -1139,6 +1139,7 @@ We encountered an unexpected error talking to our servers.
 
 There is likely something wrong with the request.
 
+The --tag flag you passed was: nightly
 The --group flag you passed was: e2e-tests
 The --parallel flag you passed was: true
 The --ciBuildId flag you passed was: ciBuildId123
@@ -1248,7 +1249,7 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Tag: false, Group: foo, Parallel: true                                             │
+  │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1276,7 +1277,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
-  │ Params:     Tag: false, Group: foo, Parallel: true                                             │
+  │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 

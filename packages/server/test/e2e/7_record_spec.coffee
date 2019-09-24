@@ -402,9 +402,10 @@ describe "e2e record", ->
       req: "postRunRequest@2.1.0",
       resSchema: "postRunResponse@2.1.0"
       res: (req, res) ->
-        { group, ciBuildId } = req.body
+        { group, tag, ciBuildId } = req.body
 
         expect(group).to.eq("prod-e2e")
+        expect(tag).to.eq("nightly")
         expect(ciBuildId).to.eq("ciBuildId123")
 
         ## if this is the first response
@@ -459,12 +460,13 @@ describe "e2e record", ->
 
     setup(routes)
 
-    it "passes in parallel with group", ->
+    it "passes in parallel with group and tag", ->
       Promise.all([
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record*"
           group: "prod-e2e"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -485,6 +487,7 @@ describe "e2e record", ->
             key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
             spec: "record*"
             group: "prod-e2e"
+            tag: "nightly"
             record: true
             parallel: true
             snapshot: true
@@ -681,6 +684,25 @@ describe "e2e record", ->
             "POST /runs"
           ])
 
+      it "warns but proceeds when tagging without parallelization", ->
+        process.env.DISABLE_API_RETRIES = "true"
+
+        e2e.exec(@, {
+          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+          spec: "record_pass*"
+          tag: "nightly"
+          record: true
+          snapshot: true
+          ciBuildId: "ciBuildId123"
+          expectedExitCode: 0
+        })
+        .then ->
+          urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            "POST /runs"
+          ])
+
       it "does not proceed and exits with error when parallelizing", ->
         process.env.DISABLE_API_RETRIES = "true"
 
@@ -688,6 +710,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -721,6 +744,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -769,6 +793,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -837,6 +862,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "e2e-tests"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -1223,6 +1249,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
