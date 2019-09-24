@@ -79,7 +79,7 @@ const runSmokeTest = (binaryDir, options) => {
   const spawn = (linuxWithDisplayEnv) => {
     const random = _.random(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
-    
+
     if (process.platform !== 'win32' && process.geteuid() === 0) {
       // electron requires --no-sandbox to run as root
       args.unshift('--no-sandbox')
