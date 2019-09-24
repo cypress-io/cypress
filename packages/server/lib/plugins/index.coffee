@@ -81,6 +81,7 @@ module.exports = {
 
       handleError = (err) ->
         debug("plugins process error:", err.stack)
+        return if not pluginsProcess ## prevent repeating this in case of multiple errors
         killPluginsProcess()
         err = errors.get("PLUGINS_ERROR", err.annotated or err.stack or err.message)
         err.title = "Error running plugin"

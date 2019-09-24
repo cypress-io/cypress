@@ -177,7 +177,7 @@ const _stopServer = () => {
   authRedirectReached = false
 }
 
-const _launchNativeAuth = (loginUrl, sendMessage) => {
+const _launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
   const warnCouldNotLaunch = () => {
     if (openExternalAttempted && !authRedirectReached) {
       sendMessage('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
@@ -198,7 +198,7 @@ const _launchNativeAuth = (loginUrl, sendMessage) => {
     debug('Error launching native auth: %o', { err })
     warnCouldNotLaunch()
   })
-}
+})
 
 module.exports = {
   _buildFullLoginUrl,

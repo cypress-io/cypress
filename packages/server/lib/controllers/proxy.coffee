@@ -45,7 +45,6 @@ isGzipError = (err) ->
 responseMustHaveEmptyBody = (method, statusCode) ->
   _.some([
     _.includes(NO_BODY_STATUS_CODES, statusCode),
-    _.inRange(statusCode, 100, 200),
     _.invoke(method, 'toLowerCase') == 'head',
   ])
 
@@ -199,13 +198,17 @@ module.exports = {
         rewrite = (body) ->
           ## transparently decode their body to a node string and then re-encode
           nodeCharset = getNodeCharsetFromResponse(headers, body)
-          body = rewriter.html(iconv.decode(body, nodeCharset), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
-          iconv.encode(body, nodeCharset)
+          decodedBody = iconv.decode(body, nodeCharset)
+          rewrittenBody = rewriter.html(decodedBody, remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          iconv.encode(rewrittenBody, nodeCharset)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
         ## a buffer
         injection = concat (body) ->
+          ## concat-stream yields an empty array if nothing is written
+          if _.isEqual(body, [])
+            body = Buffer.from('')
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
           if isGzipped

@@ -1,41 +1,36 @@
-/* eslint-disable
-    @cypress/dev/no-return-before,
-    no-unused-vars,
-*/
 const fs = require('fs-extra')
 const pkg = require('./package.json')
 const gulp = require('gulp')
-const clean = require('gulp-clean')
-const rename = require('gulp-rename')
+const rimraf = require('rimraf')
 const source = require('vinyl-source-stream')
 const coffeeify = require('coffeeify')
 const browserify = require('browserify')
-const icons = require('@cypress/icons')
+const cypressIcons = require('@cypress/icons')
 
-gulp.task('clean', () => {
-  return gulp.src('dist', { allowEmpty: true })
-  .pipe(clean())
-})
+const copySocketClient = () => {
+  return gulp.src(require('../socket').getPathToClientSource())
+  .pipe(gulp.dest('dist'))
+}
 
-gulp.task('manifest', (done) => {
-  return gulp.src('app/manifest.json')
+const clean = (done) => {
+  rimraf('dist', done)
+}
+
+const manifest = (done) => {
+  gulp.src('app/manifest.json')
   .pipe(gulp.dest('dist'))
   .on('end', () => {
-    return fs.readJson('dist/manifest.json', (err, json) => {
+    return fs.readJson('dist/manifest.json', function (err, json) {
       json.version = pkg.version
 
       return fs.writeJson('dist/manifest.json', json, { spaces: 2 }, done)
     })
   })
-})
 
-gulp.task('backup', () => {
-  return gulp.src('dist/background.js')
-  .pipe(rename('background_src.js'))
-  .pipe(gulp.dest('dist'))
-})
+  return null
+}
 
-gulp.task('background', () => {
+const background = () => {
   return browserify({
     entries: 'app/init.js',
     transform: coffeeify,
@@ -43,46 +38,57 @@ gulp.task('background', () => {
   .bundle()
   .pipe(source('background.js'))
   .pipe(gulp.dest('dist'))
-})
+}
 
-gulp.task('html', () => {
+const html = () => {
   return gulp.src('app/**/*.html')
   .pipe(gulp.dest('dist'))
-})
+}
 
-gulp.task('css', () => {
+const css = () => {
   return gulp.src('app/**/*.css')
   .pipe(gulp.dest('dist'))
-})
+}
 
-gulp.task('icons', () => {
+const icons = () => {
   return gulp.src([
-    icons.getPathToIcon('icon_16x16.png'),
-    icons.getPathToIcon('icon_19x19.png'),
-    icons.getPathToIcon('icon_38x38.png'),
-    icons.getPathToIcon('icon_48x48.png'),
-    icons.getPathToIcon('icon_128x128.png'),
+    cypressIcons.getPathToIcon('icon_16x16.png'),
+    cypressIcons.getPathToIcon('icon_19x19.png'),
+    cypressIcons.getPathToIcon('icon_38x38.png'),
+    cypressIcons.getPathToIcon('icon_48x48.png'),
+    cypressIcons.getPathToIcon('icon_128x128.png'),
   ])
   .pipe(gulp.dest('dist/icons'))
-})
+}
 
-gulp.task('logos', () => {
+const logos = () => {
   return gulp.src([
-    icons.getPathToLogo('cypress-bw.png'),
+    cypressIcons.getPathToLogo('cypress-bw.png'),
   ])
   .pipe(gulp.dest('dist/logos'))
-})
+}
 
-gulp.task('build', gulp.series('clean', gulp.parallel(
-  'icons',
-  'logos',
-  'manifest',
-  'background',
-  'html',
-  'css',
-)))
+const build = gulp.series(
+  clean,
+  gulp.parallel(
+    copySocketClient,
+    icons,
+    logos,
+    manifest,
+    background,
+    html,
+    css
+  )
+)
 
-gulp.task('watch', gulp.series('build'), (done) => {
-  gulp.watch('app/**/*', gulp.series('build'))
-  done()
-})
+const watchBuild = () => {
+  return gulp.watch('app/**/*', build)
+}
+
+const watch = gulp.series(build, watchBuild)
+
+module.exports = {
+  build,
+  clean,
+  watch,
+}
