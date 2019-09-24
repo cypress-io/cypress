@@ -30,7 +30,6 @@ exports['e2e promises failing1 1'] = `
   2)  catches promise errors and calls done with err even when async:
      Error: foo
       at stack trace line
-      at stack trace line
 
 
 

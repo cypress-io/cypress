@@ -102,14 +102,19 @@ describe "e2e subdomain", ->
     }
   })
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "subdomain_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-      config: {
-        hosts: {
-          "*.foobar.com": "127.0.0.1"
+  [
+    "electron",
+    "chrome"
+  ].forEach (browser) ->
+    it "passes in #{browser}", ->
+      e2e.exec(@, {
+        spec: "subdomain_spec.coffee"
+        snapshot: true
+        expectedExitCode: 0
+        config: {
+          hosts: {
+            "*.foobar.com": "127.0.0.1"
+          }
         }
-      }
-    })
+        browser
+      })

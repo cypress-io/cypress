@@ -354,3 +354,32 @@ exports['shows help for run --foo 1'] = `
   -------
   
 `
+
+exports['cli CYPRESS_ENV allows staging environment 1'] = `
+  code: 0
+  stderr:
+  -------
+  
+  -------
+
+`
+
+exports['cli CYPRESS_ENV catches environment "foo" 1'] = `
+  code: 11
+  stderr:
+  -------
+  The environment variable with the reserved name "CYPRESS_ENV" is set.
+
+  Unset the "CYPRESS_ENV" environment variable and run Cypress again.
+
+  ----------
+
+  CYPRESS_ENV=foo
+
+  ----------
+
+  Platform: xxx
+  Cypress Version: 1.2.3
+  -------
+
+`
