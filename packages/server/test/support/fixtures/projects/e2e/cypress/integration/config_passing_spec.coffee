@@ -34,3 +34,8 @@ describe "Cypress static methods + props", ->
     expect(spec.name).to.eq("config_passing_spec.coffee")
     expect(spec.relative).to.eq("cypress/integration/config_passing_spec.coffee")
     expect(spec.absolute.indexOf("cypress/integration/config_passing_spec.coffee")).to.be.gt(0)
+
+  context ".env", ->
+    ## https://github.com/cypress-io/cypress/issues/4952
+    it "doesn't die on <script> tags", ->
+      expect(Cypress.env('scriptlet')).to.eq("<script>alert('this should not break')</script>")

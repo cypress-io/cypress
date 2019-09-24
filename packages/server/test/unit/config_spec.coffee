@@ -18,6 +18,27 @@ describe "lib/config", ->
   afterEach ->
     process.env = @env
 
+  context "environment name check", ->
+    it "throws an error for unknown CYPRESS_ENV", ->
+      sinon.stub(errors, "throw").withArgs("INVALID_CYPRESS_ENV", "foo-bar")
+      process.env.CYPRESS_ENV = "foo-bar"
+      cfg = {
+        projectRoot: "/foo/bar/"
+      }
+      options = {}
+      config.mergeDefaults(cfg, options)
+      expect(errors.throw).have.been.calledOnce
+
+    it "allows known CYPRESS_ENV", ->
+      sinon.stub(errors, "throw")
+      process.env.CYPRESS_ENV = "test"
+      cfg = {
+        projectRoot: "/foo/bar/"
+      }
+      options = {}
+      config.mergeDefaults(cfg, options)
+      expect(errors.throw).not.to.be.called
+
   context ".get", ->
     beforeEach ->
       @projectRoot = "/_test-output/path/to/project"
