@@ -215,6 +215,15 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
     """
+    readonly: """
+      #{cmd('{{cmd}}')} failed because this element is readonly:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+    """
     invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
@@ -298,6 +307,7 @@ module.exports = {
   get:
     alias_invalid: "'{{prop}}' is not a valid alias property. Only 'numbers' or 'all' is permitted."
     alias_zero: "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @{{alias}}.1"
+    invalid_options: "#{cmd('get')} only accepts an options object for its second argument. You passed {{options}}"
 
   getCookie:
     invalid_argument: "#{cmd('getCookie')} must be passed a string argument for name."
@@ -982,7 +992,7 @@ module.exports = {
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 3000px."
+    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 4000px."
     empty_string: "#{cmd('viewport')} cannot be passed an empty string."
     invalid_orientation: "#{cmd('viewport')} can only accept '{{all}}' as valid orientations. Your orientation was: '{{orientation}}'"
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
