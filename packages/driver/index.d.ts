@@ -54,6 +54,8 @@ declare global {
   }
 }
 
+export as namespace Cypress
+
 export const $Cypress: Cypress.Cypress
 
 export default $Cypress

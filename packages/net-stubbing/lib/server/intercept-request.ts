@@ -2,6 +2,7 @@ import _ from 'lodash'
 import concatStream from 'concat-stream'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
+import net from 'net'
 import url from 'url'
 
 import {
@@ -133,17 +134,17 @@ function _getRouteForRequest (routes: BackendRoute[], req: CypressIncomingReques
  * @param res
  * @param cb Can be called to resume the proxy's normal behavior. If `res` is not handled and this is not called, the request will hang.
  */
-export function InterceptRequest (state: NetStubbingState, project: any, req: CypressIncomingRequest, res: CypressOutgoingResponse, cb: Function) {
+export function InterceptRequest (state: NetStubbingState, socket: net.Socket, req: CypressIncomingRequest, res: CypressOutgoingResponse, cb: Function) {
   const route = _getRouteForRequest(state.routes, req)
 
   try {
-    return _onProxiedRequest(state, route, project.server._socket, req, res, cb)
+    return _onProxiedRequest(state, route, socket, req, res, cb)
   } catch (err) {
     debug('error in onProxiedRequest: %o', { err, req, res, routes: state.routes })
   }
 }
 
-function _onProxiedRequest (state: NetStubbingState, route: BackendRoute | undefined, socket: any, req: CypressIncomingRequest, res: CypressOutgoingResponse, cb: Function) {
+function _onProxiedRequest (state: NetStubbingState, route: BackendRoute | undefined, socket: net.Socket, req: CypressIncomingRequest, res: CypressOutgoingResponse, cb: Function) {
   if (!route) {
     // not intercepted, carry on normally...
     return cb()
