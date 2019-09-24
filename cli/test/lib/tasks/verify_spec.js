@@ -43,8 +43,6 @@ context('lib/tasks/verify', () => {
 
     os.platform.returns('darwin')
     os.release.returns('0.0.0')
-    
-    sinon.stub(process, 'geteuid').returns(1000)
 
     sinon.stub(util, 'getCacheDir').returns(cacheDir)
     sinon.stub(util, 'isCi').returns(false)
@@ -55,6 +53,7 @@ context('lib/tasks/verify', () => {
     sinon.stub(xvfb, 'stop').resolves()
     sinon.stub(xvfb, 'isNeeded').returns(false)
     sinon.stub(Promise.prototype, 'delay').resolves()
+    sinon.stub(process, 'geteuid').returns(1000)
 
     sinon.stub(_, 'random').returns('222')
 
