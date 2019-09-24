@@ -85,11 +85,18 @@ context('lib/tasks/verify', () => {
       )
     })
   })
-  
+
   it('adds --no-sandbox when user is root', () => {
+    // make it think the executable exists and is verified
+    createfs({
+      alreadyVerified: true,
+      executable: mockfs.file({ mode: 0o777 }),
+      packageVersion,
+    })
+
     process.geteuid.returns(0)
     util.exec.resolves()
-    
+
     return verify.start()
     .then(() => {   
       expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
