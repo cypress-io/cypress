@@ -74,21 +74,21 @@ class App extends Component {
 
   _monitorWindowResize () {
     const state = this.props.state
+    const win = this.props.window
 
-    const $window = $(this.props.window)
     const $header = $(findDOMNode(this.refs.header))
     const $reporterWrap = $(this.refs.reporterWrap)
 
     this._onWindowResize = () => {
       state.updateWindowDimensions({
-        windowWidth: $window.width(),
-        windowHeight: $window.height(),
+        windowWidth: win.innerWidth,
+        windowHeight: win.innerHeight,
         reporterWidth: $reporterWrap.outerWidth(),
         headerHeight: $header.outerHeight(),
       })
     }
 
-    $window.on('resize', this._onWindowResize).trigger('resize')
+    $(win).on('resize', this._onWindowResize).trigger('resize')
   }
 
   _onReporterResizeStart = () => {
@@ -98,6 +98,12 @@ class App extends Component {
   _onReporterResize = (reporterWidth) => {
     this.props.state.reporterWidth = reporterWidth
     this.props.state.absoluteReporterWidth = reporterWidth
+
+    const $header = $(findDOMNode(this.refs.header))
+
+    this.props.state.updateWindowDimensions({
+      headerHeight: $header.outerHeight(),
+    })
   }
 
   _onReporterResizeEnd = () => {
