@@ -1,1 +1,1 @@
-import "./does/not/exist"
+import './does/not/exist'
