@@ -94,8 +94,11 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    process.geteuid.returns(0)
-    util.exec.resolves()
+    process.geteuid.returns(0) // user is root
+    util.exec.resolves({
+      stdout: '222',
+      stderr: '',
+    })
 
     return verify.start()
     .then(() => {
