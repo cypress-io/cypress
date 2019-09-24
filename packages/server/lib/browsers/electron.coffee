@@ -93,7 +93,7 @@ getAutomation = (win) ->
             .then ->
               cookieToBeCleared
         when "is:automation:client:connected"
-          true
+          tryToCall(win, 'isDestroyed') == false
         when "take:screenshot"
           tryToCall(win, 'capturePage')
           .then _.partialRight(_.invoke, 'toDataURL')
@@ -194,16 +194,18 @@ module.exports = {
 
   _attachDebugger: (webContents) ->
     originalSendCommand = webContents.debugger.sendCommand
-
     webContents.debugger.sendCommand = (message, data = {}) ->
-      new Promise (resolve, reject) =>
-        debug('debugger: sending %s %o', message, data)
+      debug('debugger: sending %s %o', message, data)
 
-        originalSendCommand.call webContents.debugger, message, data, (err, result) =>
-          debug("debugger: received response for %s: %o", message, { err, result })
-          if _.isEmpty(err)
-            return resolve(result)
-          reject(err)
+      originalSendCommand
+      .call(webContents.debugger, message, data)
+      .then (result) =>
+        debug("debugger: received response for %s: result: %o", message, result)
+        result
+      .catch (err) =>
+        debug("debugger: received error on %s: result: %o", message, err)
+        throw err
+
     try
       webContents.debugger.attach()
       debug("debugger attached")
@@ -238,8 +240,7 @@ module.exports = {
 
   _clearCache: (webContents) ->
     debug("clearing cache")
-    Promise.fromCallback (cb) =>
-      webContents.session.clearCache(cb)
+    webContents.session.clearCache()
 
   _setUserAgent: (webContents, userAgent) ->
     debug("setting user agent to:", userAgent)
@@ -248,14 +249,13 @@ module.exports = {
     webContents.session.setUserAgent(userAgent)
 
   _setProxy: (webContents, proxyServer) ->
-    Promise.fromCallback (cb) =>
-      webContents.session.setProxy({
-        proxyRules: proxyServer
-        ## this should really only be necessary when
-        ## running Chromium versions >= 72
-        ## https://github.com/cypress-io/cypress/issues/1872
-        proxyBypassRules: "<-loopback>"
-      }, cb)
+    webContents.session.setProxy({
+      proxyRules: proxyServer
+      ## this should really only be necessary when
+      ## running Chromium versions >= 72
+      ## https://github.com/cypress-io/cypress/issues/1872
+      proxyBypassRules: "<-loopback>"
+    })
 
   open: (browser, url, options = {}, automation) ->
     { projectRoot, isTextTerminal } = options

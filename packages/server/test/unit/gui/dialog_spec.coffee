@@ -7,7 +7,9 @@ Windows = require("#{root}../lib/gui/windows")
 describe "gui/dialog", ->
   context ".show", ->
     beforeEach ->
-      @showOpenDialog = electron.dialog.showOpenDialog = sinon.stub()
+      @showOpenDialog = electron.dialog.showOpenDialog = sinon.stub().resolves({
+        filePaths: []
+      })
 
     it "calls dialog.showOpenDialog with args", ->
       dialog.show()
@@ -16,13 +18,13 @@ describe "gui/dialog", ->
       })
 
     it "resolves with first path", ->
-      @showOpenDialog.yields(["foo", "bar"])
+      @showOpenDialog.resolves({
+        filePaths: ["foo", "bar"]
+      })
 
       dialog.show().then (ret) ->
         expect(ret).to.eq("foo")
 
     it "handles null paths", ->
-      @showOpenDialog.yields(null)
-
       dialog.show().then (ret) ->
         expect(ret).to.eq(undefined)

@@ -190,10 +190,7 @@ const _launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
 
   openExternalAttempted = true
 
-  // wrap openExternal here in case `electron.shell` is not available (during tests)
-  return Promise.fromCallback((cb) => {
-    shell.openExternal(loginUrl, {}, cb)
-  })
+  return shell.openExternal(loginUrl)
   .catch((err) => {
     debug('Error launching native auth: %o', { err })
     warnCouldNotLaunch()
