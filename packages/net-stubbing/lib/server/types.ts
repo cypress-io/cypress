@@ -30,7 +30,7 @@ export interface BackendRequest {
    * A callback that can be used to send the response through the proxy.
    */
   continueResponse?: (newResStream?: Readable) => void
-  getResBodyStream?: () => Readable
+  onResponse?: (incomingRes: IncomingMessage, resStream: Readable) => void
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
   incomingRes?: IncomingMessage

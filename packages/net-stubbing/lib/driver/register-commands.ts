@@ -318,15 +318,19 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     const sendContinueFrame = () => {
       continueSent = true
 
-      request.state = RequestState.Intercepted
-
-      // copy changeable attributes of userReq to req in frame
-      // @ts-ignore
-      continueFrame.req = {
-        ..._.pick(userReq, SERIALIZABLE_REQ_PROPS),
+      if (request) {
+        request.state = RequestState.Intercepted
       }
 
-      _emit('http:request:continue', continueFrame)
+      if (continueFrame) {
+        // copy changeable attributes of userReq to req in frame
+        // @ts-ignore
+        continueFrame.req = {
+          ..._.pick(userReq, SERIALIZABLE_REQ_PROPS),
+        }
+
+        _emit('http:request:continue', continueFrame)
+      }
     }
 
     if (!route) {

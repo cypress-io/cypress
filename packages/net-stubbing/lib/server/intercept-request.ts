@@ -148,6 +148,7 @@ export const InterceptRequest : RequestMiddleware = function () {
     requestId,
     route,
     continueRequest: this.next,
+    onResponse: this.onResponse,
     req: this.req,
     res: this.res,
   }
@@ -186,7 +187,7 @@ function _interceptRequest (request: BackendRequest, route: BackendRoute, socket
 
   if (route.staticResponse) {
     emitReceived()
-    sendStaticResponse(request.res, route.staticResponse)
+    sendStaticResponse(request.res, route.staticResponse, request.onResponse!)
 
     return // don't call cb since we've satisfied the response here
   }
@@ -251,7 +252,7 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
   }
 
   if (frame.staticResponse) {
-    sendStaticResponse(backendRequest.res, frame.staticResponse)
+    sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
 
     return
   }

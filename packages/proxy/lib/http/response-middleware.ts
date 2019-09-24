@@ -20,9 +20,6 @@ export type ResponseMiddleware = HttpMiddleware<{
    * This is done as-needed to avoid unnecessary g(un)zipping.
    */
   makeResStreamPlainText: () => void
-  /**
-   * Has the `incomingResStream` already been gunzipped?
-   */
   isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
@@ -132,37 +129,21 @@ const LogResponse: ResponseMiddleware = function () {
 }
 
 const AttachPlainTextStreamFn : ResponseMiddleware = function () {
-  this.makeResStreamPlainText = () => {
-    if (!this.isGunzipped && resIsGzipped(this.incomingRes) && (this.res.wantsInjection || this.res.wantsSecurityRemoved)) {
+  this.makeResStreamPlainText = function () {
+    debug('ensuring resStream is plaintext')
+
+    if (!this.isGunzipped && resIsGzipped(this.incomingRes)) {
       debug('gunzipping response body')
 
       const gunzip = zlib.createGunzip(zlibOptions)
 
       this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
 
-      this.skipMiddleware('GzipBody')
+      this.isGunzipped = true
     }
   }
 
   this.next()
-}
-
-const NetStubbingIntercept : ResponseMiddleware = function () {
-  const getResBodyStream = () => {
-    this.makeResStreamPlainText()
-
-    return this.incomingResStream
-  }
-
-  const next = (newResStream?: Readable) => {
-    if (newResStream) {
-      this.incomingResStream = newResStream
-    }
-
-    this.next()
-  }
-
-  InterceptResponse(this.netStubbingState, this.socket, this.req, getResBodyStream, this.incomingRes, next)
 }
 
 const PatchExpressSetHeader : ResponseMiddleware = function () {
@@ -338,9 +319,11 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
-const GzipBody: ResponseMiddleware = function () {
-  debug('regzipping response body')
-  this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
+const GzipBody : ResponseMiddleware = function () {
+  if (this.isGunzipped) {
+    debug('regzipping response body')
+    this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
+  }
 
   this.next()
 }
@@ -353,7 +336,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
 export default {
   LogResponse,
   AttachPlainTextStreamFn,
-  NetStubbingIntercept,
+  InterceptResponse,
   PatchExpressSetHeader,
   SetInjectionLevel,
   OmitProblematicHeaders,

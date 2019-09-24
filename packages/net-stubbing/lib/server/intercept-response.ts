@@ -1,12 +1,11 @@
 import _ from 'lodash'
 import concatStream from 'concat-stream'
 import debugModule from 'debug'
-import { IncomingMessage } from 'http'
 import { PassThrough, Readable } from 'stream'
 import ThrottleStream from 'throttle'
 
 import {
-  CypressIncomingRequest,
+  ResponseMiddleware,
 } from '@packages/proxy'
 import {
   NetStubbingState,
@@ -23,37 +22,52 @@ import {
 
 const debug = debugModule('cypress:net-stubbing:server:intercept-response')
 
-export function InterceptResponse (state: NetStubbingState, project: any, req: CypressIncomingRequest, getResBodyStream: () => Readable, incomingRes: IncomingMessage, continueResponse: (newResStream?: Readable) => void) {
-  const backendRequest = state.requests[req.requestId]
+export const InterceptResponse : ResponseMiddleware = function () {
+  const backendRequest = this.netStubbingState.requests[this.req.requestId]
 
-  debug('onProxiedResponse %o', { req, backendRequest })
+  debug('InterceptResponse %o', { req: this.req, backendRequest })
 
   if (!backendRequest || !backendRequest.sendResponseToDriver) {
     // either the original request was not intercepted, or there's nothing for the driver to do with this response
-    return continueResponse()
+    return this.next()
   }
 
   // this may get set back to `true` by another route
   backendRequest.sendResponseToDriver = false
-  backendRequest.incomingRes = incomingRes
-  backendRequest.getResBodyStream = getResBodyStream
-  backendRequest.continueResponse = continueResponse
+
+  backendRequest.incomingRes = this.incomingRes
+
+  backendRequest.onResponse = (incomingRes, resStream) => {
+    this.incomingRes = incomingRes
+
+    backendRequest.continueResponse!(resStream)
+  }
+
+  backendRequest.continueResponse = (newResStream?: Readable) => {
+    if (newResStream) {
+      this.incomingResStream = newResStream.on('error', this.onError)
+    }
+
+    this.next()
+  }
 
   const frame : NetEventFrames.HttpResponseReceived = {
     routeHandlerId: backendRequest.route.handlerId!,
     requestId: backendRequest.requestId,
-    res: _.extend(_.pick(incomingRes, SERIALIZABLE_RES_PROPS), {
-      url: req.proxiedUrl,
+    res: _.extend(_.pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
+      url: this.req.proxiedUrl,
     }) as CyHttpMessages.IncomingResponse,
   }
 
   const res = frame.res as CyHttpMessages.IncomingResponse
 
-  function emitReceived () {
-    emit(project.server._socket, 'http:response:received', frame)
+  const emitReceived = () => {
+    emit(this.socket, 'http:response:received', frame)
   }
 
-  getResBodyStream().pipe(concatStream((resBody) => {
+  this.makeResStreamPlainText()
+
+  this.incomingResStream.pipe(concatStream((resBody) => {
     res.body = resBody.toString()
     emitReceived()
   }))
@@ -89,10 +103,10 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
 
     if (frame.staticResponse) {
       if (frame.throttleKbps) {
-        return sendStaticResponse(res, frame.staticResponse, throttleify(frame.staticResponse.body))
+        return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse, throttleify(frame.staticResponse.body))
       }
 
-      return sendStaticResponse(res, frame.staticResponse)
+      return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse)
     }
 
     // merge the changed response attributes with our response and continue
@@ -106,8 +120,10 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
         const pt = new PassThrough()
 
         pt.write(bodyBuffer)
+        // pt.on('pipe', () => pt.end())
         pt.end()
 
+        pt.thisIsTheBody = true
         newResStream = pt
       }
 
@@ -121,6 +137,8 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
 
   if (typeof frame.continueResponseAt === 'number') {
     const delayMs = frame.continueResponseAt - Date.now()
+
+    debug('pausing before continuing %o', { delayMs })
 
     if (delayMs > 0) {
       return setTimeout(continueResponse, delayMs)

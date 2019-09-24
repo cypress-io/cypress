@@ -19,7 +19,20 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
-const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
+const MaybeEndRequestWithBufferedResponse : RequestMiddleware = function () {
+  const buffer = this.buffers.take(this.req.proxiedUrl)
+
+  if (buffer) {
+    debug('got a buffer %o', buffer)
+    this.res.wantsInjection = 'full'
+
+    return this.onResponse(buffer.response, buffer.stream)
+  }
+
+  this.next()
+}
+
+const RedirectToClientRouteIfUnloaded : RequestMiddleware = function () {
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
   if (this.req.cookies['__cypress.unload']) {
@@ -31,22 +44,22 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   this.next()
 }
 
-// TODO: is this necessary? it seems to be for requesting Cypress w/o the proxy,
-// which isn't currently supported
-const RedirectToClientRouteIfNotProxied: RequestMiddleware = function () {
-  // when you access cypress from a browser which has not had its proxy setup then
-  // req.url will match req.proxiedUrl and we'll know to instantly redirect them
-  // to the correct client route
-  if (this.req.url === this.req.proxiedUrl && !this.getRemoteState().visiting) {
-    // if we dont have a remoteState.origin that means we're initially requesting
-    // the cypress app and we need to redirect to the root path that serves the app
-    this.res.redirect(this.config.clientRoute)
+// // TODO: is this necessary? it seems to be for requesting Cypress w/o the proxy,
+// // which isn't currently supported
+// const RedirectToClientRouteIfNotProxied : RequestMiddleware = function () {
+//   // when you access cypress from a browser which has not had its proxy setup then
+//   // req.url will match req.proxiedUrl and we'll know to instantly redirect them
+//   // to the correct client route
+//   if (this.req.url === this.req.proxiedUrl && !this.getRemoteState().visiting) {
+//     // if we dont have a remoteState.origin that means we're initially requesting
+//     // the cypress app and we need to redirect to the root path that serves the app
+//     this.res.redirect(this.config.clientRoute)
 
-    return this.end()
-  }
+//     return this.end()
+//   }
 
-  this.next()
-}
+//   this.next()
+// }
 
 const EndRequestsToBlacklistedHosts: RequestMiddleware = function () {
   const { blacklistHosts } = this.config
@@ -70,20 +83,7 @@ const EndRequestsToBlacklistedHosts: RequestMiddleware = function () {
   this.next()
 }
 
-const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
-  const buffer = this.buffers.take(this.req.proxiedUrl)
-
-  if (buffer) {
-    debug('got a buffer %o', buffer)
-    this.res.wantsInjection = 'full'
-
-    return this.onResponse(buffer.response, buffer.stream)
-  }
-
-  this.next()
-}
-
-const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
+const StripUnsupportedAcceptEncoding : RequestMiddleware = function () {
   // Cypress can only support plaintext or gzip, so make sure we don't request anything else
   const acceptEncoding = this.req.headers['accept-encoding']
 
@@ -131,6 +131,11 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     requestOptions.url = requestOptions.url.replace(remoteState.origin, remoteState.fileServer)
   }
 
+  // if the request has been buffered, can't stream body
+  if (this.req.body) {
+    _.assign(requestOptions, _.pick(this.req, 'method', 'body', 'headers'))
+  }
+
   const req = this.request.create(requestOptions)
 
   req.on('error', this.onError)
@@ -140,19 +145,21 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     req.abort()
   })
 
-  // pipe incoming request body, headers to new request
-  this.req.pipe(req)
+  if (!this.req.body) {
+    // pipe incoming request body, headers to new request
+    this.req.pipe(req)
+  }
 
   this.outgoingReq = req
 }
 
 export default {
   LogRequest,
+  MaybeEndRequestWithBufferedResponse,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,
-  RedirectToClientRouteIfNotProxied,
+  // RedirectToClientRouteIfNotProxied,
   EndRequestsToBlacklistedHosts,
-  MaybeEndRequestWithBufferedResponse,
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,
   SendRequestOutgoing,

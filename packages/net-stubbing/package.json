@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "concat-stream": "^2.0.0",
+    "is-html": "^2.0.0",
     "minimatch": "^3.0.4",
     "throttle": "^1.0.3"
   },

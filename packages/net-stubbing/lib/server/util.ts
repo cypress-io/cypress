@@ -1,14 +1,16 @@
 import _ from 'lodash'
 import debugModule from 'debug'
-import { ServerResponse } from 'http'
+import isHtml from 'is-html'
+import { ServerResponse, IncomingMessage } from 'http'
 import { StaticResponse } from '../external-types'
 import {
   RouteMatcherOptionsGeneric,
   STRING_MATCHER_FIELDS,
   DICT_STRING_MATCHER_FIELDS,
 } from '../types'
-import { Readable } from 'stream'
+import { Readable, PassThrough } from 'stream'
 import CyServer from '@packages/server'
+import { Socket } from 'net'
 
 const debug = debugModule('cypress:net-stubbing:server:util')
 
@@ -39,7 +41,26 @@ export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<a
   )
 }
 
-export function sendStaticResponse (res: ServerResponse, staticResponse: StaticResponse, resStream?: Readable) {
+function _getFakeClientResponse (opts: {
+  statusCode: number
+  headers: {
+    [k: string]: string
+  }
+  body: string
+}) {
+  const clientResponse = new IncomingMessage(new Socket)
+
+  // be nice and infer this content-type for the user
+  if (!_.keys(opts.headers).map(_.toLower).includes('content-type') && isHtml(opts.body)) {
+    opts.headers['content-type'] = 'text/html'
+  }
+
+  _.merge(clientResponse, opts)
+
+  return clientResponse
+}
+
+export function sendStaticResponse (res: ServerResponse, staticResponse: StaticResponse, onResponse: (incomingRes: IncomingMessage, stream: Readable) => void, resStream?: Readable) {
   if (staticResponse.destroySocket) {
     res.connection.destroy()
     res.destroy()
@@ -48,22 +69,26 @@ export function sendStaticResponse (res: ServerResponse, staticResponse: StaticR
   }
 
   const statusCode = staticResponse.statusCode || 200
-  const headers = staticResponse.headers
+  const headers = staticResponse.headers || {}
+  const body = resStream ? '' : staticResponse.body || ''
 
-  res.writeHead(statusCode, headers || {})
+  const incomingRes = _getFakeClientResponse({
+    statusCode,
+    headers,
+    body,
+  })
 
-  res.flushHeaders()
+  if (!resStream) {
+    const pt = new PassThrough()
 
-  if (resStream) {
-    // ignore staticResponse.body
-    return resStream.pipe(res)
+    if (staticResponse.body) {
+      pt.write(staticResponse.body)
+    }
+
+    pt.end()
+
+    resStream = pt
   }
 
-  if (staticResponse.body) {
-    res.write(staticResponse.body)
-  }
-
-  res.end()
-
-  return
+  onResponse(incomingRes, resStream)
 }

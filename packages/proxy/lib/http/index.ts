@@ -66,7 +66,7 @@ type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
    * Call to completely end the stage, bypassing any remaining middleware.
    */
   end: () => void
-  onResponse: (incomingRes: Response, resStream: Readable) => void
+  onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
   onError: (error: Error) => void
   skipMiddleware: (name: string) => void
 }>
@@ -94,6 +94,10 @@ export function _runStage (type: HttpStages, ctx: any) {
       let ended = false
 
       function copyChangedCtx () {
+        if (ended) {
+          return
+        }
+
         _.chain(fullCtx)
         .omit(READONLY_MIDDLEWARE_KEYS)
         .forEach((value, key) => {
@@ -130,7 +134,7 @@ export function _runStage (type: HttpStages, ctx: any) {
           _end(runMiddlewareStack())
         },
         end: () => _end(),
-        onResponse: (incomingRes: IncomingMessage, resStream: Readable) => {
+        onResponse: (incomingRes: Response, resStream: Readable) => {
           ctx.incomingRes = incomingRes
           ctx.incomingResStream = resStream
 

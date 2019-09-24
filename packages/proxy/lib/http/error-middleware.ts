@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import debugModule from 'debug'
 import { HttpMiddleware } from '.'
+import { InterceptError } from '@packages/net-stubbing/server'
 import { Readable } from 'stream'
 import { Request } from 'request'
 
@@ -42,6 +43,7 @@ export const DestroyResponse: ErrorMiddleware = function () {
 
 export default {
   LogError,
+  InterceptError,
   AbortRequest,
   UnpipeResponse,
   DestroyResponse,
