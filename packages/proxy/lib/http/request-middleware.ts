@@ -19,10 +19,6 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
-const NetStubbingIntercept : RequestMiddleware = function () {
-  InterceptRequest(this.netStubbingState, this.socket, this.req, this.res, this.next)
-}
-
 const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
@@ -152,7 +148,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
-  NetStubbingIntercept,
+  InterceptRequest,
   RedirectToClientRouteIfUnloaded,
   RedirectToClientRouteIfNotProxied,
   EndRequestsToBlacklistedHosts,

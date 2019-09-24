@@ -8,10 +8,11 @@ import {
   DICT_STRING_MATCHER_FIELDS,
 } from '../types'
 import { Readable } from 'stream'
+import CyServer from '@packages/server'
 
 const debug = debugModule('cypress:net-stubbing:server:util')
 
-export function emit (socket: any, eventName: string, data: any) {
+export function emit (socket: CyServer.Socket, eventName: string, data: object) {
   debug('sending event to driver %o', { eventName, data })
   socket.toDriver('net:event', eventName, data)
 }

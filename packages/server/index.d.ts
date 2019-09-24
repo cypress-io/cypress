@@ -25,7 +25,9 @@ export namespace CyServer {
     visiting: string
   }
 
-  export interface Socket {}
+  export interface Socket {
+    toDriver: (eventName: string, ...args: any) => void
+  }
 }
 
 export default CyServer

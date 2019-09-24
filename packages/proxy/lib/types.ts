@@ -22,3 +22,9 @@ export type CypressOutgoingResponse = Response & {
   wantsSecurityRemoved: null | boolean
   body?: string | Readable
 }
+
+export { ErrorMiddleware } from './http/error-middleware'
+
+export { RequestMiddleware } from './http/request-middleware'
+
+export { ResponseMiddleware } from './http/response-middleware'

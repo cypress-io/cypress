@@ -2,12 +2,11 @@ import _ from 'lodash'
 import concatStream from 'concat-stream'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
-import net from 'net'
 import url from 'url'
 
 import {
   CypressIncomingRequest,
-  CypressOutgoingResponse,
+  RequestMiddleware,
 } from '@packages/proxy'
 import {
   BackendRoute,
@@ -21,6 +20,7 @@ import {
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
 import { getAllStringMatcherFields, sendStaticResponse, emit } from './util'
+import CyServer from '@packages/server'
 
 const debug = debugModule('cypress:net-stubbing:server:intercept-request')
 
@@ -134,62 +134,59 @@ function _getRouteForRequest (routes: BackendRoute[], req: CypressIncomingReques
  * @param res
  * @param cb Can be called to resume the proxy's normal behavior. If `res` is not handled and this is not called, the request will hang.
  */
-export function InterceptRequest (state: NetStubbingState, socket: net.Socket, req: CypressIncomingRequest, res: CypressOutgoingResponse, cb: Function) {
-  const route = _getRouteForRequest(state.routes, req)
+export const InterceptRequest : RequestMiddleware = function () {
+  const route = _getRouteForRequest(this.netStubbingState.routes, this.req)
 
-  try {
-    return _onProxiedRequest(state, route, socket, req, res, cb)
-  } catch (err) {
-    debug('error in onProxiedRequest: %o', { err, req, res, routes: state.routes })
-  }
-}
-
-function _onProxiedRequest (state: NetStubbingState, route: BackendRoute | undefined, socket: net.Socket, req: CypressIncomingRequest, res: CypressOutgoingResponse, cb: Function) {
   if (!route) {
     // not intercepted, carry on normally...
-    return cb()
+    return this.next()
   }
 
   const requestId = _.uniqueId('interceptedRequest')
-  const frame : NetEventFrames.HttpRequestReceived = {
-    routeHandlerId: route.handlerId!,
-    requestId,
-    req: _.extend(_.pick(req, SERIALIZABLE_REQ_PROPS), {
-      url: req.proxiedUrl,
-    }) as CyHttpMessages.IncomingRequest,
-    notificationOnly: !!route.staticResponse,
-  }
-
-  function emitReceived () {
-    emit(socket, 'http:request:received', frame)
-  }
 
   const request : BackendRequest = {
     requestId,
     route,
-    continueRequest: cb,
-    req,
-    res,
+    continueRequest: this.next,
+    req: this.req,
+    res: this.res,
   }
 
   // attach requestId to the original req object for later use
-  req.requestId = requestId
+  this.req.requestId = requestId
 
-  state.requests[requestId] = request
+  this.netStubbingState.requests[requestId] = request
 
-  res.once('finish', () => {
-    emit(socket, 'http:request:complete', {
+  this.res.once('finish', () => {
+    emit(this.socket, 'http:request:complete', {
       requestId,
       routeHandlerId: route.handlerId!,
     })
 
     debug('request/response finished, cleaning up %o', { requestId })
-    delete state.requests[requestId]
+    delete this.netStubbingState.requests[requestId]
   })
+
+  _interceptRequest(request, route, this.socket)
+}
+
+function _interceptRequest (request: BackendRequest, route: BackendRoute, socket: CyServer.Socket) {
+  const emitReceived = () => {
+    emit(socket, 'http:request:received', frame)
+  }
+
+  const frame : NetEventFrames.HttpRequestReceived = {
+    routeHandlerId: route.handlerId!,
+    requestId: request.req.requestId,
+    req: _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
+      url: request.req.proxiedUrl,
+    }) as CyHttpMessages.IncomingRequest,
+    notificationOnly: !!route.staticResponse,
+  }
 
   if (route.staticResponse) {
     emitReceived()
-    sendStaticResponse(res, route.staticResponse)
+    sendStaticResponse(request.res, route.staticResponse)
 
     return // don't call cb since we've satisfied the response here
   }
@@ -200,13 +197,13 @@ function _onProxiedRequest (state: NetStubbingState, route: BackendRoute | undef
   }
 
   // else, buffer the body
-  req.pipe(concatStream((reqBody) => {
+  request.req.pipe(concatStream((reqBody) => {
     frame.req.body = reqBody.toString()
     emitReceived()
   }))
 }
 
-export function onRequestContinue (state: NetStubbingState, frame: NetEventFrames.HttpRequestContinue, socket: any) {
+export function onRequestContinue (state: NetStubbingState, frame: NetEventFrames.HttpRequestContinue, socket: CyServer.Socket) {
   const backendRequest = state.requests[frame.requestId]
 
   if (!backendRequest) {
@@ -245,8 +242,12 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
 
     const nextRoute = _getRouteForRequest(state.routes, backendRequest.req, prevRoute)
 
+    if (!nextRoute) {
+      return backendRequest.continueRequest()
+    }
+
     // TODO: kind of an awkward API, might want to change
-    return _onProxiedRequest(state, nextRoute, socket, backendRequest.req, backendRequest.res, backendRequest.continueRequest)
+    return _interceptRequest(backendRequest, nextRoute, socket)
   }
 
   if (frame.staticResponse) {
