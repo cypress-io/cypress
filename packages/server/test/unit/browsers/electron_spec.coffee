@@ -348,7 +348,7 @@ describe "lib/browsers/electron", ->
     it "sets proxy rules for webContents", ->
       webContents = {
         session: {
-          setProxy: sinon.stub().resolves()
+          setProxy: sinon.stub().callsArg(1)
         }
       }
 
@@ -365,8 +365,6 @@ describe "lib/browsers/electron", ->
 
       @sendCommand.throws()
       .withArgs('Browser.getVersion').resolves()
-
-      electron._attachDebugger(@win.webContents)
 
       @onRequest = electron._getAutomation(@win).onRequest
 

@@ -774,12 +774,12 @@ describe "lib/cypress", ->
           debugger: {
             on: sinon.stub()
             attach: sinon.stub()
-            sendCommand: sinon.stub().resolves()
+            sendCommand: sinon.stub().callsArg(2)
           }
           setUserAgent: sinon.stub()
           session: {
-            clearCache: sinon.stub().resolves()
-            setProxy: sinon.stub().resolves()
+            clearCache: sinon.stub().yieldsAsync()
+            setProxy: sinon.stub().yieldsAsync()
             setUserAgent: sinon.stub()
           }
         }
