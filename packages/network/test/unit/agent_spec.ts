@@ -298,7 +298,7 @@ describe('lib/agent', function () {
         .catch((e) => {
           expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: The upstream proxy closed the socket after connecting but before sending a response.')
 
-          return proxy.closeAsync()
+          return proxy.destroyAsync()
         })
       })
     })
