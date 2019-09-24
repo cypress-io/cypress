@@ -78,7 +78,7 @@ const runSmokeTest = (binaryDir, options) => {
    */
   const spawn = (linuxWithDisplayEnv) => {
     const random = _.random(0, 1000)
-    const args = ['--smoke-test', `--ping=${random}`]
+    const args = ['--no-sandbox', '--smoke-test', `--ping=${random}`]
 
     if (options.dev) {
       executable = 'node'
