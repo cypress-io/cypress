@@ -4,7 +4,7 @@ _ = require("lodash")
 $ = require("jquery")
 chai = require("chai")
 sinonChai = require("@cypress/sinon-chai")
-{prettyFormat, setPrintComplextValueHook} = require('@packages/pretty-format/src')
+chaiInspect = require('./chai/inspect')
 
 $dom = require("../dom")
 $utils = require("../cypress/utils")
@@ -40,9 +40,6 @@ getType = (val) ->
   match = /\[object (.*)\]/.exec(Object.prototype.toString.call(val))
   return match && match[1]
 
-setPrintComplextValueHook (val) ->
-  if getType(val) is 'Window'
-    return '[window]'
 
 chai.use (chai, u) ->
   chaiUtils = u
@@ -79,7 +76,15 @@ chai.use (chai, u) ->
   existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
   objDisplay   = chai.util.objDisplay
   getMessage   = chai.util.getMessage
-  inspect = chai.util.inspect
+  _inspect = chai.util.inspect
+
+
+  {inspect, setFormatValueHook} = chaiInspect.create(chai)
+
+  setFormatValueHook (ctx, val) ->
+    if val && getType(val) is 'Window'
+      return '[window]'
+
 
   removeOrKeepSingleQuotesBetweenStars = (message) ->
     ## remove any single quotes between our **, preserving escaped quotes
@@ -107,7 +112,7 @@ chai.use (chai, u) ->
     , []
 
   restoreAsserts = ->
-    chai.util.inspect = inspect
+    chai.util.inspect = _inspect
     chai.util.getMessage = getMessage
     chai.util.objDisplay = objDisplay
     chai.Assertion::assert = assertProto
@@ -120,8 +125,7 @@ chai.use (chai, u) ->
 
 
   overrideChaiInspect = () ->
-    chai.util.inspect = ->
-      prettyFormat(...arguments)
+    chai.util.inspect = inspect
 
   overrideChaiObjDisplay = ->
     chai.util.objDisplay = (obj) ->
