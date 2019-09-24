@@ -34,10 +34,11 @@ setWindowProxy = (win) ->
   if not process.env.HTTP_PROXY
     return
 
-  win.webContents.session.setProxy({
-    proxyRules: process.env.HTTP_PROXY
-    proxyBypassRules: process.env.NO_PROXY
-  })
+  return new Promise (resolve) ->
+    win.webContents.session.setProxy({
+      proxyRules: process.env.HTTP_PROXY
+      proxyBypassRules: process.env.NO_PROXY
+    }, resolve)
 
 module.exports = {
   reset: ->
