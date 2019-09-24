@@ -69,6 +69,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     get: (selector, options = {}) ->
       ctx = @
 
+      if options is null or _.isArray(options) or not _.isPlainObject(options)
+        $errUtils.throwErrByPath("get.invalid_options", {
+          args: { options  }
+        })
+
       _.defaults(options, {
         retry: true
         withinSubject: cy.state("withinSubject")
@@ -78,7 +83,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       consoleProps = {}
-
       start = (aliasType) ->
         return if options.log is false
 

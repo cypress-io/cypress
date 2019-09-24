@@ -5,7 +5,7 @@ import { render } from 'react-dom'
 import State from './lib/state'
 import Container from './app/container'
 
-configure({ enforceActions: 'strict' })
+configure({ enforceActions: 'always' })
 
 const Runner = {
   start (el, base64Config) {

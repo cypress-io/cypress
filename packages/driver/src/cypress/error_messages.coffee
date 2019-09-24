@@ -424,6 +424,10 @@ module.exports = {
       message: "`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@{{alias}}.1`"
       docsUrl: "https://on.cypress.io/get"
     }
+    invalid_options: {
+      message: "#{cmd('get')} only accepts an options object for its second argument. You passed {{options}}"
+      docsUrl: "https://on.cypress.io/get"
+    }
 
   getCookie:
     invalid_argument: {

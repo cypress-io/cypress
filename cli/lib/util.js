@@ -120,6 +120,25 @@ function stdoutLineMatches (expectedLine, stdout) {
 }
 
 /**
+ * Confirms if given value is a valid CYPRESS_ENV value. Undefined values
+ * are valid, because the system can set the default one.
+ *
+ * @param {string} value
+ * @example util.isValidCypressEnvValue(process.env.CYPRESS_ENV)
+ */
+function isValidCypressEnvValue (value) {
+  if (_.isUndefined(value)) {
+    // will get default value
+    return true
+  }
+
+  // names of config environments, see "packages/server/config/app.yml"
+  const names = ['development', 'test', 'staging', 'production']
+
+  return _.includes(names, value)
+}
+
+/**
  * Prints NODE_OPTIONS using debug() module, but only
  * if DEBUG=cypress... is set
  */
@@ -158,7 +177,7 @@ const dequote = (str) => {
 
 const util = {
   normalizeModuleOptions,
-
+  isValidCypressEnvValue,
   printNodeOptions,
 
   isCi () {
