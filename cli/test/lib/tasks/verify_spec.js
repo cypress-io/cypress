@@ -43,6 +43,8 @@ context('lib/tasks/verify', () => {
 
     os.platform.returns('darwin')
     os.release.returns('0.0.0')
+    
+    sinon.stub(process, 'geteuid').returns(1000)
 
     sinon.stub(util, 'getCacheDir').returns(cacheDir)
     sinon.stub(util, 'isCi').returns(false)
