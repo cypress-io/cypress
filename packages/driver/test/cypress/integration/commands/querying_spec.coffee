@@ -1171,9 +1171,18 @@ describe "src/cy/commands/querying", ->
           expect(err.docsUrl).to.eq("https://on.cypress.io/get")
           done()
 
-        cy.server()
-        cy.route(/users/, {}).as("getUsers")
-        cy.get("@getUsers.all ")
+        cy
+          .server()
+          .route(/users/, {}).as("getUsers")
+          .get("@getUsers.all ")
+
+      _.each ["", "foo", [], 1, null], (value) =>
+        it "throws when options property is not an object. Such as: #{value}", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "`cy.get()` only accepts an options object for its second argument. You passed #{value}"
+            done()
+
+          cy.get("foobar", value)
 
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button").hide()
@@ -1555,7 +1564,7 @@ describe "src/cy/commands/querying", ->
         it "throws when text is #{val}", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq("`cy.contains()` can only accept a string, number or regular expression.")
-            expect(err.docsUrl).to.eq("https://on.cypress.io/contains")          
+            expect(err.docsUrl).to.eq("https://on.cypress.io/contains")
             done()
 
           cy.contains(val)
