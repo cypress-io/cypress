@@ -71,7 +71,6 @@ context('lib/tasks/verify', () => {
   })
 
   it('logs error and exits when no version of Cypress is installed', () => {
-
     return verify
     .start()
     .then(() => {
@@ -84,6 +83,16 @@ context('lib/tasks/verify', () => {
         'no version of Cypress installed 1',
         normalize(stdout.toString())
       )
+    })
+  })
+  
+  it('adds --no-sandbox when user is root', () => {
+    process.geteuid.returns(0)
+    util.exec.resolves()
+    
+    return verify.start()
+    .then(() => {   
+      expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
     })
   })
 
