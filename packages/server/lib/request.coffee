@@ -483,7 +483,8 @@ module.exports = (options = {}) ->
 
     contentTypeIsJson: (response) ->
       ## TODO: use https://github.com/jshttp/type-is for this
-      response?.headers?["content-type"]?.includes("application/json")
+      ## https://github.com/cypress-io/cypress/pull/5166
+      response?.headers?["content-type"]?.split(';', 2)[0].endsWith("json")
 
     parseJsonBody: (body) ->
       try

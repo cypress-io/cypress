@@ -292,6 +292,7 @@ module.exports = {
   get:
     alias_invalid: "'{{prop}}' is not a valid alias property. Only 'numbers' or 'all' is permitted."
     alias_zero: "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @{{alias}}.1"
+    invalid_options: "#{cmd('get')} only accepts an options object for its second argument. You passed {{options}}"
 
   getCookie:
     invalid_argument: "#{cmd('getCookie')} must be passed a string argument for name."

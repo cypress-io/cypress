@@ -826,6 +826,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
+    when "INVALID_CYPRESS_ENV"
+      """
+      We have detected unknown or unsupported CYPRESS_ENV value
+
+        #{chalk.yellow(arg1)}
+
+      Please do not modify CYPRESS_ENV value.
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
