@@ -5,7 +5,7 @@ execa = require('execa')
 path = require("path")
 Promise = require("bluebird")
 os = require("os")
-verify = require("../../lib/tasks/verify")
+verify = require("../../cli/lib/tasks/verify")
 Fixtures = require("../../packages/server/test/support/helpers/fixtures")
 
 fs = Promise.promisifyAll(fse)
