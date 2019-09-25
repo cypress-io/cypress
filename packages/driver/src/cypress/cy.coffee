@@ -501,7 +501,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     state("subject", undefined)
 
   pushSubjectAndValidate = (name, args, firstCall, prevSubject) ->
+    console.log("Pushing subject and validating")
     console.log(prevSubject)
+    console.log(firstCall)
     if firstCall
       ## if we have a prevSubject then error
       ## since we're invoking this improperly
@@ -528,7 +530,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ensures.ensureSubjectByType(subject, prevSubject, name)
 
     args.unshift(subject)
-
+    console.log(args)
+    console.log(args[0])
     Cypress.action("cy:next:subject:prepared", subject, args)
 
     args
@@ -807,6 +810,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         wrapped
 
       wrapByType = (fn, firstCall) ->
+
         if type is "parent"
           return fn
 
@@ -860,14 +864,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       cy.addChainer name, (chainer, args) ->
         { firstCall, chainerId } = chainer
-
+        console.log(firstCall)
+        console.log(chainerId)
+        console.log(name)
         ## dont enqueue / inject any new commands if
         ## onInjectCommand returns false
         onInjectCommand = state("onInjectCommand")
 
         if _.isFunction(onInjectCommand)
           return if onInjectCommand.call(cy, name, args...) is false
-
+        console.log("Queueing command")
         enqueue({
           name
           args

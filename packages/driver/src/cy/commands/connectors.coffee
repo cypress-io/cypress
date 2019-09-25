@@ -391,16 +391,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       next = state("current").get("next")
       if next
         checkSubject = (newSubject, args) ->
+          console.log("Calling check subject")
+          console.log(newSubject)
+          console.log(args)
           return if state("current") isnt next
 
           ## find the new subject and splice it out
           ## with our existing subject
+          ## But only if the new subject is defined
+          ## Otherwise keep the current subject as it is
+          ## https://github.com/cypress-io/cypress/issues/4921
           index = _.indexOf(args, newSubject)
-          if index > -1
-            args.splice(index, 1, subject)
-
+          if not _.isUndefined(newSubject) and index > -1 
+              args.splice(index, 1, subject)
           cy.removeListener("next:subject:prepared", checkSubject)
-
         cy.on("next:subject:prepared", checkSubject)
 
       endEarly = false
