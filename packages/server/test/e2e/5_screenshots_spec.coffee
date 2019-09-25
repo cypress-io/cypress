@@ -62,14 +62,14 @@ describe "e2e screenshots", ->
     ## the test title as the file name
 
     e2e.exec(@, {
-      spec: "screenshots_spec.coffee"
+      spec: "screenshots_spec.js"
       expectedExitCode: 4
       snapshot: true
       timeout: 180000
     })
     .then ->
       screenshot = (paths...) ->
-        path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.coffee", paths...)
+        path.join(e2ePath, "cypress", "screenshots", "screenshots_spec.js", paths...)
 
       screenshot1 = screenshot("black.png")
       screenshot2 = screenshot("red.png")

@@ -5,6 +5,7 @@ const logSymbols = require('log-symbols')
 const debug = require('debug')('cypress:cli')
 const util = require('./util')
 const logger = require('./logger')
+const errors = require('./errors')
 const cache = require('./tasks/cache')
 
 // patch "commander" method called when a user passed an unknown option
@@ -86,11 +87,32 @@ const parseVariableOpts = (fnArgs, args) => {
 
 const parseOpts = (opts) => {
   opts = _.pick(opts,
-    'browser', 'cachePath', 'cacheList', 'cacheClear', 'ciBuildId',
-    'config', 'cypressVersion', 'destination', 'detached', 'dev',
-    'exit', 'env', 'force', 'global', 'group', 'headed', 'key', 'path',
-    'parallel', 'port', 'project', 'reporter', 'reporterOptions',
-    'record', 'spec', 'tag')
+    'browser',
+    'cachePath',
+    'cacheList',
+    'cacheClear',
+    'ciBuildId',
+    'config',
+    'cypressVersion',
+    'destination',
+    'detached',
+    'dev',
+    'exit',
+    'env',
+    'force',
+    'global',
+    'group',
+    'headed',
+    'key',
+    'path',
+    'parallel',
+    'port',
+    'project',
+    'reporter',
+    'reporterOptions',
+    'record',
+    'spec',
+    'tag')
 
   if (opts.exit) {
     opts = _.omit(opts, 'exit')
@@ -129,7 +151,19 @@ const descriptions = {
   version: 'prints Cypress version',
 }
 
-const knownCommands = ['cache', 'help', '-h', '--help', 'install', 'open', 'run', 'verify', '-v', '--version', 'version']
+const knownCommands = [
+  'cache',
+  'help',
+  '-h',
+  '--help',
+  'install',
+  'open',
+  'run',
+  'verify',
+  '-v',
+  '--version',
+  'version',
+]
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -140,9 +174,11 @@ const text = (description) => {
 }
 
 function includesVersion (args) {
-  return _.includes(args, 'version') ||
+  return (
+    _.includes(args, 'version') ||
     _.includes(args, '--version') ||
     _.includes(args, '-v')
+  )
 }
 
 function showVersions () {
@@ -162,6 +198,14 @@ module.exports = {
   init (args) {
     if (!args) {
       args = process.argv
+    }
+
+    if (!util.isValidCypressEnvValue(process.env.CYPRESS_ENV)) {
+      debug('invalid CYPRESS_ENV value', process.env.CYPRESS_ENV)
+
+      return errors.exitWithError(errors.errors.invalidCypressEnv)(
+        `CYPRESS_ENV=${process.env.CYPRESS_ENV}`
+      )
     }
 
     const program = new commander.Command()
@@ -236,7 +280,9 @@ module.exports = {
     program
     .command('install')
     .usage('[options]')
-    .description('Installs the Cypress executable matching this package\'s version')
+    .description(
+      'Installs the Cypress executable matching this package\'s version'
+    )
     .option('-f, --force', text('forceInstall'))
     .action((opts) => {
       require('./tasks/install')
@@ -247,7 +293,9 @@ module.exports = {
     program
     .command('verify')
     .usage('[options]')
-    .description('Verifies that Cypress is installed correctly and executable')
+    .description(
+      'Verifies that Cypress is installed correctly and executable'
+    )
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       const defaultOpts = { force: true, welcomeMessage: false }

@@ -123,7 +123,7 @@ describe "lib/cypress", ->
     .callThrough()
     .withArgs("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
     .returns(null)
-    
+
     sinon.spy(errors, "log")
     sinon.spy(errors, "logException")
     sinon.spy(console, "log")
@@ -646,9 +646,8 @@ describe "lib/cypress", ->
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
-      if process.env.CI
-        ## Gleb: disabling this because Node 8 docker image runs as root
-        ## which makes accessing everything possible.
+      ## test disabled if running as root - root can write all things at all times
+      if process.geteuid() == 0
         return
 
       permissionsPath = path.resolve("./permissions")
@@ -775,7 +774,7 @@ describe "lib/cypress", ->
           debugger: {
             on: sinon.stub()
             attach: sinon.stub()
-            sendCommand: sinon.stub()
+            sendCommand: sinon.stub().callsArg(2)
           }
           setUserAgent: sinon.stub()
           session: {
@@ -787,7 +786,6 @@ describe "lib/cypress", ->
 
         sinon.stub(browserUtils, "launch").resolves(ee)
         sinon.stub(Windows, "create").returns(ee)
-        sinon.stub(Windows, "automation")
 
       context "before:browser:launch", ->
         it "chrome", ->
