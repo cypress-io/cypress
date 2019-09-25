@@ -1,1 +1,2 @@
-console.log("bar")
+/* eslint-disable no-console */
+console.log('bar')

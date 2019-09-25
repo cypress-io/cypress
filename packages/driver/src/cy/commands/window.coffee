@@ -9,11 +9,15 @@ viewports = {
   "macbook-11" : "1366x768"
   "ipad-2"     : "768x1024"
   "ipad-mini"  : "768x1024"
+  "iphone-xr"  : "414x896"
+  "iphone-x"   : "375x812"
   "iphone-6+"  : "414x736"
   "iphone-6"   : "375x667"
   "iphone-5"   : "320x568"
   "iphone-4"   : "320x480"
   "iphone-3"   : "320x480"
+  "samsung-s10" : "360x760"
+  "samsung-note9" : "414x846"
 }
 
 validOrientations = ["landscape", "portrait"]
@@ -155,7 +159,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       widthAndHeightAreWithinBounds = (width, height) ->
         _.every [width, height], (val) ->
-          val >= 20 and val <= 3000
+          val >= 20 and val <= 4000
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)
