@@ -72,6 +72,10 @@ const runSmokeTest = (binaryDir, options) => {
 
   debug('needs Xvfb?', needsXvfb)
 
+  const isLinuxLike = () => process.platform !== 'win32'
+
+  const isRootUser = () => process.geteuid() === 0
+
   /**
    * Spawn Cypress running smoke test to check if all operating system
    * dependencies are good.
@@ -79,6 +83,11 @@ const runSmokeTest = (binaryDir, options) => {
   const spawn = (linuxWithDisplayEnv) => {
     const random = _.random(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
+
+    if (isLinuxLike() && isRootUser()) {
+      // electron requires --no-sandbox to run as root
+      args.unshift('--no-sandbox')
+    }
 
     if (options.dev) {
       executable = 'node'
@@ -112,14 +121,18 @@ const runSmokeTest = (binaryDir, options) => {
     .then((result) => {
       // TODO: when execa > 1.1 is released
       // change this to `result.all` for both stderr and stdout
-      const smokeTestReturned = result.stdout
+      // use lodash to be robust during tests against null result or missing stdout
+      const smokeTestStdout = _.get(result, 'stdout', '')
 
-      debug('smoke test stdout "%s"', smokeTestReturned)
+      debug('smoke test stdout "%s"', smokeTestStdout)
 
-      if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
+      if (!util.stdoutLineMatches(String(random), smokeTestStdout)) {
         debug('Smoke test failed because could not find %d in:', random, result)
 
-        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(result.stderr || result.stdout)
+        const smokeTestStderr = _.get(result, 'stderr', '')
+        const errorText = smokeTestStderr || smokeTestStdout
+
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(errorText)
       }
     })
   }
