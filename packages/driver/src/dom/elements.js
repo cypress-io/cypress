@@ -390,8 +390,14 @@ const isFocusable = ($el) => {
   })
 }
 
-const isFocusableAndNotHidden = (el) => {
-  return isFocusable(wrap(el)) && !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+const isW3CRendered = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
+  return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+}
+
+const isW3CFocusable = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
 const isType = function ($el, type) {
@@ -856,7 +862,7 @@ _.extend(module.exports, {
 
   isFocusable,
 
-  isFocusableAndNotHidden,
+  isW3CFocusable,
 
   isAttached,
 

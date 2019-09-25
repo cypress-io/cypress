@@ -677,10 +677,11 @@ describe('intercept blur methods correctly', () => {
       cy.get('area').focus().should('have.focus')
 
     })
-
   })
 
-  it('does not send focus events for focusable elements that are hidden', () => {
+  // W3C Hidden @see html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  // fix https://github.com/cypress-io/cypress/issues/4898
+  it('does not send focus events for focusable elements that are w3c hidden', () => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html')
     .then(() => {
 
@@ -711,9 +712,10 @@ describe('intercept blur methods correctly', () => {
       cy.get('no-focus-4').should('not.be.visible')
 
     })
-
   })
 
+  // W3C Hidden @see html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  // fix https://github.com/cypress-io/cypress/issues/4898
   it('does send focus events for focusable elements that are 0x0 size', () => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html')
     .then(() => {
