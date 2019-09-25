@@ -75,6 +75,11 @@ describe "src/cy/commands/actions/check", ->
         done("should not fire change event")
 
       cy.get(checkbox).check()
+    
+    ## readonly should only be limited to inputs, not checkboxes
+    it "can check readonly checkboxes", ->
+      cy.get('#readonly-checkbox').check().then ($checkbox) ->
+        expect($checkbox).to.be.checked
 
     it "does not require visibility with force: true", ->
       checkbox = ":checkbox[name='birds']"

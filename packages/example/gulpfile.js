@@ -1,10 +1,10 @@
-let gulp = require('gulp')
-let ghPages = require('gulp-gh-pages-will')
-let clean = require('gulp-clean')
-let RevAll = require('gulp-rev-all')
+const gulp = require('gulp')
+const ghPages = require('gulp-gh-pages-will')
+const gulpClean = require('gulp-clean')
+const RevAll = require('gulp-rev-all')
 
-gulp.task('assets', function () {
-  let revAllOpts = {
+const assets = () => {
+  const revAllOpts = {
     dontGlobal: ['.ico', 'fira.css', 'javascript-logo.png'],
     dontRenameFile: ['.ico', '.html', /fonts/],
     dontSearchFile: ['.js'],
@@ -14,28 +14,25 @@ gulp.task('assets', function () {
   return gulp.src('./app/**/*')
   .pipe(RevAll.revision(revAllOpts))
   .pipe(gulp.dest('build'))
-})
+}
 
-gulp.task('cname', function () {
-  return gulp.src('CNAME')
+const cname = () => {
+  return gulp.src('CNAME', { allowEmpty: true })
   .pipe(gulp.dest('build'))
-})
+}
 
-gulp.task('gitignore', function () {
-  return gulp.src('.gitignore', { allowEmpty: true })
-  .pipe(gulp.dest('build'))
-})
-
-gulp.task('clean', function () {
+const clean = () => {
   return gulp.src('./build', { allowEmpty: true })
-  .pipe(clean())
-})
+  .pipe(gulpClean())
+}
 
-gulp.task('push-gh-pages', function () {
+const pushGhPages = () => {
   return gulp.src('build/**/*')
   .pipe(ghPages())
-})
+}
 
-gulp.task('build', gulp.series('clean', gulp.parallel('assets', 'cname', 'gitignore')))
+const build = gulp.series(clean, gulp.parallel(assets, cname))
 
-gulp.task('deploy', gulp.series('build', 'push-gh-pages'))
+exports.build = build
+
+exports.deploy = gulp.series(build, pushGhPages)

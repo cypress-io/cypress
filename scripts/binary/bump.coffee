@@ -1,4 +1,3 @@
-require("console.table")
 _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
@@ -119,7 +118,8 @@ awaitEachProjectAndProvider = (projects, fn, filter = R.identity) ->
   filteredProjects = R.filter(filter, projects)
   if check.empty(filteredProjects)
     console.log("⚠️ zero filtered projects left after filtering")
-  console.table("filtered projects", filteredProjects)
+  console.log("filtered projects:")
+  console.table(filteredProjects)
   Promise.mapSeries filteredProjects, (project) ->
     fn(project.repo, project.provider, creds)
 
@@ -152,7 +152,8 @@ module.exports = {
   nextVersion: (version) ->
     MAIN_PROJECTS = remapMain(_PROVIDERS)
     console.log("Setting next version to build", version)
-    console.table("In these projects", MAIN_PROJECTS)
+    console.log("In these projects:")
+    console.table(MAIN_PROJECTS)
 
     la(check.unemptyString(version),
       "missing next version to set", version)
@@ -168,7 +169,8 @@ module.exports = {
 
   # in each project, set a couple of environment variables
   version: (nameOrUrl, binaryVersionOrUrl, platform, providerName) ->
-    console.table("All possible projects", PROJECTS)
+    console.log("All possible projects:")
+    console.table(PROJECTS)
 
     la(check.unemptyString(nameOrUrl),
       "missing cypress name or url to set", nameOrUrl)
