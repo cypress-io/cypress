@@ -5,6 +5,7 @@ execa = require('execa')
 path = require("path")
 Promise = require("bluebird")
 os = require("os")
+verify = require("../../cli/lib/tasks/verify")
 Fixtures = require("../../packages/server/test/support/helpers/fixtures")
 
 fs = Promise.promisifyAll(fse)
@@ -16,7 +17,7 @@ shouldSkipProjectTest = () ->
   os.platform() == "win32"
 
 runSmokeTest = (buildAppExecutable) ->
-  rand = "" + Math.random()
+  rand = String(_.random(0, 1000))
   console.log("executable path #{buildAppExecutable}")
 
   hasRightResponse = (stdout) ->
@@ -25,7 +26,11 @@ runSmokeTest = (buildAppExecutable) ->
     lines = stdout.split('\n').map((s) -> s.trim())
     return lines.includes(rand)
 
-  execa "#{buildAppExecutable}", ["--smoke-test", "--ping=#{rand}"], {timeout: 10000}
+  args = ["--smoke-test", "--ping=#{rand}"]
+  if verify.needsSandbox()
+    args.push("--no-sandbox")
+
+  execa "#{buildAppExecutable}", args, {timeout: 10000}
   .catch (err) ->
     console.error("smoke test failed with error %s", err.message)
     throw err
