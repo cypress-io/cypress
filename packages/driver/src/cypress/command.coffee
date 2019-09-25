@@ -42,8 +42,7 @@ class $Command
 
   hasPreviouslyLinkedCommand: ->
     prev = @get("prev")
-    console.log(prev)
-    
+
     !!(prev and prev.get("chainerId") is @get("chainerId"))
 
   is: (str) ->

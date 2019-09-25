@@ -18,6 +18,8 @@ class $CommandQueue
     return logs
 
   add: (obj) ->
+    console.log('Adding command to queue')
+    console.log(obj)
     if utils.isInstanceOf(obj, $Command)
       return obj
     else
@@ -28,6 +30,9 @@ class $CommandQueue
 
   names: ->
     @invokeMap("get", "name")
+
+  remove: (index, amountToRemove) ->
+    @commands.splice(index, amountToRemove)
 
   splice: (start, end, obj) ->
     cmd = @add(obj)
@@ -40,7 +45,7 @@ class $CommandQueue
       prev.set("next", cmd)
       cmd.set("prev", prev)
 
-    if next
+    if next and not _.isUndefined(next.get("parentCommand"))
       next.set("prev", cmd)
       cmd.set("next", next)
 

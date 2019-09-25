@@ -184,7 +184,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
   enqueue = (obj) ->
-    console.log(obj)
     ## if we have a nestedIndex it means we're processing
     ## nested commands and need to splice them into the
     ## index past the current index as opposed to
@@ -204,15 +203,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## we're about to splice this into our commands
     ## and need to reset next + increment the index
     if _.isNumber(nestedIndex)
+      ## if these are nested commands set the parentCommand to the currentCommand
+      state("parentCommand", state("currentCommand"))
       state("nestedIndex", nestedIndex += 1)
-
     ## we look at whether or not nestedIndex is a number, because if it
     ## is then we need to splice inside of our commands, else just push
     ## it onto the end of the queu
     index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
-
-    queue.splice(index, 0, obj)
-
+    ## so....If we're dealing with nested commands....
+    parentCommand = state("parentCommand")
+    if not _.isUndefined(parentCommand) 
+      obj.parentCommand = parentCommand
+    else queue.splice(index, 0, obj)
     Cypress.action("cy:command:enqueued", obj)
 
   getCommandsUntilFirstParentOrValidSubject = (command, memo = []) ->
@@ -314,7 +316,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         else
           ret
     .then (subject) ->
-      console.log(subject)
       state("commandIntermediateValue", undefined)
 
       ## we may be given a regular array here so
@@ -342,6 +343,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       command.finishLogs()
 
       ## reset the nestedIndex back to null
+      console.log(command)
+      console.log("Reseting nestedIndex...")
       state("nestedIndex", null)
 
       ## also reset recentlyReady back to null
@@ -402,10 +405,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       console.log(runnable)
 
       Cypress.action("cy:command:start", command)
+      state("currentCommand", command)
 
       runCommand(command)
       .then ->
-        console.log("***********Command is Finished**************")
+        ## If the command has a parentCommand (meaning that is a nested command...)
+        ## then remove that command from the queue
+        ## TODO: We will have to test chained commands...but hopefully that should just work??
         ## each successful command invocation should
         ## always reset the timeout for the current runnable
         ## unless it already has a state.  if it has a state
@@ -419,9 +425,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## in between different hooks like before + beforeEach
         ## else run will be called again and index would start
         ## over at 0
-        state("index", index += 1)
+        ## However, we should only mutate the index if we aren't removing a command
+        if command.get("parentCommand")
+          queue.remove(state("index"), 1)
+        else state("index", index += 1)
         Cypress.action("cy:command:end", command)
-
+        state("currentCommand", null)
         if fn = state("onPaused")
           new Promise (resolve) ->
             fn(resolve)
@@ -788,7 +797,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       $Chainer.add(name, fn)
 
     addCommand: ({name, fn, type, prevSubject}) ->
-      console.log(name)
       ## TODO: prob don't need this anymore
       commandFns[name] = fn
 
@@ -871,10 +879,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         return true
 
     now: (name, args...) ->
+      console.log(args)
       Promise.resolve(
         commandFns[name].apply(cy, args)
       )
-
+    runCommandFromWithin: (obj) ->
+      cmd = queue.add(obj)
+      runCommand(cmd)
     replayCommandsFrom: (current) ->
       ## reset each chainerId to the
       ## current value

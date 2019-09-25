@@ -131,10 +131,8 @@ create = (Cypress, cy, state, config) ->
 
       ## normalize type by how they validate their
       ## previous subject (unless they're explicitly set)
-      console.log(name)
-      console.log(prevSubject)
+      
       type = options.type ?= getTypeByPrevSubject(prevSubject)
-      console.log(type)
 
       store({
         name

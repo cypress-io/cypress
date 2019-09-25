@@ -418,7 +418,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## reference the next command after this
       ## within.  when that command runs we'll
       ## know to remove withinSubject
+      finished = false
       next = cy.state("current").get("next")
+      current = cy.state("current")
       console.log(next)
       ## backup the current withinSubject
       ## this prevents a bug where we null out
@@ -427,11 +429,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## once its done
       prevWithinSubject = cy.state("withinSubject")
       cy.state("withinSubject", subject)
+      console.log("When we are done the within...we should remove all commands that were in the within block from the queue")
 
+      finishWithin = (obj) ->
+        console.log("Finish within was called...")
+        console.log("going to try running this command")
+        console.log(obj)
+        cy.runCommandFromWithin(obj)
+
+      if current
+         cy.on("command:enqueued", finishWithin)
       fn.call(ctx, subject)
 
       cleanup = ->
+        console.log("Nuking listeners")
         cy.removeListener("command:start", setWithinSubject)
+        cy.removeListener("command:enqueued", finishWithin)
 
       ## we need a mechanism to know when we should remove
       ## our withinSubject so we dont accidentally keep it
@@ -440,6 +453,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## is the command which references our 'next' and
       ## if so, remove the within subject
       setWithinSubject = (obj) ->
+        console.log(obj isnt next)
         return if obj isnt next
 
         ## okay so what we're doing here is creating a property
@@ -448,20 +462,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## exact same 'next' command, then this prevents accidentally
         ## resetting withinSubject more than once.  If they point
         ## to differnet 'next's then its okay
-        console.log(next)
-        console.log(obj)
-        console.log(cy.state("subject"))
-        console.log(cy.state("nextWithinSubject"))
-        console.log(cy.state("chainerId"))
         if next isnt cy.state("nextWithinSubject")
-          console.log('setting within subject')
-          console.log(prevWithinSubject)
           cy.state("withinSubject", prevWithinSubject or null)
           cy.state("nextWithinSubject", next)
 
         ## regardless nuke this listeners
         cleanup()
-
       ## if next is defined then we know we'll eventually
       ## unbind these listeners
       if next

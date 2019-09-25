@@ -12,6 +12,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     noop: (arg) -> arg
 
     log: (msg, args) ->
+      console.log(msg)
+      console.log(args)
       Cypress.log({
         end: true
         snapshot: true
