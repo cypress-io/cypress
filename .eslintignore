@@ -7,7 +7,12 @@
 **/dist
 **/dist-test
 **/node_modules
-**/support/fixtures
+**/support/fixtures/*
+!**/support/fixtures/projects
+**/support/fixtures/projects/**/_fixtures/*
+**/support/fixtures/projects/**/*.jsx
+**/support/fixtures/projects/**/jquery.js
+**/support/fixtures/projects/**/fail.js
 **/test/fixtures
 **/vendor
 

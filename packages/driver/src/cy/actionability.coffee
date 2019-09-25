@@ -209,6 +209,18 @@ ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 
 verify = (cy, $el, options, callbacks) ->
+
+  _.defaults(options, {
+    ensure: {
+      position: true,
+      visibility: true,
+      notDisabled: true,
+      notCovered: true,
+      notReadonly: false,
+      custom: false
+    }
+  })
+
   win = $dom.getWindowByElement($el.get(0))
 
   { _log, force, position } = options
@@ -220,7 +232,7 @@ verify = (cy, $el, options, callbacks) ->
 
   ## if we have a position we must validate
   ## this ahead of time else bail early
-  if position
+  if options.ensure.position and position
     try
       cy.ensureValidPosition(position, _log)
     catch err
@@ -232,6 +244,9 @@ verify = (cy, $el, options, callbacks) ->
 
     runAllChecks = ->
       if force isnt true
+        ## ensure its 'receivable'
+        if (options.ensure.notDisabled) then cy.ensureNotDisabled($el, _log)
+
         ## scroll the element into view
         $el.get(0).scrollIntoView()
 
@@ -239,10 +254,13 @@ verify = (cy, $el, options, callbacks) ->
           onScroll($el, "element")
 
         ## ensure its visible
-        cy.ensureVisibility($el, _log)
+        if (options.ensure.visibility) then cy.ensureVisibility($el, _log)
 
-        ## ensure its 'receivable' (not disabled, readonly)
-        cy.ensureReceivability($el, _log)
+        if options.ensure.notReadonly
+          cy.ensureNotReadonly($el, _log)
+
+        if _.isFunction(options.custom)
+          options.custom($el, _log)
 
       ## now go get all the coords for this element
       coords = getCoordinatesForEl(cy, $el, options)
@@ -264,7 +282,7 @@ verify = (cy, $el, options, callbacks) ->
         ## to figure out if its being covered by another element.
         ## this calculation is relative from the viewport so we
         ## only care about fromViewport coords
-        $elAtCoords = ensureElIsNotCovered(cy, win, $el, coords.fromViewport, options, _log, onScroll)
+        $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromViewport, options, _log, onScroll)
 
       ## pass our final object into onReady
       finalEl = $elAtCoords ? $el

@@ -1473,7 +1473,7 @@ describe('src/cy/commands/actions/type', () => {
 
           cy.get('#generic-iframe')
           .then(($iframe) => {
-            $iframe.load(() => {
+            $iframe.on('load', () => {
               loaded = true
             })
           }).scrollIntoView()
@@ -4260,7 +4260,7 @@ describe('src/cy/commands/actions/type', () => {
           expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
           expect(err.message).to.include('The element typed into was:')
           expect(err.message).to.include('<form id="by-id">...</form>')
-          expect(err.message).to.include('Cypress considers the \'body\', \'textarea\', any \'element\' with a \'tabindex\' or \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid typeable elements.')
+          expect(err.message).to.include(`Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.`)
 
           done()
         })

@@ -112,15 +112,27 @@ ServerExtensions = [{
 }]
 
 class CA
+  constructor: (caFolder) ->
+    if not caFolder
+      caFolder = path.join(os.tmpdir(), 'cy-ca')
 
- randomSerialNumber: ->
-   ## generate random 16 bytes hex string
-   sn = ""
+    @baseCAFolder = caFolder
+    @certsFolder  = path.join(@baseCAFolder, "certs")
+    @keysFolder   = path.join(@baseCAFolder, "keys")
 
-   for i in [1..4]
-     sn += ("00000000" + Math.floor(Math.random()*Math.pow(256, 4)).toString(16)).slice(-8)
+  removeAll: ->
+    fs
+    .removeAsync(@baseCAFolder)
+    .catchReturn({ code: "ENOENT" })
 
-   sn
+  randomSerialNumber: ->
+    ## generate random 16 bytes hex string
+    sn = ""
+
+    for i in [1..4]
+      sn += ("00000000" + Math.floor(Math.random()*Math.pow(256, 4)).toString(16)).slice(-8)
+
+    sn
 
   generateCA: ->
     generateKeyPairAsync({bits: 512})
@@ -128,6 +140,7 @@ class CA
       cert = pki.createCertificate()
       cert.publicKey = keys.publicKey
       cert.serialNumber = @randomSerialNumber()
+
       cert.validity.notBefore = new Date()
       cert.validity.notAfter = new Date()
       cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10)
@@ -140,9 +153,9 @@ class CA
       @CAkeys = keys
 
       Promise.all([
-        fs.writeFileAsync(path.join(@certsFolder, "ca.pem"),        pki.certificateToPem(cert))
-        fs.writeFileAsync(path.join(@keysFolder, "ca.private.key"), pki.privateKeyToPem(keys.privateKey))
-        fs.writeFileAsync(path.join(@keysFolder, "ca.public.key"),  pki.publicKeyToPem(keys.publicKey))
+        fs.outputFileAsync(path.join(@certsFolder, "ca.pem"),        pki.certificateToPem(cert))
+        fs.outputFileAsync(path.join(@keysFolder, "ca.private.key"), pki.privateKeyToPem(keys.privateKey))
+        fs.outputFileAsync(path.join(@keysFolder, "ca.public.key"),  pki.publicKeyToPem(keys.publicKey))
       ])
 
   loadCA: ->
@@ -198,9 +211,9 @@ class CA
     dest = mainHost.replace(asterisksRe, "_")
 
     Promise.all([
-      fs.writeFileAsync(path.join(@certsFolder, dest + ".pem"),        certPem)
-      fs.writeFileAsync(path.join(@keysFolder,  dest + ".key"),        keyPrivatePem)
-      fs.writeFileAsync(path.join(@keysFolder,  dest + ".public.key"), keyPublicPem)
+      fs.outputFileAsync(path.join(@certsFolder, dest + ".pem"),        certPem)
+      fs.outputFileAsync(path.join(@keysFolder,  dest + ".key"),        keyPrivatePem)
+      fs.outputFileAsync(path.join(@keysFolder,  dest + ".public.key"), keyPublicPem)
     ])
     .return([certPem, keyPrivatePem])
 
@@ -216,25 +229,12 @@ class CA
     path.join(@certsFolder, "ca.pem")
 
   @create = (caFolder) ->
-    ca = new CA
+    ca = new CA(caFolder)
 
-    if not caFolder
-      caFolder = path.join(os.tmpdir(), 'cy-ca')
-
-    ca.baseCAFolder = caFolder
-    ca.certsFolder  = path.join(ca.baseCAFolder, "certs")
-    ca.keysFolder   = path.join(ca.baseCAFolder, "keys")
-
-    Promise.all([
-      fs.ensureDirAsync(ca.baseCAFolder)
-      fs.ensureDirAsync(ca.certsFolder)
-      fs.ensureDirAsync(ca.keysFolder)
-    ])
-    .then ->
-      fs.statAsync(path.join(ca.certsFolder, "ca.pem"))
-      .bind(ca)
-      .then(ca.loadCA)
-      .catch(ca.generateCA)
+    fs.statAsync(path.join(ca.certsFolder, "ca.pem"))
+    .bind(ca)
+    .then(ca.loadCA)
+    .catch(ca.generateCA)
     .return(ca)
 
 module.exports = CA

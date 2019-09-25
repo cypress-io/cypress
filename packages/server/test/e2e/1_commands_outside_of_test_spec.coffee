@@ -10,12 +10,6 @@ describe "e2e commands outside of test", ->
   ], (browser) ->
 
     it "[#{browser}] fails on cy commands", ->
-      ## TODO: remove this after electron upgrade
-      if browser is 'electron'
-        console.log('⚠️ skipping test in electron due to chromium 63 bug with sourceMaps')
-        ## this.skip() will not work here since it skips the afterEach
-        return
-
       e2e.exec(@, {
         spec: "commands_outside_of_test_spec.coffee"
         snapshot: true
@@ -24,12 +18,6 @@ describe "e2e commands outside of test", ->
       })
 
     it "[#{browser}] fails on failing assertions", ->
-      ## TODO: remove this after electron upgrade
-      if browser is 'electron'
-        console.log('⚠️ skipping test in electron due to chromium 63 bug with sourceMaps')
-        ## this.skip() will not work here since it skips the afterEach
-        return
-
       e2e.exec(@, {
         spec: "assertions_failing_outside_of_test_spec.coffee"
         snapshot: true

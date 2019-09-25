@@ -762,9 +762,17 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('actionability', () => {
-
       it('can click on inline elements that wrap lines', () => {
         cy.get('#overflow-link').find('.wrapped').click()
+      })
+
+      // readonly should only limit typing, not clicking
+      it('can click on readonly inputs', () => {
+        cy.get('#readonly-attr').click()
+      })
+
+      it('can click on readonly submit inputs', () => {
+        cy.get('#readonly-submit').click()
       })
 
       it('can click elements which are hidden until scrolled within parent container', () => {
