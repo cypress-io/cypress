@@ -58,6 +58,8 @@ runProjectTest = (buildAppExecutable, e2e) ->
       "--run-project=#{e2e}",
       "--spec=#{e2e}/cypress/integration/simple_passing_spec.coffee"
     ]
+    if verify.needsSandbox()
+      args.push("--no-sandbox")
     options = {
       stdio: "inherit", env: env
     }
@@ -91,12 +93,18 @@ runFailingProjectTest = (buildAppExecutable, e2e) ->
     new Promise (resolve, reject) ->
       env = _.omit(process.env, "CYPRESS_ENV")
 
-      cp.spawn(buildAppExecutable, [
+      args = [
         "--run-project=#{e2e}",
         "--spec=#{e2e}/cypress/integration/simple_failing_spec.coffee"
-      ], {
-        stdio: "inherit", env: env
-      })
+      ]
+      if verify.needsSandbox()
+        args.push("--no-sandbox")
+
+      options = {
+        stdio: "inherit",
+        env
+      }
+      cp.spawn(buildAppExecutable, args, options)
       .on "exit", (code) ->
         if code is 2
           resolve()
