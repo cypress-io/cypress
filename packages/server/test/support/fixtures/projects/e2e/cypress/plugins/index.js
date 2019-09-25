@@ -30,23 +30,25 @@ module.exports = (on) => {
       throw new Error(message)
     },
 
-    'ensure:pixel:color' ({ name, coords, color, devicePixelRatio }) {
+    'ensure:pixel:color' ({ name, colors, devicePixelRatio }) {
       const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
 
       return Jimp.read(imagePath)
       .then((image) => {
-        let [x, y] = coords
+        _.each(colors, ({ coords, color }) => {
+          let [x, y] = coords
 
-        x = x * devicePixelRatio
-        y = y * devicePixelRatio
+          x = x * devicePixelRatio
+          y = y * devicePixelRatio
 
-        const pixels = Jimp.intToRGBA(image.getPixelColor(x, y))
+          const pixels = Jimp.intToRGBA(image.getPixelColor(x, y))
 
-        const { r, g, b } = pixels
+          const { r, g, b } = pixels
 
-        if (!_.isEqual(color, [r, g, b])) {
-          throw new Error(`The pixel color at coords: [${x}, ${y}] does not match the expected pixel color. The color was [${r}, ${g}, ${b}] and was expected to be [${color.join(', ')}].`)
-        }
+          if (!_.isEqual(color, [r, g, b])) {
+            throw new Error(`The pixel color at coords: [${x}, ${y}] does not match the expected pixel color. The color was [${r}, ${g}, ${b}] and was expected to be [${color.join(', ')}].`)
+          }
+        })
 
         return null
       })
@@ -101,6 +103,7 @@ module.exports = (on) => {
 
     'record:fast_visit_spec' ({ percentiles, url, browser, currentRetry }) {
       percentiles.forEach(([percent, percentile]) => {
+        // eslint-disable-next-line no-console
         console.log(`${percent}%\t of visits to ${url} finished in less than ${percentile}ms`)
       })
 
@@ -110,8 +113,9 @@ module.exports = (on) => {
         currentRetry,
         ...percentiles.reduce((acc, pair) => {
           acc[pair[0]] = pair[1]
+
           return acc
-        }, {})
+        }, {}),
       }
 
       return performance.track('fast_visit_spec percentiles', data)

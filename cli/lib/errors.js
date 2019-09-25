@@ -36,7 +36,9 @@ const failedUnzip = {
 
 const missingApp = (binaryDir) => {
   return {
-    description: `No version of Cypress is installed in: ${chalk.cyan(binaryDir)}`,
+    description: `No version of Cypress is installed in: ${chalk.cyan(
+      binaryDir
+    )}`,
     solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
   `,
@@ -59,7 +61,8 @@ const binaryNotExecutable = (executable) => {
 
 const notInstalledCI = (executable) => {
   return {
-    description: 'The cypress npm package is installed, but the Cypress binary is missing.',
+    description:
+      'The cypress npm package is installed, but the Cypress binary is missing.',
     solution: stripIndent`\n
     We expected the binary to be installed here: ${chalk.cyan(executable)}
 
@@ -114,7 +117,7 @@ const smokeTestFailure = (smokeTestCommand, timedOut) => {
 const invalidSmokeTestDisplayError = {
   code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
   description: 'Cypress verification failed.',
-  solution  (msg) {
+  solution (msg) {
     return stripIndent`
       Cypress failed to start after spawning a new Xvfb server.
 
@@ -152,7 +155,8 @@ const missingDependency = {
 }
 
 const invalidCacheDirectory = {
-  description: 'Cypress cannot write to the cache directory due to file permissions',
+  description:
+    'Cypress cannot write to the cache directory due to file permissions',
   solution: stripIndent`
     See discussion and possible solutions at
     ${chalk.blue(util.getGitHubIssueUrl(1281))}
@@ -165,7 +169,8 @@ const versionMismatch = {
 }
 
 const unexpected = {
-  description: 'An unexpected error occurred while verifying the Cypress executable.',
+  description:
+    'An unexpected error occurred while verifying the Cypress executable.',
   solution: stripIndent`
     Please search Cypress documentation for possible solutions:
 
@@ -179,10 +184,19 @@ const unexpected = {
   `,
 }
 
+const invalidCypressEnv = {
+  description:
+    chalk.red('The environment variable with the reserved name "CYPRESS_ENV" is set.'),
+  solution: chalk.red('Unset the "CYPRESS_ENV" environment variable and run Cypress again.'),
+  exitCode: 11,
+}
+
 const removed = {
   CYPRESS_BINARY_VERSION: {
     description: stripIndent`
-    The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green('3.0.0')}
+    The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green(
+    '3.0.0'
+  )}
     `,
     solution: stripIndent`
     You should set CYPRESS_INSTALL_BINARY instead.
@@ -190,7 +204,9 @@ const removed = {
   },
   CYPRESS_SKIP_BINARY_INSTALL: {
     description: stripIndent`
-    The environment variable CYPRESS_SKIP_BINARY_INSTALL has been removed as of version ${chalk.green('3.0.0')}
+    The environment variable CYPRESS_SKIP_BINARY_INSTALL has been removed as of version ${chalk.green(
+    '3.0.0'
+  )}
     `,
     solution: stripIndent`
       To skip the binary install, set CYPRESS_INSTALL_BINARY=0
@@ -210,8 +226,7 @@ const CYPRESS_RUN_BINARY = {
 }
 
 function getPlatformInfo () {
-  return util.getOsVersionAsync()
-  .then((version) => {
+  return util.getOsVersionAsync().then((version) => {
     return stripIndent`
     Platform: ${os.platform()} (${version})
     Cypress Version: ${util.pkgVersion()}
@@ -220,8 +235,7 @@ function getPlatformInfo () {
 }
 
 function addPlatformInformation (info) {
-  return getPlatformInfo()
-  .then((platform) => {
+  return getPlatformInfo().then((platform) => {
     return merge(info, { platform })
   })
 }
@@ -231,18 +245,18 @@ function addPlatformInformation (info) {
  * and if possible a way to solve it. Resolves with a string.
  */
 function formErrorText (info, msg, prevMessage) {
-  return addPlatformInformation(info)
-  .then((obj) => {
+  return addPlatformInformation(info).then((obj) => {
     const formatted = []
 
     function add (msg) {
-      formatted.push(
-        stripIndents(msg)
-      )
+      formatted.push(stripIndents(msg))
     }
 
-    la(is.unemptyString(obj.description),
-      'expected error description to be text', obj.description)
+    la(
+      is.unemptyString(obj.description),
+      'expected error description to be text',
+      obj.description
+    )
 
     // assuming that if there the solution is a function it will handle
     // error message and (optional previous error message)
@@ -258,8 +272,11 @@ function formErrorText (info, msg, prevMessage) {
 
       `)
     } else {
-      la(is.unemptyString(obj.solution),
-        'expected error solution to be text', obj.solution)
+      la(
+        is.unemptyString(obj.solution),
+        'expected error solution to be text',
+        obj.solution
+      )
 
       add(`
         ${obj.description}
@@ -312,13 +329,30 @@ const raise = (info) => {
 
 const throwFormErrorText = (info) => {
   return (msg, prevMessage) => {
-    return formErrorText(info, msg, prevMessage)
-    .then(raise(info))
+    return formErrorText(info, msg, prevMessage).then(raise(info))
+  }
+}
+
+/**
+ * Forms full error message with error and OS details, prints to the error output
+ * and then exits the process.
+ * @param {ErrorInformation} info Error information {description, solution}
+ * @example return exitWithError(errors.invalidCypressEnv)('foo')
+ */
+const exitWithError = (info) => {
+  return (msg) => {
+    return formErrorText(info, msg).then((text) => {
+      // eslint-disable-next-line no-console
+      console.error(text)
+      process.exit(info.exitCode || 1)
+    })
   }
 }
 
 module.exports = {
   raise,
+  exitWithError,
+  // formError,
   formErrorText,
   throwFormErrorText,
   hr,
@@ -334,6 +368,7 @@ module.exports = {
     unexpected,
     failedDownload,
     failedUnzip,
+    invalidCypressEnv,
     invalidCacheDirectory,
     removed,
     CYPRESS_RUN_BINARY,
