@@ -286,7 +286,7 @@ describe "Proxy", ->
       })
       .then =>
         throw new Error('should not succeed')
-      .catch { message: "Error: socket hang up" }, =>
+      .catch { message: 'Error: Client network socket disconnected before secure TLS connection was established' }, =>
         expect(createProxyConn).to.not.be.called
         expect(createSocket).to.be.calledWith({
           port: @proxy._sniPort

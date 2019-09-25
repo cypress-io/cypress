@@ -209,6 +209,15 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
     """
+    readonly: """
+      #{cmd('{{cmd}}')} failed because this element is readonly:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+    """
     invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
