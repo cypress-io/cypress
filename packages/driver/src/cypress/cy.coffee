@@ -197,6 +197,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## first command. this was due to nestedIndex being undefined at that
     ## time. so we have to ensure to check that its any kind of number (even 0)
     ## in order to know to splice into the existing array.
+
     nestedIndex = state("nestedIndex")
     ## if this is a number then we know
     ## we're about to splice this into our commands
@@ -224,6 +225,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## break and return the memo
     if command.get("type") is "parent" or $dom.isAttached(command.get("subject"))
       return memo
+
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
 
   runCommand = (command) ->
@@ -372,6 +374,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         state("subject", command.get("subject"))
 
         return next()
+
       ## if we're at the very end
       if not command
 
@@ -418,8 +421,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         if command.get("parentCommand")
           queue.remove(state("index"), 1)
         else state("index", index += 1)
+
         Cypress.action("cy:command:end", command)
         state("currentCommand", null)
+
         if fn = state("onPaused")
           new Promise (resolve) ->
             fn(resolve)
@@ -792,7 +797,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         wrapped
 
       wrapByType = (fn, firstCall) ->
-
         if type is "parent"
           return fn
 
@@ -839,18 +843,21 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         if not state("promise")
           if state("returnedCustomPromise")
             warnMixingPromisesAndCommands()
+
           run()
 
         return chain
 
       cy.addChainer name, (chainer, args) ->
         { firstCall, chainerId } = chainer
+
         ## dont enqueue / inject any new commands if
         ## onInjectCommand returns false
         onInjectCommand = state("onInjectCommand")
 
         if _.isFunction(onInjectCommand)
           return if onInjectCommand.call(cy, name, args...) is false
+          
         enqueue({
           name
           args

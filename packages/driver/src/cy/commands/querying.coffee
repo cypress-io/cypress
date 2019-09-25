@@ -424,7 +424,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## reference the next command after this
       ## within.  when that command runs we'll
       ## know to remove withinSubject
-      finished = false
       next = cy.state("current").get("next")
 
       ## backup the current withinSubject
@@ -469,6 +468,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         ## regardless nuke this listeners
         cleanup()
+        
       ## if next is defined then we know we'll eventually
       ## unbind these listeners
       if next

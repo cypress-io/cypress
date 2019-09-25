@@ -131,7 +131,6 @@ create = (Cypress, cy, state, config) ->
 
       ## normalize type by how they validate their
       ## previous subject (unless they're explicitly set)
-      
       type = options.type ?= getTypeByPrevSubject(prevSubject)
 
       store({
