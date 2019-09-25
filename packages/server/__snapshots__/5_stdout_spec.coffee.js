@@ -87,7 +87,6 @@ The internal Cypress web server responded with:
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 

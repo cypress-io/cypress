@@ -134,7 +134,6 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -312,7 +311,6 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -659,7 +657,6 @@ Error: ESOCKETTIMEDOUT
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
      CypressError: \`cy.visit()\` failed trying to load:
@@ -704,7 +701,6 @@ Error: ESOCKETTIMEDOUT
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
      CypressError: \`cy.visit()\` failed trying to load:
@@ -736,7 +732,6 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
