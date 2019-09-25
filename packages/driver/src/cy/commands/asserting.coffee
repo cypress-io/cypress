@@ -54,7 +54,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     .return(subject)
 
   shouldFn = (subject, chainers, args...) ->
-    console.log(subject)
     if _.isFunction(chainers)
       return shouldFnWithCallback.apply(@, arguments)
 

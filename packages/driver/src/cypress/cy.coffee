@@ -198,20 +198,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## time. so we have to ensure to check that its any kind of number (even 0)
     ## in order to know to splice into the existing array.
     nestedIndex = state("nestedIndex")
-
     ## if this is a number then we know
     ## we're about to splice this into our commands
     ## and need to reset next + increment the index
     if _.isNumber(nestedIndex)
-      ## if these are nested commands set the parentCommand to the currentCommand
-      state("parentCommand", state("currentCommand"))
+      parentCommand = state("currentCommand")
       state("nestedIndex", nestedIndex += 1)
     ## we look at whether or not nestedIndex is a number, because if it
     ## is then we need to splice inside of our commands, else just push
     ## it onto the end of the queu
     index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
-    ## so....If we're dealing with nested commands....
-    parentCommand = state("parentCommand")
+    ## if we're dealing with nestedCommands
+    ## then add the parentCommand to the obj
     if not _.isUndefined(parentCommand) 
       obj.parentCommand = parentCommand
     else queue.splice(index, 0, obj)
