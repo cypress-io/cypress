@@ -166,6 +166,9 @@ describe "src/cy/commands/actions/trigger", ->
       it "can trigger on elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").trigger("mousedown")
 
+      it "can trigger on readonly inputs", ->
+        cy.get("#readonly-attr").trigger("mousedown")
+
       it "does not scroll when being forced", ->
         scrolled = []
 

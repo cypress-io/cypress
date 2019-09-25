@@ -104,7 +104,7 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
-  ensureReceivability = (subject, onFail) ->
+  ensureNotDisabled = (subject, onFail) ->
     cmd = state("current").get("name")
 
     if subject.prop("disabled")
@@ -114,6 +114,9 @@ create = (state, expect) ->
         onFail
         args: { cmd, node }
       })
+
+  ensureNotReadonly = (subject, onFail) ->
+    cmd = state("current").get("name")
 
     # readonly can only be applied to input/textarea
     # not on checkboxes, radios, etc..
@@ -328,7 +331,7 @@ create = (state, expect) ->
 
     ensureElementIsNotAnimating
 
-    ensureReceivability
+    ensureNotDisabled
 
     ensureVisibility
 
@@ -341,6 +344,8 @@ create = (state, expect) ->
     ensureValidPosition
 
     ensureScrollability
+
+    ensureNotReadonly
   }
 
 module.exports = {

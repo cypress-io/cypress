@@ -285,6 +285,7 @@ module.exports = {
     }
     invalid_position_argument: {
       message: "Invalid position argument: `{{position}}`. Position may only be {{validPositions}}."
+      docsUrl: "https://on.cypress.io/element-cannot-be-interacted-with"
     }
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
@@ -1333,7 +1334,7 @@ module.exports = {
       docsUrl: "https://on.cypress.io/viewport"
     }
     dimensions_out_of_range: {
-      message: "#{cmd('viewport')} `width` and `height` must be between `20px` and `3000px`."
+      message: "#{cmd('viewport')} `width` and `height` must be between `20px` and `4000px`."
       docsUrl: "https://on.cypress.io/viewport"
     }
     empty_string: {

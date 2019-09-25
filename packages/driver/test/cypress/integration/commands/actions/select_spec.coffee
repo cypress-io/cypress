@@ -66,6 +66,11 @@ describe "src/cy/commands/actions/select", ->
       cy.get("select[name=movies]").select(["The Human Condition", "There Will Be Blood"]).then ($select) ->
         expect($select.val()).to.deep.eq ["thc", "twbb"]
 
+    ## readonly should only be limited to inputs, not checkboxes
+    it "can select a readonly select", ->
+      cy.get("select[name=hunter]").select("gon").then ($select) ->
+        expect($select.val()).to.eq("gon-val")
+
     it "clears previous values when providing an array", ->
       ## make sure we have a previous value
       select = cy.$$("select[name=movies]").val(["2001"])
@@ -75,17 +80,16 @@ describe "src/cy/commands/actions/select", ->
         expect($select.val()).to.deep.eq ["apoc", "br"]
 
     it "lists the select as the focused element", ->
-      select = cy.$$("select:first")
+      select = cy.$$("#select-maps")
 
-      cy.get("select:first").select("de_train").focused().then ($focused) ->
+      cy.get("#select-maps").select("de_train").focused().then ($focused) ->
         expect($focused.get(0)).to.eq select.get(0)
 
     it "causes previous input to receive blur", (done) ->
       cy.$$("input:text:first").blur -> done()
 
-      cy
-        .get("input:text:first").type("foo")
-        .get("select:first").select("de_train")
+      cy.get("input:text:first").type("foo")
+      cy.get("#select-maps").select("de_train")
 
     it "can forcibly click even when being covered by another element", (done) ->
       select  = $("<select><option>foo</option></select>").attr("id", "select-covered-in-span").prependTo(cy.$$("body"))
@@ -107,19 +111,19 @@ describe "src/cy/commands/actions/select", ->
       cy.get("#select-covered-in-span").select("foobar", {timeout: 1000, interval: 60})
 
     it "can forcibly click even when element is invisible", (done) ->
-      select = cy.$$("select:first").hide()
+      select = cy.$$("#select-maps").hide()
 
       select.click -> done()
 
-      cy.get("select:first").select("de_dust2", {force: true})
+      cy.get("#select-maps").select("de_dust2", {force: true})
 
     it "retries until <option> can be selected", ->
       option = cy.$$("<option>foo</option>")
 
       cy.on "command:retry", _.once =>
-        cy.$$("select:first").append option
+        cy.$$("#select-maps").append option
 
-      cy.get("select:first").select("foo")
+      cy.get("#select-maps").select("foo")
 
     it "retries until <select> is no longer disabled", ->
       select = cy.$$("select[name=disabled]")
@@ -146,12 +150,12 @@ describe "src/cy/commands/actions/select", ->
         return null
 
       it "eventually passes the assertion", ->
-        cy.$$("select:first").change ->
+        cy.$$("#select-maps").change ->
           _.delay =>
             $(@).addClass("selected")
           , 100
 
-        cy.get("select:first").select("de_nuke").should("have.class", "selected").then ->
+        cy.get("#select-maps").select("de_nuke").should("have.class", "selected").then ->
           lastLog = @lastLog
 
           expect(lastLog.get("name")).to.eq("assert")
@@ -210,7 +214,7 @@ describe "src/cy/commands/actions/select", ->
       it "throws when subject is not in the document", (done) ->
         selected = 0
 
-        $select = cy.$$("select:first").change (e) ->
+        $select = cy.$$("#select-maps").change (e) ->
           selected += 1
           $select.remove()
 
@@ -219,7 +223,7 @@ describe "src/cy/commands/actions/select", ->
           expect(err.message).to.include "`cy.select()` failed because this element"
           done()
 
-        cy.get("select:first").select("de_dust2").select("de_aztec")
+        cy.get("#select-maps").select("de_dust2").select("de_aztec")
 
       it "throws when more than 1 element in the collection", (done) ->
         num = cy.$$("select").length
@@ -256,13 +260,13 @@ describe "src/cy/commands/actions/select", ->
         cy.get("select[name=names]").select(["bm", "ss"])
 
       it "throws when the subject isnt visible", (done) ->
-        select = cy.$$("select:first").show().hide()
+        select = cy.$$("#select-maps").show().hide()
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.select()` failed because this element is not visible"
           done()
 
-        cy.get("select:first").select("de_dust2")
+        cy.get("#select-maps").select("de_dust2")
 
       it "throws when value or text does not exist", (done) ->
         cy.on "fail", (err) ->
@@ -300,14 +304,14 @@ describe "src/cy/commands/actions/select", ->
 
           done()
 
-        cy.get("select:first").select("de_nuke").should("have.class", "selected")
+        cy.get("#select-maps").select("de_nuke").should("have.class", "selected")
 
       it "does not log an additional log on failure", (done) ->
         cy.on "fail", =>
           expect(@logs.length).to.eq(3)
           done()
 
-        cy.get("select:first").select("de_nuke").should("have.class", "selected")
+        cy.get("#select-maps").select("de_nuke").should("have.class", "selected")
 
       it "only logs once on failure", (done) ->
         cy.on "fail", (err) =>
@@ -315,7 +319,7 @@ describe "src/cy/commands/actions/select", ->
           expect(@logs.length).to.eq(2)
           done()
 
-        cy.get("select:first").select("does_not_exist")
+        cy.get("#select-maps").select("does_not_exist")
 
     describe ".log", ->
       beforeEach ->
@@ -328,19 +332,19 @@ describe "src/cy/commands/actions/select", ->
         return null
 
       it "logs out select", ->
-        cy.get("select:first").select("de_dust2").then ->
+        cy.get("#select-maps").select("de_dust2").then ->
           lastLog = @lastLog
 
           expect(lastLog.get("name")).to.eq "select"
 
       it "passes in $el", ->
-        cy.get("select:first").select("de_dust2").then ($select) ->
+        cy.get("#select-maps").select("de_dust2").then ($select) ->
           lastLog = @lastLog
 
           expect(lastLog.get("$el")).to.eq $select
 
       it "snapshots before clicking", (done) ->
-        cy.$$("select:first").change =>
+        cy.$$("#select-maps").change =>
           lastLog = @lastLog
 
           expect(lastLog.get("snapshots").length).to.eq(1)
@@ -348,10 +352,10 @@ describe "src/cy/commands/actions/select", ->
           expect(lastLog.get("snapshots")[0].body).to.be.an("object")
           done()
 
-        cy.get("select:first").select("de_dust2").then ($select) ->
+        cy.get("#select-maps").select("de_dust2").then ($select) ->
 
       it "snapshots after clicking", ->
-        cy.get("select:first").select("de_dust2").then ($select) ->
+        cy.get("#select-maps").select("de_dust2").then ($select) ->
           lastLog = @lastLog
 
           expect(lastLog.get("snapshots").length).to.eq(2)
@@ -359,22 +363,22 @@ describe "src/cy/commands/actions/select", ->
           expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
       it "is not immediately ended", (done) ->
-        cy.$$("select:first").click =>
+        cy.$$("#select-maps").click =>
           lastLog = @lastLog
 
           expect(lastLog.get("state")).to.eq("pending")
           done()
 
-        cy.get("select:first").select("de_dust2")
+        cy.get("#select-maps").select("de_dust2")
 
       it "ends", ->
-        cy.get("select:first").select("de_dust2").then ->
+        cy.get("#select-maps").select("de_dust2").then ->
           lastLog = @lastLog
 
           expect(lastLog.get("state")).to.eq("passed")
 
       it "#consoleProps", ->
-        cy.get("select:first").select("de_dust2").then ($select) ->
+        cy.get("#select-maps").select("de_dust2").then ($select) ->
           { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($select)
           console = @lastLog.invoke("consoleProps")
           expect(console.Command).to.eq("select")
@@ -390,12 +394,12 @@ describe "src/cy/commands/actions/select", ->
           if log.get("name") is "select"
             types.push(log)
 
-        cy.get("select:first").select("de_dust2").then ->
+        cy.get("#select-maps").select("de_dust2").then ->
           expect(@logs.length).to.eq(2)
           expect(types.length).to.eq(1)
 
       it "logs deltaOptions", ->
-        cy.get("select:first").select("de_dust2", {force: true, timeout: 1000}).then ->
+        cy.get("#select-maps").select("de_dust2", {force: true, timeout: 1000}).then ->
           lastLog = @lastLog
 
           expect(lastLog.get("message")).to.eq "{force: true, timeout: 1000}"

@@ -90,7 +90,7 @@ The task 'returns:undefined' returned undefined. You must return a promise, a va
 
 The task handler was:
 
-returns:undefined() {}
+'returns:undefined' () {}
 
 Fix this in your plugins file here:
 /foo/bar/.projects/e2e/cypress/plugins/index.js
@@ -113,9 +113,6 @@ https://on.cypress.io/api/task
      CypressError: \`cy.task('errors')\` failed with the following error:
 
 > Error: Error thrown in task handler
-    at stack trace line
-    at stack trace line
-    at stack trace line
     at stack trace line
     at stack trace line
     at stack trace line

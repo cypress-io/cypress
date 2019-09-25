@@ -159,7 +159,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       widthAndHeightAreWithinBounds = (width, height) ->
         _.every [width, height], (val) ->
-          val >= 20 and val <= 3000
+          val >= 20 and val <= 4000
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)
