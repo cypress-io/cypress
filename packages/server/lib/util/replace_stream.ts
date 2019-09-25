@@ -1,7 +1,12 @@
-const GraphemeSplitter = require('grapheme-splitter')
-const through = require('through')
+import through from 'through'
 
-const splitter = new GraphemeSplitter()
+const GraphemeSplitter = require('grapheme-splitter')
+
+interface IGraphemeSplitter {
+  nextBreak: (string: string, at: number) => number
+}
+
+const splitter : IGraphemeSplitter = new GraphemeSplitter()
 
 /**
  * UTF-8 grapheme aware stream replacer
