@@ -3769,42 +3769,37 @@ describe('mouse state', () => {
         cy.get('#inner').should('not.be.visible')
       })
 
-      it('will respect changes to dom in event handlers', () => {
+      it.only('will respect changes to dom in event handlers', () => {
 
-        allMouseEvents.forEach((evt) => {
-          cy.$$('#sq4').on(evt, cy.spy().as(`sq4:${evt}`))
-          cy.$$('#outer').on(evt, cy.spy().as(`outer:${evt}`))
-          cy.$$('input:first').on(evt, cy.spy().as(`input:${evt}`))
-        })
+        const els = {
+          sq4: cy.$$('#sq4'),
+          outer: cy.$$('#outer'),
+          input: cy.$$('input:first'),
+        }
+
+        attachListeners(['mouseenter', 'mouseexit'])
+
+        attachMouseClickListeners(els)
+        attachMouseHoverListeners(els)
+
+        return
 
         cy.get('#sq4').click()
-        cy.get('#outer').click({ timeout: 200 })
+        cy.get('#outer').click()
 
-        cy.getAll('@sq4:mouseover @sq4:mousedown @sq4:mouseup @sq4:click').each((spy) => {
-          expect(spy).to.be.calledTwice
-        })
+        cy.getAll('@sq4:mouseover @sq4:mousedown @sq4:mouseup @sq4:click').each(shouldBeCalledNth(2))
 
-        cy.getAll('@sq4:mouseout').each((spy) => {
-          expect(spy).to.be.calledOnce
-        })
+        cy.getAll('@sq4:mouseout').each(shouldBeCalledOnce)
 
-        cy.getAll('@outer:mousedown @outer:mouseup @outer:click').each((spy) => {
-          expect(spy).to.not.be.called
-        })
+        cy.getAll('@outer:mousedown @outer:mouseup @outer:click').each(shouldNotBeCalled)
 
-        cy.getAll('@outer:mouseover @outer:mouseout').each((spy) => {
-          expect(spy).to.be.calledOnce
-        })
+        cy.getAll('@outer:mouseover @outer:mouseout').each(shouldBeCalledOnce)
 
         cy.get('input:first').click().should('not.have.focus')
 
-        cy.getAll('@input:mouseover @input:mouseout').each((spy) => {
-          expect(spy).to.be.calledOnce
-        })
+        cy.getAll('@input:mouseover @input:mouseout').each(shouldBeCalledOnce)
 
-        cy.getAll('@input:mousedown @input:mouseup @input:click').each((spy) => {
-          expect(spy).to.not.be.called
-        })
+        cy.getAll('@input:mousedown @input:mouseup @input:click').each(shouldNotBeCalled)
 
       })
       // it('will continue to send mouseleave events', function (done) {

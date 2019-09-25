@@ -70,6 +70,7 @@ const create = (state, keyboard, focused) => {
       // if coords are same AND we're already hovered on the element, don't send move events
       if (_.isEqual({ x: coords.x, y: coords.y }, getMouseCoords(state)) && lastHoveredEl === targetEl) return { el: targetEl }
 
+      debug('mousemove events')
       const events = mouse._mouseMoveEvents(targetEl, coords)
 
       const resultEl = mouse.getElAtCoordsOrForce(coords, forceEl)
@@ -564,6 +565,8 @@ const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = f
   // TODO: IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
   // https://dom.spec.whatwg.org/#dom-document-createevent
   const Constructor = el.ownerDocument.defaultView.MouseEvent
+
+  debug('send event:', evtName)
 
   return sendEvent(evtName, el, evtOptions, bubbles, cancelable, Constructor)
 }
