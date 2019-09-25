@@ -14,7 +14,7 @@ io.client.connect = sinon.stub().returns({ emit: () => {}, on: () => {} })
 
 beforeEach(() => {
   driver.$ = sinon.stub().throws('$ called without being stubbed')
-  io.connect.throws('connect called without being stubbed')
+  io.connect = sinon.stub().throws('connect called without being stubbed')
 })
 
 afterEach(() => {

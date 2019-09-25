@@ -241,8 +241,8 @@ function dimensionsMatchPreviousLayer (obj, container) {
     return
   }
 
-  return obj.width === previousLayer.width() &&
-  obj.height === previousLayer.height()
+  return obj.width === previousLayer[0].offsetWidth &&
+  obj.height === previousLayer[0].offsetHeight
 }
 
 function getDimensionsFor (dimensions, attr, dimension) {
@@ -255,14 +255,13 @@ function getZIndex (el) {
   }
 
   return _.toNumber(el.css('zIndex'))
-
 }
 
 function getElementDimensions ($el) {
   const dimensions = {
     offset: $el.offset(), // offset disregards margin but takes into account border + padding
-    height: $el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
-    width: $el.width(),
+    height: $el[0].offsetHeight, // we want to use offsetHeight here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
+    width: $el[0].offsetWidth,
     paddingTop: getPadding($el, 'top'),
     paddingRight: getPadding($el, 'right'),
     paddingBottom: getPadding($el, 'bottom'),
@@ -338,8 +337,8 @@ function isInViewport (win, el) {
   return (
     rect.top >= 0 &&
     rect.left >= 0 &&
-    rect.bottom <= $(win).height() &&
-    rect.right <= $(win).width()
+    rect.bottom <= win.innerHeight &&
+    rect.right <= win.innerWidth
   )
 }
 

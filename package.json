@@ -102,7 +102,6 @@
     "cloudflare-cli": "3.2.2",
     "coffeelint": "1.16.2",
     "common-tags": "1.8.0",
-    "console.table": "0.10.0",
     "debug": "4.1.1",
     "decaffeinate": "6.0.1",
     "del": "3.0.0",
@@ -110,7 +109,7 @@
     "eslint": "6.1.0",
     "eslint-plugin-cypress": "2.6.0",
     "eslint-plugin-json-format": "2.0.0",
-    "eslint-plugin-mocha": "5.3.0",
+    "eslint-plugin-mocha": "6.1.0",
     "eslint-plugin-react": "7.14.2",
     "execa": "1.0.0",
     "execa-wrap": "1.4.0",
@@ -161,7 +160,7 @@
     "vinyl-paths": "2.1.0"
   },
   "engines": {
-    "node": ">=8.9.3"
+    "node": "12.4.0"
   },
   "productName": "Cypress",
   "license": "MIT",

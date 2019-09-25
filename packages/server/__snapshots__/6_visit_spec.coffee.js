@@ -120,10 +120,7 @@ The stack trace for this error is:
 
 Error: connect ECONNREFUSED 127.0.0.1:16795
     at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -234,7 +231,6 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -317,7 +313,6 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -430,7 +425,6 @@ cy.request() will automatically get and set cookies and enable you to parse resp
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -527,7 +521,6 @@ When this 'load' event occurs, Cypress will continue running commands.
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
   2) when visit times out fails timeout exceeds timeout option:
      CypressError: Timed out after waiting '500ms' for your remote page to load.
@@ -539,7 +532,6 @@ You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait lon
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
 When this 'load' event occurs, Cypress will continue running commands.
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -657,11 +649,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -706,11 +694,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -755,11 +739,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -816,190 +796,6 @@ Error: ESOCKETTIMEDOUT
   │ ✖ visit_response_never_ends_failing_sp…     XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
-
-
-`
-
-exports['e2e visit resolves visits quickly in chrome (headed) 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
-  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
-
-Warning: Cypress can only record videos when using the built in 'electron' browser.
-
-You have set the browser to: 'chrome'
-
-A video will not be recorded when using this browser.
-
-
-  on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-    ✓ with connection: close
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-    ✓ with connection: keep-alive
-
-
-  2 passing
-
-
-  (Results)
-
-  ┌──────────────────────────────────────┐
-  │ Tests:        2                      │
-  │ Passing:      2                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        false                  │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     fast_visit_spec.coffee │
-  └──────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
-
-
-`
-
-exports['e2e visit resolves visits quickly in electron (headless) 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (fast_visit_spec.coffee)                                                   │
-  │ Searched:   cypress/integration/fast_visit_spec.coffee                                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
-
-
-  on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-    ✓ with connection: close
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-histogram line
-    ✓ with connection: keep-alive
-
-
-  2 passing
-
-
-  (Results)
-
-  ┌──────────────────────────────────────┐
-  │ Tests:        2                      │
-  │ Passing:      2                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        true                   │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     fast_visit_spec.coffee │
-  └──────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
 
 
 `

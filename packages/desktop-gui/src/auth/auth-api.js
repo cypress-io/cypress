@@ -39,7 +39,6 @@ class AuthApi {
   logOut () {
     authStore.setUser(null)
 
-    ipc.clearGithubCookies()
     ipc.logOut()
     .catch((err) => {
       err.name = 'An unexpected error occurred while logging out'
