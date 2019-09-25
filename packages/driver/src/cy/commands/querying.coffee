@@ -270,7 +270,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: ["optional", "window", "document", "element"] }, {
     contains: (subject, filter, text, options = {}) ->
-      console.log(subject)
       ## nuke our subject if its present but not an element.
       ## in these cases its either window or document but
       ## we dont care.
@@ -420,7 +419,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## know to remove withinSubject
       finished = false
       next = cy.state("current").get("next")
-      
+
       ## backup the current withinSubject
       ## this prevents a bug where we null out
       ## withinSubject when there are nested .withins()

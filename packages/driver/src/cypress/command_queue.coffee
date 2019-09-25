@@ -18,8 +18,6 @@ class $CommandQueue
     return logs
 
   add: (obj) ->
-    console.log('Adding command to queue')
-    console.log(obj)
     if utils.isInstanceOf(obj, $Command)
       return obj
     else
