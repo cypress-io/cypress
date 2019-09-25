@@ -27,8 +27,10 @@ describe('network error handling', function () {
       })
       .get('input[type=text]')
       .type('bar')
+
       cy.get('input[type=submit]')
       .click()
+
       cy.contains('{"foo":"bar"}')
     })
   })

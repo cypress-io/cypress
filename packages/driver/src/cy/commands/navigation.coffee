@@ -522,6 +522,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         onLoad: ->
       })
 
+      if !_.isUndefined(options.qs) and not _.isObject(options.qs)
+        $utils.throwErrByPath("visit.invalid_qs", { args: { qs: String(options.qs) }})
+
       if options.retryOnStatusCodeFailure and not options.failOnStatusCode
         $utils.throwErrByPath("visit.status_code_flags_invalid")
 
@@ -549,6 +552,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
+
+      if qs = options.qs
+        url = $Location.mergeUrlWithParams(url, qs)
 
       cleanup = null
 
@@ -610,7 +616,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         existing = $utils.locExisting()
 
         ## TODO: $Location.resolve(existing.origin, url)
-        
+
         if $Location.isLocalFileUrl(url)
           return specifyFileByRelativePath(url, options._log)
 

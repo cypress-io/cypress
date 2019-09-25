@@ -1,4 +1,4 @@
-exports['e2e subdomain passes 1'] = `
+exports['e2e subdomain passes in electron 1'] = `
 
 ====================================================================================================
 
@@ -21,7 +21,7 @@ exports['e2e subdomain passes 1'] = `
     ✓ can swap to help.foobar.com:2292
     ✓ can directly visit a subdomain in another test
     ✓ issue: #207: does not duplicate or hostOnly cookies as a domain cookie
-    ✓ corrects sets domain based cookies
+    ✓ correctly sets domain based cookies
     - issue #362: do not set domain based (non hostOnly) cookies by default
     - sets a hostOnly cookie by default
     ✓ issue #361: incorrect cookie synchronization between cy.request redirects
@@ -52,6 +52,76 @@ exports['e2e subdomain passes 1'] = `
 
   - Started processing:   Compressing to 32 CRF
   - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ subdomain_spec.coffee                     XX:XX        9        7        -        2        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        9        7        -        2        -  
+
+
+`
+
+exports['e2e subdomain passes in chrome 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (subdomain_spec.coffee)                                                    │
+  │ Searched:   cypress/integration/subdomain_spec.coffee                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: subdomain_spec.coffee...                                                        (1 of 1) 
+
+Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
+
+
+  subdomains
+    ✓ can swap to help.foobar.com:2292
+    ✓ can directly visit a subdomain in another test
+    ✓ issue: #207: does not duplicate or hostOnly cookies as a domain cookie
+    ✓ correctly sets domain based cookies
+    - issue #362: do not set domain based (non hostOnly) cookies by default
+    - sets a hostOnly cookie by default
+    ✓ issue #361: incorrect cookie synchronization between cy.request redirects
+    ✓ issue #362: incorrect cookie synchronization between cy.visit redirects
+    ✓ issue #600 can visit between nested subdomains
+
+
+  7 passing
+  2 pending
+
+
+  (Results)
+
+  ┌─────────────────────────────────────┐
+  │ Tests:        9                     │
+  │ Passing:      7                     │
+  │ Failing:      0                     │
+  │ Pending:      2                     │
+  │ Skipped:      0                     │
+  │ Screenshots:  0                     │
+  │ Video:        false                 │
+  │ Duration:     X seconds             │
+  │ Spec Ran:     subdomain_spec.coffee │
+  └─────────────────────────────────────┘
 
 
 ====================================================================================================
