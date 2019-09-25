@@ -120,10 +120,7 @@ The stack trace for this error is:
 
 Error: connect ECONNREFUSED 127.0.0.1:16795
     at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -232,7 +229,6 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -315,7 +311,6 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -426,7 +421,6 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -522,7 +516,6 @@ When this \`load\` event occurs, Cypress will continue running commands.
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
   2) when visit times out fails timeout exceeds timeout option:
      CypressError: Timed out after waiting \`500ms\` for your remote page to load.
@@ -534,7 +527,6 @@ You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
 When this \`load\` event occurs, Cypress will continue running commands.
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -651,11 +643,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -699,11 +687,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -747,11 +731,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

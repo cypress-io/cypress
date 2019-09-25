@@ -1,75 +1,3 @@
-exports['e2e requests passes 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_spec.coffee)                                                      │
-  │ Searched:   cypress/integration/request_spec.coffee                                            │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: request_spec.coffee...                                                          (1 of 1) 
-
-
-  redirects + requests
-    ✓ gets and sets cookies from cy.request
-    ✓ visits idempotant
-    ✓ automatically follows redirects
-    ✓ can turn off automatically following redirects
-    ✓ follows all redirects even when they change methods
-    ✓ can submit json body
-    ✓ can submit form url encoded body
-    ✓ can send qs query params
-    ✓ passes even on non 2xx or 3xx status code
-    ✓ sets Accept header to */* by default
-    ✓ can override the accept header
-    ✓ issue #375: does not duplicate request cookies on 302 redirect
-
-
-  12 passing
-
-
-  (Results)
-
-  ┌───────────────────────────────────┐
-  │ Tests:        12                  │
-  │ Passing:      12                  │
-  │ Failing:      0                   │
-  │ Pending:      0                   │
-  │ Skipped:      0                   │
-  │ Screenshots:  0                   │
-  │ Video:        true                │
-  │ Duration:     X seconds           │
-  │ Spec Ran:     request_spec.coffee │
-  └───────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ request_spec.coffee                       XX:XX       12       12        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       12       12        -        -        -  
-
-
-`
-
 exports['e2e requests fails when network immediately fails 1'] = `
 
 ====================================================================================================
@@ -137,14 +65,10 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
 
 https://on.cypress.io/request
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -283,7 +207,6 @@ https://on.cypress.io/request
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
@@ -324,6 +247,150 @@ https://on.cypress.io/request
   │ ✖ request_status_code_failing_spec.cof…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+
+
+`
+
+exports['e2e requests passes in electron 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (request_spec.coffee)                                                      │
+  │ Searched:   cypress/integration/request_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: request_spec.coffee...                                                          (1 of 1) 
+
+
+  redirects + requests
+    ✓ gets and sets cookies from cy.request
+    ✓ visits idempotant
+    ✓ automatically follows redirects
+    ✓ can turn off automatically following redirects
+    ✓ follows all redirects even when they change methods
+    ✓ can submit json body
+    ✓ can submit form url encoded body
+    ✓ can send qs query params
+    ✓ passes even on non 2xx or 3xx status code
+    ✓ sets Accept header to */* by default
+    ✓ can override the accept header
+    ✓ issue #375: does not duplicate request cookies on 302 redirect
+
+
+  12 passing
+
+
+  (Results)
+
+  ┌───────────────────────────────────┐
+  │ Tests:        12                  │
+  │ Passing:      12                  │
+  │ Failing:      0                   │
+  │ Pending:      0                   │
+  │ Skipped:      0                   │
+  │ Screenshots:  0                   │
+  │ Video:        true                │
+  │ Duration:     X seconds           │
+  │ Spec Ran:     request_spec.coffee │
+  └───────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ request_spec.coffee                       XX:XX       12       12        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX       12       12        -        -        -  
+
+
+`
+
+exports['e2e requests passes in chrome 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (request_spec.coffee)                                                      │
+  │ Searched:   cypress/integration/request_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: request_spec.coffee...                                                          (1 of 1) 
+
+Warning: Cypress can only record videos when using the built in 'electron' browser.
+
+You have set the browser to: 'chrome'
+
+A video will not be recorded when using this browser.
+
+
+  redirects + requests
+    ✓ gets and sets cookies from cy.request
+    ✓ visits idempotant
+    ✓ automatically follows redirects
+    ✓ can turn off automatically following redirects
+    ✓ follows all redirects even when they change methods
+    ✓ can submit json body
+    ✓ can submit form url encoded body
+    ✓ can send qs query params
+    ✓ passes even on non 2xx or 3xx status code
+    ✓ sets Accept header to */* by default
+    ✓ can override the accept header
+    ✓ issue #375: does not duplicate request cookies on 302 redirect
+
+
+  12 passing
+
+
+  (Results)
+
+  ┌───────────────────────────────────┐
+  │ Tests:        12                  │
+  │ Passing:      12                  │
+  │ Failing:      0                   │
+  │ Pending:      0                   │
+  │ Skipped:      0                   │
+  │ Screenshots:  0                   │
+  │ Video:        false               │
+  │ Duration:     X seconds           │
+  │ Spec Ran:     request_spec.coffee │
+  └───────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ request_spec.coffee                       XX:XX       12       12        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX       12       12        -        -        -  
 
 
 `

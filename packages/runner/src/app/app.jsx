@@ -75,21 +75,21 @@ class App extends Component {
 
   _monitorWindowResize () {
     const state = this.props.state
+    const win = this.props.window
 
-    const $window = $(this.props.window)
     const $header = $(findDOMNode(this.refs.header))
     const $reporterWrap = $(this.refs.reporterWrap)
 
     this._onWindowResize = () => {
       state.updateWindowDimensions({
-        windowWidth: $window.width(),
-        windowHeight: $window.height(),
+        windowWidth: win.innerWidth,
+        windowHeight: win.innerHeight,
         reporterWidth: $reporterWrap.outerWidth(),
         headerHeight: $header.outerHeight(),
       })
     }
 
-    $window.on('resize', this._onWindowResize).trigger('resize')
+    $(win).on('resize', this._onWindowResize).trigger('resize')
   }
 
   _onReporterResizeStart = () => {
@@ -99,6 +99,12 @@ class App extends Component {
   _onReporterResize = (reporterWidth) => {
     this.props.state.reporterWidth = reporterWidth
     this.props.state.absoluteReporterWidth = reporterWidth
+
+    const $header = $(findDOMNode(this.refs.header))
+
+    this.props.state.updateWindowDimensions({
+      headerHeight: $header.outerHeight(),
+    })
   }
 
   _onReporterResizeEnd = () => {
@@ -153,11 +159,8 @@ class App extends Component {
       containerNode.className += ' screenshotting'
 
       if (!config.scale) {
-        const $window = $(window)
-        const $iframesSizeNode = $(iframesSizeNode)
-
-        iframesSizeNode.style.width = `${Math.min($window.width(), $iframesSizeNode.width())}px`
-        iframesSizeNode.style.height = `${Math.min($window.height(), $iframesSizeNode.height())}px`
+        iframesSizeNode.style.width = `${Math.min(window.innerWidth, iframesSizeNode.offsetWidth)}px`
+        iframesSizeNode.style.height = `${Math.min(window.innerHeight, iframesSizeNode.offsetHeight)}px`
         iframesSizeNode.style.transform = null
       }
 

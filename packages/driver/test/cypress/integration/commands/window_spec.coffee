@@ -642,7 +642,7 @@ describe "src/cy/commands/window", ->
       it "throws when passed negative numbers", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "`cy.viewport()` `width` and `height` must be between `20px` and `3000px`."
+          expect(err.message).to.eq "`cy.viewport()` `width` and `height` must be between `20px` and `4000px`."
           expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
@@ -651,7 +651,7 @@ describe "src/cy/commands/window", ->
       it "throws when passed width less than 20", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "`cy.viewport()` `width` and `height` must be between `20px` and `3000px`."
+          expect(err.message).to.eq "`cy.viewport()` `width` and `height` must be between `20px` and `4000px`."
           expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
@@ -660,17 +660,17 @@ describe "src/cy/commands/window", ->
       it "does not throw when passed width equal to 20", ->
         cy.viewport(20, 600)
 
-      it "throws when passed height greater than than 3000", (done) ->
+      it "throws when passed height greater than than 4000", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "`cy.viewport()` `width` and `height` must be between `20px` and `3000px`."
+          expect(err.message).to.eq "`cy.viewport()` `width` and `height` must be between `20px` and `4000px`."
           expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
-        cy.viewport(1000, 3001)
+        cy.viewport(1000, 4001)
 
-      it "does not throw when passed width equal to 3000", ->
-        cy.viewport(200, 3000)
+      it "does not throw when passed width equal to 4000", ->
+        cy.viewport(200, 4000)
 
       it "throws when passed an empty string as width", (done) ->
         cy.on "fail", (err) =>

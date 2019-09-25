@@ -22,6 +22,7 @@ Cached Theme Material Design.pak
 packages/https-proxy/ca/
 
 # from desktop-gui
+packages/desktop-gui/cypress/videos
 packages/desktop-gui/src/jsconfig.json
 
 # from driver
@@ -32,9 +33,6 @@ packages/driver/test/cypress/screenshots
 packages/example/app
 packages/example/build
 packages/example/cypress
-
-# from driver
-packages/driver/test/cypress/videos
 
 # from server
 packages/server/.cy
