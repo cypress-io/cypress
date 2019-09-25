@@ -225,9 +225,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## break and return the memo
     if command.get("type") is "parent" or $dom.isAttached(command.get("subject"))
-      console.log(memo)
       return memo
-    console.log(memo)
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
 
   runCommand = (command) ->
@@ -343,8 +341,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       command.finishLogs()
 
       ## reset the nestedIndex back to null
-      console.log(command)
-      console.log("Reseting nestedIndex...")
       state("nestedIndex", null)
 
       ## also reset recentlyReady back to null
@@ -356,7 +352,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   run = ->
     next = ->
-      console.log('Running command...')
       ## bail if we've been told to abort in case
       ## an old command continues to run after
       if stopped
@@ -366,7 +361,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       index = state("index") ? state("index", 0)
 
       command = queue.at(index)
-      console.log(command)
 
       ## if the command should be skipped
       ## just bail and increment index
@@ -390,9 +384,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## finished running if the application under
         ## test is no longer stable because we cannot
         ## move onto the next test until its finished
-        console.log(stability.whenStable)
         return stability.whenStable ->
-          console.log("Queue is finished")
           Cypress.action("cy:command:queue:end")
 
           return null
@@ -402,7 +394,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       ## store the current runnable
       runnable = state("runnable")
-      console.log(runnable)
 
       Cypress.action("cy:command:start", command)
       state("currentCommand", command)
@@ -501,9 +492,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     state("subject", undefined)
 
   pushSubjectAndValidate = (name, args, firstCall, prevSubject) ->
-    console.log("Pushing subject and validating")
-    console.log(prevSubject)
-    console.log(firstCall)
     if firstCall
       ## if we have a prevSubject then error
       ## since we're invoking this improperly
@@ -522,7 +510,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       removeSubject()
 
     subject = state("subject")
-    console.log(subject)
 
     if prevSubject
       ## make sure our current subject is valid for
@@ -530,8 +517,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ensures.ensureSubjectByType(subject, prevSubject, name)
 
     args.unshift(subject)
-    console.log(args)
-    console.log(args[0])
     Cypress.action("cy:next:subject:prepared", subject, args)
 
     args
@@ -548,8 +533,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## if our outer promise is pending
     ## then cancel outer and inner
     ## and set canceled to be true
-    console.log(p)
-    console.log(p.isPending())
     if (p and p.isPending())
       state("canceled", true)
       state("cancel")()
@@ -857,23 +840,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         if not state("promise")
           if state("returnedCustomPromise")
             warnMixingPromisesAndCommands()
-          console.log('Starting run..')
           run()
 
         return chain
 
       cy.addChainer name, (chainer, args) ->
         { firstCall, chainerId } = chainer
-        console.log(firstCall)
-        console.log(chainerId)
-        console.log(name)
         ## dont enqueue / inject any new commands if
         ## onInjectCommand returns false
         onInjectCommand = state("onInjectCommand")
 
         if _.isFunction(onInjectCommand)
           return if onInjectCommand.call(cy, name, args...) is false
-        console.log("Queueing command")
         enqueue({
           name
           args
@@ -885,7 +863,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         return true
 
     now: (name, args...) ->
-      console.log(args)
       Promise.resolve(
         commandFns[name].apply(cy, args)
       )

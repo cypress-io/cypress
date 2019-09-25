@@ -420,8 +420,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## know to remove withinSubject
       finished = false
       next = cy.state("current").get("next")
-      current = cy.state("current")
-      console.log(next)
+      
       ## backup the current withinSubject
       ## this prevents a bug where we null out
       ## withinSubject when there are nested .withins()
@@ -429,12 +428,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## once its done
       prevWithinSubject = cy.state("withinSubject")
       cy.state("withinSubject", subject)
-      console.log("When we are done the within...we should remove all commands that were in the within block from the queue")
 
+      ## instead of just inserting these command into the queue and letting them run that way
+      ## we are going to run them ourselves and then remove them from the queue
       finishWithin = (obj) ->
-        console.log("Finish within was called...")
-        console.log("going to try running this command")
-        console.log(obj)
         cy.runCommandFromWithin(obj)
 
       if current
@@ -442,7 +439,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       fn.call(ctx, subject)
 
       cleanup = ->
-        console.log("Nuking listeners")
         cy.removeListener("command:start", setWithinSubject)
         cy.removeListener("command:enqueued", finishWithin)
 
@@ -453,7 +449,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## is the command which references our 'next' and
       ## if so, remove the within subject
       setWithinSubject = (obj) ->
-        console.log(obj isnt next)
         return if obj isnt next
 
         ## okay so what we're doing here is creating a property
@@ -479,5 +474,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           cleanup()
 
           cy.state("withinSubject", null)
+
       return subject
   })

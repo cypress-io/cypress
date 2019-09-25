@@ -74,7 +74,6 @@ create = (state, queue, retryFn) ->
         assertions.push(cmd)
       else
         break
-    console.log(assertions)
     assertions
 
   injectAssertionFns = (cmds) ->
@@ -109,7 +108,6 @@ create = (state, queue, retryFn) ->
     cmds = getUpcomingAssertions()
 
     state("upcomingAssertions", cmds)
-    console.log(cmds)
 
     ## we're applying the default assertion in the
     ## case where there are no upcoming assertion commands

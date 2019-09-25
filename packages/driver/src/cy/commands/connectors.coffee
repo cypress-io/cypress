@@ -391,9 +391,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       next = state("current").get("next")
       if next
         checkSubject = (newSubject, args) ->
-          console.log("Calling check subject")
-          console.log(newSubject)
-          console.log(args)
           return if state("current") isnt next
 
           ## find the new subject and splice it out
