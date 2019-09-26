@@ -33,7 +33,7 @@ const flattenCypress = function (obj) {
 
 const maybeVerifyConfigFile = Promise.method((configFile) => {
   if (configFile === false) {
-    return true
+    return
   }
 
   return fs.statAsync(configFile)
