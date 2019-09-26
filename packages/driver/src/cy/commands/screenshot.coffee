@@ -9,10 +9,10 @@ $utils = require("../../cypress/utils")
 
 getViewportHeight = (state) ->
   ## TODO this doesn't seem correct
-  Math.min(state("viewportHeight"), $(window).height())
+  Math.min(state("viewportHeight"), window.innerHeight)
 
 getViewportWidth = (state) ->
-  Math.min(state("viewportWidth"), $(window).width())
+  Math.min(state("viewportWidth"), window.innerWidth)
 
 automateScreenshot = (state, options = {}) ->
   { runnable, timeout } = options
@@ -238,8 +238,8 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
     }
     userClip: clip
     viewport: {
-      width: $(window).width()
-      height: $(window).height()
+      width: window.innerWidth
+      height: window.innerHeight
     }
     scaled: getShouldScale(screenshotConfig)
     blackout: getBlackout(screenshotConfig)

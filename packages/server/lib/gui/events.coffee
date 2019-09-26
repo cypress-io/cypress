@@ -91,13 +91,6 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
-    when "clear:github:cookies"
-      Windows.getBrowserAutomation(event.sender)
-      .clearCookies({domain: "github.com"})
-      .return(null)
-      .then(send)
-      .catch(sendErr)
-
     when "external:open"
       shell.openExternal(arg)
 

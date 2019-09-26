@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node8.9.3-npm6.10.1-chrome75
+      - image: cypress/browsers:node12.0.0-chrome73
     environment:
       PLATFORM: linux
 
@@ -797,12 +797,15 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - driver-integration-tests-3x:
+        context: test-runner:integration-tests
         requires:
           - build
     - desktop-gui-integration-tests-2x:
+        context: test-runner:integration-tests
         requires:
           - build
     - reporter-integration-tests:
+        context: test-runner:integration-tests
         requires:
           - build
     - run-launcher:

@@ -4,6 +4,10 @@ const $jquery = require('./jquery')
 const $window = require('./window')
 const $document = require('./document')
 const $utils = require('../cypress/utils')
+const $selection = require('./selection')
+const { parentHasDisplayNone } = require('./visibility')
+
+const { wrap } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -344,6 +348,30 @@ const isFocused = (el) => {
   }
 }
 
+const isFocusedOrInFocused = (el) => {
+
+  const doc = $document.getDocumentFromElement(el)
+
+  const { activeElement, body } = doc
+
+  if (activeElementIsDefault(activeElement, body)) {
+    return false
+  }
+
+  let elToCheckCurrentlyFocused
+
+  if (isFocusable($(el))) {
+    elToCheckCurrentlyFocused = el
+  } else if (isContentEditable(el)) {
+    elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
+  }
+
+  if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    return true
+  }
+
+}
+
 const isElement = function (obj) {
   try {
     if ($jquery.isJquery(obj)) {
@@ -360,6 +388,16 @@ const isFocusable = ($el) => {
   return _.some(focusable, (sel) => {
     return $el.is(sel)
   })
+}
+
+const isW3CRendered = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
+  return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+}
+
+const isW3CFocusable = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
 const isType = function ($el, type) {
@@ -813,7 +851,9 @@ const stringify = (el, form = 'long') => {
   })
 }
 
-module.exports = {
+// We extend `module.exports` to allow circular dependencies using `require`
+// Otherwise we would not be able to `require` this util from `./selection`, for example.
+_.extend(module.exports, {
   isElement,
 
   isSelector,
@@ -821,6 +861,8 @@ module.exports = {
   isScrollOrAuto,
 
   isFocusable,
+
+  isW3CFocusable,
 
   isAttached,
 
@@ -856,6 +898,8 @@ module.exports = {
 
   isFocused,
 
+  isFocusedOrInFocused,
+
   isInputAllowingImplicitFormSubmission,
 
   isNeedSingleValueChangeInputElement,
@@ -889,4 +933,4 @@ module.exports = {
   getFirstStickyPositionParent,
 
   getFirstScrollableParent,
-}
+})
