@@ -775,6 +775,24 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#readonly-submit').click()
       })
 
+      it('can click on checkbox inputs', () => {
+        cy.get(':checkbox:first').click()
+        .then(($el) => {
+          expect($el).to.be.checked
+        })
+      })
+
+      it('can force click on disabled checkbox inputs', () => {
+        cy.get(':checkbox:first')
+        .then(($el) => {
+          $el[0].disabled = true
+        })
+        .click({ force: true })
+        .then(($el) => {
+          expect($el).to.be.checked
+        })
+      })
+
       it('can click elements which are hidden until scrolled within parent container', () => {
         cy.get('#overflow-auto-container').contains('quux').click()
       })
@@ -2961,7 +2979,6 @@ describe('src/cy/commands/actions/click', () => {
           cancelable: true,
           data: undefined,
           detail: 0,
-          eventPhase: 2,
           handleObj: { type: 'contextmenu', origType: 'contextmenu', data: undefined },
           relatedTarget: null,
           shiftKey: false,
@@ -3065,7 +3082,7 @@ describe('src/cy/commands/actions/click', () => {
       attachContextmenuListeners({ el, el2 })
 
       cy.get('button:first').rightclick().should('not.exist')
-      cy.get(el2.selector).should('have.focus')
+      cy.get('div#tabindex').should('have.focus')
 
       cy.getAll('el', 'pointerover mouseover').each(shouldBeCalledOnce)
       cy.getAll('el', 'pointerdown mousedown pointerup mouseup contextmenu').each(shouldNotBeCalled)
@@ -3769,7 +3786,7 @@ describe('mouse state', () => {
         cy.get('#inner').should('not.be.visible')
       })
 
-      it.only('will respect changes to dom in event handlers', () => {
+      it('will respect changes to dom in event handlers', () => {
 
         const els = {
           sq4: cy.$$('#sq4'),
@@ -3781,8 +3798,6 @@ describe('mouse state', () => {
 
         attachMouseClickListeners(els)
         attachMouseHoverListeners(els)
-
-        return
 
         cy.get('#sq4').click()
         cy.get('#outer').click()
