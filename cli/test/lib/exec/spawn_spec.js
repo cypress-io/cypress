@@ -11,6 +11,7 @@ const mockedEnv = require('mocked-env')
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
 const spawn = require(`${lib}/exec/spawn`)
+const verify = require(`${lib}/tasks/verify`)
 const util = require(`${lib}/util.js`)
 const expect = require('chai').expect
 
@@ -76,8 +77,17 @@ describe('lib/exec/spawn', function () {
   })
 
   context('.start', function () {
+    // ️️⚠️ NOTE ⚠️
+    // when asserting the calls made to spawn the child Cypress process
+    // we have to be _very_ careful. Spawn uses process.env object, if an assertion
+    // fails, it will print the entire process.env object to the logs, which
+    // might contain sensitive environment variables. Think about what the
+    // failed assertion might print to the public CI logs and limit
+    // the environment variables when running tests on CI.
+
     it('passes args + options to spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(false)
 
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
@@ -94,6 +104,7 @@ describe('lib/exec/spawn', function () {
 
     it('uses npm command when running in dev mode', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(false)
 
       const p = path.resolve('..', 'scripts', 'start.js')
 
