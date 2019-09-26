@@ -9,6 +9,7 @@ const debugElectron = require('debug')('cypress:electron')
 const util = require('../util')
 const state = require('../tasks/state')
 const xvfb = require('./xvfb')
+const verify = require('../tasks/verify')
 const { throwFormErrorText, errors } = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
@@ -104,6 +105,10 @@ module.exports = {
         const envOverrides = util.getEnvOverrides()
         const electronArgs = _.clone(args)
         const node11WindowsFix = isPlatform('win32')
+
+        if (verify.needsSandbox()) {
+          electronArgs.push('--no-sandbox')
+        }
 
         // strip dev out of child process options
         let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
