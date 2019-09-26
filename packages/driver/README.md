@@ -77,6 +77,14 @@ If you want to run tests in Chrome and keep it open after the spec finishes, you
 
 ```bash
 npm run cypress:run -- --config testFiles=e2e/focus_blur_spec.js --browser chrome --no-exit
+If you would like to run a particular integration test, see the GUI and poke around during the test, you can an exclusive test like:
+
+```bash
+cd packages/driver
+node ../../scripts/cypress run \
+  --project ./test \
+  --spec test/cypress/integration/cypress/cy_spec.coffee \
+  --headed --no-exit
 ```
 
 ## Debugging

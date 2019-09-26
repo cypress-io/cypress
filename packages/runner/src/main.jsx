@@ -8,8 +8,10 @@ import Container from './app/container'
 configure({ enforceActions: 'strict' })
 
 const Runner = {
-  start (el, config) {
+  start (el, base64Config) {
     action('started', () => {
+      const config = JSON.parse(atob(base64Config))
+
       const state = new State((config.state || {}).reporterWidth)
 
       Runner.state = state

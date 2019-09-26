@@ -52,7 +52,7 @@
     "chalk": "2.4.2",
     "charset": "1.0.1",
     "check-more-types": "2.24.0",
-    "chokidar": "3.0.1",
+    "chokidar": "3.0.2",
     "chrome-remote-interface": "0.28.0",
     "cjsxify": "0.3.0",
     "cli-table3": "0.5.1",
@@ -104,7 +104,6 @@
     "moment": "2.24.0",
     "morgan": "1.9.1",
     "node-machine-id": "1.1.10",
-    "node-offline-localhost": "0.9.0",
     "node-webkit-updater": "cypress-io/node-webkit-updater#e74623726f381487f543e373e71515177a32daeb",
     "opn": "cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5",
     "ospath": "1.2.2",
@@ -122,7 +121,6 @@
     "sanitize-filename": "1.6.1",
     "semver": "6.3.0",
     "send": "0.17.0",
-    "server-destroy": "1.0.1",
     "shell-env": "3.0.0",
     "signal-exit": "3.0.2",
     "sinon": "5.1.1",
@@ -158,14 +156,13 @@
     "chokidar-cli": "1.2.2",
     "chrome-har-capturer": "0.13.4",
     "coffee-coverage": "3.0.1",
-    "console-table-printer": "1.0.0-beta12",
     "cors": "2.8.5",
     "eol": "0.9.1",
     "eventsource": "1.0.7",
     "express-session": "1.16.1",
     "express-useragent": "1.0.12",
     "http-mitm-proxy": "0.7.0",
-    "https-proxy-agent": "2.2.0",
+    "https-proxy-agent": "lpinca/node-https-proxy-agent#967f0115bddedbce0e4591c2a2250f988809dec8",
     "istanbul": "0.4.5",
     "mocked-env": "1.2.4",
     "mockery": "2.1.0",
@@ -188,5 +185,8 @@
     "config",
     "lib"
   ],
-  "productName": "Cypress"
+  "productName": "Cypress",
+  "optionalDependencies": {
+    "registry-js": "1.8.0"
+  }
 }
