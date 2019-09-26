@@ -23,16 +23,18 @@ exports['e2e config passes 1'] = `
     ✓ .arch
     ✓ .browser
     ✓ .spec
+    .env
+      ✓ doesn't die on <script> tags
 
 
-  5 passing
+  6 passing
 
 
   (Results)
 
   ┌──────────────────────────────────────────┐
-  │ Tests:        5                          │
-  │ Passing:      5                          │
+  │ Tests:        6                          │
+  │ Passing:      6                          │
   │ Failing:      0                          │
   │ Pending:      0                          │
   │ Skipped:      0                          │
@@ -56,9 +58,9 @@ exports['e2e config passes 1'] = `
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ config_passing_spec.coffee                XX:XX        5        5        -        -        - │
+  │ ✔ config_passing_spec.coffee                XX:XX        6        6        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        5        5        -        -        -  
+    All specs passed!                           XX:XX        6        6        -        -        -  
 
 
 `
@@ -91,7 +93,6 @@ exports['e2e config fails 1'] = `
 
   1) config times out looking for a missing element:
      CypressError: Timed out retrying: Expected to find element: '#bar', but never found it.
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

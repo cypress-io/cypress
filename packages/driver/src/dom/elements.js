@@ -4,6 +4,7 @@ const $jquery = require('./jquery')
 const $window = require('./window')
 const $document = require('./document')
 const $utils = require('../cypress/utils')
+const $selection = require('./selection')
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -342,6 +343,30 @@ const isFocused = (el) => {
   } catch (err) {
     return false
   }
+}
+
+const isFocusedOrInFocused = (el) => {
+
+  const doc = $document.getDocumentFromElement(el)
+
+  const { activeElement, body } = doc
+
+  if (activeElementIsDefault(activeElement, body)) {
+    return false
+  }
+
+  let elToCheckCurrentlyFocused
+
+  if (isFocusable($(el))) {
+    elToCheckCurrentlyFocused = el
+  } else if (isContentEditable(el)) {
+    elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
+  }
+
+  if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    return true
+  }
+
 }
 
 const isElement = function (obj) {
@@ -707,7 +732,7 @@ const getContainsSelector = (text, filter = '') => {
   const filters = filter.trim().split(',')
 
   const selectors = _.map(filters, (filter) => {
-    return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+    return `${filter}:not(script,style):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
   })
 
   return selectors.join()
@@ -813,7 +838,9 @@ const stringify = (el, form = 'long') => {
   })
 }
 
-module.exports = {
+// We extend `module.exports` to allow circular dependencies using `require`
+// Otherwise we would not be able to `require` this util from `./selection`, for example.
+_.extend(module.exports, {
   isElement,
 
   isSelector,
@@ -856,6 +883,8 @@ module.exports = {
 
   isFocused,
 
+  isFocusedOrInFocused,
+
   isInputAllowingImplicitFormSubmission,
 
   isNeedSingleValueChangeInputElement,
@@ -889,4 +918,4 @@ module.exports = {
   getFirstStickyPositionParent,
 
   getFirstScrollableParent,
-}
+})

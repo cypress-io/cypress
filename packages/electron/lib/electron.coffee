@@ -1,5 +1,6 @@
 fs       = require("fs-extra")
 cp       = require("child_process")
+os       = require("os")
 path     = require("path")
 debug    = require("debug")("cypress:electron")
 Promise  = require("bluebird")
@@ -59,6 +60,10 @@ module.exports = {
     .then ->
       execPath = paths.getPathToExec()
 
+      ## if running as root, no-sandbox must be passed or Chrome will not start
+      if os.platform() == "linux" && process.geteuid() == 0
+        argv.unshift("--no-sandbox")
+
       ## we have an active debugger session
       if inspector.url()
         dp = process.debugPort + 1
@@ -70,6 +75,10 @@ module.exports = {
         if opts.inspectBrk
           argv.unshift("--inspect-brk=5566")
 
+      ## max HTTP header size 8kb -> 1mb
+      ## https://github.com/cypress-io/cypress/issues/76
+      argv.unshift("--max-http-header-size=#{1024*1024}")
+
       debug("spawning %s with args", execPath, argv)
 
       if debug.enabled
@@ -77,8 +86,8 @@ module.exports = {
         argv.push("--enable-logging")
 
       cp.spawn(execPath, argv, {stdio: "inherit"})
-      .on "close", (code) ->
-        debug("electron closing with code", code)
+      .on "close", (code, errCode) ->
+        debug("electron closing %o", { code, errCode })
 
         if code
           debug("original command was")

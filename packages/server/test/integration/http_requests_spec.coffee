@@ -271,8 +271,12 @@ describe "Routes", ->
         @rp("http://localhost:9999/__")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include("version")
-          expect(res.body).to.include(pkg.version)
+
+          base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include("version")
+          expect(configStr).to.include(pkg.version)
 
   context "GET /__cypress/runner/*", ->
     beforeEach ->
@@ -3145,7 +3149,7 @@ describe "Routes", ->
       afterEach ->
         @httpSrv.close()
 
-      [204, 304, 101, 102, 103].forEach (status) ->
+      [204, 304].forEach (status) ->
         it "passes through a #{status} response immediately", ->
           @rp({
             url: "http://localhost:#{@port}/?status=#{status}"
