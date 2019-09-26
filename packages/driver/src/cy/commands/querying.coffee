@@ -434,19 +434,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       prevWithinSubject = cy.state("withinSubject")
       cy.state("withinSubject", subject)
       ## instead of just inserting these command into the queue and letting them run that way
-      ## we are going to run them ourselves and then remove them from the queue
+      ## we are going to run them ourselves in a separate queue
       finishWithin = () ->
-        ## this should trigger it's own queue maybe?
-        ## Since this should run isolated from the rest of the queue
-        ## So when all commands are queue then we want to trigger the first one to run
-        ## Can we add these to their own queue maybe?
-        console.log("All commands are added...")
-        console.log("now we want to run all these commands")
-        console.log(cy.state("withinQueue"))
         { commands } = cy.state("withinQueue")
-        ## So....we want to run each command in the queue
+        ##we want to run each command in the queue
         ## and once the command is done move onto the next
         ## this should also block the within command from finishing
+        console.log("Running commands")
         for cmd in commands
           res = cy.runCommandFromWithin(cmd)
           await res
@@ -493,6 +487,5 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       await finishWithin()
       cy.state("withinQueue", null)
-      console.log("Commands are finished")
       return subject
   })

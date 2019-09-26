@@ -213,7 +213,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## then add the parentCommand to the obj
     if not _.isUndefined(parentCommand) 
       obj.parentCommand = parentCommand
-      obj.type = "child"
+      if obj.type is "parent" then obj.type = "child"
 
     ## If we are dealing with a within commmand,
     ## We want to create its own queue, and run the commands from there

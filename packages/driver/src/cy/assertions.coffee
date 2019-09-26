@@ -61,19 +61,31 @@ create = (state, queue, retryFn) ->
     current = state("current")
     index   = state("index") + 1
     chainerId = current.attributes.chainerId
+    isNestedCommand = not _.isUndefined(current.attributes.parentCommand) 
     assertions = []
-    ## grab the rest of the queue'd commands
-    for cmd in queue.slice(index).get()
-      ## don't break on utilities, just skip over them
-      if cmd.is("utility")
-        continue
+    ## We could probably make this a lot neater
+    ## Not completely sure how though...
+    if isNestedCommand
+      for cmd in state("withinQueue").get()
+        if cmd is current 
+          continue
+        if cmd.is("utility")
+          continue
+        if cmd.is("assertion") and cmd.attributes.chainerId is chainerId
+           assertions.push(cmd)
+        else break
+    else
+      for cmd in queue.slice(index).get()
+        ## don't break on utilities, just skip over them
+        if cmd.is("utility")
+          continue
 
-      ## grab all of the queued commands which are
-      ## assertions and match our current chainerId
-      if cmd.is("assertion") and cmd.attributes.chainerId is chainerId
-        assertions.push(cmd)
-      else
-        break
+        ## grab all of the queued commands which are
+        ## assertions and match our current chainerId
+        if cmd.is("assertion") and cmd.attributes.chainerId is chainerId
+          assertions.push(cmd)
+        else
+          break
     assertions
 
   injectAssertionFns = (cmds) ->
@@ -106,7 +118,8 @@ create = (state, queue, retryFn) ->
 
   verifyUpcomingAssertions = (subject, options = {}, callbacks = {}) ->
     cmds = getUpcomingAssertions()
-
+    console.log("Upcoming assertions are")
+    console.log(cmds)
     state("upcomingAssertions", cmds)
 
     ## we're applying the default assertion in the
