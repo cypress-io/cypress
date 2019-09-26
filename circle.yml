@@ -814,6 +814,7 @@ linux-workflow: &linux-workflow
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
@@ -821,6 +822,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
