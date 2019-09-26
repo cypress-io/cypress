@@ -40,7 +40,7 @@
     "axios": "0.18.1",
     "babel-loader": "8.0.6",
     "css-loader": "2.1.1",
-    "cypress": "3.3.1",
+    "cypress": "3.4.1",
     "github-post-release": "1.13.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
