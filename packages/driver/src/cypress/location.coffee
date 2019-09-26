@@ -142,9 +142,16 @@ class $Location
     ## aws.amazon.com/bucket/foo
     ## foo.bar.co.uk
     ## foo.bar.co.uk/asdf
-    url = "/#{url}"
-    url = url.split("/")[0].split(".")
-    url.length is 3 or url.length is 4
+    ##url = "/#{url}"
+    url = url.split("/")
+    url = url[0].split('.')
+    ## In the case of a url like /?foo=..
+    ## It's split into ?foo=, "", "" which is not a valid
+    ## So if after we split a url, there are any empty strings consider it invalid
+    ## https://github.com/cypress-io/cypress/issues/5090
+    if not url.some (part) -> part is ""
+      url.length is 3 or url.length is 4
+    else false
 
   @fullyQualifyUrl = (url) ->
     return url if @isFullyQualifiedUrl(url)
