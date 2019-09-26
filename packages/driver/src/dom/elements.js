@@ -5,6 +5,9 @@ const $window = require('./window')
 const $document = require('./document')
 const $utils = require('../cypress/utils')
 const $selection = require('./selection')
+const { parentHasDisplayNone } = require('./visibility')
+
+const { wrap } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -385,6 +388,16 @@ const isFocusable = ($el) => {
   return _.some(focusable, (sel) => {
     return $el.is(sel)
   })
+}
+
+const isW3CRendered = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
+  return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+}
+
+const isW3CFocusable = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
 const isType = function ($el, type) {
@@ -848,6 +861,8 @@ _.extend(module.exports, {
   isScrollOrAuto,
 
   isFocusable,
+
+  isW3CFocusable,
 
   isAttached,
 
