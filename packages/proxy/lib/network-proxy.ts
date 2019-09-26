@@ -7,6 +7,7 @@ export class NetworkProxy {
     config: any
     getRemoteState: () => any
     middleware?: any
+    request: any
   }) {
     this.http = new Http(opts)
   }

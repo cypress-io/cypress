@@ -141,7 +141,7 @@ class Server
 
       getRemoteState = => @_getRemoteState()
 
-      @_networkProxy = new NetworkProxy({ config, getRemoteState })
+      @_networkProxy = new NetworkProxy({ config, getRemoteState, request: @_request })
 
       @createHosts(config.hosts)
 

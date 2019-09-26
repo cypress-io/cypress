@@ -48,6 +48,7 @@ const READONLY_MIDDLEWARE_KEYS : (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getRemoteState',
+  'request',
   'next',
   'end',
   'onResponse',
@@ -59,6 +60,7 @@ type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & Readonly<{
   buffers: HttpBuffers
   config: any
   getRemoteState: () => any
+  request: any
 
   next: () => void
   /**
@@ -173,16 +175,19 @@ export class Http {
   config: any
   getRemoteState: () => any
   middleware: MiddlewareStacks
+  request: any
 
   constructor (opts: {
     config: any
     getRemoteState: () => any
     middleware?: MiddlewareStacks
+    request: any
   }) {
     this.buffers = new HttpBuffers()
 
     this.config = opts.config
     this.getRemoteState = opts.getRemoteState
+    this.request = opts.request
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = {
@@ -203,6 +208,7 @@ export class Http {
       buffers: this.buffers,
       config: this.config,
       getRemoteState: this.getRemoteState,
+      request: this.request,
       middleware: _.cloneDeep(this.middleware),
     }
 

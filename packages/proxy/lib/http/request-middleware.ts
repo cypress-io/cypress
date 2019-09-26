@@ -129,7 +129,7 @@ const SendRequestOutgoing : RequestMiddleware = function () {
     requestOptions.url = requestOptions.url.replace(remoteState.origin, remoteState.fileServer)
   }
 
-  const req = request.create(requestOptions)
+  const req = this.request.create(requestOptions)
 
   req.on('error', this.onError)
   req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
