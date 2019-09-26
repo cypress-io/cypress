@@ -68,7 +68,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     invokedCyCommand = false
 
-    enqueuedCommand = ->
+    enqueuedCommand = (obj) ->
+      ## Do the same thing here as with within?
       invokedCyCommand = true
 
     state("onInjectCommand", returnFalseIfThenable)

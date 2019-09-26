@@ -46,7 +46,7 @@ class $CommandQueue
     if next and not _.isUndefined(next.get("parentCommand"))
       next.set("prev", cmd)
       cmd.set("next", next)
-
+    console.log(@commands)
     return cmd
 
   slice: ->

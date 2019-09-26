@@ -207,12 +207,22 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state("nestedIndex", nestedIndex += 1)
     ## we look at whether or not nestedIndex is a number, because if it
     ## is then we need to splice inside of our commands, else just push
-    ## it onto the end of the queu
+    ## it onto the end of the queue
     index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
     ## if we're dealing with nestedCommands
     ## then add the parentCommand to the obj
     if not _.isUndefined(parentCommand) 
       obj.parentCommand = parentCommand
+      obj.type = "child"
+
+    ## If we are dealing with a within commmand,
+    ## We want to create its own queue, and run the commands from there
+    ## That way they run within the context of the within, instead of running outside of the within
+    if state("withinQueue")
+        state("withinQueue").splice(state("withinQueue").length, 0, obj)
+    else if not _.isUndefined(parentCommand) and parentCommand.get("name") is "within"
+        state("withinQueue", $CommandQueue.create())
+        state("withinQueue").splice(state("withinQueue").length, 0, obj)
     else queue.splice(index, 0, obj)
     Cypress.action("cy:command:enqueued", obj)
 
@@ -404,6 +414,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## If the command has a parentCommand (meaning that is a nested command...)
         ## then remove that command from the queue
         ## TODO: We will have to test chained commands...but hopefully that should just work??
+
         ## each successful command invocation should
         ## always reset the timeout for the current runnable
         ## unless it already has a state.  if it has a state
@@ -418,10 +429,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## else run will be called again and index would start
         ## over at 0
         ## However, we should only mutate the index if we aren't removing a command
-        if command.get("parentCommand")
-          queue.remove(state("index"), 1)
-        else state("index", index += 1)
-
+        ## Since every nested command will get removed here...
+        ## Unsure if this is the best place for this
+        ##if command.get("parentCommand")
+        ##queue.remove(state("index"), 1)
+        state("index", index += 1)
         Cypress.action("cy:command:end", command)
         state("currentCommand", null)
 
@@ -857,7 +869,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         if _.isFunction(onInjectCommand)
           return if onInjectCommand.call(cy, name, args...) is false
-          
+
         enqueue({
           name
           args
@@ -873,8 +885,17 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         commandFns[name].apply(cy, args)
       )
     runCommandFromWithin: (obj) ->
-      cmd = queue.add(obj)
-      runCommand(cmd)
+      ## instead of removing the commands from the queue
+      ## after they are done running, should we do it here?
+      ## Worried about the behaviour with other nested commands
+      new Promise( (resolve) ->
+        Cypress.action("cy:command:start", obj)
+        runCommand(obj)
+        .then ->
+          Cypress.action("cy:command:end", obj)
+          resolve(obj)
+      )
+      
     replayCommandsFrom: (current) ->
       ## reset each chainerId to the
       ## current value
