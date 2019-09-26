@@ -13,5 +13,7 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
+// custom commands provided by this package, built from TypeScript code in "lib"
+// using "npm run transpile"
 import '../../dist'
 import '@percy/cypress'
