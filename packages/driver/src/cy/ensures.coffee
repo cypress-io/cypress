@@ -27,7 +27,7 @@ create = (state, expect) ->
         ## if this is an element then ensure its currently attached
         ## to its document context
         if $dom.isElement(subject)
-          ensureAttached(subject)
+          ensureAttached(subject, name)
 
         ## always ensure this is an element
         ensureElement(subject, name)

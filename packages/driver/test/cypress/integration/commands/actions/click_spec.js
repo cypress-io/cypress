@@ -1486,7 +1486,7 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.get('input:first')
-        .should(($el) => {
+        .then(($el) => {
           $el[0].ownerDocument.addEventListener('scroll', () => {
             $el.remove()
           })
