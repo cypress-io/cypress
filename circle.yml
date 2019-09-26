@@ -830,6 +830,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-npm-package:
+        context: test-runner:upload
         filters:
           branches:
             only:
@@ -891,6 +892,7 @@ mac-workflow: &mac-workflow
 
     - build-npm-package:
         name: Mac NPM package
+        context: test-runner:upload
         executor: mac
         filters:
           branches:
