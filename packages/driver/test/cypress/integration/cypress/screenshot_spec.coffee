@@ -138,7 +138,7 @@ describe "src/cypress/screenshot", ->
           Screenshot.defaults({ blackout: [true] })
         .to.throw("Cypress.Screenshot.defaults() 'blackout' option must be an array of strings. You passed: true")
 
-      it "throws if padding is not a number or an array of numbers with a length between 1 and 4", ->
+      it "throws if padding is not a number or an array of numbers with a maximum length of 4", ->
         expect =>
           Screenshot.defaults({ padding: '50px' })
         .to.throw("Cypress.Screenshot.defaults() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: 50px")

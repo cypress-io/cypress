@@ -716,7 +716,7 @@ describe "src/cy/commands/screenshot", ->
         @assertErrorMessage("cy.screenshot() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: bad, bad, bad, bad", done)
         cy.screenshot({ padding: ['bad', 'bad', 'bad', 'bad'] })
 
-      it "throws if padding is not an array with a length between 1 and 4", (done) ->
+      it "throws if padding is not an array with a maximum length of 4", (done) ->
         @assertErrorMessage("cy.screenshot() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: 20, 10, 20, 10, 50", done)
         cy.screenshot({ padding: [20, 10, 20, 10, 50] })
 
