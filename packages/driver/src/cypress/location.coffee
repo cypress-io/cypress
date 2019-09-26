@@ -149,7 +149,7 @@ class $Location
     ## It's split into ?foo=, "", "" which is not a valid
     ## So if after we split a url, there are any empty strings consider it invalid
     ## https://github.com/cypress-io/cypress/issues/5090
-    not url.some (part) -> part is "" ? url.length is 3 or url.length is 4 : false
+    if not url.some (part) -> part is "" then url.length is 3 or url.length is 4 else false
 
   @fullyQualifyUrl = (url) ->
     return url if @isFullyQualifiedUrl(url)
@@ -194,7 +194,6 @@ class $Location
 
       if not url.pathname
         url.set("pathname", "/")
-
       url.toString()
     else
       url
