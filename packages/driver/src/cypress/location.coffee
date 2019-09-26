@@ -144,6 +144,7 @@ class $Location
     ## foo.bar.co.uk/asdf
     ##url = "/#{url}"
     url = url.split("/")[0].split(".")
+    
     ## In the case of a url like /?foo=..
     ## It's split into ?foo=, "", "" which is not a valid
     ## So if after we split a url, there are any empty strings consider it invalid
