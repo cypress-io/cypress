@@ -38,7 +38,7 @@ describe "subdomains", ->
         occurences = Cypress._.compact(cookie.split("secret-session"))
         expect(occurences).to.have.length(1)
 
-  it "corrects sets domain based cookies", ->
+  it "correctly sets domain based cookies", ->
     cy
       .visit("http://domain.foobar.com:2292")
       .getCookies().should("have.length", 1)

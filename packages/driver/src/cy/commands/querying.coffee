@@ -218,6 +218,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## and catch any sizzle errors!
         try
           $el = cy.$$(selector, options.withinSubject)
+          # jQuery v3 has removed its deprecated properties like ".selector"
+          # https://jquery.com/upgrade-guide/3.0/#breaking-change-deprecated-context-and-selector-properties-removed
+          # but our error messages use this property to actually show the missing element
+          # so let's put it back
+          $el.selector = selector unless $el.selector
         catch e
           e.onFail = -> if options.log is false then e else options._log.error(e)
           throw e

@@ -2,12 +2,7 @@ bodyParser   = require("body-parser")
 cookieParser = require("cookie-parser")
 e2e          = require("../support/helpers/e2e")
 
-counts = {
-  "localhost:2290": 0
-  "localhost:2291": 0
-  "localhost:2292": 0
-  "localhost:2293": 0
-}
+counts = null
 
 urlencodedParser = bodyParser.urlencoded({ extended: false })
 jsonParser       = bodyParser.json()
@@ -131,12 +126,25 @@ describe "e2e requests", ->
     }]
   })
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "request_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  beforeEach ->
+    counts = {
+      "localhost:2290": 0
+      "localhost:2291": 0
+      "localhost:2292": 0
+      "localhost:2293": 0
+    }
+
+  [
+    "electron",
+    "chrome"
+  ].forEach (browser) ->
+    it "passes in #{browser}", ->
+      e2e.exec(@, {
+        spec: "request_spec.coffee"
+        snapshot: true
+        expectedExitCode: 0
+        browser
+      })
 
   it "fails when network immediately fails", ->
     e2e.exec(@, {

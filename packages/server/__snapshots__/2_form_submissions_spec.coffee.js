@@ -176,7 +176,6 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
