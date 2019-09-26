@@ -1039,9 +1039,9 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.deep.eq(js)
-
-            Promise.fromCallback (cb) =>
-              server.close(cb)
+        .finally =>
+          Promise.fromCallback (cb) =>
+            server.close(cb)
 
     context "accept-encoding", ->
       beforeEach ->
