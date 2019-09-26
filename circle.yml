@@ -838,6 +838,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-binary:
+        context: test-runner:upload
         filters:
           branches:
             only:
