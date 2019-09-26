@@ -797,12 +797,15 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - driver-integration-tests-3x:
+        context: test-runner:integration-tests
         requires:
           - build
     - desktop-gui-integration-tests-2x:
+        context: test-runner:integration-tests
         requires:
           - build
     - reporter-integration-tests:
+        context: test-runner:integration-tests
         requires:
           - build
     - run-launcher:
