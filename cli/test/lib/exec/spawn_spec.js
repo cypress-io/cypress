@@ -102,6 +102,24 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    it('uses --no-sandbox when needed', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(true)
+
+      return spawn.start('--foo', { foo: 'bar' })
+      .then(() => {
+        const args = cp.spawn.firstCall.args.slice(0, 2)
+        const expectedCliArgs = [
+          '--foo',
+          '--cwd',
+          cwd,
+          '--no-sandbox',
+        ]
+
+        expect(args).deep.equal(['/path/to/cypress', expectedCliArgs])
+      })
+    })
+
     it('uses npm command when running in dev mode', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       sinon.stub(verify, 'needsSandbox').returns(false)
