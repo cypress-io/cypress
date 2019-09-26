@@ -530,7 +530,7 @@ describe "lib/project", ->
       @pristinePath = Fixtures.projectPath("pristine")
 
     it "inserts path into cache", ->
-      Project.add(@pristinePath)
+      Project.add(@pristinePath, {})
       .then =>
         cache.read()
       .then (json) =>
@@ -540,7 +540,7 @@ describe "lib/project", ->
       it "returns object containing path and id", ->
         sinon.stub(settings, "read").resolves({projectId: "id-123"})
 
-        Project.add(@pristinePath)
+        Project.add(@pristinePath, {})
         .then (project) =>
           expect(project.id).to.equal("id-123")
           expect(project.path).to.equal(@pristinePath)
@@ -549,10 +549,20 @@ describe "lib/project", ->
       it "returns object containing just the path", ->
         sinon.stub(settings, "read").rejects()
 
-        Project.add(@pristinePath)
+        Project.add(@pristinePath, {})
         .then (project) =>
           expect(project.id).to.be.undefined
           expect(project.path).to.equal(@pristinePath)
+
+    describe "if configFile is non-default", ->
+      it "doesn't cache anything and returns object containing just the path", ->
+        Project.add(@pristinePath, { configFile: false })
+        .then (project) =>
+          expect(project.id).to.be.undefined
+          expect(project.path).to.equal(@pristinePath)
+          cache.read()
+        .then (json) =>
+          expect(json.PROJECTS).to.deep.eq([])
 
   context "#createCiProject", ->
     beforeEach ->

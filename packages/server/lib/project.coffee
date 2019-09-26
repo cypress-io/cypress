@@ -493,9 +493,11 @@ class Project extends EE
   @getPathsAndIds = ->
     cache.getProjectRoots()
     .map (projectRoot) ->
+      ## this assumes that the configFile for a cached project is 'cypress.json'
+      ## https://git.io/JeGyF
       Promise.props({
         path: projectRoot
-        id: settings.id(projectRoot, @options)
+        id: settings.id(projectRoot)
       })
 
   @_mergeDetails = (clientProject, project) ->
@@ -564,7 +566,12 @@ class Project extends EE
   @remove = (path) ->
     cache.removeProject(path)
 
-  @add = (path) ->
+  @add = (path, options) ->
+    ## don't cache a project if a non-default configFile is set
+    ## https://git.io/JeGyF
+    if settings.configFile(options) isnt 'cypress.json'
+      return Promise.resolve({ path })
+
     cache.insertProject(path)
     .then =>
       @id(path)
