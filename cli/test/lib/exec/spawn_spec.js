@@ -108,6 +108,9 @@ describe('lib/exec/spawn', function () {
 
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
+        // skip the options argument: we do not need anything about it
+        // and also less risk that a failed assertion would dump the
+        // entire ENV object with possible sensitive variables
         const args = cp.spawn.firstCall.args.slice(0, 2)
         const expectedCliArgs = [
           '--foo',
@@ -116,7 +119,7 @@ describe('lib/exec/spawn', function () {
           '--no-sandbox',
         ]
 
-        expect(args).deep.equal(['/path/to/cypress', expectedCliArgs])
+        expect(args).to.deep.equal(['/path/to/cypress', expectedCliArgs])
       })
     })
 
