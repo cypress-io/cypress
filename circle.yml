@@ -863,6 +863,7 @@ linux-workflow: &linux-workflow
           - build-npm-package
           - build-binary
     - test-binary-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
@@ -929,6 +930,7 @@ mac-workflow: &mac-workflow
           - Mac binary
 
     - test-binary-against-staging:
+        context: test-runner:record-tests
         name: Test Mac binary against staging
         executor: mac
         filters:
