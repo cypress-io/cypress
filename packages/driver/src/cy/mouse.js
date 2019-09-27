@@ -70,14 +70,9 @@ const create = (state, keyboard, focused) => {
       // if coords are same AND we're already hovered on the element, don't send move events
       if (_.isEqual({ x: coords.x, y: coords.y }, getMouseCoords(state)) && lastHoveredEl === targetEl) return { el: targetEl }
 
-      debug('mousemove events')
       const events = mouse._mouseMoveEvents(targetEl, coords)
 
       const resultEl = mouse.getElAtCoordsOrForce(coords, forceEl)
-
-      if (resultEl !== targetEl) {
-        mouse._mouseMoveEvents(resultEl, coords)
-      }
 
       return { el: resultEl, fromEl: lastHoveredEl, events }
     },
@@ -85,6 +80,13 @@ const create = (state, keyboard, focused) => {
     /**
      * @param {HTMLElement} el
      * @param {Coords} coords
+     * Steps to perform mouse move:
+     * - send out events to elLastHovered (bubbles)
+     * - send leave events to all Elements until commonAncestor
+     * - send over events to elToHover (bubbles)
+     * - send enter events to all elements from commonAncestor
+     * - send move events to elToHover (bubbles)
+     * - elLastHovered = elToHover
      */
     _mouseMoveEvents (el, coords) {
 
@@ -371,7 +373,28 @@ const create = (state, keyboard, focused) => {
       return mouse._mouseUpEvents(fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
     },
 
+    /**
+    *
+    * Steps to perform click:
+    *
+    * moveToCoordsOrNoop = (coords, el) => {
+    *   elAtPoint = getElementFromPoint(coords)
+    *   if (elAtPoint !== el)
+    *     sendMouseMoveEvents(elAtPoint, el)
+    *   return getElementFromPoint(coords)
+    * }
+    *
+    * coords = getCoords(elSubject)
+    * el1 = moveToCoordsOrNoop(coords, elLastHovered)
+    * mouseDown(el1)
+    * el2 = moveToCoordsOrNoop(coords, el1)
+    * mouseUp(el2)
+    * el3 = moveToCoordsOrNoop(coords, el2)
+    * if (notDetached(el1))
+    * sendClick(el3)
+    */
     mouseClick (fromViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+
       debug('mouseClick', { fromViewport, forceEl })
       const mouseDownEvents = mouse.mouseDown(fromViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
@@ -545,6 +568,8 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
     }
   }
 
+  debug('event:', evtName, el)
+
   const preventedDefault = !el.dispatchEvent(evt)
 
   return {
@@ -565,8 +590,6 @@ const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = f
   // TODO: IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
   // https://dom.spec.whatwg.org/#dom-document-createevent
   const Constructor = el.ownerDocument.defaultView.MouseEvent
-
-  debug('send event:', evtName)
 
   return sendEvent(evtName, el, evtOptions, bubbles, cancelable, Constructor)
 }

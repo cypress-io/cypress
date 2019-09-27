@@ -48,6 +48,10 @@ div {
 	display: inherit;
 }
 
+#sq6.hover {
+  margin-left: 100px;
+}
+
 button {
   display: inherit;
   position: relative;
@@ -74,6 +78,16 @@ function activate() {
 
 function deactivate() {
   inner.classList.remove('active');
+}
+
+function setHover() {
+  // console.log('hover')
+  this.classList.add('hover');
+}
+
+function unsetHover() {
+  // console.log('unhover')
+  this.classList.remove('hover');
 }
 
 function color() {
@@ -106,6 +120,10 @@ sq5.addEventListener('pointerdown', (e) => {
   e.preventDefault()
 })
 
+const sq6 = document.getElementById('sq6')
+sq6.addEventListener("mouseenter", setHover);
+sq6.addEventListener("mouseleave", unsetHover);
+
 
 }
 
@@ -128,7 +146,7 @@ sq5.addEventListener('pointerdown', (e) => {
 
 <div id="sq4" class="square green"></div>
 <input id="sq5"></input>
-<input id="sq6"></input>
+<div id="sq6" class="square red"></div>
 
 </body>
 </html>

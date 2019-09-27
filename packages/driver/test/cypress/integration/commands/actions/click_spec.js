@@ -3817,17 +3817,28 @@ describe('mouse state', () => {
         cy.getAll('@input:mousedown @input:mouseup @input:click').each(shouldNotBeCalled)
 
       })
-      // it('will continue to send mouseleave events', function (done) {
-      //   cy.once('fail', (err) => {
-      //     expect(err.message).to.contain('is being covered')
-      //     done()
-      //   })
 
-    //   cy.get('#sq4').click()
-    //   cy.timeout(500)
-    //   cy.get('#outer').click()
-    //   cy.get('input:last').click()//.click({ timeout: 200 })
-    // })
+      it('can click on a recursively moving element', () => {
+
+        const sq6 = cy.$$('#sq6')
+
+        /*
+        * the square moves back-forth on mouseleave/mouseenter
+        * so:
+        * - move phase, mouseover sent to sq, sq leaves
+        * - before mousedown events, move phase, sq returns, mousedown sent to sq
+        * - before mouseup events, move phase, mouseover sent to sq, sq leaves, mouseup sent to body
+        * - before click events, move events sent, sq returns, click sent to sq
+        */
+        attachListeners(['mouseover'])({ sq6 })
+        attachMouseClickListeners({ sq6 })
+
+        cy.get('#sq6')
+        .click()
+
+        cy.getAll('sq6', 'mousedown pointerdown click').each(shouldBeCalledOnce)
+        cy.getAll('sq6', 'mouseover').each(shouldBeCalledNth(2))
+      })
     })
 
     it('handles disabled attr', () => {
