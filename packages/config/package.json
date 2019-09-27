@@ -1,0 +1,6 @@
+{
+  "name": "@packages/config",
+  "version": "0.0.0",
+  "description": "Exports the default configuration for Cypress",
+  "main": "index.js"
+}
