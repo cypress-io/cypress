@@ -7,5 +7,5 @@ describe "e2e async timeouts", ->
     e2e.exec(@, {
       spec: "async_timeouts_spec.coffee"
       snapshot: true
-      expectedExitCode: 1
+      expectedExitCode: 2
     })
