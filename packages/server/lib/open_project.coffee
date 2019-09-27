@@ -201,6 +201,9 @@ create = ->
             relaunchBrowser()
       })
 
+      if !_.isUndefined(args.configFile)
+        options.configFile = args.configFile
+
       options = _.extend {}, args.config, options
 
       ## open the project and return

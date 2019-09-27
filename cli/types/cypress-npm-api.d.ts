@@ -224,7 +224,7 @@ declare module 'cypress' {
     })
     ```
    */
-  interface CypressRunOptions {
+  interface CypressRunOptions extends CypressCommonOptions {
     /**
      * Specify different browser to run tests in, either by name or by filesystem path
     */
@@ -233,14 +233,6 @@ declare module 'cypress' {
      * Specify a unique identifier for a run to enable grouping or parallelization
      */
     ciBuildId: string
-    /**
-     * Specify configuration
-     */
-    config: Partial<CypressConfiguration>
-    /**
-     * Specify environment variables
-     */
-    env: object
     /**
      * Group recorded tests together under a single run name
      */
@@ -265,10 +257,6 @@ declare module 'cypress' {
      * Override default port
      */
     port: number
-    /**
-     * Path to a specific project
-     */
-    project: string
     /**
      * Whether to record the test run
      */
@@ -302,23 +290,15 @@ declare module 'cypress' {
     })
     ```
    */
-  interface CypressOpenOptions {
+  interface CypressOpenOptions extends CypressCommonOptions  {
     /**
      * Specify a filesystem path to a custom browser
      */
     browser: string
     /**
-     * Specify configuration
-     */
-    config: Partial<CypressConfiguration>
-    /**
      * Open Cypress in detached mode
      */
     detached: boolean
-    /**
-     * Specify environment variables
-     */
-    env: object
     /**
      * Run in global mode
      */
@@ -327,6 +307,28 @@ declare module 'cypress' {
      * Override default port
      */
     port: number
+  }
+
+  /**
+   * Options available for `cypress.open` and `cypress.run`
+   */
+  interface CypressCommonOptions {
+    /**
+     * Specify configuration
+     */
+    config: Partial<CypressConfiguration>
+    /**
+     * Path to the config file to be used.
+     *
+     * If `false` is passed, no config file will be used.
+     *
+     * @default "cypress.json"
+     */
+    configFile: string | false
+    /**
+     * Specify environment variables
+     */
+    env: object
     /**
      * Path to a specific project
      */

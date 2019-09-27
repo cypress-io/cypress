@@ -88,6 +88,7 @@ const parseOpts = (opts) => {
     'config',
     'record',
     'key',
+    'configFile',
     'browser',
     'detached',
     'headed',
@@ -121,18 +122,15 @@ const descriptions = {
   reporter:
     'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
-  port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
-  env:
-    'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
-  config:
-    'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
-  browserRunMode:
-    'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
-  browserOpenMode:
-    'path to a custom browser to be added to the list of available browsers in Cypress',
+  port: 'runs Cypress on a specific port. overrides any value in the configuration file.',
+  env: 'sets environment variables. separate multiple values with a comma. overrides any value in the configuration file or cypress.env.json',
+  config: 'sets configuration values. separate multiple values with a comma. overrides any value in the configuration file.',
+  browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
+  browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
   detached: 'runs Cypress application in detached mode',
   project: 'path to the project',
   global: 'force Cypress into global mode as if its globally installed',
+  configFile: 'path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.',
   version: 'prints Cypress version',
   headed: 'displays the Electron browser instead of running headlessly',
   dev: 'runs cypress in development and bypasses binary check',
@@ -242,6 +240,7 @@ module.exports = {
     .option('-p, --port <port>', text('port'))
     .option('-e, --env <env>', text('env'))
     .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
     .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
     .option('-P, --project <project-path>', text('project'))
     .option('--parallel', text('parallel'))
@@ -264,6 +263,7 @@ module.exports = {
     .option('-p, --port <port>', text('port'))
     .option('-e, --env <env>', text('env'))
     .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
     .option('-b, --browser <browser-path>', text('browserOpenMode'))
     .option('-P, --project <project-path>', text('project'))
