@@ -67,6 +67,9 @@ class Project extends EE
       onSettingsChanged: false
     }
 
+    debug("project options %o", options)
+    @options = options
+
     if process.env.CYPRESS_MEMORY
       logMemory = ->
         console.log("memory info", process.memoryUsage())
@@ -181,7 +184,7 @@ class Project extends EE
       fs.pathExists(supportFile)
       .then (found) =>
         if not found
-          errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
+          errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile, settings.configFile(cfg))
 
   watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
@@ -205,7 +208,7 @@ class Project extends EE
             options.onError(err)
       })
 
-  watchSettings: (onSettingsChanged) ->
+  watchSettings: (onSettingsChanged, options) ->
     ## bail if we havent been told to
     ## watch anything (like in run mode)
     return if not onSettingsChanged
@@ -224,11 +227,13 @@ class Project extends EE
         onSettingsChanged.call(@)
     }
 
-    @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
+    if options.configFile != false
+      @watchers.watch(settings.pathToConfigFile(@projectRoot, options), obj)
+
     @watchers.watch(settings.pathToCypressEnvJson(@projectRoot), obj)
 
   watchSettingsAndStartWebsockets: (options = {}, cfg = {}) ->
-    @watchSettings(options.onSettingsChanged)
+    @watchSettings(options.onSettingsChanged, options)
 
     { reporter, projectRoot } = cfg
 
@@ -313,7 +318,9 @@ class Project extends EE
   ## returns project config (user settings + defaults + cypress.json)
   ## with additional object "state" which are transient things like
   ## window width and height, DevTools open or not, etc.
-  getConfig: (options = {}) =>
+  getConfig: (options={}) =>
+    options ?= @options
+
     if @cfg
       return Promise.resolve(@cfg)
 
@@ -438,12 +445,12 @@ class Project extends EE
   getProjectId: ->
     @verifyExistence()
     .then =>
-      settings.read(@projectRoot)
-    .then (settings) =>
-      if settings and id = settings.projectId
+      settings.read(@projectRoot, @options)
+    .then (readSettings) =>
+      if readSettings and id = readSettings.projectId
         return id
 
-      errors.throw("NO_PROJECT_ID", @projectRoot)
+      errors.throw("NO_PROJECT_ID", settings.configFile(@options), @projectRoot)
 
   verifyExistence: ->
     fs
@@ -486,6 +493,8 @@ class Project extends EE
   @getPathsAndIds = ->
     cache.getProjectRoots()
     .map (projectRoot) ->
+      ## this assumes that the configFile for a cached project is 'cypress.json'
+      ## https://git.io/JeGyF
       Promise.props({
         path: projectRoot
         id: settings.id(projectRoot)
@@ -557,7 +566,12 @@ class Project extends EE
   @remove = (path) ->
     cache.removeProject(path)
 
-  @add = (path) ->
+  @add = (path, options) ->
+    ## don't cache a project if a non-default configFile is set
+    ## https://git.io/JeGyF
+    if settings.configFile(options) isnt 'cypress.json'
+      return Promise.resolve({ path })
+
     cache.insertProject(path)
     .then =>
       @id(path)
@@ -569,9 +583,9 @@ class Project extends EE
   @id = (path) ->
     Project(path).getProjectId()
 
-  @ensureExists = (path) ->
-    ## do we have a cypress.json for this project?
-    settings.exists(path)
+  @ensureExists = (path, options) ->
+    ## is there a configFile? is the root writable?
+    settings.exists(path, options)
 
   @config = (path) ->
     Project(path).getConfig()

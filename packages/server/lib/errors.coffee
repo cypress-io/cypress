@@ -349,7 +349,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       You passed the --record flag but this project has not been setup to record.
 
-      This project is missing the 'projectId' inside of 'cypress.json'.
+      This project is missing the 'projectId' inside of '#{arg1}'.
 
       We cannot uniquely identify this project without this id.
 
@@ -457,7 +457,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We could not find a project with the ID: #{chalk.yellow(arg1)}
 
-      This projectId came from your cypress.json file or an environment variable.
+      This projectId came from your '#{arg2}' file or an environment variable.
 
       Please log into the Dashboard and find your project.
 
@@ -468,7 +468,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       https://on.cypress.io/dashboard
       """
     when "NO_PROJECT_ID"
-      "Can't find 'projectId' in the 'cypress.json' file for this project: " + chalk.blue(arg1)
+      "Can't find 'projectId' in the '#{arg1}' file for this project: " + chalk.blue(arg2)
     when "NO_PROJECT_FOUND_AT_PROJECT_ROOT"
       "Can't find project at the path: " + chalk.blue(arg1)
     when "CANNOT_FETCH_PROJECT_TOKEN"
@@ -546,7 +546,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Your `supportFile` is set to `#{arg1}`, but either the file is missing or it's invalid. The `supportFile` must be a `.js` or `.coffee` file or, if you're using a preprocessor plugin, it must be supported by that plugin.
 
-      Correct your `cypress.json`, create the appropriate file, or set `supportFile` to `false` if a support file is not necessary for your project.
+      Correct your `#{arg2}`, create the appropriate file, or set `supportFile` to `false` if a support file is not necessary for your project.
 
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
@@ -687,11 +687,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Learn more at https://on.cypress.io/reporters
       """
-    when "PROJECT_DOES_NOT_EXIST"
+    when "CONFIG_FILE_NOT_FOUND"
       """
-      Could not find any tests to run.
+      Could not find a Cypress configuration file, exiting.
 
-      We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
+      We looked but did not find a #{chalk.blue(arg1)} file in this folder: #{chalk.blue(arg2)}
       """
     when "INVOKED_BINARY_OUTSIDE_NPM_MODULE"
       """

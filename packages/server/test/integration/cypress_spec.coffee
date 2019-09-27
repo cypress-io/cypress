@@ -383,7 +383,7 @@ describe "lib/cypress", ->
         ])
       .each(ensureDoesNotExist)
       .then =>
-        @expectExitWithErr("PROJECT_DOES_NOT_EXIST", @pristinePath)
+        @expectExitWithErr("CONFIG_FILE_NOT_FOUND", @pristinePath)
 
     it "does not scaffold integration or example specs when runMode", ->
       settings.write(@pristinePath, {})
@@ -890,6 +890,35 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
+    describe "--config-file", ->
+      it "false does not require cypress.json to run", ->
+        fs.statAsync(path.join(@pristinePath, 'cypress.json'))
+          .then =>
+            throw new Error("cypress.json should not exist")
+          .catch {code: "ENOENT"}, =>
+            cypress.start([
+              "--run-project=#{@pristinePath}"
+              "--no-run-mode",
+              "--config-file",
+              "false"
+            ]).then =>
+              @expectExitWith(0)
+
+      it "with a custom config file fails when it doesn't exist", ->
+        @filename = "abcdefgh.test.json"
+
+        fs.statAsync(path.join(@todosPath, @filename))
+          .then =>
+            throw new Error("#{@filename} should not exist")
+          .catch {code: "ENOENT"}, =>
+            cypress.start([
+              "--run-project=#{@todosPath}"
+              "--no-run-mode",
+              "--config-file",
+              @filename
+            ]).then =>
+              @expectExitWithErr("CONFIG_FILE_NOT_FOUND", @filename, @todosPath)
+
   ## most record mode logic is covered in e2e tests.
   ## we only need to cover the edge cases / warnings
   context "--record or --ci", ->
@@ -1393,6 +1422,49 @@ describe "lib/cypress", ->
         Events.handleEvent(options, bus, event, 123, "open:project", @todosPath)
       .then ->
         expect(event.sender.send.withArgs("response").firstCall.args[1].data).to.eql(warning)
+
+    describe "--config-file", ->
+      beforeEach ->
+        @filename = "foo.bar.baz.asdf.quux.json"
+        @open = sinon.stub(Server.prototype, "open").resolves([])
+
+      it "reads config from a custom config file", ->
+        sinon.stub(fs, "readJsonAsync")
+        fs.readJsonAsync.withArgs(path.join(@pristinePath, @filename)).resolves({
+          env: { foo: "bar" },
+          port: 2020
+        })
+        fs.readJsonAsync.callThrough()
+
+        cypress.start([
+          "--config-file=#{@filename}"
+        ])
+        .then =>
+          options = Events.start.firstCall.args[0]
+          Events.handleEvent(options, {}, {}, 123, "open:project", @pristinePath)
+        .then =>
+          expect(@open).to.be.called
+
+          cfg = @open.getCall(0).args[0]
+
+          expect(cfg.env.foo).to.equal("bar")
+          expect(cfg.port).to.equal(2020)
+
+      it "creates custom config file if it does not exist", ->
+        write = sinon.spy(settings, "_write")
+
+        cypress.start([
+          "--config-file=#{@filename}"
+        ])
+        .then =>
+          options = Events.start.firstCall.args[0]
+          Events.handleEvent(options, {}, {}, 123, "open:project", @pristinePath)
+        .then =>
+          expect(@open).to.be.called
+
+          fs.readJsonAsync(path.join(@pristinePath, @filename))
+          .then (json) =>
+            expect(json).to.deep.equal({})
 
   context "--cwd", ->
     beforeEach ->

@@ -123,7 +123,8 @@ CONFIG_DEFAULTS = {
   integrationFolder:             "cypress/integration"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
-  pluginsFile:                    "cypress/plugins"
+  pluginsFile:                   "cypress/plugins"
+  configFile:                    "cypress.json"
 
   ## deprecated
   javascripts:                   []
@@ -135,6 +136,7 @@ validationRules = {
   blacklistHosts: v.isStringOrArrayOfStrings
   modifyObstructiveCode: v.isBoolean
   chromeWebSecurity: v.isBoolean
+  configFile: v.isStringOrFalse
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject
   execTimeout: v.isNumber
@@ -217,7 +219,7 @@ module.exports = {
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot).then(validateFile("cypress.json"))
+      settings.read(projectRoot, options).then(validateFile("cypress.json"))
       settings.readEnv(projectRoot).then(validateFile("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
@@ -248,7 +250,7 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     resolved = {}
 
-    _.extend config, _.pick(options, "morgan", "isTextTerminal", "socketId", "report", "browsers")
+    _.extend config, _.pick(options, "configFile", "morgan", "isTextTerminal", "socketId", "report", "browsers")
 
     _
     .chain(@whitelist(options))
@@ -405,7 +407,7 @@ module.exports = {
         return fs.pathExists(obj.supportFile)
         .then (found) ->
           if not found
-            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
+            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile, obj.configFile || CONFIG_DEFAULTS.configFile)
           debug("switching to found file %s", obj.supportFile)
     .catch({code: "MODULE_NOT_FOUND"}, ->
       debug("support file %s does not exist", sf)
@@ -426,7 +428,7 @@ module.exports = {
       else
         debug("support file is not default")
         ## they have it explicitly set, so it should be there
-        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
+        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || CONFIG_DEFAULTS.configFile)
     )
     .then ->
       if obj.supportFile

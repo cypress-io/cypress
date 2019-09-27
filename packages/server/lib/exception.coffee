@@ -2,10 +2,8 @@ _        = require("lodash")
 Promise  = require("bluebird")
 pkg      = require("@packages/root")
 path     = require("path")
-
 api      = require("./api")
 user     = require("./user")
-Settings = require("./util/settings")
 system   = require("./util/system")
 
 ## strip everything but the file name to remove any sensitive

@@ -293,15 +293,16 @@ exports['shows help for open --foo 1'] = `
 
   Options:
 
-    -p, --port <port>             runs Cypress on a specific port. overrides any value in cypress.json.
-    -e, --env <env>               sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
-    -c, --config <config>         sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
-    -d, --detached [bool]         runs Cypress application in detached mode
-    -b, --browser <browser-path>  path to a custom browser to be added to the list of available browsers in Cypress
-    -P, --project <project-path>  path to the project
-    --global                      force Cypress into global mode as if its globally installed
-    --dev                         runs cypress in development and bypasses binary check
-    -h, --help                    output usage information
+    -p, --port <port>                runs Cypress on a specific port. overrides any value in the configuration file.
+    -e, --env <env>                  sets environment variables. separate multiple values with a comma. overrides any value in the configuration file or cypress.env.json
+    -c, --config <config>            sets configuration values. separate multiple values with a comma. overrides any value in the configuration file.
+    -C, --config-file <config-file>  path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.
+    -d, --detached [bool]            runs Cypress application in detached mode
+    -b, --browser <browser-path>     path to a custom browser to be added to the list of available browsers in Cypress
+    -P, --project <project-path>     path to the project
+    --global                         force Cypress into global mode as if its globally installed
+    --dev                            runs cypress in development and bypasses binary check
+    -h, --help                       output usage information
   -------
   stderr:
   -------
@@ -336,9 +337,10 @@ exports['shows help for run --foo 1'] = `
     -s, --spec <spec>                          runs a specific spec file. defaults to "all"
     -r, --reporter <reporter>                  runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"
     -o, --reporter-options <reporter-options>  options for the mocha reporter. defaults to "null"
-    -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
-    -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
-    -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
+    -p, --port <port>                          runs Cypress on a specific port. overrides any value in the configuration file.
+    -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in the configuration file or cypress.env.json
+    -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in the configuration file.
+    -C, --config-file <config-file>            path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.
     -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
     -P, --project <project-path>               path to the project
     --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes

@@ -129,7 +129,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
-        $utils.throwErrByPath("request.url_invalid")
+        $utils.throwErrByPath("request.url_invalid", {
+          args: {
+            configFile: Cypress.config("configFile")
+          }
+        })
 
       ## if a user has `x-www-form-urlencoded` content-type set
       ## with an object body, they meant to add 'form: true'

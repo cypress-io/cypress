@@ -20,3 +20,10 @@ exports['exec run .processRunOptions passes --record option 1'] = [
   "--record",
   "my record id"
 ]
+
+exports['exec run .processRunOptions passes --config-file false option 1'] = [
+  "--run-project",
+  null,
+  "--config-file",
+  false
+]
