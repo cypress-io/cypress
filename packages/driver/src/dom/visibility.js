@@ -424,5 +424,7 @@ module.exports = {
 
   isHidden,
 
+  parentHasDisplayNone,
+
   getReasonIsHidden,
 }
