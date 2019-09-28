@@ -677,6 +677,62 @@ describe('intercept blur methods correctly', () => {
       cy.get('area').focus().should('have.focus')
 
     })
+  })
 
+  // W3C Hidden @see html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  // fix https://github.com/cypress-io/cypress/issues/4898
+  it('does not send focus events for focusable elements that are w3c hidden', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html')
+    .then(() => {
+
+      cy.$$('<input style="visibility:hidden" id="no-focus-1"/>')
+      .appendTo(cy.$$('body'))
+
+      cy.$$('<input style="display:none" id="no-focus-2"/>')
+      .appendTo(cy.$$('body'))
+
+      cy.$$('<div style="visibility:hidden"><input id="no-focus-3"/></div>')
+      .appendTo(cy.$$('body'))
+
+      cy.$$('<div style="display:none"><input id="no-focus-4"/></div>')
+      .appendTo(cy.$$('body'))
+
+      const stub = cy.stub().as('focus')
+
+      cy.$$('#no-focus-1').on('focus', stub).get(0).focus()
+      cy.$$('#no-focus-2').on('focus', stub).get(0).focus()
+      cy.$$('#no-focus-3').on('focus', stub).get(0).focus()
+      cy.$$('#no-focus-4').on('focus', stub).get(0).focus()
+
+      expect(stub).not.called
+
+      cy.get('no-focus-1').should('not.be.visible')
+      cy.get('no-focus-2').should('not.be.visible')
+      cy.get('no-focus-3').should('not.be.visible')
+      cy.get('no-focus-4').should('not.be.visible')
+
+    })
+  })
+
+  // W3C Hidden @see html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  // fix https://github.com/cypress-io/cypress/issues/4898
+  it('does send focus events for focusable elements that are 0x0 size', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html')
+    .then(() => {
+
+      cy.$$('<input style="width:0;height:0;padding:0;margin:0;border:0;outline:0" id="focus-1"/>')
+      .appendTo(cy.$$('body'))
+
+      const stub = cy.stub()
+
+      cy.$$('#focus-1')
+      .on('focus', stub)
+      .get(0).focus()
+
+      expect(stub).calledOnce
+
+      cy.get('#focus-1').should('not.be.visible')
+
+    })
   })
 })

@@ -1,3 +1,3 @@
-beforeEach(function(){
+beforeEach(function () {
 
-});
+})

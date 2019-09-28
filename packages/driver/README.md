@@ -55,6 +55,16 @@ cd packages/driver
 npm start
 ```
 
+If you would like to run a particular integration test, see the GUI and poke around during the test, you can an exclusive test like:
+
+```bash
+cd packages/driver
+node ../../scripts/cypress run \
+  --project ./test \
+  --spec test/cypress/integration/cypress/cy_spec.coffee \
+  --headed --no-exit
+```
+
 ## Debugging
 
 In the browser

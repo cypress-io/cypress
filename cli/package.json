@@ -86,7 +86,8 @@
     "shelljs": "0.8.3",
     "sinon": "7.2.2",
     "snap-shot-it": "7.8.0",
-    "spawn-mock": "1.0.0"
+    "spawn-mock": "1.0.0",
+    "strip-ansi": "4.0.0"
   },
   "files": [
     "bin",
