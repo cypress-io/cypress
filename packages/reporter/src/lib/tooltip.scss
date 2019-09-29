@@ -3,4 +3,12 @@
 .tooltip {
   font-family: $muli;
   word-wrap: break-word;
+
+  .kbd {
+    background-color: rgb(73, 73, 73);
+    color:rgb(243, 243, 243);
+    padding: 1px 4px;
+    font-weight: 600;
+    border-radius: 3px;
+  }
 }
