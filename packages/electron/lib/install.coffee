@@ -10,8 +10,8 @@ log     = require("debug")("cypress:electron")
 fs = Promise.promisifyAll(fs)
 
 ## ensure we have an electronVersion set in package.json
-if not electronVersion = pkg.electronVersion
-  throw new Error("Missing 'electronVersion' in ./package.json")
+if not electronVersion = pkg.devDependencies.electron
+  throw new Error("Missing 'electron' devDependency in ./package.json")
 
 module.exports = {
   checkCurrentVersion: ->

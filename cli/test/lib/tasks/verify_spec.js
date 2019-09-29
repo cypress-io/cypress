@@ -53,6 +53,7 @@ context('lib/tasks/verify', () => {
     sinon.stub(xvfb, 'stop').resolves()
     sinon.stub(xvfb, 'isNeeded').returns(false)
     sinon.stub(Promise.prototype, 'delay').resolves()
+    sinon.stub(process, 'geteuid').returns(1000)
 
     sinon.stub(_, 'random').returns('222')
 
@@ -70,7 +71,6 @@ context('lib/tasks/verify', () => {
   })
 
   it('logs error and exits when no version of Cypress is installed', () => {
-
     return verify
     .start()
     .then(() => {
@@ -83,6 +83,26 @@ context('lib/tasks/verify', () => {
         'no version of Cypress installed 1',
         normalize(stdout.toString())
       )
+    })
+  })
+
+  it('adds --no-sandbox when user is root', () => {
+    // make it think the executable exists
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0o777 }),
+      packageVersion,
+    })
+
+    process.geteuid.returns(0) // user is root
+    util.exec.resolves({
+      stdout: '222',
+      stderr: '',
+    })
+
+    return verify.start()
+    .then(() => {
+      expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
     })
   })
 

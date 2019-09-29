@@ -155,6 +155,11 @@ class $Location
     url = new UrlParse(url, existing.origin)
     url.toString()
 
+  @mergeUrlWithParams = (url, params) ->
+    url = new UrlParse(url, null, true)
+    url.set("query", _.merge(url.query || {}, params))
+    url.toString()
+
   @normalize = (url) ->
     ## A properly formed URL will always have a trailing
     ## slash at the end of it

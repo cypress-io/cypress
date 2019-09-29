@@ -25,6 +25,7 @@ const terminal = require('../util/terminal')
 const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
 const electronApp = require('../util/electron_app')
+const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
@@ -440,7 +441,7 @@ const createAndOpenProject = function (socketId, options) {
   const { projectRoot, projectId } = options
 
   return Project
-  .ensureExists(projectRoot)
+  .ensureExists(projectRoot, options)
   .then(() => {
     // open this project without
     // adding it to the global cache
@@ -1114,12 +1115,14 @@ module.exports = {
     // and open up the project
     return createAndOpenProject(socketId, options)
     .then(({ project, projectId, config }) => {
+      debug('project created and opened with config %o', config)
+
       // if we have a project id and a key but record hasnt been given
       recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
       recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
 
       if (record) {
-        recordMode.throwIfNoProjectId(projectId)
+        recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
         recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
         recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
       }

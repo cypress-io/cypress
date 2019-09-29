@@ -149,6 +149,7 @@ describe "src/cy/commands/navigation", ->
             expect(win.foo).to.be.undefined
 
       it "throws when reload times out", (done) ->
+        cy.timeout(1000)
         locReload = cy.spy(Cypress.utils, "locReload")
 
         cy
@@ -326,6 +327,7 @@ describe "src/cy/commands/navigation", ->
         cy.go(0)
 
       it "throws when go times out", (done) ->
+        cy.timeout(1000)
         cy
           .visit("/timeout?ms=100")
           .visit("/fixtures/jquery.html")
@@ -543,11 +545,11 @@ describe "src/cy/commands/navigation", ->
 
     it "does not support file:// protocol", (done) ->
       Cypress.config("baseUrl", "")
-    
+
       cy.on "fail", (err) ->
         expect(err.message).to.contain("cy.visit() failed because the 'file://...' protocol is not supported by Cypress.")
         done()
-    
+
       cy.visit("file:///cypress/fixtures/generic.html")
 
     ## https://github.com/cypress-io/cypress/issues/1727
@@ -618,6 +620,15 @@ describe "src/cy/commands/navigation", ->
         }
       })
       cy.contains('"user-agent":"something special"')
+
+    it "can send querystring params", ->
+      qs = { "foo bar": "baz quux" }
+
+      cy
+        .visit("http://localhost:3500/dump-qs", { qs })
+        .then ->
+          cy.contains(JSON.stringify(qs))
+          cy.url().should('eq', 'http://localhost:3500/dump-qs?foo%20bar=baz%20quux')
 
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
@@ -1059,6 +1070,23 @@ describe "src/cy/commands/navigation", ->
           url: "http://foobarbaz",
           headers: "quux"
         })
+
+      [
+        "foo",
+        null,
+        false,
+      ].forEach (qs) =>
+        str = String(qs)
+
+        it "throws when qs is #{str}", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.contain "cy.visit() requires the 'qs' option to be an object, but received: '#{str}'"
+            done()
+
+          cy.visit({
+            url: "http://foobarbaz",
+            qs
+          })
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
         cy.on "fail", (err) ->
