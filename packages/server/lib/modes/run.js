@@ -736,14 +736,13 @@ module.exports = {
         chalk.cyan(`Compressing to ${videoCompression} CRF`)
       )
 
-      const started = new Date()
+      const started = Date.now()
       let progress = Date.now()
-      const throttle =
-          env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
+      const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
 
       const onProgress = function (float) {
         if (float === 1) {
-          const finished = new Date() - started
+          const finished = Date.now() - started
           const dur = `(${humanTime.long(finished)})`
 
           console.log(
@@ -755,7 +754,7 @@ module.exports = {
           return console.log('')
         }
 
-        if (new Date() - progress > throttle) {
+        if (Date.now() - progress > throttle) {
           // bump up the progress so we dont
           // continuously get notifications
           progress += throttle
@@ -863,12 +862,11 @@ module.exports = {
   },
 
   waitForBrowserToConnect (options = {}) {
-    let waitForBrowserToConnect
     const { project, socketId, timeout } = options
 
     let attempts = 0
 
-    return (waitForBrowserToConnect = () => {
+    const wait = () => {
       return Promise.join(
         this.waitForSocketConnection(project, socketId),
         this.launchBrowser(options)
@@ -881,14 +879,15 @@ module.exports = {
 
         // always first close the open browsers
         // before retrying or dieing
-        return openProject.closeBrowser().then(() => {
+        return openProject.closeBrowser()
+        .then(() => {
           if (attempts === 1 || attempts === 2) {
             // try again up to 3 attempts
             const word = attempts === 1 ? 'Retrying...' : 'Retrying again...'
 
             errors.warning('TESTS_DID_NOT_START_RETRYING', word)
 
-            return waitForBrowserToConnect()
+            return wait()
           }
 
           err = errors.get('TESTS_DID_NOT_START_FAILED')
@@ -897,7 +896,9 @@ module.exports = {
           return project.emit('exitEarlyWithErr', err.message)
         })
       })
-    })()
+    }
+
+    return wait()
   },
 
   waitForSocketConnection (project, id) {
@@ -1096,7 +1097,8 @@ module.exports = {
       runEachSpec,
       afterSpecRun,
       beforeSpecRun,
-    }).then((runs = []) => {
+    })
+    .then((runs = []) => {
       results.startedTestsAt = getRun(_.first(runs), 'stats.wallClockStartedAt')
       results.endedTestsAt = getRun(_.last(runs), 'stats.wallClockEndedAt')
       results.totalDuration = reduceRuns(runs, 'stats.wallClockDuration')
@@ -1138,7 +1140,8 @@ module.exports = {
       browser,
       video: options.video,
       videosFolder: options.videosFolder,
-    }).then((videoRecordProps = {}) => {
+    })
+    .then((videoRecordProps = {}) => {
       return Promise.props({
         results: this.waitForTestsToFinishRunning({
           spec,
@@ -1219,95 +1222,90 @@ module.exports = {
         recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
       }
 
-        if (record) {
-          recordMode.throwIfNoProjectId(projectId)
-          recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
-          recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
+      return Promise.all([
+        system.info(),
+        browsers.ensureAndGetByNameOrPath(browserName),
+        this.findSpecs(config, specPattern),
+        trashAssets(config),
+        removeOldProfiles(),
+      ])
+      .spread((sys = {}, browser = {}, specs = []) => {
+        // return only what is return to the specPattern
+        if (specPattern) {
+          specPattern = specsUtil.getPatternRelativeToProjectRoot(
+            specPattern,
+            projectRoot
+          )
         }
 
-        return Promise.all([
-          system.info(),
-          browsers.ensureAndGetByNameOrPath(browserName),
-          this.findSpecs(config, specPattern),
-          trashAssets(config),
-          removeOldProfiles(),
-        ]).spread((sys = {}, browser = {}, specs = []) => {
-          // return only what is return to the specPattern
-          if (specPattern) {
-            specPattern = specsUtil.getPatternRelativeToProjectRoot(
-              specPattern,
-              projectRoot
-            )
-          }
+        if (!specs.length) {
+          errors.throw(
+            'NO_SPECS_FOUND',
+            config.integrationFolder,
+            specPattern
+          )
+        }
 
-          if (!specs.length) {
-            errors.throw(
-              'NO_SPECS_FOUND',
-              config.integrationFolder,
-              specPattern
-            )
-          }
+        if (browser.family === 'chrome') {
+          chromePolicyCheck.run(onWarning)
+        }
 
-          if (browser.family === 'chrome') {
-            chromePolicyCheck.run(onWarning)
-          }
+        const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
+          return this.runSpecs({
+            beforeSpecRun,
+            afterSpecRun,
+            projectRoot,
+            specPattern,
+            socketId,
+            parallel,
+            browser,
+            project,
+            runUrl,
+            group,
+            config,
+            specs,
+            sys,
+            videosFolder: config.videosFolder,
+            video: config.video,
+            videoCompression: config.videoCompression,
+            videoUploadOnPasses: config.videoUploadOnPasses,
+            exit: options.exit,
+            headed: options.headed,
+            outputPath: options.outputPath,
+          })
+          .tap(renderSummaryTable(runUrl))
+        }
 
-          const runAllSpecs = (
-            { beforeSpecRun, afterSpecRun, runUrl },
-            parallelOverride = parallel
-          ) => {
-            return this.runSpecs({
-              beforeSpecRun,
-              afterSpecRun,
-              projectRoot,
-              specPattern,
-              socketId,
-              parallel: parallelOverride,
-              browser,
-              project,
-              runUrl,
-              group,
-              config,
-              specs,
-              sys,
-              videosFolder: config.videosFolder,
-              video: config.video,
-              videoCompression: config.videoCompression,
-              videoUploadOnPasses: config.videoUploadOnPasses,
-              exit: options.exit,
-              headed: options.headed,
-              outputPath: options.outputPath,
-            }).tap(renderSummaryTable(runUrl))
-          }
+        if (record) {
+          const { projectName } = config
 
-          if (record) {
-            const { projectName } = config
+          return recordMode.createRunAndRecordSpecs({
+            key,
+            sys,
+            specs,
+            group,
+            browser,
+            parallel,
+            ciBuildId,
+            projectId,
+            projectRoot,
+            projectName,
+            specPattern,
+            runAllSpecs,
+          })
+        }
 
-            return recordMode.createRunAndRecordSpecs({
-              key,
-              sys,
-              specs,
-              group,
-              browser,
-              parallel,
-              ciBuildId,
-              projectId,
-              projectRoot,
-              projectName,
-              specPattern,
-              runAllSpecs,
-            })
-          }
-
-          // not recording, can't be parallel
-          return runAllSpecs({}, false)
+        // not recording, can't be parallel
+        return runAllSpecs({
+          parallel: false,
         })
-      }
-    )
+      })
+    })
   },
 
   run (options) {
-    return electronApp.ready().then(() => {
+    return electronApp.ready()
+    .then(() => {
       return this.ready(options)
     })
   },
