@@ -27,6 +27,42 @@ const focusEvents = ['focus', 'focusin']
 
 const allMouseEvents = [...mouseClickEvents, ...mouseHoverEvents, ...focusEvents]
 
+const attachListeners = (listenerArr) => {
+  return (els) => {
+    _.each(els, (el, elName) => {
+      return listenerArr.forEach((evtName) => {
+        el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
+      })
+    })
+  }
+}
+
+const attachFocusListeners = attachListeners(focusEvents)
+const attachMouseClickListeners = attachListeners(mouseClickEvents)
+const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
+const attachMouseDblclickListeners = attachListeners(['dblclick'])
+const attachContextmenuListeners = attachListeners(['contextmenu'])
+
+const getAllFn = (...aliases) => {
+  if (aliases.length > 1) {
+    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
+  }
+
+  return Cypress.Promise.all(
+    aliases[0].split(' ').map((alias) => {
+      return cy.now('get', alias)
+    })
+  )
+}
+
+Cypress.Commands.add('getAll', getAllFn)
+
+const wrapped = (obj) => cy.wrap(obj, { log: false })
+const shouldBeCalled = (stub) => wrapped(stub).should('be.called')
+const shouldBeCalledOnce = (stub) => wrapped(stub).should('be.calledOnce')
+const shouldBeCalledWithCount = (num) => (stub) => wrapped(stub).should('have.callCount', num)
+const shouldNotBeCalled = (stub) => wrapped(stub).should('not.be.called')
+
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -387,19 +423,22 @@ describe('src/cy/commands/actions/click', () => {
 
       attachFocusListeners({ btn })
       attachMouseClickListeners({ btn, div })
-      attachMouseHoverListeners({ div })
+      attachMouseHoverListeners({ btn, div })
 
       btn.on('pointerdown', () => {
         // synchronously remove this button
-
         btn.remove()
       })
 
-      // return
       cy.contains('button').click()
 
       cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
       cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
+
+      // the browser is in control of whether or not the pointerdown event
+      // so this test *may* not necessarily pass in all browsers, but it's
+      // worth adding to help specify the current expected behavior
+      cy.getAll('div', 'pointerdown').each(shouldNotBeCalled)
       cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
     })
 
@@ -413,7 +452,6 @@ describe('src/cy/commands/actions/click', () => {
 
       btn.on('pointerover', () => {
         // synchronously remove this button
-
         btn.remove()
       })
 
@@ -457,7 +495,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('sends modifiers', () => {
-
       const btn = cy.$$('button:first')
 
       attachMouseClickListeners({ btn })
@@ -739,6 +776,7 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/4347
     it('can click inside an iframe', () => {
       cy.get('iframe')
       .should(($iframe) => {
@@ -2209,7 +2247,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('span#not-hidden').click().click()
 
         cy.getAll('btn', 'mousemove mouseover').each(shouldBeCalledOnce)
-        cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledNth(2))
+        cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledWithCount(2))
         .then(function () {
 
           const { logs } = this
@@ -2539,7 +2577,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('serially dblclicks a collection of anchors to the top of the page', () => {
-
       const throttled = cy.stub().as('clickcount')
 
       // create a throttled click function
@@ -3802,7 +3839,7 @@ describe('mouse state', () => {
         cy.get('#sq4').click()
         cy.get('#outer').click()
 
-        cy.getAll('@sq4:mouseover @sq4:mousedown @sq4:mouseup @sq4:click').each(shouldBeCalledNth(2))
+        cy.getAll('@sq4:mouseover @sq4:mousedown @sq4:mouseup @sq4:click').each(shouldBeCalledWithCount(2))
 
         cy.getAll('@sq4:mouseout').each(shouldBeCalledOnce)
 
@@ -3837,7 +3874,7 @@ describe('mouse state', () => {
         .click()
 
         cy.getAll('sq6', 'mousedown pointerdown click').each(shouldBeCalledOnce)
-        cy.getAll('sq6', 'mouseover').each(shouldBeCalledNth(2))
+        cy.getAll('sq6', 'mouseover').each(shouldBeCalledWithCount(2))
       })
     })
 
@@ -4054,39 +4091,3 @@ describe('mouse state', () => {
   })
 
 })
-
-const attachListeners = (listenerArr) => {
-  return (els) => {
-    _.each(els, (el, elName) => {
-      return listenerArr.forEach((evtName) => {
-        el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
-      })
-    })
-  }
-}
-
-const attachFocusListeners = attachListeners(focusEvents)
-const attachMouseClickListeners = attachListeners(mouseClickEvents)
-const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
-const attachMouseDblclickListeners = attachListeners(['dblclick'])
-const attachContextmenuListeners = attachListeners(['contextmenu'])
-
-const getAllFn = (...aliases) => {
-  if (aliases.length > 1) {
-    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
-  }
-
-  return Cypress.Promise.all(
-    aliases[0].split(' ').map((alias) => {
-      return cy.now('get', alias)
-    })
-  )
-}
-
-Cypress.Commands.add('getAll', getAllFn)
-
-const _wrapLogFalse = (obj) => cy.wrap(obj, { log: false })
-const shouldBeCalled = (stub) => _wrapLogFalse(stub).should('be.called')
-const shouldBeCalledOnce = (stub) => _wrapLogFalse(stub).should('be.calledOnce')
-const shouldBeCalledNth = (num) => (stub) => _wrapLogFalse(stub).should('have.callCount', num)
-const shouldNotBeCalled = (stub) => _wrapLogFalse(stub).should('not.be.called')

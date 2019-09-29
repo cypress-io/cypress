@@ -1,7 +1,7 @@
-const $dom = require('../dom')
-const $elements = require('../dom/elements')
 const $ = require('jquery')
 const _ = require('lodash')
+const $dom = require('../dom')
+const $elements = require('../dom/elements')
 const $Keyboard = require('./keyboard')
 const $selection = require('../dom/selection')
 const debug = require('debug')('cypress:driver:mouse')
@@ -375,21 +375,22 @@ const create = (state, keyboard, focused) => {
 
     /**
     *
-    * Steps to perform click:
+    * Steps to perform a click:
     *
-    * moveToCoordsOrNoop = (coords, el) => {
+    * moveToCoordsOrNoop = (coords) => {
     *   elAtPoint = getElementFromPoint(coords)
-    *   if (elAtPoint !== el)
-    *     sendMouseMoveEvents(elAtPoint, el)
+    *   if (elAtPoint !== elLastHovered)
+    *     sendMouseMoveEvents({to: elAtPoint, from: elLastHovered})
+    *     elLastHovered = elAtPoint
     *   return getElementFromPoint(coords)
     * }
     *
     * coords = getCoords(elSubject)
-    * el1 = moveToCoordsOrNoop(coords, elLastHovered)
-    * mouseDown(el1)
-    * el2 = moveToCoordsOrNoop(coords, el1)
-    * mouseUp(el2)
-    * el3 = moveToCoordsOrNoop(coords, el2)
+    * el1 = moveToCoordsOrNoop(coords)
+    * sendMousedown(el1)
+    * el2 = moveToCoordsOrNoop(coords)
+    * sendMouseup(el2)
+    * el3 = moveToCoordsOrNoop(coords)
     * if (notDetached(el1))
     * sendClick(el3)
     */
