@@ -244,6 +244,10 @@ verify = (cy, $el, options, callbacks) ->
 
     runAllChecks = ->
       if force isnt true
+
+        ## ensure it's attached
+        cy.ensureAttached($el, null, _log)
+
         ## ensure its 'receivable'
         if (options.ensure.notDisabled) then cy.ensureNotDisabled($el, _log)
 

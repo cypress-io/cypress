@@ -373,6 +373,10 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'visibility: collapse'`
   }
 
+  if ($elements.isDetached($el)) {
+    return `This element '${node}' is not visible because it is detached from the DOM`
+  }
+
   if (elHasVisibilityHidden($el)) {
     return `This element '${node}' is not visible because it has CSS property: 'visibility: hidden'`
   }
