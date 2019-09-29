@@ -1,5 +1,3 @@
-/* global Promise */
-
 module.exports = (on) => {
   on('file:preprocessor', () => {
     return new Promise(() => {

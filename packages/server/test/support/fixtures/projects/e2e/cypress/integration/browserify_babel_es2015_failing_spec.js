@@ -1,1 +1,1 @@
-import "../../lib/fail"
+import '../../lib/fail'
