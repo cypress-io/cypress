@@ -31,7 +31,6 @@ describe('rect highlight', () => {
 })
 
 const expectToBeInside = (rectInner, rectOuter) => {
-  Cypress.log({ name: 'assert', message: `Expected to be inside rect` })
   expect(rectInner.width, 'width').lte(rectOuter.width)
   expect(rectInner.height, 'height').lte(rectOuter.height)
   expect(rectInner.top, 'top').gte(rectOuter.top)
