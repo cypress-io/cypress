@@ -127,9 +127,12 @@ const _launchServer = (baseLoginUrl, sendMessage) => {
         res.redirect(`${baseLoginUrl}?status=${status}`)
       }
 
-      if (_.get(req.query, 'status') === 'error') {
-        authCallback(new Error('There was an error authenticating to the Cypress dashboard.'))
-        redirectToStatus('error')
+      if (_.get(req.query, 'status') === 'error' || !authCallback) {
+        if (authCallback) {
+          authCallback(new Error('There was an error authenticating to the Cypress dashboard.'))
+        }
+
+        return redirectToStatus('error')
       }
 
       const { state, name, email, access_token } = req.query
@@ -190,10 +193,7 @@ const _launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
 
   openExternalAttempted = true
 
-  // wrap openExternal here in case `electron.shell` is not available (during tests)
-  return Promise.fromCallback((cb) => {
-    shell.openExternal(loginUrl, {}, cb)
-  })
+  return shell.openExternal(loginUrl)
   .catch((err) => {
     debug('Error launching native auth: %o', { err })
     warnCouldNotLaunch()
