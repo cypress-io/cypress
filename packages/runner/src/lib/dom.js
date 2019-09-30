@@ -112,6 +112,11 @@ function addElementBoxModelLayers ($el, $body) {
       obj.left -= dimensions.marginLeft
     }
 
+    if (attr === 'Padding') {
+      obj.top += dimensions.borderTop
+      obj.left += dimensions.borderLeft
+    }
+
     // bail if the dimensions of this layer match the previous one
     // so we dont create unnecessary layers
     if (dimensionsMatchPreviousLayer(obj, $container)) return
