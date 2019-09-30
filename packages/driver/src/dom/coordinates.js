@@ -5,6 +5,10 @@ const getElementAtPointFromViewport = (doc, x, y) => {
   return doc.elementFromPoint(x, y)
 }
 
+const isAutIframe = (win) => {
+  !$elements.getNativeProp(win.parent, 'frameElement')
+}
+
 const getElementPositioning = ($el) => {
   /**
    * @type {HTMLElement}
@@ -24,15 +28,11 @@ const getElementPositioning = ($el) => {
   // const rect = el.getBoundingClientRect()
   const rect = el.getClientRects()[0] || el.getBoundingClientRect()
 
-  function calculateAutIframeCoords (rect, el) {
+  const getRectFromAutIframe = (rect, el) => {
     let x = 0 //rect.left
     let y = 0 //rect.top
     let curWindow = el.ownerDocument.defaultView
     let frame
-
-    const isAutIframe = (win) => {
-      !$elements.getNativeProp(win.parent, 'frameElement')
-    }
 
     while (!isAutIframe(curWindow) && window.parent !== window) {
       frame = $elements.getNativeProp(curWindow, 'frameElement')
@@ -50,7 +50,7 @@ const getElementPositioning = ($el) => {
 
     autFrame = curWindow
 
-    const ret = {
+    return {
       left: x + rect.left,
       top: y + rect.top,
       right: x + rect.right,
@@ -58,18 +58,17 @@ const getElementPositioning = ($el) => {
       width: rect.width,
       height: rect.height,
     }
-
-    return ret
-
   }
 
   const rectCenter = getCenterCoordinates(rect)
-
-  const rectFromAut = calculateAutIframeCoords(rect, el)
+  const rectFromAut = getRectFromAutIframe(rect, el)
   const rectFromAutCenter = getCenterCoordinates(rectFromAut)
 
   // add the center coordinates
   // because its useful to any caller
+
+  const topCenter = rectCenter.y
+  const leftCenter = rectCenter.x
 
   return {
     scrollTop: el.scrollTop,
@@ -81,11 +80,17 @@ const getElementPositioning = ($el) => {
       left: rect.left,
       right: rect.right,
       bottom: rect.bottom,
-      topCenter: rectCenter.y,
-      leftCenter: rectCenter.x,
+      topCenter,
+      leftCenter,
       doc: win.document,
     },
     fromWindow: {
+      top: rect.top + win.pageYOffset,
+      left: rect.left + win.pageXOffset,
+      topCenter: topCenter + win.pageYOffset,
+      leftCenter: leftCenter + win.pageXOffset,
+    },
+    fromAutWindow: {
       top: rectFromAut.top + autFrame.pageYOffset,
       left: rectFromAut.left + autFrame.pageXOffset,
       topCenter: rectFromAutCenter.y + autFrame.pageYOffset,

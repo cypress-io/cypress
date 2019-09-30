@@ -95,8 +95,7 @@ takeScrollingScreenshots = (scrolls, win, state, automationOptions) ->
 
   Promise
   .mapSeries(scrolls, scrollAndTake)
-  .then (results) ->
-    _.last(results)
+  .then(_.last)
 
 takeFullPageScreenshot = (state, automationOptions) ->
   win = state("window")
