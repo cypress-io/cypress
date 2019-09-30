@@ -1,6 +1,7 @@
 require('../../spec_helper')
 
 const os = require('os')
+const execa = require('execa')
 const xvfb = require(`${lib}/exec/xvfb`)
 
 describe('lib/exec/xvfb', function () {
@@ -66,6 +67,17 @@ describe('lib/exec/xvfb', function () {
         expect(err.known).to.be.true
         expect(err.message).to.include('something bad happened')
         expect(err.message).to.include('Xvfb exited with a non zero exit code.')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/5186
+    it('creates an xvfb with no pointer devices', function () {
+      return xvfb.start()
+      .then(() => {
+        return execa.stdout('xinput')
+      })
+      .then((stdout) => {
+        expect(stdout).to.not.include('pointer')
       })
     })
   })
