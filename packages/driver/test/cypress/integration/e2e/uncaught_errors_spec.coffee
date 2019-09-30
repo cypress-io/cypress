@@ -117,8 +117,6 @@ describe "uncaught errors", ->
         done()
       false
 
-    # cy.visit('https://www.nba.com/membership/user/login')
-
     cy.visit('/fixtures/global-error.html')
     .wait(10)
     .then ->
