@@ -110,3 +110,16 @@ describe "uncaught errors", ->
         .appendTo(win.document.body)
 
       .contains("visit").click()
+
+  it 'global onerror', (done) ->
+    cy.once 'uncaught:exception', ->
+      setTimeout ->
+        done()
+      false
+
+    # cy.visit('https://www.nba.com/membership/user/login')
+
+    cy.visit('/fixtures/global-error.html')
+    .wait(10)
+    .then ->
+      done('should have errored')
