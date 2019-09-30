@@ -111,6 +111,7 @@ describe "uncaught errors", ->
 
       .contains("visit").click()
 
+  # fix https://github.com/cypress-io/cypress/issues/987
   it 'global onerror', (done) ->
     cy.once 'uncaught:exception', ->
       setTimeout ->
