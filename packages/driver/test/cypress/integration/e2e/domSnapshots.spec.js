@@ -2,16 +2,13 @@ const { withMutableReporterState, findReactInstance, getCommandLogWithText } = r
 const { $ } = Cypress
 
 describe('rect highlight', () => {
-
   it('content highlight does not include padding', () => {
     cy.visit('/fixtures/dom.html')
 
     cy.get('button:first')
 
     cy.wait(0)
-    // cy.wrap(null).should(() => {
-
-    cy.then(() => {
+    .then(() => {
       withMutableReporterState(() => {
 
         const commandLogEl = getCommandLogWithText('button:first')
