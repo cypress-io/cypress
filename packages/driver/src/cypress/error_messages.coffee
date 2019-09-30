@@ -6,7 +6,7 @@ divider = (num, char) ->
 format = (data) ->
   switch
     when _.isString(data)
-      _.truncate(data, { length: 100 })
+      _.truncate(data, { length: 2000 })
     when _.isObject(data)
       JSON.stringify(data, null, 2)
     else
@@ -832,15 +832,15 @@ module.exports = {
       """
     not_attached: (obj) ->
       """
-      #{cmd(obj.name)} failed because this element is detached from the DOM.
+      #{cmd(obj.cmd)} failed because this element is detached from the DOM.
 
-      #{obj.subject}
+      #{obj.node}
 
       Cypress requires elements be attached in the DOM to interact with them.
 
       The previous command that ran was:
 
-        > #{cmd(obj.previous)}
+        > #{cmd(obj.prev)}
 
       This DOM element likely became detached somewhere between the previous and current command.
 
