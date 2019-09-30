@@ -1,4 +1,11 @@
-export const getCommandLogWithText = (text) => cy.$$(`.command-wrapper:contains(${text}):visible`, top.document).parentsUntil('li').last().parent()[0]
+export const getCommandLogWithText = (text) => {
+  return cy
+  .$$(`.runnable-active .command-wrapper:contains(${text}):visible`, top.document)
+  .parentsUntil('li')
+  .last()
+  .parent()
+  .get(0)
+}
 
 export const findReactInstance = function (dom) {
   let key = Object.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
@@ -19,9 +26,8 @@ export const withMutableReporterState = (fn) => {
 
   currentTestLog.props.model.isOpen = true
 
-  return Cypress.Promise.try(() => {
-    return fn()
-  }).then(() => {
+  return Cypress.Promise.try(fn)
+  .then(() => {
     top.Runner.configureMobx({ enforceActions: 'strict' })
   })
 
