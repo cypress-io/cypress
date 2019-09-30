@@ -76,7 +76,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       log: true,
       verify: true,
       force: false,
-      // TODO: 4.0 make this false by default
       multiple: false,
       position,
       x,
