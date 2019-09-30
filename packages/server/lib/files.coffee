@@ -1,6 +1,7 @@
 path    = require("path")
 Promise = require("bluebird")
 fs      = require("./util/fs")
+yaml    = require("js-yaml")
 
 module.exports = {
   readFile: (projectRoot, file, options = {}) ->
@@ -12,10 +13,16 @@ module.exports = {
 
     readFn(filePath, options.encoding or "utf8")
     .then (contents) ->
-      {
-        contents: contents
-        filePath: filePath
-      }
+      if path.extname(filePath) is ".yml" or path.extname(filePath) is ".yaml"
+        {
+          contents: yaml.safeLoad(contents)
+          filePath: filePath
+        }         
+      else
+        {
+          contents: contents
+          filePath: filePath
+        }
     .catch (err) ->
       err.filePath = filePath
       throw err
