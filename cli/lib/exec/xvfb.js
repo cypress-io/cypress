@@ -14,6 +14,9 @@ const xvfb = Promise.promisifyAll(new Xvfb({
       debugXvfb(data.toString())
     }
   },
+  xvfb_args: [
+    '-nocursor',
+  ],
 }))
 
 module.exports = {
