@@ -59,23 +59,17 @@ getPublisher = (getAwsObj = getS3Credentials) ->
 
 hasCloudflareEnvironmentVars = () ->
   check.unemptyString(process.env.CF_TOKEN) &&
-  check.unemptyString(process.env.CF_EMAIL) &&
-  check.unemptyString(process.env.CF_DOMAIN)
+  check.unemptyString(process.env.CF_ZONEID)
 
 # depends on the credentials file or environment variables
 makeCloudflarePurgeCommand = (url) ->
-  configFile = path.resolve(__dirname, "..", "support", ".cfcli.yml")
-  if fs.existsSync(configFile)
-    console.log("using CF credentials file")
-    return "cfcli purgefile -c #{configFile} #{url}"
-  else if hasCloudflareEnvironmentVars()
+  if hasCloudflareEnvironmentVars()
     console.log("using CF environment variables")
     token = process.env.CF_TOKEN
-    email = process.env.CF_EMAIL
-    domain = process.env.CF_DOMAIN
-    return "cfcli purgefile -e #{email} -k #{token} -d #{domain} #{url}"
+    zoneid = process.env.CF_ZONEID
+    return "curl -X POST -H \"Authorization: Bearer #{CF_TOKEN}\" -H \"Content-Type: application/json\" --data '{\"files\":[\"#{url}\"]}' \"https://api.cloudflare.com/client/v4/zones/#{CF_ZONEID}/purge_cache\""
   else
-    throw new Error("Cannot form Cloudflare purge command without credentials")
+    throw new Error("Cannot form Cloudflare purge command without credentials. Ensure that the CF_TOKEN and CF_ZONEID environment variables are set.")
 
 # purges a given url from Cloudflare
 purgeCache = (url) ->
