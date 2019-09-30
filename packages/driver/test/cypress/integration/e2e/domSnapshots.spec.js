@@ -9,13 +9,13 @@ describe('rect highlight', () => {
   it('highlight elements are properly positioned', () => {
     getAndPin('button:first')
 
-    expectCorrectHighlightPositions()
+    shouldHaveCorrectHighlightPositions()
   })
 
   it('highlight elements properly positioned for content-box', () => {
     getAndPin('button.content-box:first')
 
-    expectCorrectHighlightPositions()
+    shouldHaveCorrectHighlightPositions()
   })
 })
 
@@ -37,7 +37,7 @@ const getAndPin = (sel) => {
   })
 }
 
-const expectCorrectHighlightPositions = () => {
+const shouldHaveCorrectHighlightPositions = () => {
   return cy.wrap(null, { timeout: 400 }).should(() => {
     const dims = {
       content: cy.$$('div[data-layer=Content]')[0].getBoundingClientRect(),
