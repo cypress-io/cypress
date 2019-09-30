@@ -4,5 +4,8 @@
   flex-grow: 2;
   margin-bottom: 0;
   width: 100%;
-  min-height: 0;
+
+  & > * {
+    overflow: auto;
+  }
 }
