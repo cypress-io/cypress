@@ -233,15 +233,15 @@ function createLayer ($el, attr, color, container, dimensions) {
 function dimensionsMatchPreviousLayer (obj, container) {
   // since we're prepending to the container that
   // means the previous layer is actually the first child element
-  const previousLayer = container.children().first().get(0)
+  const previousLayer = container.children().first()
 
   // bail if there is no previous layer
   if (!previousLayer) {
     return
   }
 
-  return obj.width === previousLayer.offsetWidth &&
-  obj.height === previousLayer.offsetHeight
+  return obj.width === previousLayer.width() &&
+  obj.height === previousLayer.height()
 }
 
 function getDimensionsFor (dimensions, attr, dimension) {
@@ -254,15 +254,14 @@ function getZIndex (el) {
   }
 
   return _.toNumber(el.css('zIndex'))
+
 }
 
 function getElementDimensions ($el) {
-  const el = $el.get(0)
-
   const dimensions = {
     offset: $el.offset(), // offset disregards margin but takes into account border + padding
-    height: el.offsetHeight, // we want to use offsetHeight here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
-    width: el.offsetWidth,
+    height: $el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
+    width: $el.width(),
     paddingTop: getPadding($el, 'top'),
     paddingRight: getPadding($el, 'right'),
     paddingBottom: getPadding($el, 'bottom'),
@@ -338,8 +337,8 @@ function isInViewport (win, el) {
   return (
     rect.top >= 0 &&
     rect.left >= 0 &&
-    rect.bottom <= win.innerHeight &&
-    rect.right <= win.innerWidth
+    rect.bottom <= $(win).height() &&
+    rect.right <= $(win).width()
   )
 }
 
