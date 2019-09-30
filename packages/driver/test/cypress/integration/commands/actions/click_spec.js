@@ -707,7 +707,6 @@ describe('src/cy/commands/actions/click', () => {
         // return cy.wrap($iframe[0].contentDocument.body)
         return cy.wrap($iframe.first().contents().find('body'))
       })
-
       .within(() => {
         cy.get('a#hashchange')
         // .should($el => $el[0].click())
@@ -2981,7 +2980,7 @@ describe('src/cy/commands/actions/click', () => {
               ],
             },
             {
-              'name': 'Mouse Dblclick Event',
+              'name': 'Mouse Double Click Event',
               'data': [
                 {
                   'Event Name': 'dblclick',
@@ -3380,7 +3379,7 @@ describe('src/cy/commands/actions/click', () => {
               ],
             },
             {
-              'name': 'Contextmenu Event',
+              'name': 'Mouse Right Click Event',
               'data': [
                 {
                   'Event Name': 'contextmenu',
@@ -3420,7 +3419,7 @@ describe('mouse state', () => {
               doc: cy.state('document'),
             }
 
-            cy.devices.mouse.mouseMove(coords)
+            cy.devices.mouse.move(coords)
             expect(mouseenter).to.be.calledOnce
             expect(cy.state('mouseCoords')).ok
           })

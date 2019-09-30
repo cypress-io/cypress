@@ -65,514 +65,273 @@ const formatMouseEvents = (events) => {
 module.exports = (Commands, Cypress, cy, state, config) => {
   const { mouse } = cy.devices
 
+  const mouseEvent = (eventName, { subject, positionOrX, y, options, onReady, onTable }) => {
+    let position
+    let x
+
+    ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
+
+    _.defaults(options, {
+      $el: subject,
+      log: true,
+      verify: true,
+      force: false,
+      // TODO: 4.0 make this false by default
+      multiple: false,
+      position,
+      x,
+      y,
+      errorOnSelect: true,
+      waitForAnimations: config('waitForAnimations'),
+      animationDistanceThreshold: config('animationDistanceThreshold'),
+    })
+
+    // throw if we're trying to click multiple elements
+    // and we did not pass the multiple flag
+    if ((options.multiple === false) && (options.$el.length > 1)) {
+      $utils.throwErrByPath('click.multiple_elements', {
+        args: { cmd: eventName, num: options.$el.length },
+      })
+    }
+
+    const perform = (el) => {
+      let deltaOptions
+      const $el = $dom.wrap(el)
+
+      if (options.log) {
+        // figure out the options which actually change the behavior of clicks
+        deltaOptions = $utils.filterOutOptions(options)
+
+        options._log = Cypress.log({
+          message: deltaOptions,
+          $el,
+        })
+
+        options._log.snapshot('before', { next: 'after' })
+      }
+
+      if (options.errorOnSelect && $el.is('select')) {
+        $utils.throwErrByPath('click.on_select_element', {
+          args: { cmd: eventName },
+          onFail: options._log,
+        })
+      }
+
+      // we want to add this delay delta to our
+      // runnables timeout so we prevent it from
+      // timing out from multiple clicks
+      cy.timeout($actionability.delay, true, eventName)
+
+      const createLog = (domEvents, fromWindowCoords) => {
+        let consoleObj
+
+        const elClicked = domEvents.moveEvents.el
+
+        if (options._log) {
+          consoleObj = options._log.invoke('consoleProps')
+        }
+
+        const consoleProps = function () {
+          consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
+            'Applied To': $dom.getElements(options.$el),
+            'Elements': options.$el.length,
+            'Coords': _.pick(fromWindowCoords, 'x', 'y'), // always absolute
+            'Options': deltaOptions,
+          })
+
+          if (options.$el.get(0) !== elClicked) {
+            // only do this if $elToClick isnt $el
+            consoleObj['Actual Element Clicked'] = $dom.getElements($(elClicked))
+          }
+
+          consoleObj.table = _.extend((consoleObj.table || {}), onTable(domEvents))
+
+          return consoleObj
+        }
+
+        return Promise
+        .delay($actionability.delay, 'click')
+        .then(() => {
+          // display the red dot at these coords
+          if (options._log) {
+            // because we snapshot and output a command per click
+            // we need to manually snapshot + end them
+            options._log.set({ coords: fromWindowCoords, consoleProps })
+          }
+
+          // we need to split this up because we want the coordinates
+          // to mutate our passed in options._log but we dont necessary
+          // want to snapshot and end our command if we're a different
+          // action like (cy.type) and we're borrowing the click action
+          if (options._log && options.log) {
+            return options._log.snapshot().end()
+          }
+        })
+        .return(null)
+      }
+
+      // must use callbacks here instead of .then()
+      // because we're issuing the clicks synchonrously
+      // once we establish the coordinates and the element
+      // passes all of the internal checks
+      return $actionability.verify(cy, $el, options, {
+        onScroll ($el, type) {
+          return Cypress.action('cy:scrolled', $el, type)
+        },
+
+        onReady ($elToClick, coords) {
+          const { fromWindow, fromViewport } = coords
+
+          const forceEl = options.force && $elToClick.get(0)
+
+          const moveEvents = mouse.move(fromViewport, forceEl)
+
+          const onReadyProps = onReady(fromViewport, forceEl)
+
+          return createLog({
+            moveEvents,
+            ...onReadyProps,
+          }, fromWindow)
+        },
+      })
+      .catch((err) => {
+        // snapshot only on click failure
+        err.onFail = function () {
+          if (options._log) {
+            return options._log.snapshot()
+          }
+        }
+
+        // if we give up on waiting for actionability then
+        // lets throw this error and log the command
+        return $utils.throwErr(err, { onFail: options._log })
+      })
+    }
+
+    return Promise
+    .each(options.$el.toArray(), perform)
+    .then(() => {
+      if (options.verify === false) {
+        return options.$el
+      }
+
+      const verifyAssertions = () => {
+        return cy.verifyUpcomingAssertions(options.$el, options, {
+          onRetry: verifyAssertions,
+        })
+      }
+
+      return verifyAssertions()
+    })
+  }
+
   return Commands.addAll({ prevSubject: 'element' }, {
     click (subject, positionOrX, y, options = {}) {
-      let position
-      let x
-
-      ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
-
-      _.defaults(options, {
-        $el: subject,
-        log: true,
-        verify: true,
-        force: false,
-        multiple: false,
-        position,
-        x,
+      return mouseEvent('click', {
         y,
-        errorOnSelect: true,
-        waitForAnimations: config('waitForAnimations'),
-        animationDistanceThreshold: config('animationDistanceThreshold'),
-      })
+        subject,
+        options,
+        positionOrX,
+        onReady (fromViewport, forceEl) {
+          const clickEvents = mouse.click(fromViewport, forceEl)
 
-      // throw if we're trying to click multiple elements
-      // and we did not pass the multiple flag
-      if ((options.multiple === false) && (options.$el.length > 1)) {
-        $utils.throwErrByPath('click.multiple_elements', {
-          args: { cmd: 'click', num: options.$el.length },
-        })
-      }
-
-      const click = (el) => {
-        let deltaOptions
-        const $el = $dom.wrap(el)
-
-        if (options.log) {
-          // figure out the options which actually change the behavior of clicks
-          deltaOptions = $utils.filterOutOptions(options)
-
-          options._log = Cypress.log({
-            message: deltaOptions,
-            $el,
-          })
-
-          options._log.snapshot('before', { next: 'after' })
-        }
-
-        if (options.errorOnSelect && $el.is('select')) {
-          $utils.throwErrByPath('click.on_select_element', { args: { cmd: 'click' }, onFail: options._log })
-        }
-
-        // we want to add this delay delta to our
-        // runnables timeout so we prevent it from
-        // timing out from multiple clicks
-        cy.timeout($actionability.delay, true, 'click')
-
-        const createLog = (domEvents, fromWindowCoords) => {
-          let consoleObj
-
-          const elClicked = domEvents.moveEvents.el
-
-          if (options._log) {
-            consoleObj = options._log.invoke('consoleProps')
+          return {
+            clickEvents,
           }
-
-          const consoleProps = function () {
-            consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
-              'Applied To': $dom.getElements(options.$el),
-              'Elements': options.$el.length,
-              'Coords': _.pick(fromWindowCoords, 'x', 'y'), // always absolute
-              'Options': deltaOptions,
-            })
-
-            if (options.$el.get(0) !== elClicked) {
-              // only do this if $elToClick isnt $el
-              consoleObj['Actual Element Clicked'] = $dom.getElements($(elClicked))
-            }
-
-            consoleObj.table = _.extend((consoleObj.table || {}), {
-              1: () => {
-                return formatMoveEventsTable(domEvents.moveEvents.events)
-              },
-              2: () => {
-                return {
-                  name: 'Mouse Click Events',
-                  data: formatMouseEvents(domEvents.clickEvents),
-                }
-              },
-            })
-
-            return consoleObj
+        },
+        onTable (domEvents) {
+          return {
+            1: () => {
+              return formatMoveEventsTable(domEvents.moveEvents.events)
+            },
+            2: () => {
+              return {
+                name: 'Mouse Click Events',
+                data: formatMouseEvents(domEvents.clickEvents),
+              }
+            },
           }
-
-          return Promise
-          .delay($actionability.delay, 'click')
-          .then(() => {
-            // display the red dot at these coords
-            if (options._log) {
-              // because we snapshot and output a command per click
-              // we need to manually snapshot + end them
-              options._log.set({ coords: fromWindowCoords, consoleProps })
-            }
-
-            // we need to split this up because we want the coordinates
-            // to mutate our passed in options._log but we dont necessary
-            // want to snapshot and end our command if we're a different
-            // action like (cy.type) and we're borrowing the click action
-            if (options._log && options.log) {
-              return options._log.snapshot().end()
-            }
-          })
-          .return(null)
-        }
-
-        // must use callbacks here instead of .then()
-        // because we're issuing the clicks synchonrously
-        // once we establish the coordinates and the element
-        // passes all of the internal checks
-        return $actionability.verify(cy, $el, options, {
-          onScroll ($el, type) {
-            return Cypress.action('cy:scrolled', $el, type)
-          },
-
-          onReady ($elToClick, coords) {
-            const { fromWindow, fromViewport } = coords
-
-            const forceEl = options.force && $elToClick.get(0)
-
-            const moveEvents = mouse.mouseMove(fromViewport, forceEl)
-
-            const clickEvents = mouse.mouseClick(fromViewport, forceEl)
-
-            return createLog({ moveEvents, clickEvents }, fromWindow)
-
-          },
-        })
-        .catch((err) => {
-          // snapshot only on click failure
-          err.onFail = function () {
-            if (options._log) {
-              return options._log.snapshot()
-            }
-          }
-
-          // if we give up on waiting for actionability then
-          // lets throw this error and log the command
-          return $utils.throwErr(err, { onFail: options._log })
-        })
-      }
-
-      return Promise
-      .each(options.$el.toArray(), click)
-      .then(() => {
-        if (options.verify === false) {
-          return options.$el
-        }
-
-        const verifyAssertions = () => {
-          return cy.verifyUpcomingAssertions(options.$el, options, {
-            onRetry: verifyAssertions,
-          })
-        }
-
-        return verifyAssertions()
+        },
       })
     },
 
-    // update dblclick to use the click
-    // logic and just swap out the event details?
     dblclick (subject, positionOrX, y, options = {}) {
-      let position
-      let x
+      // TODO: 4.0 make this false by default
+      options.multiple = true
 
-      ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
-
-      _.defaults(options, {
-        $el: subject,
-        log: true,
-        verify: true,
-        force: false,
-        // TODO: 4.0 make this false by default
-        multiple: true,
-        position,
-        x,
+      return mouseEvent('dblclick', {
         y,
-        errorOnSelect: true,
-        waitForAnimations: config('waitForAnimations'),
-        animationDistanceThreshold: config('animationDistanceThreshold'),
-      })
+        subject,
+        options,
+        positionOrX,
+        onReady (fromViewport, forceEl) {
+          const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromViewport, forceEl)
 
-      // throw if we're trying to click multiple elements
-      // and we did not pass the multiple flag
-      if ((options.multiple === false) && (options.$el.length > 1)) {
-        $utils.throwErrByPath('click.multiple_elements', {
-          args: { cmd: 'dblclick', num: options.$el.length },
-        })
-      }
-
-      const dblclick = (el) => {
-        let deltaOptions
-        const $el = $dom.wrap(el)
-
-        if (options.log) {
-          // figure out the options which actually change the behavior of clicks
-          deltaOptions = $utils.filterOutOptions(options)
-
-          options._log = Cypress.log({
-            message: deltaOptions,
-            $el,
-          })
-
-          options._log.snapshot('before', { next: 'after' })
-        }
-
-        if (options.errorOnSelect && $el.is('select')) {
-          $utils.throwErrByPath('click.on_select_element', { args: { cmd: 'dblclick' }, onFail: options._log })
-        }
-
-        // we want to add this delay delta to our
-        // runnables timeout so we prevent it from
-        // timing out from multiple clicks
-        cy.timeout($actionability.delay, true, 'dblclick')
-
-        const createLog = (domEvents, fromWindowCoords) => {
-          let consoleObj
-
-          const elClicked = domEvents.moveEvents.el
-
-          if (options._log) {
-            consoleObj = options._log.invoke('consoleProps')
+          return {
+            dblclickProps,
+            clickEvents: [clickEvents1, clickEvents2],
           }
-
-          const consoleProps = function () {
-            consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
-              'Applied To': $dom.getElements(options.$el),
-              'Elements': options.$el.length,
-              'Coords': _.pick(fromWindowCoords, 'x', 'y'), // always absolute
-              'Options': deltaOptions,
-            })
-
-            if (options.$el.get(0) !== elClicked) {
-              // only do this if $elToClick isnt $el
-              consoleObj['Actual Element Clicked'] = $dom.getElements(elClicked)
-            }
-
-            consoleObj.table = _.extend((consoleObj.table || {}), {
-              1: () => {
-                return formatMoveEventsTable(domEvents.moveEvents.events)
-              },
-              2: () => {
-                return {
-                  name: 'Mouse Click Events',
-                  data: _.concat(
-                    formatMouseEvents(domEvents.clickEvents[0], formatMouseEvents),
-                    formatMouseEvents(domEvents.clickEvents[1], formatMouseEvents)
-                  ),
-                }
-              },
-              3: () => {
-                return {
-                  name: 'Mouse Dblclick Event',
-                  data: formatMouseEvents({ dblclickProps: domEvents.dblclickProps }),
-                }
-              },
-            })
-
-            return consoleObj
+        },
+        onTable (domEvents) {
+          return {
+            1: () => {
+              return formatMoveEventsTable(domEvents.moveEvents.events)
+            },
+            2: () => {
+              return {
+                name: 'Mouse Click Events',
+                data: _.concat(
+                  formatMouseEvents(domEvents.clickEvents[0], formatMouseEvents),
+                  formatMouseEvents(domEvents.clickEvents[1], formatMouseEvents)
+                ),
+              }
+            },
+            3: () => {
+              return {
+                name: 'Mouse Double Click Event',
+                data: formatMouseEvents({
+                  dblclickProps: domEvents.dblclickProps,
+                }),
+              }
+            },
           }
-
-          return Promise
-          .delay($actionability.delay, 'dblclick')
-          .then(() => {
-            // display the red dot at these coords
-            if (options._log) {
-              // because we snapshot and output a command per click
-              // we need to manually snapshot + end them
-              options._log.set({ coords: fromWindowCoords, consoleProps })
-            }
-
-            // we need to split this up because we want the coordinates
-            // to mutate our passed in options._log but we dont necessary
-            // want to snapshot and end our command if we're a different
-            // action like (cy.type) and we're borrowing the click action
-            if (options._log && options.log) {
-              return options._log.snapshot().end()
-            }
-          })
-          .return(null)
-        }
-
-        // must use callbacks here instead of .then()
-        // because we're issuing the clicks synchonrously
-        // once we establish the coordinates and the element
-        // passes all of the internal checks
-        return $actionability.verify(cy, $el, options, {
-          onScroll ($el, type) {
-            return Cypress.action('cy:scrolled', $el, type)
-          },
-
-          onReady ($elToClick, coords) {
-            const { fromWindow, fromViewport } = coords
-            const forceEl = options.force && $elToClick.get(0)
-            const moveEvents = mouse.mouseMove(fromViewport, forceEl)
-            const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromViewport, forceEl)
-
-            return createLog({
-              moveEvents,
-              clickEvents: [clickEvents1, clickEvents2],
-              dblclickProps,
-            }, fromWindow)
-          },
-        })
-        .catch((err) => {
-          // snapshot only on click failure
-          err.onFail = function () {
-            if (options._log) {
-              return options._log.snapshot()
-            }
-          }
-
-          // if we give up on waiting for actionability then
-          // lets throw this error and log the command
-          return $utils.throwErr(err, { onFail: options._log })
-        })
-      }
-
-      return Promise
-      .each(options.$el.toArray(), dblclick)
-      .then(() => {
-        if (options.verify === false) {
-          return options.$el
-        }
-
-        const verifyAssertions = () => {
-          return cy.verifyUpcomingAssertions(options.$el, options, {
-            onRetry: verifyAssertions,
-          })
-        }
-
-        return verifyAssertions()
+        },
       })
     },
 
     rightclick (subject, positionOrX, y, options = {}) {
-      let position
-      let x
-
-      ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
-
-      _.defaults(options, {
-        $el: subject,
-        log: true,
-        verify: true,
-        force: false,
-        multiple: false,
-        position,
-        x,
+      return mouseEvent('rightclick', {
         y,
-        errorOnSelect: true,
-        waitForAnimations: config('waitForAnimations'),
-        animationDistanceThreshold: config('animationDistanceThreshold'),
-      })
+        subject,
+        options,
+        positionOrX,
+        onReady (fromViewport, forceEl) {
+          const { clickEvents, contextmenuEvent } = mouse.rightclick(fromViewport, forceEl)
 
-      // throw if we're trying to click multiple elements
-      // and we did not pass the multiple flag
-      if ((options.multiple === false) && (options.$el.length > 1)) {
-        $utils.throwErrByPath('click.multiple_elements', {
-          args: { cmd: 'rightclick', num: options.$el.length },
-        })
-      }
-
-      const rightclick = (el) => {
-        let deltaOptions
-        const $el = $dom.wrap(el)
-
-        if (options.log) {
-          // figure out the options which actually change the behavior of clicks
-          deltaOptions = $utils.filterOutOptions(options)
-
-          options._log = Cypress.log({
-            message: deltaOptions,
-            $el,
-          })
-
-          options._log.snapshot('before', { next: 'after' })
-        }
-
-        if (options.errorOnSelect && $el.is('select')) {
-          $utils.throwErrByPath('click.on_select_element', { args: { cmd: 'rightclick' }, onFail: options._log })
-        }
-
-        // we want to add this delay delta to our
-        // runnables timeout so we prevent it from
-        // timing out from multiple clicks
-        cy.timeout($actionability.delay, true, 'rightclick')
-
-        const createLog = (domEvents, fromWindowCoords) => {
-          let consoleObj
-
-          const elClicked = domEvents.moveEvents.el
-
-          if (options._log) {
-            consoleObj = options._log.invoke('consoleProps')
+          return {
+            clickEvents,
+            contextmenuEvent,
           }
-
-          const consoleProps = function () {
-            consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
-              'Applied To': $dom.getElements(options.$el),
-              'Elements': options.$el.length,
-              'Coords': _.pick(fromWindowCoords, 'x', 'y'), // always absolute
-              'Options': deltaOptions,
-            })
-
-            if (options.$el.get(0) !== elClicked) {
-              // only do this if $elToClick isnt $el
-              consoleObj['Actual Element Clicked'] = $dom.getElements(elClicked)
-            }
-
-            consoleObj.table = _.extend((consoleObj.table || {}), {
-              1: () => {
-                return formatMoveEventsTable(domEvents.moveEvents.events)
-              },
-              2: () => {
-                return {
-                  name: 'Mouse Click Events',
-                  data: formatMouseEvents(domEvents.clickEvents, formatMouseEvents),
-                }
-              },
-              3: () => {
-                return {
-                  name: 'Contextmenu Event',
-                  data: formatMouseEvents(domEvents.contextmenuEvent),
-                }
-              },
-            })
-
-            return consoleObj
+        },
+        onTable (domEvents) {
+          return {
+            1: () => {
+              return formatMoveEventsTable(domEvents.moveEvents.events)
+            },
+            2: () => {
+              return {
+                name: 'Mouse Click Events',
+                data: formatMouseEvents(domEvents.clickEvents, formatMouseEvents),
+              }
+            },
+            3: () => {
+              return {
+                name: 'Mouse Right Click Event',
+                data: formatMouseEvents(domEvents.contextmenuEvent),
+              }
+            },
           }
-
-          return Promise
-          .delay($actionability.delay, 'rightclick')
-          .then(() => {
-            // display the red dot at these coords
-            if (options._log) {
-              // because we snapshot and output a command per click
-              // we need to manually snapshot + end them
-              options._log.set({ coords: fromWindowCoords, consoleProps })
-            }
-
-            // we need to split this up because we want the coordinates
-            // to mutate our passed in options._log but we dont necessary
-            // want to snapshot and end our command if we're a different
-            // action like (cy.type) and we're borrowing the click action
-            if (options._log && options.log) {
-              return options._log.snapshot().end()
-            }
-          })
-          .return(null)
-        }
-
-        // must use callbacks here instead of .then()
-        // because we're issuing the clicks synchonrously
-        // once we establish the coordinates and the element
-        // passes all of the internal checks
-        return $actionability.verify(cy, $el, options, {
-          onScroll ($el, type) {
-            return Cypress.action('cy:scrolled', $el, type)
-          },
-
-          onReady ($elToClick, coords) {
-            const { fromWindow, fromViewport } = coords
-            const forceEl = options.force && $elToClick.get(0)
-            const moveEvents = mouse.mouseMove(fromViewport, forceEl)
-            const { clickEvents, contextmenuEvent } = mouse.rightclick(fromViewport, forceEl)
-
-            return createLog({
-              moveEvents,
-              clickEvents,
-              contextmenuEvent,
-            }, fromWindow)
-          },
-        })
-        .catch((err) => {
-          // snapshot only on click failure
-          err.onFail = function () {
-            if (options._log) {
-              return options._log.snapshot()
-            }
-          }
-
-          // if we give up on waiting for actionability then
-          // lets throw this error and log the command
-          return $utils.throwErr(err, { onFail: options._log })
-        })
-      }
-
-      return Promise
-      .each(options.$el.toArray(), rightclick)
-      .then(() => {
-        if (options.verify === false) {
-          return options.$el
-        }
-
-        const verifyAssertions = () => {
-          return cy.verifyUpcomingAssertions(options.$el, options, {
-            onRetry: verifyAssertions,
-          })
-        }
-
-        return verifyAssertions()
+        },
       })
     },
   })
