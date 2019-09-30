@@ -127,6 +127,11 @@ const _launchServer = (baseLoginUrl, sendMessage) => {
         res.redirect(`${baseLoginUrl}?status=${status}`)
       }
 
+      /**
+       * Cypress Dashboard can redirect to us with an error; or, if Electron's shell.openExternal
+       * is bugging out, `authCallback` can be undefined and reaching this point makes no sense.
+       * @see https://github.com/cypress-io/cypress/pull/5243
+       */
       if (_.get(req.query, 'status') === 'error' || !authCallback) {
         if (authCallback) {
           authCallback(new Error('There was an error authenticating to the Cypress dashboard.'))
