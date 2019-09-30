@@ -79,6 +79,10 @@ describe "src/cy/commands/files", ->
 
     it "works when contents are supposed to be null", ->
       cy.readFile("does-not-exist").should("be.null")
+    
+    it "parses YAML files automatically", ->
+       cy.readFile("cypress/fixtures/fox.yml").its("data").should("eq", "The quick brown fox jumps over the lazy dog")
+       cy.readFile("cypress/fixtures/fox.yaml").its("data").should("eq", "The quick brown fox jumps over the lazy dog")
 
     describe ".log", ->
       beforeEach ->
