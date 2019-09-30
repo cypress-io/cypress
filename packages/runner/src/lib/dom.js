@@ -259,7 +259,6 @@ function getZIndex (el) {
   }
 
   return _.toNumber(el.css('zIndex'))
-
 }
 
 function getElementDimensions ($el) {
@@ -342,8 +341,8 @@ function isInViewport (win, el) {
   return (
     rect.top >= 0 &&
     rect.left >= 0 &&
-    rect.bottom <= $(win).height() &&
-    rect.right <= $(win).width()
+    rect.bottom <= win.innerHeight &&
+    rect.right <= win.innerWidth
   )
 }
 
