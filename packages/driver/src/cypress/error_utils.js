@@ -264,7 +264,7 @@ const getSourceDetails = (generatedDetails) => {
   return $sourceMapUtils.getSourcePosition(file, generatedDetails)
 }
 
-const getCodeFrameFromStack = (stack, lineIndex = 0) => {
+const getCodeFrameFromStack = (stack, lineIndex) => {
   const generatedStackLineDetails = getStackLineDetails(stack, lineIndex)
 
   if (!generatedStackLineDetails) return null
@@ -278,8 +278,8 @@ const getCodeFrameFromStack = (stack, lineIndex = 0) => {
   return getCodeFrame($sourceMapUtils.getSourceContents(file), stackLineDetails)
 }
 
-const addCodeFrameToErr = (err, stack) => {
-  const codeFrame = getCodeFrameFromStack(stack)
+const addCodeFrameToErr = ({ err, stack, lineIndex = 0 }) => {
+  const codeFrame = getCodeFrameFromStack(stack, lineIndex)
 
   if (codeFrame) {
     err.codeFrames = [codeFrame]

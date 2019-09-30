@@ -462,9 +462,9 @@ describe "driver/src/cypress/error_utils", ->
         line: 3
         column: 5
       })
-      err = $errUtils.addCodeFrameToErr(@err, """Error
+      err = $errUtils.addCodeFrameToErr({ err: @err, stack: """Error
         at Context.<anonymous> (http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js:5:21)
-      """)
+      """ })
 
       expect(err.codeFrames).to.be.an("array")
 
@@ -480,9 +480,9 @@ describe "driver/src/cypress/error_utils", ->
     it "does not add code frame if stack does not yield one", ->
       cy.stub($sourceMapUtils, "getSourcePosition").returns(null)
 
-      err = $errUtils.addCodeFrameToErr(@err, """Error
+      err = $errUtils.addCodeFrameToErr({ err: @err, stack: """Error
         at Context.<anonymous> (http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js:5:21)
-      """)
+      """ })
 
       expect(err.codeFrames).to.be.undefined
 

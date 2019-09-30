@@ -92,6 +92,8 @@ create = (state, queue, retryFn) ->
       ## them up with existing ones
       cmd.set("assertionIndex", 0)
 
+      state("current")?.set("currentAssertion", cmd)
+
       cmd.get("fn").originalFn.apply(
         state("ctx"),
         [subject].concat(cmd.get("args"))

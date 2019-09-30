@@ -276,8 +276,8 @@ chai.use (chai, u) ->
       assertFn(passed, message, value, actual, expected, err)
 
       if err
-        stack = (new specWindow.Error("assertion invocation stack")).stack
-        err = $errUtils.addCodeFrameToErr(err, stack)
+        stack = specWindow.__getSpecFrameStack("assertion invocation stack")
+        err = $errUtils.addCodeFrameToErr({ err, stack, lineIndex: 1 })
 
         throw err
 

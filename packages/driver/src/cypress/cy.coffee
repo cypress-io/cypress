@@ -369,6 +369,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## and set the subject
       ## TODO DRY THIS LOGIC UP
       if command and command.get("skip")
+        if command.is("assertion")
+          state("assertionStack", command.get("invocationStack"))
+
         ## must set prev + next since other
         ## operations depend on this state being correct
         command.set({prev: queue.at(index - 1), next: queue.at(index + 1)})
@@ -468,6 +471,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       errors.commandRunningFailed(err)
 
       err = $errUtils.processErr(err, config)
+      err = $errUtils.addCodeFrameToErr({ err, stack: err.stack })
 
       fail(err, state("runnable"))
     )
@@ -561,14 +565,32 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## which need to run
     state("index", queue.length)
 
+  getCodeFrameStack = (err) ->
+    current = state("current")
+    currentName = current?.get("name")
+
+    ## cy.then will not error on its own, but will have an
+    ## invocation stack, so we need to prefer the actual error's stack
+    ## cy.should does not register as the current command at all
+    ## so we make the current command
+    if err.stack and currentName is "then" or current?.get("followedByShouldCallback")
+      return err.stack
+
+    currentAssertion = current?.get("currentAssertion")
+
+    (currentAssertion or current)?.get("invocationStack")
+
   fail = (err, runnable) ->
     ## TODO: can we move both processErr calls here?
     stopped = true
 
     if not err.codeFrames
-      stack = state("current")?.get("invocationStack")
-      ## TODO: this won't work correctly if it's an error in a .then
-      err = $errUtils.addCodeFrameToErr(err, stack or err.stack)
+      stack = getCodeFrameStack(err)
+      err = $errUtils.addCodeFrameToErr({
+        err,
+        stack: stack or err.stack,
+        lineIndex: 1
+      })
 
     ## store the error on state now
     state("error", err)
@@ -813,7 +835,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           fn.apply(runnableCtx(name), args)
 
       cy[name] = (args...) ->
-        invocationStack = (new specWindow.Error("command invocation stack")).stack
+        invocationStack = specWindow.__getSpecFrameStack("command invocation stack")
 
         ensures.ensureRunnable(name)
 
@@ -1114,6 +1136,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         catch err
           err = $errUtils.processErr(err, config)
+          err = $errUtils.addCodeFrameToErr({ err, stack: err.stack })
 
           ## if our runnable.fn throw synchronously
           ## then it didnt fail from a cypress command

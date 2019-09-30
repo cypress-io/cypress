@@ -46,6 +46,8 @@ convertRowFontSize = ($row, message) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   shouldFnWithCallback = (subject, fn) ->
+    state("current")?.set("followedByShouldCallback", true)
+
     Promise
     .try =>
       remoteSubject = cy.getRemotejQueryInstance(subject)
@@ -64,8 +66,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## since we are throwing our own error
       ## without going through the assertion we need
       ## to ensure our .should command gets logged
-      current = state("current")
-
       log = Cypress.log({
         name: "should"
         type: "child"

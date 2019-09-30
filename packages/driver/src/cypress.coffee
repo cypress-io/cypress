@@ -178,7 +178,7 @@ class $Cypress
 
     $scriptUtils.runScripts(specWindow, scripts)
     .catch (err) =>
-      err = $errUtils.addCodeFrameToErr(err, err.stack)
+      err = $errUtils.addCodeFrameToErr({ err, stack: err.stack })
       @runner.onScriptError(err)
     .then =>
       ## push down the options to the runner

@@ -75,7 +75,7 @@ module.exports = {
       ## TODO: rename this to config.isRunMode
       ## vs config.isInterativeMode
       shouldWatch = not config.isTextTerminal
-      
+
       baseFilePath = filePath
       .replace(config.projectRoot, "")
       .replace(config.integrationFolder, "")
