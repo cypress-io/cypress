@@ -156,6 +156,7 @@ const displayRunStarting = function (options = {}) {
 
   console.log('')
 
+  // TODO: calculate this more intelligently after https://github.com/cypress-io/cypress/pull/5120 goes in
   const colWidths = config.resolvedNodePath ? [16, 84] : [12, 88]
 
   const table = terminal.table({
