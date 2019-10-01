@@ -22,4 +22,17 @@ require && require.extensions && delete require.extensions['.coffee.md']
 // https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
 process.enablePromiseAPIs = process.env.CYPRESS_ENV !== 'production'
 
+// don't emit the NODE_TLS_REJECT_UNAUTHORIZED warning while
+// we work on proper SSL verification
+// https://github.com/cypress-io/cypress/issues/5248
+const originalEmitWarning = process.emitWarning
+
+process.emitWarning = (warning, options) => {
+  if (warning && warning.includes && warning.includes('NODE_TLS_REJECT_UNAUTHORIZED')) {
+    return
+  }
+
+  return originalEmitWarning.call(process, warning, options)
+}
+
 module.exports = require('./lib/cypress').start(process.argv)
