@@ -814,6 +814,7 @@ linux-workflow: &linux-workflow
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
@@ -821,6 +822,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
@@ -828,6 +830,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-npm-package:
+        context: test-runner:upload
         filters:
           branches:
             only:
@@ -835,6 +838,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-binary:
+        context: test-runner:upload
         filters:
           branches:
             only:
@@ -842,6 +846,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
+        context: test-runner:trigger-test-jobs
         filters:
           branches:
             only:
@@ -858,6 +863,7 @@ linux-workflow: &linux-workflow
           - build-npm-package
           - build-binary
     - test-binary-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
@@ -889,6 +895,7 @@ mac-workflow: &mac-workflow
 
     - build-npm-package:
         name: Mac NPM package
+        context: test-runner:upload
         executor: mac
         filters:
           branches:
@@ -923,6 +930,7 @@ mac-workflow: &mac-workflow
           - Mac binary
 
     - test-binary-against-staging:
+        context: test-runner:record-tests
         name: Test Mac binary against staging
         executor: mac
         filters:
@@ -934,6 +942,7 @@ mac-workflow: &mac-workflow
           - Mac binary
 
     - test-binary-and-npm-against-other-projects:
+        context: test-runner:trigger-test-jobs
         name: Test Mac binary against other projects
         executor: mac
         filters:
