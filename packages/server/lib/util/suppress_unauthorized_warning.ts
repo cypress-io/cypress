@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+const originalEmitWarning = process.emitWarning
+
 let suppressed = false
 
 /**
@@ -13,8 +15,6 @@ export function suppress () {
   }
 
   suppressed = true
-
-  const originalEmitWarning = process.emitWarning
 
   process.emitWarning = (warning, ...args) => {
     if (_.isString(warning) && _.includes(warning, 'NODE_TLS_REJECT_UNAUTHORIZED')) {
