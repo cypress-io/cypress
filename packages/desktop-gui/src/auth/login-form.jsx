@@ -1,10 +1,13 @@
 import cs from 'classnames'
+import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import authApi from './auth-api'
+import authStore from './auth-store'
 import ipc from '../lib/ipc'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
+@observer
 class LoginForm extends Component {
   static defaultProps = {
     onSuccess () {},
@@ -16,7 +19,7 @@ class LoginForm extends Component {
   }
 
   render () {
-    const { message } = this.props
+    const { message } = authStore
 
     return (
       <div className='login-content'>
@@ -54,7 +57,7 @@ class LoginForm extends Component {
   }
 
   _buttonContent () {
-    const message = this.props.message || {}
+    const message = authStore || {}
 
     if (this.state.isLoggingIn) {
       if (message.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
