@@ -11,9 +11,8 @@ describe('Settings', () => {
     cy.fixture('keys').as('keys')
 
     this.goToSettings = () => {
-      return cy
-      .get('.navbar-default')
-      .get('a').contains('Settings').click()
+      cy.get('.navbar-default')
+      cy.get('a').contains('Settings').click()
     }
 
     cy.visitIndex().then(function (win) {
@@ -91,15 +90,15 @@ describe('Settings', () => {
         })
       })
 
-      it('displays \'true\' values', () => {
+      it('displays "true" values', () => {
         cy.get('.line').contains('true')
       })
 
-      it('displays \'null\' values', () => {
+      it('displays "null" values', () => {
         cy.get('.line').contains('null')
       })
 
-      it('displays \'object\' values for env and hosts', () => {
+      it('displays "object" values for env and hosts', () => {
         cy.get('.nested-obj').eq(0)
         .contains('fixturesFolder')
 
@@ -107,7 +106,7 @@ describe('Settings', () => {
         .contains('*.foobar.com')
       })
 
-      it('displays \'array\' values for blacklistHosts', () => {
+      it('displays "array" values for blacklistHosts', () => {
         cy.get('.nested-arr')
         .parent()
         .should('contain', '[')
@@ -154,7 +153,7 @@ describe('Settings', () => {
         })
       })
 
-      it('loads the project\'s record key', function () {
+      it('loads the projects record key', function () {
         expect(this.ipc.getRecordKeys).to.be.called
       })
 
@@ -419,7 +418,7 @@ describe('Settings', () => {
     })
   })
 
-  context('when you are not a user of this project\'s org', () => {
+  context('when you are not a user of this projects org', () => {
     beforeEach(function () {
       this.openProject.resolve(this.config)
     })
@@ -430,6 +429,38 @@ describe('Settings', () => {
       this.goToSettings()
 
       cy.contains('h5', 'Record Keys').should('not.exist')
+    })
+  })
+
+  context('when configFile is false', () => {
+    beforeEach(function () {
+      this.openProject.resolve(Cypress._.assign({
+        configFile: false,
+      }, this.config))
+
+      this.goToSettings()
+
+      cy.contains('Configuration').click()
+    })
+
+    it('notes that cypress.json is disabled', () => {
+      cy.contains('set from cypress.json file (currently disabled by --config-file false)')
+    })
+  })
+
+  context('when configFile is set', function () {
+    beforeEach(function () {
+      this.openProject.resolve(Cypress._.assign({
+        configFile: 'special-cypress.json',
+      }, this.config))
+
+      this.goToSettings()
+
+      cy.contains('Configuration').click()
+    })
+
+    it('notes that a custom config is in use', () => {
+      cy.contains('set from custom config file special-cypress.json')
     })
   })
 })

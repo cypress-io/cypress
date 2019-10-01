@@ -147,6 +147,7 @@ const openProject = (project) => {
     project.update({
       id: config.projectId,
       name: config.projectName,
+      configFile: config.configFile,
       ..._.pick(config, ['resolvedNodeVersion', 'resolvedNodePath']),
     })
 

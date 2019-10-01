@@ -18,6 +18,7 @@ const validProps = cacheProps.concat([
   'isChosen',
   'isLoading',
   'isNew',
+  'configFile',
   'browsers',
   'onBoardingModalOpen',
   'browserState',

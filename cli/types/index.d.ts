@@ -19,6 +19,10 @@
 /// <reference path="./jquery/index.d.ts" />
 /// <reference path="./chai-jquery/index.d.ts" />
 
+// jQuery includes dependency "sizzle" that provides types
+// so we include it too in "node_modules/sizzle".
+// This way jQuery can load it using 'reference types="sizzle"' directive
+
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 
