@@ -114,7 +114,7 @@
     "request": "2.88.0",
     "request-promise": "4.2.4",
     "return-deep-diff": "0.3.0",
-    "sanitize-filename": "1.6.1",
+    "sanitize-filename": "1.6.3",
     "semver": "6.3.0",
     "send": "0.17.0",
     "shell-env": "3.0.0",
