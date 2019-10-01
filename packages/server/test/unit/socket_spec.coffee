@@ -143,7 +143,7 @@ describe "lib/socket", ->
 
         it "does not clear any namespaced cookies", (done) ->
           sinon.stub(chrome.cookies, "getAll")
-          .withArgs({name: "session"})
+          .withArgs({name: "session", domain: "google.com"})
           .yieldsAsync([
             {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
           ])

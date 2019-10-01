@@ -1,6 +1,8 @@
 _             = require("lodash")
 zlib          = require("zlib")
+charset       = require("charset")
 concat        = require("concat-stream")
+iconv         = require("iconv-lite")
 Promise       = require("bluebird")
 accept        = require("http-accept")
 debug         = require("debug")("cypress:server:proxy")
@@ -22,6 +24,18 @@ zlibOptions = {
   finishFlush: zlib.Z_SYNC_FLUSH
 }
 
+## https://github.com/cypress-io/cypress/issues/1543
+getNodeCharsetFromResponse = (headers, body) ->
+  httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
+
+  debug("inferred charset from response %o", { httpCharset })
+
+  if iconv.encodingExists(httpCharset)
+    return httpCharset
+
+  ## browsers default to latin1
+  return "latin1"
+
 isGzipError = (err) ->
   Object.prototype.hasOwnProperty.call(zlib.constants, err.code)
 
@@ -31,7 +45,6 @@ isGzipError = (err) ->
 responseMustHaveEmptyBody = (method, statusCode) ->
   _.some([
     _.includes(NO_BODY_STATUS_CODES, statusCode),
-    _.inRange(statusCode, 100, 200),
     _.invoke(method, 'toLowerCase') == 'head',
   ])
 
@@ -119,6 +132,13 @@ module.exports = {
       ## make sure the response includes string type
       contentType and contentType.includes(str)
 
+    resContentTypeIsJavaScript = (respHeaders) ->
+      _.some [
+        'application/javascript',
+        'application/x-javascript',
+        'text/javascript'
+      ].map(_.partial(resContentTypeIs, respHeaders))
+
     reqAcceptsHtml = ->
       ## don't inject if this is an XHR from jquery
       return if req.headers["x-requested-with"]
@@ -176,12 +196,19 @@ module.exports = {
       ## bypass the stream buffer and pipe this back
       if wantsInjection
         rewrite = (body) ->
-          rewriter.html(body.toString("utf8"), remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          ## transparently decode their body to a node string and then re-encode
+          nodeCharset = getNodeCharsetFromResponse(headers, body)
+          decodedBody = iconv.decode(body, nodeCharset)
+          rewrittenBody = rewriter.html(decodedBody, remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          iconv.encode(rewrittenBody, nodeCharset)
 
         ## TODO: we can probably move this to the new
         ## replacestream rewriter instead of using
         ## a buffer
         injection = concat (body) ->
+          ## concat-stream yields an empty array if nothing is written
+          if _.isEqual(body, [])
+            body = Buffer.from('')
           ## if we're gzipped that means we need to unzip
           ## this content first, inject, and the rezip
           if isGzipped
@@ -247,6 +274,16 @@ module.exports = {
     onResponse = (str, incomingRes) =>
       {headers, statusCode} = incomingRes
 
+      originalSetHeader = res.setHeader
+
+      ## express does all kinds of silly/nasty stuff to the content-type...
+      ## but we don't want to change it at all!
+      res.setHeader = (k, v) ->
+        if k == 'content-type'
+          v = incomingRes.headers['content-type']
+
+        originalSetHeader.call(res, k, v)
+
       wantsInjection ?= do ->
         return false if not resContentTypeIs(headers, "text/html")
 
@@ -263,7 +300,7 @@ module.exports = {
         ## on the response or its a request for any javascript script tag
         config.modifyObstructiveCode and (
           (wantsInjection is "full") or
-            resContentTypeIs(headers, "application/javascript")
+            resContentTypeIsJavaScript(headers)
         )
 
       @setResHeaders(req, res, incomingRes, wantsInjection)

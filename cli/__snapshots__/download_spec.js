@@ -17,7 +17,9 @@ https://cypress.example.com/desktop/0.20.2?platform=OS&arch=ARCH
 exports['download status errors 1'] = `
 Error: The Cypress App could not be downloaded.
 
-Please check network connectivity and try again:
+Does your workplace require a proxy to be used to access the Internet? If so, you must configure the HTTP_PROXY environment variable before downloading Cypress. Read more: https://on.cypress.io/proxy-configuration
+
+Otherwise, please check network connectivity and try again:
 
 ----------
 

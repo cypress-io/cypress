@@ -20,6 +20,12 @@ includeTypes.forEach((folder) => {
   shell.cp('-R', source, 'types')
 })
 
+// jQuery v3.3.x includes "dist" folder that just references back to itself
+// causing dtslint to think there are double definitions. Remove that folder.
+const typesJqueryDistFolder = join('types', 'jquery', 'dist')
+
+shell.rm('-rf', typesJqueryDistFolder)
+
 // fix paths to Chai, jQuery and other types to be relative
 shell.sed(
   '-i',

@@ -99,7 +99,7 @@ module.exports = {
  */
 if (os.platform() === 'win32') {
   try {
-    const registryJs = require('@cypress/registry-js')
+    const registryJs = require('registry-js')
 
     module.exports = {
       run: getRunner(registryJs),

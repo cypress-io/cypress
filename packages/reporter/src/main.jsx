@@ -11,6 +11,7 @@ import events from './lib/events'
 import runnablesStore from './runnables/runnables-store'
 import scroller from './lib/scroller'
 import statsStore from './header/stats-store'
+import shortcuts from './lib/shortcuts'
 
 import Header from './header/header'
 import Runnables from './runnables/runnables'
@@ -75,14 +76,19 @@ class Reporter extends Component {
   }
 
   componentDidMount () {
+    shortcuts.start(this.props.appState)
     EQ.init()
+  }
+  componentWillUnmount () {
+    shortcuts.stop()
   }
 }
 
 if (window.Cypress) {
+  window.state = appState
   window.render = (props) => {
     render(<Reporter {...props} />, document.getElementById('app'))
   }
 }
 
-export default { Reporter }
+export { Reporter }

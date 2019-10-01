@@ -1470,4 +1470,3 @@ describe "e2e record", ->
             snapshot: true
             expectedExitCode: 0
           })
-

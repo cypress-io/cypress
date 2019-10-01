@@ -6,11 +6,17 @@ divider = (num, char) ->
 format = (data) ->
   switch
     when _.isString(data)
-      _.truncate(data, { length: 100 })
+      _.truncate(data, { length: 2000 })
     when _.isObject(data)
       JSON.stringify(data, null, 2)
     else
       data
+
+formatConfigFile = (configFile) ->
+  if configFile == false
+    return "'cypress.json' (currently disabled by --config-file=false)"
+
+  return "'#{format(configFile)}'"
 
 formatRedirect = (redirect) -> "  - #{redirect}"
 
@@ -209,6 +215,15 @@ module.exports = {
 
       https://on.cypress.io/element-cannot-be-interacted-with
     """
+    readonly: """
+      #{cmd('{{cmd}}')} failed because this element is readonly:
+
+      {{node}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+    """
     invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
     not_scrollable: """
       #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
@@ -220,6 +235,15 @@ module.exports = {
       {{node}}
 
       {{reason}}
+
+      Fix this problem, or use {force: true} to disable error checking.
+
+      https://on.cypress.io/element-cannot-be-interacted-with
+    """
+    readonly: """
+      #{cmd('{{cmd}}')} failed because this element is readonly:
+
+      {{node}}
 
       Fix this problem, or use {force: true} to disable error checking.
 
@@ -283,6 +307,7 @@ module.exports = {
   get:
     alias_invalid: "'{{prop}}' is not a valid alias property. Only 'numbers' or 'all' is permitted."
     alias_zero: "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @{{alias}}.1"
+    invalid_options: "#{cmd('get')} only accepts an options object for its second argument. You passed {{options}}"
 
   getCookie:
     invalid_argument: "#{cmd('getCookie')} must be passed a string argument for name."
@@ -566,13 +591,13 @@ module.exports = {
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
 
   navigation:
-    cross_origin: """
+    cross_origin: ({ message, originPolicy, configFile }) -> """
       Cypress detected a cross origin error happened on page load:
 
-        > {{message}}
+        > #{message}
 
       Before the page load, you were bound to the origin policy:
-        > {{originPolicy}}
+        > #{originPolicy}
 
       A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -586,17 +611,17 @@ module.exports = {
 
       You may need to restructure some of your test code to avoid this problem.
 
-      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
+      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in #{formatConfigFile(configFile)}.
 
       https://on.cypress.io/cross-origin-violation
 
     """
-    timed_out: """
-      Timed out after waiting '{{ms}}ms' for your remote page to load.
+    timed_out: ({ ms, configFile }) -> """
+      Timed out after waiting '#{ms}ms' for your remote page to load.
 
-      Your page did not fire its 'load' event within '{{ms}}ms'.
+      Your page did not fire its 'load' event within '#{ms}ms'.
 
-      You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+      You can try increasing the 'pageLoadTimeout' value in #{formatConfigFile(configFile)} to wait longer.
 
       Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
@@ -719,7 +744,8 @@ module.exports = {
       No response was received within the timeout.
       """
     url_missing: "#{cmd('request')} requires a url. You did not provide a url."
-    url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present."
+    url_invalid: ({configFile}) ->
+      "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in #{formatConfigFile(configFile)}. Neither of those values were present."
     url_wrong_type: "#{cmd('request')} requires the url to be a string."
 
   route:
@@ -806,15 +832,15 @@ module.exports = {
       """
     not_attached: (obj) ->
       """
-      #{cmd(obj.name)} failed because this element is detached from the DOM.
+      #{cmd(obj.cmd)} failed because this element is detached from the DOM.
 
-      #{obj.subject}
+      #{obj.node}
 
       Cypress requires elements be attached in the DOM to interact with them.
 
       The previous command that ran was:
 
-        > #{cmd(obj.previous)}
+        > #{cmd(obj.prev)}
 
       This DOM element likely became detached somewhere between the previous and current command.
 
@@ -894,7 +920,14 @@ module.exports = {
 
   type:
     empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."
-    invalid: "Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}"
+    readonly: "#{cmd('type')} cannot type into an element with a 'readonly' attribute. The element typed into was: {{node}}"
+    invalid: """
+      Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}
+
+      If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
+
+      https://on.cypress.io/type
+    """
     invalid_date: "Typing into a date input with #{cmd('type')} requires a valid date with the format 'yyyy-MM-dd'. You passed: {{chars}}"
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
@@ -959,7 +992,7 @@ module.exports = {
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 3000px."
+    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 4000px."
     empty_string: "#{cmd('viewport')} cannot be passed an empty string."
     invalid_orientation: "#{cmd('viewport')} can only accept '{{all}}' as valid orientations. Your orientation was: '{{orientation}}'"
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
@@ -982,6 +1015,7 @@ module.exports = {
     invalid_1st_arg: "#{cmd('visit')} must be called with a URL or an options object containing a URL as its 1st argument"
     invalid_method: "#{cmd('visit')} was called with an invalid method: '{{method}}'. Method can only be GET or POST."
     invalid_headers: "#{cmd('visit')} requires the 'headers' option to be an object."
+    invalid_qs: "#{cmd('visit')} requires the 'qs' option to be an object, but received: '{{qs}}'"
     no_duplicate_url: """
       #{cmd('visit')} must be called with only one URL. You specified two URLs:
 
@@ -1073,6 +1107,16 @@ module.exports = {
         However, you can likely use #{cmd('request')} instead of #{cmd('visit')}.
 
         #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
+      """
+
+    specify_file_by_relative_path: """
+      #{cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
+
+      To visit a local file, you can pass in the relative path to the file from the `projectRoot` (Note: if the configuration value `baseUrl` is set, the supplied path will be resolved from the `baseUrl` instead of `projectRoot`)
+
+      https://docs.cypress.io/api/commands/visit.html
+
+      https://docs.cypress.io/api/cypress-api/config.html
       """
 
   wait:

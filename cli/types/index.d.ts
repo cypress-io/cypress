@@ -19,6 +19,10 @@
 /// <reference path="./jquery/index.d.ts" />
 /// <reference path="./chai-jquery/index.d.ts" />
 
+// jQuery includes dependency "sizzle" that provides types
+// so we include it too in "node_modules/sizzle".
+// This way jQuery can load it using 'reference types="sizzle"' directive
+
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 
@@ -331,6 +335,12 @@ declare namespace Cypress {
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
+    once: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
     off: Actions
   }
 
@@ -573,8 +583,10 @@ declare namespace Cypress {
      *    cy.contains(/^b\w+/)
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
+     *    // tries to find the given text for up to 1 second
+     *    cy.contains('my text to find', {timeout: 1000})
      */
-    contains(content: string | number | RegExp): Chainable<Subject>
+    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
     /**
      * Get the child DOM element that contains given text.
      *
@@ -931,6 +943,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     on: Actions
+
+    /**
+     * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
+     * @see https://on.cypress.io/catalog-of-events#App-Events
+     */
+    once: Actions
 
     /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
@@ -2241,6 +2259,13 @@ declare namespace Cypress {
      */
     delay: number
     /**
+     * Parse special characters for strings surrounded by `{}`,
+     * such as `{esc}`. Set to `false` to type the literal characters instead
+     *
+     * @default true
+     */
+    parseSpecialCharSequences: boolean
+    /**
      * Forces the action, disables waiting for actionability
      *
      * @default false
@@ -2328,6 +2353,11 @@ declare namespace Cypress {
      *    })
      */
     auth: Auth
+
+    /**
+     * Query parameters to append to the `url` of the request.
+     */
+    qs: object
   }
 
   /**
@@ -3722,6 +3752,14 @@ declare namespace Cypress {
      */
     (chainer: 'contain.html', value: string): Chainable<Subject>
     /**
+     * Assert that the html of the first element of the selection partially contains the given html, using `.html()`.
+     * @example
+     *    cy.get('#result').should('include.html', '<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'include.html', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection has the given id, using `.attr('id')`.
      * @example
      *    cy.get('#result').should('have.id', 'result')
@@ -3755,6 +3793,14 @@ declare namespace Cypress {
      */
     (chainer: 'contain.text', value: string): Chainable<Subject>
     /**
+     * Assert that the text of the first element of the selection partially contains the given text, using `.text()`.
+     * @example
+     *    cy.get('#result').should('include.text', 'John Doe')
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'include.text', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection has the given value, using `.val()`.
      * @example
      *    cy.get('textarea').should('have.value', 'foo bar baz')
@@ -3770,6 +3816,14 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'contain.value', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection partially contains the given value, using `.val()`.
+     * @example
+     *    cy.get('textarea').should('include.value', 'foo bar baz')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'include.value', value: string): Chainable<Subject>
     /**
      * Assert that the selection matches a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
@@ -3926,6 +3980,14 @@ declare namespace Cypress {
      */
     (chainer: 'not.contain.html', value: string): Chainable<Subject>
     /**
+     * Assert that the html of the first element of the selection does not contain the given html, using `.html()`.
+     * @example
+     *    cy.get('#result').should('not.include.html', '<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.include.html', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection does not have the given id, using `.attr('id')`.
      * @example
      *    cy.get('#result').should('not.have.id', 'result')
@@ -3959,6 +4021,14 @@ declare namespace Cypress {
      */
     (chainer: 'not.contain.text', value: string): Chainable<Subject>
     /**
+     * Assert that the text of the first element of the selection does not contain the given text, using `.text()`.
+     * @example
+     *    cy.get('#result').should('not.include.text', 'John Doe')
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.include.text', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection does not have the given value, using `.val()`.
      * @example
      *    cy.get('textarea').should('not.have.value', 'foo bar baz')
@@ -3974,6 +4044,14 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.contain.value', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not contain the given value, using `.val()`.
+     * @example
+     *    cy.get('textarea').should('not.include.value', 'foo bar baz')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.include.value', value: string): Chainable<Subject>
     /**
      * Assert that the selection does not match a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
@@ -4295,7 +4373,7 @@ declare namespace Cypress {
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
-  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
     top: number,
     left: number
@@ -4304,22 +4382,44 @@ declare namespace Cypress {
   // Diff taken from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
   type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
+  /**
+   * Public interface for the global "cy" object. If you want to add
+   * a custom property to this object, you should extend this interface.
+   * @see https://on.cypress.io/typescript#Types-for-custom-commands
+   *
+  ```
+  // in your TS file
+  declare namespace Cypress {
+    interface cy {
+      // declare additional properties on "cy" object, like
+      // label: string
+    }
+    interface Chainable {
+      // declare additional custom commands as methods, like
+      // login(username: string, password: string)
+    }
+  }
+  ```
+   */
+  interface cy extends Chainable<undefined> {}
 }
 
 /**
  * Global variables `cy` added by Cypress with all API commands.
  * @see https://on.cypress.io/api
- * @example
+ *
 ```
 cy.get('button').click()
 cy.get('.result').contains('Expected text')
 ```
  */
-declare const cy: Cypress.Chainable<undefined>
+declare const cy: Cypress.cy
+
 /**
  * Global variable `Cypress` holds common utilities and constants.
  * @see https://on.cypress.io/api
- * @example
+ *
 ```
 Cypress.config("pageLoadTimeout") // => 60000
 Cypress.version // => "1.4.0"

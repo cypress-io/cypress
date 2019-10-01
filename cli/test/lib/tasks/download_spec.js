@@ -1,5 +1,6 @@
 require('../../spec_helper')
 
+const _ = require('lodash')
 const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
@@ -138,7 +139,7 @@ describe('lib/tasks/download', function () {
     })
   })
 
-  describe('verify downloaded file', function () {
+  context('verify downloaded file', function () {
     before(function () {
       this.expectedChecksum = hasha.fromFileSync(examplePath)
       this.expectedFileSize = fs.statSync(examplePath).size
@@ -308,6 +309,32 @@ describe('lib/tasks/download', function () {
       logger.error(err)
 
       return snapshot('download status errors 1', normalize(ctx.stdout.toString()))
+    })
+  })
+
+  context('with proxy env vars', () => {
+    beforeEach(function () {
+      this.env = _.clone(process.env)
+    })
+
+    afterEach(function () {
+      process.env = this.env
+    })
+
+    it('prefers https_proxy over http_proxy', () => {
+      process.env.HTTP_PROXY = 'foo'
+      expect(download.getProxyUrl()).to.eq('foo')
+      process.env.https_proxy = 'bar'
+      expect(download.getProxyUrl()).to.eq('bar')
+    })
+
+    it('falls back to npm_config_proxy', () => {
+      process.env.npm_config_proxy = 'foo'
+      expect(download.getProxyUrl()).to.eq('foo')
+      process.env.npm_config_https_proxy = 'bar'
+      expect(download.getProxyUrl()).to.eq('bar')
+      process.env.https_proxy = 'baz'
+      expect(download.getProxyUrl()).to.eq('baz')
     })
   })
 })

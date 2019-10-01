@@ -20,11 +20,11 @@ const model = (props) => {
 describe('Command model', () => {
   let clock
 
-  before(() => {
+  beforeEach(() => {
     clock = sinon.useFakeTimers()
   })
 
-  after(() => {
+  afterEach(() => {
     clock.restore()
   })
 
