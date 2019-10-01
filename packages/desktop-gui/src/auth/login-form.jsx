@@ -31,7 +31,7 @@ class LoginForm extends Component {
           onClick={this._login}
           disabled={this.state.isLoggingIn}
         >
-          {this._buttonContent()}
+          {this._buttonContent(message)}
         </button>
         {
           message && <p className={`message ${message.type}`} onClick={this._selectUrl}>
@@ -56,11 +56,9 @@ class LoginForm extends Component {
     selection.addRange(range)
   }
 
-  _buttonContent () {
-    const message = authStore || {}
-
+  _buttonContent (message) {
     if (this.state.isLoggingIn) {
-      if (message.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
+      if (message && message.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
         return (
           <span>
             <i className='fa fa-exclamation-triangle'></i>{' '}
@@ -72,7 +70,7 @@ class LoginForm extends Component {
       return (
         <span>
           <i className='fa fa-spinner fa-spin'></i>{' '}
-          {message.browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
+          {message && message.browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
         </span>
       )
     }
