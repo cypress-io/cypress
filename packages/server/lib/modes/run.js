@@ -96,8 +96,7 @@ const formatFooterSummary = function (results) {
 }
 
 const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }) => {
-  debug('formatting Node version. Resolved version "%s", path if any "%s"',
-    resolvedNodeVersion, resolvedNodePath)
+  debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
   if (resolvedNodePath) {
     return `v${resolvedNodeVersion} (${resolvedNodePath})`
