@@ -58,5 +58,18 @@ describe('controls', function () {
         expect(runner.emit).to.have.been.calledWith('focus:tests')
       })
     })
+
+    it('has shortcut in tooltips', () => {
+      cy.get('.focus-tests > button').trigger('mouseover')
+      cy.get('.tooltip').should('have.text', 'View All Tests F')
+      cy.get('.focus-tests > button').trigger('mouseout')
+
+      cy.get('button.restart').trigger('mouseover')
+      cy.get('.tooltip').should('have.text', 'Run All Tests R')
+
+      cy.window().then((win) => win.state.isRunning = true)
+      cy.get('button.stop').trigger('mouseover')
+      cy.get('.tooltip').should('have.text', 'Stop Running S')
+    })
   })
 })

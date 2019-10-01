@@ -85,6 +85,7 @@ class Reporter extends Component {
 }
 
 if (window.Cypress) {
+  window.state = appState
   window.render = (props) => {
     render(<Reporter {...props} />, document.getElementById('app'))
   }
