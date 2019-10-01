@@ -72,6 +72,7 @@
     "express": "4.16.4",
     "express-handlebars": "3.0.2",
     "find-process": "1.4.1",
+    "fix-path": "2.1.0",
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "8.1.0",
     "getos": "3.1.1",
@@ -131,6 +132,7 @@
     "url-parse": "1.4.7",
     "utf8-stream": "0.0.0",
     "uuid": "3.3.2",
+    "which": "1.3.1",
     "widest-line": "3.1.0",
     "winston": "2.4.4"
   },
