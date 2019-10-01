@@ -8,6 +8,10 @@
     <script type="text/javascript">
       document.domain = 'localhost';
 
+      window.__getSpecFrameStack = function (message) {
+        return (new Error(message)).stack
+      };
+
       (function(parent) {
         var Cypress = window.Cypress = parent.Cypress;
         if (!Cypress) {
