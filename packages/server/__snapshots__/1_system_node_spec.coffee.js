@@ -7,7 +7,7 @@ exports['e2e system node uses system node when launching plugins file 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:        1.2.3                                                                          │
   │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   v0.0.0 (/foo/bar/node)                                                         │
+  │ Node Version:   vXXXXX (/foo/bar/node)                                                         │
   │ Specs:          1 found (spec.js)                                                              │
   │ Searched:       cypress/integration/spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
