@@ -43,7 +43,7 @@ class Project extends Component {
       )
     }
 
-    if (this.props.project.error) return <ErrorMessage error={this.props.project.error} onTryAgain={this._reopenProject}/>
+    if (this.props.project.error) return <ErrorMessage onTryAgain={this._reopenProject} project={this.props.project}/>
 
     return (
       <>

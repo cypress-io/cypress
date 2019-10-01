@@ -9,11 +9,7 @@ const normalizeStyles = (styles) => {
 
 const addStyles = (styles, to) => {
   return new Promise((resolve) => {
-    $(styles)
-    .load(() => {
-      return resolve()
-    })
-    .appendTo(cy.$$(to))
+    $(styles).on('load', resolve).appendTo(cy.$$(to))
   })
 }
 

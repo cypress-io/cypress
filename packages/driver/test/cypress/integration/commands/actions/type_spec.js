@@ -1472,7 +1472,7 @@ describe('src/cy/commands/actions/type', () => {
 
           cy.get('#generic-iframe')
           .then(($iframe) => {
-            $iframe.load(() => {
+            $iframe.on('load', () => {
               loaded = true
             })
           }).scrollIntoView()
