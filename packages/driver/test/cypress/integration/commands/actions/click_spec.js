@@ -1480,7 +1480,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when subject is detached during actionability', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.click() failed because this element is detached from the DOM')
+          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
 
           done()
         })

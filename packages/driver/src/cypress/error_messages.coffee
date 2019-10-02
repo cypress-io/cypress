@@ -767,11 +767,11 @@ module.exports = {
       docsUrl: "https://on.cypress.io/cross-origin-violation"
     }
     timed_out: ({ ms, configFile }) -> """
-      Timed out after waiting '#{ms}ms' for your remote page to load.
+      Timed out after waiting `#{ms}ms` for your remote page to load.
 
-      Your page did not fire its 'load' event within '#{ms}ms'.
+      Your page did not fire its `load` event within `#{ms}ms`.
 
-      You can try increasing the 'pageLoadTimeout' value in #{formatConfigFile(configFile)} to wait longer.
+      You can try increasing the `pageLoadTimeout` value in #{formatConfigFile(configFile)} to wait longer.
 
       Browsers will not fire the `load` event until all stylesheets and scripts are done downloading.
 
