@@ -59,7 +59,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not multiple and valueOrText.length > 1
         $utils.throwErrByPath "select.invalid_multiple"
 
-      ## deselect all options if we receive an empty array for a multi select
+      ## deselect all options if we receive an empty array for a multi select or empty string for a single select
       if valueOrText.length == 0 or (valueOrText.length == 1 and valueOrText[0] == "")
         clearOptions = ->
           options.$el.val([])
