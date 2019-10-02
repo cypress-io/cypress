@@ -243,7 +243,7 @@ We dynamically generated a new test to display this failure.
 exports['e2e record api interaction errors project 404 errors and exits 1'] = `
 We could not find a project with the ID: pid123
 
-This projectId came from your cypress.json file or an environment variable.
+This projectId came from your 'cypress.json' file or an environment variable.
 
 Please log into the Dashboard and find your project.
 

@@ -6,11 +6,17 @@ divider = (num, char) ->
 format = (data) ->
   switch
     when _.isString(data)
-      _.truncate(data, { length: 100 })
+      _.truncate(data, { length: 2000 })
     when _.isObject(data)
       JSON.stringify(data, null, 2)
     else
       data
+
+formatConfigFile = (configFile) ->
+  if configFile == false
+    return "`cypress.json` (currently disabled by --config-file=false)"
+
+  return "`#{format(configFile)}`"
 
 formatRedirect = (redirect) -> "  - #{redirect}"
 
@@ -735,35 +741,37 @@ module.exports = {
     timed_out: "Cypress command timeout of `{{ms}}ms` exceeded."
 
   navigation:
-    cross_origin: {
+    cross_origin: ({ message, originPolicy, configFile }) -> {
       message: """
         Cypress detected a cross origin error happened on page load:
 
-          > {{message}}
+          > #{message}
 
         Before the page load, you were bound to the origin policy:
-          > {{originPolicy}}
+          > #{originPolicy}
 
-        A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+          A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
-        This typically happens in one of three ways:
+          This typically happens in one of three ways:
 
-        1. You clicked an `<a>` that routed you outside of your application
-        2. You submitted a `form` and your server redirected you outside of your application
-        3. You used a JavaScript redirect to a page outside of your application
+          1. You clicked an `<a>` that routed you outside of your application
+          2. You submitted a `form` and your server redirected you outside of your application
+          3. You used a JavaScript redirect to a page outside of your application
 
-        Cypress does not allow you to change superdomains within a single test.
+          Cypress does not allow you to change superdomains within a single test.
 
         You may need to restructure some of your test code to avoid this problem.
+
+        Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in #{formatConfigFile(configFile)}.
       """
       docsUrl: "https://on.cypress.io/cross-origin-violation"
     }
-    timed_out: """
-      Timed out after waiting `{{ms}}ms` for your remote page to load.
+    timed_out: ({ ms, configFile }) -> """
+      Timed out after waiting `#{ms}ms` for your remote page to load.
 
-      Your page did not fire its `load` event within `{{ms}}ms`.
+      Your page did not fire its `load` event within `#{ms}ms`.
 
-      You can try increasing the `pageLoadTimeout` value in `cypress.json` to wait longer.
+      You can try increasing the `pageLoadTimeout` value in #{formatConfigFile(configFile)} to wait longer.
 
       Browsers will not fire the `load` event until all stylesheets and scripts are done downloading.
 
@@ -917,8 +925,8 @@ module.exports = {
       message: "#{cmd('request')} requires a `url`. You did not provide a `url`."
       docsUrl: "https://on.cypress.io/request"
     }
-    url_invalid: {
-      message: "#{cmd('request')} must be provided a fully qualified `url` - one that begins with `http`. By default #{cmd('request')} will use either the current window's origin or the `baseUrl` in `cypress.json`. Neither of those values were present."
+    url_invalid: ({ configFile }) -> {
+      message: "#{cmd('request')} must be provided a fully qualified `url` - one that begins with `http`. By default #{cmd('request')} will use either the current window's origin or the `baseUrl` in #{formatConfigFile(configFile)}. Neither of those values were present."
       docsUrl: "https://on.cypress.io/request"
     }
     url_wrong_type: {
@@ -1115,15 +1123,15 @@ module.exports = {
       """
     not_attached: (obj) -> {
       message: """
-        #{cmd(obj.name)} failed because this element is detached from the DOM.
+        #{cmd(obj.cmd)} failed because this element is detached from the DOM.
 
-        `#{obj.subject}`
+        `#{obj.node}`
 
         Cypress requires elements be attached in the DOM to interact with them.
 
         The previous command that ran was:
 
-          > #{cmd(obj.previous)}
+          > #{cmd(obj.prev)}
 
         This DOM element likely became detached somewhere between the previous and current command.
 
