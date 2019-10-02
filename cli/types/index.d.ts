@@ -286,6 +286,11 @@ declare namespace Cypress {
     log(options: Partial<LogConfig>): Log
 
     /**
+     * Access and set Cypress's internal state.
+     */
+    state: State
+
+    /**
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
@@ -309,6 +314,8 @@ declare namespace Cypress {
      */
     dom: {
       isHidden(element: JQuery | HTMLElement): boolean
+      isWindow(maybeWindow: Window | any): maybeWindow is Window
+      isJquery(maybeJquery: JQuery | any): maybeJquery is JQuery
     }
 
     /**
@@ -1902,6 +1909,9 @@ declare namespace Cypress {
      * @default true
      */
     log: boolean
+  }
+
+  interface State {
   }
 
   /**

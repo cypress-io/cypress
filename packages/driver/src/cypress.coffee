@@ -26,6 +26,8 @@ $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 
+{ resolveWindowReference } = require("./cypress/resolve-window-reference")
+
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
   cy: "detachDom getStyles".split(" ")
@@ -470,6 +472,7 @@ class $Cypress
   Log: $Log
   LocalStorage: $LocalStorage
   Mocha: $Mocha
+  resolveWindowReference
   Runner: $Runner
   Server: $Server
   Screenshot: $Screenshot
