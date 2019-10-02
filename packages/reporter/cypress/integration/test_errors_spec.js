@@ -73,6 +73,7 @@ describe('test errors', function () {
       .and('not.contain', '*fizz*')
     })
 
+    // NOTE: still needs to be implemented
     it.skip('renders and escapes markdown with leading/trailing whitespace', () => {
       cy.get('.runnable-err-message')
 
