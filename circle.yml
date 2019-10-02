@@ -225,6 +225,10 @@ jobs:
       # Prune so we do not save removed dependencies to cache
       - run: npm run all prune
 
+      # store NPM logs in case there was a problem
+      - store_artifacts:
+          path: ~/.npm/_logs
+
       - save-caches
 
       ## save entire folder as artifact for other jobs to run without reinstalling
