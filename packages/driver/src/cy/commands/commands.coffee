@@ -14,7 +14,8 @@ command = (ctx, name, args...) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addChainer({
-    command: (chainer, args) ->
+    ## invocationStack has to be passed in here, but can be ignored
+    command: (chainer, invocationStack, args) ->
       command(chainer, args...)
   })
 
