@@ -121,4 +121,4 @@ describe "uncaught errors", ->
     cy.visit('/fixtures/global-error.html')
     .wait(10)
     .then ->
-      done('should have errored')
+      throw new Error('should have errored')
