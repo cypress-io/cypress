@@ -5,7 +5,7 @@ human = require("human-interval")
 la = require("lazy-ass")
 check = require("check-more-types")
 cp = require("child_process")
-fs = require("fs")
+fse = require("fs-extra")
 os = require("os")
 Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
@@ -58,9 +58,8 @@ getPublisher = (getAwsObj = getS3Credentials) ->
     secretAccessKey: aws.secret
   }
 
-getDestktopUrl = (version, osName, zipName) ->
-  url = [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
-  url
+getDesktopUrl = (version, osName, zipName) ->
+  [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
 
 # purges desktop application url from Cloudflare cache
 purgeDesktopAppFromCache = ({version, platform, zipName}) ->
@@ -72,7 +71,7 @@ purgeDesktopAppFromCache = ({version, platform, zipName}) ->
 
   osName = getUploadNameByOsAndArch(platform)
   la(check.unemptyString(osName), "missing osName", osName)
-  url = getDestktopUrl(version, osName, zipName)
+  url = getDesktopUrl(version, osName, zipName)
 
   purgeCloudflareCache(url)
 
@@ -122,9 +121,9 @@ saveUrl = (filename) -> (url) ->
   la(check.unemptyString(filename), "missing filename", filename)
   la(check.url(url), "invalid url to save", url)
   s = JSON.stringify({url})
-  fs.writeFileSync(filename, s)
-  console.log("saved url", url)
-  console.log("into file", filename)
+  fse.writeFile(filename, s)
+  .then =>
+    console.log("saved url", url, "into file", filename)
 
 module.exports = {
   getS3Credentials,
