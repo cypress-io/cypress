@@ -14,6 +14,8 @@ const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
 const state = require('./state')
 
+const VERIFY_TEST_RUNNER_TIMEOUT_MS = 30000
+
 const checkExecutable = (binaryDir) => {
   const executable = state.getPathToExecutable(binaryDir)
 
@@ -78,6 +80,11 @@ const runSmokeTest = (binaryDir, options) => {
     const random = _.random(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
 
+    if (needsSandbox()) {
+      // electron requires --no-sandbox to run as root
+      args.unshift('--no-sandbox')
+    }
+
     if (options.dev) {
       executable = 'node'
       args.unshift(
@@ -90,6 +97,7 @@ const runSmokeTest = (binaryDir, options) => {
     debug('running smoke test')
     debug('using Cypress executable %s', executable)
     debug('smoke test command:', smokeTestCommand)
+    debug('smoke test timeout %d ms', options.smokeTestTimeout)
 
     const env = _.extend({}, process.env, {
       ELECTRON_ENABLE_LOGGING: true,
@@ -109,14 +117,18 @@ const runSmokeTest = (binaryDir, options) => {
     .then((result) => {
       // TODO: when execa > 1.1 is released
       // change this to `result.all` for both stderr and stdout
-      const smokeTestReturned = result.stdout
+      // use lodash to be robust during tests against null result or missing stdout
+      const smokeTestStdout = _.get(result, 'stdout', '')
 
-      debug('smoke test stdout "%s"', smokeTestReturned)
+      debug('smoke test stdout "%s"', smokeTestStdout)
 
-      if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
+      if (!util.stdoutLineMatches(String(random), smokeTestStdout)) {
         debug('Smoke test failed because could not find %d in:', random, result)
 
-        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(result.stderr || result.stdout)
+        const smokeTestStderr = _.get(result, 'stderr', '')
+        const errorText = smokeTestStderr || smokeTestStdout
+
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(errorText)
       }
     })
   }
@@ -242,7 +254,7 @@ const start = (options = {}) => {
     dev: false,
     force: false,
     welcomeMessage: true,
-    smokeTestTimeout: 10000,
+    smokeTestTimeout: VERIFY_TEST_RUNNER_TIMEOUT_MS,
   })
 
   if (options.dev) {
@@ -344,6 +356,18 @@ const start = (options = {}) => {
   })
 }
 
+const isLinuxLike = () => process.platform !== 'win32'
+
+const isRootUser = () => process.geteuid() === 0
+
+/**
+ * Returns true if running on a system where Electron needs "--no-sandbox" flag.
+ * @see https://crbug.com/638180
+*/
+const needsSandbox = () => isLinuxLike() && isRootUser()
+
 module.exports = {
   start,
+  VERIFY_TEST_RUNNER_TIMEOUT_MS,
+  needsSandbox,
 }

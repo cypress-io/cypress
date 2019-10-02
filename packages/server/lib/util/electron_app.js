@@ -1,3 +1,5 @@
+const debug = require('debug')('cypress:server:electron_app')
+
 const scale = () => {
   try {
     const { app } = require('electron')
@@ -11,6 +13,13 @@ const scale = () => {
 const ready = () => {
   const Promise = require('bluebird')
   const { app } = require('electron')
+
+  // electron >= 5.0.0 will exit the app if all browserwindows are closed,
+  // this is obviously undesirable in run mode
+  // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
+  app.on('window-all-closed', () => {
+    debug('all BrowserWindows closed, not exiting')
+  })
 
   const waitForReady = () => {
     return new Promise((resolve) => {

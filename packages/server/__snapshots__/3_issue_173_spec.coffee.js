@@ -38,7 +38,6 @@ exports['e2e issue 173 failing 1'] = `
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 

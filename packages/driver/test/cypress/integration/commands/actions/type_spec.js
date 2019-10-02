@@ -1,6 +1,5 @@
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
-const { Keyboard } = Cypress
 const { Promise } = Cypress
 const $selection = require('../../../../../src/dom/selection')
 
@@ -1473,7 +1472,7 @@ describe('src/cy/commands/actions/type', () => {
 
           cy.get('#generic-iframe')
           .then(($iframe) => {
-            $iframe.load(() => {
+            $iframe.on('load', () => {
               loaded = true
             })
           }).scrollIntoView()
@@ -2743,7 +2742,7 @@ describe('src/cy/commands/actions/type', () => {
 
         it('resets modifiers before next test', () => {
           // this test will fail if you comment out
-          // $Keyboard.resetModifiers
+          // keyboard.resetModifiers
 
           const $input = cy.$$('input:text:first')
           const events = []
@@ -4238,7 +4237,7 @@ describe('src/cy/commands/actions/type', () => {
           expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
           expect(err.message).to.include('The element typed into was:')
           expect(err.message).to.include('<form id="by-id">...</form>')
-          expect(err.message).to.include('Cypress considers the \'body\', \'textarea\', any \'element\' with a \'tabindex\' or \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid typeable elements.')
+          expect(err.message).to.include(`Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.`)
 
           done()
         })
@@ -4334,7 +4333,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
 
-          const allChars = _.keys(Keyboard.specialChars).concat(_.keys(Keyboard.modifierChars)).join(', ')
+          const allChars = _.keys(cy.devices.keyboard.specialChars).concat(_.keys(cy.devices.keyboard.modifierChars)).join(', ')
 
           expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
 

@@ -4,13 +4,14 @@ Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
+findSystemNode = require("./util/find_system_node")
 fs       = require("./util/fs")
 keys     = require("./util/keys")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
-debug      = require("debug")("cypress:server:config")
+debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
 CYPRESS_ENV_PREFIX = "CYPRESS_"
@@ -69,7 +70,8 @@ configKeys = toWords """
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
-  waitForAnimations
+  waitForAnimations               resolvedNodeVersion
+  nodeVersion                     resolvedNodePath
 """
 
 breakingConfigKeys = toWords """
@@ -123,7 +125,9 @@ CONFIG_DEFAULTS = {
   integrationFolder:             "cypress/integration"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
-  pluginsFile:                    "cypress/plugins"
+  pluginsFile:                   "cypress/plugins"
+  nodeVersion:                   "default"
+  configFile:                    "cypress.json"
 
   ## deprecated
   javascripts:                   []
@@ -135,6 +139,7 @@ validationRules = {
   blacklistHosts: v.isStringOrArrayOfStrings
   modifyObstructiveCode: v.isBoolean
   chromeWebSecurity: v.isBoolean
+  configFile: v.isStringOrFalse
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject
   execTimeout: v.isNumber
@@ -162,6 +167,7 @@ validationRules = {
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
+  nodeVersion: v.isOneOf("default", "bundled", "system")
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -207,12 +213,17 @@ hideSpecialVals = (val, key) ->
 module.exports = {
   getConfigKeys: -> configKeys
 
+  isValidCypressEnvValue: (value) ->
+    # names of config environments, see "config/app.yml"
+    names = ["development", "test", "staging", "production"]
+    _.includes(names, value)
+
   whitelist: (obj = {}) ->
     _.pick(obj, configKeys.concat(breakingConfigKeys))
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot).then(validateFile("cypress.json"))
+      settings.read(projectRoot, options).then(validateFile("cypress.json"))
       settings.readEnv(projectRoot).then(validateFile("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
@@ -243,7 +254,7 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     resolved = {}
 
-    _.extend config, _.pick(options, "morgan", "isTextTerminal", "socketId", "report", "browsers")
+    _.extend config, _.pick(options, "configFile", "morgan", "isTextTerminal", "socketId", "report", "browsers")
 
     _
     .chain(@whitelist(options))
@@ -265,7 +276,12 @@ module.exports = {
     ## split out our own app wide env from user env variables
     ## and delete envFile
     config.env = @parseEnv(config, options.env, resolved)
+
     config.cypressEnv = process.env["CYPRESS_ENV"]
+    debug("using CYPRESS_ENV %s", config.cypressEnv)
+    if not @isValidCypressEnvValue(config.cypressEnv)
+      errors.throw("INVALID_CYPRESS_ENV", config.cypressEnv)
+
     delete config.envFile
 
     ## when headless
@@ -297,6 +313,7 @@ module.exports = {
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
     .then(@setScaffoldPaths)
+    .then(_.partialRight(@setNodeBinary, options.onWarning))
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)
@@ -355,6 +372,21 @@ module.exports = {
           source("default")
     .value()
 
+  # instead of the built-in Node process, specify a path to 3rd party Node
+  setNodeBinary: Promise.method (obj, onWarning) ->
+    if obj.nodeVersion != 'system'
+      obj.resolvedNodeVersion = process.versions.node
+      return obj
+
+    findSystemNode.findNodePathAndVersion()
+    .then ({ path, version }) ->
+      obj.resolvedNodePath = path
+      obj.resolvedNodeVersion = version
+    .catch (err) ->
+      onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
+      obj.resolvedNodeVersion = process.versions.node
+    .return(obj)
+
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
 
@@ -395,7 +427,7 @@ module.exports = {
         return fs.pathExists(obj.supportFile)
         .then (found) ->
           if not found
-            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
+            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile, obj.configFile || CONFIG_DEFAULTS.configFile)
           debug("switching to found file %s", obj.supportFile)
     .catch({code: "MODULE_NOT_FOUND"}, ->
       debug("support file %s does not exist", sf)
@@ -416,7 +448,7 @@ module.exports = {
       else
         debug("support file is not default")
         ## they have it explicitly set, so it should be there
-        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
+        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || CONFIG_DEFAULTS.configFile)
     )
     .then ->
       if obj.supportFile

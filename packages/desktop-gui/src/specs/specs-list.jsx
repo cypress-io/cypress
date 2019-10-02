@@ -22,7 +22,7 @@ class SpecsList extends Component {
     if (!specsStore.filter && !specsStore.specs.length) return this._empty()
 
     return (
-      <div id='tests-list-page'>
+      <div className='specs'>
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
@@ -73,7 +73,7 @@ class SpecsList extends Component {
     }
 
     return (
-      <ul className='outer-files-container list-as-table'>
+      <ul className='specs-list list-as-table'>
         {_.map(specsStore.specs, (spec) => this._specItem(spec, 0))}
       </ul>
     )
@@ -168,7 +168,7 @@ class SpecsList extends Component {
 
   _empty () {
     return (
-      <div id='tests-list-page'>
+      <div className='specs'>
         <div className='empty-well'>
           <h5>
             No files found in
