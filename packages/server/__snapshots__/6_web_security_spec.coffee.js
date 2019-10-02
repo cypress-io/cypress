@@ -185,9 +185,6 @@ exports['e2e web security when disabled passes 1'] = `
                                                                                                     
   Running: web_security_spec.coffee...                                                     (1 of 1) 
 
-Timed out waiting for the browser to connect. Retrying...
-The automation client disconnected. Cannot continue running tests.
-
 
   web security
     ✓ fails when clicking <a> to another origin
