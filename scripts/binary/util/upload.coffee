@@ -10,6 +10,7 @@ os = require("os")
 Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
 konfig = require('../../binary/get-config')()
+{ purgeCloudflareCache } = require('./purge-cloudflare-cache')
 
 formHashFromEnvironment = () ->
   env = process.env
@@ -57,35 +58,6 @@ getPublisher = (getAwsObj = getS3Credentials) ->
     secretAccessKey: aws.secret
   }
 
-hasCloudflareEnvironmentVars = () ->
-  check.unemptyString(process.env.CF_TOKEN) &&
-  check.unemptyString(process.env.CF_ZONEID)
-
-# depends on the credentials file or environment variables
-makeCloudflarePurgeCommand = (url) ->
-  if hasCloudflareEnvironmentVars()
-    console.log("using CF environment variables")
-    token = process.env.CF_TOKEN
-    zoneid = process.env.CF_ZONEID
-    return "curl -X POST -H \"Authorization: Bearer #{CF_TOKEN}\" -H \"Content-Type: application/json\" --data '{\"files\":[\"#{url}\"]}' \"https://api.cloudflare.com/client/v4/zones/#{CF_ZONEID}/purge_cache\""
-  else
-    throw new Error("Cannot form Cloudflare purge command without credentials. Ensure that the CF_TOKEN and CF_ZONEID environment variables are set.")
-
-# purges a given url from Cloudflare
-purgeCache = (url) ->
-  la(check.url(url), "missing url to purge", url)
-
-  new Promise (resolve, reject) =>
-    console.log("purging url", url)
-    purgeCommand = makeCloudflarePurgeCommand(url)
-    cp.exec purgeCommand, (err, stdout, stderr) ->
-      if err
-        console.error("Could not purge #{url}")
-        console.error(err.message)
-        return reject(err)
-      console.log("#purgeCache: #{url}")
-      resolve()
-
 getDestktopUrl = (version, osName, zipName) ->
   url = [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
   url
@@ -101,7 +73,8 @@ purgeDesktopAppFromCache = ({version, platform, zipName}) ->
   osName = getUploadNameByOsAndArch(platform)
   la(check.unemptyString(osName), "missing osName", osName)
   url = getDestktopUrl(version, osName, zipName)
-  purgeCache(url)
+
+  purgeCloudflareCache(url)
 
 # purges links to desktop app for all platforms
 # for a given version
@@ -156,7 +129,6 @@ saveUrl = (filename) -> (url) ->
 module.exports = {
   getS3Credentials,
   getPublisher,
-  purgeCache,
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
   getUploadNameByOsAndArch,
