@@ -44,8 +44,11 @@ isValidVisitMethod = (method) ->
 
 timedOutWaitingForPageLoad = (ms, log) ->
   $errUtils.throwErrByPath("navigation.timed_out", {
+    args: {
+      configFile: Cypress.config("configFile")
+      ms
+    }
     onFail: log
-    args: { ms }
   })
 
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
@@ -222,6 +225,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
       $errUtils.throwErrByPath("navigation.cross_origin", {
         onFail: options._log
         args: {
+          configFile: Cypress.config("configFile")
           message: err.message
           originPolicy: originPolicy
         }

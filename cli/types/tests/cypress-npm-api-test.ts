@@ -9,3 +9,12 @@ cypress.run().then(results => {
   results // $ExpectType CypressRunResult
 })
 cypress.open() // $ExpectType Promise<void>
+cypress.run() // $ExpectType Promise<CypressRunResult>
+
+cypress.open({
+  configFile: false
+})
+
+cypress.run({
+  configFile: "abc123"
+})
