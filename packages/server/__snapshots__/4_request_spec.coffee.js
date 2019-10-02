@@ -422,7 +422,7 @@ exports['e2e requests prints long http props on fail 1'] = `
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
-     CypressError: cy.request() failed on:
+     CypressError: \`cy.request()\` failed on:
 
 http://localhost:2294/myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong
 
@@ -430,9 +430,9 @@ The response we received from your web server was:
 
   > 404: Not Found
 
-This was considered a failure because the status code was not '2xx' or '3xx'.
+This was considered a failure because the status code was not \`2xx\` or \`3xx\`.
 
-If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
 
 -----------------------------------------------------------
 
@@ -471,7 +471,9 @@ Body: <!DOCTYPE html>
 <pre>Cannot GET /myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong</pre>
 </body>
 </html>
-      at stack trace line
+
+https://on.cypress.io/request
+
       at stack trace line
       at stack trace line
       at stack trace line

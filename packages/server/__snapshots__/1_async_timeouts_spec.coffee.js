@@ -30,7 +30,7 @@ exports['e2e async timeouts failing1 1'] = `
       at stack trace line
 
   2) async fails async after cypress command:
-     Error: Timed out after '100ms'. The done() callback was never invoked!
+     Error: Timed out after \`100ms\`. The \`done()\` callback was never invoked!
       at stack trace line
 
 
