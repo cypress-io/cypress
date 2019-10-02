@@ -87,6 +87,14 @@ describe "src/cy/commands/actions/select", ->
       cy.get("select[name=movies]").select([]).then ($select) ->
         expect($select.val()).to.deep.eq []
 
+    it "clears previous value when providing an empty string to a single select", ->
+      ## make sure we have a previous value
+      select = cy.$$("select[name=foods]").val("Ramen")
+      expect(select.val()).to.eq "Ramen"
+
+      cy.get("select[name=foods]").select("").then ($select) ->
+        expect($select.val()).to.eq null
+
     it "lists the select as the focused element", ->
       select = cy.$$("#select-maps")
 
