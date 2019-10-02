@@ -6,7 +6,18 @@ import Tooltip from '@cypress/react-tooltip'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
-const display = (obj) => {
+import schema from '../../../../cli/schema/cypress.schema.json'
+
+const schemaDesc = _.mapValues(schema.properties, (o) => {
+  return o.description
+})
+
+const schemaDefault = _.mapValues(schema.properties, (o) => {
+  return o.default || null
+})
+
+const display = (obj, schemaDesc, schemaDefault) => {
+
   const keys = _.keys(obj)
   const lastKey = _.last(keys)
 
@@ -18,7 +29,7 @@ const display = (obj) => {
     }
 
     if (value.isArray) {
-      return getSpan(key, value, hasComma, true)
+      return getSpan(key, value, hasComma, true, schemaDesc, schemaDefault)
     }
 
     if (_.isObject(value.value)) {
@@ -31,7 +42,7 @@ const display = (obj) => {
       return displayObject(key, value, hasComma)
     }
 
-    return getSpan(key, value, hasComma)
+    return getSpan(key, value, hasComma, false, schemaDesc, schemaDefault)
   })
 }
 
@@ -79,12 +90,15 @@ const displayObject = (key, nestedObj, hasComma) => {
   return displayNestedObj(key, obj, hasComma)
 }
 
-const getSpan = (key, obj, hasComma, isArray) => {
+const getSpan = (key, obj, hasComma, isArray, schemaDesc, schemaDefault) => {
+  let description = (schemaDesc.hasOwnProperty(key)) ? schemaDesc[key] : ''
+  let defaultVal = (schemaDefault.hasOwnProperty(key)) ? `default: ${schemaDefault[key]}` : false
+
   return (
     <div key={key} className='line'>
-      {getKey(key, isArray)}
+      {getKey(key, isArray, description)}
       {getColon(isArray)}
-      <Tooltip title={obj.from || ''} placement='right' className='cy-tooltip'>
+      <Tooltip title={defaultVal} placement='right' className='cy-tooltip'>
         <span className={obj.from}>
           {getString(obj.value)}
           {`${obj.value}`}
@@ -96,8 +110,12 @@ const getSpan = (key, obj, hasComma, isArray) => {
   )
 }
 
-const getKey = (key, isArray) => {
-  return isArray ? '' : <span className='key'>{key}</span>
+const getKey = (key, isArray, value) => {
+  if (!value) {
+    return isArray ? '' : <span className='key'>{key}</span>
+  }
+
+  return isArray ? '' : <Tooltip title={value} className='cy-tooltip'><span className='key'>{key}</span></Tooltip>
 }
 
 const getColon = (isArray) => {
@@ -153,7 +171,7 @@ const Configuration = observer(({ project }) => (
     </table>
     <pre className='config-vars'>
       {'{'}
-      {display(project.resolvedConfig)}
+      {display(project.resolvedConfig, schemaDesc, schemaDefault)}
       {'}'}
     </pre>
   </div>
