@@ -59,6 +59,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not multiple and valueOrText.length > 1
         $utils.throwErrByPath "select.invalid_multiple"
 
+      ## deselect all options if we receive an empty array for a multi select
+      if multiple and valueOrText.length == 0
+        clearOptions = ->
+          options.$el.val([])
+
+        retryClear = ->
+          Promise
+            .try(clearOptions)
+            .catch (err) ->
+              options.error = err
+
+              cy.retry(retryClear, options)
+
+        return Promise
+          .try(retryClear)
+
       getOptions = ->
         ## throw if <select> is disabled
         if options.$el.prop("disabled")

@@ -79,6 +79,14 @@ describe "src/cy/commands/actions/select", ->
       cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
         expect($select.val()).to.deep.eq ["apoc", "br"]
 
+    it "clears previous values when providing an empty array", ->
+      ## make sure we have previous values
+      select = cy.$$("select[name=movies]").val(["br", "2001"])
+      expect(select.val()).to.deep.eq ["br", "2001"]
+
+      cy.get("select[name=movies]").select([]).then ($select) ->
+        expect($select.val()).to.deep.eq []
+
     it "lists the select as the focused element", ->
       select = cy.$$("#select-maps")
 
