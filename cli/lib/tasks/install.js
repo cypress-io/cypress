@@ -164,7 +164,9 @@ const start = (options = {}) => {
       debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
       logger.info(
         stripIndent`
-        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`)
+        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`
+      )
+
       logger.info()
 
       return Promise.resolve()
@@ -187,7 +189,9 @@ const start = (options = {}) => {
         ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
 
               Previous installs of Cypress may not be found.
-      `)
+      `
+    )
+
     logger.info()
   }
 
@@ -220,6 +224,7 @@ const start = (options = {}) => {
     logger.log(stripIndent`
       Cypress ${chalk.green(binaryVersion)} is installed in ${chalk.cyan(installDir)}
       `)
+
     logger.info()
 
     if (options.force) {
@@ -257,6 +262,7 @@ const start = (options = {}) => {
             These versions may not work properly together.
         `)
       )
+
       logger.warn()
     }
 
