@@ -493,11 +493,11 @@ exports['e2e visit normal response timeouts fails when visit times out 1'] = `
   2 failing
 
   1) when visit times out fails timeout exceeds pageLoadTimeout:
-     CypressError: Timed out after waiting '1000ms' for your remote page to load.
+     CypressError: Timed out after waiting \`1000ms\` for your remote page to load.
 
-Your page did not fire its 'load' event within '1000ms'.
+Your page did not fire its \`load\` event within \`1000ms\`.
 
-You can try increasing the 'pageLoadTimeout' value in \`cypress.json\` to wait longer.
+You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
@@ -518,11 +518,11 @@ When this \`load\` event occurs, Cypress will continue running commands.
       at stack trace line
 
   2) when visit times out fails timeout exceeds timeout option:
-     CypressError: Timed out after waiting '500ms' for your remote page to load.
+     CypressError: Timed out after waiting \`500ms\` for your remote page to load.
 
-Your page did not fire its 'load' event within '500ms'.
+Your page did not fire its \`load\` event within \`500ms\`.
 
-You can try increasing the 'pageLoadTimeout' value in \`cypress.json\` to wait longer.
+You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
