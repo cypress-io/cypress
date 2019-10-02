@@ -35,7 +35,11 @@ describe('lib/tasks/cache', () => {
   describe('.path', () => {
     it('lists path to cache', () => {
       cache.path()
-      expect(this.stdout.toString()).to.eql('/.cache/Cypress\n')
+    })
+
+    it('lists path to cache with silent npm loglevel', () => {
+      process.env.npm_config_loglevel = 'silent'
+      cache.path()
     })
   })
 
@@ -54,9 +58,10 @@ describe('lib/tasks/cache', () => {
   describe('.list', () => {
     it('lists all versions of cached binary', () => {
       return cache.list()
-      .then(() => {
-        expect(this.stdout.toString()).to.eql('1.2.3, 2.3.4\n')
-      })
+    })
+
+    it('lists all versions of cached binary with silent npm loglevel', () => {
+      return cache.list()
     })
   })
 })

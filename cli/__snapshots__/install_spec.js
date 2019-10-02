@@ -112,16 +112,6 @@ Cypress Version: 1.2.3
 `
 
 exports['silent install 1'] = `
-[no output]
-`
-
-exports['skip installation 1'] = `
-Note: Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.
-
-
-`
-
-exports['silent install 1'] = `
 Installing Cypress (version: 1.2.3)
 [xx:xx:xx]  Downloading Cypress     [started]
 [xx:xx:xx]  Downloading Cypress     [completed]
@@ -129,6 +119,12 @@ Installing Cypress (version: 1.2.3)
 [xx:xx:xx]  Unzipping Cypress       [completed]
 [xx:xx:xx]  Finishing Installation  [started]
 [xx:xx:xx]  Finishing Installation  [completed]
+
+`
+
+exports['skip installation 1'] = `
+Note: Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.
+
 
 `
 

@@ -19,7 +19,7 @@
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
     "test-dependencies": "npm run check-deps && dependency-check . --no-dev",
     "pretest-unit": "npm run check-deps-pre",
-    "test-unit": "npm run unit",
+    "test-unit": "npm run unit -- test/**/*_spec.js",
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run unit -- --watch",
     "types": "npm run dtslint",

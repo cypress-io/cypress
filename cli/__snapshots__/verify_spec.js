@@ -288,10 +288,6 @@ Found binary version 7.8.9 installed in: /cache/Cypress/1.2.3/Cypress.app
 
 `
 
-exports['silent verify 1'] = `
-[no output]
-`
-
 exports['valid CYPRESS_RUN_BINARY 1'] = `
 Note: You have set the environment variable:
 

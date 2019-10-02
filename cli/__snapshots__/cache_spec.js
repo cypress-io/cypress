@@ -9,3 +9,11 @@ exports['lib/tasks/cache .list lists all versions of cached binary 1'] = `
 exports['lib/tasks/cache .path lists path to cache 1'] = `
 /.cache/Cypress
 `
+
+exports['lib/tasks/cache .path lists path to cache with silent npm loglevel 1'] = `
+/.cache/Cypress
+`
+
+exports['lib/tasks/cache .list lists all versions of cached binary with silent npm loglevel 1'] = `
+1.2.3, 2.3.4
+`
