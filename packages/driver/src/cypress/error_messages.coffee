@@ -1123,7 +1123,7 @@ module.exports = {
       """
     not_attached: (obj) -> {
       message: """
-        #{cmd(obj.name)} failed because this element is detached from the DOM.
+        #{cmd(obj.cmd)} failed because this element is detached from the DOM.
 
         `#{obj.node}`
 
