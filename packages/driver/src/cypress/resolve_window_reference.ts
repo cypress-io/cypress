@@ -11,36 +11,36 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
   const { dom } = Cypress
   const state = Cypress.state as State
 
-  const val = maybeWindow[prop]
+  const actualValue = maybeWindow[prop]
 
-  if (_.isFunction(val)) {
-    return val.bind(maybeWindow)
+  if (_.isFunction(actualValue)) {
+    return actualValue.bind(maybeWindow)
   }
 
-  if (!dom.isWindow(val) || dom.isJquery(val)) {
-    return val
+  if (!dom.isWindow(actualValue) || dom.isJquery(actualValue)) {
+    return actualValue
   }
 
   const $autIframe = state('$autIframe')
 
   if (!$autIframe) {
     // TODO: warning?
-    return val
+    return actualValue
   }
 
   const contentWindow = $autIframe.prop('contentWindow')
 
-  // val is a reference to a Window
+  // actualValue is a reference to a Window
   if (prop === 'top') {
     return contentWindow
   }
 
   if (prop === 'parent') {
-    if (val === contentWindow) {
+    if (actualValue === currentWindow.top) {
       return contentWindow
     }
 
     // else, return the actual parent
-    return currentWindow['prop']
+    return actualValue
   }
 }
