@@ -4,6 +4,7 @@ Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
+findSystemNode = require("./util/find_system_node")
 fs       = require("./util/fs")
 keys     = require("./util/keys")
 origin   = require("./util/origin")
@@ -69,7 +70,8 @@ configKeys = toWords """
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
-  waitForAnimations
+  waitForAnimations               resolvedNodeVersion
+  nodeVersion                     resolvedNodePath
 """
 
 breakingConfigKeys = toWords """
@@ -124,6 +126,7 @@ CONFIG_DEFAULTS = {
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
   pluginsFile:                   "cypress/plugins"
+  nodeVersion:                   "default"
   configFile:                    "cypress.json"
 
   ## deprecated
@@ -164,6 +167,7 @@ validationRules = {
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
+  nodeVersion: v.isOneOf("default", "bundled", "system")
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -309,6 +313,7 @@ module.exports = {
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
     .then(@setScaffoldPaths)
+    .then(_.partialRight(@setNodeBinary, options.onWarning))
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)
@@ -366,6 +371,21 @@ module.exports = {
         else
           source("default")
     .value()
+
+  # instead of the built-in Node process, specify a path to 3rd party Node
+  setNodeBinary: Promise.method (obj, onWarning) ->
+    if obj.nodeVersion != 'system'
+      obj.resolvedNodeVersion = process.versions.node
+      return obj
+
+    findSystemNode.findNodePathAndVersion()
+    .then ({ path, version }) ->
+      obj.resolvedNodePath = path
+      obj.resolvedNodeVersion = version
+    .catch (err) ->
+      onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
+      obj.resolvedNodeVersion = process.versions.node
+    .return(obj)
 
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)

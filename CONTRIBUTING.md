@@ -138,7 +138,7 @@ If an issue already exists you should:
 
 When opening an issue, there is a provided [issue template](./ISSUE_TEMPLATE.md). If the opened issue does not provide enough information asked from the issue template you should:
 
-- Explain that we require new issues follow our provided [issue template](./ISSUE_TEMPLATE.md) and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template). 
+- Explain that we require new issues follow our provided [issue template](./ISSUE_TEMPLATE.md) and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template).
 - Close the issue.
 
 ### Are they running the current version of Cypress?
@@ -170,7 +170,7 @@ The best way to determine the validity of a bug is to recreate it yourself. Foll
 
 - Thank them for their contribution.
 - Explain that there is not enough information to reproduce the bug. Provide information on how you went about recreating the scenario, if you’re able. Note your OS, Browser, Cypress version and any other information.
-- Link them to our contributing guideline for [opening issues](#opening-issues). 
+- Link them to our contributing guideline for [opening issues](#opening-issues).
 - Note that if no reproducible example is provided, we will unfortunately have to close the issue.
 - Add the `stage: needs information` label to the issue.
 
@@ -362,7 +362,7 @@ When you edit files, you can quickly fix all changed files before you commit usi
 npm run lint-changed-fix
 ```
 
-When committing files, we run a Git pre-commit hook to lint the staged JS files. See the [`lint-staged` project](https://github.com/okonet/lint-staged).  
+When committing files, we run a Git pre-commit hook to lint the staged JS files. See the [`lint-staged` project](https://github.com/okonet/lint-staged).
 If this command fails, you may need to run `npm run lint-changed-fix` and commit those changes.
 
 ### Tests
@@ -455,7 +455,7 @@ To run local tests, consult the `README.md` of each package.
 
 We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our dependencies. The bot uses the settings in [renovate.json](renovate.json) to maintain our [Update Dependencies](https://github.com/cypress-io/cypress/issues/3777) issue and open PRs. You can manually select a package to open a PR from our [Update Dependencies](https://github.com/cypress-io/cypress/issues/3777) issue.
 
-Every PR for a package upgrade requires a review of the packages changes either from their changelog or their commits as well as all of the existing Cypress tests to pass. 
+Every PR for a package upgrade requires a review of the packages changes either from their changelog or their commits as well as all of the existing Cypress tests to pass.
 
 #### If there are test failures or breaking changes:
 
@@ -465,3 +465,9 @@ Every PR for a package upgrade requires a review of the packages changes either 
 ## Deployment
 
 We will try to review and merge pull requests quickly. After merging we will try releasing a new version. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](DEPLOY.md)
+
+## Known problems
+
+### ENFILE or EMFILE
+
+If you get `ENFILE: file table overflow`, `ENFILE: too many open files` or any other `ENFILE` or `EMFILE` errors on Mac, that means you are doing synchronous file system operations. Cypress should **NEVER** do them. Instead we should use async file system operations and let `graceful-fs` retry them. Find the place where the synchronous `fs` operation is done from the stacktrace and make it async.

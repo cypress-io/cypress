@@ -700,7 +700,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       This is not the recommended approach, and Cypress may not work correctly.
 
       Please install the 'cypress' NPM package and follow the instructions here:
-      
+
       https://on.cypress.io/installing-cypress
       """
     when "DUPLICATE_TASK_KEY"
@@ -826,6 +826,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
+    when "COULD_NOT_FIND_SYSTEM_NODE"
+      """
+      `nodeVersion` is set to `system`, but Cypress could not find a usable Node executable on your PATH.
+
+      Make sure that your Node executable exists and can be run by the current user.
+
+      Cypress will use the built-in Node version (v#{arg1}) instead.
+      """
     when "INVALID_CYPRESS_ENV"
       """
       We have detected unknown or unsupported CYPRESS_ENV value
@@ -854,7 +862,7 @@ get = (type, arg1, arg2) ->
 warning = (type, arg1, arg2) ->
   err = get(type, arg1, arg2)
   log(err, "magenta")
-  
+
   return null
 
 throwErr = (type, arg1, arg2) ->
@@ -895,16 +903,16 @@ log = (err, color = "red") ->
   console.log chalk[color](err.stack)
 
   return err
-  
+
 logException = Promise.method (err) ->
   ## TODO: remove context here
   if @log(err) and isProduction()
-    ## log this exception since 
+    ## log this exception since
     ## its not a known error
     return require("./logger")
     .createException(err)
     .catch(->)
-  
+
 module.exports = {
   get,
 
