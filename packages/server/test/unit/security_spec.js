@@ -141,8 +141,8 @@ describe('lib/util/security', () => {
   context('.strip', () => {
     // eslint-disable-next-line mocha/no-exclusive-tests
     context.only('injects Cypress window property resolver', () => {
-      function match (varName, prop) {
-        return `(window.top.Cypress.resolveWindowReference(window, ${varName}, '${prop}'))`
+      function match (varName, prop, parens = true) {
+        return `${parens ? '(' : ''}window.top.Cypress.resolveWindowReference(window, ${varName}, '${prop}')${parens ? ')' : ''}`
       }
 
       [
@@ -163,6 +163,18 @@ describe('lib/util/security', () => {
         [
           'if (window["top"] != window["parent"]) run()',
           `if (${match('window', 'top')} != ${match('window', 'parent')}) run()`,
+        ],
+        [
+          'if (top != self) run()',
+          `if ((top === window['top'] ? ${match('window', 'top', false)} : top) != self) run()`,
+        ],
+        [
+          'if (window != top) {',
+          `if (window != (top === window['top'] ? ${match('window', 'top', false)} : top)) {`,
+        ],
+        [
+          'if (top.location != self.location) run()',
+          `if ((top === window['top'] ? ${match('window', 'top', false)} : top).location != self.location) run()`,
         ],
       ].forEach(([string, expected]) => {
         if (!expected) {

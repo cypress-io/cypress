@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const pumpify = require('pumpify')
 const { replaceStream } = require('./replace_stream')
 const utf8Stream = require('utf8-stream')
@@ -57,41 +58,74 @@ const dotAccessRe = new RegExp(
 
 const dotAccessReplacement = `(window.top.Cypress.resolveWindowReference(window, $1, '$2'))$3`
 
-// const topOrParentEqualityBeforeRe = /((?:window|self)(?:\.|\[['"](?:top|self)['"]\])?\s*[!=]==?\s*(?:(?:window|self)(?:\.|\[['"]))?)(top|parent)(?![\w])/g
-// const topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=]==?\s*(?:window|self))/g
-// const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(top|parent)([.])(location|frames)/g
+// need to inject a ternary to determine if `prop === window.prop` (has not been redefined in a closure), now we're having fun
+const closureDetectionTern = (match) => {
+  return `($${match} === window['$${match}'] ? window.top.Cypress.resolveWindowReference(window, window, '$${match}') : $${match})`
+}
+
+// if (window != top) {
+//  $1: window !=
+//  $2: top
+const topOrParentEqualityBeforeRe = /((?:window|self)(?:\.|\[['"](?:top|self)['"]\])?\s*[!=]==?\s*(?:(?:window|self)(?:\.|\[['"]))?)(top|parent)(?![\w])/g
+
+const topOrParentEqualityBeforeReplacement = `$1${closureDetectionTern(2)}`
+
+// if (top != self) {
+//  $1: top
+//  $2:  != self
+const topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=]==?\s*(?:window|self))/g
+
+const topOrParentEqualityAfterReplacement = `${closureDetectionTern(1)}$2`
+
+// if (top.location != self.location) run()
+//  $1: prefix, if any
+//  $2: top
+//  $3: location
+
+const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(top|parent)\.(location|frames)/g
+
+const topOrParentLocationOrFramesReplacement = `$1${closureDetectionTern(2)}.$3`
+
+// TODO: necessary to still do? should be covered by `dotAccessReplacement`
 // const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
 
+const transforms = [
+  {
+    from: dotAccessRe,
+    to: dotAccessReplacement,
+  },
+  {
+    from: bracketAccessRe,
+    to: bracketAccessReplacement,
+  },
+  {
+    from: topOrParentEqualityAfterRe,
+    to: topOrParentEqualityAfterReplacement,
+  },
+  {
+    from: topOrParentEqualityBeforeRe,
+    to: topOrParentEqualityBeforeReplacement,
+  },
+  {
+    from: topOrParentLocationOrFramesRe,
+    to: topOrParentLocationOrFramesReplacement,
+  },
+]
+
 const strip = (html) => {
+  transforms.forEach(({ from, to }) => {
+    html = html.replace(from, to)
+  })
+
   return html
-  .replace(dotAccessRe, dotAccessReplacement)
-  .replace(bracketAccessRe, bracketAccessReplacement)
-  // .replace(topOrParentEqualityBeforeRe, '$1self')
-  // .replace(topOrParentEqualityAfterRe, 'self$2')
-  // .replace(topOrParentLocationOrFramesRe, '$1self$3$4')
-  // .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
 }
 
 const stripStream = () => {
   return pumpify(
     utf8Stream(),
     replaceStream(
-      [
-        dotAccessRe,
-        bracketAccessRe,
-        // topOrParentEqualityBeforeRe,
-        // topOrParentEqualityAfterRe,
-        // topOrParentLocationOrFramesRe,
-        // jiraTopWindowGetterRe,
-      ],
-      [
-        dotAccessReplacement,
-        bracketAccessReplacement,
-        // '$1self',
-        // 'self$2',
-        // '$1self$3$4',
-        // '$1 || $2.parent.__Cypress__$3',
-      ]
+      _.map(transforms, _.property('from')),
+      _.map(transforms, _.property('to'))
     )
   )
 }

@@ -26,7 +26,7 @@ const doublyNestedIframe = {
 
 describe('src/cypress/resolve_window_reference', function () {
   context('resolves correctly', function () {
-    it('returns bound fn given fn', function () {
+    it('returns bound fn if prop is fn', function () {
       const unboundFn = function () {
         return this
       }

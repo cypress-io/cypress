@@ -3,12 +3,25 @@
 (function () {
   function run () {
     const div = document.createElement('div')
-    div.innerText = 'security triggered'
+
+    div.innerText = `security triggered ${(new Error).stack.split('\n', 3)[2]}`
     document.body.appendChild(div)
   }
 
   window.topFoo = "foo"
   window.parentFoo = "foo"
+
+  ;(function() {
+    const top = 'foo'
+    const parent = 'foo'
+    const self = 'foo'
+
+    // should stay local
+    if (top !== self) run()
+    if (parent !== self) run()
+    if (self !== top) run()
+    if (self !== parent) run()
+  })()
 
   if (top != self) run()
   if (top!=self) run()
