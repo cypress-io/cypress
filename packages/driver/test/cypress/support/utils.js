@@ -1,4 +1,4 @@
-export const getCommandLogWithText = (text) => cy.$$(`.command-wrapper:contains(${text}):visible`, top.document).parentsUntil('li').last().parent()[0]
+export const getCommandLogWithText = (text) => cy.$$(`.runnable-active .command-wrapper:contains(${text}):visible`, top.document).parentsUntil('li').last().parent()[0]
 
 export const findReactInstance = function (dom) {
   let key = Object.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
