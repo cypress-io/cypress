@@ -34,11 +34,11 @@ const suspectPropertiesRe = regexPart(/(parent|top)/)
 //  $3: prop if 'prop"
 //  $4: prop if "prop"
 const bracketAccessRe = new RegExp(
-  `${identifierPrefix}\[${whitespaceIncNewlinesRe}*(${
+  `${identifierPrefix}\\[${whitespaceIncNewlinesRe}*(${
     [`'`, `"`].map((mark) => {
       return `${mark}${suspectPropertiesRe}${mark}`
     }).join('|')
-  })${whitespaceIncNewlinesRe}*\]`,
+  })${whitespaceIncNewlinesRe}*\\]`,
   'g'
 )
 

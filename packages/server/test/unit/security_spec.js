@@ -160,6 +160,10 @@ describe('lib/util/security', () => {
         ['window[\'top\'].foo', `${match('window', 'top')}.foo`],
         ['window.top["foo"]', `${match('window', 'top')}["foo"]`],
         ['window[\'top\']["foo"]', `${match('window', 'top')}["foo"]`],
+        [
+          'if (window["top"] != window["parent"]) run()',
+          `if (${match('window', 'top')} != ${match('window', 'parent')}) run()`,
+        ],
       ].forEach(([string, expected]) => {
         if (!expected) {
           expected = string
