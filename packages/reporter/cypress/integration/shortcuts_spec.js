@@ -59,6 +59,19 @@ describe('controls', function () {
       })
     })
 
+    it('does not run shortcut if typed into an input', () => {
+      cy.get('body')
+      .then(($body) => {
+        // this realistically happens with the selector playground, but
+        // need to add an input since this environment is isolated
+        $body.append('<input id="temp-input" />')
+      })
+      .get('#temp-input').type('r')
+      .then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
+      })
+    })
+
     it('has shortcut in tooltips', () => {
       cy.get('.focus-tests > button').trigger('mouseover')
       cy.get('.tooltip').should('have.text', 'View All Tests F')
