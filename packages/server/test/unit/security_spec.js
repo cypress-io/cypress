@@ -139,6 +139,40 @@ const expected = `\
 
 describe('lib/util/security', () => {
   context('.strip', () => {
+    // eslint-disable-next-line mocha/no-exclusive-tests
+    context.only('injects Cypress window property resolver', () => {
+      function match (varName, prop) {
+        return `(window.top.Cypress.resolveWindowReference(window, ${varName}, '${prop}'))`
+      }
+
+      [
+        ['window.top', match('window', 'top')],
+        ['window.parent', match('window', 'parent')],
+        ['window[\'top\']', match('window', 'top')],
+        ['window[\'parent\']', match('window', 'parent')],
+        ['window["top"]', match('window', 'top')],
+        ['window["parent"]', match('window', 'parent')],
+        ['foowindow.top', match('foowindow', 'top')],
+        ['foowindow[\'top\']', match('foowindow', 'top')],
+        ['window.topfoo'],
+        ['window[\'topfoo\']'],
+        ['window.top.foo', `${match('window', 'top')}.foo`],
+        ['window[\'top\'].foo', `${match('window', 'top')}.foo`],
+        ['window.top["foo"]', `${match('window', 'top')}["foo"]`],
+        ['window[\'top\']["foo"]', `${match('window', 'top')}["foo"]`],
+      ].forEach(([string, expected]) => {
+        if (!expected) {
+          expected = string
+        }
+
+        it(`${string} => ${expected}`, () => {
+          const actual = security.strip(string)
+
+          expect(actual).to.eq(expected)
+        })
+      })
+    })
+
     it('replaces obstructive code', () => {
       expect(security.strip(original)).to.eq(expected)
     })
