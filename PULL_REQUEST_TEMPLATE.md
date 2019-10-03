@@ -1,35 +1,43 @@
-<!-- Thanks for contributing!
+<!-- 
+Thanks for contributing!
 Read our contribution guidelines here: 
-https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md -->
+https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md 
+-->
 
-- Closes <!-- issue number here - example "Closes #1234" -->
+<!-- Example: "Closes #1234" -->
 
-### Description of change
+- Closes <!-- issue number here -->
 
-<!-- How would you explain this change in our changelog 
-for every user to read and understand -->
+### User facing changelog
 
-### How to use the feature
+<!--
+Explain the change(s) for every user to read in our changelog.
+-->
 
-<!-- What code does the user write now versus before?
- (a GIF or screenshots of the feature in action is preferred!) 
- Fixing a bug? What test passes now that used to fail for the user? -->
+### Additional details
 
-### How the design has changed
+<!--
+Examples:
+- Why was this change necessary?
+- What is affected by this change?
+- Any implementation details to explain?
+-->
 
-<!-- screenshots comparing the previous design(s) to new -->
+### How has the user experience changed?
 
-### Notes
+<!--
+Provide before and after examples of the change.
+Screenshots or GIFs are preferred.
+-->
 
-<!-- Have something else to add? Add it here :) -->
+### PR Tasks
 
-### Pre-merge Tasks
+<!-- 
+These tasks must be completed before a PR is merged.
+Delete tasks if they are not applicable. 
+-->
 
-<!-- The following tasks must be completed before a PR can be merged.
-You can delete tasks if they are not applicable to the PR changes. -->
-
-- [ ] Have tests been added/updated for the changes in this PR?
-- [ ] Has a PR to [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation) been submitted to document any user-facing changes? <!-- Link to PR here -->
-- [ ] Have the [type definitions](cli/types/index.d.ts) been updated with any user-facing API changes?
-- [ ] Has the [cypress.schema.json](cli/schema/cypress.schema.json) been updated with any new configuration options?
-- [ ] Has the original issue been tagged with a release in ZenHub? <!-- (internal team only)-->
+- [ ] Have tests been added/updated?
+- [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
+- [ ] Have API changes been updated in the [type definitions](cli/types/index.d.ts)?
+- [ ] Have new configuration options been added to the [cypress.schema.json](cli/schema/cypress.schema.json)?
