@@ -127,17 +127,6 @@ module.exports = {
     .return(win)
 
   _attachDebugger: (webContents) ->
-    originalSendCommand = webContents.debugger.sendCommand
-
-    webContents.debugger.sendCommand = (message, data = {}) ->
-      new Promise (resolve, reject) =>
-        debug('debugger: sending %s %o', message, data)
-
-        originalSendCommand.call webContents.debugger, message, data, (err, result) =>
-          debug("debugger: received response for %s: %o", message, { err, result })
-          if _.isEmpty(err)
-            return resolve(result)
-          reject(err)
     try
       webContents.debugger.attach()
       debug("debugger attached")

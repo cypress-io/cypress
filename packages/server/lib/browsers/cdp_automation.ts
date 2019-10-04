@@ -24,16 +24,16 @@ export function CdpAutomation (opts : {
   const { invokeViaDebugger, takeScreenshot } = opts
 
   const _invokeViaDebugger = function (command: string, data?: any) {
-    debug('CDP: sending %s %o', command, data)
+    debug('sending %s %o', command, data)
 
     return invokeViaDebugger(command, data)
     .then((result) => {
-      debug('CDP: received response for %s: %o', command, { result })
+      debug('received response for %s: %o', command, { result })
 
       return result
     })
     .catch((err) => {
-      debug('CDP: received error for %s: %o', command, { err })
+      debug('received error for %s: %o', command, { err })
     })
   }
 
