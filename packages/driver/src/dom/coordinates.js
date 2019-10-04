@@ -5,9 +5,7 @@ const getElementAtPointFromViewport = (doc, x, y) => {
   return doc.elementFromPoint(x, y)
 }
 
-const isAutIframe = (win) => {
-  !$elements.getNativeProp(win.parent, 'frameElement')
-}
+const isAutIframe = (win) => !$elements.getNativeProp(win.parent, 'frameElement')
 
 const getElementPositioning = ($el) => {
   /**
@@ -34,18 +32,17 @@ const getElementPositioning = ($el) => {
     let curWindow = el.ownerDocument.defaultView
     let frame
 
-    while (!isAutIframe(curWindow) && window.parent !== window) {
+    while (!isAutIframe(curWindow) && curWindow.parent !== curWindow) {
       frame = $elements.getNativeProp(curWindow, 'frameElement')
-      curWindow = curWindow.parent
 
-      if (curWindow && $elements.getNativeProp(curWindow, 'frameElement')) {
+      if (curWindow && frame) {
         const frameRect = frame.getBoundingClientRect()
 
         x += frameRect.left
         y += frameRect.top
       }
-      // Cypress will sometimes miss the Iframe if coords are too small
-      // remove this when test-runner is extracted out
+
+      curWindow = curWindow.parent
     }
 
     autFrame = curWindow
@@ -60,12 +57,12 @@ const getElementPositioning = ($el) => {
     }
   }
 
-  const rectCenter = getCenterCoordinates(rect)
   const rectFromAut = getRectFromAutIframe(rect, el)
   const rectFromAutCenter = getCenterCoordinates(rectFromAut)
 
   // add the center coordinates
   // because its useful to any caller
+  const rectCenter = getCenterCoordinates(rect)
 
   const topCenter = rectCenter.y
   const leftCenter = rectCenter.x
@@ -224,7 +221,7 @@ const getElementCoordinatesByPosition = ($el, position) => {
   // but also from the viewport so
   // whoever is calling us can use it
   // however they'd like
-  const { width, height, fromViewport, fromWindow } = positionProps
+  const { width, height, fromViewport, fromWindow, fromAutWindow } = positionProps
 
   // dynamically call the by transforming the nam=> e
   // bottom -> getBottomCoordinates
@@ -259,14 +256,21 @@ const getElementCoordinatesByPosition = ($el, position) => {
   fromWindow.x = windowTargetCoords.x
   fromWindow.y = windowTargetCoords.y
 
+  const autTargetCoords = fn({
+    width,
+    height,
+    top: fromAutWindow.top,
+    left: fromAutWindow.left,
+  })
+
+  fromAutWindow.x = autTargetCoords.x
+  fromAutWindow.y = autTargetCoords.y
+
   // return an object with both sets
   // of normalized coordinates for both
   // the window and the viewport
   return {
-    width,
-    height,
-    fromViewport,
-    fromWindow,
+    ...positionProps,
   }
 }
 

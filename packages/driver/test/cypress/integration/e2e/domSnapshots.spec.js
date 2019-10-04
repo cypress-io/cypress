@@ -1,5 +1,4 @@
-const { withMutableReporterState, findReactInstance, getCommandLogWithText } = require('../../support/utils')
-const { $ } = Cypress
+const { clickCommandLog } = require('../../support/utils')
 
 describe('rect highlight', () => {
   beforeEach(() => {
@@ -19,24 +18,6 @@ describe('rect highlight', () => {
   })
 })
 
-const getAndPin = (sel) => {
-  cy.get(sel)
-
-  cy.wait(0)
-  .then(() => {
-    withMutableReporterState(() => {
-
-      const commandLogEl = getCommandLogWithText(sel)
-
-      const reactCommandInstance = findReactInstance(commandLogEl)
-
-      reactCommandInstance.props.appState.isRunning = false
-
-      $(commandLogEl).find('.command-wrapper').click()
-    })
-  })
-}
-
 const shouldHaveCorrectHighlightPositions = () => {
   return cy.wrap(null, { timeout: 400 }).should(() => {
     const dims = {
@@ -48,6 +29,11 @@ const shouldHaveCorrectHighlightPositions = () => {
     expectToBeInside(dims.content, dims.padding, 'content to be inside padding')
     expectToBeInside(dims.padding, dims.border, 'padding to be inside border')
   })
+}
+
+const getAndPin = (sel) => {
+  cy.get(sel)
+  clickCommandLog(sel)
 }
 
 const expectToBeInside = (rectInner, rectOuter, mes = 'rect to be inside rect') => {
