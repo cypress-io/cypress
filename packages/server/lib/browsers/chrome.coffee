@@ -13,7 +13,8 @@ fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 protocol  = require("./protocol")
-{initCriClient} = require("./cri-client")
+{ CdpAutomation } = require("./cdp_automation")
+{ initCriClient } = require("./cri-client")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
@@ -141,30 +142,35 @@ _connectToChromeRemoteInterface = (port) ->
     debug("received wsUrl %s for port %d", wsUrl, port)
     initCriClient(wsUrl)
 
-_maybeRecordVideo = (options) ->
-  (client) ->
-    if options.screencastFrame
-      debug('starting screencast')
-      client.Page.screencastFrame(options.screencastFrame)
-      client.send('Page.startScreencast', {
-        format: 'jpeg'
-      })
-    client
+_maybeRecordVideo = (client, options) ->
+  if options.screencastFrame
+    debug('starting screencast')
+    client.Page.screencastFrame(options.screencastFrame)
+    client.send('Page.startScreencast', {
+      format: 'jpeg'
+    })
 
 # a utility function that navigates to the given URL
 # once Chrome remote interface client is passed to it.
-_navigateUsingCRI = (url) ->
+_navigateUsingCRI = (client, url) ->
   la(check.url(url), "missing url to navigate to", url)
+  la(client, "could not get CRI client")
+  debug("received CRI client")
+  debug('navigating to page %s', url)
+  # when opening the blank page and trying to navigate
+  # the focus gets lost. Restore it and then navigate.
+  client.send("Page.bringToFront")
+  .then ->
+    client.send("Page.navigate", { url })
 
-  (client) ->
-    la(client, "could not get CRI client")
-    debug("received CRI client")
-    debug('navigating to page %s', url)
-    # when opening the blank page and trying to navigate
-    # the focus gets lost. Restore it and then navigate.
-    client.send("Page.bringToFront")
-    .then ->
-      client.send("Page.navigate", { url })
+_setAutomation = (client, automation) ->
+  automation.use(
+    CdpAutomation({
+      invokeViaDebugger: client.send
+      takeScreenshot: ->
+        client.send('Page.captureScreenshot')
+    })
+  )
 
 module.exports = {
   #
@@ -287,6 +293,8 @@ module.exports = {
         # and when the connection is ready
         # navigate to the actual url
         @_connectToChromeRemoteInterface(port)
-        .then @_maybeRecordVideo(options)
-        .then @_navigateUsingCRI(url)
+        .then (client) =>
+          _setAutomation(client, automation)
+          @_maybeRecordVideo(client, options)
+          @_navigateUsingCRI(client, url)
 }
