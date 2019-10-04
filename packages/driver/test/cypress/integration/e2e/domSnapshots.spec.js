@@ -1,5 +1,4 @@
-const { withMutableReporterState, findReactInstance, getCommandLogWithText } = require('../../support/utils')
-const { $ } = Cypress
+const { clickCommandLog } = require('../../support/utils')
 
 describe('rect highlight', () => {
   beforeEach(() => {
@@ -17,25 +16,24 @@ describe('rect highlight', () => {
 
     shouldHaveCorrectHighlightPositions()
   })
-})
 
-const getAndPin = (sel) => {
-  cy.get(sel)
+  it('replaces iframe with placeholder content', () => {
+    cy.$$('iframe:first').css({ padding: 0, width: '600px' })
+    getAndPin('iframe:first')
 
-  cy.wait(0)
-  .then(() => {
-    withMutableReporterState(() => {
+    // NOTE: possibly switch to visual screenshot diffing in future
+    // since data: iframes are considered cross-origin and we cannot
+    // query into them and assert on contents
+    // e.g. cy.get('iframe:first').toMatchScreenshot()
 
-      const commandLogEl = getCommandLogWithText(sel)
+    // For now we parse the src attr and assert on base64 encoded content
+    cy.get('iframe:first').then(($iframe) => {
+      const html = $iframe.attr('src')
 
-      const reactCommandInstance = findReactInstance(commandLogEl)
-
-      reactCommandInstance.props.appState.isRunning = false
-
-      $(commandLogEl).find('.command-wrapper').click()
+      expect(atob(html.split(',')[1])).to.contain('placeholder')
     })
   })
-}
+})
 
 const shouldHaveCorrectHighlightPositions = () => {
   return cy.wrap(null, { timeout: 400 }).should(() => {
@@ -48,6 +46,11 @@ const shouldHaveCorrectHighlightPositions = () => {
     expectToBeInside(dims.content, dims.padding, 'content to be inside padding')
     expectToBeInside(dims.padding, dims.border, 'padding to be inside border')
   })
+}
+
+const getAndPin = (sel) => {
+  cy.get(sel)
+  clickCommandLog(sel)
 }
 
 const expectToBeInside = (rectInner, rectOuter, mes = 'rect to be inside rect') => {

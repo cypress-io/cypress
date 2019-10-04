@@ -1,4 +1,12 @@
-export const getCommandLogWithText = (text) => cy.$$(`.runnable-active .command-wrapper:contains(${text}):visible`, top.document).parentsUntil('li').last().parent()[0]
+const { $ } = Cypress
+
+export const getCommandLogWithText = (text) => {
+  return cy
+  .$$(`.runnable-active .command-wrapper:contains(${text}):visible`, top.document)
+  .parentsUntil('li')
+  .last()
+  .parent()
+}
 
 export const findReactInstance = function (dom) {
   let key = Object.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
@@ -10,6 +18,26 @@ export const findReactInstance = function (dom) {
     ? internalInstance._debugOwner.stateNode
     : internalInstance.return.stateNode
 
+}
+
+export const clickCommandLog = (sel) => {
+  return cy.wait(0)
+  .then(() => {
+    withMutableReporterState(() => {
+
+      const commandLogEl = getCommandLogWithText(sel)
+
+      const reactCommandInstance = findReactInstance(commandLogEl[0])
+
+      if (!reactCommandInstance) {
+        assert(false, 'failed to get command log React instance')
+      }
+
+      reactCommandInstance.props.appState.isRunning = false
+
+      $(commandLogEl).find('.command-wrapper').click()
+    })
+  })
 }
 
 export const withMutableReporterState = (fn) => {
