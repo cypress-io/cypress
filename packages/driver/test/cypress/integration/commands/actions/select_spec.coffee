@@ -87,12 +87,36 @@ describe "src/cy/commands/actions/select", ->
       cy.get("select[name=movies]").select([]).then ($select) ->
         expect($select.val()).to.deep.eq []
 
+    it "does not throw any errors if an empty array is provided to a multi select with nothing selected", ->
+      ## make sure no values are selected
+      select = cy.$$("select[name=movies]").val([])
+      expect(select.val()).to.deep.eq []
+
+      cy.get("select[name=movies]").select([]).then ($select) ->
+        expect($select.val()).to.deep.eq []
+
+    it "does not throw any errors if an empty string is provided to a multi select", ->
+      cy.get("select[name=movies]").select("").then ($select) ->
+        expect($select.val()).to.deep.eq []
+
     it "clears previous value when providing an empty string to a single select", ->
       ## make sure we have a previous value
       select = cy.$$("select[name=foods]").val("Ramen")
       expect(select.val()).to.eq "Ramen"
 
       cy.get("select[name=foods]").select("").then ($select) ->
+        expect($select.val()).to.eq null
+
+    it "does not throw any errors if an empty string is provided to a single select with nothing selected", ->
+      ## make sure no value is selected
+      select = cy.$$("select[name=foods]").val("")
+      expect(select.val()).to.eq null
+
+      cy.get("select[name=foods]").select("").then ($select) ->
+        expect($select.val()).to.eq null
+
+    it "does not throw any errors if an array is provided to a single select", ->
+      cy.get("select[name=foods]").select([]).then ($select) ->
         expect($select.val()).to.eq null
 
     it "lists the select as the focused element", ->
