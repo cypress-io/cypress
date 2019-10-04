@@ -25,7 +25,41 @@ const mouseHoverEvents = [
 ]
 const focusEvents = ['focus', 'focusin']
 
-const allMouseEvents = [...mouseClickEvents, ...mouseHoverEvents, ...focusEvents]
+const attachListeners = (listenerArr) => {
+  return (els) => {
+    _.each(els, (el, elName) => {
+      return listenerArr.forEach((evtName) => {
+        el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
+      })
+    })
+  }
+}
+
+const attachFocusListeners = attachListeners(focusEvents)
+const attachMouseClickListeners = attachListeners(mouseClickEvents)
+const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
+const attachMouseDblclickListeners = attachListeners(['dblclick'])
+const attachContextmenuListeners = attachListeners(['contextmenu'])
+
+const getAllFn = (...aliases) => {
+  if (aliases.length > 1) {
+    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
+  }
+
+  return Cypress.Promise.all(
+    aliases[0].split(' ').map((alias) => {
+      return cy.now('get', alias)
+    })
+  )
+}
+
+Cypress.Commands.add('getAll', getAllFn)
+
+const wrapped = (obj) => cy.wrap(obj, { log: false })
+const shouldBeCalled = (stub) => wrapped(stub).should('be.called')
+const shouldBeCalledOnce = (stub) => wrapped(stub).should('be.calledOnce')
+const shouldBeCalledWithCount = (num) => (stub) => wrapped(stub).should('have.callCount', num)
+const shouldNotBeCalled = (stub) => wrapped(stub).should('not.be.called')
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
@@ -180,85 +214,6 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    describe('pointer-events:none', () => {
-      beforeEach(function () {
-        cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo(cy.$$('#dom'))
-        this.ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>').appendTo(cy.$$('#dom'))
-        cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red">#ptrNone > div</div>').appendTo(this.ptrNone)
-
-        this.logs = []
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-
-          this.logs.push(log)
-        })
-      })
-
-      it('element behind pointer-events:none should still get click', () => {
-        cy.get('#ptr').click() // should pass with flying colors
-      })
-
-      it('should be able to force on pointer-events:none with force:true', () => {
-        cy.get('#ptrNone').click({ timeout: 300, force: true })
-      })
-
-      it('should error with message about pointer-events', function () {
-        const onError = cy.stub().callsFake((err) => {
-          const { lastLog } = this
-
-          expect(err.message).to.contain('has CSS \'pointer-events: none\'')
-          expect(err.message).to.not.contain('inherited from')
-          const consoleProps = lastLog.invoke('consoleProps')
-
-          expect(_.keys(consoleProps)).deep.eq([
-            'Command',
-            'Tried to Click',
-            'But it has CSS',
-            'Error',
-          ])
-
-          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
-        })
-
-        cy.once('fail', onError)
-
-        cy.get('#ptrNone').click({ timeout: 300 })
-        .then(() => {
-          expect(onError).calledOnce
-        })
-      })
-
-      it('should error with message about pointer-events and include inheritance', function () {
-        const onError = cy.stub().callsFake((err) => {
-          const { lastLog } = this
-
-          expect(err.message).to.contain('has CSS \'pointer-events: none\', inherited from this element:')
-          expect(err.message).to.contain('<div id="ptrNone"')
-          const consoleProps = lastLog.invoke('consoleProps')
-
-          expect(_.keys(consoleProps)).deep.eq([
-            'Command',
-            'Tried to Click',
-            'But it has CSS',
-            'Inherited From',
-            'Error',
-          ])
-
-          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
-
-          expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
-        })
-
-        cy.once('fail', onError)
-
-        cy.get('#ptrNoneChild').click({ timeout: 300 })
-        .then(() => {
-          expect(onError).calledOnce
-        })
-
-      })
-    })
-
     it('records correct clientX when el scrolled', (done) => {
       const $btn = $('<button id=\'scrolledBtn\' style=\'position: absolute; top: 1600px; left: 1200px; width: 100px;\'>foo</button>').appendTo(cy.$$('body'))
 
@@ -387,19 +342,22 @@ describe('src/cy/commands/actions/click', () => {
 
       attachFocusListeners({ btn })
       attachMouseClickListeners({ btn, div })
-      attachMouseHoverListeners({ div })
+      attachMouseHoverListeners({ btn, div })
 
       btn.on('pointerdown', () => {
         // synchronously remove this button
-
         btn.remove()
       })
 
-      // return
       cy.contains('button').click()
 
       cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
       cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
+
+      // the browser is in control of whether or not the pointerdown event
+      // so this test *may* not necessarily pass in all browsers, but it's
+      // worth adding to help specify the current expected behavior
+      cy.getAll('div', 'pointerdown').each(shouldNotBeCalled)
       cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
     })
 
@@ -413,7 +371,6 @@ describe('src/cy/commands/actions/click', () => {
 
       btn.on('pointerover', () => {
         // synchronously remove this button
-
         btn.remove()
       })
 
@@ -457,7 +414,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('sends modifiers', () => {
-
       const btn = cy.$$('button:first')
 
       attachMouseClickListeners({ btn })
@@ -739,6 +695,7 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/4347
     it('can click inside an iframe', () => {
       cy.get('iframe')
       .should(($iframe) => {
@@ -750,7 +707,6 @@ describe('src/cy/commands/actions/click', () => {
         // return cy.wrap($iframe[0].contentDocument.body)
         return cy.wrap($iframe.first().contents().find('body'))
       })
-
       .within(() => {
         cy.get('a#hashchange')
         // .should($el => $el[0].click())
@@ -758,6 +714,84 @@ describe('src/cy/commands/actions/click', () => {
       })
       .then(($body) => {
         expect($body[0].ownerDocument.defaultView.location.hash).eq('#hashchange')
+      })
+    })
+
+    describe('pointer-events:none', () => {
+      beforeEach(function () {
+        cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo(cy.$$('#dom'))
+        this.ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>').appendTo(cy.$$('#dom'))
+        cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red">#ptrNone > div</div>').appendTo(this.ptrNone)
+
+        this.logs = []
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+
+          this.logs.push(log)
+        })
+      })
+
+      it('element behind pointer-events:none should still get click', () => {
+        cy.get('#ptr').click() // should pass with flying colors
+      })
+
+      it('should be able to force on pointer-events:none with force:true', () => {
+        cy.get('#ptrNone').click({ timeout: 300, force: true })
+      })
+
+      it('should error with message about pointer-events', function () {
+        const onError = cy.stub().callsFake((err) => {
+          const { lastLog } = this
+
+          expect(err.message).to.contain('has CSS \'pointer-events: none\'')
+          expect(err.message).to.not.contain('inherited from')
+          const consoleProps = lastLog.invoke('consoleProps')
+
+          expect(_.keys(consoleProps)).deep.eq([
+            'Command',
+            'Tried to Click',
+            'But it has CSS',
+            'Error',
+          ])
+
+          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
+        })
+
+        cy.once('fail', onError)
+
+        cy.get('#ptrNone').click({ timeout: 300 })
+        .then(() => {
+          expect(onError).calledOnce
+        })
+      })
+
+      it('should error with message about pointer-events and include inheritance', function () {
+        const onError = cy.stub().callsFake((err) => {
+          const { lastLog } = this
+
+          expect(err.message).to.contain('has CSS \'pointer-events: none\', inherited from this element:')
+          expect(err.message).to.contain('<div id="ptrNone"')
+          const consoleProps = lastLog.invoke('consoleProps')
+
+          expect(_.keys(consoleProps)).deep.eq([
+            'Command',
+            'Tried to Click',
+            'But it has CSS',
+            'Inherited From',
+            'Error',
+          ])
+
+          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
+
+          expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
+        })
+
+        cy.once('fail', onError)
+
+        cy.get('#ptrNoneChild').click({ timeout: 300 })
+        .then(() => {
+          expect(onError).calledOnce
+        })
       })
     })
 
@@ -831,11 +865,10 @@ describe('src/cy/commands/actions/click', () => {
         })
         .prependTo($body)
 
-        $(`\
-<div><input type="text" data-cy="input" />
-<br><br>
-<a href="#" data-cy="button"> Button </a></div>\
-`)
+        $(`<div><input type="text" data-cy="input" />
+          <br><br>
+          <a href="#" data-cy="button"> Button </a></div>\
+        `)
         .attr('id', 'nav')
         .css({
           position: 'sticky',
@@ -988,6 +1021,10 @@ describe('src/cy/commands/actions/click', () => {
 
         $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
+        .css({
+          width: 120,
+          height: 20,
+        })
         .appendTo(cy.$$('#fixed-nav-test'))
         .mousedown(spy)
 
@@ -1009,11 +1046,21 @@ describe('src/cy/commands/actions/click', () => {
         // - element scrollIntoView
         // - element scrollIntoView (retry animation coords)
         // - window
-        cy.get('#button-covered-in-nav').click()
-        .then(() => {
+        cy
+        .get('#button-covered-in-nav').click()
+        .then(($btn) => {
+          const rect = $btn.get(0).getBoundingClientRect()
+          const { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
+          // this button should be 120 pixels wide
+          expect(rect.width).to.eq(120)
+
+          const obj = spy.firstCall.args[0]
+
+          // clientX + clientY are relative to the document
           expect(scrolled).to.deep.eq(['element', 'element', 'window'])
-          expect(spy.args[0][0]).property('clientX').closeTo(60, 2)
-          expect(spy.args[0][0]).property('clientY').eq(68)
+          expect(obj).property('clientX').closeTo(fromViewport.leftCenter, 1)
+          expect(obj).property('clientY').closeTo(fromViewport.topCenter, 1)
         })
       })
 
@@ -1901,8 +1948,6 @@ describe('src/cy/commands/actions/click', () => {
 
           this.logs.push(log)
         })
-
-        null
       })
 
       it('logs immediately before resolving', (done) => {
@@ -2023,23 +2068,26 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps', () => {
-        cy.get('button').first().click().then(function ($button) {
+        cy.get('button').first().click().then(function ($btn) {
           const { lastLog } = this
 
-          const console = lastLog.invoke('consoleProps')
-          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
-          const logCoords = lastLog.get('coords')
+          const rect = $btn.get(0).getBoundingClientRect()
+          const consoleProps = lastLog.invoke('consoleProps')
+          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-          expect(logCoords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
-          expect(logCoords.y).to.be.closeTo(fromWindow.y, 1) // ensure we are within 1
-          expect(console.Command).to.eq('click')
-          expect(console['Applied To'], 'applied to').to.eq(lastLog.get('$el').get(0))
-          expect(console.Elements).to.eq(1)
-          expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
+          // this button should be 60 pixels wide
+          expect(rect.width).to.eq(60)
 
-          expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
+          expect(consoleProps.Coords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
+          expect(consoleProps.Coords.y).to.be.closeTo(fromWindow.y, 1) // ensure we are within 1
+
+          expect(consoleProps).to.containSubset({
+            'Command': 'click',
+            'Applied To': lastLog.get('$el').get(0),
+            'Elements': 1,
+          })
         })
-      }) // ensure we are within 1
+      })
 
       it('#consoleProps actual element clicked', () => {
         const $btn = $('<button>', {
@@ -2225,7 +2273,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('span#not-hidden').click().click()
 
         cy.getAll('btn', 'mousemove mouseover').each(shouldBeCalledOnce)
-        cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledNth(2))
+        cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledWithCount(2))
         .then(function () {
 
           const { logs } = this
@@ -2396,7 +2444,6 @@ describe('src/cy/commands/actions/click', () => {
           spyTableData.reset()
 
           return withMutableReporterState(() => {
-
             const commandLogEl = getCommandLogWithText('click')
 
             const reactCommandInstance = findReactInstance(commandLogEl)
@@ -2555,7 +2602,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('serially dblclicks a collection of anchors to the top of the page', () => {
-
       const throttled = cy.stub().as('clickcount')
 
       // create a throttled click function
@@ -2580,7 +2626,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('serially dblclicks a collection', () => {
-
       const throttled = cy.stub().as('clickcount')
 
       // create a throttled click function
@@ -2820,19 +2865,23 @@ describe('src/cy/commands/actions/click', () => {
 
         })
 
-        cy.get('button').first().dblclick().then(function () {
+        cy.get('button').first().dblclick().then(function ($btn) {
           const { lastLog } = this
 
+          const rect = $btn.get(0).getBoundingClientRect()
           const consoleProps = lastLog.invoke('consoleProps')
+          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
+          // this button should be 60 pixels wide
+          expect(rect.width).to.eq(60)
+
+          expect(consoleProps.Coords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
+          expect(consoleProps.Coords.y).to.be.closeTo(fromWindow.y, 1) // ensure we are within 1
 
           expect(consoleProps).to.containSubset({
             'Command': 'dblclick',
             'Applied To': {},
             'Elements': 1,
-            'Coords': {
-              'x': 34,
-              'y': 548,
-            },
             'Options': {
               'multiple': true,
             },
@@ -2947,7 +2996,7 @@ describe('src/cy/commands/actions/click', () => {
               ],
             },
             {
-              'name': 'Mouse Dblclick Event',
+              'name': 'Mouse Double Click Event',
               'data': [
                 {
                   'Event Name': 'dblclick',
@@ -2965,7 +3014,6 @@ describe('src/cy/commands/actions/click', () => {
   })
 
   context('#rightclick', () => {
-
     it('can rightclick', () => {
       const el = cy.$$('button:first')
 
@@ -3259,22 +3307,25 @@ describe('src/cy/commands/actions/click', () => {
       it('#consoleProps', function () {
         cy.on('log:added', (attrs, log) => {
           this.log = log
-
         })
 
-        cy.get('button').first().rightclick().then(function () {
+        cy.get('button').first().rightclick().then(function ($btn) {
           const { lastLog } = this
 
+          const rect = $btn.get(0).getBoundingClientRect()
           const consoleProps = lastLog.invoke('consoleProps')
+          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
+          // this button should be 60 pixels wide
+          expect(rect.width).to.eq(60)
+
+          expect(consoleProps.Coords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
+          expect(consoleProps.Coords.y).to.be.closeTo(fromWindow.y, 1) // ensure we are within 1
 
           expect(consoleProps).to.containSubset({
             'Command': 'rightclick',
             'Applied To': {},
             'Elements': 1,
-            'Coords': {
-              'x': 34,
-              'y': 548,
-            },
             'table': {},
           })
 
@@ -3344,7 +3395,7 @@ describe('src/cy/commands/actions/click', () => {
               ],
             },
             {
-              'name': 'Contextmenu Event',
+              'name': 'Mouse Right Click Event',
               'data': [
                 {
                   'Event Name': 'contextmenu',
@@ -3364,14 +3415,12 @@ describe('src/cy/commands/actions/click', () => {
 })
 
 describe('mouse state', () => {
-
   describe('mouse/pointer events', () => {
     beforeEach(() => {
       cy.visit('http://localhost:3500/fixtures/dom.html')
     })
 
     describe('resets mouse state', () => {
-
       it('set state', () => {
         cy.get('div.item:first').then(($el) => {
           const mouseenter = cy.stub().as('mouseenter')
@@ -3386,7 +3435,7 @@ describe('mouse state', () => {
               doc: cy.state('document'),
             }
 
-            cy.devices.mouse.mouseMove(coords)
+            cy.devices.mouse.move(coords)
             expect(mouseenter).to.be.calledOnce
             expect(cy.state('mouseCoords')).ok
           })
@@ -3394,7 +3443,7 @@ describe('mouse state', () => {
       })
 
       it('reset state', () => {
-        const mouseenter = cy.stub().callsFake(() => { }).as('mouseenter')
+        const mouseenter = cy.stub().as('mouseenter')
 
         cy.get('body').then(($el) => {
           $el[0].addEventListener('mouseenter', mouseenter)
@@ -3803,7 +3852,6 @@ describe('mouse state', () => {
       })
 
       it('will respect changes to dom in event handlers', () => {
-
         const els = {
           sq4: cy.$$('#sq4'),
           outer: cy.$$('#outer'),
@@ -3818,24 +3866,23 @@ describe('mouse state', () => {
         cy.get('#sq4').click()
         cy.get('#outer').click()
 
-        cy.getAll('@sq4:mouseover @sq4:mousedown @sq4:mouseup @sq4:click').each(shouldBeCalledNth(2))
+        cy.getAll('sq4', 'mouseover mousedown mouseup click').each(shouldBeCalledWithCount(2))
 
-        cy.getAll('@sq4:mouseout').each(shouldBeCalledOnce)
+        cy.getAll('sq4', 'mouseout').each(shouldBeCalledOnce)
 
-        cy.getAll('@outer:mousedown @outer:mouseup @outer:click').each(shouldNotBeCalled)
+        cy.getAll('outer', 'mousedown mouseup click').each(shouldNotBeCalled)
 
-        cy.getAll('@outer:mouseover @outer:mouseout').each(shouldBeCalledOnce)
+        cy.getAll('outer', 'mouseover mouseout').each(shouldBeCalledOnce)
 
         cy.get('input:first').click().should('not.have.focus')
 
-        cy.getAll('@input:mouseover @input:mouseout').each(shouldBeCalledOnce)
+        cy.getAll('input', 'mouseover mouseout').each(shouldBeCalledOnce)
 
-        cy.getAll('@input:mousedown @input:mouseup @input:click').each(shouldNotBeCalled)
+        cy.getAll('input', 'mousedown mouseup click').each(shouldNotBeCalled)
 
       })
 
       it('can click on a recursively moving element', () => {
-
         const sq6 = cy.$$('#sq6')
 
         /*
@@ -3853,16 +3900,22 @@ describe('mouse state', () => {
         .click()
 
         cy.getAll('sq6', 'mousedown pointerdown click').each(shouldBeCalledOnce)
-        cy.getAll('sq6', 'mouseover').each(shouldBeCalledNth(2))
+        cy.getAll('sq6', 'mouseover').each(shouldBeCalledWithCount(2))
       })
     })
 
     it('handles disabled attr', () => {
-      const btn = cy.$$(/*html*/'<input id=\'btn\'>').appendTo(cy.$$('body'))
-
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
+      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      .css({
+        float: 'left',
+        display: 'block',
+        width: 250,
+        height: 30,
       })
+      .appendTo(cy.$$('body'))
+
+      attachMouseHoverListeners({ btn })
+      attachMouseClickListeners({ btn })
 
       btn.on('pointerover', () => {
         btn.attr('disabled', true)
@@ -3870,22 +3923,27 @@ describe('mouse state', () => {
 
       cy.get('#btn').click()
 
-      cy.getAll('@pointerover @pointerenter @pointerdown @pointerup').each((stub) => {
+      cy.getAll('btn', 'pointerover pointerenter pointerdown pointerup').each((stub) => {
         expect(stub).to.be.calledOnce
       })
 
-      cy.getAll('@mouseover @mouseenter @mousedown @mouseup @click').each((stub) => {
+      cy.getAll('btn', 'mouseover mouseenter mousedown mouseup click').each((stub) => {
         expect(stub).to.not.be.called
       })
-
     })
 
     it('handles disabled attr added on mousedown', () => {
-      const btn = cy.$$(/*html*/'<input id=\'btn\'>').appendTo(cy.$$('body'))
-
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
+      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      .css({
+        float: 'left',
+        display: 'block',
+        width: 250,
+        height: 30,
       })
+      .appendTo(cy.$$('body'))
+
+      attachMouseHoverListeners({ btn })
+      attachMouseClickListeners({ btn })
 
       btn.on('mousedown', () => {
         btn.attr('disabled', true)
@@ -3893,37 +3951,43 @@ describe('mouse state', () => {
 
       cy.get('#btn').click()
 
-      cy.getAll('@pointerdown @mousedown @pointerup').each((stub) => {
+      cy.getAll('btn', 'pointerdown mousedown pointerup').each((stub) => {
         expect(stub).to.be.calledOnce
       })
 
-      cy.getAll('@mouseup @click').each((stub) => {
+      cy.getAll('btn', 'mouseup click').each((stub) => {
         expect(stub).to.not.be.calledOnce
       })
     })
 
     it('can click new element after mousemove sequence', () => {
-      const btn = cy.$$(/*html*/'<input id=\'btn\'>').css({ display: 'block' }).appendTo(cy.$$('body'))
+      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      .css({
+        float: 'left',
+        display: 'block',
+        width: 250,
+        height: 30,
+      })
+      .appendTo(cy.$$('body'))
+
       const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
         backgroundColor: 'blue',
         position: 'relative',
-        height: '50px',
-        width: '300px',
-        top: '-30px',
-      }).appendTo(btn.parent())
+        height: 50,
+        width: 300,
+      })
+      .appendTo(btn.parent())
 
       cover.on('mousemove', () => {
         cover.hide()
       })
 
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
-        cover.on(eventName, cy.stub().as(`cover:${eventName}`))
-      })
+      attachMouseHoverListeners({ btn, cover })
+      attachMouseClickListeners({ btn, cover })
 
       cy.get('#cover').click()
 
-      cy.getAll('@cover:pointerdown @cover:mousedown @cover:pointerup @cover:mouseup @cover:click').each((stub) => {
+      cy.getAll('cover', 'pointerdown mousedown pointerup mouseup click').each((stub) => {
         expect(stub).to.not.be.called
       })
 
@@ -3932,21 +3996,35 @@ describe('mouse state', () => {
       //   expect(stub).to.be.calledOnce
       // })
 
-      cy.getAll('@pointerdown @mousedown @mouseup @pointerup @click').each((stub) => {
+      cy.getAll('btn', 'pointerdown mousedown mouseup pointerup click').each((stub) => {
         expect(stub).to.be.calledOnce
       })
-
     })
 
     it('can click new element after mousemove sequence [disabled]', () => {
-      const btn = cy.$$(/*html*/'<input id=\'btn\'>').css({ display: 'block' }).appendTo(cy.$$('body'))
+      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      .css({
+        float: 'left',
+        display: 'block',
+        width: 250,
+        height: 30,
+      })
+      .appendTo(cy.$$('body'))
+
       const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
         backgroundColor: 'blue',
         position: 'relative',
-        height: '50px',
-        width: '300px',
-        top: '-30px',
-      }).appendTo(btn.parent())
+        height: 50,
+        width: 300,
+      })
+      .appendTo(btn.parent())
+
+      cover.on('mousemove', () => {
+        cover.hide()
+      })
+
+      attachMouseHoverListeners({ btn, cover })
+      attachMouseClickListeners({ btn, cover })
 
       btn.attr('disabled', true)
 
@@ -3954,40 +4032,45 @@ describe('mouse state', () => {
         cover.hide()
       })
 
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
-      })
+      attachMouseHoverListeners({ btn, cover })
+      attachMouseClickListeners({ btn, cover })
 
       cy.get('#cover').click()
 
-      cy.getAll('@mousedown @mouseup @click').each((stub) => {
+      cy.getAll('btn', 'mousedown mouseup click').each((stub) => {
         expect(stub).to.not.be.called
       })
 
       // on disabled inputs, pointer events are still fired
-      cy.getAll('@pointerdown @pointerup').each((stub) => {
+      cy.getAll('btn', 'pointerdown pointerup').each((stub) => {
         expect(stub).to.be.called
       })
-
     })
 
     it('can target new element after mousedown sequence', () => {
-      const btn = cy.$$(/*html*/'<input id=\'btn\'>').css({ display: 'block' }).appendTo(cy.$$('body'))
+      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      .css({
+        float: 'left',
+        display: 'block',
+        width: 250,
+        height: 30,
+      })
+      .appendTo(cy.$$('body'))
+
       const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
         backgroundColor: 'blue',
         position: 'relative',
-        height: '50px',
-        width: '300px',
-        top: '-30px',
-      }).appendTo(btn.parent())
+        height: 50,
+        width: 300,
+      })
+      .appendTo(btn.parent())
 
       cover.on('mousedown', () => {
         cover.hide()
       })
 
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
-      })
+      attachMouseHoverListeners({ btn, cover })
+      attachMouseClickListeners({ btn, cover })
 
       btn.on('mouseup', () => {
         btn.attr('disabled', true)
@@ -3995,30 +4078,35 @@ describe('mouse state', () => {
 
       cy.get('#cover').click()
 
-      cy.getAll('@mouseup @pointerup').each((stub) => {
+      cy.getAll('btn', 'mouseup pointerup').each((stub) => {
         expect(stub).to.be.calledOnce
       })
-
     })
 
     it('can target new element after mouseup sequence', () => {
-      const btn = cy.$$(/*html*/'<input id=\'btn\'>').css({ display: 'block' }).appendTo(cy.$$('body'))
+      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      .css({
+        float: 'left',
+        display: 'block',
+        width: 250,
+        height: 30,
+      })
+      .appendTo(cy.$$('body'))
+
       const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
         backgroundColor: 'blue',
         position: 'relative',
-        height: '50px',
-        width: '300px',
-        top: '-30px',
-      }).appendTo(btn.parent())
+        height: 50,
+        width: 300,
+      })
+      .appendTo(btn.parent())
 
       cover.on('mouseup', () => {
         cover.hide()
       })
 
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
-        cover.on(eventName, cy.stub().as(`cover:${eventName}`))
-      })
+      attachMouseHoverListeners({ btn, cover })
+      attachMouseClickListeners({ btn, cover })
 
       btn.on('mouseup', () => {
         btn.attr('disabled', true)
@@ -4026,43 +4114,47 @@ describe('mouse state', () => {
 
       cy.get('#cover').click()
 
-      return cy.getAll('@cover:click').each((stub) => {
+      cy.getAll('cover', 'click').each((stub) => {
         expect(stub).to.not.be.called
-      }).then(() => {
-        return cy.getAll('@cover:pointerdown @cover:mousedown @cover:mouseup').each((stub) => {
-          expect(stub).to.be.calledOnce
-        })
       })
 
+      cy.getAll('cover', 'pointerdown mousedown mouseup').each((stub) => {
+        expect(stub).to.be.calledOnce
+      })
     })
 
     it('responds to changes in move handlers', () => {
-      const btn = cy.$$(/*html*/'<input id=\'btn\'>').css({ display: 'block' }).appendTo(cy.$$('body'))
+      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      .css({
+        float: 'left',
+        display: 'block',
+        width: 250,
+        height: 30,
+      })
+      .appendTo(cy.$$('body'))
+
       const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
         backgroundColor: 'blue',
         position: 'relative',
-        height: '50px',
-        width: '300px',
-        top: '-30px',
-      }).appendTo(btn.parent())
+        height: 50,
+        width: 300,
+      })
+      .appendTo(btn.parent())
 
       cover.on('mouseover', () => {
         cover.hide()
       })
 
-      allMouseEvents.forEach((eventName) => {
-        btn.on(eventName, cy.stub().as(eventName))
-
-        cover.on(eventName, cy.stub().as(`cover:${eventName}`))
-      })
+      attachMouseHoverListeners({ btn, cover })
+      attachMouseClickListeners({ btn, cover })
 
       cy.get('#cover').click()
 
-      cy.getAll('@cover:mousedown').each((stub) => {
+      cy.getAll('cover', 'mousedown').each((stub) => {
         expect(stub).to.not.be.called
       })
 
-      cy.getAll('@pointerdown @mousedown @mouseup @pointerup @click').each((stub) => {
+      cy.getAll('btn', 'pointerdown mousedown mouseup pointerup click').each((stub) => {
         expect(stub).to.be.calledOnce
       })
     })
@@ -4070,39 +4162,3 @@ describe('mouse state', () => {
   })
 
 })
-
-const attachListeners = (listenerArr) => {
-  return (els) => {
-    _.each(els, (el, elName) => {
-      return listenerArr.forEach((evtName) => {
-        el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
-      })
-    })
-  }
-}
-
-const attachFocusListeners = attachListeners(focusEvents)
-const attachMouseClickListeners = attachListeners(mouseClickEvents)
-const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
-const attachMouseDblclickListeners = attachListeners(['dblclick'])
-const attachContextmenuListeners = attachListeners(['contextmenu'])
-
-const getAllFn = (...aliases) => {
-  if (aliases.length > 1) {
-    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
-  }
-
-  return Cypress.Promise.all(
-    aliases[0].split(' ').map((alias) => {
-      return cy.now('get', alias)
-    })
-  )
-}
-
-Cypress.Commands.add('getAll', getAllFn)
-
-const _wrapLogFalse = (obj) => cy.wrap(obj, { log: false })
-const shouldBeCalled = (stub) => _wrapLogFalse(stub).should('be.called')
-const shouldBeCalledOnce = (stub) => _wrapLogFalse(stub).should('be.calledOnce')
-const shouldBeCalledNth = (num) => (stub) => _wrapLogFalse(stub).should('have.callCount', num)
-const shouldNotBeCalled = (stub) => _wrapLogFalse(stub).should('not.be.called')

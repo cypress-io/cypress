@@ -19,9 +19,8 @@ export const withMutableReporterState = (fn) => {
 
   currentTestLog.props.model.isOpen = true
 
-  return Cypress.Promise.try(() => {
-    return fn()
-  }).then(() => {
+  return Cypress.Promise.try(fn)
+  .then(() => {
     top.Runner.configureMobx({ enforceActions: 'strict' })
   })
 
