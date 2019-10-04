@@ -17,6 +17,7 @@ describe('rect highlight', () => {
     shouldHaveCorrectHighlightPositions()
   })
 
+  // https://github.com/cypress-io/cypress/issues/5295
   it('replaces iframe with placeholder content', () => {
     cy.$$('iframe:first').css({ padding: 0, width: '600px' })
     getAndPin('iframe:first')
