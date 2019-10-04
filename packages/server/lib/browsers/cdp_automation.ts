@@ -34,6 +34,7 @@ export function CdpAutomation (opts : {
     })
     .catch((err) => {
       debug('received error for %s: %o', command, { err })
+      throw err
     })
   }
 
