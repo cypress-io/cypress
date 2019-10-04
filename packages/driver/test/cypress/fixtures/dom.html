@@ -6,6 +6,12 @@
   <body>
     <div id="dom">
       <style>
+        body {
+          display: block;
+          padding: 0;
+          margin: 8px;
+        }
+        
         :focus {
           background-color: red;
           border: 1px solid black;
@@ -47,6 +53,14 @@
 
         [contenteditable] p {
           display: block
+        }
+
+        .content-box {
+          box-sizing: content-box
+        }
+        
+        #button {
+          width: 60px
         }
 
       </style>
@@ -427,6 +441,8 @@
       </div>
 
       <div id="invisible" style="display: none;">i am not visible</div>
+
+      <button class="content-box">content-box</button>
 
       <div id="svgs">
         <svg data-cy="line" width="300" height="200">

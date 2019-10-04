@@ -1,8 +1,8 @@
-const $dom = require('../dom')
-const $elements = require('../dom/elements')
 const $ = require('jquery')
 const _ = require('lodash')
-const $Keyboard = require('./keyboard').default
+const $dom = require('../dom')
+const $elements = require('../dom/elements')
+const $Keyboard = require('./keyboard')
 const $selection = require('../dom/selection')
 const debug = require('debug')('cypress:driver:mouse')
 
@@ -23,19 +23,26 @@ const getLastHoveredEl = (state) => {
   }
 
   return lastHoveredEl
+}
 
+const defaultPointerDownUpOptions = {
+  pointerType: 'mouse',
+  pointerId: 1,
+  isPrimary: true,
+  detail: 0,
+  // pressure 0.5 is default for mouse that doesn't support pressure
+  // https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pressure
+  pressure: 0.5,
 }
 
 const getMouseCoords = (state) => {
   return state('mouseCoords')
 }
 
-const create = (state, focused) => {
-
+const create = (state, keyboard, focused) => {
   const mouse = {
-
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
+      const _activeModifiers = keyboard.getActiveModifiers()
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
@@ -53,8 +60,8 @@ const create = (state, focused) => {
      * @param {Coords} coords
      * @param {HTMLElement} forceEl
      */
-    mouseMove (coords, forceEl) {
-      debug('mousemove', coords)
+    move (coords, forceEl) {
+      debug('mouse.move', coords)
 
       const lastHoveredEl = getLastHoveredEl(state)
 
@@ -63,13 +70,9 @@ const create = (state, focused) => {
       // if coords are same AND we're already hovered on the element, don't send move events
       if (_.isEqual({ x: coords.x, y: coords.y }, getMouseCoords(state)) && lastHoveredEl === targetEl) return { el: targetEl }
 
-      const events = mouse._mouseMoveEvents(targetEl, coords)
+      const events = mouse._moveEvents(targetEl, coords)
 
       const resultEl = mouse.getElAtCoordsOrForce(coords, forceEl)
-
-      if (resultEl !== targetEl) {
-        mouse._mouseMoveEvents(resultEl, coords)
-      }
 
       return { el: resultEl, fromEl: lastHoveredEl, events }
     },
@@ -77,9 +80,15 @@ const create = (state, focused) => {
     /**
      * @param {HTMLElement} el
      * @param {Coords} coords
+     * Steps to perform mouse move:
+     * - send out events to elLastHovered (bubbles)
+     * - send leave events to all Elements until commonAncestor
+     * - send over events to elToHover (bubbles)
+     * - send enter events to all elements from commonAncestor
+     * - send move events to elToHover (bubbles)
+     * - elLastHovered = elToHover
      */
-    _mouseMoveEvents (el, coords) {
-
+    _moveEvents (el, coords) {
       // events are not fired on disabled elements, so we don't have to take that into account
       const win = $dom.getWindowByElement(el)
       const { x, y } = coords
@@ -190,7 +199,6 @@ const create = (state, focused) => {
 
       }
 
-      // if (!Cypress.config('mousemoveBeforeMouseover') && el) {
       pointermove = () => {
         return sendPointermove(el, defaultPointerOptions)
       }
@@ -215,7 +223,6 @@ const create = (state, focused) => {
       events.push({ mousemove: mousemove() })
 
       return events
-
     },
 
     /**
@@ -231,10 +238,7 @@ const create = (state, focused) => {
 
       const el = doc.elementFromPoint(x, y)
 
-      // mouse._mouseMoveEvents(el, { x, y })
-
       return el
-
     },
 
     /**
@@ -247,7 +251,7 @@ const create = (state, focused) => {
         return forceEl
       }
 
-      const { el } = mouse.mouseMove(coords)
+      const { el } = mouse.move(coords)
 
       return el
     },
@@ -256,7 +260,7 @@ const create = (state, focused) => {
      * @param {Coords} coords
      * @param {HTMLElement} forceEl
      */
-    _mouseDownEvents (coords, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+    _downEvents (coords, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
 
       const { x, y } = coords
       const el = mouse.moveToCoordsOrForce(coords, forceEl)
@@ -266,14 +270,10 @@ const create = (state, focused) => {
       const defaultOptions = mouse._getDefaultMouseOptions(x, y, win)
 
       const pointerEvtOptions = _.extend({}, defaultOptions, {
+        ...defaultPointerDownUpOptions,
         button: 0,
         which: 1,
         buttons: 1,
-        detail: 0,
-        pressure: 0.5,
-        pointerType: 'mouse',
-        pointerId: 1,
-        isPrimary: true,
         relatedTarget: null,
       }, pointerEvtOptionsExtend)
 
@@ -317,11 +317,10 @@ const create = (state, focused) => {
 
     },
 
-    mouseDown (coords, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
-
+    down (coords, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       const $previouslyFocused = focused.getFocused()
 
-      const mouseDownEvents = mouse._mouseDownEvents(coords, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownEvents = mouse._downEvents(coords, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       // el we just send pointerdown
       const el = mouseDownEvents.pointerdownProps.el
@@ -334,7 +333,6 @@ const create = (state, focused) => {
       const $elToFocus = $elements.getFirstFocusableEl($(el))
 
       if (focused.needsFocus($elToFocus, $previouslyFocused)) {
-
         if ($dom.isWindow($elToFocus)) {
           // if the first focusable element from the click
           // is the window, then we can skip the focus event
@@ -367,19 +365,41 @@ const create = (state, focused) => {
      * @param {Coords} fromViewport
      * @param {HTMLElement} forceEl
      */
-    mouseUp (fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
-      debug('mouseUp', { fromViewport, forceEl, skipMouseEvent })
+    up (fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+      debug('mouse.up', { fromViewport, forceEl, skipMouseEvent })
 
-      return mouse._mouseUpEvents(fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      return mouse._upEvents(fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
     },
 
-    mouseClick (fromViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
-      debug('mouseClick', { fromViewport, forceEl })
-      const mouseDownEvents = mouse.mouseDown(fromViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+    /**
+    *
+    * Steps to perform a click:
+    *
+    * moveToCoordsOrNoop = (coords) => {
+    *   elAtPoint = getElementFromPoint(coords)
+    *   if (elAtPoint !== elLastHovered)
+    *     sendMouseMoveEvents({to: elAtPoint, from: elLastHovered})
+    *     elLastHovered = elAtPoint
+    *   return getElementFromPoint(coords)
+    * }
+    *
+    * coords = getCoords(elSubject)
+    * el1 = moveToCoordsOrNoop(coords)
+    * sendMousedown(el1)
+    * el2 = moveToCoordsOrNoop(coords)
+    * sendMouseup(el2)
+    * el3 = moveToCoordsOrNoop(coords)
+    * if (notDetached(el1))
+    * sendClick(el3)
+    */
+    click (fromViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+      debug('mouse.click', { fromViewport, forceEl })
+
+      const mouseDownEvents = mouse.down(fromViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
 
-      const mouseUpEvents = mouse.mouseUp(fromViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseUpEvents = mouse.up(fromViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const skipClickEvent = $elements.isDetachedEl(mouseDownEvents.pointerdownProps.el)
 
@@ -395,19 +415,15 @@ const create = (state, focused) => {
      * @param {HTMLElement} forceEl
      * @param {Window} win
      */
-    _mouseUpEvents (fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+    _upEvents (fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
 
       const win = state('window')
 
       let defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
 
       const pointerEvtOptions = _.extend({}, defaultOptions, {
+        ...defaultPointerDownUpOptions,
         buttons: 0,
-        pressure: 0.5,
-        pointerType: 'mouse',
-        pointerId: 1,
-        isPrimary: true,
-        detail: 0,
       }, pointerEvtOptionsExtend)
 
       let mouseEvtOptions = _.extend({}, defaultOptions, {
@@ -482,7 +498,7 @@ const create = (state, focused) => {
 
     dblclick (fromViewport, forceEl, mouseEvtOptionsExtend = {}) {
       const click = (clickNum) => {
-        const clickEvents = mouse.mouseClick(fromViewport, forceEl, {}, { detail: clickNum })
+        const clickEvents = mouse.click(fromViewport, forceEl, {}, { detail: clickNum })
 
         return clickEvents
       }
@@ -504,7 +520,6 @@ const create = (state, focused) => {
     },
 
     rightclick (fromViewport, forceEl) {
-
       const pointerEvtOptionsExtend = {
         button: 2,
         buttons: 2,
@@ -516,18 +531,17 @@ const create = (state, focused) => {
         which: 3,
       }
 
-      const mouseDownEvents = mouse.mouseDown(fromViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownEvents = mouse.down(fromViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const contextmenuEvent = mouse._contextmenuEvent(fromViewport, forceEl)
 
       const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
 
-      const mouseUpEvents = mouse.mouseUp(fromViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseUpEvents = mouse.up(fromViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const clickEvents = _.extend({}, mouseDownEvents, mouseUpEvents)
 
       return _.extend({}, { clickEvents, contextmenuEvent })
-
     },
   }
 
@@ -536,12 +550,12 @@ const create = (state, focused) => {
 
 const { stopPropagation } = window.MouseEvent.prototype
 
-const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, constructor) => {
+const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, Constructor) => {
   evtOptions = _.extend({}, evtOptions, { bubbles, cancelable })
   const _eventModifiers = $Keyboard.fromModifierEventOptions(evtOptions)
   const modifiers = $Keyboard.modifiersToString(_eventModifiers)
 
-  const evt = new constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
+  const evt = new Constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
 
   if (bubbles) {
     evt.stopPropagation = function (...args) {
@@ -550,6 +564,8 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
       return stopPropagation.apply(this, ...args)
     }
   }
+
+  debug('event:', evtName, el)
 
   const preventedDefault = !el.dispatchEvent(evt)
 
@@ -563,16 +579,16 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
 }
 
 const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
-  const constructor = el.ownerDocument.defaultView.PointerEvent
+  const Constructor = el.ownerDocument.defaultView.PointerEvent
 
-  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
+  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, Constructor)
 }
 const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
-  // IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
+  // TODO: IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
   // https://dom.spec.whatwg.org/#dom-document-createevent
-  const constructor = el.ownerDocument.defaultView.MouseEvent
+  const Constructor = el.ownerDocument.defaultView.MouseEvent
 
-  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
+  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, Constructor)
 }
 
 const sendPointerup = (el, evtOptions) => {
@@ -633,7 +649,6 @@ const formatReasonNotFired = (reason) => {
 }
 
 const toCoordsEventOptions = (x, y, win) => {
-
   // these are the coords from the document, ignoring scroll position
   const fromDocCoords = $elements.getFromDocCoords(x, y, win)
 

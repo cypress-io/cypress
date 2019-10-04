@@ -6,6 +6,7 @@ const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
+const $Keyboard = require('../../../cy/keyboard')
 const Debug = require('debug')
 const debug = Debug('cypress:driver:command:type')
 
@@ -16,8 +17,7 @@ const debug = Debug('cypress:driver:command:type')
 // const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 
 module.exports = function (Commands, Cypress, cy, state, config) {
-  const { keyboard } = cy.internal
-  const { Keyboard } = Cypress
+  const { keyboard } = cy.devices
 
   function type (subject, chars, options = {}) {
     // debugger
@@ -51,7 +51,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          const modifiers = Keyboard.modifiersToString(Keyboard.getActiveModifiers(state))
+          const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers())
 
           if (modifiers) {
             obj.modifiers = modifiers
@@ -93,8 +93,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             'Applied To': $dom.getElements(options.$el),
             'Options': deltaOptions,
             'table': {
-              //# mouse events tables will take up slots 1 and 2 if they're present
-              //# this preserves the order of the tables
+              // mouse events tables will take up slots 1 and 2 if they're present
+              // this preserves the order of the tables
               3: () => {
                 return {
                   name: 'Keyboard Events',
@@ -104,7 +104,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               },
             },
           }
+
         },
+
       })
 
       options._log.snapshot('before', { next: 'after' })

@@ -6,6 +6,9 @@ import * as $document from './document'
 import $utils from '../cypress/utils.coffee'
 import * as $selection from './selection'
 import _ from '../config/lodash'
+import { parentHasDisplayNone } from './visibility'
+
+const { wrap } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -491,6 +494,16 @@ const isFocusable = ($el: JQuery<Element>) => {
  */
 const isFocusableWhenNotDisabled = ($el: JQuery<Element>) => {
   return _.some(focusableWhenNotDisabled, (sel) => $el.is(sel)) || (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
+}
+
+const isW3CRendered = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
+  return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+}
+
+const isW3CFocusable = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
 const isType = function (el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
@@ -1060,6 +1073,7 @@ export {
   isDisabled,
   isReadOnlyInput,
   isReadOnlyInputOrTextarea,
+  isW3CFocusable,
   isAttached,
   isDetached,
   isAttachedEl,

@@ -1,10 +1,13 @@
 import cs from 'classnames'
+import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import authApi from './auth-api'
+import authStore from './auth-store'
 import ipc from '../lib/ipc'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
+@observer
 class LoginForm extends Component {
   static defaultProps = {
     onSuccess () {},
@@ -16,7 +19,7 @@ class LoginForm extends Component {
   }
 
   render () {
-    const { message } = this.props
+    const { message } = authStore
 
     return (
       <div className='login-content'>
@@ -28,7 +31,7 @@ class LoginForm extends Component {
           onClick={this._login}
           disabled={this.state.isLoggingIn}
         >
-          {this._buttonContent()}
+          {this._buttonContent(message)}
         </button>
         {
           message && <p className={`message ${message.type}`} onClick={this._selectUrl}>
@@ -53,11 +56,9 @@ class LoginForm extends Component {
     selection.addRange(range)
   }
 
-  _buttonContent () {
-    const message = this.props.message || {}
-
+  _buttonContent (message) {
     if (this.state.isLoggingIn) {
-      if (message.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
+      if (message && message.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
         return (
           <span>
             <i className='fa fa-exclamation-triangle'></i>{' '}
@@ -69,7 +70,7 @@ class LoginForm extends Component {
       return (
         <span>
           <i className='fa fa-spinner fa-spin'></i>{' '}
-          {message.browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
+          {message && message.browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
         </span>
       )
     }
