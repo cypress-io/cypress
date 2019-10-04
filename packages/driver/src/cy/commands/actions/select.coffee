@@ -72,8 +72,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
               cy.retry(retryClear, options)
 
-        return Promise
-          .try(retryClear)
+        return retryClear()
 
       getOptions = ->
         ## throw if <select> is disabled
