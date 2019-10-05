@@ -99,7 +99,7 @@ const getSpan = (key, obj, hasComma, isArray, schemaDesc, schemaDefault) => {
   if (defaultVal) {
     schemaValue = (<Tooltip title={defaultVal} placement='right' className='cy-tooltip'>{spanValue}</Tooltip>)
   } else {
-    schemaValue = (<span className={obj.from}>{spanValue}</span>)
+    schemaValue = ({ spanValue })
   }
 
   return (
