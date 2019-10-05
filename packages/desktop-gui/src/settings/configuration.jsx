@@ -93,18 +93,20 @@ const displayObject = (key, nestedObj, hasComma) => {
 const getSpan = (key, obj, hasComma, isArray, schemaDesc, schemaDefault) => {
   let description = (schemaDesc.hasOwnProperty(key)) ? schemaDesc[key] : ''
   let defaultVal = (schemaDefault.hasOwnProperty(key)) ? `default: ${schemaDefault[key]}` : false
+  let schemaValue
+  let spanValue = (<span className={obj.from}>{getString(obj.value)}{`${obj.value}`}{getString(obj.value)}</span>)
+
+  if (defaultVal) {
+    schemaValue = (<Tooltip title={defaultVal} placement='right' className='cy-tooltip'>{spanValue}</Tooltip>)
+  } else {
+    schemaValue = (<span className={obj.from}>{spanValue}</span>)
+  }
 
   return (
     <div key={key} className='line'>
       {getKey(key, isArray, description)}
       {getColon(isArray)}
-      <Tooltip title={defaultVal} placement='right' className='cy-tooltip'>
-        <span className={obj.from}>
-          {getString(obj.value)}
-          {`${obj.value}`}
-          {getString(obj.value)}
-        </span>
-      </Tooltip>
+      {schemaValue}
       {getComma(hasComma)}
     </div>
   )
