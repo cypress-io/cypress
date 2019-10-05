@@ -309,6 +309,7 @@ declare namespace Cypress {
      */
     dom: {
       isHidden(element: JQuery | HTMLElement): boolean
+      isDetached(element: JQuery | HTMLElement): boolean
     }
 
     /**
