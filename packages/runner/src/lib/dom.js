@@ -71,6 +71,9 @@ function addElementBoxModelLayers ($el, $body) {
   const dimensions = getElementDimensions($el)
 
   const $container = $('<div class="__cypress-highlight">')
+  .css({
+    opacity: 0.7,
+  })
 
   const layers = {
     Content: '#9FC4E7',
@@ -224,7 +227,6 @@ function createLayer ($el, attr, color, container, dimensions) {
     position: 'absolute',
     zIndex: getZIndex($el),
     backgroundColor: color,
-    opacity: 0.6,
   }
 
   return $('<div>')
@@ -238,15 +240,15 @@ function createLayer ($el, attr, color, container, dimensions) {
 function dimensionsMatchPreviousLayer (obj, container) {
   // since we're prepending to the container that
   // means the previous layer is actually the first child element
-  const previousLayer = container.children().first()
+  const previousLayer = container.children().first().get(0)
 
   // bail if there is no previous layer
   if (!previousLayer) {
     return
   }
 
-  return obj.width === previousLayer.width() &&
-  obj.height === previousLayer.height()
+  return obj.width === previousLayer.offsetWidth &&
+  obj.height === previousLayer.offsetHeight
 }
 
 function getDimensionsFor (dimensions, attr, dimension) {
@@ -262,10 +264,14 @@ function getZIndex (el) {
 }
 
 function getElementDimensions ($el) {
+  const el = $el.get(0)
+
   const dimensions = {
     offset: $el.offset(), // offset disregards margin but takes into account border + padding
-    height: $el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
-    width: $el.width(),
+    // dont use jquery here for width/height because it uses getBoundingClientRect() which returns scaled values.
+    // TODO: switch back to using jquery when upgrading to jquery 3.4+
+    height: el.offsetHeight,
+    width: el.offsetWidth,
     paddingTop: getPadding($el, 'top'),
     paddingRight: getPadding($el, 'right'),
     paddingBottom: getPadding($el, 'bottom'),
@@ -280,6 +286,11 @@ function getElementDimensions ($el) {
     marginLeft: getMargin($el, 'left'),
   }
 
+  // NOTE: offsetWidth/height always give us content + padding + border, so subtract them
+  // TODO: remove this when upgrading jquery to 3.4+
+  dimensions.width -= dimensions.paddingLeft + dimensions.paddingRight + dimensions.borderLeft + dimensions.borderRight
+  dimensions.height -= dimensions.paddingTop + dimensions.paddingBottom + dimensions.borderTop + dimensions.borderBottom
+
   // innerHeight: Get the current computed height for the first
   // element in the set of matched elements, including padding but not border.
 
@@ -287,14 +298,25 @@ function getElementDimensions ($el) {
   // element in the set of matched elements, including padding, border,
   // and optionally margin. Returns a number (without 'px') representation
   // of the value or null if called on an empty set of elements.
+  dimensions.heightWithPadding =
+    dimensions.height + dimensions.paddingTop + dimensions.paddingBottom
 
-  dimensions.heightWithPadding = $el.innerHeight()
-  dimensions.heightWithBorder = $el.innerHeight() + getTotalFor(['borderTop', 'borderBottom'], dimensions)
-  dimensions.heightWithMargin = $el.outerHeight(true)
+  dimensions.heightWithBorder =
+    dimensions.heightWithPadding +
+    dimensions.borderTop +
+    dimensions.borderBottom
 
-  dimensions.widthWithPadding = $el.innerWidth()
-  dimensions.widthWithBorder = $el.innerWidth() + getTotalFor(['borderRight', 'borderLeft'], dimensions)
-  dimensions.widthWithMargin = $el.outerWidth(true)
+  dimensions.heightWithMargin =
+    dimensions.heightWithBorder + dimensions.marginTop + dimensions.marginBottom
+
+  dimensions.widthWithPadding =
+    dimensions.width + dimensions.paddingLeft + dimensions.paddingRight
+
+  dimensions.widthWithBorder =
+    dimensions.widthWithPadding + dimensions.borderLeft + dimensions.borderRight
+
+  dimensions.widthWithMargin =
+    dimensions.widthWithBorder + dimensions.marginLeft + dimensions.marginRight
 
   return dimensions
 }
@@ -320,12 +342,6 @@ function getBorder ($el, dir) {
 
 function getMargin ($el, dir) {
   return getNumAttrValue($el, `margin-${dir}`)
-}
-
-function getTotalFor (directions, dimensions) {
-  return _.reduce(directions, (memo, direction) => {
-    return memo + dimensions[direction]
-  }, 0)
 }
 
 function getOuterSize ($el) {

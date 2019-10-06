@@ -7,6 +7,8 @@ describe('rect highlight', () => {
   })
 
   it('highlight elements are properly positioned', () => {
+    cy.$$('button:first').css({ boxSizing: 'content-box' })
+
     getAndPin('button:first')
 
     shouldHaveCorrectHighlightPositions()
@@ -14,6 +16,27 @@ describe('rect highlight', () => {
 
   it('highlight elements properly positioned for content-box', () => {
     getAndPin('button.content-box:first')
+
+    shouldHaveCorrectHighlightPositions()
+  })
+
+  it('highlight elements with css transform', () => {
+    cy.$$('button:first').css({ transform: 'scale(1.5) rotate(45deg)' })
+
+    getAndPin('button:first')
+
+    shouldHaveCorrectHighlightPositions()
+  })
+
+  it('highlight elements with css transform on parent', () => {
+    cy.$$('<div id="parent">parent<div id="child">child</div></div>').css({
+      transform: 'scale(1.5) rotate(45deg) translate(100px, 20px)',
+      height: 40,
+      width: 60,
+    })
+    .prependTo(cy.$$('body'))
+
+    getAndPin('#child')
 
     shouldHaveCorrectHighlightPositions()
   })
