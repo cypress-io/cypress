@@ -2,7 +2,7 @@ const $ = require('jquery')
 const _ = require('lodash')
 const $dom = require('../dom')
 const $elements = require('../dom/elements')
-const $Keyboard = require('./keyboard')
+const $Keyboard = require('./keyboard').default
 const $selection = require('../dom/selection')
 const debug = require('debug')('cypress:driver:mouse')
 
@@ -42,7 +42,8 @@ const getMouseCoords = (state) => {
 const create = (state, keyboard, focused) => {
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = keyboard.getActiveModifiers()
+      debug({ keyboard })
+      const _activeModifiers = $Keyboard.getActiveModifiers(state)
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
