@@ -28,6 +28,7 @@
   "dependencies": {
     "@cypress/listr-verbose-renderer": "0.4.1",
     "@cypress/xvfb": "1.2.4",
+    "@types/sizzle": "2.3.2",
     "arch": "2.1.1",
     "bluebird": "3.5.0",
     "cachedir": "1.3.0",
