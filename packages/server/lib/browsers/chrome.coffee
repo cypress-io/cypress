@@ -164,20 +164,10 @@ _navigateUsingCRI = (client, url) ->
     client.send("Page.navigate", { url })
 
 _setAutomation = (client, automation) ->
-  takeScreenshot = ->
-    client.ensureMinimumProtocolVersion('1.3')
-    .catch (err) ->
-      console.log(err)
-      throw new Error("takeScreenshot requires at least Chrome 64.\n\nDetails:\n${err.message}")
-    .then ->
-      client.send('Page.captureScreenshot')
-    .then (b64Image) ->
-      "data:image/png;base64,#{b64Image.data}"
-
   automation.use(
     CdpAutomation({
       invokeViaDebugger: client.send
-      takeScreenshot
+      takeScreenshot: client.takeScreenshot
     })
   )
 
