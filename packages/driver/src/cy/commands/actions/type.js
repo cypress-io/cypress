@@ -441,7 +441,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       options.ensure = {
         position: true,
         visibility: true,
-        receivability: true,
+        notDisabled: true,
         notAnimating: true,
         notCovered: true,
         notReadonly: true,
