@@ -337,18 +337,27 @@ const getStackLineDetails = (stack, lineIndex = 0) => {
 const translateStackLine = (stackUtil, stackLine) => {
   const generatedDetails = stackUtil.parseLine(stackLine)
 
-  if (!generatedDetails) return stackLine
+  if (!generatedDetails) return `at ${stackLine}`
 
   const sourceDetails = getSourceDetails(generatedDetails)
 
-  if (!sourceDetails) return stackLine
+  if (!sourceDetails) return `at ${stackLine}`
 
   const { source, line, column } = sourceDetails
 
   return `at ${generatedDetails.function} (${source}:${line}:${column})`
 }
 
-const stackLineRegex = /^\s*at /
+const stackLineRegex = /^(\s*)at /
+
+const getWhitespace = (line) => {
+  if (!line) return ''
+
+  // eslint-disable-next-line no-unused-vars
+  const [__, whitespace] = line.match(stackLineRegex) || []
+
+  return whitespace
+}
 
 // returns tuple of [message, stack]
 const splitStack = (stack) => {
@@ -368,10 +377,11 @@ const splitStack = (stack) => {
 
 const getSourceStack = (stack = '') => {
   const [messageLines, stackLines] = splitStack(stack)
+  const whitespace = getWhitespace(stackLines[0])
   const stackUtil = new StackUtils()
-  const cleanedLines = getCleanedStackLines(stackUtil, stackLines)
+  const cleanedLines = _.compact(getCleanedStackLines(stackUtil, stackLines))
   const translated = _.map(cleanedLines, (line) => {
-    return `    ${translateStackLine(stackUtil, line)}`
+    return `${whitespace}${translateStackLine(stackUtil, line)}`
   })
 
   return messageLines.concat(translated).join('\n')
