@@ -1,3 +1,3 @@
-import rewriter from './rewriter'
+export { HtmlJsRewriter, rewriteHtmlJs } from './html'
 
-export default rewriter
+export { rewriteJs } from './js'

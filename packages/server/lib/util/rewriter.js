@@ -16,7 +16,7 @@ const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
 
-const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRemoved) {
+const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRemoved, isHtml) {
   const replace = (re, str) => {
     return html.replace(re, str)
   }
@@ -33,7 +33,7 @@ const rewriteHtml = function (html, domainName, wantsInjection, wantsSecurityRem
   //# strip clickjacking and framebusting
   //# from the HTML if we've been told to
   if (wantsSecurityRemoved) {
-    html = security.strip(html)
+    html = security.strip(html, { isHtml })
   }
 
   switch (false) {

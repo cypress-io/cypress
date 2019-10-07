@@ -192,6 +192,8 @@ module.exports = {
       if responseMustHaveEmptyBody(req.method, statusCode)
         return res.end()
 
+      isHtml = !resContentTypeIsJavaScript(headers)
+
       ## if there is nothing to inject then just
       ## bypass the stream buffer and pipe this back
       if wantsInjection
@@ -199,7 +201,7 @@ module.exports = {
           ## transparently decode their body to a node string and then re-encode
           nodeCharset = getNodeCharsetFromResponse(headers, body)
           decodedBody = iconv.decode(body, nodeCharset)
-          rewrittenBody = rewriter.html(decodedBody, remoteState.domainName, wantsInjection, wantsSecurityRemoved)
+          rewrittenBody = rewriter.html(decodedBody, remoteState.domainName, wantsInjection, wantsSecurityRemoved, isHtml)
           iconv.encode(rewrittenBody, nodeCharset)
 
         ## TODO: we can probably move this to the new
@@ -253,7 +255,7 @@ module.exports = {
           return str
           .pipe(conditional(isGzipped, gunzip))
           .on("error", onError)
-          .pipe(rewriter.security())
+          .pipe(rewriter.security({ isHtml }))
           .on("error", onError)
           .pipe(conditional(isGzipped, zlib.createGzip()))
           .on("error", onError)
