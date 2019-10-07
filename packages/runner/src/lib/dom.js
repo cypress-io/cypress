@@ -112,6 +112,11 @@ function addElementBoxModelLayers ($el, $body) {
       obj.left -= dimensions.marginLeft
     }
 
+    if (attr === 'Padding') {
+      obj.top += dimensions.borderTop
+      obj.left += dimensions.borderLeft
+    }
+
     // bail if the dimensions of this layer match the previous one
     // so we dont create unnecessary layers
     if (dimensionsMatchPreviousLayer(obj, $container)) return
@@ -233,15 +238,15 @@ function createLayer ($el, attr, color, container, dimensions) {
 function dimensionsMatchPreviousLayer (obj, container) {
   // since we're prepending to the container that
   // means the previous layer is actually the first child element
-  const previousLayer = container.children().first().get(0)
+  const previousLayer = container.children().first()
 
   // bail if there is no previous layer
   if (!previousLayer) {
     return
   }
 
-  return obj.width === previousLayer.offsetWidth &&
-  obj.height === previousLayer.offsetHeight
+  return obj.width === previousLayer.width() &&
+  obj.height === previousLayer.height()
 }
 
 function getDimensionsFor (dimensions, attr, dimension) {
@@ -257,12 +262,10 @@ function getZIndex (el) {
 }
 
 function getElementDimensions ($el) {
-  const el = $el.get(0)
-
   const dimensions = {
     offset: $el.offset(), // offset disregards margin but takes into account border + padding
-    height: el.offsetHeight, // we want to use offsetHeight here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
-    width: el.offsetWidth,
+    height: $el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
+    width: $el.width(),
     paddingTop: getPadding($el, 'top'),
     paddingRight: getPadding($el, 'right'),
     paddingBottom: getPadding($el, 'bottom'),
