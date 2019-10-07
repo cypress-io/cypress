@@ -842,6 +842,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Please do not modify CYPRESS_ENV value.
       """
+    when "CDP_VERSION_TOO_OLD"
+      """
+      A minimum CDP version of v#{arg1} is required, but the current browser has #{arg2.major ? "v#{arg2.major}.#{arg2.minor}" : 'an older version'}.
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
