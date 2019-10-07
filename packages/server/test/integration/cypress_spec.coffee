@@ -775,7 +775,7 @@ describe "lib/cypress", ->
           debugger: {
             on: sinon.stub()
             attach: sinon.stub()
-            sendCommand: sinon.stub().callsArg(2)
+            sendCommand: sinon.stub().resolves()
           }
           setUserAgent: sinon.stub()
           session: {
@@ -796,8 +796,9 @@ describe "lib/cypress", ->
           # the "returns(resolves)" stub is due to curried method
           # it accepts URL to visit and then waits for actual CRI client reference
           # and only then navigates to that URL
-          visitPage = sinon.stub().resolves()
-          sinon.stub(chromeBrowser, "_navigateUsingCRI").returns(visitPage)
+          sinon.stub(chromeBrowser, "_navigateUsingCRI").resolves()
+
+          sinon.stub(chromeBrowser, "_setAutomation").returns()
 
           cypress.start([
             "--run-project=#{@pluginBrowser}"
@@ -818,7 +819,9 @@ describe "lib/cypress", ->
 
             @expectExitWith(0)
 
-            expect(visitPage).to.have.been.calledOnce
+            expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
+            expect(chromeBrowser._setAutomation).to.have.been.calledOnce
+            expect(chromeBrowser._connectToChromeRemoteInterface).to.have.been.calledOnce
 
         it "electron", ->
           writeVideoFrame = sinon.stub()

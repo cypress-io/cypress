@@ -7,7 +7,7 @@ Promise   = require("bluebird")
 la        = require('lazy-ass')
 check     = require('check-more-types')
 extension = require("@packages/extension")
-debug     = require("debug")("cypress:server:browsers")
+debug     = require("debug")("cypress:server:browsers:chrome")
 plugins   = require("../plugins")
 fs        = require("../util/fs")
 appData   = require("../util/app_data")
@@ -167,9 +167,12 @@ _setAutomation = (client, automation) ->
   takeScreenshot = ->
     client.ensureMinimumProtocolVersion('1.3')
     .catch (err) ->
-      throw new Error("takeScreenshot requires at least Chrome 64. \n\nDetails:\n${err.message}")
+      console.log(err)
+      throw new Error("takeScreenshot requires at least Chrome 64.\n\nDetails:\n${err.message}")
     .then ->
       client.send('Page.captureScreenshot')
+    .then (b64Image) ->
+      "data:image/png;base64,#{b64Image.data}"
 
   automation.use(
     CdpAutomation({
@@ -194,6 +197,8 @@ module.exports = {
   _maybeRecordVideo
 
   _navigateUsingCRI
+
+  _setAutomation
 
   _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
@@ -300,7 +305,7 @@ module.exports = {
         # navigate to the actual url
         @_connectToChromeRemoteInterface(port)
         .then (client) =>
-          _setAutomation(client, automation)
+          @_setAutomation(client, automation)
           @_maybeRecordVideo(client, options)
           @_navigateUsingCRI(client, url)
 }

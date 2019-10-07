@@ -19,6 +19,9 @@ describe "lib/browsers/chrome", ->
           screencastFrame: sinon.stub().returns()
         }
       }
+      @automation = {
+        use: sinon.stub().returns()
+      }
 
       sinon.stub(chrome, "_getArgs").returns(@args)
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
@@ -32,7 +35,7 @@ describe "lib/browsers/chrome", ->
       sinon.stub(utils, "getPort").resolves(50505)
 
     it "focuses on the page and calls CRI Page.visit", ->
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then =>
         expect(utils.getPort).to.have.been.calledOnce # to get remote interface port
         expect(@criClient.send).to.have.been.calledTwice
@@ -42,7 +45,7 @@ describe "lib/browsers/chrome", ->
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then ->
         expect(plugins.execute).not.to.be.called
 
@@ -50,7 +53,7 @@ describe "lib/browsers/chrome", ->
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then =>
         # to initialize remote interface client and prepare for true tests
         # we load the browser with blank page first
@@ -67,7 +70,7 @@ describe "lib/browsers/chrome", ->
       ## this should get obliterated
       @args.push("--something=else")
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
@@ -90,7 +93,7 @@ describe "lib/browsers/chrome", ->
       ## this should get obliterated
       @args.push("--something=else")
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
@@ -111,7 +114,7 @@ describe "lib/browsers/chrome", ->
       })
       sinon.stub(fs, "writeJson")
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then ->
         expect(fs.writeJson).to.be.calledWith("/profile/dir/Default/Preferences", {
           profile: {
@@ -200,4 +203,3 @@ describe "lib/browsers/chrome", ->
       chromeVersionHasLoopback("71", false)
       chromeVersionHasLoopback("72", true)
       chromeVersionHasLoopback("73", true)
-
