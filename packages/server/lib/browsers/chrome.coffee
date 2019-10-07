@@ -280,7 +280,7 @@ module.exports = {
         # first allows us to connect the remote interface,
         # start video recording and then
         # we will load the actual page
-        utils.launch(browser, null, args)
+        utils.launch(browser, "about:blank", args)
 
       .tap =>
         # SECOND connect to the Chrome remote interface
