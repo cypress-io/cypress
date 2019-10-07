@@ -51,7 +51,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          console.log({ $Keyboard })
           const modifiers = $Keyboard.modifiersToString($Keyboard.getActiveModifiers(state))
 
           if (modifiers) {

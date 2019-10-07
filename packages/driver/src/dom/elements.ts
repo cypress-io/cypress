@@ -785,7 +785,7 @@ const isScrollable = ($el) => {
   return false
 }
 
-const getFromDocCoords = (x, y, win) => {
+const getFromWindowCoords = (x, y, win) => {
   return {
     x: win.scrollX + x,
     y: win.scrollY + y,
@@ -1105,7 +1105,7 @@ export {
   tryCallNativeMethod,
   findParent,
   getElements,
-  getFromDocCoords,
+  getFromWindowCoords,
   getFirstFocusableEl,
   getActiveElByDocument,
   getContainsSelector,
