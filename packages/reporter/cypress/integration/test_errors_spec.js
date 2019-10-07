@@ -4,6 +4,23 @@ describe('test errors', function () {
   beforeEach(function () {
     cy.fixture('runnables_error').as('runnablesErr')
 
+    this.commandErr = {
+      name: 'CommandError',
+      message: '`foo` \\`bar\\` **baz** *fizz* ** buzz **',
+      mdMessage: '`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`',
+      stack: 'failed to visit\n\ncould not visit http: //localhost:3000',
+      docsUrl: 'https://on.cypress.io/type',
+      codeFrames: [
+        {
+          file: 'users.spec.js',
+          line: 5,
+          column: 6,
+          language: 'javascript',
+          frame: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\')\n.then(() => { })',
+        },
+      ],
+    }
+
     this.setError = function (err) {
       this.runnablesErr.suites[0].tests[0].err = err
 
@@ -24,26 +41,31 @@ describe('test errors', function () {
     })
   })
 
-  describe('command error', function () {
-    beforeEach(function () {
-      this.commandErr = {
-        name: 'CommandError',
-        message: '`foo` \\`bar\\` **baz** *fizz* ** buzz **',
-        mdMessage: '`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`',
-        stack: 'failed to visit\n\ncould not visit http: //localhost:3000',
-        docsUrl: 'https://on.cypress.io/type',
-        codeFrames: [
-          {
-            file: 'users.spec.js',
-            line: 5,
-            column: 6,
-            language: 'javascript',
-            frame: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\')\n.then(() => { })',
-          },
-        ],
-      }
+  describe('stack trace', function () {
+    it('hides stack trace by default', function () {
+      this.setError(this.commandErr)
+
+      cy.get('.runnable-err-stack-trace').should('not.be.visible')
     })
 
+    it('opens stack trace on click', function () {
+      this.setError(this.commandErr)
+
+      cy.contains('View stack trace').click()
+      cy.get('.runnable-err-stack-trace')
+      .should('be.visible')
+      .should('have.text', this.commandErr.stack.replace(/\n/g, ''))
+    })
+
+    it('shows source-mapped stack if present', function () {
+      this.commandErr.sourceMappedStack = 'the source mapped stack'
+      this.setError(this.commandErr)
+
+      cy.get('.runnable-err-stack-trace').should('have.text', 'the source mapped stack')
+    })
+  })
+
+  describe('command error', function () {
     it('shows error name', function () {
       this.setError(this.commandErr)
 
@@ -83,6 +105,25 @@ describe('test errors', function () {
       .contains('code', 'foo')
       .and('not.contain', '`foo`')
     })
+  })
+
+  describe('code frames', function () {
+    it('shows code frame when included on error', function () {
+      this.setError(this.commandErr)
+
+      cy
+      .get('.test-error-code-frame')
+      .should('be.visible')
+    })
+
+    it('does not show code frame when not included on error', function () {
+      this.commandErr.codeFrames = []
+      this.setError(this.commandErr)
+
+      cy
+      .get('.test-error-code-frame')
+      .should('not.be.visible')
+    })
 
     it('use correct language class', function () {
       this.setError(this.commandErr)
@@ -100,5 +141,6 @@ describe('test errors', function () {
       .get('.test-error-code-frame pre')
       .should('have.class', 'language-text')
     })
+
   })
 })
