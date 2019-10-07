@@ -54,7 +54,7 @@ describe "lib/browsers/chrome", ->
       .then =>
         # to initialize remote interface client and prepare for true tests
         # we load the browser with blank page first
-        expect(utils.launch).to.be.calledWith("chrome", null, @args)
+        expect(utils.launch).to.be.calledWith("chrome", "about:blank", @args)
 
     it "normalizes --load-extension if provided in plugin", ->
       plugins.has.returns(true)
