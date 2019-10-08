@@ -819,6 +819,8 @@ module.exports = {
         return this.getChromeProps(browser.isHeaded, project, writeVideoFrame)
       }
 
+      debug('warning - cannot determine browser props for %o', browser)
+
       return {}
     })()
 
