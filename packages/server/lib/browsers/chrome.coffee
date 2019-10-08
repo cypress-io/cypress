@@ -143,7 +143,9 @@ _connectToChromeRemoteInterface = (port) ->
 
 _maybeRecordVideo = (options) ->
   (client) ->
-    return client unless options.screencastFrame
+    if not options.screencastFrame
+      debug("screencastFrame is false")
+      return client
 
     debug('starting screencast')
     client.Page.screencastFrame(options.screencastFrame)

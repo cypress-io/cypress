@@ -612,6 +612,9 @@ module.exports = {
   maybeStartVideoRecording,
 
   getChromeProps (isHeaded, project, writeVideoFrame) {
+    debug('setting Chrome properties, is headed? %s, should write video? %s',
+      isHeaded, Boolean(writeVideoFrame))
+
     const chromeProps = {}
 
     if (isHeaded && writeVideoFrame) {
@@ -805,11 +808,11 @@ module.exports = {
     } = options
 
     const browserOpts = (() => {
-      if (browser.name === 'electron') {
+      if (browser.family === 'electron') {
         return this.getElectronProps(browser.isHeaded, project, writeVideoFrame)
       }
 
-      if (browser.name === 'electron') {
+      if (browser.family === 'chrome') {
         return this.getChromeProps(browser.isHeaded, project, writeVideoFrame)
       }
 
