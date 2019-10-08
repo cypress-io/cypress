@@ -5,6 +5,11 @@ debug         = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
 fs            = require("../util/fs")
+la            = require("lazy-ass")
+check         = require("check-more-types")
+
+# returns true if the passed string is a known browser family name
+isBrowserFamily = check.oneOf(["electron", "chrome"])
 
 instance = null
 
@@ -36,6 +41,7 @@ cleanup = ->
   instance = null
 
 getBrowserLauncherByFamily = (family) ->
+  la(isBrowserFamily(family), "unknown browser family", family)
   switch family
     when "electron"
       require("./electron")
@@ -86,6 +92,8 @@ module.exports = {
   launch: utils.launch
 
   close: kill
+
+  isBrowserFamily
 
   getAllBrowsersWith: (nameOrPath) ->
     if nameOrPath

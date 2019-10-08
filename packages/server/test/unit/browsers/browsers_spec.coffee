@@ -6,6 +6,12 @@ browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
 
 describe "lib/browsers/index", ->
+  context ".isBrowserFamily", ->
+    it "allows only known browsers", ->
+      expect(browsers.isBrowserFamily("chrome")).to.be.true
+      expect(browsers.isBrowserFamily("electron")).to.be.true
+      expect(browsers.isBrowserFamily("my-favorite-browser")).to.be.false
+
   context ".ensureAndGetByNameOrPath", ->
     it "returns browser by name", ->
       sinon.stub(utils, "getBrowsers").resolves([

@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const _ = require('lodash')
+const la = require('lazy-ass')
 const pkg = require('@packages/root')
 const path = require('path')
 const chalk = require('chalk')
@@ -808,6 +809,8 @@ module.exports = {
     } = options
 
     const browserOpts = (() => {
+      la(browsers.isBrowserFamily(browser.family), 'invalid browser family in', browser)
+
       if (browser.family === 'electron') {
         return this.getElectronProps(browser.isHeaded, project, writeVideoFrame)
       }
