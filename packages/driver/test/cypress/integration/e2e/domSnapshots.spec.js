@@ -11,7 +11,7 @@ describe('rect highlight', () => {
 
     getAndPin('button:first')
 
-    shouldHaveCorrectHighlightPositions()
+    shouldHaveCorrectHighlightPositions('button:first')
   })
 
   it('highlight elements properly positioned for content-box', () => {
@@ -20,12 +20,20 @@ describe('rect highlight', () => {
     shouldHaveCorrectHighlightPositions()
   })
 
+  it('highlight inline elements', () => {
+    cy.$$('<span>foo</span>').prependTo(cy.$$('body'))
+
+    getAndPin('span:first')
+
+    shouldHaveCorrectHighlightPositions('span:first')
+  })
+
   it('highlight elements with css transform', () => {
     cy.$$('button:first').css({ transform: 'scale(1.5) rotate(45deg)' })
 
     getAndPin('button:first')
 
-    shouldHaveCorrectHighlightPositions()
+    shouldHaveCorrectHighlightPositions('button:first')
   })
 
   it('highlight elements with css transform on parent', () => {
@@ -38,7 +46,8 @@ describe('rect highlight', () => {
 
     getAndPin('#child')
 
-    shouldHaveCorrectHighlightPositions()
+    // TODO: assert covers element bounding-box
+    shouldHaveCorrectHighlightPositions(null)
   })
 })
 
@@ -60,7 +69,7 @@ const getAndPin = (sel) => {
   })
 }
 
-const shouldHaveCorrectHighlightPositions = () => {
+const shouldHaveCorrectHighlightPositions = (sel) => {
   return cy.wrap(null, { timeout: 400 }).should(() => {
     const dims = {
       content: cy.$$('div[data-layer=Content]')[0].getBoundingClientRect(),
@@ -70,7 +79,25 @@ const shouldHaveCorrectHighlightPositions = () => {
 
     expectToBeInside(dims.content, dims.padding, 'content to be inside padding')
     expectToBeInside(dims.padding, dims.border, 'padding to be inside border')
+    if (sel) {
+      // assert convering bounding-box of element
+      expectToBeEqual(dims.border, cy.$$(sel)[0].getBoundingClientRect(), 'border-box to match selector bounding-box')
+    }
   })
+}
+
+const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {
+  try {
+    expect(Math.floor(rect1.width), 'width').eq(Math.floor(rect2.width))
+    expect(Math.floor(rect1.height), 'height').eq(Math.floor(rect2.height))
+    expect(Math.floor(rect1.top), 'top').eq(Math.floor(rect2.top))
+    expect(Math.floor(rect1.left), 'left').eq(Math.floor(rect2.left))
+    expect(Math.floor(rect1.right), 'right').eq(Math.floor(rect2.right))
+    expect(Math.floor(rect1.bottom), 'bottom').eq(Math.floor(rect2.bottom))
+  } catch (e) {
+    e.message = `\nExpected ${mes}\n${e.message}`
+    throw e
+  }
 }
 
 const expectToBeInside = (rectInner, rectOuter, mes = 'rect to be inside rect') => {
