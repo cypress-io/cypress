@@ -41,7 +41,9 @@ cleanup = ->
   instance = null
 
 getBrowserLauncherByFamily = (family) ->
-  la(isBrowserFamily(family), "unknown browser family", family)
+  if not isBrowserFamily(family)
+    debug("unknown browser family", family)
+
   switch family
     when "electron"
       require("./electron")
