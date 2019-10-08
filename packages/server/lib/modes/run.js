@@ -787,10 +787,6 @@ module.exports = {
 
       return videoCapture.process(name, cname, videoCompression, onProgress)
     })
-    .catch({ recordingVideoFailed: true }, () => {
-      // dont do anything if this error occured because
-      // recording the video had already failed
-    })
     .catch((err) => {
       // log that post processing was attempted
       // but failed and dont let this change the run exit code
