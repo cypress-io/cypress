@@ -21,7 +21,7 @@ const focusable = [
   'button:not([disabled])',
   'iframe',
   '[tabindex]',
-  '[contentEditable]',
+  '[contenteditable]',
 ]
 const focusableWhenNotDisabled = [
   'a[href]',
@@ -32,21 +32,8 @@ const focusableWhenNotDisabled = [
   'button',
   'iframe',
   '[tabindex]',
-  '[contentEditable]',
+  '[contenteditable]',
 ]
-
-// const isTextInputable = (el: HTMLElement) => {
-//   if (isTextLike(el)) {
-//     return _.some([':not([readonly])'].map((sel) => $jquery.wrap(el).is(sel)))
-//   }
-
-//   return false
-
-// }
-
-// const textinputable = ['input']
-
-//'body,a[href],button,select,[tabindex],input,textarea,[contenteditable]'
 
 const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
@@ -445,15 +432,15 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
   return null
 }
 
-const isFocusedOrInFocused = (el) => {
+const isFocusedOrInFocused = (el: HTMLElement) => {
 
   const doc = $document.getDocumentFromElement(el)
 
-  const { activeElement, body } = doc
+  const { activeElement } = doc
 
-  if (activeElementIsDefault(activeElement, body)) {
-    return false
-  }
+  // if (activeElementIsDefault(activeElement, body)) {
+  //   return false
+  // }
 
   let elToCheckCurrentlyFocused
 
@@ -466,6 +453,8 @@ const isFocusedOrInFocused = (el) => {
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
     return true
   }
+
+  return false
 
 }
 
