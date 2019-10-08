@@ -144,7 +144,6 @@ function match (varName, prop) {
 describe('lib/util/security', () => {
   context('.strip', () => {
     context('injects Cypress window property resolver', () => {
-
       [
         ['window.top', match('window', 'top')],
         ['window.parent', match('window', 'parent')],
@@ -175,6 +174,11 @@ describe('lib/util/security', () => {
         [
           'if (top.location != self.location) run()',
           `if (${match('top', 'location')} != ${match('self', 'location')}) run()`,
+        ],
+        // fun construct found in Apple's analytics code
+        [
+          'n = (c = n).parent',
+          `n = ${match('(c = n)', 'parent')}`,
         ],
       ].forEach(([string, expected]) => {
         if (!expected) {

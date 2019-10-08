@@ -2,9 +2,9 @@ import _ from 'lodash'
 import { HtmlJsRewriter, rewriteHtmlJs, rewriteJs } from '@packages/rewriter'
 import duplexify from 'duplexify'
 import concatStream from 'concat-stream'
-import pumpify from 'pumpify'
 import stream from 'stream'
 
+const pumpify = require('pumpify')
 const utf8Stream = require('utf8-stream')
 
 function match (varName, prop) {
@@ -16,7 +16,18 @@ const closureDetectionTern = (prop) => {
   return `(${prop} === window['${prop}'] ? ${match('window', prop)} : ${prop})`
 }
 
-function rewriteJsFn (js, node) {
+/**
+ * Given an ESTree node and the corresponding source code, either:
+ *  1. returns a string that replaces the node in `js`, or
+ *  2. returns nothing to not modify the node at all
+ *
+ * @see https://runkit.com/flotwig/esprima-doodle for experiments in
+ *  converting common JS constructs to ESTree nodes
+ *
+ * @param js Full JS source that `node` comes from
+ * @param node ESTree node with range metadata
+ */
+function rewriteJsFn (js: string, node) {
   function get (path: string) {
     return _.get(node, path)
   }
@@ -43,7 +54,12 @@ function rewriteJsFn (js, node) {
       return
     }
 
-    const objSrc = js.slice(node.range[0], node.object.range[1])
+    // don't use _.slice since it converts js to an array first
+    const objSrc = _.chain(js.slice(node.range[0], node.property.range[0]))
+    // sometimes the slice has a . or [ in it, wish i could find a more
+    // elegant way to fix
+    .trimEnd('.[')
+    .value()
 
     return match(objSrc, prop)
   }

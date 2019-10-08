@@ -4,10 +4,6 @@ module.exports = {
   partial (domain) {
     return oneLine`
       <script type='text/javascript'>
-        window.Cypress = {
-          resolveWindowReference: (w, o, v) => o[v];
-        }
-
         document.domain = '${domain}';
       </script>
     `
