@@ -439,24 +439,28 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    it('catches process.stdin errors and returns when code=EPIPE', function () {
-      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+    // https://github.com/cypress-io/cypress/issues/1841
+    // https://github.com/cypress-io/cypress/issues/5241
+    ;['EPIPE', 'ENOTCONN'].forEach((errCode) => {
+      it(`catches process.stdin errors and returns when code=${errCode}`, function () {
+        this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      return spawn.start()
-      .then(() => {
-        let called = false
+        return spawn.start()
+        .then(() => {
+          let called = false
 
-        const fn = () => {
-          called = true
-          const err = new Error()
+          const fn = () => {
+            called = true
+            const err = new Error()
 
-          err.code = 'EPIPE'
+            err.code = errCode
 
-          return process.stdin.emit('error', err)
-        }
+            return process.stdin.emit('error', err)
+          }
 
-        expect(fn).not.to.throw()
-        expect(called).to.be.true
+          expect(fn).not.to.throw()
+          expect(called).to.be.true
+        })
       })
     })
 
