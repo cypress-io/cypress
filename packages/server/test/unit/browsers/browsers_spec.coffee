@@ -38,6 +38,8 @@ describe "lib/browsers/index", ->
         expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
         expect(err.message).to.contain("'foo-bad-bang' was not found on your system")
 
+    # Ooo, browser clean up tests are disabled?!!
+
     # it "calls onBrowserClose callback on close", ->
     #   onBrowserClose = sinon.stub()
     #   browsers.launch("electron", @url, {onBrowserClose}).then ->

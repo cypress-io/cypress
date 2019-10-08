@@ -38,6 +38,11 @@ interface CRIWrapper {
    * @example client.Page.screencastFrame(cb)
   */
   Page: CRI.Page
+
+  /**
+   * Calls underlying remote interface clien't close
+  */
+  close ():Promise<null>
 }
 
 /**
@@ -69,6 +74,9 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
       })
     },
     Page: cri.Page,
+    close ():Promise<null> {
+      return cri.close()
+    },
   }
 
   return client

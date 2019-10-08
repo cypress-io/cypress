@@ -61,10 +61,11 @@ const getWsTargetFor = (port) => {
 
     // find the first target page that's a real tab
     // and not the dev tools or background page.
-    // typically there are two targets found like
-    // { title: 'Cypress', type: 'background_page', url: 'chrome-extension://...', ... }
-    // { title: 'New Tab', type: 'page', url: 'chrome://newtab/', ...}
-    const newTabTargetFields = { type: 'page', url: 'chrome://newtab/' }
+    // since we open a blank page first, it has a special url
+    const newTabTargetFields = {
+      type: 'page',
+      url: 'about:blank',
+    }
     const target = _.find(targets, newTabTargetFields)
 
     la(target, 'could not find CRI target')

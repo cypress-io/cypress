@@ -13,19 +13,24 @@ kill = (unbind) ->
   ## instance
   return Promise.resolve() if not instance
 
-  new Promise (resolve) ->
-    if unbind
-      instance.removeAllListeners()
+  # if this browser needs to close its own connection, call the close
+  closeRemoteClient = if instance.close then instance.close() else Promise.resolve()
 
-    instance.once "exit", (code, sigint) ->
-      debug("browser process killed")
+  closeRemoteClient.then ->
+    new Promise (resolve) ->
+      if unbind
+        debug("removing all listeners")
+        instance.removeAllListeners()
 
-      resolve.apply(null, arguments)
+      instance.once "exit", (code, sigint) ->
+        debug("browser process killed")
 
-    debug("killing browser process")
+        resolve.apply(null, arguments)
 
-    instance.kill()
-    cleanup()
+      debug("killing browser process")
+
+      instance.kill()
+      cleanup()
 
 cleanup = ->
   instance = null
