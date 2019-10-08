@@ -1,4 +1,8 @@
+import debugModule from 'debug'
+
 const chromeRemoteInterface = require('chrome-remote-interface')
+
+const debugVerbose = debugModule('cy-verbose:server:browsers:cri-client')
 
 /**
  * Url returned by the Chrome Remote Interface
@@ -51,7 +55,18 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
 
   const client: CRIWrapper = {
     send: (command: CRI.Command, params: object):Promise<any> => {
+      debugVerbose('sending %s %o', command, params)
+
       return cri.send(command, params)
+      .then((result) => {
+        debugVerbose('received response for %s: %o', command, { result })
+
+        return result
+      })
+      .catch((err) => {
+        debugVerbose('received error for %s: %o', command, { err })
+        throw err
+      })
     },
     Page: cri.Page,
   }
