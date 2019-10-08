@@ -64,7 +64,7 @@ histogram line
   │ Pending:      0                      │
   │ Skipped:      0                      │
   │ Screenshots:  0                      │
-  │ Video:        true                   │
+  │ Video:        false                  │
   │ Duration:     X seconds              │
   │ Spec Ran:     fast_visit_spec.coffee │
   └──────────────────────────────────────┘
@@ -150,16 +150,10 @@ histogram line
   │ Pending:      0                      │
   │ Skipped:      0                      │
   │ Screenshots:  0                      │
-  │ Video:        true                   │
+  │ Video:        false                  │
   │ Duration:     X seconds              │
   │ Spec Ran:     fast_visit_spec.coffee │
   └──────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
 ====================================================================================================
