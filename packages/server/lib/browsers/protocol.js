@@ -7,7 +7,7 @@ const is = require('check-more-types')
 const pluralize = require('pluralize')
 const debug = require('debug')('cypress:server:protocol')
 
-function getDelayMsForRetry (i) {
+function _getDelayMsForRetry (i) {
   if (i < 8) {
     return 100
   }
@@ -20,7 +20,7 @@ function getDelayMsForRetry (i) {
 function connectAsync (opts) {
   return Promise.fromCallback((cb) => {
     connect.createRetryingSocket({
-      getDelayMsForRetry,
+      getDelayMsForRetry: _getDelayMsForRetry,
       ...opts,
     }, cb)
   })
@@ -71,5 +71,6 @@ const getWsTargetFor = (port) => {
 }
 
 module.exports = {
+  _getDelayMsForRetry,
   getWsTargetFor,
 }
