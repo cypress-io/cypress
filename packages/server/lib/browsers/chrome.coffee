@@ -286,6 +286,8 @@ module.exports = {
         utils.launch(browser, "about:blank", args)
 
       .then (launchedBrowser) =>
+        la(launchedBrowser, "did not get launched browser instance")
+
         # SECOND connect to the Chrome remote interface
         # and when the connection is ready
         # navigate to the actual url

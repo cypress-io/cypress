@@ -17,15 +17,18 @@ describe "lib/browsers/chrome", ->
         send: sinon.stub().resolves()
         Page: {
           screencastFrame: sinon.stub().returns()
-        }
+        },
+        close: sinon.stub().resolves()
       }
+      # mock launched browser child process object
+      @launchedBrowser = {}
 
       sinon.stub(chrome, "_getArgs").returns(@args)
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
       sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(@criClient)
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
-      sinon.stub(utils, "launch")
+      sinon.stub(utils, "launch").resolves(@launchedBrowser)
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
       # port for Chrome remote interface communication
@@ -119,6 +122,14 @@ describe "lib/browsers/chrome", ->
             exited_cleanly: true
           }
         })
+
+    it "calls cri client close", ->
+      chrome.open("chrome", "http://", {}, {})
+      .then =>
+        expect(@launchedBrowser.close, "Chrome browser process gets close method").to.be.a("function")
+        @launchedBrowser.close()
+      .then =>
+        expect(@criClient.close).to.have.been.calledOnce
 
   context "#_getArgs", ->
     it "disables gpu when linux", ->
