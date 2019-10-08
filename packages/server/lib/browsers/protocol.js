@@ -1,29 +1,28 @@
 const _ = require('lodash')
 const CRI = require('chrome-remote-interface')
-const promiseRetry = require('promise-retry')
+const { connect } = require('@packages/network')
 const Promise = require('bluebird')
-const net = require('net')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const pluralize = require('pluralize')
 const debug = require('debug')('cypress:server:protocol')
 
+function getDelayMsForRetry (i) {
+  if (i < 8) {
+    return 100
+  }
+
+  if (i < 10) {
+    return 500
+  }
+}
+
 function connectAsync (opts) {
-  return new Promise(function (resolve, reject) {
-    debug('connectAsync with options %o', opts)
-    let socket = net.connect(opts)
-
-    socket.once('connect', function () {
-      socket.removeListener('error', reject)
-      debug('successfully connected with options %o', opts)
-      resolve(socket)
-    })
-
-    socket.once('error', function (err) {
-      debug('error connecting with options %o', opts, err)
-      socket.removeListener('connection', resolve)
-      reject(err)
-    })
+  return Promise.fromCallback((cb) => {
+    connect.createRetryingSocket({
+      getDelayMsForRetry,
+      ...opts,
+    }, cb)
   })
 }
 
@@ -35,14 +34,10 @@ const getWsTargetFor = (port) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
-  return promiseRetry(
-    (retry) => {
-      return connectAsync({ port }).catch(retry)
-    },
-    { retries: 10 }
-  )
-  .catch(() => {
-    debug('retry connecting to debugging port %d', port)
+  return connectAsync({ port })
+  .catch((err) => {
+    debug('failed to connect to CDP %o', { port, err })
+    throw err
   })
   .then(() => {
     debug('CRI.List on port %d', port)
