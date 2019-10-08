@@ -136,6 +136,8 @@ class Test extends Component {
   }
 
   _openFile = ({ file, column, line }) => {
+    // TODO: don't just prepend project root
+    // the file should be absolute to start with
     events.emit('open:file', {
       column,
       line,
