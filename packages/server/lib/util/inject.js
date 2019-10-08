@@ -5,7 +5,6 @@ module.exports = {
     return oneLine`
       <script type='text/javascript'>
         window.Cypress = {
-          // so window.top, etc. still work when browsing outside of Cypress
           resolveWindowReference: (w, o, v) => o[v];
         }
 
