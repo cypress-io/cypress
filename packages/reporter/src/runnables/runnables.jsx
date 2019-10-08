@@ -36,11 +36,11 @@ function content ({ isReady, runnables }, specPath, error, config) {
 @observer
 class Runnables extends Component {
   render () {
-    const { error, runnablesStore, specPath } = this.props
+    const { error, runnablesStore, specPath, config } = this.props
 
     return (
       <div ref='container' className='container'>
-        {content(runnablesStore, specPath, error, this.props.config)}
+        {content(runnablesStore, specPath, error, config)}
       </div>
     )
   }
