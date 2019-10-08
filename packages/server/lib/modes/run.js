@@ -790,7 +790,7 @@ module.exports = {
     .catch((err) => {
       // log that post processing was attempted
       // but failed and dont let this change the run exit code
-      return errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+      errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
     })
   },
 

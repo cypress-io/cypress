@@ -224,6 +224,15 @@ describe "lib/modes/run", ->
       .then ->
         expect(videoCapture.process).not.to.be.called
 
+    it "logs a warning on failure and resolves", ->
+      sinon.stub(errors, 'warning')
+      end = sinon.stub().rejects()
+
+      runMode.postProcessRecording(end)
+      .then ->
+        expect(end).to.be.calledOnce
+        expect(errors.warning).to.be.calledWith('VIDEO_POST_PROCESSING_FAILED')
+
   context ".waitForBrowserToConnect", ->
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
       sinon.spy(errors, "warning")
