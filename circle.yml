@@ -452,30 +452,30 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "driver-integration-tests-electron":
-    <<: *defaults
-    parallelism: 5
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm start
-          background: true
-          working_directory: packages/driver
-      - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 5x-driver-electron --browser electron
-          working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+  # "driver-integration-tests-electron":
+  #   <<: *defaults
+  #   parallelism: 5
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm start
+  #         background: true
+  #         working_directory: packages/driver
+  #     - run:
+  #         command: $(npm bin)/wait-on http://localhost:3500
+  #         working_directory: packages/driver
+  #     - run:
+  #         command: |
+  #           CYPRESS_KONFIG_ENV=production \
+  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+  #           npm run cypress:run -- --record --parallel --group 5x-driver-electron --browser electron
+  #         working_directory: packages/driver
+  #     - store_test_results:
+  #         path: /tmp/cypress
+  #     - store_artifacts:
+  #         path: /tmp/artifacts
+  #     - store-npm-logs
 
   "desktop-gui-integration-tests-2x":
     <<: *defaults
@@ -857,10 +857,11 @@ linux-workflow: &linux-workflow
         context: test-runner:integration-tests
         requires:
           - build
-    - driver-integration-tests-electron:
-        context: test-runner:integration-tests
-        requires:
-          - build
+    ## TODO: add these back in when flaky tests are fixed
+    # - driver-integration-tests-electron:
+    #     context: test-runner:integration-tests
+    #     requires:
+    #       - build
     - desktop-gui-integration-tests-2x:
         context: test-runner:integration-tests
         requires:
