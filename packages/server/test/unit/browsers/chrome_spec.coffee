@@ -127,7 +127,7 @@ describe "lib/browsers/chrome", ->
         })
 
     it "calls cri client close", ->
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then =>
         expect(@launchedBrowser.close, "Chrome browser process gets close method").to.be.a("function")
         @launchedBrowser.close()

@@ -162,14 +162,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
+      onFail = options._log
+
       if not _.isString(name) or not _.isString(value)
-        Cypress.utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
+        Cypress.utils.throwErrByPath("setCookie.invalid_arguments", { onFail })
 
       if cookieParser.parseCookieName(name) == null
-        Cypress.utils.throwErrByPath("setCookie.invalid_name", { args: { name } })
+        Cypress.utils.throwErrByPath("setCookie.invalid_name", { args: { name }, onFail })
 
       if cookieParser.parseCookieValue(value) == null
-        Cypress.utils.throwErrByPath("setCookie.invalid_value", { args: { value } })
+        Cypress.utils.throwErrByPath("setCookie.invalid_value", { args: { value }, onFail })
 
       automateCookies("set:cookie", cookie, options._log, options.timeout)
       .then (resp) ->
@@ -177,10 +179,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         return resp
       .catch (err) ->
-        Cypress.utils.throwErrByPath("setCookie.backend_error", { args: {
-          browserDisplayName: Cypress.browser.displayName,
-          errStack: err.stack
-        }})
+        Cypress.utils.throwErrByPath("setCookie.backend_error", {
+          args: {
+            browserDisplayName: Cypress.browser.displayName,
+            errStack: err.stack
+          }
+          onFail
+        })
 
     clearCookie: (name, options = {}) ->
       _.defaults options, {

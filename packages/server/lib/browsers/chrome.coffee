@@ -159,16 +159,17 @@ _maybeRecordVideo = (options) ->
 
 # a utility function that navigates to the given URL
 # once Chrome remote interface client is passed to it.
-_navigateUsingCRI = (client, url) ->
-  la(check.url(url), "missing url to navigate to", url)
-  la(client, "could not get CRI client")
-  debug("received CRI client")
-  debug('navigating to page %s', url)
-  # when opening the blank page and trying to navigate
-  # the focus gets lost. Restore it and then navigate.
-  client.send("Page.bringToFront")
-  .then ->
-    client.send("Page.navigate", { url })
+_navigateUsingCRI = (url) ->
+  (client) ->
+    la(check.url(url), "missing url to navigate to", url)
+    la(client, "could not get CRI client")
+    debug("received CRI client")
+    debug('navigating to page %s', url)
+    # when opening the blank page and trying to navigate
+    # the focus gets lost. Restore it and then navigate.
+    client.send("Page.bringToFront")
+    .then ->
+      client.send("Page.navigate", { url })
 
 _setAutomation = (client, automation) ->
   automation.use(
@@ -306,7 +307,7 @@ module.exports = {
         .then (criClient) =>
           la(criClient, "expected Chrome remote interface reference", criClient)
 
-          @_setAutomation(client, automation)
+          @_setAutomation(criClient, automation)
 
           debug("adding method to close the remote interface client")
           launchedBrowser.close = () ->

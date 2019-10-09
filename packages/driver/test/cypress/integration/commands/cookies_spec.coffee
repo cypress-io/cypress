@@ -435,9 +435,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.include "some err message"
+          expect(lastLog.get("error").name).to.eq "CypressError"
+          expect(lastLog.get("error").stack).to.include error.stack
           done()
 
         cy.setCookie("foo", "bar")
@@ -453,7 +453,7 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("name")).to.eq("setCookie")
           expect(lastLog.get("message")).to.eq("foo, bar")
-          expect(err.message).to.eq("cy.setCookie() timed out waiting '50ms' to complete.")
+          expect(err.message).to.include("cy.setCookie() timed out waiting '50ms' to complete.")
           done()
 
         cy.setCookie("foo", "bar", {timeout: 50})
@@ -510,11 +510,11 @@ describe "src/cy/commands/cookies", ->
             done()
 
           errStub = cy.stub(Cypress.utils, "throwErrByPath")
-          .callThrough()
+          errStub.callThrough()
 
           ## stub cookie validation so this invalid cookie can make it to the backend
-          skipErrStub = Cypress.utils.throwErrByPath
-          .withArgs("setCookie.invalid_value", { args: { value: " bar" } })
+          skipErrStub = errStub
+          .withArgs("setCookie.invalid_value")
           .returns()
 
           ## browser backend should yell since this is invalid
