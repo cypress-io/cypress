@@ -60,6 +60,12 @@ interface CRIWrapper {
   close ():Promise<null>
 }
 
+const getMajorMinorVersion = (version: string) => {
+  const [major, minor] = version.split('.', 2).map(Number)
+
+  return { major, minor }
+}
+
 /**
  * Creates a wrapper for Chrome remote interface client
  * that only allows to use low-level "send" method
@@ -87,12 +93,6 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
         errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
       }
     })
-  }
-
-  const getMajorMinorVersion = (version: string) => {
-    const [major, minor] = version.split('.', 2).map(Number)
-
-    return { major, minor }
   }
 
   const getProtocolVersion = () => {
@@ -130,10 +130,15 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
     takeScreenshot: () => {
       return ensureMinimumProtocolVersion('1.3')
       .catch((err) => {
-        throw new Error(`takeScreenshot requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-      }).then(() => {
+        throw new Error(`Taking a screenshot requires at least Chrome 64.\n\nDetails:\n${err.message}`)
+      })
+      .then(() => {
         return client.send('Page.captureScreenshot')
-      }).then(({ data }) => {
+        .catch((err) => {
+          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
+        })
+      })
+      .then(({ data }) => {
         return `data:image/png;base64,${data}`
       })
     },

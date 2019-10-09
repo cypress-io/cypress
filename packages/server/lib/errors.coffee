@@ -844,7 +844,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CDP_VERSION_TOO_OLD"
       """
-      A minimum CDP version of v#{arg1} is required, but the current browser has #{arg2.major ? "v#{arg2.major}.#{arg2.minor}" : 'an older version'}.
+      A minimum CDP version of v#{arg1} is required, but the current browser has #{if arg2.major != 0 then "v#{arg2.major}.#{arg2.minor}" else 'an older version'}.
       """
 
 get = (type, arg1, arg2) ->
