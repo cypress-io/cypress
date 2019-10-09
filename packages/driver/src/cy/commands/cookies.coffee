@@ -167,7 +167,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not _.isString(name) or not _.isString(value)
         Cypress.utils.throwErrByPath("setCookie.invalid_arguments", { onFail })
 
-      if cookieParser.parseCookieName(name) == null
+      if cookieParser.isCookieName(name) isnt true
         Cypress.utils.throwErrByPath("setCookie.invalid_name", { args: { name }, onFail })
 
       if cookieParser.parseCookieValue(value) == null
