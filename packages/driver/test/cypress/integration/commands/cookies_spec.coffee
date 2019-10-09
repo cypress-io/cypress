@@ -427,7 +427,6 @@ describe "src/cy/commands/cookies", ->
       it "logs once on error", (done) ->
         error = new Error("some err message")
         error.name = "foo"
-        error.stack = "stack"
 
         Cypress.automation.rejects(error)
 
