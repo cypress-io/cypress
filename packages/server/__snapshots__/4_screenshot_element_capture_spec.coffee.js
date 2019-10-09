@@ -52,6 +52,12 @@ exports['e2e screenshot element capture passes in chrome 1'] = `
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (9).png (YYYYxZZZZ)
 
 
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
 ====================================================================================================
 
   (Run Finished)
