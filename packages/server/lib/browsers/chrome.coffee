@@ -84,7 +84,6 @@ defaultArgs = [
   ## https://github.com/cypress-io/cypress/issues/3633
   "--disable-backgrounding-occluded-window"
   "--disable-breakpad"
-  "--disable-dev-shm-usage"
   "--password-store=basic"
   "--use-mock-keychain"
 ]
