@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "bin-up": "1.2.0",
+    "bin-up": "1.2.2",
     "chai": "3.5.0",
     "cross-env": "5.2.0",
     "request": "2.88.0",
