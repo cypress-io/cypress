@@ -193,7 +193,7 @@ const openProject = (project) => {
 
 const reopenProject = (project) => {
   project.clearError()
-  project.clearWarning()
+  project.clearWarning(null, true)
 
   return closeProject(project)
   .then(() => {

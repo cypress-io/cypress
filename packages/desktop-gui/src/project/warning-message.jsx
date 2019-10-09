@@ -15,6 +15,11 @@ class WarningMessage extends Component {
         </p>
         <div>
           <MarkdownRenderer markdown={warningText}/>
+          {this.props.onTryAgain &&
+            <button className="retry-button btn btn-default btn-sm" onClick={this.props.onTryAgain}>
+              <i className='fa fa-refresh' /> Try Again
+            </button>
+          }
         </div>
         <button className='btn btn-link close' onClick={this.props.onClearWarning}>
           <i className='fa fa-remove' />

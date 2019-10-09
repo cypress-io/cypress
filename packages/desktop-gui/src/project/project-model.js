@@ -217,15 +217,18 @@ export default class Project {
     }
   }
 
-  @action clearWarning (warning) {
+  @action clearWarning (warning, isProjectReload) {
     if (!warning) {
       // calling with no warning clears all warnings
       return this.warnings.map((warning) => {
-        return this.clearWarning(warning)
+        return this.clearWarning(warning, isProjectReload)
       })
     }
 
-    this.dismissedWarnings[this._serializeWarning(warning)] = true
+    if (!isProjectReload) {
+      // dismiss warning if not cleared by project reload
+      this.dismissedWarnings[this._serializeWarning(warning)] = true
+    }
 
     this.warnings = _.without(this.warnings, warning)
   }

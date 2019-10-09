@@ -97,6 +97,13 @@
   flex-shrink: 0;
   position: relative;
 
+  .retry-button {
+    font-size: 12px;
+    position: unset;
+    top: unset;
+    right: unset;
+  }
+
   code, pre {
     border: none;
     color: #8a6d3b;
