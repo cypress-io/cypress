@@ -22,8 +22,10 @@ describe('rect highlight', () => {
 const getAndPin = (sel) => {
   cy.get(sel)
 
-  cy.wait(0)
-  .then(() => {
+  // arbitrary wait to allow clicking and pinning command
+  // if reduced, test is flakey
+  cy.wait(10)
+  .should(() => {
     withMutableReporterState(() => {
 
       const commandLogEl = getCommandLogWithText(sel)
@@ -33,6 +35,9 @@ const getAndPin = (sel) => {
       reactCommandInstance.props.appState.isRunning = false
 
       $(commandLogEl).find('.command-wrapper').click()
+
+      // make sure command was pinned, otherwise throw a better error message
+      expect(cy.$$('.command-pin:visible', top.document).length, 'command should be pinned').ok
     })
   })
 }
