@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import cdp from 'devtools-protocol'
-import debugModule from 'debug'
 import tough from 'tough-cookie'
 
 interface CyCookie {
@@ -15,28 +14,12 @@ interface CyCookie {
 }
 
 const cors = require('../util/cors')
-const debug = debugModule('cypress:server:browsers:cdp_automation')
 
 export function CdpAutomation (opts : {
   invokeViaDebugger: (message: string, data?: any) => Promise<any>
   takeScreenshot: () => Promise<string>
 }) {
   const { invokeViaDebugger, takeScreenshot } = opts
-
-  const _invokeViaDebugger = function (command: string, data?: any) {
-    debug('sending %s %o', command, data)
-
-    return invokeViaDebugger(command, data)
-    .then((result) => {
-      debug('received response for %s: %o', command, { result })
-
-      return result
-    })
-    .catch((err) => {
-      debug('received error for %s: %o', command, { err })
-      throw err
-    })
-  }
 
   const normalizeGetCookieProps = function (cookie: cdp.Network.Cookie): CyCookie {
     if (cookie.expires === -1) {
@@ -76,15 +59,19 @@ export function CdpAutomation (opts : {
   }
 
   const getAllCookies = function (data) {
-    return _invokeViaDebugger('Network.getAllCookies').then(function (result: cdp.Network.GetAllCookiesResponse) {
+    return invokeViaDebugger('Network.getAllCookies').then(function (result: cdp.Network.GetAllCookiesResponse) {
       return normalizeGetCookies(result.cookies).filter(function (cookie: CyCookie) {
-        return _.every([!data.domain || tough.domainMatch(cookie.domain, data.domain), !data.path || tough.pathMatch(cookie.path, data.path), !data.name || data.name === cookie.name])
+        return _.every([
+          !data.domain || tough.domainMatch(cookie.domain, data.domain),
+          !data.path || tough.pathMatch(cookie.path, data.path),
+          !data.name || data.name === cookie.name,
+        ])
       })
     })
   }
 
   const getCookiesByUrl = function (url) {
-    return _invokeViaDebugger('Network.getCookies', {
+    return invokeViaDebugger('Network.getCookies', {
       urls: [url],
     }).then(function (result: cdp.Network.GetCookiesResponse) {
       return normalizeGetCookies(result.cookies)
@@ -110,7 +97,7 @@ export function CdpAutomation (opts : {
       case 'set:cookie':
         setCookie = normalizeSetCookieProps(data)
 
-        return _invokeViaDebugger('Network.setCookie', setCookie).then(function (result: cdp.Network.SetCookieResponse) {
+        return invokeViaDebugger('Network.setCookie', setCookie).then(function (result: cdp.Network.SetCookieResponse) {
           if (!result.success) {
             // i wish CDP provided some more detail here, but this is really it in v1.3
             // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
@@ -121,7 +108,7 @@ export function CdpAutomation (opts : {
         })
       case 'clear:cookie':
         return getCookie(data).then(function (cookieToBeCleared) { // so we can resolve with the value of the removed cookie
-          return _invokeViaDebugger('Network.deleteCookies', data).then(function () {
+          return invokeViaDebugger('Network.deleteCookies', data).then(function () {
             return cookieToBeCleared
           })
         })
