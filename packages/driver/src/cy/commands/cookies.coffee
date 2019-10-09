@@ -1,4 +1,5 @@
 _ = require("lodash")
+cookieParser = require("strict-cookie-parser")
 Promise = require("bluebird")
 
 $dom = require("../../dom")
@@ -162,13 +163,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not _.isString(name) or not _.isString(value)
-        $utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
+        Cypress.utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
+
+      if cookieParser.parseCookieName(name) == null
+        Cypress.utils.throwErrByPath("setCookie.invalid_name", { args: { name } })
+
+      if cookieParser.parseCookieValue(value) == null
+        Cypress.utils.throwErrByPath("setCookie.invalid_value", { args: { value } })
 
       automateCookies("set:cookie", cookie, options._log, options.timeout)
       .then (resp) ->
         options.cookie = resp
 
         return resp
+      .catch (err) ->
+        Cypress.utils.throwErrByPath("setCookie.backend_error", { args: {
+          browserDisplayName: Cypress.browser.displayName,
+          errStack: err.stack
+        }})
 
     clearCookie: (name, options = {}) ->
       _.defaults options, {

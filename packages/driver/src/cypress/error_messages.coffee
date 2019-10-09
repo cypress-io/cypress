@@ -810,7 +810,14 @@ module.exports = {
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
+    backend_error: """
+    #{cmd('setCookie')} had an unexpected error setting the requested cookie in {{browserDisplayName}}.
+
+    {{errStack}}
+    """
     invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
+    invalid_name: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
+    invalid_value: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
 
   spread:
     invalid_type: "#{cmd('spread')} requires the existing subject be array-like."
