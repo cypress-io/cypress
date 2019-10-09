@@ -37,6 +37,12 @@ executors:
       PLATFORM: mac
 
 commands:
+  store-npm-logs:
+    description: Saves any NPM debug logs as artifacts in case there is a problem
+    steps:
+      - store_artifacts:
+          path: ~/.npm/_logs
+
   # for caching node modules use project environment variable
   # like CACHE_VERSION=15
   save-cache:
@@ -226,10 +232,7 @@ jobs:
       - run: npm run all prune
 
       - save-caches
-
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
@@ -244,9 +247,7 @@ jobs:
           at: ~/
       ## this will catch .only's in js/coffee as well
       - run: npm run lint-all
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   unit-tests:
     <<: *defaults
@@ -276,9 +277,7 @@ jobs:
       - run: npm run all test -- --package static
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   lint-types:
     <<: *defaults
@@ -295,9 +294,7 @@ jobs:
       - run:
           command: npm run dtslint
           working_directory: cli
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-unit-tests":
     <<: *defaults
@@ -308,9 +305,7 @@ jobs:
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-integration-tests":
     <<: *defaults
@@ -321,9 +316,7 @@ jobs:
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-performance-tests":
       <<: *defaults
@@ -336,9 +329,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-e2e-tests-1":
     <<: *defaults
@@ -350,9 +341,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-e2e-tests-2":
     <<: *defaults
@@ -364,9 +353,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-e2e-tests-3":
     <<: *defaults
@@ -378,9 +365,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+
 
   "server-e2e-tests-4":
     <<: *defaults
@@ -392,9 +377,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-e2e-tests-5":
     <<: *defaults
@@ -406,9 +389,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-e2e-tests-6":
     <<: *defaults
@@ -420,9 +401,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-e2e-tests-7":
     <<: *defaults
@@ -434,9 +413,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "server-e2e-tests-8":
       <<: *defaults
@@ -448,9 +425,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "driver-integration-tests-chrome":
     <<: *defaults
@@ -475,9 +450,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "driver-integration-tests-electron":
     <<: *defaults
@@ -502,9 +475,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "desktop-gui-integration-tests-2x":
     <<: *defaults
@@ -525,9 +496,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "reporter-integration-tests":
     <<: *defaults
@@ -547,9 +516,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "run-launcher":
     <<: *defaults
@@ -611,9 +578,7 @@ jobs:
       - run: cp binary-url.json /tmp/urls
       - run: cp cypress.zip /tmp/urls
       - run: ls /tmp/urls
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
       - persist_to_workspace:
           root: /tmp/urls
           paths:
@@ -645,9 +610,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_video=false \
             npm run cypress:run -- --project /tmp/repo --record
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "test-against-staging":
     <<: *defaults
@@ -664,9 +627,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
             npm run cypress:run -- --project /tmp/repo --record
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "build-npm-package":
     <<: *defaults
@@ -707,9 +668,7 @@ jobs:
       - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
       - run: cp npm-package-url.json /tmp/urls
       - run: ls /tmp/urls
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
       - persist_to_workspace:
           root: /tmp/urls
           paths:
@@ -755,9 +714,7 @@ jobs:
               --npm /tmp/urls/npm-package-url.json \
               --binary /tmp/urls/binary-url.json \
               --provider circle
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
@@ -787,9 +744,7 @@ jobs:
           name: Verify Cypress binary
           working_directory: test-binary
           command: $(npm bin)/cypress verify
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
@@ -819,9 +774,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -851,9 +804,7 @@ jobs:
       - run:
           working_directory: /tmp/kitchensink
           command: npm run e2e
-      # store NPM logs in case there was a problem
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - store-npm-logs
 
 linux-workflow: &linux-workflow
   jobs:
