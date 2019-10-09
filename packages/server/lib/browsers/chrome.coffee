@@ -148,7 +148,7 @@ _maybeRecordVideo = (options) ->
       return client
 
     debug('starting screencast')
-    client.Page.screencastFrame(options.screencastFrame)
+    client.on('Page.screencastFrame', options.screencastFrame)
 
     client.send('Page.startScreencast', {
       format: 'jpeg'

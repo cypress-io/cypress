@@ -9,6 +9,10 @@ const debugVerbose = debugModule('cy-verbose:server:browsers:cri-client')
 */
 type websocketUrl = string
 
+/**
+ * Enumerations to make programming CDP slightly simpler - provides
+ * IntelliSense whenever you use named types.
+ */
 namespace CRI {
   export enum Command {
     'Page.bringToFront',
@@ -16,8 +20,8 @@ namespace CRI {
     'Page.startScreencast'
   }
 
-  export interface Page {
-    screencastFrame(cb)
+  export enum EventNames {
+    'Page.screencastFrame'
   }
 }
 
@@ -37,12 +41,17 @@ interface CRIWrapper {
    *
    * @example client.Page.screencastFrame(cb)
   */
-  Page: CRI.Page
 
   /**
-   * Calls underlying remote interface clien't close
+   * Registers callback for particular event.
+   * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
+   */
+  on (eventName: CRI.EventNames, cb: Function): void
+
+  /**
+   * Calls underlying remote interface client close
   */
-  close ():Promise<null>
+  close ():Promise<void>
 }
 
 /**
@@ -58,8 +67,12 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
     local: true,
   })
 
+  /**
+   * Wrapper around Chrome remote interface client
+   * that logs every command sent.
+   */
   const client: CRIWrapper = {
-    send: (command: CRI.Command, params: object):Promise<any> => {
+    send (command: CRI.Command, params: object):Promise<any> {
       debugVerbose('sending %s %o', command, params)
 
       return cri.send(command, params)
@@ -73,8 +86,14 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
         throw err
       })
     },
-    Page: cri.Page,
-    close ():Promise<null> {
+
+    on (eventName: CRI.EventNames, cb: Function) {
+      debugVerbose('registering CDP event %s', eventName)
+
+      return cri.on(eventName, cb)
+    },
+
+    close ():Promise<void> {
       return cri.close()
     },
   }
