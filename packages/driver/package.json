@@ -54,7 +54,7 @@
     "parse-domain": "2.0.0",
     "setimmediate": "1.0.5",
     "sinon": "3.3.0",
-    "strict-cookie-parser": "cypress-io/strict-cookie-parser#1fcc484f29785c62d14bf82a0e9faf4af93d5f0a",
+    "strict-cookie-parser": "cypress-io/strict-cookie-parser#60d3822fb63ba8c3aa3eb94213a2ed76d339631e",
     "text-mask-addons": "3.8.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
