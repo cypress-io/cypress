@@ -66,7 +66,7 @@ module.exports = {
         if not wantsWrite = pt.write(data)
           pt.once "drain", ->
             debugFrames("video stream drained")
-      
+
             wantsWrite = true
       else
         skipped += 1
@@ -105,8 +105,6 @@ module.exports = {
           if logErrors
             options.onError(err, stdout, stderr)
 
-          err.recordingVideoFailed = true
-
           ## reject the ended promise
           ended.reject(err)
 
@@ -115,14 +113,14 @@ module.exports = {
 
           ended.resolve()
         .save(name)
-        
+
     startCapturing()
     .then ({ cmd, startedVideoCapture }) ->
       return {
-        cmd,    
+        cmd,
         endVideoCapture,
         writeVideoFrame,
-        startedVideoCapture,          
+        startedVideoCapture,
       }
 
   process: (name, cname, videoCompression, onProgress = ->) ->

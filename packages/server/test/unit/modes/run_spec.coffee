@@ -143,7 +143,11 @@ describe "lib/modes/run", ->
         absolute: "/path/to/spec"
       }
 
-      browser = { name: "electron", isHeaded: false }
+      browser = {
+        name: "electron",
+        family: "electron",
+        isHeaded: false
+      }
 
       runMode.launchBrowser({
         spec
@@ -173,7 +177,11 @@ describe "lib/modes/run", ->
         absolute: "/path/to/spec"
       }
 
-      browser = { name: "chrome", isHeaded: true }
+      browser = {
+        name: "chrome",
+        family: "chrome",
+        isHeaded: true
+      }
 
       runMode.launchBrowser({
         spec
@@ -215,6 +223,15 @@ describe "lib/modes/run", ->
       runMode.postProcessRecording(endVideoCapture, "foo", "foo-compress", 32, false)
       .then ->
         expect(videoCapture.process).not.to.be.called
+
+    it "logs a warning on failure and resolves", ->
+      sinon.stub(errors, 'warning')
+      end = sinon.stub().rejects()
+
+      runMode.postProcessRecording(end)
+      .then ->
+        expect(end).to.be.calledOnce
+        expect(errors.warning).to.be.calledWith('VIDEO_POST_PROCESSING_FAILED')
 
   context ".waitForBrowserToConnect", ->
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
@@ -528,7 +545,7 @@ describe "lib/modes/run", ->
         expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_HEADED")
 
     it "disables video recording for non-electron non-chrome browser", ->
-      browser = { name: "canary" }
+      browser = { name: "canary", family: "chrome" }
 
       sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves(browser)
 
@@ -563,7 +580,8 @@ describe "lib/modes/run", ->
       sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves({
         name: "fooBrowser",
         path: "path/to/browser"
-        version: "777"
+        version: "777",
+        family: "electron"
       })
       sinon.stub(runMode, "waitForSocketConnection").resolves()
       sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({
@@ -615,7 +633,7 @@ describe "lib/modes/run", ->
         })
 
     it "passes headed to openProject.launch", ->
-      browser = { name: "electron" }
+      browser = { name: "electron", family: "electron" }
 
       browsers.ensureAndGetByNameOrPath.resolves(browser)
 

@@ -136,19 +136,26 @@ _connectToChromeRemoteInterface = (port) ->
   la(check.userPort(port), "expected port number to connect CRI to", port)
 
   debug("connecting to Chrome remote interface at random port %d", port)
-  # at first the tab will be blank "new tab"
+
   protocol.getWsTargetFor(port)
   .then (wsUrl) ->
     debug("received wsUrl %s for port %d", wsUrl, port)
     initCriClient(wsUrl)
 
-_maybeRecordVideo = (client, options) ->
-  if options.screencastFrame
+_maybeRecordVideo = (options) ->
+  (client) ->
+    if not options.screencastFrame
+      debug("screencastFrame is false")
+      return client
+
     debug('starting screencast')
     client.Page.screencastFrame(options.screencastFrame)
+
     client.send('Page.startScreencast', {
       format: 'jpeg'
     })
+    .then ->
+      return client
 
 # a utility function that navigates to the given URL
 # once Chrome remote interface client is passed to it.
@@ -287,15 +294,30 @@ module.exports = {
         # first allows us to connect the remote interface,
         # start video recording and then
         # we will load the actual page
-        utils.launch(browser, null, args)
+        utils.launch(browser, "about:blank", args)
 
-      .tap =>
+      .then (launchedBrowser) =>
+        la(launchedBrowser, "did not get launched browser instance")
+
         # SECOND connect to the Chrome remote interface
         # and when the connection is ready
         # navigate to the actual url
         @_connectToChromeRemoteInterface(port)
-        .then (client) =>
+        .then (criClient) =>
+          la(criClient, "expected Chrome remote interface reference", criClient)
+
           @_setAutomation(client, automation)
-          @_maybeRecordVideo(client, options)
-          @_navigateUsingCRI(client, url)
+
+          debug("adding method to close the remote interface client")
+          launchedBrowser.close = () ->
+            debug("closing remote interface client")
+            criClient.close()
+
+          return criClient
+        .then @_maybeRecordVideo(options)
+        .then @_navigateUsingCRI(url)
+        .then ->
+          # return the launched browser process
+          # with additional method to close the remote connection
+          return launchedBrowser
 }

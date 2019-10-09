@@ -765,6 +765,10 @@ describe "lib/cypress", ->
 
         ee = new EE()
         ee.kill = ->
+          # ughh, would be nice to test logic inside the launcher
+          # that cleans up after the browser exit
+          # like calling client.close() if available to let the
+          # browser free any resources
           ee.emit("exit")
         ee.close = ->
           ee.emit("closed")
@@ -792,7 +796,10 @@ describe "lib/cypress", ->
         it "chrome", ->
           # during testing, do not try to connect to the remote interface or
           # use the Chrome remote interface client
-          sinon.stub(chromeBrowser, "_connectToChromeRemoteInterface").resolves()
+          criClient = {
+            close: sinon.stub().resolves()
+          }
+          sinon.stub(chromeBrowser, "_connectToChromeRemoteInterface").resolves(criClient)
           # the "returns(resolves)" stub is due to curried method
           # it accepts URL to visit and then waits for actual CRI client reference
           # and only then navigates to that URL

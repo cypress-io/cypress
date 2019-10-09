@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const _ = require('lodash')
+const la = require('lazy-ass')
 const pkg = require('@packages/root')
 const path = require('path')
 const chalk = require('chalk')
@@ -612,6 +613,9 @@ module.exports = {
   maybeStartVideoRecording,
 
   getChromeProps (isHeaded, project, writeVideoFrame) {
+    debug('setting Chrome properties, is headed? %s, should write video? %s',
+      isHeaded, Boolean(writeVideoFrame))
+
     const chromeProps = {}
 
     if (isHeaded && writeVideoFrame) {
@@ -783,14 +787,10 @@ module.exports = {
 
       return videoCapture.process(name, cname, videoCompression, onProgress)
     })
-    .catch({ recordingVideoFailed: true }, () => {
-      // dont do anything if this error occured because
-      // recording the video had already failed
-    })
     .catch((err) => {
       // log that post processing was attempted
       // but failed and dont let this change the run exit code
-      return errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+      errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
     })
   },
 
@@ -805,13 +805,17 @@ module.exports = {
     } = options
 
     const browserOpts = (() => {
-      if (browser.name === 'electron') {
+      la(browsers.isBrowserFamily(browser.family), 'invalid browser family in', browser)
+
+      if (browser.family === 'electron') {
         return this.getElectronProps(browser.isHeaded, project, writeVideoFrame)
       }
 
-      if (browser.name === 'electron') {
+      if (browser.family === 'chrome') {
         return this.getChromeProps(browser.isHeaded, project, writeVideoFrame)
       }
+
+      debug('warning - cannot determine browser props for %o', browser)
 
       return {}
     })()

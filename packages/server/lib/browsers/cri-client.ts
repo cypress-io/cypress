@@ -1,5 +1,9 @@
+import debugModule from 'debug'
+
 const chromeRemoteInterface = require('chrome-remote-interface')
 const errors = require('../errors')
+
+const debugVerbose = debugModule('cy-verbose:server:browsers:cri-client')
 
 /**
  * Url returned by the Chrome Remote Interface
@@ -49,6 +53,11 @@ interface CRIWrapper {
    * @example client.Page.screencastFrame(cb)
   */
   Page: CRI.Page
+
+  /**
+   * Calls underlying remote interface clien't close
+  */
+  close ():Promise<null>
 }
 
 /**
@@ -105,7 +114,18 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
     ensureMinimumProtocolVersion,
     getProtocolVersion,
     send: (command: CRI.Command, params?: object):Promise<any> => {
+      debugVerbose('sending %s %o', command, params)
+
       return cri.send(command, params)
+      .then((result) => {
+        debugVerbose('received response for %s: %o', command, { result })
+
+        return result
+      })
+      .catch((err) => {
+        debugVerbose('received error for %s: %o', command, { err })
+        throw err
+      })
     },
     takeScreenshot: () => {
       return ensureMinimumProtocolVersion('1.3')
@@ -118,6 +138,9 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
       })
     },
     Page: cri.Page,
+    close ():Promise<null> {
+      return cri.close()
+    },
   }
 
   return client
