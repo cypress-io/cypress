@@ -449,6 +449,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             win.history.go(num)
 
             retWin = ->
+              knownCommandCausedInstability = false
+
               ## need to set the attributes of 'go'
               ## consoleProps here with win
 
@@ -459,8 +461,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Promise
             .delay(100)
             .then ->
-              knownCommandCausedInstability = false
-
               ## if we've didUnload then we know we're
               ## doing a full page refresh and we need
               ## to wait until
