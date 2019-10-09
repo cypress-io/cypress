@@ -110,7 +110,13 @@ export function CdpAutomation (opts : {
       case 'set:cookie':
         setCookie = normalizeSetCookieProps(data)
 
-        return _invokeViaDebugger('Network.setCookie', setCookie).then(function () {
+        return _invokeViaDebugger('Network.setCookie', setCookie).then(function (result: cdp.Network.SetCookieResponse) {
+          if (!result.success) {
+            // i wish CDP provided some more detail here, but this is really it in v1.3
+            // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
+            throw new Error('Failed to set cookie via Network.setCookie.')
+          }
+
           return getCookie(data)
         })
       case 'clear:cookie':
