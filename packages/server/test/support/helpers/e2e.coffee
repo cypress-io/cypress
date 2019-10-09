@@ -58,6 +58,11 @@ replaceDurationFromReporter = (str, p1, p2, p3) ->
 
   p1 + _.padEnd("X", p2.length, "X") + p3
 
+replaceNodeVersion = (str, p1, p2, p3) ->
+  ## Node Version: 1.2.3
+
+  return p1 + _.padEnd("X", p2.length, "X") + ' (/foo/bar/node)' + ' '.repeat(p3.length - 16)
+
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
   ## full length of the duration so it doesn't shift content
@@ -85,7 +90,8 @@ normalizeStdout = (str, options = {}) ->
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) ## durations in tables
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") ## replace Cypress: 2.1.0
+  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$11.2.3") ## replace Cypress: 2.1.0
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion) ## replace Node Version: 1.2.3
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) ## replace duration='1589'
   .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
