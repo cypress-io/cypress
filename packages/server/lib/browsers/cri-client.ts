@@ -1,8 +1,10 @@
 import debugModule from 'debug'
+import _ from 'lodash'
 
 const chromeRemoteInterface = require('chrome-remote-interface')
-
-const debugVerbose = debugModule('cy-verbose:server:browsers:cri-client')
+const debugVerbose = debugModule('cypress-verbose:server:browsers:cri-client')
+const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:[-->]')
+const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:[<--]')
 
 /**
  * Url returned by the Chrome Remote Interface
@@ -54,18 +56,59 @@ interface CRIWrapper {
   close ():Promise<void>
 }
 
+const maybeDebugCdpMessages = (cri) => {
+  if (debugVerboseReceive.enabled) {
+    cri._ws.on('message', (data) => {
+      data = _
+      .chain(JSON.parse(data))
+      .tap((data) => {
+        const str = _.get(data, 'params.data')
+
+        if (!_.isString(str)) {
+          return
+        }
+
+        data.params.data = _.truncate(str, {
+          length: 100,
+          omission: `... [truncated string of total bytes: ${str.length}]`,
+        })
+
+        return data
+      })
+      .value()
+
+      debugVerboseReceive('received CDP message %o', data)
+    })
+
+  }
+
+  if (debugVerboseSend.enabled) {
+    const send = cri._ws.send
+
+    cri._ws.send = (data, callback) => {
+      debugVerboseSend('sending CDP command %o', JSON.parse(data))
+
+      return send.call(cri._ws, data, callback)
+    }
+  }
+}
+
 /**
  * Creates a wrapper for Chrome remote interface client
  * that only allows to use low-level "send" method
  * and not via domain objects and commands.
  *
- * @example initCriClient('ws://localhost:...').send('Page.bringToFront')
+ * @example create('ws://localhost:...').send('Page.bringToFront')
  */
-export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => {
+export { chromeRemoteInterface }
+
+export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => {
   const cri = await chromeRemoteInterface({
     target: debuggerUrl,
     local: true,
   })
+
+  maybeDebugCdpMessages(cri)
 
   /**
    * Wrapper around Chrome remote interface client
@@ -73,22 +116,11 @@ export const initCriClient = async (debuggerUrl: websocketUrl): Promise<CRIWrapp
    */
   const client: CRIWrapper = {
     send (command: CRI.Command, params: object):Promise<any> {
-      debugVerbose('sending %s %o', command, params)
-
       return cri.send(command, params)
-      .then((result) => {
-        debugVerbose('received response for %s: %o', command, { result })
-
-        return result
-      })
-      .catch((err) => {
-        debugVerbose('received error for %s: %o', command, { err })
-        throw err
-      })
     },
 
     on (eventName: CRI.EventNames, cb: Function) {
-      debugVerbose('registering CDP event %s', eventName)
+      debugVerbose('registering CDP on event %o', { eventName })
 
       return cri.on(eventName, cb)
     },
