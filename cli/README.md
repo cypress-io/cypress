@@ -1,6 +1,6 @@
 # CLI
 
-The CLI is used to build Cypress npm module to be run within a terminal.
+The CLI is used to build the [cypress npm module](https://www.npmjs.com/package/cypress) to be run within a terminal.
 
 **The CLI has the following responsibilities:**
 
@@ -8,9 +8,10 @@ The CLI is used to build Cypress npm module to be run within a terminal.
 - Allow users to install the Cypress executable
 - Allow users to print their current Cypress version
 - Allow users to run Cypress tests from the terminal
-- Allow users to open Cypress in the interactive GUI.
-- Allow users to verifies that Cypress is installed correctly and executable
+- Allow users to open Cypress in the interactive Test Runner.
+- Allow users to verify that Cypress is installed correctly and executable
 - Allow users to manages the Cypress binary cache
+- Allow users to pass in options that change way tests are ran or recorded (browsers used, specfiles ran, grouping, parallelization)
 
 ## Installing
 
@@ -23,7 +24,7 @@ npm install
 
 ## Building
 
-See `scripts/build.js`. Note that the built NPM package will include [NPM_README.md](NPM_README.md) as its public README file.
+See `scripts/build.js`. Note that the built npm package will include [NPM_README.md](NPM_README.md) as its public README file.
 
 ## Testing
 

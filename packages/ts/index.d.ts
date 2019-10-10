@@ -95,3 +95,7 @@ declare module 'url' {
     format(): string
   }
 }
+
+declare interface InternalStream {
+  queue(str: string | null): void
+}

@@ -1,7 +1,7 @@
 import { cors } from '../../lib'
 import { expect } from 'chai'
 
-describe('lib/util/cors', () => {
+describe('lib/cors', () => {
   context('.parseUrlIntoDomainTldPort', () => {
     beforeEach(function () {
       this.isEq = (url, obj) => {

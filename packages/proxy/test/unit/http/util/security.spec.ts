@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import concat from 'concat-stream'
+import { concatStream } from '@packages/network'
 import { expect } from 'chai'
 import fs from 'fs'
 import Promise from 'bluebird'
@@ -274,7 +274,7 @@ function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&f
 
       const replacer = security.stripStream()
 
-      replacer.pipe(concat({ encoding: 'string' }, (str) => {
+      replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
         const string = str.toString().trim()
 
         try {

@@ -1470,12 +1470,31 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           expect(clicked).to.eq(1)
-          expect(err.message).to.include('cy.click() failed because this element')
+          expect(err.message).to.include('cy.click() failed because this element is detached from the DOM')
 
           done()
         })
 
         cy.get(':checkbox:first').click().click()
+      })
+
+      it('throws when subject is detached during actionability', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('cy.click() failed because this element is detached from the DOM')
+
+          done()
+        })
+
+        cy.get('input:first')
+        .then(($el) => {
+          // This represents an asynchronous re-render
+          // since we fire the 'scrolled' event during actionability
+          // if we use el.on('scroll'), headless electron is flaky
+          cy.on('scrolled', () => {
+            $el.remove()
+          })
+        })
+        .click()
       })
 
       it('logs once when not dom subject', function (done) {

@@ -44,14 +44,14 @@ const Controls = observer(({ events, appState }) => {
         </Tooltip>
       ))}
       {ifThen(appState.isRunning && !appState.isPaused, (
-        <Tooltip placement='bottom' title='Stop Running'>
+        <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>}>
           <button aria-label='Stop' className='stop' onClick={emit('stop')}>
             <i className='fa fa-stop'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
-        <Tooltip placement='bottom' title='Run all tests'>
+        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>}>
           <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
             <i className='fa fa-repeat'></i>
           </button>
