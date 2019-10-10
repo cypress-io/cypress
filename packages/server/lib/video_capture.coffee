@@ -1,6 +1,9 @@
 _          = require("lodash")
+os         = require("os")
+path       = require("path")
 utils      = require("fluent-ffmpeg/lib/utils")
 debug      = require("debug")("cypress:server:video")
+
 # extra verbose logs for logging individual frames
 debugFrames = require("debug")("cypress:server:video:frames")
 ffmpeg     = require("fluent-ffmpeg")
@@ -13,6 +16,32 @@ debug("using ffmpeg from %s", ffmpegPath)
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 module.exports = {
+  getCodecData: (src) ->
+  # Promise.fromCallback (cb) ->
+  #   ffmpeg(src)
+  #   .ffprobe(cb)
+  
+    ## TODO: figure out if we can get codecData
+    ## without doing a mutation
+    output = path.join(os.tmpdir(), 'tmp-output.mp4')
+    
+    new Promise (resolve, reject) ->
+      ffmpeg()
+      .on 'codecData', (data) ->
+        debug('codecData %o', {
+          src,
+          data, 
+        })
+
+        resolve(data)
+      .on "error", (err) ->
+        debug("getting codecData failed", { err })
+
+        reject(err)
+      .input(src)
+      .output(output)
+      .run()
+  
   copy: (src, dest) ->
     debug("copying from %s to %s", src, dest)
     fs
