@@ -4360,6 +4360,22 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:text:first').type('foo')
       })
 
+      it('throws when subject is disabled and force:true', function (done) {
+        cy.timeout(200)
+
+        cy.$$('input:text:first').prop('disabled', true)
+
+        cy.on('fail', (err) => {
+          // get + type logs
+          expect(this.logs.length).eq(2)
+          expect(err.message).to.include('cy.type() failed because it targeted a disabled element.')
+
+          done()
+        })
+
+        cy.get('input:text:first').type('foo', { force: true })
+      })
+
       it('throws when submitting within nested forms')
 
       it('logs once when not dom subject', function (done) {

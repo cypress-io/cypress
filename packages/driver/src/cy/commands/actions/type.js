@@ -383,7 +383,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       // and seeing if that is focused
       // Checking first if element is focusable accounts for focusable els inside
       // of contenteditables
-      if ($elements.isFocusedOrInFocused(options.$el.get(0))) {
+      if ($elements.isFocusedOrInFocused(options.$el[0])) {
         debug('element is already focused, only checking readOnly property')
         options.ensure = {
           notReadonly: true,
@@ -406,6 +406,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // click the element first to simulate focus
           // and typical user behavior in case the window
           // is out of focus
+          // cannot just call .focus, since children of contenteditable will not receive cursor
+          // with .focus()
           return cy.now('click', $elToClick, {
             $el: $elToClick,
             log: false,
@@ -416,23 +418,26 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             interval: options.interval,
           })
           .then(() => {
-            if ($elToClick.is('body') || !($elements.isFocusable($elToClick) || $elements.isFocusedOrInFocused($elToClick[0]))) {
-              const node = $dom.stringify($elToClick)
+            if ($elements.isFocusedOrInFocused($elToClick[0]) || options.force) {
+              return type()
+            }
 
-              $utils.throwErrByPath('type.not_on_typeable_element', {
-                onFail: options._log,
+            const node = $dom.stringify($elToClick)
+            const onFail = options._log
+
+            if ($dom.isTextLike($elToClick[0])) {
+
+              $utils.throwErrByPath('type.not_actionable_textlike', {
+                onFail,
                 args: { node },
               })
             }
 
-            return type()
+            $utils.throwErrByPath('type.not_on_typeable_element', {
+              onFail,
+              args: { node },
+            })
 
-            // cannot just call .focus, since children of contenteditable will not receive cursor
-            // with .focus()
-
-            // focusCursor calls focus on first focusable
-            // then moves cursor to end if in textarea, input, or contenteditable
-            // $selection.focusCursor($elToFocus[0])
           })
 
         },
