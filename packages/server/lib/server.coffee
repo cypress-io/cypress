@@ -2,7 +2,6 @@ _            = require("lodash")
 exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
-concatStream = require("concat-stream")
 stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
@@ -14,7 +13,13 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
-{ agent, blacklist, cors, uri } = require("@packages/network")
+{
+  agent,
+  blacklist,
+  concatStream,
+  cors,
+  uri
+} = require("@packages/network")
 { NetworkProxy } = require("@packages/proxy")
 origin       = require("./util/origin")
 ensureUrl    = require("./util/ensure-url")
@@ -447,11 +452,6 @@ class Server
                 ## this allows us to detect & reject ETIMEDOUT errors
                 ## where the headers have been sent but the
                 ## connection hangs before receiving a body.
-
-                if !_.get(responseBuffer, 'length')
-                  ## concatStream can yield an empty array, which is
-                  ## not a valid chunk
-                  responseBuffer = undefined
 
                 ## if there is not a content-type, try to determine
                 ## if the response content is HTML-like
