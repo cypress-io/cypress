@@ -48,10 +48,6 @@ replaceBrowserName = (str, key, customBrowserPath, browserName, version, headles
   ## this ensures we add whitespace so the border is not shifted
   key + customBrowserPath + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString)
 
-replaceStringWithXs = (str) ->
-  ## foobarbaz -> XXXXXXXXX
-  return _.padEnd("X", str.length, "X")
-
 replaceDurationSeconds = (str, p1, p2, p3, p4) ->
   ## get the padding for the existing duration
   lengthOfExistingDuration = _.sum([p2?.length or 0, p3.length, p4.length])
@@ -87,8 +83,9 @@ normalizeStdout = (str, options = {}) ->
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
   str = str
-  ## /Users/jane/........../ -> /XXXXXXXXXX/
-  .replace(new RegExp(pathUpToProjectName, 'g'), replaceStringWithXs)
+  ## /Users/jane/........../ -> //foo/bar/.projects/  
+  ## (Required when paths are printed outside of our own formatting)
+  .split(pathUpToProjectName).join("/foo/bar/.projects")
   .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
   .replace(browserNameVersionRe, replaceBrowserName)
   ## numbers in parenths
