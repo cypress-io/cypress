@@ -24,7 +24,7 @@ npm install
 
 ## Building
 
-See `scripts/build.js`. Note that the built NPM package will include [NPM_README.md](NPM_README.md) as its public README file.
+See `scripts/build.js`. Note that the built npm package will include [NPM_README.md](NPM_README.md) as its public README file.
 
 ## Testing
 
