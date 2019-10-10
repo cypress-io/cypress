@@ -14,7 +14,7 @@ exports['cy.visit performance tests pass in chrome 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  fast_visit_spec.coffee...                                                       (1 of 1)
+  Running:  fast_visit_spec.coffee                                                          (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -63,17 +63,17 @@ histogram line
 
   (Results)
 
-  ┌──────────────────────────────────────┐
-  │ Tests:        2                      │
-  │ Passing:      2                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        false                  │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     fast_visit_spec.coffee │
-  └──────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fast_visit_spec.coffee                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -81,7 +81,7 @@ histogram line
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  fast_visit_spec.coffee                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
