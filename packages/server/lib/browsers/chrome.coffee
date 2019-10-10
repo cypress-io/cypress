@@ -13,7 +13,7 @@ fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 protocol  = require("./protocol")
-{initCriClient} = require("./cri-client")
+CriClient = require("./cri-client")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
@@ -129,8 +129,8 @@ _disableRestorePagesPrompt = (userDir) ->
         fs.writeJson(prefsPath, preferences)
   .catch ->
 
-# After the browser has been opened, we can connect to
-# its remote interface via a websocket.
+## After the browser has been opened, we can connect to
+## its remote interface via a websocket.
 _connectToChromeRemoteInterface = (port) ->
   la(check.userPort(port), "expected port number to connect CRI to", port)
 
@@ -139,10 +139,11 @@ _connectToChromeRemoteInterface = (port) ->
   protocol.getWsTargetFor(port)
   .then (wsUrl) ->
     debug("received wsUrl %s for port %d", wsUrl, port)
-    initCriClient(wsUrl)
+    
+    CriClient.create(wsUrl)
 
 _maybeRecordVideo = (options) ->
-  (client) ->
+  return (client) ->
     if not options.screencastFrame
       debug("screencastFrame is false")
       return client
@@ -156,27 +157,28 @@ _maybeRecordVideo = (options) ->
     .then ->
       return client
 
-# a utility function that navigates to the given URL
-# once Chrome remote interface client is passed to it.
+## a utility function that navigates to the given URL
+## once Chrome remote interface client is passed to it.
 _navigateUsingCRI = (url) ->
   la(check.url(url), "missing url to navigate to", url)
 
-  (client) ->
+  return (client) ->
     la(client, "could not get CRI client")
     debug("received CRI client")
     debug('navigating to page %s', url)
-    # when opening the blank page and trying to navigate
-    # the focus gets lost. Restore it and then navigate.
+
+    ## when opening the blank page and trying to navigate
+    ## the focus gets lost. Restore it and then navigate.
     client.send("Page.bringToFront")
     .then ->
       client.send("Page.navigate", { url })
 
 module.exports = {
-  #
-  # tip:
-  #   by adding utility functions that start with "_"
-  #   as methods here we can easily stub them from our unit tests
-  #
+  ##
+  ## tip:
+  ##   by adding utility functions that start with "_"
+  ##   as methods here we can easily stub them from our unit tests
+  ##
 
   _normalizeArgExtensions
 
@@ -276,23 +278,22 @@ module.exports = {
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
-        debug("get random port %d for remote debugging", port)
         args.push("--remote-debugging-port=#{port}")
+        
+        debug("launching in chrome with debugging port", { url, args, port })
 
-        debug("launch in chrome: %s, %s", url, args)
-
-        # FIRST load the blank page
-        # first allows us to connect the remote interface,
-        # start video recording and then
-        # we will load the actual page
+        ## FIRST load the blank page
+        ## first allows us to connect the remote interface,
+        ## start video recording and then
+        ## we will load the actual page
         utils.launch(browser, "about:blank", args)
 
       .then (launchedBrowser) =>
         la(launchedBrowser, "did not get launched browser instance")
 
-        # SECOND connect to the Chrome remote interface
-        # and when the connection is ready
-        # navigate to the actual url
+        ## SECOND connect to the Chrome remote interface
+        ## and when the connection is ready
+        ## navigate to the actual url
         @_connectToChromeRemoteInterface(port)
         .then (criClient) =>
           la(criClient, "expected Chrome remote interface reference", criClient)
@@ -305,8 +306,7 @@ module.exports = {
           return criClient
         .then @_maybeRecordVideo(options)
         .then @_navigateUsingCRI(url)
-        .then ->
-          # return the launched browser process
-          # with additional method to close the remote connection
-          return launchedBrowser
+        ## return the launched browser process
+        ## with additional method to close the remote connection
+        .return(launchedBrowser)
 }

@@ -402,14 +402,64 @@ const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   la(browsers.isBrowserFamily(browser.family), 'invalid browser family in', browser)
 
   if (browser.family === 'electron') {
-    return this.getElectronProps(browser.isHeaded, project, writeVideoFrame)
+    return getElectronProps(browser.isHeaded, project, writeVideoFrame)
   }
 
   if (browser.family === 'chrome') {
-    return this.getChromeProps(browser.isHeaded, project, writeVideoFrame)
+    return getChromeProps(browser.isHeaded, project, writeVideoFrame)
   }
 
   return {}
+}
+
+const getChromeProps = (isHeaded, project, writeVideoFrame) => {
+  const shouldWriteVideo = Boolean(writeVideoFrame)
+
+  debug('setting Chrome properties %o', { isHeaded, shouldWriteVideo })
+
+  return _
+  .chain({})
+  .tap((props) => {
+    if (isHeaded && writeVideoFrame) {
+      props.screencastFrame = (e) => {
+        // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
+        writeVideoFrame(new Buffer(e.data, 'base64'))
+      }
+    }
+  })
+  .value()
+}
+
+const getElectronProps = (isHeaded, project, writeVideoFrame) => {
+  return _
+  .chain({
+    width: 1280,
+    height: 720,
+    show: isHeaded,
+    onCrashed () {
+      const err = errors.get('RENDERER_CRASHED')
+
+      errors.log(err)
+
+      return project.emit('exitEarlyWithErr', err.message)
+    },
+    onNewWindow (e, url, frameName, disposition, options) {
+      // force new windows to automatically open with show: false
+      // this prevents window.open inside of javascript client code
+      // to cause a new BrowserWindow instance to open
+      // https://github.com/cypress-io/cypress/issues/123
+      options.show = false
+    },
+  })
+  .tap((props) => {
+    if (writeVideoFrame) {
+      props.recordFrameRate = 20
+      props.onPaint = (event, dirty, image) => {
+        return writeVideoFrame(image.toJPEG(100))
+      }
+    }
+  })
+  .value()
 }
 
 const sumByProp = (runs, prop) => {
@@ -426,7 +476,7 @@ const writeOutput = (outputPath, results) => {
       return
     }
 
-    debug('saving output results as %s', outputPath)
+    debug('saving output results %o', { outputPath })
 
     return fs.outputJsonAsync(outputPath, results)
   })
@@ -612,52 +662,9 @@ module.exports = {
 
   maybeStartVideoRecording,
 
-  getChromeProps (isHeaded, project, writeVideoFrame) {
-    debug('setting Chrome properties, is headed? %s, should write video? %s',
-      isHeaded, Boolean(writeVideoFrame))
+  getChromeProps,
 
-    const chromeProps = {}
-
-    if (isHeaded && writeVideoFrame) {
-      chromeProps.screencastFrame = (e) => {
-        // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
-        writeVideoFrame(new Buffer(e.data, 'base64'))
-      }
-    }
-
-    return chromeProps
-  },
-
-  getElectronProps (isHeaded, project, writeVideoFrame) {
-    const electronProps = {
-      width: 1280,
-      height: 720,
-      show: isHeaded,
-      onCrashed () {
-        const err = errors.get('RENDERER_CRASHED')
-
-        errors.log(err)
-
-        return project.emit('exitEarlyWithErr', err.message)
-      },
-      onNewWindow (e, url, frameName, disposition, options) {
-        // force new windows to automatically open with show: false
-        // this prevents window.open inside of javascript client code
-        // to cause a new BrowserWindow instance to open
-        // https://github.com/cypress-io/cypress/issues/123
-        options.show = false
-      },
-    }
-
-    if (writeVideoFrame) {
-      electronProps.recordFrameRate = 20
-      electronProps.onPaint = (event, dirty, image) => {
-        return writeVideoFrame(image.toJPEG(100))
-      }
-    }
-
-    return electronProps
-  },
+  getElectronProps,
 
   displayResults (obj = {}, estimated) {
     const results = collectTestResults(obj, estimated)
