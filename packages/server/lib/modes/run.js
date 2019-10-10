@@ -112,6 +112,8 @@ const formatSymbolSummary = (failures) => {
 }
 
 const formatPath = (name, n, colour = 'reset') => {
+  if (!name) return ''
+
   if (env.get('CYPRESS_ENV') === 'test') {
     // if we're testing within Cypress, we want to strip out
     // the current working directory before calculating the stdout tables
