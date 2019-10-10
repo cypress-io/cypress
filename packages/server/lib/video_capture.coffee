@@ -17,13 +17,6 @@ fs         = require("./util/fs")
 debug("using ffmpeg from %s", ffmpegPath)
 ffmpeg.setFfmpegPath(ffmpegPath)
 
-ffmpegLoggerObj = {
-  debug,
-  info: debug,
-  warn: debug,
-  error: debug
-}
-
 durationRe = /(\d{2}):(\d{2}):(\d{2})\.(\d{2})/
 
 module.exports = {
