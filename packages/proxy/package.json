@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
-    "charset": "^1.0.1",
-    "concat-stream": "^1.6.2",
+    "charset": "1.0.1",
+    "concat-stream": "1.6.2",
     "debug": "4.1.1",
-    "iconv-lite": "^0.5.0",
+    "iconv-lite": "0.5.0",
     "lodash": "4.17.15",
-    "replacestream": "^4.0.3"
+    "replacestream": "4.0.3"
   },
   "devDependencies": {
     "@cypress/sinon-chai": "^2.9.0",
