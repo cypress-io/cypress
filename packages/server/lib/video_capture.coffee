@@ -1,62 +1,44 @@
 _          = require("lodash")
-BlackHoleStream = require("black-hole-stream")
 la         = require("lazy-ass")
 os         = require("os")
 path       = require("path")
 utils      = require("fluent-ffmpeg/lib/utils")
 debug      = require("debug")("cypress:server:video")
-
-# extra verbose logs for logging individual frames
-debugFrames = require("debug")("cypress:server:video:frames")
 ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
 Promise    = require("bluebird")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
+BlackHoleStream = require("black-hole-stream")
 fs         = require("./util/fs")
 
+## extra verbose logs for logging individual frames
+debugFrames = require("debug")("cypress:server:video:frames")
+
 debug("using ffmpeg from %s", ffmpegPath)
+
 ffmpeg.setFfmpegPath(ffmpegPath)
 
-durationRe = /(\d{2}):(\d{2}):(\d{2})\.(\d{2})/
-
 module.exports = {
-  getMsFromDuration: (durationString) ->
-    matches = durationRe.exec(durationString)
-    la(matches, 'durationString should be a string of the format: HH:MM:SS.MS')
-    [hrs, mins, secs, ms] = matches.slice(1).map(Number)
-    mins += hrs * 60
-    secs += mins * 60
-    ms += secs * 1000
-    ms
+  getMsFromDuration: (duration) ->
+    utils.timemarkToSeconds(duration) * 1000
 
   getCodecData: (src) ->
     new Promise (resolve, reject) ->
-      onError = (err) ->
-        debug("getting codecData failed", { err })
-        cleanup()
-        reject(err)
-
-      cleanup = =>
-        ff?.removeListener("error", onError)
-        ff?.kill()
-        ff = null
-
-      ff = ffmpeg(src)
-      .on 'codecData', (data) ->
-        debug('codecData %o', {
-          src,
-          data,
-        })
-        cleanup()
-        resolve(data)
-      .on "error", onError
-      ## an outputformat must be set, or ffmpeg will fail to read the input
-      ## this is not enough for ffmpeg to properly transcode, so it will
-      ## exit with an error - which is fine since we cleanup error listeners
-      ## on success anyways, the error will get ignored
-      .format('mp4')
-      .output(new BlackHoleStream)
+      ffmpeg()
+      .on "stderr", (stderr) ->
+        debug("get codecData stderr log %o", { message: stderr })
+      .on("codecData", resolve)
+      .input(src)
+      .format("null")
+      .output(new BlackHoleStream())
       .run()
+    .tap (data) ->
+      debug('codecData %o', {
+        src,
+        data,
+      })
+    .tapCatch (err) ->
+      debug("getting codecData failed", { err })
 
   copy: (src, dest) ->
     debug("copying from %s to %s", src, dest)

@@ -1,4 +1,5 @@
 path = require("path")
+humanInterval = require("human-interval")
 e2e = require("../support/helpers/e2e")
 glob = require("../../lib/util/glob")
 videoCapture = require("../../lib/video_capture")
@@ -23,14 +24,15 @@ describe "e2e video compression", ->
         snapshot: false
         config: {
           env: {
-            NUM_TESTS: 40
-            MS_PER_TEST: 500
+            NUM_TESTS
+            MS_PER_TEST
           }
         }
         expectedExitCode: 0
       })
       .tap ->
         videosPath = Fixtures.projectPath("e2e/cypress/videos/*")
+
         glob(videosPath)
         .then (files) ->
           expect(files).to.have.length(1, "globbed for videos and found: #{files.length}. Expected to find 1 video. Search in videosPath: #{videosPath}.")
@@ -38,7 +40,8 @@ describe "e2e video compression", ->
           videoCapture.getCodecData(files[0])
           .then ({ duration }) ->
             durationMs = videoCapture.getMsFromDuration(duration)
-            expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, 10 * 1000)
+            expect(durationMs).to.be.ok
+            expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, humanInterval('10 seconds'))
 
       .get("stdout")
       .then (stdout) ->
