@@ -126,7 +126,7 @@ const getHostContenteditable = function (el) {
   // TODO: remove this when we no longer click before type and move
   // cursor to the end
   if (!_hasContenteditableAttr(curEl)) {
-    return curEl // el.ownerDocument.body
+    return el
   }
 
   return curEl

@@ -4,36 +4,6 @@ const { Promise } = Cypress
 const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
 const { stripIndent } = require('common-tags')
 
-// Cypress.on('test:after:run', (t) => {
-//   debugger
-// })
-
-describe('foo', ()=>{
-  beforeEach(()=> {
-    cy.setCookie('foo', '   bar')
-    // Cypress.on('fail', (err) => {
-    //   debugger
-    // })
-  })
-  it.only('test1', ()=>{
-
-  })
-})
-
-it('get document frag', ()=>{
-  cy.visit('https://www.lightningdesignsystem.com/components/input/')
-  cy.get(':nth-child(2) > .docs-codeblock-example > .slds-form-element > .slds-form-element__control > #text-input-id-1').click().type('foo')
-  
-  // cy.window().then(win => {
-  //   win.document.getSelection().removeAllRanges()
-  //   const r = win.document.createRange()
-  //   r.selectNode(cy.$$('div:first'))
-  //   const frag = r.cloneContents()
-  //   cy.wrap(frag)
-  // })
-})
-
-
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
 // this differently
@@ -1542,7 +1512,7 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
-        it(`can type into an iframe with designmode = 'on'`, () => {
+        it('can type into an iframe with designmode = \'on\'', () => {
           // append a new iframe to the body
           cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
           .appendTo(cy.$$('body'))
@@ -3329,15 +3299,14 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('accurately returns documentElement el with no falsey contenteditable="false" attr', () => {
+      it('accurately returns same el with no falsey contenteditable="false" attr', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0].ownerDocument.documentElement)
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0])
         })
       })
 
-      
       // https://github.com/cypress-io/cypress/issues/3001
       describe('skip actionability if already focused', () => {
         it('inside input', () => {
@@ -4322,15 +4291,21 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('throws when not textarea or text-like', (done) => {
-        cy.get('form#by-id').type('foo')
+      it('throws when not textarea or text-like', () => {
+        cy.get('#specific-contains').type('foo')
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
           expect(err.message).to.include('The element typed into was:')
           expect(err.message).to.include('<form id="by-id">...</form>')
-          expect(err.message).to.include(`A typeable element matches one of the following selectors:`)
-          done()
+          expect(err.message).to.include(stripIndent`Cypress considers any element matching the following selectors to be typeable:
+          -
+          - 
+          - 
+          - 
+          `)
+        //   done()
+        // })
         })
       })
 
@@ -4957,7 +4932,7 @@ https://on.cypress.io/type`)
           expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('<form id="checkboxes">...</form>')
-          expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+          expect(err.message).to.include('Cypress considers a \'textarea\', any \'element\' with a \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid clearable elements.')
 
           done()
         })
@@ -4970,7 +4945,7 @@ https://on.cypress.io/type`)
           expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('<div id="dom">...</div>')
-          expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+          expect(err.message).to.include('Cypress considers a \'textarea\', any \'element\' with a \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid clearable elements.')
 
           done()
         })
@@ -4983,7 +4958,8 @@ https://on.cypress.io/type`)
           expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('<input type="radio" name="gender" value="male">')
-          expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+          expect(err.message).to.include('Cypress considers a \'textarea\', any \'element\' with a \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid clearable elements.')
+
           done()
         })
 
@@ -4995,7 +4971,7 @@ https://on.cypress.io/type`)
           expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('<input type="checkbox" name="colors" value="blue">')
-          expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+          expect(err.message).to.include('Cypress considers a \'textarea\', any \'element\' with a \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid clearable elements.')
 
           done()
         })
