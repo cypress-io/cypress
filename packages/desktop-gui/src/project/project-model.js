@@ -18,6 +18,7 @@ const validProps = cacheProps.concat([
   'isChosen',
   'isLoading',
   'isNew',
+  'configFile',
   'browsers',
   'onBoardingModalOpen',
   'browserState',
@@ -25,6 +26,8 @@ const validProps = cacheProps.concat([
   'parentTestsFolderDisplay',
   'integrationExampleName',
   'scaffoldedFiles',
+  'resolvedNodePath',
+  'resolvedNodeVersion',
 ])
 
 export default class Project {
@@ -58,6 +61,8 @@ export default class Project {
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
   @observable scaffoldedFiles = []
+  @observable resolvedNodePath
+  @observable resolvedNodeVersion
   // should never change after first set
   @observable path
   // not observable

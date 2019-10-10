@@ -10,7 +10,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk proxySource'.split(' ')
+const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk configFile proxySource'.split(' ')
 
 // returns true if the given string has double quote character "
 // only at the last position.
@@ -39,7 +39,7 @@ const normalizeBackslashes = function (options) {
   // backslash at the end
   // https://github.com/cypress-io/cypress/issues/535
   // these properties are paths and likely to have backslash on Windows
-  const pathProperties = ['runProject', 'project', 'appPath', 'execPath']
+  const pathProperties = ['runProject', 'project', 'appPath', 'execPath', 'configFile']
 
   pathProperties.forEach((property) => {
     if (options[property]) {
@@ -146,6 +146,7 @@ module.exports = {
       'app-path': 'appPath',
       'ci-build-id': 'ciBuildId',
       'clear-logs': 'clearLogs',
+      'config-file': 'configFile',
       'exec-path': 'execPath',
       'exit-with-code': 'exitWithCode',
       'inspect-brk': 'inspectBrk',
