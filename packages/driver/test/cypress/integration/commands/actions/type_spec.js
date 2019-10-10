@@ -4305,6 +4305,7 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       it('throws when not textarea or text-like', (done) => {
+        cy.timeout(300)
         cy.get('form#by-id').type('foo')
 
         cy.on('fail', (err) => {
