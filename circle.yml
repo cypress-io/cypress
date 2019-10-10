@@ -1024,6 +1024,7 @@ mac-workflow: &mac-workflow
 
     - post-beta-install-comment:
         name: Post Mac beta install comment
+        context: test-runner:commit-status-checks
         executor: mac
         filters:
           branches:
