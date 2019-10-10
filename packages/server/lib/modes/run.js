@@ -133,11 +133,11 @@ const formatPath = (name, n, colour = 'reset') => {
   return `${color(name, colour)}`
 }
 
-const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }) => {
+const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => {
   debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
   if (resolvedNodePath) {
-    return `v${resolvedNodeVersion} (${resolvedNodePath})`
+    return formatPath(`v${resolvedNodeVersion} (${resolvedNodePath})`, width)
   }
 }
 
@@ -166,7 +166,8 @@ const displayRunStarting = function (options = {}) {
 
   console.log('')
 
-  // TODO: calculate this more intelligently after https://github.com/cypress-io/cypress/pull/5120 goes in
+  // if we show Node Version, then increase 1st column width
+  // to include wider 'Node Version:'
   const colWidths = config.resolvedNodePath ? [16, 84] : [12, 88]
 
   const table = terminal.table({
@@ -202,7 +203,7 @@ const displayRunStarting = function (options = {}) {
   .chain([
     [gray('Cypress:'), pkg.version],
     [gray('Browser:'), formatBrowser(browser)],
-    [gray('Node Version:'), formatNodeVersion(config)],
+    [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
     [gray('Searched:'), formatSpecPattern(specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group)],
