@@ -134,30 +134,6 @@ describe "lib/gui/events", ->
         @handleEvent("get:current:user").then (assert) =>
           assert.sendErrCalledWith(err)
 
-  context "cookies", ->
-    describe "clear:github:cookies", ->
-      it "clears cookies and returns null", ->
-        sinon.stub(Windows, "getBrowserAutomation")
-        .withArgs(@event.sender)
-        .returns({
-          clearCookies: sinon.stub().withArgs({domain: "github.com"}).resolves()
-        })
-
-        @handleEvent("clear:github:cookies").then (assert) =>
-          assert.sendCalledWith(null)
-
-      it "catches errors", ->
-        err = new Error("foo")
-
-        sinon.stub(Windows, "getBrowserAutomation")
-        .withArgs(@event.sender)
-        .returns({
-          clearCookies: sinon.stub().withArgs({domain: "github.com"}).rejects(err)
-        })
-
-        @handleEvent("clear:github:cookies", {foo: "bar"}).then (assert) =>
-          assert.sendErrCalledWith(err)
-
   context "external shell", ->
     describe "external:open", ->
       it "shell.openExternal with arg", ->
@@ -377,14 +353,14 @@ describe "lib/gui/events", ->
 
     describe "add:project", ->
       it "adds project + returns result", ->
-        sinon.stub(Project, "add").withArgs("/_test-output/path/to/project").resolves("result")
+        sinon.stub(Project, "add").withArgs("/_test-output/path/to/project", @options).resolves("result")
 
         @handleEvent("add:project", "/_test-output/path/to/project").then (assert) =>
           assert.sendCalledWith("result")
 
       it "catches errors", ->
         err = new Error("foo")
-        sinon.stub(Project, "add").withArgs("/_test-output/path/to/project").rejects(err)
+        sinon.stub(Project, "add").withArgs("/_test-output/path/to/project", @options).rejects(err)
 
         @handleEvent("add:project", "/_test-output/path/to/project").then (assert) =>
           assert.sendErrCalledWith(err)

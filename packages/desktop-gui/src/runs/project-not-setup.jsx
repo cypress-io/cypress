@@ -4,6 +4,7 @@ import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
 import ipc from '../lib/ipc'
+import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project-modal'
 
 @observer
@@ -71,8 +72,8 @@ export default class ProjectNotSetup extends Component {
           <i className='fa fa-warning errored'></i>{' '}
           Runs cannot be displayed
         </h4>
-        <p>We were unable to find an existing project matching the <code>projectId</code> in your <code>cypress.json</code>.</p>
-        <p>To see runs for a current project, add the correct <code>projectId</code> to your <code>cypress.json</code></p>
+        <p>We were unable to find an existing project matching the <code>projectId</code> in your {configFileFormatted(this.props.project.configFile)}.</p>
+        <p>To see runs for a current project, add the correct <code>projectId</code> to your {configFileFormatted(this.props.project.configFile)}.</p>
         <p>- or -</p>
         <button
           className='btn btn-warning'

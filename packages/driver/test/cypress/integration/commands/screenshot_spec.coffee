@@ -302,8 +302,8 @@ describe "src/cy/commands/screenshot", ->
       .screenshot()
       .then ->
         expect(Cypress.automation.withArgs("take:screenshot").args[0][1].viewport).to.eql({
-          width: $(window.parent).width()
-          height: $(window.parent).height()
+          width: window.parent.innerWidth
+          height: window.parent.innerHeight
         })
 
     it "can handle window w/length > 1 as a subject", ->

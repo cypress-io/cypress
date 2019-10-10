@@ -63,6 +63,11 @@ replaceDurationFromReporter = (str, p1, p2, p3) ->
 
   p1 + _.padEnd("X", p2.length, "X") + p3
 
+replaceNodeVersion = (str, p1, p2, p3) ->
+  ## Node Version: 10.2.3
+
+  return p1 + _.padEnd("X", p2.length, "X") + ' (/foo/bar/node)' + ' '.repeat(p3.length - 16)
+
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
   ## full length of the duration so it doesn't shift content
@@ -86,13 +91,17 @@ normalizeStdout = (str, options = {}) ->
   .replace(new RegExp(pathUpToProjectName, 'g'), replaceStringWithXs)
   .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
   .replace(browserNameVersionRe, replaceBrowserName)
-  .replace(/\s\(\d+([ms]|ms)\)/g, "") ## numbers in parenths
+  ## numbers in parenths
+  .replace(/\s\(\d+([ms]|ms)\)/g, "") 
    ## 12:35 -> XX:XX
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
-  .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
+  ## replace dynamic video names
+  .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") 
   ## Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") 
+  ## Node Version: 10.2.3 (Users/jane/node) -> Node Version: XXXXX (foo/bar/node)
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion) 
   ## 15 seconds -> XX seconds
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   ## duration='1589' -> duraction='XXXX'
@@ -102,9 +111,12 @@ normalizeStdout = (str, options = {}) ->
   .replace(/\r/g, "")
   ## replaces multiple lines of uploading results (since order not guaranteed)
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) 
+  ## fix "Require stacks" for CI
+  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3") 
 
   if options.browser isnt undefined and options.browser isnt 'electron'
-    str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") ## screenshot dimensions
+    ## screenshot dimensions
+    str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") 
 
   return str.split("\n")
     .map(replaceStackTraceLines)

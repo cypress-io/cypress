@@ -16,10 +16,8 @@ const resetStyles = `
   padding: 0 !important;
 `
 
-function addHitBoxLayer (coords, body) {
-  if (body == null) {
-    body = $('body')
-  }
+function addHitBoxLayer (coords, $body) {
+  $body = $body || $('body')
 
   const height = 10
   const width = 10
@@ -45,8 +43,11 @@ function addHitBoxLayer (coords, body) {
     box-shadow: 0 0 5px #333;
     z-index: 2147483647;
   `)
-  const box = $(`<div class="__cypress-highlight" style="${boxStyles}" />`)
-  const wrapper = $(`<div style="${styles(resetStyles)} position: relative" />`).appendTo(box)
+
+  const $box = $(`<div class="__cypress-highlight" style="${boxStyles}" />`)
+
+  const wrapper = $(`<div style="${styles(resetStyles)} position: relative" />`).appendTo($box)
+
   const dotStyles = styles(`
     ${resetStyles}
     position: absolute;
@@ -61,17 +62,15 @@ function addHitBoxLayer (coords, body) {
 
   $(`<div style="${dotStyles}">`).appendTo(wrapper)
 
-  return box.appendTo(body)
+  return $box.appendTo($body)
 }
 
-function addElementBoxModelLayers ($el, body) {
-  if (body == null) {
-    body = $('body')
-  }
+function addElementBoxModelLayers ($el, $body) {
+  $body = $body || $('body')
 
   const dimensions = getElementDimensions($el)
 
-  const container = $('<div class="__cypress-highlight">')
+  const $container = $('<div class="__cypress-highlight">')
 
   const layers = {
     Content: '#9FC4E7',
@@ -113,16 +112,21 @@ function addElementBoxModelLayers ($el, body) {
       obj.left -= dimensions.marginLeft
     }
 
+    if (attr === 'Padding') {
+      obj.top += dimensions.borderTop
+      obj.left += dimensions.borderLeft
+    }
+
     // bail if the dimensions of this layer match the previous one
     // so we dont create unnecessary layers
-    if (dimensionsMatchPreviousLayer(obj, container)) return
+    if (dimensionsMatchPreviousLayer(obj, $container)) return
 
-    return createLayer($el, attr, color, container, obj)
+    return createLayer($el, attr, color, $container, obj)
   })
 
-  container.appendTo(body)
+  $container.appendTo($body)
 
-  container.children().each((index, el) => {
+  $container.children().each((index, el) => {
     const $el = $(el)
     const top = $el.data('top')
     const left = $el.data('left')
@@ -134,7 +138,7 @@ function addElementBoxModelLayers ($el, body) {
     })
   })
 
-  return container
+  return $container
 }
 
 function getOrCreateSelectorHelperDom ($body) {
@@ -237,7 +241,7 @@ function dimensionsMatchPreviousLayer (obj, container) {
   const previousLayer = container.children().first()
 
   // bail if there is no previous layer
-  if (!previousLayer.length) {
+  if (!previousLayer) {
     return
   }
 
@@ -255,7 +259,6 @@ function getZIndex (el) {
   }
 
   return _.toNumber(el.css('zIndex'))
-
 }
 
 function getElementDimensions ($el) {
@@ -296,9 +299,9 @@ function getElementDimensions ($el) {
   return dimensions
 }
 
-function getNumAttrValue (el, attr) {
+function getNumAttrValue ($el, attr) {
   // nuke anything thats not a number or a negative symbol
-  const num = _.toNumber(el.css(attr).replace(/[^0-9\.-]+/, ''))
+  const num = _.toNumber($el.css(attr).replace(/[^0-9\.-]+/, ''))
 
   if (!_.isFinite(num)) {
     throw new Error('Element attr did not return a valid number')
@@ -307,16 +310,16 @@ function getNumAttrValue (el, attr) {
   return num
 }
 
-function getPadding (el, dir) {
-  return getNumAttrValue(el, `padding-${dir}`)
+function getPadding ($el, dir) {
+  return getNumAttrValue($el, `padding-${dir}`)
 }
 
-function getBorder (el, dir) {
-  return getNumAttrValue(el, `border-${dir}-width`)
+function getBorder ($el, dir) {
+  return getNumAttrValue($el, `border-${dir}-width`)
 }
 
-function getMargin (el, dir) {
-  return getNumAttrValue(el, `margin-${dir}`)
+function getMargin ($el, dir) {
+  return getNumAttrValue($el, `margin-${dir}`)
 }
 
 function getTotalFor (directions, dimensions) {
@@ -325,10 +328,10 @@ function getTotalFor (directions, dimensions) {
   }, 0)
 }
 
-function getOuterSize (el) {
+function getOuterSize ($el) {
   return {
-    width: el.outerWidth(true),
-    height: el.outerHeight(true),
+    width: $el.outerWidth(true),
+    height: $el.outerHeight(true),
   }
 }
 
@@ -338,8 +341,8 @@ function isInViewport (win, el) {
   return (
     rect.top >= 0 &&
     rect.left >= 0 &&
-    rect.bottom <= $(win).height() &&
-    rect.right <= $(win).width()
+    rect.bottom <= win.innerHeight &&
+    rect.right <= win.innerWidth
   )
 }
 
@@ -351,17 +354,17 @@ function scrollIntoView (win, el) {
 
 const sizzleRe = /sizzle/i
 
-function getElementsForSelector ({ root, selector, method, cypressDom }) {
+function getElementsForSelector ({ $root, selector, method, cypressDom }) {
   let $el = null
 
   try {
     if (method === 'contains') {
-      $el = root.find(cypressDom.getContainsSelector(selector))
+      $el = $root.find(cypressDom.getContainsSelector(selector))
       if ($el.length) {
         $el = cypressDom.getFirstDeepestElement($el)
       }
     } else {
-      $el = root.find(selector)
+      $el = $root.find(selector)
     }
   } catch (err) {
     // if not a sizzle error, ignore it and let $el be null

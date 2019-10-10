@@ -5,24 +5,21 @@ debug     = require("debug")("cypress:server:cookies")
 
 ## match the w3c webdriver spec on return cookies
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
+COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry hostOnly".split(" ")
 
-normalizeCookies = (cookies, includeHostOnly) ->
-  _.map cookies, (c) ->
-    normalizeCookieProps(c, includeHostOnly)
+normalizeCookies = (cookies) ->
+  _.map cookies, normalizeCookieProps
 
-normalizeCookieProps = (props, includeHostOnly) ->
+normalizeCookieProps = (props) ->
   return props if not props
 
   ## pick off only these specific cookie properties
   ## only if they are defined
-  cookie = _.chain(props, COOKIE_PROPERTIES)
+  cookie = _.chain(props)
   .pick(COOKIE_PROPERTIES)
   .omitBy(_.isUndefined)
+  .omitBy(_.isNull)
   .value()
-
-  if includeHostOnly
-    cookie.hostOnly = props.hostOnly
 
   ## when sending cookie props we need to convert
   ## expiry to expirationDate
@@ -40,6 +37,19 @@ normalizeCookieProps = (props, includeHostOnly) ->
 
   cookie
 
+normalizeGetCookies = (cookies) ->
+  _.chain(cookies)
+  .map(normalizeGetCookieProps)
+  ## sort in order of expiration date, ascending
+  .sortBy(_.partialRight(_.get, 'expiry', Number.MAX_SAFE_INTEGER))
+  .value()
+
+normalizeGetCookieProps = (props) ->
+  return props if not props
+
+  cookie = normalizeCookieProps(props)
+  _.omit(cookie, 'hostOnly')
+
 cookies = (cyNamespace, cookieNamespace) ->
   isNamespaced = (cookie) ->
     name = cookie and cookie.name
@@ -51,29 +61,12 @@ cookies = (cyNamespace, cookieNamespace) ->
     name.startsWith(cyNamespace) or name is cookieNamespace
 
   return {
-    # normalize: (message, data, automate) ->
-    #   invoke = (fn) =>
-    #     fn.call(@, data, automate)
-
-    #   fn = switch message
-    #     when "get:cookies"   then @getCookies
-    #     when "get:cookie"    then @getCookie
-    #     when "set:cookie"    then @setCookie
-    #     when "clear:cookie"  then @clearCookie
-    #     when "clear:cookies" then @clearCookies
-
-    #   invoke(fn)
-
     getCookies: (data, automate) ->
-      { includeHostOnly } = data
-
-      delete data.includeHostOnly
-
       debug("getting:cookies %o", data)
 
       automate(data)
       .then (cookies) ->
-        cookies = normalizeCookies(cookies, includeHostOnly)
+        cookies = normalizeGetCookies(cookies)
         cookies = _.reject(cookies, isNamespaced)
 
         debug("received get:cookies %o", cookies)
@@ -88,7 +81,7 @@ cookies = (cyNamespace, cookieNamespace) ->
         if isNamespaced(cookie)
           throw new Error("Sorry, you cannot get a Cypress namespaced cookie.")
         else
-          cookie = normalizeCookieProps(cookie)
+          cookie = normalizeGetCookieProps(cookie)
 
           debug("received get:cookie %o", cookie)
 
@@ -104,25 +97,11 @@ cookies = (cyNamespace, cookieNamespace) ->
         ## unless we already have a URL
         cookie.url = data.url ? extension.getCookieUrl(data)
 
-        ## https://github.com/SalesforceEng/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie
-        ## a host only cookie is when domain was not explictly
-        ## set in the Set-Cookie header and instead was implied.
-        ## when this is the case we need to remove the domain
-        ## property else our cookie will incorrectly be set
-        ## as a domain cookie
-        ##
-        ## hostOnly=true means no domain= property was set, so
-        ##   this cookie is specific to being bound to the exact domain
-        ## hostOnly=false means that a domain= property was set, so
-        ##   this cookie has been relaxed to apply to multiple subdomains
-        if data.hostOnly
-          cookie = _.omit(cookie, "domain")
-
         debug("set:cookie %o", cookie)
 
         automate(cookie)
         .then (cookie) ->
-          cookie = normalizeCookieProps(cookie)
+          cookie = normalizeGetCookieProps(cookie)
 
           debug("received set:cookie %o", cookie)
 
@@ -145,10 +124,10 @@ cookies = (cyNamespace, cookieNamespace) ->
     clearCookies: (data, automate) ->
       cookies = _.reject(normalizeCookies(data), isNamespaced)
 
-      debug("clear:cookies %o", data)
+      debug("clear:cookies %o", cookies)
 
       clear = (cookie) ->
-        automate("clear:cookie", { name: cookie.name })
+        automate("clear:cookie", { name: cookie.name, domain: cookie.domain })
         .then(normalizeCookieProps)
 
       Promise.map(cookies, clear)
