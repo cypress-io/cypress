@@ -37,6 +37,12 @@ executors:
       PLATFORM: mac
 
 commands:
+  store-npm-logs:
+    description: Saves any NPM debug logs as artifacts in case there is a problem
+    steps:
+      - store_artifacts:
+          path: ~/.npm/_logs
+
   # for caching node modules use project environment variable
   # like CACHE_VERSION=15
   save-cache:
@@ -230,6 +236,7 @@ jobs:
           path: ~/.npm/_logs
 
       - save-caches
+      - store-npm-logs
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
@@ -244,6 +251,7 @@ jobs:
           at: ~/
       ## this will catch .only's in js/coffee as well
       - run: npm run lint-all
+      - store-npm-logs
 
   unit-tests:
     <<: *defaults
@@ -273,6 +281,7 @@ jobs:
       - run: npm run all test -- --package static
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   lint-types:
     <<: *defaults
@@ -289,6 +298,7 @@ jobs:
       - run:
           command: npm run dtslint
           working_directory: cli
+      - store-npm-logs
 
   "server-unit-tests":
     <<: *defaults
@@ -299,6 +309,7 @@ jobs:
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-integration-tests":
     <<: *defaults
@@ -309,6 +320,7 @@ jobs:
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-performance-tests":
       <<: *defaults
@@ -321,6 +333,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
 
   "server-e2e-tests-1":
     <<: *defaults
@@ -332,6 +345,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-e2e-tests-2":
     <<: *defaults
@@ -343,6 +357,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-e2e-tests-3":
     <<: *defaults
@@ -355,6 +370,7 @@ jobs:
       - store_test_results:
           path: /tmp/cypress
 
+
   "server-e2e-tests-4":
     <<: *defaults
     steps:
@@ -365,6 +381,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-e2e-tests-5":
     <<: *defaults
@@ -376,6 +393,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-e2e-tests-6":
     <<: *defaults
@@ -387,6 +405,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-e2e-tests-7":
     <<: *defaults
@@ -398,6 +417,7 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-e2e-tests-8":
       <<: *defaults
@@ -409,10 +429,11 @@ jobs:
           working_directory: packages/server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
-  "driver-integration-tests-3x":
+  "driver-integration-tests-chrome":
     <<: *defaults
-    parallelism: 3
+    parallelism: 5
     steps:
       - attach_workspace:
           at: ~/
@@ -427,12 +448,38 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
+            npm run cypress:run -- --record --parallel --group 5x-driver-chrome --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
+
+  # "driver-integration-tests-electron":
+  #   <<: *defaults
+  #   parallelism: 5
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm start
+  #         background: true
+  #         working_directory: packages/driver
+  #     - run:
+  #         command: $(npm bin)/wait-on http://localhost:3500
+  #         working_directory: packages/driver
+  #     - run:
+  #         command: |
+  #           CYPRESS_KONFIG_ENV=production \
+  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+  #           npm run cypress:run -- --record --parallel --group 5x-driver-electron --browser electron
+  #         working_directory: packages/driver
+  #     - store_test_results:
+  #         path: /tmp/cypress
+  #     - store_artifacts:
+  #         path: /tmp/artifacts
+  #     - store-npm-logs
 
   "desktop-gui-integration-tests-2x":
     <<: *defaults
@@ -453,6 +500,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
 
   "reporter-integration-tests":
     <<: *defaults
@@ -472,6 +520,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
 
   "run-launcher":
     <<: *defaults
@@ -533,6 +582,7 @@ jobs:
       - run: cp binary-url.json /tmp/urls
       - run: cp cypress.zip /tmp/urls
       - run: ls /tmp/urls
+      - store-npm-logs
       - persist_to_workspace:
           root: /tmp/urls
           paths:
@@ -564,6 +614,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_video=false \
             npm run cypress:run -- --project /tmp/repo --record
+      - store-npm-logs
 
   "test-against-staging":
     <<: *defaults
@@ -580,6 +631,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
             npm run cypress:run -- --project /tmp/repo --record
+      - store-npm-logs
 
   "build-npm-package":
     <<: *defaults
@@ -620,6 +672,7 @@ jobs:
       - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
       - run: cp npm-package-url.json /tmp/urls
       - run: ls /tmp/urls
+      - store-npm-logs
       - persist_to_workspace:
           root: /tmp/urls
           paths:
@@ -665,6 +718,7 @@ jobs:
               --npm /tmp/urls/npm-package-url.json \
               --binary /tmp/urls/binary-url.json \
               --provider circle
+      - store-npm-logs
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
@@ -694,6 +748,7 @@ jobs:
           name: Verify Cypress binary
           working_directory: test-binary
           command: $(npm bin)/cypress verify
+      - store-npm-logs
 
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
@@ -723,6 +778,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
+      - store-npm-logs
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -752,6 +808,7 @@ jobs:
       - run:
           working_directory: /tmp/kitchensink
           command: npm run e2e
+      - store-npm-logs
 
 linux-workflow: &linux-workflow
   jobs:
@@ -800,10 +857,15 @@ linux-workflow: &linux-workflow
     - server-e2e-tests-8:
         requires:
           - build
-    - driver-integration-tests-3x:
+    - driver-integration-tests-chrome:
         context: test-runner:integration-tests
         requires:
           - build
+    ## TODO: add these back in when flaky tests are fixed
+    # - driver-integration-tests-electron:
+    #     context: test-runner:integration-tests
+    #     requires:
+    #       - build
     - desktop-gui-integration-tests-2x:
         context: test-runner:integration-tests
         requires:
