@@ -15,7 +15,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  multiple_task_registrations_spec.coffee...                                      (1 of 1)
+  Running:  multiple_task_registrations_spec.coffee                                         (1 of 1)
 
 
   ✓ merges task events
@@ -25,23 +25,24 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────┐
-  │ Tests:        1                                       │
-  │ Passing:      1                                       │
-  │ Failing:      0                                       │
-  │ Pending:      0                                       │
-  │ Skipped:      0                                       │
-  │ Screenshots:  0                                       │
-  │ Video:        true                                    │
-  │ Duration:     X seconds                               │
-  │ Spec Ran:     multiple_task_registrations_spec.coffee │
-  └───────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     multiple_task_registrations_spec.coffee                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/multiple-task-registrations/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations_spe     (X seconds) 
+                         c.coffee.mp4                                                               
 
 
 ====================================================================================================
@@ -49,10 +50,10 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  multiple_task_registrations_spec.cof     XX:XX        1        1        -        -        - │
-  │    fee                                                                                         │
+  │ ✔  multiple_task_registrations_spec.co      XX:XX        1        1        -        -        - │
+  │    ffee                                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -75,7 +76,7 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  task_spec.coffee...                                                             (1 of 1)
+  Running:  task_spec.coffee                                                                (1 of 1)
 
 
   1) throws when task returns undefined
@@ -147,29 +148,31 @@ https://on.cypress.io/api/task
 
   (Results)
 
-  ┌────────────────────────────────┐
-  │ Tests:        2                │
-  │ Passing:      0                │
-  │ Failing:      2                │
-  │ Pending:      0                │
-  │ Skipped:      0                │
-  │ Screenshots:  2                │
-  │ Video:        true             │
-  │ Duration:     X seconds        │
-  │ Spec Ran:     task_spec.coffee │
-  └────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     task_spec.coffee                                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.coffee/throws when task returns undefined (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/task_spec.coffee/includes stack trace in error (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.coffee/throws when task returns unde      (1280x720) 
+     fined (failed).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.coffee/includes stack trace in error      (1280x720) 
+      (failed).png                                                                                  
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                (X seconds) 
 
 
 ====================================================================================================
@@ -177,7 +180,7 @@ https://on.cypress.io/api/task
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  task_spec.coffee                         XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

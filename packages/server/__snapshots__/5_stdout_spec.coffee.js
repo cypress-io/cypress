@@ -14,7 +14,7 @@ exports['e2e stdout displays errors from failures 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  stdout_failing_spec.coffee...                                                   (1 of 1)
+  Running:  stdout_failing_spec.coffee                                                      (1 of 1)
 
 
   stdout_failing_spec
@@ -95,30 +95,33 @@ The internal Cypress web server responded with:
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        5                          │
-  │ Passing:      2                          │
-  │ Failing:      3                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  3                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     stdout_failing_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        5                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      3                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  3                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     stdout_failing_spec.coffee                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- failing hook -- is failing -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- passing hook -- is failing (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720) 
+      -- fails (failed).png                                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720) 
+      -- failing hook -- is failing -- before each hook (failed).png                                
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720) 
+      -- passing hook -- is failing (failed).png                                                    
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds) 
 
 
 ====================================================================================================
@@ -126,7 +129,7 @@ The internal Cypress web server responded with:
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  stdout_failing_spec.coffee               XX:XX        5        2        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -151,7 +154,7 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  stdout_exit_early_failing_spec.coffee...                                        (1 of 1)
+  Running:  stdout_exit_early_failing_spec.coffee                                           (1 of 1)
 
 Oops...we found an error preparing this test file:
 
@@ -173,23 +176,24 @@ Fix the error in your code and re-run your tests.
 
   (Results)
 
-  ┌─────────────────────────────────────────────────────┐
-  │ Tests:        0                                     │
-  │ Passing:      0                                     │
-  │ Failing:      1                                     │
-  │ Pending:      0                                     │
-  │ Skipped:      0                                     │
-  │ Screenshots:  0                                     │
-  │ Video:        true                                  │
-  │ Duration:     X seconds                             │
-  │ Spec Ran:     stdout_exit_early_failing_spec.coffee │
-  └─────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     stdout_exit_early_failing_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_exit_early_failing_spec.     (X seconds) 
+                         coffee.mp4                                                                 
 
 
 ====================================================================================================
@@ -197,10 +201,10 @@ Fix the error in your code and re-run your tests.
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  stdout_exit_early_failing_spec.coffe     XX:XX        -        -        1        -        - │
-  │    e                                                                                           │
+  │ ✖  stdout_exit_early_failing_spec.coff      XX:XX        -        -        1        -        - │
+  │    ee                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
@@ -223,7 +227,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  stdout_passing_spec.coffee...                                                   (1 of 1)
+  Running:  stdout_passing_spec.coffee                                                      (1 of 1)
 
 
   stdout_passing_spec
@@ -246,23 +250,23 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        8                          │
-  │ Passing:      8                          │
-  │ Failing:      0                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  0                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     stdout_passing_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        8                                                                                │
+  │ Passing:      8                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     stdout_passing_spec.coffee                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds) 
 
 
 ====================================================================================================
@@ -270,7 +274,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  stdout_passing_spec.coffee               XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -295,7 +299,7 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_spec.coffee...                                                           (1 of 1)
+  Running:  simple_spec.coffee                                                              (1 of 1)
 
 Warning: Cypress can only record videos when running headlessly.
 
@@ -311,17 +315,17 @@ A video will not be recorded when using this mode.
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        1                  │
-  │ Passing:      1                  │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        false              │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     simple_spec.coffee │
-  └──────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_spec.coffee                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -329,7 +333,7 @@ A video will not be recorded when using this mode.
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  simple_spec.coffee                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -354,7 +358,7 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_spec.coffee...                                                           (1 of 1)
+  Running:  simple_spec.coffee                                                              (1 of 1)
 
 Warning: Cypress can only record videos when using the built in 'electron' browser.
 
@@ -370,17 +374,17 @@ A video will not be recorded when using this browser.
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        1                  │
-  │ Passing:      1                  │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        false              │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     simple_spec.coffee │
-  └──────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_spec.coffee                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -388,7 +392,7 @@ A video will not be recorded when using this browser.
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  simple_spec.coffee                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -442,9 +446,9 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing: /foo/bar/.projects/e2e/c     (X seconds) 
-                         ypress/videos/nested-1/nested-2/nested-3/abc123.mp4                   
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/spec     (X seconds) 
+                         .coffee.mp4                                                                
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -478,19 +482,17 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
   (Screenshots)
 
-  -  /foo/bar/.projects/e2e/cypress/screenshots/n      (1000x660) 
-     ested-1/nested-2/nested-3/stdout_specfile_display_spec_with_a_really_long_name_                
-     that_never_has_a_line_break_or_new_line.coffee/stdout_specfile_display_spec --                 
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/nested-1/nested-2/nested-3/stdout_specfile_dis      (1000x660) 
+     play_spec_with_a_really_long_name_that_never_has_a_line_break_or_new_line.coffe                
+     e/stdout_specfile_display_spec -- passes.png                                                   
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing: /foo/bar/.projects/e2e/c     (X seconds) 
-                         ypress/videos/nested-1/nested-2/nested-3/stdout_specfile_di                
-                         splay_spec_with_a_really_long_name_that_never_has_a_line_br                
-                         eak_or_new_line.coffee.mp4                                                 
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo     (X seconds) 
+                         ut_specfile_display_spec_with_a_really_long_name_that_never                
+                         _has_a_line_break_or_new_line.coffee.mp4                                   
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -522,10 +524,9 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing: /foo/bar/.projects/e2e/c     (X seconds) 
-                         ypress/videos/nested-1/nested-2/nested-3/stdout_specfile.co                
-                         ffee.mp4                                                                   
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo     (X seconds) 
+                         ut_specfile.coffee.mp4                                                     
 
 
 ====================================================================================================

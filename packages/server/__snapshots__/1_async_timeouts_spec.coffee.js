@@ -53,18 +53,16 @@ exports['e2e async timeouts failing1 1'] = `
 
   (Screenshots)
 
-  -  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/e2e/cypress/screenshots/a      (1280x720) 
-     sync_timeouts_spec.coffee/async -- bar fails (failed).png                                      
-  -  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/e2e/cypress/screenshots/a      (1280x720) 
-     sync_timeouts_spec.coffee/async -- fails async after cypress command (failed).p                
-     ng                                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts_spec.coffee/async -- bar fails       (1280x720) 
+     (failed).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts_spec.coffee/async -- fails asyn      (1280x720) 
+     c after cypress command (failed).png                                                           
 
 
   (Video)
 
   - Started processing:  Compressing to 32 CRF
-  - Finished processing: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/e2e/c     (X seconds) 
-                         ypress/videos/abc123.mp4                               
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds) 
 
 
 ====================================================================================================

@@ -14,7 +14,7 @@ exports['e2e js error handling fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  js_error_handling_failing_spec.coffee...                                        (1 of 1)
+  Running:  js_error_handling_failing_spec.coffee                                           (1 of 1)
 
 
   s1
@@ -105,32 +105,38 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Results)
 
-  ┌─────────────────────────────────────────────────────┐
-  │ Tests:        8                                     │
-  │ Passing:      3                                     │
-  │ Failing:      5                                     │
-  │ Pending:      0                                     │
-  │ Skipped:      0                                     │
-  │ Screenshots:  5                                     │
-  │ Video:        true                                  │
-  │ Duration:     X seconds                             │
-  │ Spec Ran:     js_error_handling_failing_spec.coffee │
-  └─────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        8                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      5                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  5                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     js_error_handling_failing_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t1 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t2 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t4 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t5 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cross origin script errors -- explains where script errored (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wi      (1280x720) 
+     thout an afterEach hook -- t1 (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wi      (1280x720) 
+     thout an afterEach hook -- t2 (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wi      (1280x720) 
+     th an afterEach hook -- t4 (failed).png                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wi      (1280x720) 
+     th an afterEach hook -- t5 (failed).png                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cr      (1280x720) 
+     oss origin script errors -- explains where script errored (failed).png                         
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/js_error_handling_failing_spec.     (X seconds) 
+                         coffee.mp4                                                                 
 
 
 ====================================================================================================
@@ -138,10 +144,10 @@ https://on.cypress.io/uncaught-exception-from-application
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  js_error_handling_failing_spec.coffe     XX:XX        8        3        5        -        - │
-  │    e                                                                                           │
+  │ ✖  js_error_handling_failing_spec.coff      XX:XX        8        3        5        -        - │
+  │    ee                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        8        3        5        -        -  
 

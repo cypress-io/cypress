@@ -14,7 +14,7 @@ exports['e2e viewport passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  viewport_spec.coffee...                                                         (1 of 1)
+  Running:  viewport_spec.coffee                                                            (1 of 1)
 
 
   viewport
@@ -28,23 +28,23 @@ exports['e2e viewport passes 1'] = `
 
   (Results)
 
-  ┌────────────────────────────────────┐
-  │ Tests:        3                    │
-  │ Passing:      3                    │
-  │ Failing:      0                    │
-  │ Pending:      0                    │
-  │ Skipped:      0                    │
-  │ Screenshots:  0                    │
-  │ Video:        true                 │
-  │ Duration:     X seconds            │
-  │ Spec Ran:     viewport_spec.coffee │
-  └────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     viewport_spec.coffee                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4            (X seconds) 
 
 
 ====================================================================================================
@@ -52,7 +52,7 @@ exports['e2e viewport passes 1'] = `
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  viewport_spec.coffee                     XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

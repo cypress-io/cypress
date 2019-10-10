@@ -14,7 +14,7 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  browserify_babel_es2015_passing_spec.coffee...                                  (1 of 1)
+  Running:  browserify_babel_es2015_passing_spec.coffee                                     (1 of 1)
 
 
   imports work
@@ -28,23 +28,24 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────────┐
-  │ Tests:        3                                           │
-  │ Passing:      3                                           │
-  │ Failing:      0                                           │
-  │ Pending:      0                                           │
-  │ Skipped:      0                                           │
-  │ Screenshots:  0                                           │
-  │ Video:        true                                        │
-  │ Duration:     X seconds                                   │
-  │ Spec Ran:     browserify_babel_es2015_passing_spec.coffee │
-  └───────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     browserify_babel_es2015_passing_spec.coffee                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_babel_es2015_passing     (X seconds) 
+                         _spec.coffee.mp4                                                           
 
 
 ====================================================================================================
@@ -52,10 +53,10 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  browserify_babel_es2015_passing_spec     XX:XX        3        3        -        -        - │
-  │    .coffee                                                                                     │
+  │ ✔  browserify_babel_es2015_passing_spe      XX:XX        3        3        -        -        - │
+  │    c.coffee                                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
@@ -78,7 +79,7 @@ exports['e2e browserify, babel, es2015 fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  browserify_babel_es2015_failing_spec.js...                                      (1 of 1)
+  Running:  browserify_babel_es2015_failing_spec.js                                         (1 of 1)
 
 Oops...we found an error preparing this test file:
 
@@ -101,23 +102,24 @@ Fix the error in your code and re-run your tests.
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────┐
-  │ Tests:        0                                       │
-  │ Passing:      0                                       │
-  │ Failing:      1                                       │
-  │ Pending:      0                                       │
-  │ Skipped:      0                                       │
-  │ Screenshots:  0                                       │
-  │ Video:        true                                    │
-  │ Duration:     X seconds                               │
-  │ Spec Ran:     browserify_babel_es2015_failing_spec.js │
-  └───────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     browserify_babel_es2015_failing_spec.js                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_babel_es2015_failing     (X seconds) 
+                         _spec.js.mp4                                                               
 
 
 ====================================================================================================
@@ -125,10 +127,10 @@ Fix the error in your code and re-run your tests.
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  browserify_babel_es2015_failing_spec     XX:XX        -        -        1        -        - │
-  │    .js                                                                                         │
+  │ ✖  browserify_babel_es2015_failing_spe      XX:XX        -        -        1        -        - │
+  │    c.js                                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 

@@ -14,7 +14,7 @@ exports['e2e iframes passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  iframe_spec.coffee...                                                           (1 of 1)
+  Running:  iframe_spec.coffee                                                              (1 of 1)
 
 
   iframes
@@ -32,23 +32,23 @@ exports['e2e iframes passes 1'] = `
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        7                  │
-  │ Passing:      7                  │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        true               │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     iframe_spec.coffee │
-  └──────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        7                                                                                │
+  │ Passing:      7                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     iframe_spec.coffee                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4              (X seconds) 
 
 
 ====================================================================================================
@@ -56,7 +56,7 @@ exports['e2e iframes passes 1'] = `
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  iframe_spec.coffee                       XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

@@ -14,7 +14,7 @@ exports['e2e websockets passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  websockets_spec.coffee...                                                       (1 of 1)
+  Running:  websockets_spec.coffee                                                          (1 of 1)
 
 
   websockets
@@ -26,23 +26,23 @@ exports['e2e websockets passes 1'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────┐
-  │ Tests:        1                      │
-  │ Passing:      1                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        true                   │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     websockets_spec.coffee │
-  └──────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     websockets_spec.coffee                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  - Started processing:  Compressing to 32 CRF
+  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4          (X seconds) 
 
 
 ====================================================================================================
@@ -50,7 +50,7 @@ exports['e2e websockets passes 1'] = `
   (Run Finished)
 
 
-       Spec                                               Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  websockets_spec.coffee                   XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
