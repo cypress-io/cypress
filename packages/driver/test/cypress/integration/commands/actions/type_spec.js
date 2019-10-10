@@ -1341,6 +1341,20 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
+      describe('input[type=datetime-local]', () => {
+        it('can change values', () => {
+          cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        })
+
+        it('overwrites existing value', () => {
+          cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        })
+
+        it('overwrites existing value input by invoking val', () => {
+          cy.get('[type="datetime-local"]').invoke('val', '2016-01-01').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        })
+      })
+
       describe('input[type=month]', () => {
         it('can change values', () => {
           cy.get('#month-without-value').type('1959-09').then(($text) => {
