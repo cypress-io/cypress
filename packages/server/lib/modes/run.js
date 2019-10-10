@@ -112,6 +112,17 @@ const formatSymbolSummary = (failures) => {
 }
 
 const formatPath = (name, n, colour = 'reset') => {
+  if (env.get('CYPRESS_ENV') === 'test') {
+    // if we're testing within Cypress, we want to strip out
+    // the current working directory before calculating the stdout tables
+    // this will keep our snapshots consistent everytime we run
+    const cwdPath = process.cwd()
+
+    name = name
+    .split(cwdPath)
+    .join('/XXX/XXX/XXX')
+  }
+
   // add newLines at each n char and colorize the path
   if (n) {
     let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
