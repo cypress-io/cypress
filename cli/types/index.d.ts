@@ -292,7 +292,6 @@ declare namespace Cypress {
       add(name: string, fn: (...args: any[]) => void): void
       add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
       overwrite(name: string, fn: (...args: any[]) => void): void
-      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
     }
 
     /**
