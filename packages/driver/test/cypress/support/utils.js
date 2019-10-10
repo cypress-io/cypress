@@ -21,7 +21,7 @@ export const findReactInstance = function (dom) {
 }
 
 export const clickCommandLog = (sel) => {
-  return cy.wait(0)
+  return cy.wait(10)
   .then(() => {
     withMutableReporterState(() => {
 
@@ -36,6 +36,9 @@ export const clickCommandLog = (sel) => {
       reactCommandInstance.props.appState.isRunning = false
 
       $(commandLogEl).find('.command-wrapper').click()
+
+      // make sure command was pinned, otherwise throw a better error message
+      expect(cy.$$('.command-pin:visible', top.document).length, 'command should be pinned').ok
     })
   })
 }

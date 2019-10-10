@@ -28,10 +28,10 @@ describe('controls', function () {
     })
   })
 
-  describe('shortcuts', function () {
-    it('stops tests', function () {
+  describe('shortcuts', () => {
+    it('stops tests', () => {
       cy.get('body').then(() => {
-        expect(runner.emit).to.not.have.been.calledWith('runner:stop')
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
       })
 
       cy.get('body').type('s').then(() => {
@@ -39,9 +39,9 @@ describe('controls', function () {
       })
     })
 
-    it('resumes tests', function () {
+    it('resumes tests', () => {
       cy.get('body').then(() => {
-        expect(runner.emit).to.not.have.been.calledWith('runner:restart')
+        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })
 
       cy.get('body').type('r').then(() => {
@@ -49,13 +49,26 @@ describe('controls', function () {
       })
     })
 
-    it('focuses on specs', function () {
+    it('focuses on specs', () => {
       cy.get('body').then(() => {
-        expect(runner.emit).to.not.have.been.calledWith('focus:tests')
+        expect(runner.emit).not.to.have.been.calledWith('focus:tests')
       })
 
       cy.get('body').type('f').then(() => {
         expect(runner.emit).to.have.been.calledWith('focus:tests')
+      })
+    })
+
+    it('does not run shortcut if typed into an input', () => {
+      cy.get('body')
+      .then(($body) => {
+        // this realistically happens with the selector playground, but
+        // need to add an input since this environment is isolated
+        $body.append('<input id="temp-input" />')
+      })
+      .get('#temp-input').type('r')
+      .then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })
     })
 

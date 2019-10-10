@@ -28,7 +28,7 @@
     "ramda": "0.24.1"
   },
   "devDependencies": {
-    "bin-up": "1.2.0",
+    "bin-up": "1.2.2",
     "chai": "3.5.0",
     "shelljs": "0.8.3",
     "sinon": "2.4.1",
