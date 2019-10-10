@@ -95,6 +95,14 @@ const formatFooterSummary = function (results) {
   ]
 }
 
+const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }) => {
+  debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
+
+  if (resolvedNodePath) {
+    return `v${resolvedNodeVersion} (${resolvedNodePath})`
+  }
+}
+
 const formatSpecSummary = (name, failures) => {
   return [
     getSymbol(failures),
@@ -133,7 +141,7 @@ const formatSpecs = function (specs) {
 }
 
 const displayRunStarting = function (options = {}) {
-  const { specs, specPattern, browser, runUrl, parallel, group } = options
+  const { config, specs, specPattern, browser, runUrl, parallel, group } = options
 
   console.log('')
 
@@ -147,8 +155,11 @@ const displayRunStarting = function (options = {}) {
 
   console.log('')
 
+  // TODO: calculate this more intelligently after https://github.com/cypress-io/cypress/pull/5120 goes in
+  const colWidths = config.resolvedNodePath ? [16, 84] : [12, 88]
+
   const table = terminal.table({
-    colWidths: [12, 88],
+    colWidths,
     type: 'outsideBorder',
   })
 
@@ -156,6 +167,7 @@ const displayRunStarting = function (options = {}) {
   .chain([
     [gray('Cypress:'), pkg.version],
     [gray('Browser:'), formatBrowser(browser)],
+    [gray('Node Version:'), formatNodeVersion(config)],
     [gray('Specs:'), formatSpecs(specs)],
     [gray('Searched:'), formatSpecPattern(specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group)],
@@ -975,6 +987,7 @@ module.exports = {
     }
 
     displayRunStarting({
+      config,
       specs,
       group,
       runUrl,
