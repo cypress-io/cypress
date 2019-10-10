@@ -1,4 +1,6 @@
 _          = require("lodash")
+BlackHoleStream = require("black-hole-stream")
+la         = require("lazy-ass")
 os         = require("os")
 path       = require("path")
 utils      = require("fluent-ffmpeg/lib/utils")
@@ -15,33 +17,54 @@ fs         = require("./util/fs")
 debug("using ffmpeg from %s", ffmpegPath)
 ffmpeg.setFfmpegPath(ffmpegPath)
 
+ffmpegLoggerObj = {
+  debug,
+  info: debug,
+  warn: debug,
+  error: debug
+}
+
+durationRe = /(\d{2}):(\d{2}):(\d{2})\.(\d{2})/
+
 module.exports = {
+  getMsFromDuration: (durationString) ->
+    matches = durationRe.exec(durationString)
+    la(matches, 'durationString should be a string of the format: HH:MM:SS.MS')
+    [hrs, mins, secs, ms] = matches.slice(1).map(Number)
+    mins += hrs * 60
+    secs += mins * 60
+    ms += secs * 1000
+    ms
+
   getCodecData: (src) ->
-  # Promise.fromCallback (cb) ->
-  #   ffmpeg(src)
-  #   .ffprobe(cb)
-  
-    ## TODO: figure out if we can get codecData
-    ## without doing a mutation
-    output = path.join(os.tmpdir(), 'tmp-output.mp4')
-    
     new Promise (resolve, reject) ->
-      ffmpeg()
+      onError = (err) ->
+        debug("getting codecData failed", { err })
+        cleanup()
+        reject(err)
+
+      cleanup = =>
+        ff?.removeListener("error", onError)
+        ff?.kill()
+        ff = null
+
+      ff = ffmpeg(src)
       .on 'codecData', (data) ->
         debug('codecData %o', {
           src,
-          data, 
+          data,
         })
-
+        cleanup()
         resolve(data)
-      .on "error", (err) ->
-        debug("getting codecData failed", { err })
-
-        reject(err)
-      .input(src)
-      .output(output)
+      .on "error", onError
+      ## an outputformat must be set, or ffmpeg will fail to read the input
+      ## this is not enough for ffmpeg to properly transcode, so it will
+      ## exit with an error - which is fine since we cleanup error listeners
+      ## on success anyways, the error will get ignored
+      .format('mp4')
+      .output(new BlackHoleStream)
       .run()
-  
+
   copy: (src, dest) ->
     debug("copying from %s to %s", src, dest)
     fs
