@@ -69,7 +69,11 @@ export function addDefaultPort (urlToCheck) {
     // unset host...
     // see above for reasoning
     parsed.host = undefined
-    parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol || 'http:']
+    if (parsed.protocol) {
+      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]
+    } else {
+      parsed.port = undefined
+    }
   }
 
   return parsed
