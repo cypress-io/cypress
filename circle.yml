@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.6.0-chrome77
+      - image: cypress/base:12.6.0
     environment:
       PLATFORM: linux
 
@@ -213,6 +213,15 @@ jobs:
       # show what is already cached globally
       - run: ls $(npm -g bin)
       - run: ls $(npm -g bin)/../lib/node_modules
+
+      # Install current versions of Chrome
+      - run:
+          name: "Install Google Chrome (stable)"
+          command: |
+            deb http://dl.google.com/linux/chrome/deb/ stable main
+            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+            sudo apt-get update 
+            sudo apt-get install google-chrome-stable
 
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
