@@ -318,14 +318,14 @@ describe('src/cy/commands/actions/type', () => {
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const $txt = cy.$$(':text:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
           expect(args[2]).to.eq(1000)
         })
@@ -336,14 +336,14 @@ describe('src/cy/commands/actions/type', () => {
 
         const $txt = cy.$$(':text:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get(':text:first').type('foo').then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
@@ -4173,15 +4173,15 @@ describe('src/cy/commands/actions/type', () => {
       context('#consoleProps', () => {
         it('has all of the regular options', () => {
           cy.get('input:first').type('foobar').then(function ($input) {
-            const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
+            const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
             const console = this.lastLog.invoke('consoleProps')
 
             expect(console.Command).to.eq('type')
             expect(console.Typed).to.eq('foobar')
             expect(console['Applied To']).to.eq($input.get(0))
-            expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1)
+            expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 1)
 
-            expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
+            expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 1)
           })
         })
 

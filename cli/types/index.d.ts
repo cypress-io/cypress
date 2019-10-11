@@ -292,7 +292,6 @@ declare namespace Cypress {
       add(name: string, fn: (...args: any[]) => void): void
       add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
       overwrite(name: string, fn: (...args: any[]) => void): void
-      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
     }
 
     /**
@@ -2196,11 +2195,19 @@ declare namespace Cypress {
     height: number
   }
 
+  type Padding =
+    | number
+    | [number]
+    | [number, number]
+    | [number, number, number]
+    | [number, number, number, number]
+
   interface ScreenshotOptions {
     blackout: string[]
     capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
+    padding: Padding
     scale: boolean
     beforeScreenshot(doc: Document): void
     afterScreenshot(doc: Document): void

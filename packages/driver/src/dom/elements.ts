@@ -773,13 +773,6 @@ const isScrollable = ($el) => {
   return false
 }
 
-const getFromWindowCoords = (x, y, win) => {
-  return {
-    x: win.scrollX + x,
-    y: win.scrollY + y,
-  }
-}
-
 const isDescendent = ($el1, $el2) => {
   if (!$el2) {
     return false
@@ -1093,7 +1086,6 @@ export {
   tryCallNativeMethod,
   findParent,
   getElements,
-  getFromWindowCoords,
   getFirstFocusableEl,
   getActiveElByDocument,
   getContainsSelector,
