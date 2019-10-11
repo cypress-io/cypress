@@ -37,9 +37,9 @@ describe('lib/browsers/protocol', function () {
       const p = protocol.getWsTargetFor(12345)
 
       const expectedError = stripIndents`
-        Cypress could not make a connection to the Chrome DevTools Protocol after 5 seconds.
+        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 5 seconds.
 
-        Without this, your tests can not run. Please check your Chrome installation and try again.
+        This usually indicates there was a problem opening the Chrome browser.
 
         The CDP port requested was ${chalk.yellow('12345')}.
 

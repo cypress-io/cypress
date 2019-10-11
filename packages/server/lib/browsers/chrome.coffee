@@ -92,6 +92,11 @@ defaultArgs = [
   "--use-mock-keychain"
 ]
 
+getRemoteDebuggingPort = Promise.method () ->
+  if port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
+    return port
+  utils.getPort()
+
 pluginsBeforeBrowserLaunch = (browser, args) ->
   ## bail if we're not registered to this event
   return args if not plugins.has("before:browser:launch")
@@ -261,7 +266,7 @@ module.exports = {
     .try =>
       args = @_getArgs(options)
 
-      utils.getPort()
+      getRemoteDebuggingPort()
       .then (port) ->
         args.push("--remote-debugging-port=#{port}")
 

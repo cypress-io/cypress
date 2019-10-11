@@ -15,15 +15,15 @@ exports['e2e cdp fails when remote debugging port cannot be connected to 1'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running: spec.ts...                                                                      (1 of 1) 
-Cypress could not make a connection to the Chrome DevTools Protocol after 5 seconds.
+Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 5 seconds.
 
-Without this, your tests can not run. Please check your Chrome installation and try again.
+This usually indicates there was a problem opening the Chrome browser.
 
-The CDP port requested was 777.
+The CDP port requested was 7777.
 
 Error details:
 
-Error: connect ECONNREFUSED 127.0.0.1:777
+Error: connect ECONNREFUSED 127.0.0.1:7777
     at stack trace line
 
 
