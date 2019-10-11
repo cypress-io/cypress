@@ -24,7 +24,9 @@ describe "lib/browsers/chrome", ->
         use: sinon.stub().returns()
       }
       # mock launched browser child process object
-      @launchedBrowser = {}
+      @launchedBrowser = {
+        kill: sinon.stub().returns()
+      }
 
       sinon.stub(chrome, "_getArgs").returns(@args)
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
@@ -126,13 +128,17 @@ describe "lib/browsers/chrome", ->
           }
         })
 
-    it "calls cri client close", ->
+    it "calls cri client close on kill", ->
+      ## need a reference here since the stub will be monkey-patched
+      kill = @launchedBrowser.kill
+
       chrome.open("chrome", "http://", {}, @automation)
       .then =>
-        expect(@launchedBrowser.close, "Chrome browser process gets close method").to.be.a("function")
-        @launchedBrowser.close()
+        expect(@launchedBrowser.kill).to.be.a("function")
+        @launchedBrowser.kill()
       .then =>
-        expect(@criClient.close).to.have.been.calledOnce
+        expect(@criClient.close).to.be.calledOnce
+        expect(kill).to.be.calledOnce
 
   context "#_getArgs", ->
     it "disables gpu when linux", ->
