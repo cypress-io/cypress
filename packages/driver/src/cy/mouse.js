@@ -65,14 +65,14 @@ const create = (state, keyboard, focused) => {
 
       const lastHoveredEl = getLastHoveredEl(state)
 
-      const targetEl = mouse.getElAtCoordsOrForce(coords, forceEl)
+      const targetEl = forceEl || mouse.getElAtCoords(coords)
 
       // if coords are same AND we're already hovered on the element, don't send move events
       if (_.isEqual({ x: coords.x, y: coords.y }, getMouseCoords(state)) && lastHoveredEl === targetEl) return { el: targetEl }
 
       const events = mouse._moveEvents(targetEl, coords)
 
-      const resultEl = mouse.getElAtCoordsOrForce(coords, forceEl)
+      const resultEl = forceEl || mouse.getElAtCoords(coords)
 
       return { el: resultEl, fromEl: lastHoveredEl, events }
     },
@@ -228,14 +228,9 @@ const create = (state, keyboard, focused) => {
     /**
      *
      * @param {Coords} coords
-     * @param {HTMLElement} forceEl
      * @returns {HTMLElement}
      */
-    getElAtCoordsOrForce ({ x, y, doc }, forceEl) {
-      if (forceEl) {
-        return forceEl
-      }
-
+    getElAtCoords ({ x, y, doc }) {
       const el = doc.elementFromPoint(x, y)
 
       return el
@@ -244,13 +239,8 @@ const create = (state, keyboard, focused) => {
     /**
      *
      * @param {Coords} coords
-     * @param {HTMLElement} forceEl
      */
-    moveToCoordsOrForce (coords, forceEl) {
-      if (forceEl) {
-        return forceEl
-      }
-
+    moveToCoords (coords) {
       const { el } = mouse.move(coords)
 
       return el
@@ -263,7 +253,7 @@ const create = (state, keyboard, focused) => {
     _downEvents (coords, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
 
       const { x, y } = coords
-      const el = mouse.moveToCoordsOrForce(coords, forceEl)
+      const el = forceEl || mouse.moveToCoords(coords)
 
       const win = $dom.getWindowByElement(el)
 
@@ -430,7 +420,7 @@ const create = (state, keyboard, focused) => {
         detail: 1,
       }, mouseEvtOptionsExtend)
 
-      const el = mouse.moveToCoordsOrForce(fromViewport, forceEl)
+      const el = forceEl || mouse.moveToCoords(fromViewport)
 
       let pointerupProps = sendPointerup(el, pointerEvtOptions)
 
@@ -453,7 +443,7 @@ const create = (state, keyboard, focused) => {
     },
 
     _mouseClickEvents (fromViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
-      const el = mouse.moveToCoordsOrForce(fromViewport, forceEl)
+      const el = forceEl || mouse.moveToCoords(fromViewport)
 
       const win = $dom.getWindowByElement(el)
 
@@ -478,7 +468,7 @@ const create = (state, keyboard, focused) => {
     },
 
     _contextmenuEvent (fromViewport, forceEl, mouseEvtOptionsExtend) {
-      const el = mouse.moveToCoordsOrForce(fromViewport, forceEl)
+      const el = forceEl || mouse.moveToCoords(fromViewport)
 
       const win = $dom.getWindowByElement(el)
       const defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
@@ -505,7 +495,7 @@ const create = (state, keyboard, focused) => {
       const clickEvents1 = click(1)
       const clickEvents2 = click(2)
 
-      const el = mouse.moveToCoordsOrForce(fromViewport, forceEl)
+      const el = forceEl || mouse.moveToCoords(fromViewport)
       const win = $dom.getWindowByElement(el)
 
       const dblclickEvtProps = _.extend(mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win), {
