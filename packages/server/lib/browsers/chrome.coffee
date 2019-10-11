@@ -261,15 +261,17 @@ module.exports = {
     .try =>
       args = @_getArgs(options)
 
-      Promise.all([
-        ## ensure that we have a clean cache dir
-        ## before launching the browser every time
-        utils.ensureCleanCache(browser, isTextTerminal),
+      utils.getPort()
+      .then (port) ->
+        args.push("--remote-debugging-port=#{port}")
 
-        pluginsBeforeBrowserLaunch(options.browser, args),
-
-        utils.getPort()
-      ])
+        Promise.all([
+          ## ensure that we have a clean cache dir
+          ## before launching the browser every time
+          utils.ensureCleanCache(browser, isTextTerminal),
+          pluginsBeforeBrowserLaunch(options.browser, args),
+          port
+        ])
     .spread (cacheDir, args, port) =>
       Promise.all([
         @_writeExtension(
@@ -290,7 +292,6 @@ module.exports = {
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
-        args.push("--remote-debugging-port=#{port}")
 
         debug("launching in chrome with debugging port", { url, args, port })
 
