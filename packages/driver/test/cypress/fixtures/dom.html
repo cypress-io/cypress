@@ -49,6 +49,10 @@
           display: block
         }
 
+        .content-box {
+          box-sizing: content-box
+        }
+
       </style>
 
       DOM Fixture
@@ -434,6 +438,8 @@
       </div>
 
       <div id="invisible" style="display: none;">i am not visible</div>
+
+      <button class="content-box">content-box</button>
 
       <div id="svgs">
         <svg data-cy="line" width="300" height="200">
