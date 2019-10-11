@@ -115,7 +115,7 @@ normalizeStderr = (str) ->
   ## use the logic from the CLI that normalizes stderr
   str
   .split('\n')
-  .filter(_.ary(shouldShowStderrLine, 1))
+  .filter(_.unary(shouldShowStderrLine))
   .join('\n')
 
 startServer = (obj) ->

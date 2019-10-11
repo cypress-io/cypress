@@ -34,14 +34,16 @@ const isGarbageLineWarning = (str) => {
 function shouldShowStderrLine (line, filterFn) {
   // bail if this is warning line garbage
   if (isGarbageLineWarning(line)) {
-    return
+    return false
   }
 
   // if we have a callback and this explictly returns
   // false then bail
   if (filterFn && filterFn(line) === false) {
-    return
+    return false
   }
+
+  return true
 }
 
 function isPlatform (platform) {
