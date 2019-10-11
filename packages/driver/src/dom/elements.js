@@ -634,7 +634,7 @@ const isScrollable = ($el) => {
   return false
 }
 
-const getFromDocCoords = (x, y, win) => {
+const getFromWindowCoords = (x, y, win) => {
   return {
     x: win.scrollX + x,
     y: win.scrollY + y,
@@ -990,7 +990,7 @@ _.extend(module.exports, {
 
   getElements,
 
-  getFromDocCoords,
+  getFromWindowCoords,
 
   getFirstFocusableEl,
 

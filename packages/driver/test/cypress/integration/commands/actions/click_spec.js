@@ -2,7 +2,7 @@ const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
 const chaiSubset = require('chai-subset')
-const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
+const { getCommandLogWithText, findReactInstance, withMutableReporterState, clickCommandLog } = require('../../../support/utils')
 
 chai.use(chaiSubset)
 
@@ -215,7 +215,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('records correct clientX when el scrolled', (done) => {
-      const $btn = $('<button id=\'scrolledBtn\' style=\'position: absolute; top: 1600px; left: 1200px; width: 100px;\'>foo</button>').appendTo(cy.$$('body'))
+      const $btn = $(`<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>`).appendTo(cy.$$('body'))
 
       const win = cy.state('window')
 
@@ -232,7 +232,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('records correct clientY when el scrolled', (done) => {
-      const $btn = $('<button id=\'scrolledBtn\' style=\'position: absolute; top: 1600px; left: 1200px; width: 100px;\'>foo</button>').appendTo(cy.$$('body'))
+      const $btn = $(`<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>`).appendTo(cy.$$('body'))
 
       const win = cy.state('window')
 
@@ -695,25 +695,81 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    // https://github.com/cypress-io/cypress/issues/4347
-    it('can click inside an iframe', () => {
-      cy.get('iframe')
-      .should(($iframe) => {
-        // wait for iframe to load
-        expect($iframe.first().contents().find('body').html()).ok
+    describe('pointer-events:none', () => {
+      beforeEach(function () {
+        cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo(cy.$$('#dom'))
+        this.ptrNone = cy.$$(`<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>`).appendTo(cy.$$('#dom'))
+        cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red">#ptrNone > div</div>').appendTo(this.ptrNone)
+
+        this.logs = []
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+
+          this.logs.push(log)
+        })
       })
-      .then(($iframe) => {
-        // cypress does not wrap this as a DOM element (does not wrap in jquery)
-        // return cy.wrap($iframe[0].contentDocument.body)
-        return cy.wrap($iframe.first().contents().find('body'))
+
+      it('element behind pointer-events:none should still get click', () => {
+        cy.get('#ptr').click() // should pass with flying colors
       })
-      .within(() => {
-        cy.get('a#hashchange')
-        // .should($el => $el[0].click())
-        .click()
+
+      it('should be able to force on pointer-events:none with force:true', () => {
+        cy.get('#ptrNone').click({ timeout: 300, force: true })
       })
-      .then(($body) => {
-        expect($body[0].ownerDocument.defaultView.location.hash).eq('#hashchange')
+
+      it('should error with message about pointer-events', function () {
+        const onError = cy.stub().callsFake((err) => {
+          const { lastLog } = this
+
+          expect(err.message).to.contain(`has CSS 'pointer-events: none'`)
+          expect(err.message).to.not.contain('inherited from')
+          const consoleProps = lastLog.invoke('consoleProps')
+
+          expect(_.keys(consoleProps)).deep.eq([
+            'Command',
+            'Tried to Click',
+            'But it has CSS',
+            'Error',
+          ])
+
+          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
+        })
+
+        cy.once('fail', onError)
+
+        cy.get('#ptrNone').click({ timeout: 300 })
+        .then(() => {
+          expect(onError).calledOnce
+        })
+      })
+
+      it('should error with message about pointer-events and include inheritance', function () {
+        const onError = cy.stub().callsFake((err) => {
+          const { lastLog } = this
+
+          expect(err.message).to.contain(`has CSS 'pointer-events: none', inherited from this element:`)
+          expect(err.message).to.contain('<div id="ptrNone"')
+          const consoleProps = lastLog.invoke('consoleProps')
+
+          expect(_.keys(consoleProps)).deep.eq([
+            'Command',
+            'Tried to Click',
+            'But it has CSS',
+            'Inherited From',
+            'Error',
+          ])
+
+          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
+
+          expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
+        })
+
+        cy.once('fail', onError)
+
+        cy.get('#ptrNoneChild').click({ timeout: 300 })
+        .then(() => {
+          expect(onError).calledOnce
+        })
       })
     })
 
@@ -1672,12 +1728,31 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           expect(clicked).to.eq(1)
-          expect(err.message).to.include('cy.click() failed because this element')
+          expect(err.message).to.include('cy.click() failed because this element is detached from the DOM')
 
           done()
         })
 
         cy.get(':checkbox:first').click().click()
+      })
+
+      it('throws when subject is detached during actionability', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('cy.click() failed because this element is detached from the DOM')
+
+          done()
+        })
+
+        cy.get('input:first')
+        .then(($el) => {
+          // This represents an asynchronous re-render
+          // since we fire the 'scrolled' event during actionability
+          // if we use el.on('scroll'), headless electron is flaky
+          cy.on('scrolled', () => {
+            $el.remove()
+          })
+        })
+        .click()
       })
 
       it('logs once when not dom subject', function (done) {
@@ -1823,7 +1898,7 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
           expect(err.message).to.include('cy.click() failed because this element is not visible:')
           expect(err.message).to.include('>button ...</button>')
-          expect(err.message).to.include('\'<button#button-covered-in-span>\' is not visible because it has CSS property: \'position: fixed\' and its being covered')
+          expect(err.message).to.include(`'<button#button-covered-in-span>' is not visible because it has CSS property: 'position: fixed' and its being covered`)
           expect(err.message).to.include('>span on...</span>')
 
           const console = lastLog.invoke('consoleProps')
@@ -1868,7 +1943,7 @@ describe('src/cy/commands/actions/click', () => {
       it('throws when provided invalid position', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('Invalid position argument: \'foo\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
+          expect(err.message).to.eq(`Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.`)
 
           done()
         })
@@ -1979,7 +2054,7 @@ describe('src/cy/commands/actions/click', () => {
 
         // append two buttons
         const button = () => {
-          return $('<button class=\'clicks\'>click</button>')
+          return $(`<button class='clicks'>click</button>`)
         }
 
         cy.$$('body').append(button()).append(button())
@@ -2416,33 +2491,6 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('can print table of keys on click', () => {
-        const spyTableName = cy.spy(top.console, 'groupCollapsed')
-        const spyTableData = cy.spy(top.console, 'table')
-
-        cy.get('input:first').click()
-
-        cy.wrap(null)
-        .should(() => {
-          spyTableName.reset()
-          spyTableData.reset()
-
-          return withMutableReporterState(() => {
-            const commandLogEl = getCommandLogWithText('click')
-
-            const reactCommandInstance = findReactInstance(commandLogEl)
-
-            reactCommandInstance.props.appState.isRunning = false
-
-            $(commandLogEl).find('.command-wrapper').click()
-
-            expect(spyTableName).calledWith('Mouse Move Events')
-            expect(spyTableName).calledWith('Mouse Click Events')
-            expect(spyTableData).calledTwice
-          })
-        })
-      })
-
       it('does not fire a click when element has been removed on mouseup', () => {
         const $btn = cy.$$('button:first')
 
@@ -2810,7 +2858,7 @@ describe('src/cy/commands/actions/click', () => {
 
         // append two buttons
         const $button = () => {
-          return $('<button class=\'dblclicks\'>dblclick</button')
+          return $(`<button class='dblclicks'>dblclick</button`)
         }
 
         cy.$$('body').append($button()).append($button())
@@ -3255,7 +3303,7 @@ describe('src/cy/commands/actions/click', () => {
 
         // append two buttons
         const $button = () => {
-          return $('<button class=\'rightclicks\'>rightclick</button')
+          return $(`<button class='rightclicks'>rightclick</button`)
         }
 
         cy.$$('body').append($button()).append($button())
@@ -3889,7 +3937,7 @@ describe('mouse state', () => {
     })
 
     it('handles disabled attr', () => {
-      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
         display: 'block',
@@ -3917,7 +3965,7 @@ describe('mouse state', () => {
     })
 
     it('handles disabled attr added on mousedown', () => {
-      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
         display: 'block',
@@ -3945,7 +3993,7 @@ describe('mouse state', () => {
     })
 
     it('can click new element after mousemove sequence', () => {
-      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
         display: 'block',
@@ -3954,7 +4002,7 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
         backgroundColor: 'blue',
         position: 'relative',
         height: 50,
@@ -3975,18 +4023,13 @@ describe('mouse state', () => {
         expect(stub).to.not.be.called
       })
 
-      // should we send mouseover to newly hovered els?
-      // cy.getAll('@mouseover').each((stub) => {
-      //   expect(stub).to.be.calledOnce
-      // })
-
       cy.getAll('btn', 'pointerdown mousedown mouseup pointerup click').each((stub) => {
         expect(stub).to.be.calledOnce
       })
     })
 
     it('can click new element after mousemove sequence [disabled]', () => {
-      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
         display: 'block',
@@ -3995,7 +4038,7 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
         backgroundColor: 'blue',
         position: 'relative',
         height: 50,
@@ -4032,7 +4075,7 @@ describe('mouse state', () => {
     })
 
     it('can target new element after mousedown sequence', () => {
-      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
         display: 'block',
@@ -4041,7 +4084,7 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
         backgroundColor: 'blue',
         position: 'relative',
         height: 50,
@@ -4068,7 +4111,7 @@ describe('mouse state', () => {
     })
 
     it('can target new element after mouseup sequence', () => {
-      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
         display: 'block',
@@ -4077,7 +4120,7 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
         backgroundColor: 'blue',
         position: 'relative',
         height: 50,
@@ -4108,7 +4151,7 @@ describe('mouse state', () => {
     })
 
     it('responds to changes in move handlers', () => {
-      const btn = cy.$$(/*html*/'<button id=\'btn\'>')
+      const btn = cy.$$(/*html*/`<button id='btn'></button>`)
       .css({
         float: 'left',
         display: 'block',
@@ -4117,7 +4160,7 @@ describe('mouse state', () => {
       })
       .appendTo(cy.$$('body'))
 
-      const cover = cy.$$(/*html*/'<div id=\'cover\'/>').css({
+      const cover = cy.$$(/*html*/`<div id='cover'></div>`).css({
         backgroundColor: 'blue',
         position: 'relative',
         height: 50,
@@ -4143,6 +4186,72 @@ describe('mouse state', () => {
       })
     })
 
+  })
+
+  describe('user experience', () => {
+
+    beforeEach(() => {
+      cy.visit('/fixtures/dom.html')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4347
+    it('can render element highlight inside iframe', () => {
+
+      cy.get('iframe:first')
+      .should(($iframe) => {
+        // wait for iframe to load
+        expect($iframe.first().contents().find('body').html()).ok
+      })
+      .then(($iframe) => {
+        // cypress does not wrap this as a DOM element (does not wrap in jquery)
+        return cy.wrap($iframe.first().contents().find('body'))
+      })
+      .within(() => {
+        cy.get('a#hashchange')
+        .click()
+      })
+      .then(($body) => {
+        expect($body[0].ownerDocument.defaultView.location.hash).eq('#hashchange')
+      })
+
+      clickCommandLog('click')
+      .then(() => {
+        cy.get('.__cypress-highlight').then(($target) => {
+          const targetRect = $target[0].getBoundingClientRect()
+          const iframeRect = cy.$$('iframe')[0].getBoundingClientRect()
+
+          expect(targetRect.top).gt(iframeRect.top)
+          expect(targetRect.bottom).lt(iframeRect.bottom)
+        })
+      })
+    })
+
+    it('can print table of keys on click', () => {
+      const spyTableName = cy.spy(top.console, 'groupCollapsed')
+      const spyTableData = cy.spy(top.console, 'table')
+
+      cy.get('input:first').click()
+
+      cy.wrap(null)
+      .should(() => {
+        spyTableName.reset()
+        spyTableData.reset()
+
+        return withMutableReporterState(() => {
+          const commandLogEl = getCommandLogWithText('click')
+
+          const reactCommandInstance = findReactInstance(commandLogEl.get(0))
+
+          reactCommandInstance.props.appState.isRunning = false
+
+          commandLogEl.find('.command-wrapper').click()
+
+          expect(spyTableName).calledWith('Mouse Move Events')
+          expect(spyTableName).calledWith('Mouse Click Events')
+          expect(spyTableData).calledTwice
+        })
+      })
+    })
   })
 
 })

@@ -4134,35 +4134,6 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
-        it('can print table of keys on click', () => {
-          cy.get('input:first').type('foo')
-
-          .then(() => {
-            return withMutableReporterState(() => {
-              const spyTableName = cy.spy(top.console, 'groupCollapsed')
-              const spyTableData = cy.spy(top.console, 'table')
-
-              const commandLogEl = getCommandLogWithText('foo')
-
-              const reactCommandInstance = findReactInstance(commandLogEl)
-
-              reactCommandInstance.props.appState.isRunning = false
-
-              $(commandLogEl).find('.command-wrapper').click()
-
-              expect(spyTableName.firstCall).calledWith('Mouse Move Events')
-              expect(spyTableName.secondCall).calledWith('Mouse Click Events')
-              expect(spyTableName.thirdCall).calledWith('Keyboard Events')
-              expect(spyTableData).calledThrice
-            })
-          })
-        })
-
-        // table.data.forEach (item, i) ->
-        //   expect(item).to.deep.eq(expectedTable[i])
-
-        // expect(table.data).to.deep.eq(expectedTable)
-
         it('has no modifiers when there are none activated', () => {
           cy.get(':text:first').type('f').then(function () {
             const table = this.lastLog.invoke('consoleProps').table[3]()
@@ -5094,6 +5065,32 @@ https://on.cypress.io/type`)
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        })
+      })
+    })
+  })
+
+  describe('user experience', () => {
+    it('can print table of keys on click', () => {
+      cy.get('input:first').type('foo')
+
+      .then(() => {
+        return withMutableReporterState(() => {
+          const spyTableName = cy.spy(top.console, 'groupCollapsed')
+          const spyTableData = cy.spy(top.console, 'table')
+
+          const commandLogEl = getCommandLogWithText('foo')
+
+          const reactCommandInstance = findReactInstance(commandLogEl[0])
+
+          reactCommandInstance.props.appState.isRunning = false
+
+          $(commandLogEl).find('.command-wrapper').click()
+
+          expect(spyTableName.firstCall).calledWith('Mouse Move Events')
+          expect(spyTableName.secondCall).calledWith('Mouse Click Events')
+          expect(spyTableName.thirdCall).calledWith('Keyboard Events')
+          expect(spyTableData).calledThrice
         })
       })
     })

@@ -76,7 +76,7 @@ class Reporter extends Component {
   }
 
   componentDidMount () {
-    shortcuts.start(this.props.appState)
+    shortcuts.start()
     EQ.init()
   }
   componentWillUnmount () {
@@ -85,6 +85,7 @@ class Reporter extends Component {
 }
 
 if (window.Cypress) {
+  window.state = appState
   window.render = (props) => {
     render(<Reporter {...props} />, document.getElementById('app'))
   }

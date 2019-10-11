@@ -638,8 +638,8 @@ const formatReasonNotFired = (reason) => {
 }
 
 const toCoordsEventOptions = (x, y, win) => {
-  // these are the coords from the document, ignoring scroll position
-  const fromDocCoords = $elements.getFromDocCoords(x, y, win)
+  // these are the coords from the element's window, ignoring scroll position
+  const fromWindowCoords = $elements.getFromWindowCoords(x, y, win)
 
   return {
     clientX: x,
@@ -648,10 +648,10 @@ const toCoordsEventOptions = (x, y, win) => {
     screenY: y,
     x,
     y,
-    pageX: fromDocCoords.x,
-    pageY: fromDocCoords.y,
-    layerX: fromDocCoords.x,
-    layerY: fromDocCoords.y,
+    pageX: fromWindowCoords.x,
+    pageY: fromWindowCoords.y,
+    layerX: fromWindowCoords.x,
+    layerY: fromWindowCoords.y,
   }
 }
 

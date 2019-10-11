@@ -1,10 +1,11 @@
+const { $ } = Cypress
+
 export const getCommandLogWithText = (text) => {
   return cy
   .$$(`.runnable-active .command-wrapper:contains(${text}):visible`, top.document)
   .parentsUntil('li')
   .last()
   .parent()
-  .get(0)
 }
 
 export const findReactInstance = function (dom) {
@@ -17,6 +18,29 @@ export const findReactInstance = function (dom) {
     ? internalInstance._debugOwner.stateNode
     : internalInstance.return.stateNode
 
+}
+
+export const clickCommandLog = (sel) => {
+  return cy.wait(10)
+  .then(() => {
+    withMutableReporterState(() => {
+
+      const commandLogEl = getCommandLogWithText(sel)
+
+      const reactCommandInstance = findReactInstance(commandLogEl[0])
+
+      if (!reactCommandInstance) {
+        assert(false, 'failed to get command log React instance')
+      }
+
+      reactCommandInstance.props.appState.isRunning = false
+
+      $(commandLogEl).find('.command-wrapper').click()
+
+      // make sure command was pinned, otherwise throw a better error message
+      expect(cy.$$('.command-pin:visible', top.document).length, 'command should be pinned').ok
+    })
+  })
 }
 
 export const withMutableReporterState = (fn) => {

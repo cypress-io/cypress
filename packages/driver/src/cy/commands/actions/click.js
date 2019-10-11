@@ -4,6 +4,7 @@ const Promise = require('bluebird')
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
+const debug = require('debug')('cypress:driver:click')
 
 const formatMoveEventsTable = (events) => {
   return {
@@ -65,7 +66,7 @@ const formatMouseEvents = (events) => {
 module.exports = (Commands, Cypress, cy, state, config) => {
   const { mouse } = cy.devices
 
-  const mouseEvent = (eventName, { subject, positionOrX, y, options, onReady, onTable }) => {
+  const mouseAction = (eventName, { subject, positionOrX, y, options, onReady, onTable }) => {
     let position
     let x
 
@@ -121,7 +122,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       // timing out from multiple clicks
       cy.timeout($actionability.delay, true, eventName)
 
-      const createLog = (domEvents, fromWindowCoords) => {
+      const createLog = (domEvents, fromWindowCoords, fromAutWindowCoords) => {
         let consoleObj
 
         const elClicked = domEvents.moveEvents.el
@@ -155,7 +156,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           if (options._log) {
             // because we snapshot and output a command per click
             // we need to manually snapshot + end them
-            options._log.set({ coords: fromWindowCoords, consoleProps })
+            options._log.set({ coords: fromAutWindowCoords, consoleProps })
           }
 
           // we need to split this up because we want the coordinates
@@ -179,8 +180,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         },
 
         onReady ($elToClick, coords) {
-          const { fromWindow, fromViewport } = coords
+          const { fromViewport, fromAutWindow, fromWindow } = coords
 
+          debug('got coords', { fromViewport, fromAutWindow })
           const forceEl = options.force && $elToClick.get(0)
 
           const moveEvents = mouse.move(fromViewport, forceEl)
@@ -190,7 +192,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           return createLog({
             moveEvents,
             ...onReadyProps,
-          }, fromWindow)
+          },
+          fromWindow,
+          fromAutWindow)
         },
       })
       .catch((err) => {
@@ -226,7 +230,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
   return Commands.addAll({ prevSubject: 'element' }, {
     click (subject, positionOrX, y, options = {}) {
-      return mouseEvent('click', {
+      return mouseAction('click', {
         y,
         subject,
         options,
@@ -258,7 +262,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       // TODO: 4.0 make this false by default
       options.multiple = true
 
-      return mouseEvent('dblclick', {
+      return mouseAction('dblclick', {
         y,
         subject,
         options,
@@ -299,7 +303,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     },
 
     rightclick (subject, positionOrX, y, options = {}) {
-      return mouseEvent('rightclick', {
+      return mouseAction('rightclick', {
         y,
         subject,
         options,
