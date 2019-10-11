@@ -13,10 +13,16 @@ module.exports = {
 
     readFn(filePath, options.encoding or "utf8")
     .then (contents) ->
-      {
-        contents: if path.extname(filePath) is ".yml" or path.extname(filePath) is ".yaml" then yaml.safeLoad(contents) else contents
-        filePath: filePath
-      }
+      if path.extname(filePath) is ".yaml" or path.extname(filePath) is ".yml"
+        {
+          contents: yaml.safeLoad(contents)
+          filePath: filePath
+        }
+      else 
+        {
+          contents: contents
+          filePath: filePath
+        }
     .catch (err) ->
       err.filePath = filePath
       throw err
