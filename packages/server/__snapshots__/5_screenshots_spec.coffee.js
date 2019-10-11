@@ -33,6 +33,8 @@ exports['e2e screenshots passes 1'] = `
     2) ensures unique paths when there's a non-named screenshot and a failure
     ✓ properly resizes the AUT iframe
     - does not take a screenshot for a pending test
+    ✓ adds padding to element screenshot when specified
+    ✓ does not add padding to non-element screenshot
     clipping
       ✓ can clip app screenshots
       ✓ can clip runner screenshots
@@ -48,7 +50,7 @@ exports['e2e screenshots passes 1'] = `
       ✓ takes another screenshot
 
 
-  18 passing
+  20 passing
   1 pending
   5 failing
 
@@ -84,12 +86,12 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Results)
 
   ┌───────────────────────────────────┐
-  │ Tests:        23                  │
-  │ Passing:      18                  │
+  │ Tests:        25                  │
+  │ Passing:      20                  │
   │ Failing:      4                   │
   │ Pending:      1                   │
   │ Skipped:      0                   │
-  │ Screenshots:  26                  │
+  │ Screenshots:  28                  │
   │ Video:        true                │
   │ Duration:     X seconds           │
   │ Spec Ran:     screenshots_spec.js │
@@ -115,6 +117,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure.png (1000x660)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure (failed).png (1280x720)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/aut-resize.png (1000x2000)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/element-padding.png (420x320)
+  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/non-element-padding.png (600x200)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/app-clip.png (100x50)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/runner-clip.png (120x60)
   - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/fullPage-clip.png (140x70)
@@ -139,9 +143,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
       Spec                                                Tests  Passing  Failing  Pending  Skipped 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.js                       XX:XX       23       18        4        1        - │
+  │ ✖ screenshots_spec.js                       XX:XX       25       20        4        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       23       18        4        1        -  
+    1 of 1 failed (100%)                        XX:XX       25       20        4        1        -  
 
 
 `
