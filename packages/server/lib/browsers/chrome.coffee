@@ -93,6 +93,11 @@ defaultArgs = [
   "--use-mock-keychain"
 ]
 
+getRemoteDebuggingPort = Promise.method () ->
+  if port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
+    return port
+  utils.getPort()
+
 pluginsBeforeBrowserLaunch = (browser, args) ->
   ## bail if we're not registered to this event
   return args if not plugins.has("before:browser:launch")
@@ -271,15 +276,17 @@ module.exports = {
     .try =>
       args = @_getArgs(options)
 
-      Promise.all([
-        ## ensure that we have a clean cache dir
-        ## before launching the browser every time
-        utils.ensureCleanCache(browser, isTextTerminal),
+      getRemoteDebuggingPort()
+      .then (port) ->
+        args.push("--remote-debugging-port=#{port}")
 
-        pluginsBeforeBrowserLaunch(options.browser, args),
-
-        utils.getPort()
-      ])
+        Promise.all([
+          ## ensure that we have a clean cache dir
+          ## before launching the browser every time
+          utils.ensureCleanCache(browser, isTextTerminal),
+          pluginsBeforeBrowserLaunch(options.browser, args),
+          port
+        ])
     .spread (cacheDir, args, port) =>
       Promise.all([
         @_writeExtension(
@@ -300,7 +307,6 @@ module.exports = {
         ## by being the last one
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
-        args.push("--remote-debugging-port=#{port}")
 
         debug("launching in chrome with debugging port", { url, args, port })
 

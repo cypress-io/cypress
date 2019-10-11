@@ -1,17 +1,18 @@
 const _ = require('lodash')
 const CRI = require('chrome-remote-interface')
 const { connect } = require('@packages/network')
+const errors = require('../errors')
 const Promise = require('bluebird')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const debug = require('debug')('cypress:server:protocol')
 
 function _getDelayMsForRetry (i) {
-  if (i < 8) {
+  if (i < 10) {
     return 100
   }
 
-  if (i < 10) {
+  if (i < 18) {
     return 500
   }
 }
@@ -22,6 +23,9 @@ function connectAsync (opts) {
       getDelayMsForRetry: _getDelayMsForRetry,
       ...opts,
     }, cb)
+  })
+  .catch((err) => {
+    errors.throw('CDP_COULD_NOT_CONNECT', opts.port, err)
   })
 }
 
