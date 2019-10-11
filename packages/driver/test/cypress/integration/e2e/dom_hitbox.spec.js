@@ -1,6 +1,7 @@
 const { withMutableReporterState, findReactInstance, getCommandLogWithText } = require('../../support/utils')
 const { $ } = Cypress
 
+// https://github.com/cypress-io/cypress/pull/5299/files
 describe('rect highlight', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -11,13 +12,13 @@ describe('rect highlight', () => {
 
     getAndPin('button:first')
 
-    shouldHaveCorrectHighlightPositions('button:first')
+    ensureCorrectHighlightPositions('button:first')
   })
 
   it('highlight elements properly positioned for content-box', () => {
     getAndPin('button.content-box:first')
 
-    shouldHaveCorrectHighlightPositions()
+    ensureCorrectHighlightPositions()
   })
 
   it('highlight inline elements', () => {
@@ -25,7 +26,7 @@ describe('rect highlight', () => {
 
     getAndPin('span:first')
 
-    shouldHaveCorrectHighlightPositions('span:first')
+    ensureCorrectHighlightPositions('span:first')
   })
 
   it('highlight elements with css transform', () => {
@@ -33,7 +34,7 @@ describe('rect highlight', () => {
 
     getAndPin('button:first')
 
-    shouldHaveCorrectHighlightPositions('button:first')
+    ensureCorrectHighlightPositions('button:first')
   })
 
   it('highlight elements with css transform on parent', () => {
@@ -47,13 +48,14 @@ describe('rect highlight', () => {
     getAndPin('#child')
 
     // TODO: assert covers element bounding-box
-    shouldHaveCorrectHighlightPositions(null)
+    ensureCorrectHighlightPositions(null)
   })
 })
 
 const getAndPin = (sel) => {
   cy.get(sel)
 
+  // TODO: fix me @brian-mann plz halp ;-(
   // arbitrary wait to allow clicking and pinning command
   // if reduced, test is flakey
   cy.wait(10)
@@ -74,7 +76,7 @@ const getAndPin = (sel) => {
   })
 }
 
-const shouldHaveCorrectHighlightPositions = (sel) => {
+const ensureCorrectHighlightPositions = (sel) => {
   return cy.wrap(null, { timeout: 400 }).should(() => {
     const dims = {
       content: cy.$$('div[data-layer=Content]')[0].getBoundingClientRect(),
@@ -93,12 +95,12 @@ const shouldHaveCorrectHighlightPositions = (sel) => {
 
 const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {
   try {
-    expect(Math.floor(rect1.width), 'width').eq(Math.floor(rect2.width))
-    expect(Math.floor(rect1.height), 'height').eq(Math.floor(rect2.height))
-    expect(Math.floor(rect1.top), 'top').eq(Math.floor(rect2.top))
-    expect(Math.floor(rect1.left), 'left').eq(Math.floor(rect2.left))
-    expect(Math.floor(rect1.right), 'right').eq(Math.floor(rect2.right))
-    expect(Math.floor(rect1.bottom), 'bottom').eq(Math.floor(rect2.bottom))
+    expect(rect1.width, 'width').to.be.closeTo(rect2.width, 1)
+    expect(rect1.height, 'height').to.be.closeTo(rect2.height, 1)
+    expect(rect1.top, 'top').to.be.closeTo(rect2.top, 1)
+    expect(rect1.left, 'left').to.be.closeTo(rect2.left, 1)
+    expect(rect1.right, 'right').to.be.closeTo(rect2.right, 1)
+    expect(rect1.bottom, 'bottom').to.be.closeTo(rect2.bottom, 1)
   } catch (e) {
     e.message = `\nExpected ${mes}\n${e.message}`
     throw e
@@ -117,5 +119,4 @@ const expectToBeInside = (rectInner, rectOuter, mes = 'rect to be inside rect') 
     e.message = `\nExpected ${mes}\n${e.message}`
     throw e
   }
-
 }

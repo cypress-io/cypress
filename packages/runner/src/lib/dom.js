@@ -266,12 +266,12 @@ function getZIndex (el) {
 function getElementDimensions ($el) {
   const el = $el.get(0)
 
-  const dimensions = {
+  const { offsetHeight, offsetWidth } = el
+
+  const box = {
     offset: $el.offset(), // offset disregards margin but takes into account border + padding
     // dont use jquery here for width/height because it uses getBoundingClientRect() which returns scaled values.
     // TODO: switch back to using jquery when upgrading to jquery 3.4+
-    height: el.offsetHeight,
-    width: el.offsetWidth,
     paddingTop: getPadding($el, 'top'),
     paddingRight: getPadding($el, 'right'),
     paddingBottom: getPadding($el, 'bottom'),
@@ -287,9 +287,12 @@ function getElementDimensions ($el) {
   }
 
   // NOTE: offsetWidth/height always give us content + padding + border, so subtract them
-  // TODO: remove this when upgrading jquery to 3.4+
-  dimensions.width -= dimensions.paddingLeft + dimensions.paddingRight + dimensions.borderLeft + dimensions.borderRight
-  dimensions.height -= dimensions.paddingTop + dimensions.paddingBottom + dimensions.borderTop + dimensions.borderBottom
+  // to get the true "clientHeight" and "clientWidth".
+  // we CANNOT just use "clientHeight" and "clientWidth" because those always return 0
+  // for inline elements >_<
+  //
+  box.width = offsetWidth - (box.paddingLeft + box.paddingRight + box.borderLeft + box.borderRight)
+  box.height = offsetHeight - (box.paddingTop + box.paddingBottom + box.borderTop + box.borderBottom)
 
   // innerHeight: Get the current computed height for the first
   // element in the set of matched elements, including padding but not border.
@@ -298,27 +301,19 @@ function getElementDimensions ($el) {
   // element in the set of matched elements, including padding, border,
   // and optionally margin. Returns a number (without 'px') representation
   // of the value or null if called on an empty set of elements.
-  dimensions.heightWithPadding =
-    dimensions.height + dimensions.paddingTop + dimensions.paddingBottom
+  box.heightWithPadding = box.height + box.paddingTop + box.paddingBottom
 
-  dimensions.heightWithBorder =
-    dimensions.heightWithPadding +
-    dimensions.borderTop +
-    dimensions.borderBottom
+  box.heightWithBorder = box.heightWithPadding + box.borderTop + box.borderBottom
 
-  dimensions.heightWithMargin =
-    dimensions.heightWithBorder + dimensions.marginTop + dimensions.marginBottom
+  box.heightWithMargin = box.heightWithBorder + box.marginTop + box.marginBottom
 
-  dimensions.widthWithPadding =
-    dimensions.width + dimensions.paddingLeft + dimensions.paddingRight
+  box.widthWithPadding = box.width + box.paddingLeft + box.paddingRight
 
-  dimensions.widthWithBorder =
-    dimensions.widthWithPadding + dimensions.borderLeft + dimensions.borderRight
+  box.widthWithBorder = box.widthWithPadding + box.borderLeft + box.borderRight
 
-  dimensions.widthWithMargin =
-    dimensions.widthWithBorder + dimensions.marginLeft + dimensions.marginRight
+  box.widthWithMargin = box.widthWithBorder + box.marginLeft + box.marginRight
 
-  return dimensions
+  return box
 }
 
 function getNumAttrValue ($el, attr) {
