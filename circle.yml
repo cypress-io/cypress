@@ -264,7 +264,8 @@ jobs:
             set -e
             if [[ "$OSTYPE" == "darwin"* ]]; then
               curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/google-chrome-stable.dmg
-              open ~/google-chrome-stable.dmg
+              hdiutil attach  ~/google-chrome-stable.dmg
+              ls /Volumnes/
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications
             else
               wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
