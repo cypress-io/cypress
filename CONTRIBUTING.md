@@ -439,11 +439,28 @@ The repository is setup with two main (protected) branches.
 
 ### Pull Requests
 
-- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If there is not an associated open issue, **create an issue using our [Issue Template](./ISSUE_TEMPLATE.md)**.
-- Please use the `address #[issue number]` or `close #[issue number]` syntax in the pull request description. This will automatically close the issue once the issue is merged.
-- Add [tests](#tests)! We are a testing product afterall. 😉
+- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./ISSUE_TEMPLATE.md)**.
+- PR's can be opened before all the work is finished. In fact we encourage this! Please write `[WIP]` in the title of your Pull Request if your PR is not ready for review - someone will review your PR as soon as the `[WIP]` is removed.
+- Fill out the [Pull Request Tempalte](./PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleteing those sections. PR's will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
+
+### Pull Request Reviews
+
+- After a PR has been opened, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review Pull Requests. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
+
+**Some rules about Pull Requests Reviews:**
+
+1. The contributor opening the pull request may not approve their own PR.
+2. The PR will not be merged if some reviewers have voted "Needs changes".
+
+If any of the Pull Request Review guidelines can't be met, a comment will be left by the reviewer with 'Request changes'. Please make any updates as appropriate and we will rereview once those changes are addressed.
+
+**During a Pull Request Review, the following should be done:**
+
+- Run the code and use it as the end user would. Double check issue and PR description to ensure it is meeting requirements.
+- Read through every line of changed code (Yes, we know this could be a LOT).
+- If you don’t understand why some piece of code is required, ask for clarification! Likely the contributor had a reason and can provide the answer quicker than investigating yourself.
 
 ### Testing
 
