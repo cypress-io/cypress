@@ -98,54 +98,54 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/black.png                       (1280x720) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/red.png                         (1280x720) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/foo/bar/baz.png                 (1280x720) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- gene      (1280x720) 
-     rates pngs on failure (failed).png                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/color-check.png                 (1280x720) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/crop-check.png                   (600x400) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage.png                     (600x500) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage-same.png                (600x500) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/pathological.png                (1280x720) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element.png                      (400x300) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- retr      (200x1300) 
-     ies each screenshot for up to  XX:XX.png                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensu      (1280x720) 
-     res unique paths for non-named screenshots.png                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensu      (1280x720) 
-     res unique paths for non-named screenshots (1).png                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensu      (1280x720) 
-     res unique paths for non-named screenshots (2).png                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensu      (1000x660) 
-     res unique paths when there's a non-named screenshot and a failure.png                         
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensu      (1280x720) 
-     res unique paths when there's a non-named screenshot and a failure (failed).png                
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/aut-resize.png                 (1000x2000) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/app-clip.png                      (100x50) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/runner-clip.png                   (120x60) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage-clip.png                 (140x70) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element-clip.png                  (160x80) 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- befo      (1280x720) 
-     re hooks -- empty test 1 -- before all hook (failed).png                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- each      (1280x720) 
-      hooks -- empty test 2 -- before each hook (failed).png                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- each      (1280x720) 
-      hooks -- empty test 2 -- after each hook (failed).png                                         
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- real      (1000x660) 
-     ly long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa                
-     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa                
-     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- real      (1000x660) 
-     ly long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa                
-     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa                
-     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/black.png                       (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/red.png                         (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/foo/bar/baz.png                 (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- gener     (1280x720)
+     ates pngs on failure (failed).png                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/color-check.png                 (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/crop-check.png                   (600x400)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage.png                     (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage-same.png                (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/pathological.png                (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element.png                      (400x300)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- retri     (200x1300)
+     es each screenshot for up to  XX:XX.png                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
+     es unique paths for non-named screenshots.png                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
+     es unique paths for non-named screenshots (1).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
+     es unique paths for non-named screenshots (2).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1000x660)
+     es unique paths when there's a non-named screenshot and a failure.png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
+     es unique paths when there's a non-named screenshot and a failure (failed).png                 
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/aut-resize.png                 (1000x2000)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/app-clip.png                      (100x50)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/runner-clip.png                   (120x60)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage-clip.png                 (140x70)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element-clip.png                  (160x80)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- befor     (1280x720)
+     e hooks -- empty test 1 -- before all hook (failed).png                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- each      (1280x720)
+     hooks -- empty test 2 -- before each hook (failed).png                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- each      (1280x720)
+     hooks -- empty test 2 -- after each hook (failed).png                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- reall     (1000x660)
+     y long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- reall     (1000x660)
+     y long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png                                                      
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4              (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4             (X seconds)
 
 
 ====================================================================================================
