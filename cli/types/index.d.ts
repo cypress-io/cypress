@@ -80,6 +80,38 @@ declare namespace Cypress {
     clear: (keys?: string[]) => void
   }
 
+  interface ViewportPosition {
+    top: number
+    left: number
+    right: number
+    bottom: number
+    topCenter: number
+    leftCenter: number
+  }
+
+  interface WindowPosition {
+    top: number
+    left: number
+    topCenter: number
+    leftCenter: number
+  }
+
+  interface ElementPositioning {
+    scrollTop: number
+    scrollLeft: number
+    width: number
+    height: number
+    fromViewport: ViewportPosition
+    fromWindow: WindowPosition
+  }
+
+  interface ElementCoordinates {
+    width: number
+    height: number
+    fromViewport: ViewportPosition
+    fromWindow: WindowPosition
+  }
+
   /**
    * Several libraries are bundled with Cypress by default.
    *
@@ -308,8 +340,40 @@ declare namespace Cypress {
      * @see https://on.cypress.io/dom
      */
     dom: {
+      wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
+      query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
+      unwrap(obj: any): any[] | any
+      isDom(obj: any): boolean
+      isType(element: JQuery | HTMLElement , type: string): boolean
+      isVisible(element: JQuery | HTMLElement): boolean
       isHidden(element: JQuery | HTMLElement): boolean
       isDetached(element: JQuery | HTMLElement): boolean
+      isFocusable(element: JQuery | HTMLElement): boolean
+      isTextLike(element: JQuery | HTMLElement): boolean
+      isScrollable(element: JQuery | HTMLElement): boolean
+      isFocused(element: JQuery | HTMLElement): boolean
+      isDetached(element: JQuery | HTMLElement): boolean
+      isAttached(element: JQuery | HTMLElement): boolean
+      isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
+      isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
+      isElement(obj: any): boolean
+      isDocument(obj: any): boolean
+      isWindow(obj: any): boolean
+      isJquery(obj: any): boolean
+      stringify(element: JQuery | HTMLElement, form: string): string
+      getElements(element: JQuery): JQuery | HTMLElement[]
+      getContainsSelector(text: string, filter?: string): JQuery.Selector
+      getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
+      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getReasonIsHidden(element: JQuery | HTMLElement): string
+      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
+      getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
+      getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
+      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position: string): ElementCoordinates
+      getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
     }
 
     /**
