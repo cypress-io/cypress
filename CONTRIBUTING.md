@@ -4,8 +4,8 @@ Thanks for taking the time to contribute! :smile:
 
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
-- Join the [Cypress Gitter chat](https://gitter.im/cypress-io/cypress) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
-- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [contact us](mailto:support@cypress.io).
+- Join the [Cypress chat](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
+- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
 - Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
@@ -13,7 +13,8 @@ Thanks for taking the time to contribute! :smile:
 
 - [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
-- Write code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
+- [Help triage existing issue](#triaging-issues).
+- Write code to address an issue. We have some issues labeled as [`first-timers-only`](https://github.com/cypress-io/cypress/labels/first-timers-only) that are good place to start. [Please thoroughly read our writing code guide](#writing-code).
 
 ## Table of Contents
 
@@ -66,7 +67,7 @@ All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT
 - [Describe your problem, not your solution](#describe-problems)
 - [Explain how to reproduce the issue](#reproducibility).
 
-Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
+Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can give, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
 
 ### Update Cypress
 
@@ -424,7 +425,7 @@ Note that unzipping Linux binary inside Docker container onto a mapped volume dr
 
 Generally when making contributions, you are typically making them to a small number of packages. Most of your local development work will be inside a single package at a time.
 
-Each package documents how to best work with it, so simply consult the `README.md` of each package.
+Each package documents how to best work with it, so consult the `README.md` of each package.
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
@@ -435,7 +436,7 @@ They will outline development and test procedures. When in doubt just look at th
 The repository is setup with two main (protected) branches.
 
 - `master` is the code already published in the last Cypress version.
-- `develop` is the current latest "edge" code. This branch is set as the default branch, and all pull requests should be made against this branch.
+- `develop` is the current latest "pre-release" code. This branch is set as the default branch, and all pull requests should be made against this branch.
 
 ### Pull Requests
 
@@ -447,7 +448,7 @@ The repository is setup with two main (protected) branches.
 
 ### Pull Request Reviews
 
-- After a PR has been opened, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review Pull Requests. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
+After a PR has been opened, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review Pull Requests. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
 
 **Some rules about Pull Requests Reviews:**
 
@@ -472,12 +473,7 @@ To run local tests, consult the `README.md` of each package.
 
 We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our dependencies. The bot uses the settings in [renovate.json](renovate.json) to maintain our [Update Dependencies](https://github.com/cypress-io/cypress/issues/3777) issue and open PRs. You can manually select a package to open a PR from our [Update Dependencies](https://github.com/cypress-io/cypress/issues/3777) issue.
 
-Every PR for a package upgrade requires a review of the packages changes either from their changelog or their commits as well as all of the existing Cypress tests to pass.
-
-#### If there are test failures or breaking changes:
-
-- Note the breaking changes in a PR comment and note where the breaking change occured.
-- Edit the PR to fix any breaking changes, if you are able. If you are not able, mark the PR review as 'changes requested' and note that there are breaking changes.
+After a PR has been opened for a dependency update, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review the dependency update. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
 
 ## Deployment
 
