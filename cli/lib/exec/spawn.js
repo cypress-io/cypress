@@ -15,8 +15,15 @@ const { throwFormErrorText, errors } = require('../errors')
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
 const isRenderWorkerRe = /\.RenderWorker-/
+// https://github.com/electron/electron/issues/15625
+const isFontconfigWarningRe = /^Fontconfig warning:/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe]
+const GARBAGE_WARNINGS = [
+  isXlibOrLibudevRe,
+  isHighSierraWarningRe,
+  isRenderWorkerRe,
+  isFontconfigWarningRe,
+]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
