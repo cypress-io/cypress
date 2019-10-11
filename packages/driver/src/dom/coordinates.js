@@ -7,31 +7,42 @@ const getElementAtPointFromViewport = (doc, x, y) => {
 
 const isAutIframe = (win) => !$elements.getNativeProp(win.parent, 'frameElement')
 
+/**
+ * @param {JQuery<HTMLElement>} $el
+ */
 const getElementPositioning = ($el) => {
-  /**
-   * @type {HTMLElement}
-   */
+  let autFrame
+
   const el = $el[0]
 
   const win = $window.getWindowByElement(el)
-  let autFrame
 
   // properties except for width / height
   // are relative to the top left of the viewport
 
-  // we use the first of getClientRects in order to account for inline elements
-  // that span multiple lines. Which would cause us to click in the center and thus miss
-  // This should be the same as using getBoundingClientRect()
-  // for elements with a single rect
-  // const rect = el.getBoundingClientRect()
+  // we use the first of getClientRects in order to account for inline
+  // elements that span multiple lines. Which would cause us to click
+  // click in the center and thus miss...
+  //
+  // however we have a fallback to getBoundingClientRect() such as
+  // when the element is hidden or detached from the DOM. getClientRects()
+  // returns a zero length DOMRectList in that case, which becomes undefined.
+  // so we fallback to getBoundingClientRect() so that we get an actual DOMRect
+  // with all properties 0'd out
   const rect = el.getClientRects()[0] || el.getBoundingClientRect()
 
-  const getRectFromAutIframe = (rect, el) => {
+  // we want to return the coordinates from the autWindow to the element
+  // which handles a situation in which the element is inside of a nested
+  // iframe. we use these "absolute" coordinates from the autWindow to draw
+  // things like the red hitbox - since the hitbox layer is placed on the
+  // autWindow instead of the window the element is actually within
+  const getRectFromAutIframe = (rect) => {
     let x = 0 //rect.left
     let y = 0 //rect.top
-    let curWindow = el.ownerDocument.defaultView
+    let curWindow = win
     let frame
 
+    // walk up from a nested iframe so we continually add the x + y values
     while (!isAutIframe(curWindow) && curWindow.parent !== curWindow) {
       frame = $elements.getNativeProp(curWindow, 'frameElement')
 
@@ -57,7 +68,7 @@ const getElementPositioning = ($el) => {
     }
   }
 
-  const rectFromAut = getRectFromAutIframe(rect, el)
+  const rectFromAut = getRectFromAutIframe(rect)
   const rectFromAutCenter = getCenterCoordinates(rectFromAut)
 
   // add the center coordinates
