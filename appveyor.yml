@@ -19,11 +19,10 @@ environment:
   aws_credentials_json:
     secure: ttGzd2/rW+i8H+pozcFxzZKU07B5INL8+LjD4vCOKes+tI6EaKhrLvAQ9xT7r+e1p8My8f4LrqvT+i37kbRCUPY4DHmUgagj3aj0OghsT0eX/Vr/6T4v1yndB7SX7FnG07eVcGb63r9f5kT7xu7ElJ9WXh1Ok5K69W0zDPsa1RGCCYqsTi4tH2h5EAZwjY1b
   # CDN control
-  CF_DOMAIN: "cypress.io"
-  CF_EMAIL:
-    secure: +kZOcImCZVZJv/e/hQc3gvJ6xXSH88qg46cMwKn8mRo=
   CF_TOKEN:
-    secure: d8SQfJ2r6qrKDjYWoFg3AzgY7aL6hTuE5OIlRr0TXkcXkZzdmYCujfzIYcCQfpZg
+    secure: nVGxcWxXGvrT621HmgMf9Mwm84dqo+cKHZj94OvyyWEGIZOJJkbWHsD/l2/r4a6Y
+  CF_ZONEID:
+    secure: SrZnd4BYW9PILEEi7y9VyXuC16C+qMEDT3QuV1PZZJa47TRkjcaYpAXhAHz0j0jT
   # authenticate as Cypress bot when posting commit status checks
   GH_APP_ID:
     secure: oR0RVDbv6GKej4wwjkz7Zw==
