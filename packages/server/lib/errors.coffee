@@ -842,6 +842,18 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Please do not modify CYPRESS_ENV value.
       """
+    when "CDP_COULD_NOT_CONNECT"
+      """
+      Cypress could not make a connection to the Chrome DevTools Protocol after 5 seconds.
+
+      Without this, your tests can not run. Please check your Chrome installation and try again.
+
+      The CDP port requested was #{chalk.yellow(arg1)}.
+
+      Error details:
+
+      #{arg2.stack}
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
