@@ -257,6 +257,15 @@ jobs:
       - run: ls $(npm -g bin)
       - run: ls $(npm -g bin)/../lib/node_modules
 
+      # Install current versions of Chrome
+      - run:
+          name: "Install Google Chrome (stable)"
+          command: |
+            deb http://dl.google.com/linux/chrome/deb/ stable main
+            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+            sudo apt-get update 
+            sudo apt-get install google-chrome-stable
+
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
       # Install sub packages dependencies and build all sub packages via postinstall script
