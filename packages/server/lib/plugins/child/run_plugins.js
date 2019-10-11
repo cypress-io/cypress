@@ -7,11 +7,17 @@ const util = require('../util')
 
 const registeredEvents = {}
 
-const invoke = (eventId, args = []) => {
+const invoke = (eventId, args = [], ipc) => {
   const event = registeredEvents[eventId]
 
   if (!event) {
-    sendError(new Error(`No handler registered for event id ${eventId}`))
+    sendError(ipc, new Error(`No handler registered for event id ${eventId}`))
+
+    return
+  }
+
+  if (!event.handler) {
+    sendError(ipc, new Error(`Plugin event handler is undefined (event - ${event.event})`))
 
     return
   }
