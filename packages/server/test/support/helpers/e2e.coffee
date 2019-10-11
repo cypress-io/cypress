@@ -36,6 +36,10 @@ pathUpToProjectName = Fixtures.projectPath("")
 stackTraceLinesRe = /^(\s+)at\s(.+)/gm
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
+snapshotIndexRe = /(\d)$/
+
+makeStderrSnapshotKey= (key) ->
+  key.replace(snapshotIndexRe, 'stderr $1')
 
 replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, "$1at stack trace line")
@@ -339,9 +343,9 @@ module.exports = {
 
       ## snapshot the stdout!
       if options.snapshot
-        ## enable callback to modify stdout
-        if ostd = options.onStdout
-          stdout = ostd(stdout)
+        ## callbacks for normalizing stdout and stderr
+        options.onStdout?(stdout)
+        options.onStderr?(stderr)
 
         ## if we have browser in the stdout make
         ## sure its legit
@@ -362,8 +366,11 @@ module.exports = {
           else
             expect(headless).to.include("(headless)")
 
+        ## snapshot stdout, stderr
         str = normalizeStdout(stdout, options)
-        snapshot(str)
+        { key } = snapshot(str)
+
+        snapshot(makeStderrSnapshotKey(key), stderr)
 
       return {
         code:   code
