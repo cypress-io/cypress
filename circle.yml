@@ -250,10 +250,11 @@ jobs:
       - run:
           name: "Install Google Chrome (stable)"
           command: |
-            sudo add-apt-repository "deb http://dl.google.com/linux/chrome/deb/ stable main" 
-            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-            sudo apt-get update 
-            sudo apt-get install google-chrome-stable
+            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+            echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
+            apt-get update
+            apt-get install -y google-chrome-stable
+            rm -rf /var/lib/apt/lists/*
 
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
