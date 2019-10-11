@@ -101,8 +101,7 @@ takeScrollingScreenshots = (scrolls, win, state, automationOptions) ->
 
   Promise
   .mapSeries(scrolls, scrollAndTake)
-  .then (results) ->
-    _.last(results)
+  .then(_.last)
 
 takeFullPageScreenshot = (state, automationOptions) ->
   win = state("window")
@@ -143,13 +142,13 @@ applyPaddingToElementPositioning = (elPosition, automationOptions) ->
   return {
     width: elPosition.width + paddingLeft + paddingRight
     height: elPosition.height + paddingTop + paddingBottom
-    fromViewport: {
-      top: elPosition.fromViewport.top - paddingTop
-      left: elPosition.fromViewport.left - paddingLeft
-      bottom: elPosition.fromViewport.bottom + paddingBottom
+    fromElViewport: {
+      top: elPosition.fromElViewport.top - paddingTop
+      left: elPosition.fromElViewport.left - paddingLeft
+      bottom: elPosition.fromElViewport.bottom + paddingBottom
     }
-    fromWindow: {
-      top: elPosition.fromWindow.top - paddingTop
+    fromElWindow: {
+      top: elPosition.fromElWindow.top - paddingTop
     }
   }
 
@@ -170,40 +169,42 @@ takeElementScreenshot = ($el, state, automationOptions) ->
   validateNumScreenshots(numScreenshots, automationOptions)
 
   scrolls = _.map _.times(numScreenshots), (index) ->
-    y = elPosition.fromWindow.top + (viewportHeight * index)
+    y = elPosition.fromElWindow.top + (viewportHeight * index)
+    
     afterScroll = ->
       elPosition = applyPaddingToElementPositioning(
         $dom.getElementPositioning($el),
         automationOptions
       )
-      x = Math.min(viewportWidth, elPosition.fromViewport.left)
+      x = Math.min(viewportWidth, elPosition.fromElViewport.left)
       width = Math.min(viewportWidth - x, elPosition.width)
 
       if numScreenshots is 1
         return {
           x: x
-          y: elPosition.fromViewport.top
+          y: elPosition.fromElViewport.top
           width: width
           height: elPosition.height
         }
 
       if index + 1 is numScreenshots
-        overlap = (numScreenshots - 1) * viewportHeight + elPosition.fromViewport.top
-        heightLeft = elPosition.fromViewport.bottom - overlap
-        {
+        overlap = (numScreenshots - 1) * viewportHeight + elPosition.fromElViewport.top
+        heightLeft = elPosition.fromElViewport.bottom - overlap
+        
+        return {
           x: x
           y: overlap
           width: width
           height: heightLeft
         }
-      else
-        {
-          x: x
-          y: Math.max(0, elPosition.fromViewport.top)
-          width: width
-          ## TODO: try simplifying to just 'viewportHeight'
-          height: Math.min(viewportHeight, elPosition.fromViewport.top + elPosition.height)
-        }
+        
+      return {
+        x: x
+        y: Math.max(0, elPosition.fromElViewport.top)
+        width: width
+        ## TODO: try simplifying to just 'viewportHeight'
+        height: Math.min(viewportHeight, elPosition.fromElViewport.top + elPosition.height)
+      }
 
     { y, afterScroll }
 
