@@ -4,19 +4,7 @@ This package contains networking-related classes and utilities.
 
 ## Exports
 
-These modules are exported from this package:
-
-```ts
-const {
-  agent,
-  allowDestroy,
-  blacklist,
-  concatStream,
-  connect,
-  cors,
-  uri
-} = require('@packages/network')
-```
+You can see a list of the modules exported from this package in [./lib/index.ts](./lib/index.ts). Here is a brief description of what's available:
 
 * `agent` is a HTTP/HTTPS [agent][1] with support for HTTP/HTTPS proxies and keepalive whenever possible
 * `allowDestroy` can be used to wrap a `net.Server` to add a `.destroy()` method
