@@ -1,4 +1,4 @@
-import { initCriClient } from '../../../lib/browsers/cri-client'
+import { create } from '../../../lib/browsers/cri-client'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -6,13 +6,13 @@ const DEBUGGER_URL = 'http://foo'
 
 describe('lib/browsers/cri-client', function () {
   let criClient: {
-    initCriClient: typeof initCriClient
+    create: typeof create
   }
   let send: sinon.SinonStub
   let criImport: sinon.SinonStub
 
   function getClient () {
-    return criClient.initCriClient(DEBUGGER_URL)
+    return criClient.create(DEBUGGER_URL)
   }
 
   beforeEach(function () {
@@ -31,7 +31,7 @@ describe('lib/browsers/cri-client', function () {
     })
   })
 
-  context('.initCriClient', function () {
+  context('.create', function () {
     it('returns an instance of the CRI client', async function () {
       const client = await getClient()
 
