@@ -46,8 +46,9 @@ defaultArgs = [
   "--allow-insecure-localhost"
   "--reduce-security-for-testing"
   "--enable-automation"
-  "--disable-infobars"
+
   "--disable-device-discovery-notifications"
+  "--disable-infobars"
 
   ## https://github.com/cypress-io/cypress/issues/2376
   "--autoplay-policy=no-user-gesture-required"
@@ -78,6 +79,17 @@ defaultArgs = [
   ## https://github.com/cypress-io/cypress/issues/2704
   "--use-fake-ui-for-media-stream"
   "--use-fake-device-for-media-stream"
+
+  ## so Cypress commands don't get throttled
+  ## https://github.com/cypress-io/cypress/issues/5132
+  "--disable-ipc-flooding-protection"
+
+  ## misc. options puppeteer passes
+  ## https://github.com/cypress-io/cypress/issues/3633
+  "--disable-backgrounding-occluded-window"
+  "--disable-breakpad"
+  "--password-store=basic"
+  "--use-mock-keychain"
 ]
 
 pluginsBeforeBrowserLaunch = (browser, args) ->
