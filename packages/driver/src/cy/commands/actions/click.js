@@ -4,7 +4,6 @@ const Promise = require('bluebird')
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
-const debug = require('debug')('cypress:driver:click')
 
 const formatMoveEventsTable = (events) => {
   return {
@@ -182,7 +181,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         onReady ($elToClick, coords) {
           const { fromViewport, fromAutWindow, fromWindow } = coords
 
-          debug('got coords', { fromViewport, fromAutWindow })
           const forceEl = options.force && $elToClick.get(0)
 
           const moveEvents = mouse.move(fromViewport, forceEl)

@@ -201,7 +201,7 @@ ensureNotAnimating = (cy, $el, coordsHistory, animationDistanceThreshold) ->
   ## if we dont have at least 2 points
   ## then automatically retry
   if coordsHistory.length < 2
-    throw new Error("coordsHistory must be at least 2 sets of coords")
+    throw $utils.cypressErr("coordsHistory must be at least 2 sets of coords")
 
   ## verify that our element is not currently animating
   ## by verifying it is still at the same coordinates within
