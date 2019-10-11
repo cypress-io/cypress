@@ -342,7 +342,7 @@ declare namespace Cypress {
     dom: {
       wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
       query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
-      unwrap(obj: any): any[] | any
+      unwrap(obj: any): any
       isDom(obj: any): boolean
       isType(element: JQuery | HTMLElement , type: string): boolean
       isVisible(element: JQuery | HTMLElement): boolean
