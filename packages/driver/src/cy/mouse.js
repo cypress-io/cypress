@@ -307,10 +307,10 @@ const create = (state, keyboard, focused) => {
 
     },
 
-    down (coords, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+    down (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       const $previouslyFocused = focused.getFocused()
 
-      const mouseDownEvents = mouse._downEvents(coords, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownEvents = mouse._downEvents(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       // el we just send pointerdown
       const el = mouseDownEvents.pointerdownProps.el
@@ -351,13 +351,13 @@ const create = (state, keyboard, focused) => {
     /**
      * @param {HTMLElement} el
      * @param {Window} win
-     * @param {Coords} fromViewport
+     * @param {Coords} fromElViewport
      * @param {HTMLElement} forceEl
      */
-    up (fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
-      debug('mouse.up', { fromViewport, forceEl, skipMouseEvent })
+    up (fromElViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+      debug('mouse.up', { fromElViewport, forceEl, skipMouseEvent })
 
-      return mouse._upEvents(fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      return mouse._upEvents(fromElViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
     },
 
     /**
@@ -381,34 +381,34 @@ const create = (state, keyboard, focused) => {
     * if (notDetached(el1))
     * sendClick(el3)
     */
-    click (fromViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
-      debug('mouse.click', { fromViewport, forceEl })
+    click (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+      debug('mouse.click', { fromElViewport, forceEl })
 
-      const mouseDownEvents = mouse.down(fromViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownEvents = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
 
-      const mouseUpEvents = mouse.up(fromViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const skipClickEvent = $elements.isDetachedEl(mouseDownEvents.pointerdownProps.el)
 
-      const mouseClickEvents = mouse._mouseClickEvents(fromViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend)
+      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend)
 
       return _.extend({}, mouseDownEvents, mouseUpEvents, mouseClickEvents)
 
     },
 
     /**
-     * @param {Coords} fromViewport
+     * @param {Coords} fromElViewport
      * @param {HTMLElement} el
      * @param {HTMLElement} forceEl
      * @param {Window} win
      */
-    _upEvents (fromViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+    _upEvents (fromElViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
 
       const win = state('window')
 
-      let defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
+      let defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
 
       const pointerEvtOptions = _.extend({}, defaultOptions, {
         ...defaultPointerDownUpOptions,
@@ -420,7 +420,7 @@ const create = (state, keyboard, focused) => {
         detail: 1,
       }, mouseEvtOptionsExtend)
 
-      const el = forceEl || mouse.moveToCoords(fromViewport)
+      const el = forceEl || mouse.moveToCoords(fromElViewport)
 
       let pointerupProps = sendPointerup(el, pointerEvtOptions)
 
@@ -442,12 +442,12 @@ const create = (state, keyboard, focused) => {
 
     },
 
-    _mouseClickEvents (fromViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
-      const el = forceEl || mouse.moveToCoords(fromViewport)
+    _mouseClickEvents (fromElViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
+      const el = forceEl || mouse.moveToCoords(fromElViewport)
 
       const win = $dom.getWindowByElement(el)
 
-      const defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
+      const defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
 
       const clickEventOptions = _.extend({}, defaultOptions, {
         buttons: 0,
@@ -467,11 +467,11 @@ const create = (state, keyboard, focused) => {
       return { clickProps }
     },
 
-    _contextmenuEvent (fromViewport, forceEl, mouseEvtOptionsExtend) {
-      const el = forceEl || mouse.moveToCoords(fromViewport)
+    _contextmenuEvent (fromElViewport, forceEl, mouseEvtOptionsExtend) {
+      const el = forceEl || mouse.moveToCoords(fromElViewport)
 
       const win = $dom.getWindowByElement(el)
-      const defaultOptions = mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win)
+      const defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
 
       const mouseEvtOptions = _.extend({}, defaultOptions, {
         button: 2,
@@ -485,9 +485,9 @@ const create = (state, keyboard, focused) => {
       return { contextmenuProps }
     },
 
-    dblclick (fromViewport, forceEl, mouseEvtOptionsExtend = {}) {
+    dblclick (fromElViewport, forceEl, mouseEvtOptionsExtend = {}) {
       const click = (clickNum) => {
-        const clickEvents = mouse.click(fromViewport, forceEl, {}, { detail: clickNum })
+        const clickEvents = mouse.click(fromElViewport, forceEl, {}, { detail: clickNum })
 
         return clickEvents
       }
@@ -495,10 +495,10 @@ const create = (state, keyboard, focused) => {
       const clickEvents1 = click(1)
       const clickEvents2 = click(2)
 
-      const el = forceEl || mouse.moveToCoords(fromViewport)
+      const el = forceEl || mouse.moveToCoords(fromElViewport)
       const win = $dom.getWindowByElement(el)
 
-      const dblclickEvtProps = _.extend(mouse._getDefaultMouseOptions(fromViewport.x, fromViewport.y, win), {
+      const dblclickEvtProps = _.extend(mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win), {
         buttons: 0,
         detail: 2,
       }, mouseEvtOptionsExtend)
@@ -508,7 +508,7 @@ const create = (state, keyboard, focused) => {
       return { clickEvents1, clickEvents2, dblclickProps }
     },
 
-    rightclick (fromViewport, forceEl) {
+    rightclick (fromElViewport, forceEl) {
       const pointerEvtOptionsExtend = {
         button: 2,
         buttons: 2,
@@ -520,13 +520,13 @@ const create = (state, keyboard, focused) => {
         which: 3,
       }
 
-      const mouseDownEvents = mouse.down(fromViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownEvents = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      const contextmenuEvent = mouse._contextmenuEvent(fromViewport, forceEl)
+      const contextmenuEvent = mouse._contextmenuEvent(fromElViewport, forceEl)
 
       const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
 
-      const mouseUpEvents = mouse.up(fromViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const clickEvents = _.extend({}, mouseDownEvents, mouseUpEvents)
 

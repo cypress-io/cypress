@@ -121,7 +121,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       // timing out from multiple clicks
       cy.timeout($actionability.delay, true, eventName)
 
-      const createLog = (domEvents, fromWindowCoords, fromAutWindowCoords) => {
+      const createLog = (domEvents, fromElWindow, fromAutWindow) => {
         let consoleObj
 
         const elClicked = domEvents.moveEvents.el
@@ -134,7 +134,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
             'Applied To': $dom.getElements(options.$el),
             'Elements': options.$el.length,
-            'Coords': _.pick(fromWindowCoords, 'x', 'y'), // always absolute
+            'Coords': _.pick(fromElWindow, 'x', 'y'), // always absolute
             'Options': deltaOptions,
           })
 
@@ -155,7 +155,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           if (options._log) {
             // because we snapshot and output a command per click
             // we need to manually snapshot + end them
-            options._log.set({ coords: fromAutWindowCoords, consoleProps })
+            options._log.set({ coords: fromAutWindow, consoleProps })
           }
 
           // we need to split this up because we want the coordinates
@@ -179,19 +179,19 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         },
 
         onReady ($elToClick, coords) {
-          const { fromViewport, fromAutWindow, fromWindow } = coords
+          const { fromElViewport, fromElWindow, fromAutWindow } = coords
 
           const forceEl = options.force && $elToClick.get(0)
 
-          const moveEvents = mouse.move(fromViewport, forceEl)
+          const moveEvents = mouse.move(fromElViewport, forceEl)
 
-          const onReadyProps = onReady(fromViewport, forceEl)
+          const onReadyProps = onReady(fromElViewport, forceEl)
 
           return createLog({
             moveEvents,
             ...onReadyProps,
           },
-          fromWindow,
+          fromElWindow,
           fromAutWindow)
         },
       })
@@ -233,8 +233,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         subject,
         options,
         positionOrX,
-        onReady (fromViewport, forceEl) {
-          const clickEvents = mouse.click(fromViewport, forceEl)
+        onReady (fromElViewport, forceEl) {
+          const clickEvents = mouse.click(fromElViewport, forceEl)
 
           return {
             clickEvents,
@@ -265,8 +265,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         subject,
         options,
         positionOrX,
-        onReady (fromViewport, forceEl) {
-          const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromViewport, forceEl)
+        onReady (fromElViewport, forceEl) {
+          const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromElViewport, forceEl)
 
           return {
             dblclickProps,
@@ -306,8 +306,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         subject,
         options,
         positionOrX,
-        onReady (fromViewport, forceEl) {
-          const { clickEvents, contextmenuEvent } = mouse.rightclick(fromViewport, forceEl)
+        onReady (fromElViewport, forceEl) {
+          const { clickEvents, contextmenuEvent } = mouse.rightclick(fromElViewport, forceEl)
 
           return {
             clickEvents,

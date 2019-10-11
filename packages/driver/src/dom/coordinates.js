@@ -72,26 +72,26 @@ const getElementPositioning = ($el) => {
     scrollLeft: el.scrollLeft,
     width: rect.width,
     height: rect.height,
-    fromViewport: {
+    fromElViewport: {
+      doc: win.document,
       top: rect.top,
       left: rect.left,
       right: rect.right,
       bottom: rect.bottom,
       topCenter,
       leftCenter,
-      doc: win.document,
     },
-    fromWindow: {
-      top: rect.top + win.pageYOffset,
-      left: rect.left + win.pageXOffset,
-      topCenter: topCenter + win.pageYOffset,
-      leftCenter: leftCenter + win.pageXOffset,
+    fromElWindow: {
+      top: rect.top + win.scrollY,
+      left: rect.left + win.scrollX,
+      topCenter: topCenter + win.scrollY,
+      leftCenter: leftCenter + win.scrollX,
     },
     fromAutWindow: {
-      top: rectFromAut.top + autFrame.pageYOffset,
-      left: rectFromAut.left + autFrame.pageXOffset,
-      topCenter: rectFromAutCenter.y + autFrame.pageYOffset,
-      leftCenter: rectFromAutCenter.x + autFrame.pageXOffset,
+      top: rectFromAut.top + autFrame.scrollY,
+      left: rectFromAut.left + autFrame.scrollX,
+      topCenter: rectFromAutCenter.y + autFrame.scrollY,
+      leftCenter: rectFromAutCenter.x + autFrame.scrollX,
     },
   }
 }
@@ -192,22 +192,22 @@ const getBottomRightCoordinates = (rect) => {
 const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   const positionProps = getElementPositioning($el)
 
-  const { fromViewport, fromWindow } = positionProps
+  const { fromElViewport, fromElWindow } = positionProps
 
-  fromViewport.left += x
-  fromViewport.top += y
+  fromElViewport.left += x
+  fromElViewport.top += y
 
-  fromWindow.left += x
-  fromWindow.top += y
+  fromElWindow.left += x
+  fromElWindow.top += y
 
-  const viewportTargetCoords = getTopLeftCoordinates(fromViewport)
-  const windowTargetCoords = getTopLeftCoordinates(fromWindow)
+  const viewportTargetCoords = getTopLeftCoordinates(fromElViewport)
+  const windowTargetCoords = getTopLeftCoordinates(fromElWindow)
 
-  fromViewport.x = viewportTargetCoords.x
-  fromViewport.y = viewportTargetCoords.y
+  fromElViewport.x = viewportTargetCoords.x
+  fromElViewport.y = viewportTargetCoords.y
 
-  fromWindow.x = windowTargetCoords.x
-  fromWindow.y = windowTargetCoords.y
+  fromElWindow.x = windowTargetCoords.x
+  fromElWindow.y = windowTargetCoords.y
 
   return positionProps
 }
@@ -221,7 +221,7 @@ const getElementCoordinatesByPosition = ($el, position) => {
   // but also from the viewport so
   // whoever is calling us can use it
   // however they'd like
-  const { width, height, fromViewport, fromWindow, fromAutWindow } = positionProps
+  const { width, height, fromElViewport, fromElWindow, fromAutWindow } = positionProps
 
   // dynamically call the by transforming the nam=> e
   // bottom -> getBottomCoordinates
@@ -237,8 +237,8 @@ const getElementCoordinatesByPosition = ($el, position) => {
   const viewportTargetCoords = fn({
     width,
     height,
-    top: fromViewport.top,
-    left: fromViewport.left,
+    top: fromElViewport.top,
+    left: fromElViewport.left,
   })
 
   // get the desired x/y coords based on
@@ -246,15 +246,15 @@ const getElementCoordinatesByPosition = ($el, position) => {
   const windowTargetCoords = fn({
     width,
     height,
-    top: fromWindow.top,
-    left: fromWindow.left,
+    top: fromElWindow.top,
+    left: fromElWindow.left,
   })
 
-  fromViewport.x = viewportTargetCoords.x
-  fromViewport.y = viewportTargetCoords.y
+  fromElViewport.x = viewportTargetCoords.x
+  fromElViewport.y = viewportTargetCoords.y
 
-  fromWindow.x = windowTargetCoords.x
-  fromWindow.y = windowTargetCoords.y
+  fromElWindow.x = windowTargetCoords.x
+  fromElWindow.y = windowTargetCoords.y
 
   const autTargetCoords = fn({
     width,

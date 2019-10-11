@@ -71,7 +71,7 @@ describe('src/cy/commands/actions/click', () => {
       const $btn = cy.$$('#button')
 
       $btn.on('click', (e) => {
-        const { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'view', 'button', 'buttons', 'which', 'relatedTarget', 'altKey', 'ctrlKey', 'shiftKey', 'metaKey', 'detail', 'type')
 
@@ -91,8 +91,8 @@ describe('src/cy/commands/actions/click', () => {
           type: 'click',
         })
 
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(e.clientX).to.be.closeTo(fromElViewport.x, 1)
+        expect(e.clientY).to.be.closeTo(fromElViewport.y, 1)
 
         done()
       })
@@ -119,7 +119,7 @@ describe('src/cy/commands/actions/click', () => {
 
       $btn.get(0).addEventListener('mousedown', (e) => {
         // calculate after scrolling
-        const { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         const obj = _.pick(e, 'bubbles', 'cancelable', 'view', 'button', 'buttons', 'which', 'relatedTarget', 'altKey', 'ctrlKey', 'shiftKey', 'metaKey', 'detail', 'type')
 
@@ -139,8 +139,8 @@ describe('src/cy/commands/actions/click', () => {
           type: 'mousedown',
         })
 
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(e.clientX).to.be.closeTo(fromElViewport.x, 1)
+        expect(e.clientY).to.be.closeTo(fromElViewport.y, 1)
 
         done()
       })
@@ -154,7 +154,7 @@ describe('src/cy/commands/actions/click', () => {
       const win = cy.state('window')
 
       $btn.get(0).addEventListener('mouseup', (e) => {
-        const { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         const obj = _.pick(e, 'bubbles', 'cancelable', 'view', 'button', 'buttons', 'which', 'relatedTarget', 'altKey', 'ctrlKey', 'shiftKey', 'metaKey', 'detail', 'type')
 
@@ -174,8 +174,8 @@ describe('src/cy/commands/actions/click', () => {
           type: 'mouseup',
         })
 
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(e.clientX).to.be.closeTo(fromElViewport.x, 1)
+        expect(e.clientY).to.be.closeTo(fromElViewport.y, 1)
 
         done()
       })
@@ -220,10 +220,10 @@ describe('src/cy/commands/actions/click', () => {
       const win = cy.state('window')
 
       $btn.get(0).addEventListener('click', (e) => {
-        const { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        expect(win.pageXOffset).to.be.gt(0)
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
+        expect(win.scrollX).to.be.gt(0)
+        expect(e.clientX).to.be.closeTo(fromElViewport.x, 1)
 
         done()
       })
@@ -237,10 +237,10 @@ describe('src/cy/commands/actions/click', () => {
       const win = cy.state('window')
 
       $btn.get(0).addEventListener('click', (e) => {
-        const { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        expect(win.pageYOffset).to.be.gt(0)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(win.scrollY).to.be.gt(0)
+        expect(e.clientY).to.be.closeTo(fromElViewport.y, 1)
 
         done()
       })
@@ -1106,7 +1106,7 @@ describe('src/cy/commands/actions/click', () => {
         .get('#button-covered-in-nav').click()
         .then(($btn) => {
           const rect = $btn.get(0).getBoundingClientRect()
-          const { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+          const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
           // this button should be 120 pixels wide
           expect(rect.width).to.eq(120)
@@ -1115,8 +1115,8 @@ describe('src/cy/commands/actions/click', () => {
 
           // clientX + clientY are relative to the document
           expect(scrolled).to.deep.eq(['element', 'element', 'window'])
-          expect(obj).property('clientX').closeTo(fromViewport.leftCenter, 1)
-          expect(obj).property('clientY').closeTo(fromViewport.topCenter, 1)
+          expect(obj).property('clientX').closeTo(fromElViewport.leftCenter, 1)
+          expect(obj).property('clientY').closeTo(fromElViewport.topCenter, 1)
         })
       })
 
@@ -1293,14 +1293,14 @@ describe('src/cy/commands/actions/click', () => {
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const $btn = cy.$$('button:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get('button:first').click({ animationDistanceThreshold: 1000 }).then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
           expect(args[2]).to.eq(1000)
         })
@@ -1311,14 +1311,14 @@ describe('src/cy/commands/actions/click', () => {
 
         const $btn = cy.$$('button:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get('button:first').click().then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
@@ -2092,9 +2092,9 @@ describe('src/cy/commands/actions/click', () => {
           const { lastLog } = this
 
           $btn.blur() // blur which removes focus styles which would change coords
-          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-          expect(lastLog.get('coords')).to.deep.eq(fromWindow)
+          expect(lastLog.get('coords')).to.deep.eq(fromElWindow)
         })
       })
 
@@ -2132,13 +2132,13 @@ describe('src/cy/commands/actions/click', () => {
 
           const rect = $btn.get(0).getBoundingClientRect()
           const consoleProps = lastLog.invoke('consoleProps')
-          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
           // this button should be 60 pixels wide
           expect(rect.width).to.eq(60)
 
-          expect(consoleProps.Coords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
-          expect(consoleProps.Coords.y).to.be.closeTo(fromWindow.y, 1) // ensure we are within 1
+          expect(consoleProps.Coords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
+          expect(consoleProps.Coords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
 
           expect(consoleProps).to.containSubset({
             'Command': 'click',
@@ -2902,13 +2902,13 @@ describe('src/cy/commands/actions/click', () => {
 
           const rect = $btn.get(0).getBoundingClientRect()
           const consoleProps = lastLog.invoke('consoleProps')
-          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
           // this button should be 60 pixels wide
           expect(rect.width).to.eq(60)
 
-          expect(consoleProps.Coords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
-          expect(consoleProps.Coords.y).to.be.closeTo(fromWindow.y, 1) // ensure we are within 1
+          expect(consoleProps.Coords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
+          expect(consoleProps.Coords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
 
           expect(consoleProps).to.containSubset({
             'Command': 'dblclick',
@@ -3346,13 +3346,13 @@ describe('src/cy/commands/actions/click', () => {
 
           const rect = $btn.get(0).getBoundingClientRect()
           const consoleProps = lastLog.invoke('consoleProps')
-          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
           // this button should be 60 pixels wide
           expect(rect.width).to.eq(60)
 
-          expect(consoleProps.Coords.x).to.be.closeTo(fromWindow.x, 1) // ensure we are within 1
-          expect(consoleProps.Coords.y).to.be.closeTo(fromWindow.y, 1) // ensure we are within 1
+          expect(consoleProps.Coords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
+          expect(consoleProps.Coords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
 
           expect(consoleProps).to.containSubset({
             'Command': 'rightclick',

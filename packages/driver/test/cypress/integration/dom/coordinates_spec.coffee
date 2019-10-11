@@ -21,14 +21,14 @@ describe "src/dom/coordinates", ->
     it "returns the leftCenter and topCenter normalized", ->
       win = Cypress.dom.getWindowByElement(@$button.get(0))
 
-      pageYOffset = Object.getOwnPropertyDescriptor(win, "pageYOffset")
-      pageXOffset = Object.getOwnPropertyDescriptor(win, "pageXOffset")
+      scrollY = Object.getOwnPropertyDescriptor(win, "scrollY")
+      scrollX = Object.getOwnPropertyDescriptor(win, "scrollX")
 
-      Object.defineProperty(win, "pageYOffset", {
+      Object.defineProperty(win, "scrollY", {
         value: 10
       })
 
-      Object.defineProperty(win, "pageXOffset", {
+      Object.defineProperty(win, "scrollX", {
         value: 20
       })
 
@@ -39,16 +39,16 @@ describe "src/dom/coordinates", ->
         height: 40
       }])
 
-      { fromViewport, fromWindow } = Cypress.dom.getElementPositioning(@$button)
+      { fromElViewport, fromElWindow } = Cypress.dom.getElementPositioning(@$button)
 
-      expect(fromViewport.topCenter).to.eq(120)
-      expect(fromViewport.leftCenter).to.eq(85)
+      expect(fromElViewport.topCenter).to.eq(120)
+      expect(fromElViewport.leftCenter).to.eq(85)
 
-      expect(fromWindow.topCenter).to.eq(130)
-      expect(fromWindow.leftCenter).to.eq(105)
+      expect(fromElWindow.topCenter).to.eq(130)
+      expect(fromElWindow.leftCenter).to.eq(105)
 
-      Object.defineProperty(win, "pageYOffset", pageYOffset)
-      Object.defineProperty(win, "pageXOffset", pageXOffset)
+      Object.defineProperty(win, "scrollY", scrollY)
+      Object.defineProperty(win, "scrollX", scrollX)
 
   context ".getCoordsByPosition", ->
     it "rounds down x and y values to object", ->
@@ -67,13 +67,13 @@ describe "src/dom/coordinates", ->
 
   context ".getElementCoordinatesByPosition", ->
     beforeEach ->
-      @fromWindowPos = (pos) =>
+      @fromElWindowPos = (pos) =>
         Cypress.dom.getElementCoordinatesByPosition(@$button, pos)
-        .fromWindow
+        .fromElWindow
 
     describe "topLeft", ->
       it "returns top left x/y including padding + border", ->
-        obj = @fromWindowPos("topLeft")
+        obj = @fromElWindowPos("topLeft")
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(60)
@@ -81,7 +81,7 @@ describe "src/dom/coordinates", ->
 
     describe "top", ->
       it "returns top center x/y including padding + border", ->
-        obj = @fromWindowPos("top")
+        obj = @fromElWindowPos("top")
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(110)
@@ -89,7 +89,7 @@ describe "src/dom/coordinates", ->
 
     describe "topRight", ->
       it "returns top right x/y including padding + border", ->
-        obj = @fromWindowPos("topRight")
+        obj = @fromElWindowPos("topRight")
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(159)
@@ -97,7 +97,7 @@ describe "src/dom/coordinates", ->
 
     describe "left", ->
       it "returns center left x/y including padding + border", ->
-        obj = @fromWindowPos("left")
+        obj = @fromElWindowPos("left")
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(60)
@@ -105,7 +105,7 @@ describe "src/dom/coordinates", ->
 
     describe "center", ->
       it "returns center x/y including padding + border", ->
-        obj = @fromWindowPos()
+        obj = @fromElWindowPos()
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(110)
@@ -117,7 +117,7 @@ describe "src/dom/coordinates", ->
         ## calculation would be wrong. using getBoundingClientRect passes this test
         @$button.css({transform: "rotate(90deg)"})
 
-        obj = @fromWindowPos()
+        obj = @fromElWindowPos()
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(110)
@@ -125,7 +125,7 @@ describe "src/dom/coordinates", ->
 
     describe "right", ->
       it "returns center right x/y including padding + border", ->
-        obj = @fromWindowPos("right")
+        obj = @fromElWindowPos("right")
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(159)
@@ -133,7 +133,7 @@ describe "src/dom/coordinates", ->
 
     describe "bottomLeft", ->
       it "returns bottom left x/y including padding + border", ->
-        obj = @fromWindowPos("bottomLeft")
+        obj = @fromElWindowPos("bottomLeft")
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(60)
@@ -141,7 +141,7 @@ describe "src/dom/coordinates", ->
 
     context "bottom", ->
       it "returns bottom center x/y including padding + border", ->
-        obj = @fromWindowPos("bottom")
+        obj = @fromElWindowPos("bottom")
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(110)
@@ -149,7 +149,7 @@ describe "src/dom/coordinates", ->
 
     context "bottomRight", ->
       it "returns bottom right x/y including padding + border", ->
-        obj = @fromWindowPos("bottomRight")
+        obj = @fromElWindowPos("bottomRight")
 
         ## padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(159)
@@ -184,6 +184,6 @@ describe "src/dom/coordinates", ->
       ]
 
       ).as 'getClientRects'
-      obj = Cypress.dom.getElementCoordinatesByPosition($el, 'center').fromViewport
+      obj = Cypress.dom.getElementCoordinatesByPosition($el, 'center').fromElViewport
 
       expect({x: obj.x, y: obj.y}).to.deep.eq({x:125, y:120})
