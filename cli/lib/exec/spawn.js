@@ -24,6 +24,19 @@ const isGarbageLineWarning = (str) => {
   })
 }
 
+function shouldShowStderrLine (line, filterFn) {
+  // bail if this is warning line garbage
+  if (isGarbageLineWarning(line)) {
+    return
+  }
+
+  // if we have a callback and this explictly returns
+  // false then bail
+  if (filterFn && filterFn(line) === false) {
+    return
+  }
+}
+
 function isPlatform (platform) {
   return os.platform() === platform
 }
@@ -62,6 +75,8 @@ function getStdio (needsXvfb) {
 
 module.exports = {
   isGarbageLineWarning,
+
+  shouldShowStderrLine,
 
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
@@ -162,19 +177,9 @@ module.exports = {
           child.stderr.on('data', (data) => {
             const str = data.toString()
 
-            // bail if this is warning line garbage
-            if (isGarbageLineWarning(str)) {
-              return
+            if (shouldShowStderrLine(str, onStderrData)) {
+              process.stderr.write(data)
             }
-
-            // if we have a callback and this explictly returns
-            // false then bail
-            if (onStderrData && onStderrData(str) === false) {
-              return
-            }
-
-            // else pass it along!
-            process.stderr.write(data)
           })
         }
 

@@ -13,6 +13,7 @@ snapshot     = require("snap-shot-it")
 debug        = require("debug")("cypress:support:e2e")
 httpsProxy   = require("@packages/https-proxy")
 Fixtures     = require("./fixtures")
+{ shouldShowStderrLine } = require("#{root}../../../cli/lib/exec/spawn.js")
 fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
@@ -109,6 +110,13 @@ normalizeStdout = (str, options = {}) ->
   return str.split("\n")
     .map(replaceStackTraceLines)
     .join("\n")
+
+normalizeStderr = (str) ->
+  ## use the logic from the CLI that normalizes stderr
+  str
+  .split('\n')
+  .filter(_.ary(shouldShowStderrLine, 1))
+  .join('\n')
 
 startServer = (obj) ->
   { onServer, port, https } = obj
@@ -367,10 +375,12 @@ module.exports = {
             expect(headless).to.include("(headless)")
 
         ## snapshot stdout, stderr
-        str = normalizeStdout(stdout, options)
-        { key } = snapshot(str)
+        normalizedStdout = normalizeStdout(stdout, options)
+        { key } = snapshot(normalizedStdout)
 
-        snapshot(makeStderrSnapshotKey(key), stderr)
+        normalizedStderr = normalizeStderr(stderr)
+        stderrKey = makeStderrSnapshotKey(key)
+        snapshot(stderrKey, normalizedStderr)
 
       return {
         code:   code
