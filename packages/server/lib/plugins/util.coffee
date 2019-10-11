@@ -32,7 +32,7 @@ module.exports = {
 
   wrapChildPromise: (ipc, invoke, ids, args = []) ->
     Promise.try ->
-      return invoke(ids.eventId, args)
+      return invoke(ids.eventId, args, ipc)
     .then (value) ->
       ## undefined is coerced into null when sent over ipc, but we need
       ## to differentiate between them for 'task' event
