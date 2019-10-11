@@ -151,7 +151,7 @@ _connectToChromeRemoteInterface = (port) ->
   protocol.getWsTargetFor(port)
   .then (wsUrl) ->
     debug("received wsUrl %s for port %d", wsUrl, port)
-    
+
     CriClient.create(wsUrl)
 
 _maybeRecordVideo = (options) ->
@@ -291,7 +291,7 @@ module.exports = {
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
         args.push("--remote-debugging-port=#{port}")
-        
+
         debug("launching in chrome with debugging port", { url, args, port })
 
         ## FIRST load the blank page
@@ -299,7 +299,6 @@ module.exports = {
         ## start video recording and then
         ## we will load the actual page
         utils.launch(browser, "about:blank", args)
-
       .then (launchedBrowser) =>
         la(launchedBrowser, "did not get launched browser instance")
 
@@ -310,10 +309,16 @@ module.exports = {
         .then (criClient) =>
           la(criClient, "expected Chrome remote interface reference", criClient)
 
-          debug("adding method to close the remote interface client")
-          launchedBrowser.close = () ->
+          ## monkey-patch the .kill method to that the CDP connection is closed
+          originalBrowserKill = launchedBrowser.kill
+
+          launchedBrowser.kill = (args...) =>
             debug("closing remote interface client")
+
             criClient.close()
+            .then =>
+              debug("closing chrome")
+              originalBrowserKill.call(launchedBrowser, args...)
 
           return criClient
         .then @_maybeRecordVideo(options)

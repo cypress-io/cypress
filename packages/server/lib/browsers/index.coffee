@@ -5,11 +5,6 @@ debug         = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
 fs            = require("../util/fs")
-la            = require("lazy-ass")
-check         = require("check-more-types")
-
-# returns true if the passed string is a known browser family name
-isBrowserFamily = check.oneOf(["electron", "chrome"])
 
 instance = null
 
@@ -18,32 +13,24 @@ kill = (unbind) ->
   ## instance
   return Promise.resolve() if not instance
 
-  # if this browser needs to close its own connection, call the close
-  closeRemoteClient = if instance.close then instance.close() else Promise.resolve()
+  new Promise (resolve) ->
+    if unbind
+      instance.removeAllListeners()
 
-  closeRemoteClient.then ->
-    new Promise (resolve) ->
-      if unbind
-        debug("removing all listeners")
-        instance.removeAllListeners()
+    instance.once "exit", (code, sigint) ->
+      debug("browser process killed")
 
-      instance.once "exit", (code, sigint) ->
-        debug("browser process killed")
+      resolve.apply(null, arguments)
 
-        resolve.apply(null, arguments)
+    debug("killing browser process")
 
-      debug("killing browser process")
-
-      instance.kill()
-      cleanup()
+    instance.kill()
+    cleanup()
 
 cleanup = ->
   instance = null
 
 getBrowserLauncherByFamily = (family) ->
-  if not isBrowserFamily(family)
-    debug("unknown browser family", family)
-
   switch family
     when "electron"
       require("./electron")
@@ -94,8 +81,6 @@ module.exports = {
   launch: utils.launch
 
   close: kill
-
-  isBrowserFamily
 
   getAllBrowsersWith: (nameOrPath) ->
     if nameOrPath
