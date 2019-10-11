@@ -88,12 +88,6 @@ exports['e2e requests passes in chrome 1'] = `
                                                                                                     
   Running: request_spec.coffee...                                                          (1 of 1) 
 
-Warning: Cypress can only record videos when using the built in 'electron' browser.
-
-You have set the browser to: 'chrome'
-
-A video will not be recorded when using this browser.
-
 
   redirects + requests
     ✓ gets and sets cookies from cy.request
@@ -122,10 +116,16 @@ A video will not be recorded when using this browser.
   │ Pending:      0                   │
   │ Skipped:      0                   │
   │ Screenshots:  0                   │
-  │ Video:        false               │
+  │ Video:        true                │
   │ Duration:     X seconds           │
   │ Spec Ran:     request_spec.coffee │
   └───────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
 
 
 ====================================================================================================
