@@ -261,11 +261,18 @@ jobs:
       - run:
           name: "Install Google Chrome (stable)"
           command: |
-            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-            echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
-            apt-get update
-            apt-get install -y google-chrome-stable
-            rm -rf /var/lib/apt/lists/*
+            set -e
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/google-chrome-stable.dmg
+              open ~/google-chrome-stable.dmg
+              cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications
+            else
+              wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+              echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
+              apt-get update
+              apt-get install -y google-chrome-stable
+              rm -rf /var/lib/apt/lists/*
+            fi
 
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
