@@ -80,8 +80,7 @@ describe "lib/browsers/chrome", ->
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache",
-          "--remote-debugging-port=50505"
+          "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
     it "normalizes multiple extensions from plugins", ->
@@ -103,8 +102,7 @@ describe "lib/browsers/chrome", ->
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache",
-          "--remote-debugging-port=50505"
+          "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
     it "cleans up an unclean browser profile exit status", ->

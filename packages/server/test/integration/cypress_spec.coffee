@@ -817,7 +817,7 @@ describe "lib/cypress", ->
 
             browserArgs = args[2]
 
-            expect(browserArgs).to.have.length(8)
+            expect(browserArgs).to.have.length(7)
 
             expect(browserArgs.slice(0, 4)).to.deep.eq([
               "chrome", "foo", "bar", "baz"
