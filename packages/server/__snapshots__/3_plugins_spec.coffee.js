@@ -41,8 +41,8 @@ Error: Async error from plugins file
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                 (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                (X seconds)
 
 
 ====================================================================================================
@@ -101,8 +101,8 @@ exports['e2e plugins passes 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                 (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                (X seconds)
 
 
 ====================================================================================================
@@ -161,8 +161,8 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 20 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                 (X seconds) 
+  -  Started processing:  Compressing to 20 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                (X seconds)
 
 
 ====================================================================================================
@@ -279,8 +279,8 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4            (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4           (X seconds)
 
 
 ====================================================================================================
@@ -348,19 +348,17 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2) 
-  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.pn      (1280x720) 
-     g                                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.pn      (1280x720) 
-     g                                                                                              
-  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (1x1) 
+  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2)
+  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png     (1280x720)
+  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (1x1)
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_spec.coffee.mp     (X seconds) 
-                         4                                                                          
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_spec.coffee.mp    (X seconds)
+                          4                                                                         
 
 
 ====================================================================================================

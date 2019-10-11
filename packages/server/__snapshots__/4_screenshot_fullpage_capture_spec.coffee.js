@@ -39,35 +39,35 @@ exports['e2e screenshot fullPage capture passes 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-original.png                                                                                
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare.png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (1).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (2).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (3).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (4).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (5).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (6).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (7).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (8).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPa       (600x500) 
-     ge-compare (9).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-original.png                                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare.png                                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (1).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (2).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (3).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (4).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (5).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (6).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (7).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (8).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.coffee/fullPag      (600x500)
+     e-compare (9).png                                                                              
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_fullpage_capture_spe      (X seconds) 
-                         c.coffee.mp4                                                               
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_fullpage_capture_spe     (X seconds)
+                          c.coffee.mp4                                                              
 
 
 ====================================================================================================

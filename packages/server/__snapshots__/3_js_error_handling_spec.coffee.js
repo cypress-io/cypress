@@ -120,23 +120,23 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wi      (1280x720) 
-     thout an afterEach hook -- t1 (failed).png                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wi      (1280x720) 
-     thout an afterEach hook -- t2 (failed).png                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wi      (1280x720) 
-     th an afterEach hook -- t4 (failed).png                                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wi      (1280x720) 
-     th an afterEach hook -- t5 (failed).png                                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cr      (1280x720) 
-     oss origin script errors -- explains where script errored (failed).png                         
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wit     (1280x720)
+     hout an afterEach hook -- t1 (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wit     (1280x720)
+     hout an afterEach hook -- t2 (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wit     (1280x720)
+     h an afterEach hook -- t4 (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wit     (1280x720)
+     h an afterEach hook -- t5 (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cro     (1280x720)
+     ss origin script errors -- explains where script errored (failed).png                          
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/js_error_handling_failing_spec.     (X seconds) 
-                         coffee.mp4                                                                 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/js_error_handling_failing_spec.    (X seconds)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================

@@ -47,13 +47,13 @@ exports['e2e issue 149 failing 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_149_spec.coffee/fails (failed).png            (1280x720) 
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_149_spec.coffee/fails (failed).png            (1280x720)
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4           (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4          (X seconds)
 
 
 ====================================================================================================

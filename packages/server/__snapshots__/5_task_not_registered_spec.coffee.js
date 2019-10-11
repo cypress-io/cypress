@@ -64,15 +64,15 @@ https://on.cypress.io/api/task
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/task_not_registered_spec.coffee/fails because       (1280x720) 
-     the 'task' event is not registered in plugins file (failed).png                                
+  -  /XXX/XXX/XXX/cypress/screenshots/task_not_registered_spec.coffee/fails because t     (1280x720)
+     he 'task' event is not registered in plugins file (failed).png                                 
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/task_not_registered_spec.coffee     (X seconds) 
-                         .mp4                                                                       
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_not_registered_spec.coffee    (X seconds)
+                          .mp4                                                                      
 
 
 ====================================================================================================

@@ -56,14 +56,14 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/spec.coffee/An uncaught error was detected out      (1280x720) 
-     side of a test (failed).png                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/spec.coffee/An uncaught error was detected outs     (1280x720)
+     ide of a test (failed).png                                                                     
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                     (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                    (X seconds)
 
 
 ====================================================================================================

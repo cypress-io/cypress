@@ -51,16 +51,16 @@ exports['e2e promises failing1 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.coffee/catches regular promise e      (1280x720) 
-     rrors (failed).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.coffee/catches promise errors an      (1280x720) 
-     d calls done with err even when async (failed).png                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.coffee/catches regular promise er     (1280x720)
+     rors (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.coffee/catches promise errors and     (1280x720)
+      calls done with err even when async (failed).png                                              
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4            (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4           (X seconds)
 
 
 ====================================================================================================

@@ -89,19 +89,19 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s1a -- t      (1280x720) 
-     2a -- before each hook (failed).png                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s3a -- t      (1280x720) 
-     8a -- before all hook (failed).png                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s4a -- t      (1280x720) 
-     10a -- before all hook (failed).png                                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s1a -- t2     (1280x720)
+     a -- before each hook (failed).png                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s3a -- t8     (1280x720)
+     a -- before all hook (failed).png                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s4a -- t1     (1280x720)
+     0a -- before all hook (failed).png                                                             
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing_spec.     (X seconds) 
-                         coffee.mp4                                                                 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing_spec.    (X seconds)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================
@@ -185,15 +185,15 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_failing_spec.coffee/s1b --      (1280x720) 
-      t2b -- before each hook (failed).png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_failing_spec.coffee/s1b --      (1280x720)
+     t2b -- before each hook (failed).png                                                           
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing_spe     (X seconds) 
-                         c.coffee.mp4                                                               
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing_spe    (X seconds)
+                          c.coffee.mp4                                                              
 
 
 ====================================================================================================
@@ -269,15 +269,15 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_root_error_failing_spec.coffee/t      (1280x720) 
-     1c -- before each hook (failed).png                                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_root_error_failing_spec.coffee/t1     (1280x720)
+     c -- before each hook (failed).png                                                             
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failin     (X seconds) 
-                         g_spec.coffee.mp4                                                          
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failin    (X seconds)
+                          g_spec.coffee.mp4                                                         
 
 
 ====================================================================================================
@@ -359,16 +359,16 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_events_failing_spec.coffee      (1280x720) 
-     /uncaught hook error should continue to fire all mocha events -- s1 -- does not                
-      run -- before each hook (failed).png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_events_failing_spec.coffee/     (1280x720)
+     uncaught hook error should continue to fire all mocha events -- s1 -- does not r               
+     un -- before each hook (failed).png                                                            
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_fail     (X seconds) 
-                         ing_spec.coffee.mp4                                                        
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_fail    (X seconds)
+                          ing_spec.coffee.mp4                                                       
 
 
 ====================================================================================================

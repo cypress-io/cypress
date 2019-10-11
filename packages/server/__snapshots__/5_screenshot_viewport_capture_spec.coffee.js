@@ -39,65 +39,65 @@ exports['e2e screenshot viewport capture passes 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-original.png                                                                                
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare.png                                                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (1).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (2).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (3).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (4).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (5).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (6).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (7).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (8).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (9).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (10).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (11).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (12).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (13).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (14).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (15).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (16).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (17).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (18).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (19).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (20).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (21).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (22).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (23).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpo      (1000x660) 
-     rt-compare (24).png                                                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-original.png                                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare.png                                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (1).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (2).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (3).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (4).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (5).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (6).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (7).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (8).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (9).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (10).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (11).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (12).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (13).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (14).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (15).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (16).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (17).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (18).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (19).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (20).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (21).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (22).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (23).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture_spec.coffee/viewpor     (1000x660)
+     t-compare (24).png                                                                             
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture_spe      (X seconds) 
-                         c.coffee.mp4                                                               
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture_spe     (X seconds)
+                          c.coffee.mp4                                                              
 
 
 ====================================================================================================

@@ -104,16 +104,16 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when invoking       (1280x720) 
-     commands and return a different value (failed).png                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when invoking       (1280x720) 
-     commands in custom command and returning differnet value (failed).png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when invoking c     (1280x720)
+     ommands and return a different value (failed).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when invoking c     (1280x720)
+     ommands in custom command and returning differnet value (failed).png                           
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4       (X seconds)
 
 
 ====================================================================================================

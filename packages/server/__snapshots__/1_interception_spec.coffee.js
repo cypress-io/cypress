@@ -60,8 +60,8 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
 
 
 ====================================================================================================

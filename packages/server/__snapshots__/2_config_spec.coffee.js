@@ -47,8 +47,8 @@ exports['e2e config passes 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -127,14 +127,14 @@ exports['e2e config fails 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/config_failing_spec.coffee/config -- times out      (1280x720) 
-      looking for a missing element (failed).png                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/config_failing_spec.coffee/config -- times out      (1280x720)
+     looking for a missing element (failed).png                                                     
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
 
 
 ====================================================================================================

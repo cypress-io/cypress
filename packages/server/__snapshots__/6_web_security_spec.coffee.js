@@ -142,18 +142,18 @@ https://on.cypress.io/cross-origin-violation
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720) 
-      when clicking a to another origin (failed).png                                                
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720) 
-      when submitted a form and being redirected to another origin (failed).png                     
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720) 
-      when using a javascript redirect to another origin (failed).png                               
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
+     when clicking a to another origin (failed).png                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
+     when submitted a form and being redirected to another origin (failed).png                      
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
+     when using a javascript redirect to another origin (failed).png                                
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4       (X seconds)
 
 
 ====================================================================================================

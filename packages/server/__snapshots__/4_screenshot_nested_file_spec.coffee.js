@@ -39,15 +39,15 @@ exports['e2e screenshot in nested spec passes 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.      (1280x720) 
-     coffee/nests the file based on spec path.png                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.c     (1280x720)
+     offee/nests the file based on spec path.png                                                    
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/screenshot_ne     (X seconds) 
-                         sted_file_spec.coffee.mp4                                                  
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/screenshot_ne    (X seconds)
+                          sted_file_spec.coffee.mp4                                                 
 
 
 ====================================================================================================

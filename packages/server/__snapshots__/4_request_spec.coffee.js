@@ -52,8 +52,8 @@ exports['e2e requests passes in electron 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4             (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4            (X seconds)
 
 
 ====================================================================================================
@@ -245,15 +245,15 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing_spec.coffee      (1280x720) 
-     /when network connection cannot be established -- fails (failed).png                           
+  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing_spec.coffee/     (1280x720)
+     when network connection cannot be established -- fails (failed).png                            
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail     (X seconds) 
-                         ing_spec.coffee.mp4                                                        
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail    (X seconds)
+                          ing_spec.coffee.mp4                                                       
 
 
 ====================================================================================================
@@ -371,15 +371,15 @@ Body: Service Unavailable
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing_spec.coffee/when s      (1280x720) 
-     tatus code isnt 2xx or 3xx -- fails (failed).png                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing_spec.coffee/when st     (1280x720)
+     atus code isnt 2xx or 3xx -- fails (failed).png                                                
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe     (X seconds) 
-                         c.coffee.mp4                                                               
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe    (X seconds)
+                          c.coffee.mp4                                                              
 
 
 ====================================================================================================
@@ -506,15 +506,15 @@ Body: <!DOCTYPE html>
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing_spec.coffee/wh      (1280x720) 
-     en status code isnt 2xx or 3xx -- fails (failed).png                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing_spec.coffee/whe     (1280x720)
+     n status code isnt 2xx or 3xx -- fails (failed).png                                            
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing     (X seconds) 
-                         _spec.coffee.mp4                                                           
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing    (X seconds)
+                          _spec.coffee.mp4                                                          
 
 
 ====================================================================================================

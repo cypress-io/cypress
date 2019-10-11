@@ -39,35 +39,35 @@ exports['e2e screenshot element capture passes 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -original.png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare.png                                                                                   
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (1).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (2).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (3).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (4).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (5).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (6).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (7).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (8).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element       (560x302) 
-     -compare (9).png                                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     original.png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare.png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (1).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (2).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (3).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (4).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (5).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (6).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (7).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (8).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (9).png                                                                                
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_element_capture_spec     (X seconds) 
-                         .coffee.mp4                                                                
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_element_capture_spec    (X seconds)
+                          .coffee.mp4                                                               
 
 
 ====================================================================================================

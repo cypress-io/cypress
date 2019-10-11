@@ -48,9 +48,9 @@ exports['e2e forms <form> submissions passes with http on localhost 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X seconds) 
-                         coffee.mp4                                                                 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.    (X seconds)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================
@@ -118,9 +118,9 @@ exports['e2e forms <form> submissions passes with https on localhost 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X seconds) 
-                         coffee.mp4                                                                 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.    (X seconds)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================
@@ -201,16 +201,16 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/form_submission_failing_spec.coffee/form submi      (1280x720) 
-     ssion fails -- fails without an explicit wait when an element is immediately fo                
-     und (failed).png                                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/form_submission_failing_spec.coffee/form submis     (1280x720)
+     sion fails -- fails without an explicit wait when an element is immediately foun               
+     d (failed).png                                                                                 
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing_spec.co     (X seconds) 
-                         ffee.mp4                                                                   
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing_spec.co    (X seconds)
+                          ffee.mp4                                                                  
 
 
 ====================================================================================================
@@ -271,9 +271,9 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing_spec.co     (X seconds) 
-                         ffee.mp4                                                                   
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing_spec.co    (X seconds)
+                          ffee.mp4                                                                  
 
 
 ====================================================================================================

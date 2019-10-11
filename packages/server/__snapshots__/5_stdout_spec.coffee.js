@@ -110,18 +110,18 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720) 
-      -- fails (failed).png                                                                         
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720) 
-      -- failing hook -- is failing -- before each hook (failed).png                                
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720) 
-      -- passing hook -- is failing (failed).png                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
+     -- fails (failed).png                                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
+     -- failing hook -- is failing -- before each hook (failed).png                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
+     -- passing hook -- is failing (failed).png                                                     
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -191,9 +191,9 @@ Fix the error in your code and re-run your tests.
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_exit_early_failing_spec.     (X seconds) 
-                         coffee.mp4                                                                 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_exit_early_failing_spec.    (X seconds)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================
@@ -265,8 +265,8 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds)
 
 
 ====================================================================================================
@@ -446,9 +446,9 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/spec     (X seconds) 
-                         .coffee.mp4                                                                
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/spec    (X seconds)
+                          .coffee.mp4                                                               
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -482,17 +482,17 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/nested-1/nested-2/nested-3/stdout_specfile_dis      (1000x660) 
-     play_spec_with_a_really_long_name_that_never_has_a_line_break_or_new_line.coffe                
-     e/stdout_specfile_display_spec -- passes.png                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/nested-1/nested-2/nested-3/stdout_specfile_disp     (1000x660)
+     lay_spec_with_a_really_long_name_that_never_has_a_line_break_or_new_line.coffee/               
+     stdout_specfile_display_spec -- passes.png                                                     
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo     (X seconds) 
-                         ut_specfile_display_spec_with_a_really_long_name_that_never                
-                         _has_a_line_break_or_new_line.coffee.mp4                                   
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo    (X seconds)
+                          ut_specfile_display_spec_with_a_really_long_name_that_never               
+                          _has_a_line_break_or_new_line.coffee.mp4                                  
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -524,9 +524,9 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo     (X seconds) 
-                         ut_specfile.coffee.mp4                                                     
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo    (X seconds)
+                          ut_specfile.coffee.mp4                                                    
 
 
 ====================================================================================================

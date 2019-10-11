@@ -57,16 +57,16 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't han      (1280x720) 
-     g when both beforeEach and afterEach fail -- before each hook (failed).png                     
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't han      (1280x720) 
-     g when both beforeEach and afterEach fail -- after each hook (failed).png                      
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang     (1280x720)
+      when both beforeEach and afterEach fail -- before each hook (failed).png                      
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang     (1280x720)
+      when both beforeEach and afterEach fail -- after each hook (failed).png                       
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4           (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4          (X seconds)
 
 
 ====================================================================================================

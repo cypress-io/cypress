@@ -53,8 +53,8 @@ Fix the error in your code and re-run your tests.
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4       (X seconds)
 
 
   (Uploading Results)
@@ -101,14 +101,14 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_fail_spec.coffee/record fails -- fails       (1280x720) 
-     1 -- before each hook (failed).png                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1     (1280x720)
+      -- before each hook (failed).png                                                              
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4         (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds)
 
 
   (Uploading Results)
@@ -149,7 +149,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -203,14 +203,14 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error       (1280x720) 
-     was detected outside of a test (failed).png                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error w     (1280x720)
+     as detected outside of a test (failed).png                                                     
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4    (X seconds)
 
 
   (Uploading Results)
@@ -310,7 +310,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
 ====================================================================================================
@@ -381,7 +381,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
 ====================================================================================================
@@ -452,7 +452,7 @@ exports['e2e record api interaction errors update instance does not update insta
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -533,7 +533,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -654,7 +654,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -729,13 +729,13 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4         (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds)
 
 
   (Uploading Results)
@@ -832,7 +832,7 @@ This error will not alter the exit code.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
 ====================================================================================================
@@ -899,7 +899,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -980,8 +980,8 @@ Fix the error in your code and re-run your tests.
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4       (X seconds)
 
 
   (Uploading Results)
@@ -1028,14 +1028,14 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_fail_spec.coffee/record fails -- fails       (1280x720) 
-     1 -- before each hook (failed).png                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1     (1280x720)
+      -- before each hook (failed).png                                                              
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4         (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds)
 
 
   (Uploading Results)
@@ -1090,14 +1090,14 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error       (1280x720) 
-     was detected outside of a test (failed).png                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error w     (1280x720)
+     as detected outside of a test (failed).png                                                     
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4    (X seconds)
 
 
   (Uploading Results)
@@ -1213,7 +1213,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
 ====================================================================================================
@@ -1321,7 +1321,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -1416,7 +1416,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -1494,7 +1494,7 @@ This error will not alter the exit code.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
 ====================================================================================================
@@ -1616,7 +1616,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -1696,7 +1696,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -1776,7 +1776,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -1856,7 +1856,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -1936,7 +1936,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -2016,7 +2016,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)
@@ -2100,7 +2100,7 @@ Details:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002) 
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.coffee/yay it passes.png           (202x1002)
 
 
   (Uploading Results)

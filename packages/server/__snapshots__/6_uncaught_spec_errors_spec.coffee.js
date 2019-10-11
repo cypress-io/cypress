@@ -57,15 +57,15 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffe      (1280x720) 
-     e/An uncaught error was detected outside of a test (failed).png                                
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee     (1280x720)
+     /An uncaught error was detected outside of a test (failed).png                                 
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_before_tes     (X seconds) 
-                         ts_parsed.coffee.mp4                                                       
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_before_tes    (X seconds)
+                          ts_parsed.coffee.mp4                                                      
 
 
 ====================================================================================================
@@ -143,15 +143,15 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/A      (1280x720) 
-     n uncaught error was detected outside of a test (failed).png                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An     (1280x720)
+      uncaught error was detected outside of a test (failed).png                                    
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_during_hoo     (X seconds) 
-                         k_spec.coffee.mp4                                                          
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_during_hoo    (X seconds)
+                          k_spec.coffee.mp4                                                         
 
 
 ====================================================================================================
@@ -223,15 +223,15 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (f      (1280x720) 
-     ailed).png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (fa     (1280x720)
+     iled).png                                                                                      
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_test_spec.coffe     (X seconds) 
-                         e.mp4                                                                      
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_test_spec.coffe    (X seconds)
+                          e.mp4                                                                     
 
 
 ====================================================================================================
@@ -307,15 +307,15 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does n      (1280x720) 
-     ot run -- before all hook (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does no     (1280x720)
+     t run -- before all hook (failed).png                                                          
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_hook_spec.coffe     (X seconds) 
-                         e.mp4                                                                      
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_hook_spec.coffe    (X seconds)
+                          e.mp4                                                                     
 
 
 ====================================================================================================
@@ -401,21 +401,21 @@ exports['e2e uncaught errors failing5 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz       (1280x720) 
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz f     (1280x720)
+     ails (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar f     (1280x720)
+     ails (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux      (1280x720)
      fails (failed).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar       (1280x720) 
-     fails (failed).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux      (1280x720) 
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2     (1280x720)
       fails (failed).png                                                                            
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux      (1280x720) 
-     2 fails (failed).png                                                                           
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test_spec.cof     (X seconds) 
-                         fee.mp4                                                                    
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test_spec.cof    (X seconds)
+                          fee.mp4                                                                   
 
 
 ====================================================================================================

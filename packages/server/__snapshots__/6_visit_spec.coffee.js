@@ -55,8 +55,8 @@ exports['e2e visit low response timeout passes 1'] = `
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4               (X seconds) 
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4              (X seconds)
 
 
 ====================================================================================================
@@ -156,15 +156,15 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_network_error_failing_spec.coffee/w      (1280x720) 
-     hen network connection cannot be established -- fails (failed).png                             
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_network_error_failing_spec.coffee/wh     (1280x720)
+     en network connection cannot be established -- fails (failed).png                              
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_network_error_failin     (X seconds) 
-                         g_spec.coffee.mp4                                                          
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_network_error_failin    (X seconds)
+                          g_spec.coffee.mp4                                                         
 
 
 ====================================================================================================
@@ -255,15 +255,15 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing_spec.coffee/wh      (1280x720) 
-     en server response is 500 -- fails (failed).png                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing_spec.coffee/whe     (1280x720)
+     n server response is 500 -- fails (failed).png                                                 
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing     (X seconds) 
-                         _spec.coffee.mp4                                                           
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing    (X seconds)
+                          _spec.coffee.mp4                                                          
 
 
 ====================================================================================================
@@ -354,15 +354,15 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_file_404_response_failing_spec.coffee/wh      (1280x720) 
-     en file server response is 404 -- fails (failed).png                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_file_404_response_failing_spec.coffee/whe     (1280x720)
+     n file server response is 404 -- fails (failed).png                                            
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing     (X seconds) 
-                         _spec.coffee.mp4                                                           
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing    (X seconds)
+                          _spec.coffee.mp4                                                          
 
 
 ====================================================================================================
@@ -455,15 +455,15 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_non_html_content_type_failing_spec.coffe      (1280x720) 
-     e/when content type is plaintext -- fails (failed).png                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_non_html_content_type_failing_spec.coffee     (1280x720)
+     /when content type is plaintext -- fails (failed).png                                          
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_fai     (X seconds) 
-                         ling_spec.coffee.mp4                                                       
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_fai    (X seconds)
+                          ling_spec.coffee.mp4                                                      
 
 
 ====================================================================================================
@@ -580,17 +580,17 @@ When this 'load' event occurs, Cypress will continue running commands.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when vi      (1280x720) 
-     sit times out -- fails timeout exceeds pageLoadTimeout (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when vi      (1280x720) 
-     sit times out -- fails timeout exceeds timeout option (failed).png                             
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when vis     (1280x720)
+     it times out -- fails timeout exceeds pageLoadTimeout (failed).png                             
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when vis     (1280x720)
+     it times out -- fails timeout exceeds timeout option (failed).png                              
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing_spec     (X seconds) 
-                         .coffee.mp4                                                                
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing_spec    (X seconds)
+                          .coffee.mp4                                                               
 
 
 ====================================================================================================
@@ -791,22 +791,22 @@ Error: ESOCKETTIMEDOUT
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/resp      (1280x720) 
-     onse timeouts result in an error -- handles no response errors on the initial v                
-     isit (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/resp      (1280x720) 
-     onse timeouts result in an error -- handles no response errors when not initial                
-     ly visiting (failed).png                                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/resp      (1280x720) 
-     onse timeouts result in an error -- fails after reducing the responseTimeout op                
-     tion (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
+     nse timeouts result in an error -- handles no response errors on the initial vis               
+     it (failed).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
+     nse timeouts result in an error -- handles no response errors when not initially               
+      visiting (failed).png                                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
+     nse timeouts result in an error -- fails after reducing the responseTimeout opti               
+     on (failed).png                                                                                
 
 
   (Video)
 
-  - Started processing:  Compressing to 32 CRF
-  - Finished processing: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_faili     (X seconds) 
-                         ng_spec.js.mp4                                                             
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_faili    (X seconds)
+                          ng_spec.js.mp4                                                            
 
 
 ====================================================================================================
