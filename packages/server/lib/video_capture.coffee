@@ -1,18 +1,45 @@
 _          = require("lodash")
+la         = require("lazy-ass")
+os         = require("os")
+path       = require("path")
 utils      = require("fluent-ffmpeg/lib/utils")
 debug      = require("debug")("cypress:server:video")
-# extra verbose logs for logging individual frames
-debugFrames = require("debug")("cypress:server:video:frames")
 ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
 Promise    = require("bluebird")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
+BlackHoleStream = require("black-hole-stream")
 fs         = require("./util/fs")
 
+## extra verbose logs for logging individual frames
+debugFrames = require("debug")("cypress:server:video:frames")
+
 debug("using ffmpeg from %s", ffmpegPath)
+
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 module.exports = {
+  getMsFromDuration: (duration) ->
+    utils.timemarkToSeconds(duration) * 1000
+
+  getCodecData: (src) ->
+    new Promise (resolve, reject) ->
+      ffmpeg()
+      .on "stderr", (stderr) ->
+        debug("get codecData stderr log %o", { message: stderr })
+      .on("codecData", resolve)
+      .input(src)
+      .format("null")
+      .output(new BlackHoleStream())
+      .run()
+    .tap (data) ->
+      debug('codecData %o', {
+        src,
+        data,
+      })
+    .tapCatch (err) ->
+      debug("getting codecData failed", { err })
+
   copy: (src, dest) ->
     debug("copying from %s to %s", src, dest)
     fs

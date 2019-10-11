@@ -133,7 +133,6 @@ describe "lib/modes/run", ->
   context ".launchBrowser", ->
     beforeEach ->
       @launch = sinon.stub(openProject, "launch")
-      sinon.stub(runMode, "getElectronProps").returns({foo: "bar"})
       sinon.stub(runMode, "screenshotMetadata").returns({a: "a"})
 
     it "can launch electron", ->
@@ -157,9 +156,7 @@ describe "lib/modes/run", ->
         screenshots: screenshots
       })
 
-      expect(runMode.getElectronProps).to.be.calledWith(false, @projectInstance, "write")
-
-      expect(@launch).to.be.calledWithMatch(browser, spec, { foo: "bar" })
+      expect(@launch).to.be.calledWithMatch(browser, spec)
 
       browserOpts = @launch.firstCall.args[2]
 
@@ -187,8 +184,6 @@ describe "lib/modes/run", ->
         spec
         browser
       })
-
-      expect(runMode.getElectronProps).not.to.be.called
 
       expect(@launch).to.be.calledWithMatch(browser, spec, {})
 
@@ -544,14 +539,13 @@ describe "lib/modes/run", ->
       .then ->
         expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_HEADED")
 
-    it "disables video recording for non-electron non-chrome browser", ->
-      browser = { name: "canary", family: "chrome" }
+    it "throws an error if invalid browser family supplied", ->
+      browser = { name: "opera", family: "opera - btw when is Opera support coming?" }
 
       sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves(browser)
 
-      runMode.run({browser: "canary"})
-      .then ->
-        expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+      expect(runMode.run({browser: "opera"}))
+      .to.be.rejectedWith(/invalid browser family in/)
 
     it "shows no warnings for chrome browser", ->
       runMode.run({browser: "chrome"})

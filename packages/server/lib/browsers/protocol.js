@@ -4,7 +4,6 @@ const { connect } = require('@packages/network')
 const Promise = require('bluebird')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const pluralize = require('pluralize')
 const debug = require('debug')('cypress:server:protocol')
 
 function _getDelayMsForRetry (i) {
@@ -35,9 +34,8 @@ const getWsTargetFor = (port) => {
   la(is.port(port), 'expected port number', port)
 
   return connectAsync({ port })
-  .catch((err) => {
+  .tapCatch((err) => {
     debug('failed to connect to CDP %o', { port, err })
-    throw err
   })
   .then(() => {
     debug('CRI.List on port %d', port)
@@ -47,13 +45,8 @@ const getWsTargetFor = (port) => {
     return CRI.List({ port })
   })
   .then((targets) => {
-    debug(
-      'CRI list has %s %o',
-      pluralize('targets', targets.length, true),
-      targets
-    )
+    debug('CRI List %o', { numTargets: targets.length, targets })
     // activate the first available id
-
     // find the first target page that's a real tab
     // and not the dev tools or background page.
     // since we open a blank page first, it has a special url
@@ -61,9 +54,11 @@ const getWsTargetFor = (port) => {
       type: 'page',
       url: 'about:blank',
     }
+
     const target = _.find(targets, newTabTargetFields)
 
     la(target, 'could not find CRI target')
+
     debug('found CRI target %o', target)
 
     return target.webSocketDebuggerUrl

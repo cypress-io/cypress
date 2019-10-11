@@ -105,7 +105,11 @@ const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }) => {
 }
 
 const formatSpecSummary = (name, failures) => {
-  return [getSymbol(failures), color(name, 'reset')].join(' ')
+  return [
+    getSymbol(failures),
+    color(name, 'reset'),
+  ]
+  .join(' ')
 }
 
 const formatRecordParams = function (runUrl, parallel, group) {
@@ -133,7 +137,8 @@ const formatSpecs = function (specs) {
     gray('('),
     gray(names.join(', ')),
     gray(')'),
-  ].join('')
+  ]
+  .join('')
 }
 
 const displayRunStarting = function (options = {}) {
@@ -159,7 +164,8 @@ const displayRunStarting = function (options = {}) {
     type: 'outsideBorder',
   })
 
-  const data = _.chain([
+  const data = _
+  .chain([
     [gray('Cypress:'), pkg.version],
     [gray('Browser:'), formatBrowser(browser)],
     [gray('Node Version:'), formatNodeVersion(config)],
@@ -193,7 +199,10 @@ const displaySpecHeader = function (name, curr, total, estimated) {
   })
 
   table.push(['', ''])
-  table.push([`Running: ${gray(`${name}...`)}`, gray(`(${curr} of ${total})`)])
+  table.push([
+    `Running: ${gray(`${name}...`)}`,
+    gray(`(${curr} of ${total})`),
+  ])
 
   console.log(table.toString())
 
@@ -234,24 +243,8 @@ const renderSummaryTable = (runUrl) => {
     })
 
     if (runs && runs.length) {
-      const head = [
-        '  Spec',
-        '',
-        'Tests',
-        'Passing',
-        'Failing',
-        'Pending',
-        'Skipped',
-      ]
-      const colAligns = [
-        'left',
-        'right',
-        'right',
-        'right',
-        'right',
-        'right',
-        'right',
-      ]
+      const head = ['  Spec', '', 'Tests', 'Passing', 'Failing', 'Pending', 'Skipped']
+      const colAligns = ['left', 'right', 'right', 'right', 'right', 'right', 'right']
       const colWidths = [39, 11, 10, 10, 10, 10, 10]
 
       const table1 = terminal.table({
@@ -321,21 +314,15 @@ const renderSummaryTable = (runUrl) => {
 }
 
 const iterateThroughSpecs = function (options = {}) {
-  const {
-    specs,
-    runEachSpec,
-    parallel,
-    beforeSpecRun,
-    afterSpecRun,
-    config,
-  } = options
+  const { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
 
   const serial = () => {
     return Promise.mapSeries(specs, runEachSpec)
   }
 
   const serialWithRecord = () => {
-    return Promise.mapSeries(specs, (spec, index, length) => {
+    return Promise
+    .mapSeries(specs, (spec, index, length) => {
       return beforeSpecRun(spec)
       .then(({ estimated }) => {
         return runEachSpec(spec, index, length, estimated)
@@ -347,36 +334,35 @@ const iterateThroughSpecs = function (options = {}) {
   }
 
   const parallelWithRecord = (runs) => {
-    return beforeSpecRun().then(
-      ({ spec, claimedInstances, totalInstances, estimated }) => {
-        // no more specs to run?
-        if (!spec) {
-          // then we're done!
-          return runs
-        }
-
-        // find the actual spec object amongst
-        // our specs array since the API sends us
-        // the relative name
-        spec = _.find(specs, { relative: spec })
-
-        return runEachSpec(
-          spec,
-          claimedInstances - 1,
-          totalInstances,
-          estimated
-        )
-        .tap((results) => {
-          runs.push(results)
-
-          return afterSpecRun(spec, results, config)
-        })
-        .then(() => {
-          // recurse
-          return parallelWithRecord(runs)
-        })
+    return beforeSpecRun()
+    .then(({ spec, claimedInstances, totalInstances, estimated }) => {
+      // no more specs to run?
+      if (!spec) {
+        // then we're done!
+        return runs
       }
-    )
+
+      // find the actual spec object amongst
+      // our specs array since the API sends us
+      // the relative name
+      spec = _.find(specs, { relative: spec })
+
+      return runEachSpec(
+        spec,
+        claimedInstances - 1,
+        totalInstances,
+        estimated
+      )
+      .tap((results) => {
+        runs.push(results)
+
+        return afterSpecRun(spec, results, config)
+      })
+      .then(() => {
+        // recurse
+        return parallelWithRecord(runs)
+      })
+    })
   }
 
   if (parallel) {
@@ -405,20 +391,79 @@ const getProjectId = Promise.method((project, id) => {
     return id
   }
 
-  return project.getProjectId().catch(() => {
+  return project.getProjectId()
+  .catch(() => {
     // no id no problem
     return null
   })
 })
 
-const reduceRuns = (runs, prop) => {
-  return _.reduce(
-    runs,
-    (memo, run) => {
-      return (memo += _.get(run, prop))
+const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
+  la(browsers.isBrowserFamily(browser.family), 'invalid browser family in', browser)
+
+  if (browser.family === 'electron') {
+    return getElectronProps(browser.isHeaded, project, writeVideoFrame)
+  }
+
+  if (browser.family === 'chrome') {
+    return getChromeProps(browser.isHeaded, project, writeVideoFrame)
+  }
+
+  return {}
+}
+
+const getChromeProps = (isHeaded, project, writeVideoFrame) => {
+  const shouldWriteVideo = Boolean(writeVideoFrame)
+
+  debug('setting Chrome properties %o', { isHeaded, shouldWriteVideo })
+
+  return _
+  .chain({})
+  .tap((props) => {
+    if (isHeaded && writeVideoFrame) {
+      props.screencastFrame = (e) => {
+        // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
+        writeVideoFrame(new Buffer(e.data, 'base64'))
+      }
+    }
+  })
+  .value()
+}
+
+const getElectronProps = (isHeaded, project, writeVideoFrame) => {
+  return _
+  .chain({
+    width: 1280,
+    height: 720,
+    show: isHeaded,
+    onCrashed () {
+      const err = errors.get('RENDERER_CRASHED')
+
+      errors.log(err)
+
+      return project.emit('exitEarlyWithErr', err.message)
     },
-    0
-  )
+    onNewWindow (e, url, frameName, disposition, options) {
+      // force new windows to automatically open with show: false
+      // this prevents window.open inside of javascript client code
+      // to cause a new BrowserWindow instance to open
+      // https://github.com/cypress-io/cypress/issues/123
+      options.show = false
+    },
+  })
+  .tap((props) => {
+    if (writeVideoFrame) {
+      props.recordFrameRate = 20
+      props.onPaint = (event, dirty, image) => {
+        return writeVideoFrame(image.toJPEG(100))
+      }
+    }
+  })
+  .value()
+}
+
+const sumByProp = (runs, prop) => {
+  return _.sumBy(runs, prop) || 0
 }
 
 const getRun = (run, prop) => {
@@ -431,7 +476,7 @@ const writeOutput = (outputPath, results) => {
       return
     }
 
-    debug('saving output results as %s', outputPath)
+    debug('saving output results %o', { outputPath })
 
     return fs.outputJsonAsync(outputPath, results)
   })
@@ -481,10 +526,9 @@ const createAndOpenProject = function (socketId, options) {
   .then(() => {
     // open this project without
     // adding it to the global cache
-    return openProjectCreate(projectRoot, socketId, options).call(
-      'getProject'
-    )
+    return openProjectCreate(projectRoot, socketId, options)
   })
+  .call('getProject')
   .then((project) => {
     return Promise.props({
       project,
@@ -495,33 +539,35 @@ const createAndOpenProject = function (socketId, options) {
 }
 
 const removeOldProfiles = () => {
-  return browsers.removeOldProfiles().catch((err) => {
+  return browsers.removeOldProfiles()
+  .catch((err) => {
     // dont make removing old browsers profiles break the build
     return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
   })
 }
 
-const trashAssets = function (config = {}) {
+const trashAssets = Promise.method((config = {}) => {
   if (config.trashAssetsBeforeRuns !== true) {
-    return Promise.resolve()
+    return
   }
 
   return Promise.join(
     trash.folder(config.videosFolder),
     trash.folder(config.screenshotsFolder)
-  ).catch((err) => {
+  )
+  .catch((err) => {
     // dont make trashing assets fail the build
     return errors.warning('CANNOT_TRASH_ASSETS', err.stack)
   })
-}
+})
 
 // if we've been told to record and we're not spawning a headed browser
 const browserCanBeRecorded = (browser) => {
-  if (browser.name === 'electron' && browser.isHeadless) {
+  if (browser.family === 'electron' && browser.isHeadless) {
     return true
   }
 
-  if (browser.name === 'chrome' && browser.isHeaded) {
+  if (browser.family === 'chrome' && browser.isHeaded) {
     return true
   }
 
@@ -531,8 +577,11 @@ const browserCanBeRecorded = (browser) => {
 const createVideoRecording = function (videoName) {
   const outputDir = path.dirname(videoName)
 
-  return fs.ensureDirAsync(outputDir).then(() => {
-    return videoCapture.start(videoName, {
+  return fs
+  .ensureDirAsync(outputDir)
+  .then(() => {
+    return videoCapture
+    .start(videoName, {
       onError (err) {
         // catch video recording failures and log them out
         // but don't let this affect the run at all
@@ -565,7 +614,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
     console.log('')
 
     // TODO update error messages and included browser name and headed mode
-    if (browser.name === 'electron' && browser.isHeaded) {
+    if (browser.family === 'electron' && browser.isHeaded) {
       errors.warning('CANNOT_RECORD_VIDEO_HEADED')
     } else {
       errors.warning('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER', browser.name)
@@ -586,7 +635,8 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const videoName = videoPath('.mp4')
   const compressedVideoName = videoPath('-compressed.mp4')
 
-  return this.createVideoRecording(videoName).then((props = {}) => {
+  return this.createVideoRecording(videoName)
+  .then((props = {}) => {
     return {
       videoName,
       compressedVideoName,
@@ -612,52 +662,9 @@ module.exports = {
 
   maybeStartVideoRecording,
 
-  getChromeProps (isHeaded, project, writeVideoFrame) {
-    debug('setting Chrome properties, is headed? %s, should write video? %s',
-      isHeaded, Boolean(writeVideoFrame))
+  getChromeProps,
 
-    const chromeProps = {}
-
-    if (isHeaded && writeVideoFrame) {
-      chromeProps.screencastFrame = (e) => {
-        // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
-        writeVideoFrame(new Buffer(e.data, 'base64'))
-      }
-    }
-
-    return chromeProps
-  },
-
-  getElectronProps (isHeaded, project, writeVideoFrame) {
-    const electronProps = {
-      width: 1280,
-      height: 720,
-      show: isHeaded,
-      onCrashed () {
-        const err = errors.get('RENDERER_CRASHED')
-
-        errors.log(err)
-
-        return project.emit('exitEarlyWithErr', err.message)
-      },
-      onNewWindow (e, url, frameName, disposition, options) {
-        // force new windows to automatically open with show: false
-        // this prevents window.open inside of javascript client code
-        // to cause a new BrowserWindow instance to open
-        // https://github.com/cypress-io/cypress/issues/123
-        options.show = false
-      },
-    }
-
-    if (writeVideoFrame) {
-      electronProps.recordFrameRate = 20
-      electronProps.onPaint = (event, dirty, image) => {
-        return writeVideoFrame(image.toJPEG(100))
-      }
-    }
-
-    return electronProps
-  },
+  getElectronProps,
 
   displayResults (obj = {}, estimated) {
     const results = collectTestResults(obj, estimated)
@@ -723,11 +730,7 @@ module.exports = {
   },
 
   postProcessRecording (end, name, cname, videoCompression, shouldUploadVideo) {
-    debug('ending the video recording %o', {
-      name,
-      videoCompression,
-      shouldUploadVideo,
-    })
+    debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
     // then begin processing the file
@@ -776,10 +779,7 @@ module.exports = {
           progress += throttle
           const percentage = `${Math.ceil(float * 100)}%`
 
-          return console.log(
-            '  - Compression progress: ',
-            chalk.cyan(percentage)
-          )
+          return console.log('  - Compression progress: ', chalk.cyan(percentage))
         }
       }
 
@@ -795,30 +795,9 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const {
-      browser,
-      spec,
-      writeVideoFrame,
-      project,
-      screenshots,
-      projectRoot,
-    } = options
+    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot } = options
 
-    const browserOpts = (() => {
-      la(browsers.isBrowserFamily(browser.family), 'invalid browser family in', browser)
-
-      if (browser.family === 'electron') {
-        return this.getElectronProps(browser.isHeaded, project, writeVideoFrame)
-      }
-
-      if (browser.family === 'chrome') {
-        return this.getChromeProps(browser.isHeaded, project, writeVideoFrame)
-      }
-
-      debug('warning - cannot determine browser props for %o', browser)
-
-      return {}
-    })()
+    const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame)
 
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) => {
@@ -940,19 +919,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const {
-      project,
-      screenshots,
-      startedVideoCapture,
-      endVideoCapture,
-      videoName,
-      compressedVideoName,
-      videoCompression,
-      videoUploadOnPasses,
-      exit,
-      spec,
-      estimated,
-    } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1004,10 +971,7 @@ module.exports = {
 
       // we should upload the video if we upload on passes (by default)
       // or if we have any failures and have started the video
-      const suv = Boolean(
-        videoUploadOnPasses === true ||
-            (startedVideoCapture && hasFailingTests)
-      )
+      const suv = Boolean(videoUploadOnPasses === true || (startedVideoCapture && hasFailingTests))
 
       obj.shouldUploadVideo = suv
 
@@ -1016,7 +980,9 @@ module.exports = {
       // always close the browser now as opposed to letting
       // it exit naturally with the parent process due to
       // electron bug in windows
-      return openProject.closeBrowser().then(() => {
+      return openProject
+      .closeBrowser()
+      .then(() => {
         if (endVideoCapture) {
           return this.postProcessRecording(
             endVideoCapture,
@@ -1046,22 +1012,9 @@ module.exports = {
   },
 
   runSpecs (options = {}) {
-    const {
-      config,
-      browser,
-      sys,
-      headed,
-      outputPath,
-      specs,
-      specPattern,
-      beforeSpecRun,
-      afterSpecRun,
-      runUrl,
-      parallel,
-      group,
-    } = options
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
 
-    const isHeadless = browser.name === 'electron' && !headed
+    const isHeadless = browser.family === 'electron' && !headed
 
     browser.isHeadless = isHeadless
     browser.isHeaded = !isHeadless
@@ -1118,13 +1071,13 @@ module.exports = {
     .then((runs = []) => {
       results.startedTestsAt = getRun(_.first(runs), 'stats.wallClockStartedAt')
       results.endedTestsAt = getRun(_.last(runs), 'stats.wallClockEndedAt')
-      results.totalDuration = reduceRuns(runs, 'stats.wallClockDuration')
-      results.totalSuites = reduceRuns(runs, 'stats.suites')
-      results.totalTests = reduceRuns(runs, 'stats.tests')
-      results.totalPassed = reduceRuns(runs, 'stats.passes')
-      results.totalPending = reduceRuns(runs, 'stats.pending')
-      results.totalFailed = reduceRuns(runs, 'stats.failures')
-      results.totalSkipped = reduceRuns(runs, 'stats.skipped')
+      results.totalDuration = sumByProp(runs, 'stats.wallClockDuration')
+      results.totalSuites = sumByProp(runs, 'stats.suites')
+      results.totalTests = sumByProp(runs, 'stats.tests')
+      results.totalPassed = sumByProp(runs, 'stats.passes')
+      results.totalPending = sumByProp(runs, 'stats.pending')
+      results.totalFailed = sumByProp(runs, 'stats.failures')
+      results.totalSkipped = sumByProp(runs, 'stats.skipped')
       results.runs = runs
 
       debug('final results of all runs: %o', results)
@@ -1189,7 +1142,9 @@ module.exports = {
   },
 
   findSpecs (config, specPattern) {
-    return specsUtil.find(config, specPattern).tap((specs = []) => {
+    return specsUtil
+    .find(config, specPattern)
+    .tap((specs = []) => {
       if (debug.enabled) {
         const names = _.map(specs, 'name')
 
@@ -1249,18 +1204,11 @@ module.exports = {
       .spread((sys = {}, browser = {}, specs = []) => {
         // return only what is return to the specPattern
         if (specPattern) {
-          specPattern = specsUtil.getPatternRelativeToProjectRoot(
-            specPattern,
-            projectRoot
-          )
+          specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
         }
 
         if (!specs.length) {
-          errors.throw(
-            'NO_SPECS_FOUND',
-            config.integrationFolder,
-            specPattern
-          )
+          errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
         }
 
         if (browser.family === 'chrome') {
@@ -1321,7 +1269,8 @@ module.exports = {
   },
 
   run (options) {
-    return electronApp.ready()
+    return electronApp
+    .ready()
     .then(() => {
       return this.ready(options)
     })
