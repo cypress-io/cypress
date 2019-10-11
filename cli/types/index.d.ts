@@ -347,7 +347,6 @@ declare namespace Cypress {
       isType(element: JQuery | HTMLElement , type: string): boolean
       isVisible(element: JQuery | HTMLElement): boolean
       isHidden(element: JQuery | HTMLElement): boolean
-      isDetached(element: JQuery | HTMLElement): boolean
       isFocusable(element: JQuery | HTMLElement): boolean
       isTextLike(element: JQuery | HTMLElement): boolean
       isScrollable(element: JQuery | HTMLElement): boolean
