@@ -854,20 +854,16 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - driver-integration-tests-chrome:
-        context: test-runner:integration-tests
         requires:
           - build
     ## TODO: add these back in when flaky tests are fixed
     # - driver-integration-tests-electron:
-    #     context: test-runner:integration-tests
     #     requires:
     #       - build
     - desktop-gui-integration-tests-2x:
-        context: test-runner:integration-tests
         requires:
           - build
     - reporter-integration-tests:
-        context: test-runner:integration-tests
         requires:
           - build
     - run-launcher:
