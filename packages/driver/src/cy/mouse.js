@@ -39,6 +39,21 @@ const getMouseCoords = (state) => {
   return state('mouseCoords')
 }
 
+const shouldFireMouseMoveEvents = (targetEl, lastHoveredEl, fromElViewport, coords) => {
+  // not the same element, fire mouse move events
+  if (lastHoveredEl !== targetEl) {
+    return true
+  }
+
+  const xy = (obj) => {
+    return _.pick(obj, 'x', 'y')
+  }
+
+  // if we have the same element, but the xy coords are different
+  // then fire mouse move events...
+  return !_.isEqual(xy(fromElViewport), xy(coords))
+}
+
 const create = (state, keyboard, focused) => {
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
@@ -60,19 +75,23 @@ const create = (state, keyboard, focused) => {
      * @param {Coords} coords
      * @param {HTMLElement} forceEl
      */
-    move (coords, forceEl) {
-      debug('mouse.move', coords)
+    move (fromElViewport, forceEl) {
+      debug('mouse.move', fromElViewport)
 
       const lastHoveredEl = getLastHoveredEl(state)
 
-      const targetEl = forceEl || mouse.getElAtCoords(coords)
+      const targetEl = forceEl || mouse.getElAtCoords(fromElViewport)
 
-      // if coords are same AND we're already hovered on the element, don't send move events
-      if (_.isEqual({ x: coords.x, y: coords.y }, getMouseCoords(state)) && lastHoveredEl === targetEl) return { el: targetEl }
+      // if the element is already hovered and our coords for firing the events
+      // already match our existing state coords, then bail early and don't fire
+      // any mouse move events
+      if (!shouldFireMouseMoveEvents(targetEl, lastHoveredEl, fromElViewport, getMouseCoords(state))) {
+        return { el: targetEl }
+      }
 
-      const events = mouse._moveEvents(targetEl, coords)
+      const events = mouse._moveEvents(targetEl, fromElViewport)
 
-      const resultEl = forceEl || mouse.getElAtCoords(coords)
+      const resultEl = forceEl || mouse.getElAtCoords(fromElViewport)
 
       return { el: resultEl, fromEl: lastHoveredEl, events }
     },
