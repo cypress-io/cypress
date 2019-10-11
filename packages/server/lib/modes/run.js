@@ -715,6 +715,7 @@ module.exports = {
       },
       chars: {
         'left': ' ',
+        'right': '',
       },
     })
 
@@ -724,12 +725,7 @@ module.exports = {
       table.push([
         '-',
         formatPath(`${screenshot.path}`, getWidth(table, 1)),
-        {
-          content: gray(dimensions),
-          style: {
-            'padding-right': -1,
-          },
-        },
+        gray(dimensions),
       ])
     })
 
@@ -759,10 +755,26 @@ module.exports = {
 
       console.log('')
 
-      console.log(
-        gray('  - Started processing: '),
-        chalk.cyan(`Compressing to ${videoCompression} CRF`)
-      )
+      const table = terminal.table({
+        colWidths: [3, 21, 76],
+        colAligns: ['left', 'left', 'left'],
+        type: 'noBorder',
+        style: {
+          'padding-right': 0,
+        },
+        chars: {
+          'left': ' ',
+          'right': '',
+        },
+      })
+
+      table.push([
+        gray('-'),
+        gray('Started processing:'),
+        chalk.cyan(`Compressing to ${videoCompression} CRF`),
+      ])
+
+      console.log(table.toString())
 
       const started = new Date
       let progress = Date.now()
@@ -774,26 +786,23 @@ module.exports = {
           const dur = `(${humanTime.long(finished)})`
 
           const table = terminal.table({
-            colWidths: [23, 62, 15],
-            colAligns: ['left', 'left', 'right'],
+            colWidths: [3, 21, 61, 15],
+            colAligns: ['left', 'left', 'left', 'right'],
             type: 'noBorder',
             style: {
               'padding-right': 0,
             },
             chars: {
               'left': ' ',
+              'right': '',
             },
           })
 
           table.push([
-            gray('- Finished processing:'),
-            `${formatPath(name, getWidth(table, 1), 'cyan')}`,
-            {
-              content: gray(dur),
-              style: {
-                'padding-right': -1,
-              },
-            },
+            gray('-'),
+            gray('Finished processing:'),
+            `${formatPath(name, getWidth(table, 2), 'cyan')}`,
+            gray(dur),
           ])
 
           console.log(table.toString())
