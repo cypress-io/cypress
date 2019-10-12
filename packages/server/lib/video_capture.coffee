@@ -150,57 +150,64 @@ module.exports = {
         startedVideoCapture,
       }
 
-  process: (name, cname, videoCompression, onProgress = ->) ->
-    total = null
+  process: (name, cname, videoCompression, ffmpegchaptersConfig, onProgress = ->) ->
+    chaptersMetaFileName = name + '.meta'
+    fs.writeFileAsync chaptersMetaFileName, ffmpegchaptersConfig
+    .then () ->
+      total = null
 
-    new Promise (resolve, reject) ->
-      debug("processing video from %s to %s video compression %o",
-        name, cname, videoCompression)
-      cmd = ffmpeg()
-      .input(name)
-      .videoCodec("libx264")
-      .outputOptions([
-        "-preset fast"
-        "-crf #{videoCompression}"
-      ])
-      .on "start", (command) ->
-        debug("compression started %o", { command })
+      new Promise (resolve, reject) ->
+        debug("processing video from %s to %s video compression %o",
+          name, cname, videoCompression)
+        cmd = ffmpeg()
+        .input(name)
+        .input(chaptersMetaFileName)
+        .videoCodec("libx264")
+        .outputOptions([
+          "-preset fast"
+          "-crf #{videoCompression}"
+          "-map_metadata 1"
+        ])
+        .on "start", (command) ->
+          debug("compression started %o", { command })
 
-      .on "codecData", (data) ->
-        debug("compression codec data: %o", data)
+        .on "codecData", (data) ->
+          debug("compression codec data: %o", data)
 
-        total = utils.timemarkToSeconds(data.duration)
+          total = utils.timemarkToSeconds(data.duration)
 
-      .on "stderr", (stderr) ->
-        debug("compression stderr log %o", { message: stderr })
+        .on "stderr", (stderr) ->
+          debug("compression stderr log %o", { message: stderr })
 
-      .on "progress", (progress) ->
-        ## bail if we dont have total yet
-        return if not total
+        .on "progress", (progress) ->
+          ## bail if we dont have total yet
+          return if not total
 
-        debug("compression progress: %o", progress)
+          debug("compression progress: %o", progress)
 
-        progressed = utils.timemarkToSeconds(progress.timemark)
+          progressed = utils.timemarkToSeconds(progress.timemark)
 
-        onProgress(progressed / total)
+          onProgress(progressed / total)
 
-      .on "error", (err, stdout, stderr) ->
-        debug("compression errored: %o", { error: err.message, stdout, stderr })
+        .on "error", (err, stdout, stderr) ->
+          debug("compression errored: %o", { error: err.message, stdout, stderr })
 
-        reject(err)
+          reject(err)
 
-      .on "end", ->
-        debug("compression ended")
+        .on "end", ->
+          debug("compression ended")
 
-        ## we are done progressing
-        onProgress(1)
+          ## we are done progressing
+          onProgress(1)
 
-        ## rename and obliterate the original
-        fs.moveAsync(cname, name, {
-          overwrite: true
-        })
-        .then ->
-          resolve()
-      .save(cname)
+          ## rename and obliterate the original
+          fs.moveAsync(cname, name, {
+            overwrite: true
+          })
+          .then ->
+            fs.unlinkAsync(chaptersMetaFileName)
+          .then ->
+            resolve()
+        .save(cname)
 
 }

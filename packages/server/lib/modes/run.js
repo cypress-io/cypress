@@ -599,6 +599,20 @@ const getVideoRecordingDelay = function (startedVideoCapture) {
   return 0
 }
 
+const generateFFmpegMeta = (testResults) => {
+  const configString = testResults.tests.map((test) => {
+    return [
+      '[CHAPTER]',
+      'TIMEBASE=1/1000',
+      `START=${test.videoTimestamp - test.wallClockDuration}`,
+      `END=${test.videoTimestamp}`,
+      `title=${test.title.join(' ')}`,
+    ].join('\n')
+  }).join('\n')
+
+  return `;FFMETADATA1\n${configString}`
+}
+
 const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const { spec, browser, video, videosFolder } = options
 
@@ -729,7 +743,7 @@ module.exports = {
     return console.log('')
   },
 
-  postProcessRecording (end, name, cname, videoCompression, shouldUploadVideo) {
+  postProcessRecording (end, name, cname, videoCompression, shouldUploadVideo, ffmpegChaptersConfig) {
     debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
@@ -785,7 +799,7 @@ module.exports = {
 
       // bar.tickTotal(float)
 
-      return videoCapture.process(name, cname, videoCompression, onProgress)
+      return videoCapture.process(name, cname, videoCompression, ffmpegChaptersConfig, onProgress)
     })
     .catch((err) => {
       // log that post processing was attempted
@@ -984,12 +998,15 @@ module.exports = {
       .closeBrowser()
       .then(() => {
         if (endVideoCapture) {
+          const ffmpegChaptersConfig = generateFFmpegMeta(obj)
+
           return this.postProcessRecording(
             endVideoCapture,
             videoName,
             compressedVideoName,
             videoCompression,
-            suv
+            suv,
+            ffmpegChaptersConfig
           ).then(finish)
           // TODO: add a catch here
         }
