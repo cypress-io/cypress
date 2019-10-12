@@ -27,18 +27,54 @@ describe "lib/plugins/index", ->
       plugins.init({}) ## doesn't reject or time out
 
     it "forks child process", ->
+      # have to fire "loaded" message, otherwise plugins.init promise never resolves
+      @ipc.on.withArgs("loaded").yields([])
       plugins.init({ pluginsFile: "cypress-plugin" })
-      expect(cp.fork).to.be.called
-      expect(cp.fork.lastCall.args[0]).to.contain("plugins/child/index.js")
-      expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
+      .then ->
+        expect(cp.fork).to.be.called
+        expect(cp.fork.lastCall.args[0]).to.contain("plugins/child/index.js")
+        expect(cp.fork.lastCall.args[1]).to.eql(["--file", "cypress-plugin"])
+
+    it "uses system Node when available", ->
+      @ipc.on.withArgs("loaded").yields([])
+      systemNode = "/my/path/to/system/node"
+      config = {
+        pluginsFile: "cypress-plugin",
+        nodeVersion: "system"
+        resolvedNodeVersion: "v1.2.3"
+        resolvedNodePath: systemNode
+      }
+      plugins.init(config)
+      .then ->
+        options = {
+          stdio: "inherit",
+          execPath: systemNode
+        }
+        expect(cp.fork.lastCall.args[2]).to.eql(options)
+
+    it "uses bundled Node when cannot find system Node", ->
+      @ipc.on.withArgs("loaded").yields([])
+      config = {
+        pluginsFile: "cypress-plugin",
+        nodeVersion: "system"
+        resolvedNodeVersion: "v1.2.3"
+      }
+      plugins.init(config)
+      .then ->
+        options = {
+          stdio: "inherit"
+        }
+        expect(cp.fork.lastCall.args[2]).to.eql(options)
 
     it "calls any handlers registered with the wrapped ipc", ->
+      @ipc.on.withArgs("loaded").yields([])
       handler = sinon.spy()
       plugins.registerHandler(handler)
       plugins.init({ pluginsFile: "cypress-plugin" })
-      expect(handler).to.be.called
-      expect(handler.lastCall.args[0].send).to.be.a("function")
-      expect(handler.lastCall.args[0].on).to.be.a("function")
+      .then ->
+        expect(handler).to.be.called
+        expect(handler.lastCall.args[0].send).to.be.a("function")
+        expect(handler.lastCall.args[0].on).to.be.a("function")
 
     it "sends config via ipc", ->
       @ipc.on.withArgs("loaded").yields([])

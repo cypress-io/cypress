@@ -131,7 +131,7 @@
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
-    "lint-staged": "8.2.1",
+    "lint-staged": "9.4.1",
     "lodash": "4.17.15",
     "make-empty-github-commit": "1.2.0",
     "mocha": "3.5.3",
@@ -161,7 +161,7 @@
     "vinyl-paths": "2.1.0"
   },
   "engines": {
-    "node": "12.4.0"
+    "node": "12.0.0"
   },
   "productName": "Cypress",
   "license": "MIT",
