@@ -178,8 +178,9 @@ _maybeRecordVideo = (options) ->
 ## a utility function that navigates to the given URL
 ## once Chrome remote interface client is passed to it.
 _navigateUsingCRI = (url) ->
-  (client) ->
-    la(check.url(url), "missing url to navigate to", url)
+  la(check.url(url), "missing url to navigate to", url)
+
+  return (client) ->
     la(client, "could not get CRI client")
     debug("received CRI client")
     debug('navigating to page %s', url)

@@ -264,6 +264,37 @@ describe('taking screenshots', () => {
     this.skip()
   })
 
+  it('adds padding to element screenshot when specified', () => {
+    cy.visit('http://localhost:3322/element')
+    cy.get('.element')
+    .screenshot('element-padding', {
+      padding: 10,
+    })
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/element-padding.png`,
+      width: 420,
+      height: 320,
+      devicePixelRatio,
+    })
+  })
+
+  it('does not add padding to non-element screenshot', () => {
+    cy.viewport(600, 200)
+    cy.visit('http://localhost:3322/color/yellow')
+    cy.screenshot('non-element-padding', {
+      capture: 'viewport',
+      padding: 10,
+    })
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/non-element-padding.png`,
+      width: 600,
+      height: 200,
+      devicePixelRatio,
+    })
+  })
+
   context('before hooks', () => {
     before(() => {
       // failure 2

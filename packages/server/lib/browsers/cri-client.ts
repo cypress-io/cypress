@@ -2,11 +2,11 @@ import debugModule from 'debug'
 import _ from 'lodash'
 
 const chromeRemoteInterface = require('chrome-remote-interface')
-const errors = require('../errors')
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cri-client')
 const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:[-->]')
 const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:[<--]')
+const errors = require('../errors')
 
 /**
  * Url returned by the Chrome Remote Interface
@@ -53,6 +53,11 @@ interface CRIWrapper {
    * Resolves with a base64 data URI screenshot.
    */
   takeScreenshot(): Promise<string>
+  /**
+   * Sends a command to the Chrome remote interface.
+   * @example client.send('Page.navigate', { url })
+  */
+  send (command: CRI.Command, params?: object):Promise<any>
   /**
    * Exposes Chrome remote interface Page domain,
    * buton only for certain actions that are hard to do using "send"
@@ -193,7 +198,6 @@ export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => 
 
       return cri.on(eventName, cb)
     },
-
     close ():Promise<void> {
       return cri.close()
     },
