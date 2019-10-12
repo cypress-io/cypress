@@ -257,6 +257,20 @@ jobs:
       - run: ls $(npm -g bin)
       - run: ls $(npm -g bin)/../lib/node_modules
 
+      # Install the root packages
+      # Link sup packages in ./node_modules/@packages/*
+      # Install sub packages dependencies and build all sub packages via postinstall script
+      - run: npm install
+      - run:
+          name: Top level packages
+          command: npm ls --depth=0 || true
+
+      # Prune so we do not save removed dependencies to cache
+      - run: npm run all prune
+
+      - save-caches
+      - store-npm-logs
+
       # Install current versions of Chrome
       - run:
           name: "Install Google Chrome (stable)"
@@ -272,21 +286,14 @@ jobs:
               apt-get update
               apt-get install -y google-chrome-stable
               rm -rf /var/lib/apt/lists/*
+              which google-chrome-stable
+              google-chrome-stable -version
             fi
 
-      # Install the root packages
-      # Link sup packages in ./node_modules/@packages/*
-      # Install sub packages dependencies and build all sub packages via postinstall script
-      - run: npm install
-      - run:
-          name: Top level packages
-          command: npm ls --depth=0 || true
-
-      # Prune so we do not save removed dependencies to cache
-      - run: npm run all prune
-
-      - save-caches
-      - store-npm-logs
+      - persist_to_workspace:
+          root: /usr/bin/
+          paths:
+            - google-chrome-stable
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
