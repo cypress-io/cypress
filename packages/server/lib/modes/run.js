@@ -610,7 +610,7 @@ const generateFFmpegMeta = (testResults) => {
       'TIMEBASE=1/1000',
       `START=${test.videoTimestamp - test.wallClockDuration}`,
       `END=${test.videoTimestamp}`,
-      `title=${test.title.join(' ')}`,
+      `title=${test.title ? test.title.join(' ') : ''}`,
     ].join('\n')
   }).join('\n')
 
