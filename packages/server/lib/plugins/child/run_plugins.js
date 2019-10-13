@@ -4,6 +4,7 @@ const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
+const validateEvent = require('./validate_event')
 
 const registeredEvents = {}
 
@@ -40,6 +41,14 @@ const load = (ipc, config, pluginsFile) => {
   // we track the register calls and then send them all at once
   // to the parent process
   const register = (event, handler) => {
+    const { isValid, error } = validateEvent(ipc, event, handler)
+
+    if (!isValid) {
+      sendError(ipc, error)
+
+      return
+    }
+
     if (event === 'task') {
       const existingEventId = _.findKey(registeredEvents, { event: 'task' })
 
