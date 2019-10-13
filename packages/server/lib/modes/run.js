@@ -600,6 +600,10 @@ const getVideoRecordingDelay = function (startedVideoCapture) {
 }
 
 const generateFFmpegMeta = (testResults) => {
+  if (!testResults.tests) {
+    return null
+  }
+
   const configString = testResults.tests.map((test) => {
     return [
       '[CHAPTER]',

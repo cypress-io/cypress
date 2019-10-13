@@ -18,6 +18,14 @@ debug("using ffmpeg from %s", ffmpegPath)
 
 ffmpeg.setFfmpegPath(ffmpegPath)
 
+maybeWriteChaptersMetaFile = (chaptersMetaFileName, ffmpegchaptersConfig) ->
+  new Promise (resolve, reject) ->
+    unless ffmpegchaptersConfig
+      return resolve(false)
+    fs.writeFileAsync chaptersMetaFileName, ffmpegchaptersConfig
+    .then () ->
+      resolve(true)
+
 module.exports = {
   getMsFromDuration: (duration) ->
     utils.timemarkToSeconds(duration) * 1000
@@ -152,22 +160,25 @@ module.exports = {
 
   process: (name, cname, videoCompression, ffmpegchaptersConfig, onProgress = ->) ->
     chaptersMetaFileName = name + '.meta'
-    fs.writeFileAsync chaptersMetaFileName, ffmpegchaptersConfig
-    .then () ->
+    maybeWriteChaptersMetaFile chaptersMetaFileName, ffmpegchaptersConfig
+    .then (addChaptersMeta) ->
       total = null
 
       new Promise (resolve, reject) ->
         debug("processing video from %s to %s video compression %o",
           name, cname, videoCompression)
-        cmd = ffmpeg()
-        .input(name)
-        .input(chaptersMetaFileName)
-        .videoCodec("libx264")
-        .outputOptions([
+        outputOptions = [
           "-preset fast"
           "-crf #{videoCompression}"
-          "-map_metadata 1"
-        ])
+        ]
+        cmd = ffmpeg()
+        if (addChaptersMeta)
+          cmd.input(chaptersMetaFileName)
+          outputOptions.push  "-map_metadata 1"
+       
+        cmd.input(name)
+        .videoCodec("libx264")
+        .outputOptions(outputOptions)
         .on "start", (command) ->
           debug("compression started %o", { command })
 
@@ -205,7 +216,8 @@ module.exports = {
             overwrite: true
           })
           .then ->
-            fs.unlinkAsync(chaptersMetaFileName)
+            if addChaptersMeta
+              fs.unlinkAsync(chaptersMetaFileName)
           .then ->
             resolve()
         .save(cname)
