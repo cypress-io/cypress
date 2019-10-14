@@ -599,7 +599,7 @@ const getVideoRecordingDelay = function (startedVideoCapture) {
   return 0
 }
 
-const generateFFmpegMeta = (testResults) => {
+const generateFfmpegChaptersConfig = (testResults) => {
   if (!testResults.tests) {
     return null
   }
@@ -1002,7 +1002,7 @@ module.exports = {
       .closeBrowser()
       .then(() => {
         if (endVideoCapture) {
-          const ffmpegChaptersConfig = generateFFmpegMeta(obj)
+          const ffmpegChaptersConfig = generateFfmpegChaptersConfig(obj)
 
           return this.postProcessRecording(
             endVideoCapture,
