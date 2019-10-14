@@ -197,7 +197,6 @@ module.exports = {
           debug("compression progress: %o", progress)
 
           progressed = utils.timemarkToSeconds(progress.timemark)
-          console.log('>> debug log 1', progressed / total)
           onProgress(progressed / total)
 
         .on "error", (err, stdout, stderr) ->
@@ -209,7 +208,6 @@ module.exports = {
           debug("compression ended")
 
           ## we are done progressing
-          console.log('>> debug log 2')
           onProgress(1)
 
           ## rename and obliterate the original
