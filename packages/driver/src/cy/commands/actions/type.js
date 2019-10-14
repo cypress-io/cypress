@@ -7,6 +7,7 @@ const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
+const $Keyboard = require('../../../cy/keyboard')
 
 const inputEvents = 'textInput input'.split(' ')
 
@@ -51,10 +52,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          const modifiers = keyboard.getActiveModifiersArray()
+          const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers())
 
-          if (modifiers.length) {
-            obj.modifiers = modifiers.join(', ')
+          if (modifiers) {
+            obj.modifiers = modifiers
           }
 
           if (key) {
@@ -91,12 +92,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               'Typed': chars,
               'Applied To': $dom.getElements(options.$el),
               'Options': deltaOptions,
-              'table' () {
-                return {
-                  name: 'Key Events Table',
-                  data: getTableData(),
-                  columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
-                }
+              'table': {
+                // mouse events tables will take up slots 1 and 2 if they're present
+                // this preserves the order of the tables
+                3: () => {
+                  return {
+                    name: 'Keyboard Events',
+                    data: getTableData(),
+                    columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
+                  }
+                },
               },
             }
           },

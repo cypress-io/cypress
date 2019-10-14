@@ -5,11 +5,12 @@ human = require("human-interval")
 la = require("lazy-ass")
 check = require("check-more-types")
 cp = require("child_process")
-fs = require("fs")
+fse = require("fs-extra")
 os = require("os")
 Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
 konfig = require('../../binary/get-config')()
+{ purgeCloudflareCache } = require('./purge-cloudflare-cache')
 
 formHashFromEnvironment = () ->
   env = process.env
@@ -57,44 +58,8 @@ getPublisher = (getAwsObj = getS3Credentials) ->
     secretAccessKey: aws.secret
   }
 
-hasCloudflareEnvironmentVars = () ->
-  check.unemptyString(process.env.CF_TOKEN) &&
-  check.unemptyString(process.env.CF_EMAIL) &&
-  check.unemptyString(process.env.CF_DOMAIN)
-
-# depends on the credentials file or environment variables
-makeCloudflarePurgeCommand = (url) ->
-  configFile = path.resolve(__dirname, "..", "support", ".cfcli.yml")
-  if fs.existsSync(configFile)
-    console.log("using CF credentials file")
-    return "cfcli purgefile -c #{configFile} #{url}"
-  else if hasCloudflareEnvironmentVars()
-    console.log("using CF environment variables")
-    token = process.env.CF_TOKEN
-    email = process.env.CF_EMAIL
-    domain = process.env.CF_DOMAIN
-    return "cfcli purgefile -e #{email} -k #{token} -d #{domain} #{url}"
-  else
-    throw new Error("Cannot form Cloudflare purge command without credentials")
-
-# purges a given url from Cloudflare
-purgeCache = (url) ->
-  la(check.url(url), "missing url to purge", url)
-
-  new Promise (resolve, reject) =>
-    console.log("purging url", url)
-    purgeCommand = makeCloudflarePurgeCommand(url)
-    cp.exec purgeCommand, (err, stdout, stderr) ->
-      if err
-        console.error("Could not purge #{url}")
-        console.error(err.message)
-        return reject(err)
-      console.log("#purgeCache: #{url}")
-      resolve()
-
-getDestktopUrl = (version, osName, zipName) ->
-  url = [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
-  url
+getDesktopUrl = (version, osName, zipName) ->
+  [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
 
 # purges desktop application url from Cloudflare cache
 purgeDesktopAppFromCache = ({version, platform, zipName}) ->
@@ -106,8 +71,9 @@ purgeDesktopAppFromCache = ({version, platform, zipName}) ->
 
   osName = getUploadNameByOsAndArch(platform)
   la(check.unemptyString(osName), "missing osName", osName)
-  url = getDestktopUrl(version, osName, zipName)
-  purgeCache(url)
+  url = getDesktopUrl(version, osName, zipName)
+
+  purgeCloudflareCache(url)
 
 # purges links to desktop app for all platforms
 # for a given version
@@ -155,14 +121,13 @@ saveUrl = (filename) -> (url) ->
   la(check.unemptyString(filename), "missing filename", filename)
   la(check.url(url), "invalid url to save", url)
   s = JSON.stringify({url})
-  fs.writeFileSync(filename, s)
-  console.log("saved url", url)
-  console.log("into file", filename)
+  fse.writeFile(filename, s)
+  .then =>
+    console.log("saved url", url, "into file", filename)
 
 module.exports = {
   getS3Credentials,
   getPublisher,
-  purgeCache,
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
   getUploadNameByOsAndArch,
