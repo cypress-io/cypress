@@ -775,12 +775,14 @@ module.exports = {
 
       const started = Date.now()
       let progress = Date.now()
+      let finished = false
       const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
 
       const onProgress = function (float) {
-        if (float === 1) {
-          const finished = Date.now() - started
-          const dur = `(${humanTime.long(finished)})`
+        if (!finished && float === 1) {
+          finished = true
+          const finishTime = Date.now() - started
+          const dur = `(${humanTime.long(finishTime)})`
 
           console.log(
             gray('  - Finished processing: '),
