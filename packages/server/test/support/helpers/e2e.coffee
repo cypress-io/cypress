@@ -33,6 +33,8 @@ Promise.config({
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
+DEFAULT_BROWSERS = ['electron', 'chrome']
+
 stackTraceLinesRe = /^(\s+)at\s(.+)/gm
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
@@ -158,9 +160,56 @@ copy = ->
       )
     )
 
-module.exports = {
-  normalizeStdout
+localItFn = (title, options = {}) ->
+  options = _
+  .chain(options)
+  .clone()
+  .defaults({
+    only: false,
+    onRun: (execFn, browser, ctx) ->
+      execFn()
+  })
+  .value()
 
+  { only, browser, onRun, spec, expectedExitCode } = options
+
+  browser ?= process.env.BROWSER or DEFAULT_BROWSERS
+
+  if not title
+    throw new Error('e2e.it(...) must be passed a title as the first argument')
+
+  mochaItFn = if only then it.only else it
+
+  runTestInEachBrowser = (browser) ->
+    testTitle = "#{title} [#{browser}]"
+
+    mochaItFn testTitle, ->
+      originalTitle = @test.parent.titlePath().concat(title).join(" / ")
+
+      ctx = @
+
+      execFn = (overrides = {}) ->
+        e2e.exec(ctx, _.extend({}, options, overrides, { 
+          browser, originalTitle
+        }))
+      
+      onRun(execFn, browser, ctx) 
+  
+  _.chain([])
+  .concat(browser)
+  .each(runTestInEachBrowser)
+  .value()
+
+## eslint-ignore-next-line
+localItFn.only = (title, options) ->
+  options.only = true
+  localItFn(title, options)
+    
+module.exports = e2e = {
+  normalizeStdout,
+  
+  it: localItFn
+  
   snapshot: (args...) ->
     args = _.compact(args)
 
@@ -242,6 +291,7 @@ module.exports = {
       browser: process.env.BROWSER
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
+      originalTitle: null
     })
 
     ctx.timeout(options.timeout)
@@ -363,8 +413,17 @@ module.exports = {
             expect(headless).to.include("(headless)")
 
         str = normalizeStdout(stdout, options)
-        snapshot(str)
 
+        args = _.compact([options.originalTitle, str])
+        
+        try 
+          snapshot(args...)
+        catch err
+          ## if this error is from a duplicated snapshot key then
+          ## ignore it else throw
+          if not err.duplicateSnapshotKey
+            throw err
+ 
       return {
         code:   code
         stdout: stdout
