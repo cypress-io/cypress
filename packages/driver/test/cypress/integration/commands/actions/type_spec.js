@@ -174,7 +174,9 @@ describe('src/cy/commands/actions/type', () => {
 
       cy.get('div[tabindex]:first').type('foobar')
 
-      cy.focused().should('have.value', 'foobar')
+      cy.get('input:first')
+      .should('be.focused')
+      .should('have.value', 'foobar')
     })
 
     describe('actionability', () => {
