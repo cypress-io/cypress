@@ -141,6 +141,7 @@ module.exports = {
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
 
   cookies:
+    invalid_name: "#{cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
     removed_method: """
       The Cypress.Cookies.{{method}}() method has been removed.
 
@@ -818,7 +819,6 @@ module.exports = {
     {{errStack}}
     """
     invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
-    invalid_name: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
     invalid_value: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
 
   spread:

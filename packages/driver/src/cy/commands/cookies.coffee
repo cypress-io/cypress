@@ -34,6 +34,10 @@ mergeDefaults = (obj) ->
   else
     merge(obj)
 
+validateCookieName = (cmd, name, onFail) ->
+  if cookieParser.isCookieName(name) isnt true
+    Cypress.utils.throwErrByPath("cookies.invalid_name", { args: { cmd, name }, onFail })
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   automateCookies = (event, obj = {}, log, timeout) ->
     automate = ->
@@ -100,8 +104,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
+      onFail = options._log
+
       if not _.isString(name)
-        $utils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
+        $utils.throwErrByPath("getCookie.invalid_argument", { onFail })
+
+      validateCookieName('getCookie', name, onFail)
 
       automateCookies("get:cookie", {name: name}, options._log, options.timeout)
       .then (resp) ->
@@ -167,8 +175,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not _.isString(name) or not _.isString(value)
         Cypress.utils.throwErrByPath("setCookie.invalid_arguments", { onFail })
 
-      if cookieParser.isCookieName(name) isnt true
-        Cypress.utils.throwErrByPath("setCookie.invalid_name", { args: { name }, onFail })
+      validateCookieName('setCookie', name, onFail)
 
       if cookieParser.parseCookieValue(value) == null
         Cypress.utils.throwErrByPath("setCookie.invalid_value", { args: { value }, onFail })
@@ -210,8 +217,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
+      onFail = options._log
+
       if not _.isString(name)
-        $utils.throwErrByPath("clearCookie.invalid_argument", { onFail: options._log })
+        $utils.throwErrByPath("clearCookie.invalid_argument", { onFail })
+
+      validateCookieName('clearCookie', name, onFail)
 
       ## TODO: prevent clearing a cypress namespace
       automateCookies("clear:cookie", {name: name}, options._log, options.timeout)

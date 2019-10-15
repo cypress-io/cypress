@@ -292,6 +292,15 @@ describe "src/cy/commands/cookies", ->
 
         cy.getCookie(123)
 
+      it "throws an error if the cookie name is invalid", (done) ->
+        cy.on "fail", (err) =>
+          expect(err.message).to.include("cy.getCookie() must be passed an RFC-6265-compliant cookie name.")
+          expect(err.message).to.include('You passed:\n\n`m=m`')
+
+          done()
+
+        cy.getCookie("m=m")
+
     describe ".log", ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>
@@ -482,7 +491,7 @@ describe "src/cy/commands/cookies", ->
       context "when setting an invalid cookie", ->
         it "throws an error if the cookie name is invalid", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include('must be passed an RFC-6265-compliant cookie name.')
+            expect(err.message).to.include("cy.setCookie() must be passed an RFC-6265-compliant cookie name.")
             expect(err.message).to.include('You passed:\n\n`m=m`')
 
             done()
@@ -662,6 +671,15 @@ describe "src/cy/commands/cookies", ->
           done()
 
         cy.clearCookie(123)
+
+      it "throws an error if the cookie name is invalid", (done) ->
+        cy.on "fail", (err) =>
+          expect(err.message).to.include("cy.clearCookie() must be passed an RFC-6265-compliant cookie name.")
+          expect(err.message).to.include('You passed:\n\n`m=m`')
+
+          done()
+
+        cy.clearCookie("m=m")
 
     describe ".log", ->
       beforeEach ->
