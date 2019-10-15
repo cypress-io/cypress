@@ -1,6 +1,7 @@
 require("../../spec_helper")
 
 _            = require("lodash")
+chalk        = require("chalk")
 cp           = require("child_process")
 niv          = require("npm-install-version")
 path         = require("path")
@@ -110,12 +111,16 @@ normalizeStdout = (str, options = {}) ->
 startServer = (obj) ->
   { onServer, port, https } = obj
 
+  console.log('STARTING ON', port)
+
   app = express()
 
   if https
     srv = httpsProxy.httpsServer(app)
   else
     srv = http.Server(app)
+
+  srv.port = port
 
   allowDestroy(srv)
 
@@ -132,7 +137,13 @@ startServer = (obj) ->
 
       resolve(srv)
 
+## since the resolved object is a .thenable, it won't get wrapped in a
+## Promise, which then leads to the rest of the Promise.chain getting no-op'd
+stopPromise = () ->
+  { then: stopPromise, catch: stopPromise }
+
 stopServer = (srv) ->
+  console.log('STOPPING ON', srv.port)
   srv.destroyAsync()
 
 copy = ->
@@ -198,6 +209,20 @@ localItFn = (title, options = {}) ->
   .concat(browser)
   .each(runTestInEachBrowser)
   .value()
+
+runAfterEach = (runnable) ->
+  Promise.map runnable._afterEach || [], (afterEachHook) ->
+    { fn } = afterEachHook
+
+    fn = fn.bind(runnable)
+
+    if fn.length == 1
+      return Promise.fromCallback fn
+
+    return fn()
+  .then ->
+    if runnable.parent
+      runAfterEach(runnable.parent)
 
 ## eslint-ignore-next-line
 localItFn.only = (title, options) ->
@@ -287,6 +312,7 @@ module.exports = e2e = {
 
   options: (ctx, options = {}) ->
     _.defaults(options, {
+      browser: 'electron'
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
       originalTitle: null
@@ -373,13 +399,17 @@ module.exports = e2e = {
         expect(process.exit).to.be.calledWith(code)
 
   exec: (ctx, options = {}) ->
-    ## if the current test wasn't meant to run in the current browser, skip it
-    if (b = process.env.BROWSER) and b isnt options.browser
-      console.log("The current test is meant to run in #{options.browser}, but BROWSER env var = #{b}. Skipping...")
-      return ctx.skip()
-
     options = @options(ctx, options)
     args    = @args(options)
+
+    ## if the current test wasn't meant to run in the current browser, skip it
+    if (b = process.env.BROWSER) and b isnt options.browser
+      console.log(chalk.cyan("This test is meant to run in #{chalk.green(options.browser)}, but process.env.BROWSER is #{chalk.green(b)}. Skipping..."))
+
+      return runAfterEach(ctx._runnable).then ->
+        ctx.skip()
+        ## dirty-nasty trick to halt Promises chained off e2e.exec
+        stopPromise()
 
     args = ["index.js"].concat(args)
 
