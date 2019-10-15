@@ -189,12 +189,12 @@ localItFn = (title, options = {}) ->
       ctx = @
 
       execFn = (overrides = {}) ->
-        e2e.exec(ctx, _.extend({}, options, overrides, { 
+        e2e.exec(ctx, _.extend({}, options, overrides, {
           browser, originalTitle
         }))
-      
-      onRun(execFn, browser, ctx) 
-  
+
+      onRun(execFn, browser, ctx)
+
   _.chain([])
   .concat(browser)
   .each(runTestInEachBrowser)
@@ -204,12 +204,12 @@ localItFn = (title, options = {}) ->
 localItFn.only = (title, options) ->
   options.only = true
   localItFn(title, options)
-    
+
 module.exports = e2e = {
   normalizeStdout,
-  
+
   it: localItFn
-  
+
   snapshot: (args...) ->
     args = _.compact(args)
 
@@ -415,15 +415,15 @@ module.exports = e2e = {
         str = normalizeStdout(stdout, options)
 
         args = _.compact([options.originalTitle, str])
-        
-        try 
+
+        try
           snapshot(args...)
         catch err
           ## if this error is from a duplicated snapshot key then
           ## ignore it else throw
           if not err.duplicateSnapshotKey
             throw err
- 
+
       return {
         code:   code
         stdout: stdout
