@@ -69,6 +69,9 @@ replaceDurationInTables = (str, p1, p2) ->
   ## full length of the duration so it doesn't shift content
   _.padStart("XX:XX", p1.length + p2.length)
 
+replaceParenTime = (str, p1) ->
+  return _.padStart("(X seconds)", p1.length)
+
 replaceUploadingResults = (orig, match..., offset, string) ->
   results = match[1].split('\n').map((res) ->
     res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)')
@@ -101,10 +104,10 @@ normalizeStdout = (str, options = {}) ->
   .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion) 
   ## 15 seconds -> XX seconds
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
-  ## duration='1589' -> duraction='XXXX'
+  ## duration='1589' -> duration='XXXX'
   .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) 
-  ## (15 seconds) -> (X seconds)
-  .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
+  ## (15 seconds) -> (XX seconds)
+  .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
   .replace(/\r/g, "")
   ## replaces multiple lines of uploading results (since order not guaranteed)
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) 

@@ -266,7 +266,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4      (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
 
 
 ====================================================================================================
