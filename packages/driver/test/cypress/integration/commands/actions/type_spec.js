@@ -167,6 +167,16 @@ describe('src/cy/commands/actions/type', () => {
       })
     })
 
+    it('can type into element that redirects focus', () => {
+      cy.$$('div[tabindex]:first').on('focus', () => {
+        cy.$$('input:first').focus()
+      })
+
+      cy.get('div[tabindex]:first').type('foobar')
+
+      cy.focused().should('have.value', 'foobar')
+    })
+
     describe('actionability', () => {
       it('can forcibly click even when element is invisible', () => {
         const $txt = cy.$$(':text:first').hide()

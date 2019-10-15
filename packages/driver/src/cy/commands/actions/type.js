@@ -418,26 +418,27 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             interval: options.interval,
           })
           .then(() => {
-            if ($elements.isFocusedOrInFocused($elToClick[0]) || options.force) {
-              return type()
-            }
+            if (!options.force && $elements.getActiveElByDocument($elToClick[0].ownerDocument) === null) {
 
-            const node = $dom.stringify($elToClick)
-            const onFail = options._log
+              const node = $dom.stringify($elToClick)
+              const onFail = options._log
 
-            if ($dom.isTextLike($elToClick[0])) {
+              if ($dom.isTextLike($elToClick[0])) {
 
-              $utils.throwErrByPath('type.not_actionable_textlike', {
+                $utils.throwErrByPath('type.not_actionable_textlike', {
+                  onFail,
+                  args: { node },
+                })
+              }
+
+              $utils.throwErrByPath('type.not_on_typeable_element', {
                 onFail,
                 args: { node },
               })
+
             }
 
-            $utils.throwErrByPath('type.not_on_typeable_element', {
-              onFail,
-              args: { node },
-            })
-
+            return type()
           })
 
         },
