@@ -1,0 +1,13 @@
+{
+  "name": "charts",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "cypress-draw",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "clean-deps": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "@cypress/draw-io": "..."
+  }
+}
