@@ -395,6 +395,7 @@ module.exports = {
           LINES: 24
         })
         .defaults({
+          FAKE_CWD_PATH: "/XXX/XXX/XXX"
           DEBUG_COLORS: "1"
           ## prevent any Compression progress
           ## messages from showing up
