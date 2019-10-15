@@ -14,6 +14,7 @@ describe "lib/browsers/chrome", ->
       @args = []
       # mock CRI client during testing
       @criClient = {
+        ensureMinimumProtocolVersion: sinon.stub().resolves()
         send: sinon.stub().resolves()
         Page: {
           screencastFrame: sinon.stub().returns()
@@ -137,6 +138,11 @@ describe "lib/browsers/chrome", ->
       .then =>
         expect(@criClient.close).to.be.calledOnce
         expect(kill).to.be.calledOnce
+
+    it "rejects if CDP version check fails", ->
+      @criClient.ensureMinimumProtocolVersion.rejects()
+
+      expect(chrome.open("chrome", "http://", {}, @automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
 
   context "#_getArgs", ->
     it "disables gpu when linux", ->

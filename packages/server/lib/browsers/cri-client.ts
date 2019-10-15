@@ -179,15 +179,9 @@ export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => 
       return cri.send(command, params)
     },
     takeScreenshot: () => {
-      return ensureMinimumProtocolVersion('1.3')
+      return client.send('Page.captureScreenshot')
       .catch((err) => {
-        throw new Error(`Taking a screenshot requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-      })
-      .then(() => {
-        return client.send('Page.captureScreenshot')
-        .catch((err) => {
-          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
-        })
+        throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
       })
       .then(({ data }) => {
         return `data:image/png;base64,${data}`

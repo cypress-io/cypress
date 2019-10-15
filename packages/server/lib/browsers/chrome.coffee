@@ -326,20 +326,24 @@ module.exports = {
         .then (criClient) =>
           la(criClient, "expected Chrome remote interface reference", criClient)
 
-          @_setAutomation(criClient, automation)
+          criClient.ensureMinimumProtocolVersion('1.3')
+          .catch (err) =>
+            throw new Error("Cypress requires at least Chrome 64.\n\nDetails:\n#{err.message}")
+          .then =>
+            @_setAutomation(criClient, automation)
 
-          ## monkey-patch the .kill method to that the CDP connection is closed
-          originalBrowserKill = launchedBrowser.kill
+            ## monkey-patch the .kill method to that the CDP connection is closed
+            originalBrowserKill = launchedBrowser.kill
 
-          launchedBrowser.kill = (args...) =>
-            debug("closing remote interface client")
+            launchedBrowser.kill = (args...) =>
+              debug("closing remote interface client")
 
-            criClient.close()
-            .then =>
-              debug("closing chrome")
-              originalBrowserKill.call(launchedBrowser, args...)
+              criClient.close()
+              .then =>
+                debug("closing chrome")
+                originalBrowserKill.call(launchedBrowser, args...)
 
-          return criClient
+            return criClient
         .then @_maybeRecordVideo(options)
         .then @_navigateUsingCRI(url)
         ## return the launched browser process

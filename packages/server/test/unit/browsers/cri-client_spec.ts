@@ -93,14 +93,6 @@ describe('lib/browsers/cri-client', function () {
         return expect(client.takeScreenshot()).to.eventually.equal('data:image/png;base64,foo')
       })
 
-      it('rejects if CDP version < 1.3', async function () {
-        send.withArgs('Browser.getVersion').rejects()
-
-        const client = await getClient()
-
-        return expect(client.takeScreenshot()).to.be.rejectedWith('Taking a screenshot requires at least Chrome 64.')
-      })
-
       it('rejects nicely if Page.captureScreenshot fails', async function () {
         send.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
         send.withArgs('Page.captureScreenshot').rejects()
