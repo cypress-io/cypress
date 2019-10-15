@@ -126,22 +126,20 @@ describe "e2e forms", ->
         .then (resp) ->
           fs.outputFileAsync(pathToLargeImage, resp)
 
-    it "passes with https on localhost", ->
-      e2e.exec(@, {
-        config: {
-          baseUrl: "https://localhost:#{HTTPS_PORT}"
-        }
-        spec: "form_submission_multipart_spec.coffee"
-        snapshot: true
-        expectedExitCode: 0
-      })
+    e2e.it "passes with https on localhost", {
+      config: {
+        baseUrl: "https://localhost:#{HTTPS_PORT}"
+      }
+      spec: "form_submission_multipart_spec.coffee"
+      snapshot: true
+      expectedExitCode: 0
+    }
 
-    it "passes with http on localhost", ->
-      e2e.exec(@, {
-        config: {
-          baseUrl: "http://localhost:#{HTTP_PORT}"
-        }
-        spec: "form_submission_multipart_spec.coffee"
-        snapshot: true
-        expectedExitCode: 0
-      })
+    e2e.it "passes with http on localhost", {
+      config: {
+        baseUrl: "http://localhost:#{HTTP_PORT}"
+      }
+      spec: "form_submission_multipart_spec.coffee"
+      snapshot: true
+      expectedExitCode: 0
+    }
