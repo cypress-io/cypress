@@ -1,4 +1,4 @@
-exports['e2e uncaught errors failing1 1'] = `
+exports['e2e uncaught errors / failing1'] = `
 
 ====================================================================================================
 
@@ -57,7 +57,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -80,7 +80,7 @@ We dynamically generated a new test to display this failure.
 
 `
 
-exports['e2e uncaught errors failing2 1'] = `
+exports['e2e uncaught errors / failing2'] = `
 
 ====================================================================================================
 
@@ -140,7 +140,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An uncaught error was detected outside of a test (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -163,7 +163,7 @@ We dynamically generated a new test to display this failure.
 
 `
 
-exports['e2e uncaught errors failing3 1'] = `
+exports['e2e uncaught errors / failing3'] = `
 
 ====================================================================================================
 
@@ -217,7 +217,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -240,7 +240,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 `
 
-exports['e2e uncaught errors failing4 1'] = `
+exports['e2e uncaught errors / failing4'] = `
 
 ====================================================================================================
 
@@ -299,7 +299,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does not run -- before all hook (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does not run -- before all hook (failed).png (YYYYxZZZZ)
 
 
   (Video)
@@ -322,7 +322,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
 `
 
-exports['e2e uncaught errors failing5 1'] = `
+exports['e2e uncaught errors / failing5'] = `
 
 ====================================================================================================
 
@@ -391,10 +391,10 @@ exports['e2e uncaught errors failing5 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2 fails (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz fails (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar fails (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux fails (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2 fails (failed).png (YYYYxZZZZ)
 
 
   (Video)
