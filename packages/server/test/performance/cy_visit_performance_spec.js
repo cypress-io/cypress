@@ -19,6 +19,7 @@ context('cy.visit performance tests', function () {
     },
     settings: {
       baseUrl: 'http://localhost:3434',
+      video: false,
     },
   })
 
@@ -37,6 +38,7 @@ context('cy.visit performance tests', function () {
           snapshot: true,
           expectedExitCode: 0,
           config: {
+            video: false,
             env: {
               currentRetry: this.test._currentRetry,
             },

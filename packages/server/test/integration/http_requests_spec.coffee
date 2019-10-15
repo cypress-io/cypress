@@ -55,6 +55,8 @@ browserifyFile = (filePath) ->
   )
 
 describe "Routes", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
