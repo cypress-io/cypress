@@ -797,6 +797,7 @@ describe "lib/cypress", ->
           # during testing, do not try to connect to the remote interface or
           # use the Chrome remote interface client
           criClient = {
+            ensureMinimumProtocolVersion: sinon.stub().resolves()
             close: sinon.stub().resolves()
           }
           sinon.stub(chromeBrowser, "_connectToChromeRemoteInterface").resolves(criClient)
