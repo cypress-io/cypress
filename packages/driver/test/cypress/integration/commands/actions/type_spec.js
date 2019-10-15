@@ -4306,12 +4306,12 @@ describe('src/cy/commands/actions/type', () => {
 
       it('throws when not textarea or text-like', (done) => {
         cy.timeout(300)
-        cy.get('form#by-id').type('foo')
+        cy.get('div#nested-find').type('foo')
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
           expect(err.message).to.include('The element typed into was:')
-          expect(err.message).to.include('<form id="by-id">...</form>')
+          expect(err.message).to.include('<div id="nested-find">Nested ...</div>')
           expect(err.message).to.include(`A typeable element matches one of the following selectors:`)
           done()
         })
