@@ -374,7 +374,7 @@ module.exports = e2e = {
 
   exec: (ctx, options = {}) ->
     ## if the current test wasn't meant to run in the current browser, skip it
-    if b = process.env.BROWSER and b isnt options.browser
+    if (b = process.env.BROWSER) and b isnt options.browser
       console.log("The current test is meant to run in #{options.browser}, but BROWSER env var = #{b}. Skipping...")
       return ctx.skip()
 
