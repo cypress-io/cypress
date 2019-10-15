@@ -8,12 +8,14 @@ const validate = (func, arg, errorMessage) => {
 }
 
 const eventHandlerShouldBeAFunction = (event, handler) => {
-  validate(_.isFunction, handler, `${event} event handler should be a function`)
+  return validate(_.isFunction, handler, `${event} event handler should be a function`)
 }
 
 const eventHandlerShouldBeAnObject = (event, handler) => {
   return validate(_.isPlainObject, handler, `${event} event handler should be an object`)
 }
+
+const isTruthy = (value) => Boolean(value)
 
 const eventValidators = {
   'file:preprocessor': eventHandlerShouldBeAFunction,
@@ -25,6 +27,14 @@ const eventValidators = {
 }
 
 const validateEvent = (event, handler) => {
+  if (!isTruthy(event)) {
+    return createErrorResult('Plugin event name is undefined')
+  }
+
+  if (!isTruthy(handler)) {
+    return createErrorResult(`Plugin event handler is undefined (event - ${event})`)
+  }
+
   const validator = eventValidators[event]
 
   if (!validator) {
