@@ -8,20 +8,8 @@ const validateEvent = require('./validate_event')
 
 const registeredEvents = {}
 
-const invoke = (eventId, args = [], ipc) => {
+const invoke = (eventId, args = []) => {
   const event = registeredEvents[eventId]
-
-  if (!event) {
-    sendError(ipc, new Error(`No handler registered for event id ${eventId}`))
-
-    return
-  }
-
-  if (!event.handler) {
-    sendError(ipc, new Error(`Plugin event handler is undefined (event - ${event.event})`))
-
-    return
-  }
 
   return event.handler(...args)
 }
