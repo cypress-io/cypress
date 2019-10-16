@@ -64,7 +64,6 @@ describe "e2e screenshots", ->
     expectedExitCode: 4
     snapshot: true
     timeout: 180000
-    sanitizeScreenshotDimensions: false
     onRun: (exec, browser) ->
       exec()
       .then ->

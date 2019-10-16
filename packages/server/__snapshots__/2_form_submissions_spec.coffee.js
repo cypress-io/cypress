@@ -1,4 +1,4 @@
-exports['e2e forms <form> submissions / passes with http on localhost'] = `
+exports['e2e forms / <form> submissions / passes with https on localhost'] = `
 
 ====================================================================================================
 
@@ -66,7 +66,7 @@ exports['e2e forms <form> submissions / passes with http on localhost'] = `
 
 `
 
-exports['e2e forms <form> submissions / passes with https on localhost'] = `
+exports['e2e forms / <form> submissions / passes with http on localhost'] = `
 
 ====================================================================================================
 
@@ -197,7 +197,7 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/form_submission_failing_spec.coffee/form submission fails -- fails without an explicit wait when an element is immediately found (failed).png (1280x720)
+  - /foo/bar/.projects/e2e/cypress/screenshots/form_submission_failing_spec.coffee/form submission fails -- fails without an explicit wait when an element is immediately found (failed).png (YYYYxZZZZ)
 
 
   (Video)
