@@ -158,6 +158,10 @@ expectRunsToHaveCorrectStats = (runs = []) ->
 
       screenshot.screenshotId = "some-random-id"
       screenshot.path = e2e.normalizeStdout(screenshot.path)
+
+      screenshot.width = 1280
+      screenshot.height = 720
+
       screenshot
 
 describe "e2e spec_isolation", ->

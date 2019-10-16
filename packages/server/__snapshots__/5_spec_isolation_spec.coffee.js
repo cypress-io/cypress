@@ -212,8 +212,8 @@ exports['e2e spec isolation fails'] = {
           "testId": "r4",
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
-          "height": 932,
-          "width": 1050
+          "height": 720,
+          "width": 1280
         },
         {
           "screenshotId": "some-random-id",
@@ -221,8 +221,8 @@ exports['e2e spec isolation fails'] = {
           "testId": "r8",
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
-          "height": 932,
-          "width": 1050
+          "height": 720,
+          "width": 1280
         },
         {
           "screenshotId": "some-random-id",
@@ -230,8 +230,8 @@ exports['e2e spec isolation fails'] = {
           "testId": "r12",
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
-          "height": 932,
-          "width": 1050
+          "height": 720,
+          "width": 1280
         }
       ],
       "spec": {
@@ -320,8 +320,8 @@ exports['e2e spec isolation fails'] = {
           "testId": "r3",
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png",
-          "height": 932,
-          "width": 1050
+          "height": 720,
+          "width": 1280
         },
         {
           "screenshotId": "some-random-id",
@@ -329,8 +329,8 @@ exports['e2e spec isolation fails'] = {
           "testId": "r4",
           "takenAt": "2018-02-01T20:14:19.323Z",
           "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png",
-          "height": 932,
-          "width": 1050
+          "height": 720,
+          "width": 1280
         }
       ],
       "spec": {
