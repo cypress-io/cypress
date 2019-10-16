@@ -23,5 +23,6 @@ describe "e2e screenshot fullPage capture", ->
   e2e.it "passes", {
     spec: "screenshot_fullpage_capture_spec.coffee"
     expectedExitCode: 0
+    keepScreenshotDimensions: true
     snapshot: true
   }

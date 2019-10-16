@@ -64,7 +64,8 @@ describe "e2e screenshots", ->
     expectedExitCode: 4
     snapshot: true
     timeout: 180000
-    onRun: (exec) ->
+    keepScreenshotDimensions: true
+    onRun: (exec, browser) ->
       exec()
       .then ->
         screenshot = (paths...) ->
@@ -115,8 +116,9 @@ describe "e2e screenshots", ->
             sizeOf(screenshot7)
           ])
         .then (dimensions = []) ->
-          ## all of the images should be 1280x720
-          ## since thats what we run headlessly
-          _.each dimensions, (dimension) ->
-            expect(dimension).to.deep.eq({width: 1280, height: 720, type: "png"})
+          if browser is "electron"
+            ## all of the images should be 1280x720
+            ## since thats what we run headlessly
+            _.each dimensions, (dimension) ->
+              expect(dimension).to.deep.eq({width: 1280, height: 720, type: "png"})
   }
