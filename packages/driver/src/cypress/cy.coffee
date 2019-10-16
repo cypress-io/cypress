@@ -1040,7 +1040,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             ## for async tests
             state("done", done)
 
-          ret = fn.apply(@, arguments)
+          ret = cy.then(()=>fn.apply(@, arguments))
 
           ## if we returned a value from fn
           ## and enqueued some new commands
