@@ -7,6 +7,7 @@ const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
+const $Keyboard = require('../../../cy/keyboard')
 
 const inputEvents = 'textInput input'.split(' ')
 
@@ -51,10 +52,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          const modifiers = keyboard.getActiveModifiersArray()
+          const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers())
 
-          if (modifiers.length) {
-            obj.modifiers = modifiers.join(', ')
+          if (modifiers) {
+            obj.modifiers = modifiers
           }
 
           if (key) {
@@ -91,12 +92,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               'Typed': chars,
               'Applied To': $dom.getElements(options.$el),
               'Options': deltaOptions,
-              'table' () {
-                return {
-                  name: 'Key Events Table',
-                  data: getTableData(),
-                  columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
-                }
+              'table': {
+                // mouse events tables will take up slots 1 and 2 if they're present
+                // this preserves the order of the tables
+                3: () => {
+                  return {
+                    name: 'Keyboard Events',
+                    data: getTableData(),
+                    columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
+                  }
+                },
               },
             }
           },
@@ -424,10 +429,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       const handleFocused = function () {
         // if it's the body, don't need to worry about focus
-        let elToCheckCurrentlyFocused
-
         if (isBody) {
           return type()
+        }
+
+        options.ensure = {
+          position: true,
+          visibility: true,
+          notDisabled: true,
+          notCovered: true,
+          notReadonly: true,
         }
 
         // if the subject is already the focused element, start typing
@@ -435,19 +446,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         // and seeing if that is focused
         // Checking first if element is focusable accounts for focusable els inside
         // of contenteditables
-        let $focused = cy.getFocused()
-
-        $focused = $focused && $focused[0]
-
-        if ($elements.isFocusable(options.$el)) {
-          elToCheckCurrentlyFocused = options.$el[0]
-        } else if ($elements.isContentEditable(options.$el[0])) {
-          elToCheckCurrentlyFocused = $selection.getHostContenteditable(options.$el[0])
-        }
-
-        if (elToCheckCurrentlyFocused && (elToCheckCurrentlyFocused === $focused)) {
-          // TODO: not scrolling here, but revisit when scroll algorithm changes
-          return type()
+        if (($elements.isFocusedOrInFocused(options.$el.get(0)))) {
+          options.ensure = {
+            notReadonly: true,
+          }
         }
 
         return $actionability.verify(cy, options.$el, options, {
@@ -456,12 +458,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           },
 
           onReady ($elToClick) {
-            $focused = cy.getFocused()
-
             // if we dont have a focused element
             // or if we do and its not ourselves
             // then issue the click
-            if (!$focused || ($focused && ($focused.get(0) !== options.$el.get(0)))) {
+            if (!$elements.isFocusedOrInFocused($elToClick[0])) {
               // click the element first to simulate focus
               // and typical user behavior in case the window
               // is out of focus

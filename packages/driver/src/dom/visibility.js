@@ -179,7 +179,7 @@ const elAtCenterPoint = function ($el) {
   const doc = $document.getDocumentFromElement($el.get(0))
   const elProps = $coordinates.getElementPositioning($el)
 
-  const { topCenter, leftCenter } = elProps.fromViewport
+  const { topCenter, leftCenter } = elProps.fromElViewport
 
   const el = $coordinates.getElementAtPointFromViewport(doc, leftCenter, topCenter)
 
@@ -232,16 +232,16 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent
     // target el is out of bounds
     if (
       // target el is to the right of the ancestor's visible area
-      (elProps.fromWindow.left > (ancestorProps.width + ancestorProps.fromWindow.left)) ||
+      (elProps.fromElWindow.left > (ancestorProps.width + ancestorProps.fromElWindow.left)) ||
 
       // target el is to the left of the ancestor's visible area
-      ((elProps.fromWindow.left + elProps.width) < ancestorProps.fromWindow.left) ||
+      ((elProps.fromElWindow.left + elProps.width) < ancestorProps.fromElWindow.left) ||
 
       // target el is under the ancestor's visible area
-      (elProps.fromWindow.top > (ancestorProps.height + ancestorProps.fromWindow.top)) ||
+      (elProps.fromElWindow.top > (ancestorProps.height + ancestorProps.fromElWindow.top)) ||
 
       // target el is above the ancestor's visible area
-      ((elProps.fromWindow.top + elProps.height) < ancestorProps.fromWindow.top)
+      ((elProps.fromElWindow.top + elProps.height) < ancestorProps.fromElWindow.top)
     ) {
       return true
     }
@@ -373,6 +373,10 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'visibility: collapse'`
   }
 
+  if ($elements.isDetached($el)) {
+    return `This element '${node}' is not visible because it is detached from the DOM`
+  }
+
   if (elHasVisibilityHidden($el)) {
     return `This element '${node}' is not visible because it has CSS property: 'visibility: hidden'`
   }
@@ -419,6 +423,8 @@ module.exports = {
   isVisible,
 
   isHidden,
+
+  parentHasDisplayNone,
 
   getReasonIsHidden,
 }

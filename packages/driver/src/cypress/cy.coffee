@@ -83,7 +83,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   location = $Location.create(state)
   focused = $Focused.create(state)
   keyboard = $Keyboard.create(state)
-  mouse = $Mouse.create(state, keyboard)
+  mouse = $Mouse.create(state, keyboard, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -537,8 +537,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
     if state("runnable")
-      ## make sure we don't ever time out this runnable now
-      timeouts.clearTimeout()
+      ## make sure we reset the runnable's timeout now
+      state("runnable").resetTimeout()
 
     ## if a command fails then after each commands
     ## could also fail unless we clear this out
@@ -680,7 +680,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
-    ensureReceivability: ensures.ensureReceivability
+    ensureNotReadonly: ensures.ensureNotReadonly
+    ensureNotDisabled: ensures.ensureNotDisabled
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
     ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating

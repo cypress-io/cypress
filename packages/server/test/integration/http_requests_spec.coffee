@@ -3,7 +3,9 @@ require("../spec_helper")
 _             = require("lodash")
 r             = require("request")
 rp            = require("request-promise")
+compression   = require("compression")
 dns           = require("dns")
+express       = require("express")
 http          = require("http")
 path          = require("path")
 url           = require("url")
@@ -53,6 +55,8 @@ browserifyFile = (filePath) ->
   )
 
 describe "Routes", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -269,8 +273,12 @@ describe "Routes", ->
         @rp("http://localhost:9999/__")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include("version")
-          expect(res.body).to.include(pkg.version)
+
+          base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include("version")
+          expect(configStr).to.include(pkg.version)
 
   context "GET /__cypress/runner/*", ->
     beforeEach ->
@@ -1002,6 +1010,44 @@ describe "Routes", ->
           expect(res.body).to.include("gzip")
           expect(res.body).not.to.include("document.domain = 'github.com'")
           expect(res.body).to.include("</html>")
+
+      ## https://github.com/cypress-io/cypress/issues/1746
+      it "can ungzip utf-8 javascript and inject without corrupting it", ->
+        js = ""
+
+        app = express()
+
+        app.use compression({ chunkSize: 64, threshold: 1 })
+
+        app.get "/", (req, res) =>
+          res.setHeader('content-type', 'application/javascript; charset=UTF-8')
+          res.setHeader('transfer-encoding', 'chunked')
+
+          write = (chunk) =>
+            js += chunk
+            res.write(chunk)
+
+          write("function ")
+          _.times 100, =>
+            write("😡😈".repeat(10))
+          write(" () { }")
+          res.end()
+
+        server = http.createServer(app)
+
+        Promise.fromCallback (cb) =>
+          server.listen(12345, cb)
+        .then =>
+          @rp({
+            url: "http://localhost:12345"
+            gzip: true
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.deep.eq(js)
+        .finally =>
+          Promise.fromCallback (cb) =>
+            server.close(cb)
 
     context "accept-encoding", ->
       beforeEach ->
@@ -2615,20 +2661,6 @@ describe "Routes", ->
               ## shouldn't be more than 500ms
               expect(reqTime).to.be.lt(500)
 
-              # b = res.body
-              #
-              # console.time("1")
-              # b.replace(topOrParentEqualityBeforeRe, "$self")
-              # console.timeEnd("1")
-              #
-              # console.time("2")
-              # b.replace(topOrParentEqualityAfterRe, "self$2")
-              # console.timeEnd("2")
-              #
-              # console.time("3")
-              # b.replace(topOrParentLocationOrFramesRe, "$1self$3$4")
-              # console.timeEnd("3")
-
       describe "off with config", ->
         beforeEach ->
           @setup("http://www.google.com", {
@@ -3119,7 +3151,7 @@ describe "Routes", ->
       afterEach ->
         @httpSrv.close()
 
-      [204, 304, 101, 102, 103].forEach (status) ->
+      [204, 304].forEach (status) ->
         it "passes through a #{status} response immediately", ->
           @rp({
             url: "http://localhost:#{@port}/?status=#{status}"
