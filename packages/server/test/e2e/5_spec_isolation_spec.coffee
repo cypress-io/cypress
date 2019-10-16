@@ -225,5 +225,5 @@ describe "e2e spec_isolation", ->
 
           expectRunsToHaveCorrectStats(json.runs)
 
-          snapshot(json)
+          snapshot('e2e spec isolation fails', json, { allowSharedSnapshot: true })
   }
