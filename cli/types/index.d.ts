@@ -48,9 +48,12 @@ declare namespace Cypress {
   interface ObjectLike {
     [key: string]: any
   }
-  interface Auth {
+  interface BasicAuth {
     username: string
     password: string
+  }
+  interface BearerAuth {
+    bearer: string
   }
 
   /**
@@ -2381,7 +2384,7 @@ declare namespace Cypress {
      *      }
      *    })
      */
-    auth: Auth
+    auth: BasicAuth | BearerAuth
 
     /**
      * Query parameters to append to the `url` of the request.
