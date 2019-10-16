@@ -127,14 +127,14 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaugh    (2400x1720)
+  -  /XXX/XXX/XXX/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaugh          (YxX)
      t error was detected outside of a test (failed).png                                            
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/commands_outside_of_test_spec.c     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/commands_outside_of_test_spec.c     (X second)
                           offee.mp4                                                                 
 
 
@@ -209,7 +209,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/    (2400x1720)
+  -  /XXX/XXX/XXX/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/          (YxX)
      An uncaught error was detected outside of a test (failed).png                                  
 
 
