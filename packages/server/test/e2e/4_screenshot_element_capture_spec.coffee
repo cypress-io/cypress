@@ -21,6 +21,6 @@ describe "e2e screenshot element capture", ->
   e2e.it "passes", {
     spec: "screenshot_element_capture_spec.coffee"
     expectedExitCode: 0
-    keepScreenshotDimensions: true
+    sanitizeScreenshotDimensions: false
     snapshot: true
   }

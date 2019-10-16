@@ -101,7 +101,7 @@ normalizeStdout = (str, options = {}) ->
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3") ## fix "Require stacks" for CI
 
-  if not options.keepScreenshotDimensions
+  if options.sanitizeScreenshotDimensions
     str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") ## screenshot dimensions
 
   return str.split("\n")
@@ -292,6 +292,7 @@ module.exports = e2e = {
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
       originalTitle: null
+      sanitizeScreenshotDimensions: true
     })
 
     ctx.timeout(options.timeout)
