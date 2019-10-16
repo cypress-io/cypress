@@ -43,7 +43,7 @@ exports['e2e user agent passes on chrome 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4         (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/user_agent_spec.coffee.mp4         (X seconds)
 
 
 ====================================================================================================
@@ -105,7 +105,7 @@ exports['e2e user agent passes on electron 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4         (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/user_agent_spec.coffee.mp4         (X seconds)
 
 
 ====================================================================================================

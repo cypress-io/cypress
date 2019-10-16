@@ -121,7 +121,7 @@ The internal Cypress web server responded with:
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -266,7 +266,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_passing_spec.coffee.mp4      (X seconds)
 
 
 ====================================================================================================
@@ -384,7 +384,7 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4             (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_spec.coffee.mp4             (X seconds)
 
 
 ====================================================================================================

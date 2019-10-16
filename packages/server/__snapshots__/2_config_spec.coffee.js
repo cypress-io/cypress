@@ -48,7 +48,7 @@ exports['e2e config passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -134,7 +134,7 @@ exports['e2e config fails 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_failing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================

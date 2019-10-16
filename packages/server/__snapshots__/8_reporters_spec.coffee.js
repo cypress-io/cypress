@@ -58,7 +58,7 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -113,7 +113,7 @@ finished!
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -180,7 +180,7 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -362,7 +362,7 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -542,7 +542,7 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================
@@ -761,7 +761,7 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4     (X seconds)
 
 
 ====================================================================================================

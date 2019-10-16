@@ -60,7 +60,7 @@ exports['e2e promises failing1 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4           (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/promises_spec.coffee.mp4           (X seconds)
 
 
 ====================================================================================================

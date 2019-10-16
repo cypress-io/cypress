@@ -53,7 +53,7 @@ exports['e2e requests passes in electron 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4            (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.coffee.mp4            (X seconds)
 
 
 ====================================================================================================
@@ -125,7 +125,7 @@ exports['e2e requests passes in chrome 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4             (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.coffee.mp4            (X seconds)
 
 
 ====================================================================================================

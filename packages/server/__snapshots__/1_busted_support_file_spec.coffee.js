@@ -48,7 +48,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4                (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                (X seconds)
 
 
 ====================================================================================================

@@ -62,7 +62,7 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4         (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4         (X seconds)
 
 
 ====================================================================================================
@@ -124,7 +124,7 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4         (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4         (X seconds)
 
 
 ====================================================================================================

@@ -54,12 +54,12 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4       (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.coffee.mp4       (X seconds)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/record_error_spec.coffee.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -108,13 +108,13 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.coffee.mp4        (X seconds)
 
 
   (Uploading Results)
 
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_fail_spec.coffee.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -210,13 +210,13 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.coffee.mp4    (X seconds)
 
 
   (Uploading Results)
 
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_uncaught_spec.coffee.mp4
 
 ====================================================================================================
 
@@ -735,13 +735,13 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_pass_spec.coffee.mp4        (X seconds)
 
 
   (Uploading Results)
 
   - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
-  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_pass_spec.coffee.mp4
 
 ====================================================================================================
 
@@ -981,12 +981,12 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4       (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.coffee.mp4       (X seconds)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/record_error_spec.coffee.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -1035,13 +1035,13 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4        (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.coffee.mp4        (X seconds)
 
 
   (Uploading Results)
 
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.coffee/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_fail_spec.coffee.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -1097,13 +1097,13 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.coffee.mp4    (X seconds)
 
 
   (Uploading Results)
 
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.coffee/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_uncaught_spec.coffee.mp4
 
 ====================================================================================================
 

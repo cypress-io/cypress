@@ -56,7 +56,7 @@ exports['e2e visit low response timeout passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/abc123.mp4              (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_spec.coffee.mp4              (X seconds)
 
 
 ====================================================================================================
