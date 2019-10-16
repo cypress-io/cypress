@@ -375,7 +375,6 @@ const isFocusedOrInFocused = (el) => {
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
     return true
   }
-
 }
 
 const isElement = function (obj) {
@@ -452,7 +451,6 @@ const getAllParents = (el) => {
   }
 
   return allParents
-
 }
 
 const isChild = ($el, $maybeChild) => {
@@ -788,7 +786,6 @@ const getElements = ($el) => {
   }
 
   return els
-
 }
 
 const getContainsSelector = (text, filter = '') => {
