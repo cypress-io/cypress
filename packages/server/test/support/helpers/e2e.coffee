@@ -101,7 +101,8 @@ normalizeStdout = (str, options = {}) ->
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3") ## fix "Require stacks" for CI
 
-  str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") ## screenshot dimensions
+  if not options.keepScreenshotDimensions
+    str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") ## screenshot dimensions
 
   return str.split("\n")
     .map(replaceStackTraceLines)
@@ -413,15 +414,7 @@ module.exports = e2e = {
 
         str = normalizeStdout(stdout, options)
 
-        args = _.compact([options.originalTitle, str])
-
-        try
-          snapshot(args...)
-        catch err
-          ## if this error is from a duplicated snapshot key then
-          ## ignore it else throw
-          if not err.duplicateSnapshotKey
-            throw err
+        snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
 
       return {
         code:   code
