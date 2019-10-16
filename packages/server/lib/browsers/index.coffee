@@ -114,7 +114,6 @@ module.exports = {
         ## or move this functionality into cypress-core-launder
         
         instance = i
-        debug('instance', instance)
         ## TODO: normalizing opening and closing / exiting
         ## so that there is a default for each browser but
         ## enable the browser to configure the interface
@@ -138,8 +137,5 @@ module.exports = {
           options.onBrowserOpen()
 
           return instance
-    # .catch (err) ->
-    #   debug("Error launching #{name}:", err)
-    #   throw err
 
 }

@@ -1,6 +1,5 @@
 http       = require("http")
 path       = require("path")
-request    = require("request")
 httpsProxy = require("../../lib/proxy")
 
 prx = null

@@ -98,8 +98,6 @@ module.exports = {
       setProxy = =>
         if ps = options.proxyServer
           @_setProxy(win.webContents, ps)
-        # if pacUrl = options.pacUrl
-        #   @_setPacUrl(win.webContents, pacUrl)
 
       Promise.join(
         setProxy(),
@@ -150,22 +148,11 @@ module.exports = {
     new Promise (resolve) ->
       webContents.session.setProxy({
         proxyRules: proxyServer
-        ## this should really only be necessary when
+        ## this should really only be necessary when 
         ## running Chromium versions >= 72
         ## https://github.com/cypress-io/cypress/issues/1872
         proxyBypassRules: "<-loopback>"
       }, resolve)
-
-  # _setPacUrl: (webContents, pacUrl) ->
-  #   new Promise (resolve) ->
-  #     webContents.session.setProxy({
-  #       proxyRules: proxyServer
-  #       ## this should really only be necessary when
-  #       ## running Chromium versions >= 72
-  #       ## https://github.com/cypress-io/cypress/issues/1872
-  #       proxyBypassRules: "<-loopback>"
-  #       pacScript: pacUrl
-  #     }, resolve)
 
   open: (browser, url, options = {}, automation) ->
     { projectRoot, isTextTerminal } = options
@@ -235,7 +222,7 @@ module.exports = {
                 throw new Error("No automation handler registered for: '#{message}'")
         })
 
-        events = new EE()
+        events = new EE
 
         win.once "closed", ->
           debug("closed event fired")

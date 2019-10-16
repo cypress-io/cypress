@@ -52,13 +52,6 @@ export const browsers: Browser[] = [
     profile: true,
     binary: 'firefox-nightly',
   },
-  // {
-  //   name: 'ie',
-  //   displayName: 'IE',
-  //   versionRegex: /.*/,
-  //   profile: false,
-  //   binary: 'iexplorer',
-  // },
 ]
 
 /** starts a found browser and opens URL if given one */

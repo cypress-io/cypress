@@ -83,7 +83,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   location = $Location.create(state)
   focused = $Focused.create(state)
   keyboard = new $Keyboard(state)
-  mouse = $Mouse.create(state, focused)
+  mouse = $Mouse.create(state, focused, Cypress)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)

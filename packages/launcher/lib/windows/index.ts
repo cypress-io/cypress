@@ -148,6 +148,3 @@ export function getVersionString (path: string) {
 export function detect (browser: Browser) {
   return getWindowsBrowser(browser.name)
 }
-
-// Get version of IE:
-// $ reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Internet Explorer" //v svcVersion

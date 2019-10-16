@@ -26,6 +26,8 @@ const focusEvents = ['focus', 'focusin']
 
 const allMouseEvents = [...mouseClickEvents, ...mouseHoverEvents, ...focusEvents]
 
+const isFirefox = Cypress.browser.family === 'firefox'
+
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -381,11 +383,9 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('events when element removed on pointerover', () => {
-      const btn = cy.$$('button:first')
-      const div = cy.$$('<div tabindex="true" style="height:80px"></div>').insertAfter(btn)
-      // const div = cy.$$('div#tabindex')
+      const btn = cy.$$('button:first').css({ transform: 'translateY(-50px)' })
+      const div = cy.$$('div#tabindex')
 
-      // attachFocusListeners({ btn })
       attachMouseClickListeners({ btn, div })
       attachMouseHoverListeners({ btn, div })
 
@@ -403,8 +403,8 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('events when element removed on pointerdown', () => {
-      const btn = cy.$$('button:first')
-      const div = cy.$$('<div tabindex="true" style="height:80px"></div>').insertAfter(btn)
+      const btn = cy.$$('button:first').css({ transform: 'translateY(-50px)' })
+      const div = cy.$$('div#tabindex')
 
       attachFocusListeners({ btn })
       attachMouseClickListeners({ btn, div })
@@ -2945,8 +2945,7 @@ describe('src/cy/commands/actions/click', () => {
 
     it('can rightclick disabled with force', () => {
       const el = cy.$$('input:first')
-
-      el.get(0).disabled = true
+      .prop('disabled', true)
 
       attachMouseClickListeners({ el })
       attachFocusListeners({ el })
@@ -2955,7 +2954,9 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('input:first').rightclick({ force: true })
 
       cy.getAll('el', 'mousedown contextmenu mouseup').each(shouldNotBeCalled)
-      cy.getAll('el', 'pointerdown pointerup').each(shouldNotBeCalled)
+
+      cy.getAll('el', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
+
     })
 
     it('rightclick cancel contextmenu', () => {
@@ -3026,7 +3027,7 @@ describe('src/cy/commands/actions/click', () => {
 
     it('rightclick remove el on mouseover', () => {
       const el = cy.$$('button:first')
-      const el2 = cy.$$('<div tabindex="true" style="height:80px"></div>').insertAfter(el)
+      const el2 = cy.$$('div#tabindex')
 
       el.on('mouseover', () => el.get(0).remove())
 
@@ -3758,7 +3759,7 @@ describe('mouse state', () => {
 
       cy.get('#btn').click()
 
-      if (Cypress.browser.family === 'firefox') {
+      if (isFirefox) {
         cy.getAll('btn', 'pointerdown pointerup').each((stub) => {
           expect(stub).not.be.calledOnce
         })
@@ -3799,7 +3800,7 @@ describe('mouse state', () => {
 
       cy.get('#btn').click()
 
-      if (Cypress.browser.family === 'firefox') {
+      if (isFirefox) {
         cy.getAll('btn', 'pointerdown mousedown').each(shouldBeCalledOnce)
       } else {
         cy.getAll('btn', 'pointerdown mousedown pointerup').each(shouldBeCalledOnce)
@@ -3873,7 +3874,7 @@ describe('mouse state', () => {
       })
 
       // Chrome: on disabled inputs, pointer events are still fired
-      if (Cypress.browser.family === 'chrome') {
+      if (Cypress.browser.family !== 'firefox') {
         cy.getAll('@pointerdown @pointerup').each(shouldBeCalledOnce)
       } else {
         cy.getAll('@pointerdown @pointerup').each(shouldNotBeCalled)

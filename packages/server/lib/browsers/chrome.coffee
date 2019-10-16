@@ -158,9 +158,6 @@ module.exports = {
     if ua = options.userAgent
       args.push("--user-agent=#{ua}")
 
-    # if pacUrl = options.pacUrl
-      # args.push("--proxy-pac-url=#{pacUrl}")
-
     if ps = options.proxyServer
       args.push("--proxy-server=#{ps}")
 
@@ -201,7 +198,6 @@ module.exports = {
       ])
     .spread (cacheDir, args) =>
       Promise.all([
-        # utils.writeExtension(
         @_writeExtension(
           browser,
           isTextTerminal,
