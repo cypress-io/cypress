@@ -37,7 +37,7 @@ executors:
       PLATFORM: mac
 
 commands:
-  run-e2e-test:
+  run-e2e-tests:
     parameters:
       browser:
         description: browser shortname to target
