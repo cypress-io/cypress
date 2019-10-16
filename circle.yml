@@ -55,26 +55,6 @@ commands:
           path: /tmp/cypress
       - store-npm-logs
 
-  run-e2e-tests-chrome:
-    parameters:
-      chunk:
-        description: e2e test chunk number
-        type: integer
-    steps:
-      - run-e2e-test:
-          browser: chrome
-          chunk: << parameters.chunk >>
-
-  run-e2e-tests-electron:
-    parameters:
-      chunk:
-        description: e2e test chunk number
-        type: integer
-    steps:
-      - run-e2e-test:
-          browser: electron
-          chunk: << parameters.chunk >>
-
   store-npm-logs:
     description: Saves any NPM debug logs as artifacts in case there is a problem
     steps:
@@ -372,97 +352,113 @@ jobs:
   "server-e2e-tests-chrome-1":
     <<: *defaults
     steps:
-      - run-e2e-tests-chrome:
+      - run-e2e-tests:
+          browser: chrome
           chunk: 1
 
   "server-e2e-tests-chrome-2":
     <<: *defaults
     steps:
-      - run-e2e-tests-chrome:
+      - run-e2e-tests:
+          browser: chrome
           chunk: 2
 
   "server-e2e-tests-chrome-3":
     <<: *defaults
     steps:
-      - run-e2e-tests-chrome:
+      - run-e2e-tests:
+          browser: chrome
           chunk: 3
 
   "server-e2e-tests-chrome-4":
     <<: *defaults
     steps:
-      - run-e2e-tests-chrome:
+      - run-e2e-tests:
+          browser: chrome
           chunk: 4
 
   "server-e2e-tests-chrome-5":
     <<: *defaults
     steps:
-      - run-e2e-tests-chrome:
+      - run-e2e-tests:
+          browser: chrome
           chunk: 5
 
   "server-e2e-tests-chrome-6":
     <<: *defaults
     steps:
-      - run-e2e-tests-chrome:
+      - run-e2e-tests:
+          browser: chrome
           chunk: 6
 
   "server-e2e-tests-chrome-7":
     <<: *defaults
     steps:
-      - run-e2e-tests-chrome:
+      - run-e2e-tests:
+          browser: chrome
           chunk: 7
 
   "server-e2e-tests-chrome-8":
     <<: *defaults
     steps:
-      - run-e2e-tests-chrome:
+      - run-e2e-tests:
+          browser: chrome
           chunk: 8
 
   "server-e2e-tests-electron-1":
     <<: *defaults
     steps:
-      - run-e2e-tests-electron:
+      - run-e2e-tests:
+          browser: electron
           chunk: 1
 
   "server-e2e-tests-electron-2":
     <<: *defaults
     steps:
-      - run-e2e-tests-electron:
+      - run-e2e-tests:
+          browser: electron
           chunk: 2
 
   "server-e2e-tests-electron-3":
     <<: *defaults
     steps:
-      - run-e2e-tests-electron:
+      - run-e2e-tests:
+          browser: electron
           chunk: 3
 
   "server-e2e-tests-electron-4":
     <<: *defaults
     steps:
-      - run-e2e-tests-electron:
+      - run-e2e-tests:
+          browser: electron
           chunk: 4
 
   "server-e2e-tests-electron-5":
     <<: *defaults
     steps:
-      - run-e2e-tests-electron:
+      - run-e2e-tests:
+          browser: electron
           chunk: 5
 
   "server-e2e-tests-electron-6":
     <<: *defaults
     steps:
-      - run-e2e-tests-electron:
+      - run-e2e-tests:
+          browser: electron
           chunk: 6
 
   "server-e2e-tests-electron-7":
     <<: *defaults
     steps:
-      - run-e2e-tests-electron:
+      - run-e2e-tests:
+          browser: electron
           chunk: 7
 
   "server-e2e-tests-electron-8":
     <<: *defaults
     steps:
-      - run-e2e-tests-electron:
+      - run-e2e-tests:
+          browser: electron
           chunk: 8
 
   "driver-integration-tests-chrome":
