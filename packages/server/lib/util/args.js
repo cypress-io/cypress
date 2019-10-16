@@ -30,7 +30,6 @@ const normalizeBackslash = function (s) {
   }
 
   return s
-
 }
 
 const normalizeBackslashes = function (options) {

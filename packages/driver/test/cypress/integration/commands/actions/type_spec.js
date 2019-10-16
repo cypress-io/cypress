@@ -1013,7 +1013,6 @@ describe('src/cy/commands/actions/type', () => {
 
       it('automatically moves the caret to the end if value is changed manually asynchronously', () => {
         cy.$$('#input-without-value').keypress((e) => {
-
           const $input = $(e.target)
 
           _.defer(() => {
@@ -1524,7 +1523,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('specialChars', () => {
-
       context('parseSpecialCharSequences: false', () => {
         it('types special character sequences literally', (done) => {
           cy.get(':text:first').invoke('val', 'foo')
@@ -2538,9 +2536,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('modifiers', () => {
-
       describe('activating modifiers', () => {
-
         it('sends keydown event for modifiers in order', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -2680,7 +2676,6 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       describe('release: false', () => {
-
         it('maintains modifiers for subsequent type commands', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -2798,7 +2793,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('case-insensitivity', () => {
-
       it('special chars are case-insensitive', () => {
         cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {
           expect($input).to.have.value('ba')
@@ -3209,7 +3203,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('caret position', () => {
-
       it('respects being formatted by input event handlers')
 
       it('accurately returns host contenteditable attr', () => {
@@ -3266,7 +3259,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('inside textarea', () => {
-
           cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <textarea id="foo"></textarea>\
@@ -3278,7 +3270,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('inside contenteditable', () => {
-
           cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <div id="foo" contenteditable> \
@@ -4042,7 +4033,6 @@ describe('src/cy/commands/actions/type', () => {
           if (log.get('name') === 'type') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('$el').get(0)).to.eq($txt.get(0))
-
           }
         })
 

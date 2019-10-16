@@ -17,7 +17,6 @@ export default {
     }
 
     return ''
-
   },
 
   absoluteSpecPath (config) {

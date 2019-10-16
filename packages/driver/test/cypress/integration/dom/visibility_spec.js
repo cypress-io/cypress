@@ -53,7 +53,6 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     it('returns false window and body > window height', () => {
-
       cy.$$('body').html('<div>foo</div>')
 
       const win = cy.state('window')
