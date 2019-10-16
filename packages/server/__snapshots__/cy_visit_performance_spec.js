@@ -100,7 +100,7 @@ exports['cy.visit performance tests pass in electron 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  fast_visit_spec.coffee...                                                       (1 of 1)
+  Running:  fast_visit_spec.coffee                                                          (1 of 1)
 
 
   on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
