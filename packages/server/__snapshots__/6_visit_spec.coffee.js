@@ -469,6 +469,129 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
 `
 
+exports['e2e visit / normal response timeouts / fails when visit times out'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (visit_http_timeout_failing_spec.coffee)                                   │
+  │ Searched:   cypress/integration/visit_http_timeout_failing_spec.coffee                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1) 
+
+
+  when visit times out
+    1) fails timeout exceeds pageLoadTimeout
+    2) fails timeout exceeds timeout option
+
+
+  0 passing
+  2 failing
+
+  1) when visit times out fails timeout exceeds pageLoadTimeout:
+     CypressError: Timed out after waiting '1000ms' for your remote page to load.
+
+Your page did not fire its 'load' event within '1000ms'.
+
+You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+
+Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+
+When this 'load' event occurs, Cypress will continue running commands.
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+  2) when visit times out fails timeout exceeds timeout option:
+     CypressError: Timed out after waiting '500ms' for your remote page to load.
+
+Your page did not fire its 'load' event within '500ms'.
+
+You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+
+Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+
+When this 'load' event occurs, Cypress will continue running commands.
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+
+
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────────────────┐
+  │ Tests:        2                                      │
+  │ Passing:      0                                      │
+  │ Failing:      2                                      │
+  │ Pending:      0                                      │
+  │ Skipped:      0                                      │
+  │ Screenshots:  2                                      │
+  │ Video:        true                                   │
+  │ Duration:     X seconds                              │
+  │ Spec Ran:     visit_http_timeout_failing_spec.coffee │
+  └──────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds pageLoadTimeout (failed).png (YYYYxZZZZ)
+  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds timeout option (failed).png (YYYYxZZZZ)
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖ visit_http_timeout_failing_spec.coff…     XX:XX        2        -        2        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+
+
+`
+
 exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when response never ends'] = `
 
 ====================================================================================================
@@ -673,129 +796,6 @@ Error: ESOCKETTIMEDOUT
   │ ✖ visit_response_never_ends_failing_sp…     XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
-
-
-`
-
-exports['e2e visit / normal response timeouts / fails when visit times out'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (visit_http_timeout_failing_spec.coffee)                                   │
-  │ Searched:   cypress/integration/visit_http_timeout_failing_spec.coffee                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1) 
-
-
-  when visit times out
-    1) fails timeout exceeds pageLoadTimeout
-    2) fails timeout exceeds timeout option
-
-
-  0 passing
-  2 failing
-
-  1) when visit times out fails timeout exceeds pageLoadTimeout:
-     CypressError: Timed out after waiting '1000ms' for your remote page to load.
-
-Your page did not fire its 'load' event within '1000ms'.
-
-You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
-
-Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
-
-When this 'load' event occurs, Cypress will continue running commands.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-
-  2) when visit times out fails timeout exceeds timeout option:
-     CypressError: Timed out after waiting '500ms' for your remote page to load.
-
-Your page did not fire its 'load' event within '500ms'.
-
-You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
-
-Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
-
-When this 'load' event occurs, Cypress will continue running commands.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-
-
-
-
-  (Results)
-
-  ┌──────────────────────────────────────────────────────┐
-  │ Tests:        2                                      │
-  │ Passing:      0                                      │
-  │ Failing:      2                                      │
-  │ Pending:      0                                      │
-  │ Skipped:      0                                      │
-  │ Screenshots:  2                                      │
-  │ Video:        true                                   │
-  │ Duration:     X seconds                              │
-  │ Spec Ran:     visit_http_timeout_failing_spec.coffee │
-  └──────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds pageLoadTimeout (failed).png (YYYYxZZZZ)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds timeout option (failed).png (YYYYxZZZZ)
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_http_timeout_failing_spec.coff…     XX:XX        2        -        2        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
 
 
 `
