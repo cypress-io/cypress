@@ -179,7 +179,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
 `
 
-exports['e2e plugins works with user extensions 1'] = `
+exports['e2e plugins / works with user extensions'] = `
 
 ====================================================================================================
 

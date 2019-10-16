@@ -337,7 +337,7 @@ A video will not be recorded when using this mode.
 
 `
 
-exports['e2e stdout logs that chrome cannot be recorded 1'] = `
+exports['e2e stdout / logs that chrome cannot be recorded'] = `
 
 ====================================================================================================
 
