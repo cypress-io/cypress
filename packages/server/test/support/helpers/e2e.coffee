@@ -292,7 +292,7 @@ module.exports = e2e = {
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
       originalTitle: null
-      sanitizeScreenshotDimensions: true
+      sanitizeScreenshotDimensions: false
     })
 
     ctx.timeout(options.timeout)
