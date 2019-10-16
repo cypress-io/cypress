@@ -70,7 +70,7 @@ replaceDurationInTables = (str, p1, p2) ->
   _.padStart("XX:XX", p1.length + p2.length)
 
 replaceParenTime = (str, p1) ->
-  return _.padStart("(X seconds)", p1.length)
+  return _.padEnd("(X seconds)", p1.length)
 
 replaceUploadingResults = (orig, match..., offset, string) ->
   results = match[1].split('\n').map((res) ->
@@ -111,10 +111,6 @@ normalizeStdout = (str, options = {}) ->
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) 
   ## fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3") 
-
-  if options.browser isnt undefined and options.browser isnt 'electron'
-    ## screenshot dimensions
-    str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") 
 
   return str.split("\n")
     .map(replaceStackTraceLines)
