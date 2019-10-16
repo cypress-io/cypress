@@ -414,7 +414,10 @@ module.exports = e2e = {
 
         str = normalizeStdout(stdout, options)
 
-        snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+        if options.originalTitle
+          snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+        else
+          snapshot(str)
 
       return {
         code:   code
