@@ -133,7 +133,6 @@ describe "lib/modes/run", ->
   context ".launchBrowser", ->
     beforeEach ->
       @launch = sinon.stub(openProject, "launch")
-      sinon.stub(runMode, "getElectronProps").returns({foo: "bar"})
       sinon.stub(runMode, "screenshotMetadata").returns({a: "a"})
 
     it "can launch electron", ->
@@ -143,7 +142,11 @@ describe "lib/modes/run", ->
         absolute: "/path/to/spec"
       }
 
-      browser = { name: "electron", isHeaded: false }
+      browser = {
+        name: "electron",
+        family: "electron",
+        isHeaded: false
+      }
 
       runMode.launchBrowser({
         spec
@@ -153,9 +156,7 @@ describe "lib/modes/run", ->
         screenshots: screenshots
       })
 
-      expect(runMode.getElectronProps).to.be.calledWith(false, @projectInstance, "write")
-
-      expect(@launch).to.be.calledWithMatch(browser, spec, { foo: "bar" })
+      expect(@launch).to.be.calledWithMatch(browser, spec)
 
       browserOpts = @launch.firstCall.args[2]
 
@@ -173,14 +174,16 @@ describe "lib/modes/run", ->
         absolute: "/path/to/spec"
       }
 
-      browser = { name: "chrome", isHeaded: true }
+      browser = {
+        name: "chrome",
+        family: "chrome",
+        isHeaded: true
+      }
 
       runMode.launchBrowser({
         spec
         browser
       })
-
-      expect(runMode.getElectronProps).not.to.be.called
 
       expect(@launch).to.be.calledWithMatch(browser, spec, {})
 
@@ -215,6 +218,15 @@ describe "lib/modes/run", ->
       runMode.postProcessRecording(endVideoCapture, "foo", "foo-compress", 32, false)
       .then ->
         expect(videoCapture.process).not.to.be.called
+
+    it "logs a warning on failure and resolves", ->
+      sinon.stub(errors, 'warning')
+      end = sinon.stub().rejects()
+
+      runMode.postProcessRecording(end)
+      .then ->
+        expect(end).to.be.calledOnce
+        expect(errors.warning).to.be.calledWith('VIDEO_POST_PROCESSING_FAILED')
 
   context ".waitForBrowserToConnect", ->
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
@@ -527,10 +539,18 @@ describe "lib/modes/run", ->
       .then ->
         expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_HEADED")
 
-    it "disables video recording for non-electron browser", ->
+    it "throws an error if invalid browser family supplied", ->
+      browser = { name: "opera", family: "opera - btw when is Opera support coming?" }
+
+      sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves(browser)
+
+      expect(runMode.run({browser: "opera"}))
+      .to.be.rejectedWith(/invalid browser family in/)
+
+    it "shows no warnings for chrome browser", ->
       runMode.run({browser: "chrome"})
       .then ->
-        expect(errors.warning).to.be.calledWith("CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER")
+        expect(errors.warning).to.not.be.called
 
     it "names video file with spec name", ->
       runMode.run()
@@ -554,7 +574,8 @@ describe "lib/modes/run", ->
       sinon.stub(browsers, "ensureAndGetByNameOrPath").resolves({
         name: "fooBrowser",
         path: "path/to/browser"
-        version: "777"
+        version: "777",
+        family: "electron"
       })
       sinon.stub(runMode, "waitForSocketConnection").resolves()
       sinon.stub(runMode, "waitForTestsToFinishRunning").resolves({
@@ -606,7 +627,7 @@ describe "lib/modes/run", ->
         })
 
     it "passes headed to openProject.launch", ->
-      browser = { name: "electron" }
+      browser = { name: "electron", family: "electron" }
 
       browsers.ensureAndGetByNameOrPath.resolves(browser)
 

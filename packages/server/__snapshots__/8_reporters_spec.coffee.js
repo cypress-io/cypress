@@ -713,6 +713,7 @@ Error: this reporter threw an error
     at stack trace line
     at stack trace line
     at stack trace line
+    at stack trace line
 
 Learn more at https://on.cypress.io/reporters
 

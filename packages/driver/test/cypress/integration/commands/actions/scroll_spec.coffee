@@ -47,7 +47,7 @@ describe "src/cy/commands/actions/scroll", ->
 
       it "can use window", ->
         cy.window().scrollTo("10px").then (win) ->
-          expect(win.pageXOffset).to.eq(10)
+          expect(win.scrollX).to.eq(10)
 
       it "can handle window w/length > 1 as a subject", ->
         cy.visit('/fixtures/dom.html')
@@ -479,31 +479,31 @@ describe "src/cy/commands/actions/scroll", ->
         expect($div).to.match div
 
     it "scrolls x axis of window to element", ->
-      expect(@win.pageYOffset).to.eq(0)
-      expect(@win.pageXOffset).to.eq(0)
+      expect(@win.scrollY).to.eq(0)
+      expect(@win.scrollX).to.eq(0)
 
       cy.get("#scroll-into-view-win-horizontal div").scrollIntoView()
       cy.window().then (win) ->
-        expect(win.pageYOffset).to.eq(0)
-        expect(win.pageXOffset).not.to.eq(0)
+        expect(win.scrollY).to.eq(0)
+        expect(win.scrollX).not.to.eq(0)
 
     it "scrolls y axis of window to element", ->
-      expect(@win.pageYOffset).to.eq(0)
-      expect(@win.pageXOffset).to.eq(0)
+      expect(@win.scrollY).to.eq(0)
+      expect(@win.scrollX).to.eq(0)
 
       cy.get("#scroll-into-view-win-vertical div").scrollIntoView()
       cy.window().then (win) ->
-        expect(win.pageYOffset).not.to.eq(0)
-        expect(win.pageXOffset).to.eq(200)
+        expect(win.scrollY).not.to.eq(0)
+        expect(win.scrollX).to.eq(200)
 
     it "scrolls both axes of window to element", ->
-      expect(@win.pageYOffset).to.eq(0)
-      expect(@win.pageXOffset).to.eq(0)
+      expect(@win.scrollY).to.eq(0)
+      expect(@win.scrollX).to.eq(0)
 
       cy.get("#scroll-into-view-win-both div").scrollIntoView()
       cy.window().then (win) ->
-        expect(win.pageYOffset).not.to.eq(0)
-        expect(win.pageXOffset).not.to.eq(0)
+        expect(win.scrollY).not.to.eq(0)
+        expect(win.scrollX).not.to.eq(0)
 
     it "scrolls x axis of container to element", ->
       expect(@scrollHoriz.get(0).scrollTop).to.eq(0)

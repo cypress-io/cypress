@@ -96,8 +96,6 @@ normalizeStdout = (str, options = {}) ->
    ## 12:35 -> XX:XX
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
-  ## replace dynamic video names
-  .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") 
   ## Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") 
   ## Node Version: 10.2.3 (Users/jane/node) -> Node Version: XXXXX (foo/bar/node)
