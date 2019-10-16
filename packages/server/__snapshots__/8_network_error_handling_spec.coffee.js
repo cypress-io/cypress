@@ -62,7 +62,7 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4         (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -124,7 +124,7 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4         (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -185,7 +185,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
                           .js.mp4                                                                   
 
 
@@ -247,7 +247,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
                           .js.mp4                                                                   
 
 
@@ -309,7 +309,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
                           .js.mp4                                                                   
 
 

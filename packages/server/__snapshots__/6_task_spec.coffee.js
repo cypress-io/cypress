@@ -41,7 +41,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations_spe    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations_spe     (X second)
                           c.coffee.mp4                                                              
 
 
@@ -172,7 +172,7 @@ https://on.cypress.io/api/task
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_spec.coffee.mp4               (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_spec.coffee.mp4                (X second)
 
 
 ====================================================================================================

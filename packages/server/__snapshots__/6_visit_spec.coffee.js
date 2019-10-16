@@ -56,7 +56,7 @@ exports['e2e visit low response timeout passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_spec.coffee.mp4              (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_spec.coffee.mp4               (X second)
 
 
 ====================================================================================================
@@ -163,7 +163,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_network_error_failin    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_network_error_failin     (X second)
                           g_spec.coffee.mp4                                                         
 
 
@@ -262,7 +262,7 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing     (X second)
                           _spec.coffee.mp4                                                          
 
 
@@ -361,7 +361,7 @@ The internal Cypress web server responded with:
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing     (X second)
                           _spec.coffee.mp4                                                          
 
 
@@ -462,7 +462,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_fai    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_fai     (X second)
                           ling_spec.coffee.mp4                                                      
 
 
@@ -589,7 +589,7 @@ When this 'load' event occurs, Cypress will continue running commands.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing_spec    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing_spec     (X second)
                           .coffee.mp4                                                               
 
 
@@ -805,7 +805,7 @@ Error: ESOCKETTIMEDOUT
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_faili    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_faili     (X second)
                           ng_spec.js.mp4                                                            
 
 

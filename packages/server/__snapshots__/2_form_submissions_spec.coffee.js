@@ -49,7 +49,7 @@ exports['e2e forms <form> submissions passes with http on localhost 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X second)
                           coffee.mp4                                                                
 
 
@@ -119,7 +119,7 @@ exports['e2e forms <form> submissions passes with https on localhost 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X second)
                           coffee.mp4                                                                
 
 
@@ -209,7 +209,7 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing_spec.co    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing_spec.co     (X second)
                           ffee.mp4                                                                  
 
 
@@ -272,7 +272,7 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing_spec.co    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing_spec.co     (X second)
                           ffee.mp4                                                                  
 
 

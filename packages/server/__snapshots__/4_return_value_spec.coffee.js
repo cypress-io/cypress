@@ -113,7 +113,7 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/return_value_spec.coffee.mp4       (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/return_value_spec.coffee.mp4        (X second)
 
 
 ====================================================================================================

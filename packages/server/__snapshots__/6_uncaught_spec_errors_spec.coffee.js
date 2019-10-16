@@ -64,7 +64,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_before_tes    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_before_tes     (X second)
                           ts_parsed.coffee.mp4                                                      
 
 
@@ -150,7 +150,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_during_hoo    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_during_hoo     (X second)
                           k_spec.coffee.mp4                                                         
 
 
@@ -230,7 +230,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_test_spec.coffe    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_test_spec.coffe     (X second)
                           e.mp4                                                                     
 
 
@@ -314,7 +314,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_hook_spec.coffe    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_hook_spec.coffe     (X second)
                           e.mp4                                                                     
 
 
@@ -414,7 +414,7 @@ exports['e2e uncaught errors failing5 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test_spec.cof    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test_spec.cof     (X second)
                           fee.mp4                                                                   
 
 

@@ -41,7 +41,7 @@ exports['e2e system node uses system node when launching plugins file 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                        (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                         (X second)
 
 
 ====================================================================================================

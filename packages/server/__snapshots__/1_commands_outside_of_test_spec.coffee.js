@@ -38,7 +38,7 @@ exports['e2e commands outside of test passes on passing assertions 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_passing_outside_of_t    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_passing_outside_of_t     (X second)
                           est_spec.coffee.mp4                                                       
 
 
@@ -216,7 +216,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_failing_outside_of_t    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_failing_outside_of_t     (X second)
                           est_spec.coffee.mp4                                                       
 
 
@@ -312,7 +312,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/commands_outside_of_test_spec.c    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/commands_outside_of_test_spec.c     (X second)
                           offee.mp4                                                                 
 
 
@@ -394,7 +394,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_failing_outside_of_t    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_failing_outside_of_t     (X second)
                           est_spec.coffee.mp4                                                       
 
 

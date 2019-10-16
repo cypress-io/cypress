@@ -48,7 +48,7 @@ exports['e2e domain passing 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/domain_2_spec.coffee.mp4           (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/domain_2_spec.coffee.mp4            (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -87,7 +87,7 @@ exports['e2e domain passing 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/domain_spec.coffee.mp4             (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/domain_spec.coffee.mp4              (X second)
 
 
 ====================================================================================================

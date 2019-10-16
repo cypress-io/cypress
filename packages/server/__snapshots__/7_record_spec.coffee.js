@@ -54,7 +54,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.coffee.mp4       (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.coffee.mp4        (X second)
 
 
   (Uploading Results)
@@ -108,7 +108,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.coffee.mp4        (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.coffee.mp4         (X second)
 
 
   (Uploading Results)
@@ -210,7 +210,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.coffee.mp4    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.coffee.mp4     (X second)
 
 
   (Uploading Results)
@@ -735,7 +735,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_pass_spec.coffee.mp4        (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_pass_spec.coffee.mp4         (X second)
 
 
   (Uploading Results)
@@ -981,7 +981,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.coffee.mp4       (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.coffee.mp4        (X second)
 
 
   (Uploading Results)
@@ -1035,7 +1035,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.coffee.mp4        (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.coffee.mp4         (X second)
 
 
   (Uploading Results)
@@ -1097,7 +1097,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.coffee.mp4    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.coffee.mp4     (X second)
 
 
   (Uploading Results)

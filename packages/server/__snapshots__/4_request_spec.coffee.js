@@ -53,7 +53,7 @@ exports['e2e requests passes in electron 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.coffee.mp4            (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.coffee.mp4             (X second)
 
 
 ====================================================================================================
@@ -125,7 +125,7 @@ exports['e2e requests passes in chrome 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.coffee.mp4            (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.coffee.mp4             (X second)
 
 
 ====================================================================================================
@@ -252,7 +252,7 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail     (X second)
                           ing_spec.coffee.mp4                                                       
 
 
@@ -378,7 +378,7 @@ Body: Service Unavailable
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe     (X second)
                           c.coffee.mp4                                                              
 
 
@@ -513,7 +513,7 @@ Body: <!DOCTYPE html>
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing     (X second)
                           _spec.coffee.mp4                                                          
 
 

@@ -43,7 +43,7 @@ exports['e2e server sent events passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/server_sent_events_spec.coffee.    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/server_sent_events_spec.coffee.     (X second)
                           mp4                                                                       
 
 

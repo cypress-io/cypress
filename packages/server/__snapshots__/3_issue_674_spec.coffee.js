@@ -66,7 +66,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_674_spec.coffee.mp4          (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_674_spec.coffee.mp4           (X second)
 
 
 ====================================================================================================

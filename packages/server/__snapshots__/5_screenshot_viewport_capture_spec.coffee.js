@@ -96,7 +96,7 @@ exports['e2e screenshot viewport capture passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture_spe    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture_spe     (X second)
                           c.coffee.mp4                                                              
 
 

@@ -100,7 +100,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing_spec.    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing_spec.     (X second)
                           coffee.mp4                                                                
 
 
@@ -192,7 +192,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing_spe    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing_spe     (X second)
                           c.coffee.mp4                                                              
 
 
@@ -276,7 +276,7 @@ Because this error occurred during a 'before each' hook we are skipping all of t
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failin    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failin     (X second)
                           g_spec.coffee.mp4                                                         
 
 
@@ -367,7 +367,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_fail    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_fail     (X second)
                           ing_spec.coffee.mp4                                                       
 
 

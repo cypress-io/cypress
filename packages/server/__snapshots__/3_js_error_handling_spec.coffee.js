@@ -135,7 +135,7 @@ https://on.cypress.io/uncaught-exception-from-application
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/js_error_handling_failing_spec.    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/js_error_handling_failing_spec.     (X second)
                           coffee.mp4                                                                
 
 

@@ -44,7 +44,7 @@ exports['e2e browserify, babel, es2015 passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_babel_es2015_passing    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_babel_es2015_passing     (X second)
                           _spec.coffee.mp4                                                          
 
 
@@ -118,7 +118,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_babel_es2015_failing    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_babel_es2015_failing     (X second)
                           _spec.js.mp4                                                              
 
 

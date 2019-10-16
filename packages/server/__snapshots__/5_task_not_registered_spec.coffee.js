@@ -71,7 +71,7 @@ https://on.cypress.io/api/task
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_not_registered_spec.coffee    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_not_registered_spec.coffee     (X second)
                           .mp4                                                                      
 
 

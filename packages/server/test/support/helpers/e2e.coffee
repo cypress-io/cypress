@@ -70,7 +70,7 @@ replaceDurationInTables = (str, p1, p2) ->
   _.padStart("XX:XX", p1.length + p2.length)
 
 replaceParenTime = (str, p1) ->
-  return _.padEnd("(X seconds)", p1.length)
+  return _.padStart("(X second)", p1.length)
 
 replaceUploadingResults = (orig, match..., offset, string) ->
   results = match[1].split('\n').map((res) ->

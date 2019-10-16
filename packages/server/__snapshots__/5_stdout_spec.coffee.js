@@ -121,7 +121,7 @@ The internal Cypress web server responded with:
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.coffee.mp4     (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.coffee.mp4      (X second)
 
 
 ====================================================================================================
@@ -192,7 +192,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_exit_early_failing_spec.    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_exit_early_failing_spec.     (X second)
                           coffee.mp4                                                                
 
 
@@ -266,7 +266,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_passing_spec.coffee.mp4      (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_passing_spec.coffee.mp4      (X second)
 
 
 ====================================================================================================
@@ -384,7 +384,7 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_spec.coffee.mp4             (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_spec.coffee.mp4              (X second)
 
 
 ====================================================================================================
@@ -447,7 +447,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/spec    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/spec     (X second)
                           .coffee.mp4                                                               
 
 
@@ -490,7 +490,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo     (X second)
                           ut_specfile_display_spec_with_a_really_long_name_that_never               
                           _has_a_line_break_or_new_line.coffee.mp4                                  
 
@@ -525,7 +525,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo     (X second)
                           ut_specfile.coffee.mp4                                                    
 
 

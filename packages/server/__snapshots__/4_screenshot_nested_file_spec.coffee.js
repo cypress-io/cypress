@@ -46,7 +46,7 @@ exports['e2e screenshot in nested spec passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/screenshot_ne    (X seconds)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/screenshot_ne     (X second)
                           sted_file_spec.coffee.mp4                                                 
 
 
