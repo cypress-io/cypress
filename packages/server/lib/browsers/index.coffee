@@ -5,6 +5,11 @@ debug         = require("debug")("cypress:server:browsers")
 utils         = require("./utils")
 errors        = require("../errors")
 fs            = require("../util/fs")
+la            = require("lazy-ass")
+check         = require("check-more-types")
+
+# returns true if the passed string is a known browser family name
+isBrowserFamily = check.oneOf(["electron", "chrome"])
 
 instance = null
 
@@ -31,6 +36,9 @@ cleanup = ->
   instance = null
 
 getBrowserLauncherByFamily = (family) ->
+  if not isBrowserFamily(family)
+    debug("unknown browser family", family)
+
   switch family
     when "electron"
       require("./electron")
@@ -74,6 +82,8 @@ process.once "exit", kill
 module.exports = {
   ensureAndGetByNameOrPath
 
+  isBrowserFamily
+
   removeOldProfiles: utils.removeOldProfiles
 
   get: utils.getBrowsers
@@ -96,7 +106,7 @@ module.exports = {
       })
 
       if not browserLauncher = getBrowserLauncherByFamily(browser.family)
-        return throwBrowserNotFound(browser, options.browsers)
+        return throwBrowserNotFound(browser.name, options.browsers)
 
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)

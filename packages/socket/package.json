@@ -19,7 +19,7 @@
     "socket.io-client": "2.2.0"
   },
   "devDependencies": {
-    "bin-up": "1.2.0",
+    "bin-up": "1.2.2",
     "chai": "3.5.0",
     "cross-env": "5.2.0",
     "patch-package": "6.1.2"

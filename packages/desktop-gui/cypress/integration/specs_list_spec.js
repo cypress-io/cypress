@@ -11,6 +11,8 @@ describe('Specs List', function () {
       this.win = win
       this.ipc = win.App.ipc
 
+      this.numSpecs = this.specs.integration.length + this.specs.unit.length
+
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
@@ -144,7 +146,7 @@ describe('Specs List', function () {
         })
 
         it('lists test specs', function () {
-          cy.get('.file a').last().should('contain', 'baz_list_spec.coffee')
+          cy.get('.file a').last().should('contain', 'last_list_spec.coffee')
           cy.get('.file a').last().should('not.contain', 'admin_users')
         })
       })
@@ -198,7 +200,6 @@ describe('Specs List', function () {
       context('displays list of specs', function () {
         it('lists main folders of specs', function () {
           cy.contains('.folder.level-0', 'integration')
-
           cy.contains('.folder.level-0', 'unit')
         })
 
@@ -211,8 +212,7 @@ describe('Specs List', function () {
         })
 
         it('lists folder with \'.\'', function () {
-          cy.get('.file').should('have.length', 7)
-
+          cy.get('.file').should('have.length', this.numSpecs)
           cy.get('.folder').should('have.length', 10)
         })
       })
@@ -226,10 +226,10 @@ describe('Specs List', function () {
         })
 
         it('hides children when folder clicked', function () {
-          cy.get('.file').should('have.length', 7)
+          cy.get('.file').should('have.length', this.numSpecs)
           cy.get('.folder .folder-name:first').click()
 
-          cy.get('.file').should('have.length', 2)
+          cy.get('.file').should('have.length', 8)
         })
 
         it('sets folder expanded when clicked twice', function () {
@@ -243,7 +243,7 @@ describe('Specs List', function () {
         it('hides children for every folder collapsed', function () {
           const lastExpandedFolderSelector = '.folder-expanded:last > div > .folder-name:last'
 
-          cy.get('.file').should('have.length', 7)
+          cy.get('.file').should('have.length', this.numSpecs)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 6)
@@ -280,6 +280,14 @@ describe('Specs List', function () {
     })
 
     context('filtering specs', function () {
+      it('scrolls the specs and not the filter', function () {
+        this.ipc.getSpecs.yields(null, this.specs)
+        this.openProject.resolve(this.config)
+
+        cy.contains('last_list_spec').scrollIntoView()
+        cy.get('.filter').should('be.visible')
+      })
+
       describe('typing the filter', function () {
         beforeEach(function () {
           this.ipc.getSpecs.yields(null, this.specs)
@@ -289,13 +297,13 @@ describe('Specs List', function () {
         })
 
         it('displays only matching spec', () => {
-          cy.get('.outer-files-container .file')
+          cy.get('.specs-list .file')
           .should('have.length', 1)
           .and('contain', 'account_new_spec.coffee')
         })
 
         it('only shows matching folders', () => {
-          cy.get('.outer-files-container .folder')
+          cy.get('.specs-list .folder')
           .should('have.length', 2)
         })
 
@@ -304,21 +312,21 @@ describe('Specs List', function () {
           cy.get('.filter')
           .should('have.value', '')
 
-          cy.get('.outer-files-container .file')
-          .should('have.length', 7)
+          cy.get('.specs-list .file')
+          .should('have.length', this.numSpecs)
         })
 
         it('clears the filter if the user press ESC key', function () {
           cy.get('.filter').type('{esc}')
           .should('have.value', '')
 
-          cy.get('.outer-files-container .file')
-          .should('have.length', 7)
+          cy.get('.specs-list .file')
+          .should('have.length', this.numSpecs)
         })
 
         it('shows empty message if no results', function () {
           cy.get('.filter').clear().type('foobarbaz')
-          cy.get('.outer-files-container').should('not.exist')
+          cy.get('.specs-list').should('not.exist')
 
           cy.get('.empty-well').should('contain', 'No specs match your search: "foobarbaz"')
         })
@@ -328,8 +336,8 @@ describe('Specs List', function () {
           cy.get('.btn').contains('Clear search').click()
           cy.focused().should('have.id', 'filter')
 
-          cy.get('.outer-files-container .file')
-          .should('have.length', 7)
+          cy.get('.specs-list .file')
+          .should('have.length', this.numSpecs)
         })
 
         it('saves the filter to local storage for the project', function () {
@@ -427,7 +435,7 @@ describe('Specs List', function () {
 
       context('choose deeper nested spec', function () {
         beforeEach(() => {
-          cy.get('.file a').contains('a', 'baz_list_spec.coffee').as('deepSpec').click()
+          cy.get('.file a').contains('a', 'last_list_spec.coffee').as('deepSpec').click()
         })
 
         it('updates spec icon', () => {

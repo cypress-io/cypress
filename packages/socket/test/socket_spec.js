@@ -1,5 +1,3 @@
-/* global describe, it, context */
-
 const fs = require('fs')
 const path = require('path')
 const server = require('socket.io')

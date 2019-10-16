@@ -12,8 +12,6 @@ import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
 import orgsApi from '../organizations/organizations-api'
 
-import LoginForm from '../auth/login-form'
-
 @observer
 class SetupProject extends Component {
   static propTypes = {
@@ -72,7 +70,9 @@ class SetupProject extends Component {
 
   render () {
     if (!authStore.isAuthenticated) {
-      return this._loginMessage()
+      authStore.setShowingLogin(true)
+
+      return null
     }
 
     if (!orgsStore.isLoaded) {
@@ -110,17 +110,6 @@ class SetupProject extends Component {
     )
   }
 
-  _loginMessage () {
-    return (
-      <div className='login modal-body'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h1><i className='fa fa-lock'></i> Log in</h1>
-        <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
-        <LoginForm />
-      </div>
-    )
-  }
-
   _loading () {
     return (
       <div className='setup-project-modal modal-body os-dialog'>
@@ -141,7 +130,7 @@ class SetupProject extends Component {
         </div>
         <div>
           <input
-            autoFocus='true'
+            autoFocus={true}
             ref='projectName'
             type='text'
             className='form-control'

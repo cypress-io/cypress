@@ -1,27 +1,13 @@
-/* eslint-disable
-    default-case,
-    no-case-declarations,
-    no-cond-assign,
-    no-const-assign,
-    no-dupe-keys,
-    no-undef,
-    one-var,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 const $jquery = require('./jquery')
 const $window = require('./window')
 const $document = require('./document')
 const $utils = require('../cypress/utils')
+const $selection = require('./selection')
+const { parentHasDisplayNone } = require('./visibility')
+
+const { wrap } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -181,12 +167,14 @@ const _getType = function () {
 
 const nativeGetters = {
   value: _getValue,
-  selectionStart: descriptor('HTMLInputElement', 'selectionStart').get,
   isContentEditable: _isContentEditable,
   isCollapsed: descriptor('Selection', 'isCollapsed').get,
   selectionStart: _getSelectionStart,
   selectionEnd: _getSelectionEnd,
   type: _getType,
+  activeElement: descriptor('Document', 'activeElement').get,
+  body: descriptor('Document', 'body').get,
+  frameElement: Object.getOwnPropertyDescriptor(window, 'frameElement').get,
 }
 
 const nativeSetters = {
@@ -263,7 +251,7 @@ const setNativeProp = function (obj, prop, val) {
   if (!nativeProp) {
     const fns = _.keys(nativeSetters).join(', ')
 
-    throw new Error(`attempted to use a native setter prop called: ${fn}. Available props are: ${fns}`)
+    throw new Error(`attempted to use a native setter prop called: ${prop}. Available props are: ${fns}`)
   }
 
   let retProp = nativeProp.call(obj, val)
@@ -329,6 +317,10 @@ const isBody = (el) => {
   return getTagName(el) === 'body'
 }
 
+const isIframe = (el) => {
+  return getTagName(el) === 'iframe'
+}
+
 const isHTML = (el) => {
   return getTagName(el) === 'html'
 }
@@ -363,6 +355,30 @@ const isFocused = (el) => {
   }
 }
 
+const isFocusedOrInFocused = (el) => {
+
+  const doc = $document.getDocumentFromElement(el)
+
+  const { activeElement, body } = doc
+
+  if (activeElementIsDefault(activeElement, body)) {
+    return false
+  }
+
+  let elToCheckCurrentlyFocused
+
+  if (isFocusable($(el))) {
+    elToCheckCurrentlyFocused = el
+  } else if (isContentEditable(el)) {
+    elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
+  }
+
+  if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    return true
+  }
+
+}
+
 const isElement = function (obj) {
   try {
     if ($jquery.isJquery(obj)) {
@@ -379,6 +395,16 @@ const isFocusable = ($el) => {
   return _.some(focusable, (sel) => {
     return $el.is(sel)
   })
+}
+
+const isW3CRendered = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
+  return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+}
+
+const isW3CFocusable = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
 const isType = function ($el, type) {
@@ -400,6 +426,34 @@ const isScrollOrAuto = (prop) => {
 
 const isAncestor = ($el, $maybeAncestor) => {
   return $el.parents().index($maybeAncestor) >= 0
+}
+
+const getFirstCommonAncestor = (el1, el2) => {
+  const el1Ancestors = [el1].concat(getAllParents(el1))
+  let curEl = el2
+
+  while (curEl) {
+    if (el1Ancestors.indexOf(curEl) !== -1) {
+      return curEl
+    }
+
+    curEl = curEl.parentNode
+  }
+
+  return curEl
+}
+
+const getAllParents = (el) => {
+  let curEl = el.parentNode
+  const allParents = []
+
+  while (curEl) {
+    allParents.push(curEl)
+    curEl = curEl.parentNode
+  }
+
+  return allParents
+
 }
 
 const isChild = ($el, $maybeChild) => {
@@ -455,6 +509,20 @@ const isAttached = function ($el) {
   // make sure every single element
   // is attached to this document
   return $document.hasActiveWindow(doc) && _.every(els, isIn)
+}
+
+/**
+ * @param {HTMLElement} el
+ */
+const isDetachedEl = (el) => {
+  return !isAttachedEl(el)
+}
+
+/**
+ * @param {HTMLElement} el
+ */
+const isAttachedEl = function (el) {
+  return isAttached($(el))
 }
 
 const isSame = function ($el1, $el2) {
@@ -618,6 +686,14 @@ const getFirstFocusableEl = ($el) => {
   return getFirstFocusableEl($el.parent())
 }
 
+const getActiveElByDocument = (doc) => {
+  const activeEl = getNativeProp(doc, 'activeElement')
+
+  if (activeEl) return activeEl
+
+  return getNativeProp(doc, 'body')
+}
+
 const getFirstParentWithTagName = ($el, tagName) => {
   // return null if we're at body/html/document
   // cuz that means nothing has fixed position
@@ -726,7 +802,7 @@ const getContainsSelector = (text, filter = '') => {
   const filters = filter.trim().split(',')
 
   const selectors = _.map(filters, (filter) => {
-    return `${filter}:not(script):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+    return `${filter}:not(script,style):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
   })
 
   return selectors.join()
@@ -832,7 +908,9 @@ const stringify = (el, form = 'long') => {
   })
 }
 
-module.exports = {
+// We extend `module.exports` to allow circular dependencies using `require`
+// Otherwise we would not be able to `require` this util from `./selection`, for example.
+_.extend(module.exports, {
   isElement,
 
   isSelector,
@@ -841,9 +919,15 @@ module.exports = {
 
   isFocusable,
 
+  isW3CFocusable,
+
   isAttached,
 
   isDetached,
+
+  isAttachedEl,
+
+  isDetachedEl,
 
   isAncestor,
 
@@ -869,11 +953,15 @@ module.exports = {
 
   isInput,
 
+  isIframe,
+
   isTextarea,
 
   isType,
 
   isFocused,
+
+  isFocusedOrInFocused,
 
   isInputAllowingImplicitFormSubmission,
 
@@ -897,9 +985,13 @@ module.exports = {
 
   getFirstFocusableEl,
 
+  getActiveElByDocument,
+
   getContainsSelector,
 
   getFirstDeepestElement,
+
+  getFirstCommonAncestor,
 
   getFirstParentWithTagName,
 
@@ -908,4 +1000,4 @@ module.exports = {
   getFirstStickyPositionParent,
 
   getFirstScrollableParent,
-}
+})

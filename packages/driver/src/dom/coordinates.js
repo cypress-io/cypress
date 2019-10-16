@@ -1,13 +1,18 @@
 const $window = require('./window')
+const $elements = require('./elements')
 
 const getElementAtPointFromViewport = (doc, x, y) => {
   return doc.elementFromPoint(x, y)
 }
 
+const isAutIframe = (win) => !$elements.getNativeProp(win.parent, 'frameElement')
+
+/**
+ * @param {JQuery<HTMLElement>} $el
+ */
 const getElementPositioning = ($el) => {
-  /**
-   * @type {HTMLElement}
-   */
+  let autFrame
+
   const el = $el[0]
 
   const win = $window.getWindowByElement(el)
@@ -15,26 +20,71 @@ const getElementPositioning = ($el) => {
   // properties except for width / height
   // are relative to the top left of the viewport
 
-  // we use the first of getClientRects in order to account for inline elements
-  // that span multiple lines. Which would cause us to click in the center and thus miss
-  // This should be the same as using getBoundingClientRect()
-  // for elements with a single rect
-  // const rect = el.getBoundingClientRect()
+  // we use the first of getClientRects in order to account for inline
+  // elements that span multiple lines. Which would cause us to click
+  // click in the center and thus miss...
+  //
+  // however we have a fallback to getBoundingClientRect() such as
+  // when the element is hidden or detached from the DOM. getClientRects()
+  // returns a zero length DOMRectList in that case, which becomes undefined.
+  // so we fallback to getBoundingClientRect() so that we get an actual DOMRect
+  // with all properties 0'd out
   const rect = el.getClientRects()[0] || el.getBoundingClientRect()
 
-  const center = getCenterCoordinates(rect)
+  // we want to return the coordinates from the autWindow to the element
+  // which handles a situation in which the element is inside of a nested
+  // iframe. we use these "absolute" coordinates from the autWindow to draw
+  // things like the red hitbox - since the hitbox layer is placed on the
+  // autWindow instead of the window the element is actually within
+  const getRectFromAutIframe = (rect) => {
+    let x = 0 //rect.left
+    let y = 0 //rect.top
+    let curWindow = win
+    let frame
+
+    // walk up from a nested iframe so we continually add the x + y values
+    while (!isAutIframe(curWindow) && curWindow.parent !== curWindow) {
+      frame = $elements.getNativeProp(curWindow, 'frameElement')
+
+      if (curWindow && frame) {
+        const frameRect = frame.getBoundingClientRect()
+
+        x += frameRect.left
+        y += frameRect.top
+      }
+
+      curWindow = curWindow.parent
+    }
+
+    autFrame = curWindow
+
+    return {
+      left: x + rect.left,
+      top: y + rect.top,
+      right: x + rect.right,
+      bottom: y + rect.top,
+      width: rect.width,
+      height: rect.height,
+    }
+  }
+
+  const rectFromAut = getRectFromAutIframe(rect)
+  const rectFromAutCenter = getCenterCoordinates(rectFromAut)
 
   // add the center coordinates
   // because its useful to any caller
-  const topCenter = center.y
-  const leftCenter = center.x
+  const rectCenter = getCenterCoordinates(rect)
+
+  const topCenter = rectCenter.y
+  const leftCenter = rectCenter.x
 
   return {
     scrollTop: el.scrollTop,
     scrollLeft: el.scrollLeft,
     width: rect.width,
     height: rect.height,
-    fromViewport: {
+    fromElViewport: {
+      doc: win.document,
       top: rect.top,
       left: rect.left,
       right: rect.right,
@@ -42,11 +92,17 @@ const getElementPositioning = ($el) => {
       topCenter,
       leftCenter,
     },
-    fromWindow: {
-      top: rect.top + win.pageYOffset,
-      left: rect.left + win.pageXOffset,
-      topCenter: topCenter + win.pageYOffset,
-      leftCenter: leftCenter + win.pageXOffset,
+    fromElWindow: {
+      top: rect.top + win.scrollY,
+      left: rect.left + win.scrollX,
+      topCenter: topCenter + win.scrollY,
+      leftCenter: leftCenter + win.scrollX,
+    },
+    fromAutWindow: {
+      top: rectFromAut.top + autFrame.scrollY,
+      left: rectFromAut.left + autFrame.scrollX,
+      topCenter: rectFromAutCenter.y + autFrame.scrollY,
+      leftCenter: rectFromAutCenter.x + autFrame.scrollX,
     },
   }
 }
@@ -147,22 +203,22 @@ const getBottomRightCoordinates = (rect) => {
 const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   const positionProps = getElementPositioning($el)
 
-  const { fromViewport, fromWindow } = positionProps
+  const { fromElViewport, fromElWindow } = positionProps
 
-  fromViewport.left += x
-  fromViewport.top += y
+  fromElViewport.left += x
+  fromElViewport.top += y
 
-  fromWindow.left += x
-  fromWindow.top += y
+  fromElWindow.left += x
+  fromElWindow.top += y
 
-  const viewportTargetCoords = getTopLeftCoordinates(fromViewport)
-  const windowTargetCoords = getTopLeftCoordinates(fromWindow)
+  const viewportTargetCoords = getTopLeftCoordinates(fromElViewport)
+  const windowTargetCoords = getTopLeftCoordinates(fromElWindow)
 
-  fromViewport.x = viewportTargetCoords.x
-  fromViewport.y = viewportTargetCoords.y
+  fromElViewport.x = viewportTargetCoords.x
+  fromElViewport.y = viewportTargetCoords.y
 
-  fromWindow.x = windowTargetCoords.x
-  fromWindow.y = windowTargetCoords.y
+  fromElWindow.x = windowTargetCoords.x
+  fromElWindow.y = windowTargetCoords.y
 
   return positionProps
 }
@@ -176,7 +232,7 @@ const getElementCoordinatesByPosition = ($el, position) => {
   // but also from the viewport so
   // whoever is calling us can use it
   // however they'd like
-  const { width, height, fromViewport, fromWindow } = positionProps
+  const { width, height, fromElViewport, fromElWindow, fromAutWindow } = positionProps
 
   // dynamically call the by transforming the nam=> e
   // bottom -> getBottomCoordinates
@@ -192,8 +248,8 @@ const getElementCoordinatesByPosition = ($el, position) => {
   const viewportTargetCoords = fn({
     width,
     height,
-    top: fromViewport.top,
-    left: fromViewport.left,
+    top: fromElViewport.top,
+    left: fromElViewport.left,
   })
 
   // get the desired x/y coords based on
@@ -201,24 +257,31 @@ const getElementCoordinatesByPosition = ($el, position) => {
   const windowTargetCoords = fn({
     width,
     height,
-    top: fromWindow.top,
-    left: fromWindow.left,
+    top: fromElWindow.top,
+    left: fromElWindow.left,
   })
 
-  fromViewport.x = viewportTargetCoords.x
-  fromViewport.y = viewportTargetCoords.y
+  fromElViewport.x = viewportTargetCoords.x
+  fromElViewport.y = viewportTargetCoords.y
 
-  fromWindow.x = windowTargetCoords.x
-  fromWindow.y = windowTargetCoords.y
+  fromElWindow.x = windowTargetCoords.x
+  fromElWindow.y = windowTargetCoords.y
+
+  const autTargetCoords = fn({
+    width,
+    height,
+    top: fromAutWindow.top,
+    left: fromAutWindow.left,
+  })
+
+  fromAutWindow.x = autTargetCoords.x
+  fromAutWindow.y = autTargetCoords.y
 
   // return an object with both sets
   // of normalized coordinates for both
   // the window and the viewport
   return {
-    width,
-    height,
-    fromViewport,
-    fromWindow,
+    ...positionProps,
   }
 }
 
