@@ -64,7 +64,7 @@
     }
   },
   "devDependencies": {
-    "@cypress/bumpercar": "2.0.9",
+    "@cypress/bumpercar": "2.0.12",
     "@cypress/commit-message-install": "2.7.0",
     "@cypress/env-or-json-file": "2.0.0",
     "@cypress/eslint-plugin-dev": "4.0.0",
