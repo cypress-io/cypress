@@ -60,8 +60,7 @@ replaceDurationFromReporter = (str, p1, p2, p3) ->
   p1 + _.padEnd("X", p2.length, "X") + p3
 
 replaceNodeVersion = (str, p1, p2, p3) ->
-  ## Node Version: 10.2.3
-  return p1 + _.padEnd("X", p2.length, "X") + ' (/foo/bar/node)' + ' '.repeat(p3.length - 16)
+  return _.padEnd("#{p1}X (/foo/bar/node)", (p1.length + p2.length + p3.length))
 
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
@@ -102,7 +101,7 @@ normalizeStdout = (str, options = {}) ->
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   ## Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") 
-  ## Node Version: 10.2.3 (Users/jane/node) -> Node Version: XXXXX (foo/bar/node)
+  ## Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
   .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion) 
   ## 15 seconds -> X second
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
