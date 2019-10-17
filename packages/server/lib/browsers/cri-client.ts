@@ -50,27 +50,10 @@ interface CRIWrapper {
   */
   send (command: CRI.Command, params?: object):Promise<any>
   /**
-   * Resolves with a base64 data URI screenshot.
-   */
-  takeScreenshot(): Promise<string>
-  /**
-   * Sends a command to the Chrome remote interface.
-   * @example client.send('Page.navigate', { url })
-  */
-  send (command: CRI.Command, params?: object):Promise<any>
-  /**
-   * Exposes Chrome remote interface Page domain,
-   * buton only for certain actions that are hard to do using "send"
-   *
-   * @example client.Page.screencastFrame(cb)
-  */
-
-  /**
    * Registers callback for particular event.
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
    */
   on (eventName: CRI.EventNames, cb: Function): void
-
   /**
    * Calls underlying remote interface client close
   */
@@ -176,15 +159,6 @@ export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => 
     getProtocolVersion,
     send: (command: CRI.Command, params?: object):Promise<any> => {
       return cri.send(command, params)
-    },
-    takeScreenshot: () => {
-      return client.send('Page.captureScreenshot')
-      .catch((err) => {
-        throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
-      })
-      .then(({ data }) => {
-        return `data:image/png;base64,${data}`
-      })
     },
     on (eventName: CRI.EventNames, cb: Function) {
       debugVerbose('registering CDP on event %o', { eventName })

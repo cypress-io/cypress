@@ -195,7 +195,6 @@ _setAutomation = (client, automation) ->
   automation.use(
     CdpAutomation({
       invokeViaDebugger: client.send
-      takeScreenshot: client.takeScreenshot
     })
   )
 

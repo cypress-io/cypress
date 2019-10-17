@@ -26,13 +26,8 @@ getAutomation = (win) ->
     tryToCall win, ->
       win.webContents.debugger.sendCommand(message, data)
 
-  takeScreenshot = ->
-    tryToCall(win, 'capturePage')
-    .then _.partialRight(_.invoke, 'toDataURL')
-
   CdpAutomation({
-    invokeViaDebugger,
-    takeScreenshot
+    invokeViaDebugger
   })
 
 module.exports = {

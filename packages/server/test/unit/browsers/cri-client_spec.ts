@@ -82,25 +82,5 @@ describe('lib/browsers/cri-client', function () {
         .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has v1.2.')
       })
     })
-
-    context('#takeScreenshot', function () {
-      it('resolves with base64 data URL', async function () {
-        send.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        send.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
-
-        const client = await getClient()
-
-        return expect(client.takeScreenshot()).to.eventually.equal('data:image/png;base64,foo')
-      })
-
-      it('rejects nicely if Page.captureScreenshot fails', async function () {
-        send.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        send.withArgs('Page.captureScreenshot').rejects()
-
-        const client = await getClient()
-
-        return expect(client.takeScreenshot()).to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
-      })
-    })
   })
 })

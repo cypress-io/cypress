@@ -17,9 +17,8 @@ const cors = require('../util/cors')
 
 export function CdpAutomation (opts : {
   invokeViaDebugger: (message: string, data?: any) => Promise<any>
-  takeScreenshot: () => Promise<string>
 }) {
-  const { invokeViaDebugger, takeScreenshot } = opts
+  const { invokeViaDebugger } = opts
 
   const normalizeGetCookieProps = function (cookie: cdp.Network.Cookie): CyCookie {
     if (cookie.expires === -1) {
@@ -115,7 +114,13 @@ export function CdpAutomation (opts : {
       case 'is:automation:client:connected':
         return true
       case 'take:screenshot':
-        return takeScreenshot()
+        return invokeViaDebugger('Page.captureScreenshot')
+        .catch((err) => {
+          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
+        })
+        .then(({ data }) => {
+          return `data:image/png;base64,${data}`
+        })
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

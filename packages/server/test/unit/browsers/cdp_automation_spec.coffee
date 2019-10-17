@@ -5,11 +5,9 @@ context "lib/browsers/cdp_automation", ->
   context ".CdpAutomation", ->
     beforeEach ->
       @invokeViaDebugger = sinon.stub()
-      @takeScreenshot = sinon.stub().resolves()
 
       @automation = CdpAutomation({
         invokeViaDebugger: @invokeViaDebugger
-        takeScreenshot: @takeScreenshot
       })
 
       @invokeViaDebugger.throws()
@@ -114,7 +112,16 @@ context "lib/browsers/cdp_automation", ->
           expect(err.message).to.eq("some error")
 
     describe "take:screenshot", ->
-      it "calls takeScreenshot", ->
-        @onRequest('take:screenshot')
-        .then =>
-          expect(@takeScreenshot).to.be.called
+      it "resolves with base64 data URL", ->
+        @invokeViaDebugger.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
+        @invokeViaDebugger.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+
+        expect(@onRequest('take:screenshot'))
+        .to.eventually.equal('data:image/png;base64,foo')
+
+      it "rejects nicely if Page.captureScreenshot fails", ->
+        @invokeViaDebugger.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
+        @invokeViaDebugger.withArgs('Page.captureScreenshot').rejects()
+
+        expect(@onRequest('take:screenshot'))
+        .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
