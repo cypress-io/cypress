@@ -55,6 +55,7 @@
     "request-progress": "3.0.0",
     "supports-color": "5.5.0",
     "tmp": "0.1.0",
+    "untildify": "3.0.3",
     "url": "0.11.0",
     "yauzl": "2.10.0"
   },
