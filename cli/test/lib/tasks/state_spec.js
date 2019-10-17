@@ -261,6 +261,8 @@ describe('lib/tasks/state', function () {
     })
 
     it('resolves ~ with user home folder', () => {
+      const homeDir = os.homedir()
+
       process.env.CYPRESS_CACHE_FOLDER = '~/.cache/Cypress'
 
       const ret = state.getCacheDir()
@@ -268,6 +270,7 @@ describe('lib/tasks/state', function () {
       debug('cache dir is "%s"', ret)
       expect(path.isAbsolute(ret), ret).to.be.true
       expect(ret, '~ has been resolved').to.not.contain('~')
+      expect(ret, 'replaced ~ with home directory').to.equal(`${homeDir}/.cache/Cypress`)
     })
   })
 
