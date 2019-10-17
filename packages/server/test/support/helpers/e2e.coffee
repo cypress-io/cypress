@@ -10,7 +10,6 @@ morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
-stripAnsi    = require("strip-ansi")
 debug        = require("debug")("cypress:support:e2e")
 httpsProxy   = require("@packages/https-proxy")
 Fixtures     = require("./fixtures")
@@ -56,12 +55,10 @@ replaceDurationSeconds = (str, p1, p2, p3, p4) ->
 
 replaceDurationFromReporter = (str, p1, p2, p3) ->
   ## duration='1589'
-
   p1 + _.padEnd("X", p2.length, "X") + p3
 
 replaceNodeVersion = (str, p1, p2, p3) ->
   ## Node Version: 10.2.3
-
   return p1 + _.padEnd("X", p2.length, "X") + ' (/foo/bar/node)' + ' '.repeat(p3.length - 16)
 
 replaceDurationInTables = (str, p1, p2) ->
@@ -105,7 +102,7 @@ normalizeStdout = (str, options = {}) ->
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") 
   ## Node Version: 10.2.3 (Users/jane/node) -> Node Version: XXXXX (foo/bar/node)
   .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion) 
-  ## 15 seconds -> XX seconds
+  ## 15 seconds -> X second
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   ## duration='1589' -> duration='XXXX'
   .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) 
