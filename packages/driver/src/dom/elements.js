@@ -356,7 +356,6 @@ const isFocused = (el) => {
 }
 
 const isFocusedOrInFocused = (el) => {
-
   const doc = $document.getDocumentFromElement(el)
 
   const { activeElement, body } = doc
@@ -376,7 +375,6 @@ const isFocusedOrInFocused = (el) => {
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
     return true
   }
-
 }
 
 const isElement = function (obj) {
@@ -453,7 +451,6 @@ const getAllParents = (el) => {
   }
 
   return allParents
-
 }
 
 const isChild = ($el, $maybeChild) => {
@@ -643,7 +640,6 @@ const isDescendent = ($el1, $el2) => {
 }
 
 const findParent = (el, fn) => {
-
   const recurse = (curEl, prevEl) => {
     if (!curEl) {
       return null
@@ -790,7 +786,6 @@ const getElements = ($el) => {
   }
 
   return els
-
 }
 
 const getContainsSelector = (text, filter = '') => {

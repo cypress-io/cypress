@@ -125,7 +125,6 @@ const create = (state) => {
         options.setKey = '{del}'
 
         return kb.ensureKey(el, null, options, () => {
-
           if ($selection.isCollapsed(el)) {
           // if there's no text selected, delete the prev char
           // if deleted char, send the input event
@@ -138,7 +137,6 @@ const create = (state) => {
           // contents and send the input event
           $selection.deleteSelectionContents(el)
           options.input = true
-
         })
       },
 
@@ -167,7 +165,6 @@ const create = (state) => {
         options.setKey = '{backspace}'
 
         return kb.ensureKey(el, null, options, () => {
-
           if ($selection.isCollapsed(el)) {
           // if there's no text selected, delete the prev char
           // if deleted char, send the input event
@@ -180,7 +177,6 @@ const create = (state) => {
           // contents and send the input event
           $selection.deleteSelectionContents(el)
           options.input = true
-
         })
       },
 
@@ -418,7 +414,6 @@ const create = (state) => {
         }
 
         return memo + chars.length
-
       }
       , 0)
     },
@@ -576,7 +571,6 @@ const create = (state) => {
 
     typeKey (el, key, options) {
       return kb.ensureKey(el, key, options, () => {
-
         const isDigit = isSingleDigitRe.test(key)
         const isNumberInputType = $elements.isInput(el) && $elements.isType(el, 'number')
 
@@ -636,7 +630,6 @@ const create = (state) => {
       if (kb.simulateKey(el, 'keydown', key, options)) {
         if (kb.simulateKey(el, 'keypress', key, options)) {
           if (kb.simulateKey(el, 'textInput', key, options)) {
-
             let ml
 
             if ($elements.isInput(el) || $elements.isTextarea(el)) {
@@ -703,7 +696,6 @@ const create = (state) => {
     },
 
     resetModifiers (doc) {
-
       const activeEl = $elements.getActiveElByDocument(doc)
       const activeModifiers = kb.getActiveModifiers(state)
 

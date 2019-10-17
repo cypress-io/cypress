@@ -84,7 +84,6 @@ export default {
   },
 
   _logTable (consoleProps) {
-
     if (isMultiEntryTable(consoleProps.table)) {
       _.each(
         _.sortBy(consoleProps.table, (val, key) => key),

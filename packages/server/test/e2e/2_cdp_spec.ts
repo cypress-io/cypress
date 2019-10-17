@@ -5,7 +5,7 @@ const Fixtures = require('../support/helpers/fixtures')
 
 describe('e2e cdp', function () {
   e2e.setup()
-  let restoreEnv : Function
+  let restoreEnv: Function
 
   beforeEach(() => {
     restoreEnv = mockedEnv({

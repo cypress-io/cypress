@@ -246,7 +246,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             }
 
             return false
-
           }
 
           const getDefaultButton = (form) => {
@@ -421,7 +420,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               onFail: options._log,
               args: { chars, allChars },
             })
-
           },
 
         })
@@ -480,7 +478,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             }
 
             return type()
-
           },
         })
       }
@@ -577,7 +574,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         }
 
         return verifyAssertions()
-
       })
     },
   })
