@@ -159,6 +159,19 @@ _connectToChromeRemoteInterface = (port) ->
     debug("received wsUrl %s for port %d", wsUrl, port)
 
     CriClient.create(wsUrl)
+  .then (client) ->
+    if process.env.CYPRESS_FORCE_BROWSER_SCALE
+      client.send('Emulation.setDeviceMetricsOverride', {
+        width: 1280,
+        height: 720,
+        deviceScaleFactor: 1,
+        mobile: false,
+        screenWidth: 1280,
+        screenHeight: 720,
+      }).then ->
+        client
+
+    client
 
 _maybeRecordVideo = (options) ->
   return (client) ->

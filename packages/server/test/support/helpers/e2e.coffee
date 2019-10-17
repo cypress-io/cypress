@@ -210,6 +210,8 @@ module.exports = {
       ## can take a long time (5-15 secs)
       @timeout(human("2 minutes"))
 
+      process.env.CYPRESS_FORCE_BROWSER_SCALE = '1'
+
       Fixtures.scaffold()
 
       sinon.stub(process, "exit")
