@@ -447,10 +447,10 @@ const isW3CFocusable = (el) => {
   return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
-const isType = function (el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
+const isType = function (el: HTMLInputElement | HTMLInputElement[] | HTMLButtonElement | HTMLButtonElement[] | JQuery<HTMLInputElement> | JQuery<HTMLButtonElement>, type) {
   el = ([] as HTMLInputElement[]).concat($jquery.unwrap(el))[0]
 
-  if (!isInput(el)) {
+  if (!isInput(el) && !isButton(el)) {
     return false
   }
 
