@@ -56,9 +56,8 @@ describe "e2e server sent events", ->
   })
 
   ## https://github.com/cypress-io/cypress/issues/1440
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "server_sent_events_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  e2e.it "passes", {
+    spec: "server_sent_events_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }

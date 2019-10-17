@@ -175,7 +175,6 @@ const deleteSelectionContents = function (el) {
 }
 
 const setSelectionRange = function (el, start, end) {
-
   if ($elements.canSetSelectionRangeElement(el)) {
     $elements.callNativeMethod(el, 'setSelectionRange', start, end)
 
@@ -190,7 +189,6 @@ const setSelectionRange = function (el, start, end) {
     start,
     end,
   }
-
 }
 
 const deleteRightOfCursor = function (el) {
@@ -448,7 +446,6 @@ const moveSelectionToEnd = function (el) {
     ({ length } = $elements.getNativeProp(el, 'value'))
 
     return setSelectionRange(el, length, length)
-
   }
 
   if ($elements.isContentEditable(el)) {

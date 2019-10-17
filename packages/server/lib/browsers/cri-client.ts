@@ -74,7 +74,7 @@ interface CRIWrapper {
   /**
    * Calls underlying remote interface client close
   */
-  close ():Promise<void>
+  close (): Promise<void>
 }
 
 const getMajorMinorVersion = (version: string) => {
@@ -106,7 +106,6 @@ const maybeDebugCdpMessages = (cri) => {
 
       debugVerboseReceive('received CDP message %o', data)
     })
-
   }
 
   if (debugVerboseSend.enabled) {

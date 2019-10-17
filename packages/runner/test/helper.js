@@ -17,7 +17,6 @@ const _useFakeTimers = sinon.useFakeTimers
 let timers = []
 
 sinon.useFakeTimers = function (...args) {
-
   const ret = _useFakeTimers.apply(this, args)
 
   timers.push(ret)

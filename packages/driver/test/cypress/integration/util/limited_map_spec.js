@@ -60,6 +60,5 @@ describe('driver/src/util/limited_map', () => {
     expect(limitedMap.size).to.equal(5)
     expect(Array.from(limitedMap.values())[0]).to.equal(2)
     expect(Array.from(limitedMap.values())[4]).to.equal(6)
-
   })
 })
