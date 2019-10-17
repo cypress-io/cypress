@@ -380,16 +380,16 @@ If you're curious how we manage all of these tests in CI check out our [`circle.
 
 #### Docker
 
-Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. In order to run the same image locally:
+Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. In order to run the image used in CI locally:
 
-1. [Install docker](https://docs.docker.com/install/) and get it running on your machine.
+1. [Install Docker](https://docs.docker.com/install/) and get it running on your machine.
 2. Run the following command from the root of the project:
 
   ```shell
   npm run docker
   ```
 
-There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs they cypress image (see [circle.yml](circle.yml) for the current image name).
+There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [circle.yml](circle.yml) for the current image name).
 
 The image will start and will map the root of the repository to `/cypress` inside the image. Now you can modify the files using your favorite environment and rerun tests inside the docker environment.
 
@@ -418,7 +418,7 @@ npm rebuild node-sass
 
 #### Docker for built binary
 
-You can also use Docker to simulate and debug the built binary. In a `temp` folder (for example from the folder `/tmp/test-folder/`) start a Docker image:
+You can also use Docker to simulate and debug the built binary. In a temporary folder (for example from the folder `/tmp/test-folder/`) start a Docker image:
 
 ```shell
 $ docker run -it -w /app -v $PWD:/app cypress/base:8 /bin/bash
