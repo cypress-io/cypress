@@ -132,9 +132,10 @@ const wrapBordersInGray = (chars) => {
 }
 
 const table = function (options = {}) {
-  let { colWidths, type } = options
+  const { type } = options
   const defaults = utils.mergeOptions({})
 
+  let { colWidths } = options
   let chars = _.defaults(getChars(type), defaults.chars)
 
   _.defaultsDeep(options, {
