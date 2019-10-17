@@ -17,16 +17,12 @@ function _getDelayMsForRetry (i) {
   }
 }
 
-function _connectAsync (opts) {
+function connectAsync (opts) {
   return Promise.fromCallback((cb) => {
     connect.createRetryingSocket({
       getDelayMsForRetry: _getDelayMsForRetry,
       ...opts,
     }, cb)
-  })
-  .then((sock) => {
-    // can be closed, just needed to test the connection
-    sock.end()
   })
   .catch((err) => {
     errors.throw('CDP_COULD_NOT_CONNECT', opts.port, err)
@@ -41,7 +37,7 @@ const getWsTargetFor = (port) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
-  return _connectAsync({ port })
+  return connectAsync({ port })
   .tapCatch((err) => {
     debug('failed to connect to CDP %o', { port, err })
   })
@@ -74,7 +70,6 @@ const getWsTargetFor = (port) => {
 }
 
 module.exports = {
-  _connectAsync,
   _getDelayMsForRetry,
   getWsTargetFor,
 }
