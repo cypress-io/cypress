@@ -59,7 +59,7 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
-    "@cypress/sinon-chai": "1.1.0",
+    "@cypress/sinon-chai": "2.9.0",
     "@types/blob-util": "1.3.3",
     "@types/bluebird": "3.5.18",
     "@types/chai": "4.0.8",

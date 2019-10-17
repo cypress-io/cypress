@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
-    "@cypress/sinon-chai": "1.1.0",
+    "@cypress/sinon-chai": "2.9.0",
     "@cypress/underscore.inflection": "1.0.1",
     "@cypress/unique-selector": "0.4.2",
     "@cypress/what-is-circular": "1.0.1",
