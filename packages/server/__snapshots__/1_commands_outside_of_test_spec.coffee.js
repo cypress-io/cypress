@@ -113,7 +113,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/    (3360x2012)
+  -  /XXX/XXX/XXX/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/     (1280x720)
      An uncaught error was detected outside of a test (failed).png                                  
 
 
@@ -209,7 +209,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaugh    (3360x2012)
+  -  /XXX/XXX/XXX/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaugh     (1280x720)
      t error was detected outside of a test (failed).png                                            
 
 
