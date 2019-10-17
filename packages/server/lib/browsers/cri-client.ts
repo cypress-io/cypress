@@ -48,7 +48,7 @@ interface CRIWrapper {
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
   */
-  send (command: CRI.Command, params?: object):Promise<any>
+  send (command: CRI.Command, params?: object): Promise<any>
   /**
    * Registers callback for particular event.
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
@@ -121,7 +121,7 @@ export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => 
 
   let cachedProtocolVersionP
 
-  const ensureMinimumProtocolVersion = (protocolVersion: string) : Promise<void> => {
+  const ensureMinimumProtocolVersion = (protocolVersion: string): Promise<void> => {
     return getProtocolVersion()
     .then((actual) => {
       const minimum = getMajorMinorVersion(protocolVersion)
@@ -157,7 +157,7 @@ export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => 
   const client: CRIWrapper = {
     ensureMinimumProtocolVersion,
     getProtocolVersion,
-    send: (command: CRI.Command, params?: object):Promise<any> => {
+    send: (command: CRI.Command, params?: object): Promise<any> => {
       return cri.send(command, params)
     },
     on (eventName: CRI.EventNames, cb: Function) {
@@ -165,7 +165,7 @@ export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => 
 
       return cri.on(eventName, cb)
     },
-    close ():Promise<void> {
+    close (): Promise<void> {
       return cri.close()
     },
   }

@@ -15,7 +15,7 @@ interface CyCookie {
 
 const cors = require('../util/cors')
 
-export function CdpAutomation (opts : {
+export function CdpAutomation (opts: {
   invokeViaDebugger: (message: string, data?: any) => Promise<any>
 }) {
   const { invokeViaDebugger } = opts
