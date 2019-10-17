@@ -2,39 +2,13 @@ require('@packages/ts/register')
 
 const _ = require('lodash')
 const CDP = require('chrome-remote-interface')
-const protocol = require(`${__dirname}/../../../../lib/browsers/protocol.js`)
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
 
 const performance = require('../../../../test/support/helpers/performance')
 
-function setDeviceMetrics (args) {
-  const port = _.chain(args)
-  .find((arg) => arg.startsWith('--remote-debugging-port='))
-  .split('=')
-  .last()
-  .toNumber()
-  .value()
-
-  // run whenever the browser becomes available, not currently a hook for this
-  protocol._connectAsync({ port })
-  .then(() => {
-    return CDP({ port })
-  })
-  .then((client) => {
-    return client.send('Emulation.setDeviceMetricsOverride', {
-      width: 1280,
-      height: 720,
-      deviceScaleFactor: 1,
-      mobile: false,
-      screenWidth: 1280,
-      screenHeight: 720,
-    })
-  })
-
-  return _.constant(args)
-}
+let cdpPort
 
 module.exports = (on) => {
   // save some time by only reading the originals once
@@ -56,12 +30,33 @@ module.exports = (on) => {
 
   on('before:browser:launch', (browser, args) => {
     if (browser.family === 'chrome') {
-      // force chrome to 1x and 1280x720
-      return setDeviceMetrics(args)
+      cdpPort = _.chain(args)
+      .find((arg) => arg.startsWith('--remote-debugging-port='))
+      .split('=')
+      .last()
+      .toNumber()
+      .value()
     }
   })
 
   on('task', {
+    'set:device:metrics' () {
+      if (cdpPort) {
+        // force chrome to 1x and 1280x720
+        return CDP({ port: cdpPort })
+        .then((client) => {
+          return client.send('Emulation.setDeviceMetricsOverride', {
+            width: 1280,
+            height: 720,
+            deviceScaleFactor: 1,
+            mobile: false,
+            screenWidth: 1280,
+            screenHeight: 720,
+          })
+        })
+      }
+    },
+
     'returns:undefined' () {},
 
     'errors' (message) {
