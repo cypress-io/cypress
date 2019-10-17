@@ -79,7 +79,6 @@ const maybeDebugCdpMessages = (cri) => {
 
       debugVerboseReceive('received CDP message %o', data)
     })
-
   }
 
   if (debugVerboseSend.enabled) {

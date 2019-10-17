@@ -152,7 +152,6 @@ const wrapBordersInGray = (chars) => {
     }
 
     return char
-
   })
 }
 

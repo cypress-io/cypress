@@ -180,12 +180,10 @@ const create = (state, keyboard, focused) => {
             sendMouseleave(elToSend, _.extend({}, defaultMouseOptions, { relatedTarget: el }))
           })
         }
-
       }
 
       if (hoveredElChanged) {
         if (el && $elements.isAttachedEl(el)) {
-
           mouseover = () => {
             return sendMouseover(el, _.extend({}, defaultMouseOptions, { relatedTarget: lastHoveredEl }))
           }
@@ -216,7 +214,6 @@ const create = (state, keyboard, focused) => {
             })
           }
         }
-
       }
 
       pointermove = () => {
@@ -271,7 +268,6 @@ const create = (state, keyboard, focused) => {
      * @param {HTMLElement} forceEl
      */
     _downEvents (coords, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
-
       const { x, y } = coords
       const el = forceEl || mouse.moveToCoords(coords)
 
@@ -324,7 +320,6 @@ const create = (state, keyboard, focused) => {
         pointerdownProps,
         mousedownProps,
       }
-
     },
 
     down (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
@@ -356,7 +351,6 @@ const create = (state, keyboard, focused) => {
           // the user clicked inside a focusable element
           focused.fireFocus($elToFocus.get(0))
         }
-
       }
 
       if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
@@ -416,7 +410,6 @@ const create = (state, keyboard, focused) => {
       const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend)
 
       return _.extend({}, mouseDownEvents, mouseUpEvents, mouseClickEvents)
-
     },
 
     /**
@@ -426,7 +419,6 @@ const create = (state, keyboard, focused) => {
      * @param {Window} win
      */
     _upEvents (fromElViewport, forceEl, skipMouseEvent, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
-
       const win = state('window')
 
       let defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
@@ -460,7 +452,6 @@ const create = (state, keyboard, focused) => {
         pointerupProps,
         mouseupProps,
       }
-
     },
 
     _mouseClickEvents (fromElViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
@@ -585,7 +576,6 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
     el,
     modifiers,
   }
-
 }
 
 const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {

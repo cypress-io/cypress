@@ -178,7 +178,6 @@ context('lib/tasks/verify', () => {
     .then(() => {
       snapshot(normalize(slice(stdout.toString())))
     })
-
   })
 
   it('logs error when child process returns incorrect stdout (stderr when exists)', () => {
@@ -205,7 +204,6 @@ context('lib/tasks/verify', () => {
     .then(() => {
       snapshot(normalize(slice(stdout.toString())))
     })
-
   })
 
   it('logs error when child process returns incorrect stdout (stdout when no stderr)', () => {
@@ -231,7 +229,6 @@ context('lib/tasks/verify', () => {
     .then(() => {
       snapshot(normalize(slice(stdout.toString())))
     })
-
   })
 
   it('sets ELECTRON_ENABLE_LOGGING without mutating process.env', () => {

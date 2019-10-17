@@ -17,14 +17,12 @@ export const findReactInstance = function (dom) {
   return internalInstance._debugOwner
     ? internalInstance._debugOwner.stateNode
     : internalInstance.return.stateNode
-
 }
 
 export const clickCommandLog = (sel) => {
   return cy.wait(10)
   .then(() => {
     withMutableReporterState(() => {
-
       const commandLogEl = getCommandLogWithText(sel)
 
       const reactCommandInstance = findReactInstance(commandLogEl[0])
@@ -54,5 +52,4 @@ export const withMutableReporterState = (fn) => {
   .then(() => {
     top.Runner.configureMobx({ enforceActions: 'strict' })
   })
-
 }

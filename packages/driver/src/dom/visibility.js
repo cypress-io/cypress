@@ -141,7 +141,6 @@ const elHasClippableOverflow = function ($el) {
 }
 
 const canClipContent = function ($el, $ancestor) {
-
   // can't clip without overflow properties
   if (!elHasClippableOverflow($ancestor)) {
     return false

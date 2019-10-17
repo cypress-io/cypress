@@ -19,7 +19,6 @@ const unwrap = function (obj) {
   }
 
   return obj
-
 }
 
 const isJquery = (obj) => {

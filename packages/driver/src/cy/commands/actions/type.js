@@ -193,7 +193,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
 
           return false
-
         }
 
         const getDefaultButton = (form) => {

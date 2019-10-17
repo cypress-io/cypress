@@ -249,7 +249,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('will send all events even mousedown is defaultPrevented', () => {
-
       const $btn = cy.$$('#button')
 
       $btn.get(0).addEventListener('mousedown', (e) => {
@@ -279,7 +278,6 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.getAll('$btn', 'pointerdown pointerup click').each(shouldBeCalledOnce)
       cy.getAll('$btn', 'mousedown mouseup').each(shouldNotBeCalled)
-
     })
 
     it('sends a click event', (done) => {
@@ -299,7 +297,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('causes focusable elements to receive focus', () => {
-
       const el = cy.$$(':text:first')
 
       attachFocusListeners({ el })
@@ -471,7 +468,6 @@ describe('src/cy/commands/actions/click', () => {
           metaKey: false,
           altKey: false,
         })
-
       })
     })
 
@@ -652,7 +648,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('places cursor at the end of [contenteditable]', () => {
-
       cy.get('[contenteditable]:first')
       .invoke('html', '<div><br></div>').click()
       .then(($el) => {
@@ -1763,7 +1758,6 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('throws when attempting to click multiple elements', (done) => {
-
         cy.on('fail', (err) => {
           expect(err.message).to.eq('cy.click() can only be called on a single element. Your subject contained 4 elements. Pass { multiple: true } if you want to serially click each element.')
 
@@ -1827,7 +1821,6 @@ describe('src/cy/commands/actions/click', () => {
       // Array(1).fill().map(()=>
 
       it('throws when any member of the subject isnt visible', function (done) {
-
         // sometimes the command will timeout early with
         // Error: coordsHistory must be at least 2 sets of coords
         cy.timeout(300)
@@ -2222,7 +2215,6 @@ describe('src/cy/commands/actions/click', () => {
         cy.$$('input:first').mousedown(() => false)
 
         cy.get('input:first').click().then(function () {
-
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps.table[1]()).to.containSubset({
@@ -2290,7 +2282,6 @@ describe('src/cy/commands/actions/click', () => {
               },
             ],
           })
-
         })
       })
 
@@ -2383,7 +2374,6 @@ describe('src/cy/commands/actions/click', () => {
         cy.getAll('btn', 'mousemove mouseover').each(shouldBeCalledOnce)
         cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledWithCount(2))
         .then(function () {
-
           const { logs } = this
           const logsArr = logs.map((x) => x.invoke('consoleProps'))
 
@@ -2436,7 +2426,6 @@ describe('src/cy/commands/actions/click', () => {
               ],
             },
           ])
-
         })
       })
 
@@ -2751,7 +2740,6 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('sends modifiers', () => {
-
       const btn = cy.$$('button:first')
 
       attachMouseClickListeners({ btn })
@@ -2939,7 +2927,6 @@ describe('src/cy/commands/actions/click', () => {
       it('#consoleProps', function () {
         cy.on('log:added', (attrs, log) => {
           this.log = log
-
         })
 
         cy.get('button').first().dblclick().then(function ($btn) {
@@ -3176,7 +3163,6 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.getAll('el', 'pointerdown mousedown contextmenu pointerup mouseup').each(shouldBeCalled)
       cy.getAll('el', 'focus click').each(shouldNotBeCalled)
-
     })
 
     it('rightclick cancel pointerdown', () => {
@@ -3192,7 +3178,6 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.getAll('el', 'pointerdown pointerup contextmenu').each(shouldBeCalled)
       cy.getAll('el', 'mousedown mouseup').each(shouldNotBeCalled)
-
     })
 
     it('rightclick remove el on pointerdown', () => {
@@ -3208,7 +3193,6 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.getAll('el', 'pointerdown').each(shouldBeCalled)
       cy.getAll('el', 'mousedown mouseup contextmenu pointerup').each(shouldNotBeCalled)
-
     })
 
     it('rightclick remove el on mouseover', () => {
@@ -3228,7 +3212,6 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('el', 'pointerover mouseover').each(shouldBeCalledOnce)
       cy.getAll('el', 'pointerdown mousedown pointerup mouseup contextmenu').each(shouldNotBeCalled)
       cy.getAll('el2', 'focus pointerdown pointerup contextmenu').each(shouldBeCalled)
-
     })
 
     describe('errors', () => {
@@ -3487,7 +3470,6 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
     })
-
   })
 })
 
@@ -3956,7 +3938,6 @@ describe('mouse state', () => {
         cy.getAll('input', 'mouseover mouseout').each(shouldBeCalledOnce)
 
         cy.getAll('input', 'mousedown mouseup click').each(shouldNotBeCalled)
-
       })
 
       it('can click on a recursively moving element', () => {
@@ -4230,18 +4211,15 @@ describe('mouse state', () => {
         expect(stub).to.be.calledOnce
       })
     })
-
   })
 
   describe('user experience', () => {
-
     beforeEach(() => {
       cy.visit('/fixtures/dom.html')
     })
 
     // https://github.com/cypress-io/cypress/issues/4347
     it('can render element highlight inside iframe', () => {
-
       cy.get('iframe:first')
       .should(($iframe) => {
         // wait for iframe to load
@@ -4298,5 +4276,4 @@ describe('mouse state', () => {
       })
     })
   })
-
 })

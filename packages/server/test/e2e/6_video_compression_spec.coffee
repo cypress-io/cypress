@@ -12,24 +12,20 @@ EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
 describe "e2e video compression", ->
   e2e.setup()
 
-  [
-    'chrome',
-    'electron'
-  ].map (browser) ->
-    it "passes in #{browser}", ->
+  e2e.it "passes", {
+    spec: "video_compression_spec.coffee"
+    snapshot: false
+    config: {
+      env: {
+        NUM_TESTS
+        MS_PER_TEST
+      }
+    }
+    expectedExitCode: 0
+    onRun: (exec) ->
       process.env.VIDEO_COMPRESSION_THROTTLE = 10
 
-      e2e.exec(@, {
-        spec: "video_compression_spec.coffee"
-        snapshot: false
-        config: {
-          env: {
-            NUM_TESTS
-            MS_PER_TEST
-          }
-        }
-        expectedExitCode: 0
-      })
+      exec()
       .tap ->
         videosPath = Fixtures.projectPath("e2e/cypress/videos/*")
 
@@ -46,3 +42,5 @@ describe "e2e video compression", ->
       .get("stdout")
       .then (stdout) ->
         expect(stdout).to.match(/Compression progress:\s+\d{1,3}%/)
+
+  },

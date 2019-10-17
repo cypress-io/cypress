@@ -782,7 +782,6 @@ const isDescendent = ($el1, $el2) => {
 }
 
 const findParent = (el, fn) => {
-
   const recurse = (curEl, prevEl) => {
     if (!curEl) {
       return null
