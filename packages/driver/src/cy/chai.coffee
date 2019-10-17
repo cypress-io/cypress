@@ -278,6 +278,10 @@ chai.use (chai, u) ->
       if err
         stack = specWindow.__getSpecFrameStack("assertion invocation stack")
         err = $errUtils.addCodeFrameToErr({ err, stack, lineIndex: 1 })
+        err = $errUtils.enhanceStack({
+          err,
+          stack: stack,
+        })
 
         throw err
 

@@ -470,7 +470,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## highlight it in red or insert a new command
       errors.commandRunningFailed(err)
 
-      err = $errUtils.processErr(err, config)
       err = $errUtils.addCodeFrameToErr({ err, stack: err.stack })
 
       fail(err, state("runnable"))
@@ -565,32 +564,45 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## which need to run
     state("index", queue.length)
 
-  getCodeFrameStack = (err) ->
+  getInvocationStack = (err) ->
     current = state("current")
     currentName = current?.get("name")
 
-    ## cy.then will not error on its own, but will have an
-    ## invocation stack, so we need to prefer the actual error's stack
-    ## cy.should does not register as the current command at all
-    ## so we make the current command
-    if err.stack and currentName is "then" or current?.get("followedByShouldCallback")
+    if err.stack and (
+      ## cy.then will not error on its own, but will have an
+      ## invocation stack, so we need to prefer the actual error's stack
+      currentName is "then" or
+      ## cy.should does not register as the current command at all
+      ## so we ignore the current command's invocation stack if cy.should
+      ## is used with a callback
+      current?.get("followedByShouldCallback") or
+      ## calling a custom command gets set as current, so if it's just wrapping
+      ## an assertion or a synchronous error occurs, we prefer that
+      current?.get("isCustom")
+    )
       return err.stack
 
+    ## cy.should without a callback will assign its invocation stack to the
+    ## current command since it does not register as the current command itself
     currentAssertion = current?.get("currentAssertion")
 
     (currentAssertion or current)?.get("invocationStack")
 
   fail = (err, runnable) ->
-    ## TODO: can we move both processErr calls here?
     stopped = true
 
-    if not err.codeFrames
-      stack = getCodeFrameStack(err)
-      err = $errUtils.addCodeFrameToErr({
-        err,
-        stack: stack or err.stack,
-        lineIndex: 1
-      })
+    stack = getInvocationStack(err)
+
+    err = $errUtils.addCodeFrameToErr({
+      err,
+      stack: stack or err.stack,
+      lineIndex: 1
+    })
+    err = $errUtils.enhanceStack({
+      err,
+      stack: stack or err.stack,
+    })
+    err = $errUtils.processErr(err, config)
 
     ## store the error on state now
     state("error", err)
@@ -811,7 +823,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## add this function to our chainer class
       $Chainer.add(name, fn)
 
-    addCommand: ({name, fn, type, prevSubject}) ->
+    addCommand: ({name, fn, type, prevSubject, isCustom}) ->
       ## TODO: prob don't need this anymore
       commandFns[name] = fn
 
@@ -891,6 +903,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           type
           chainerId
           invocationStack
+          isCustom
           fn: wrap(firstCall)
         })
 
@@ -1135,7 +1148,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           return ret
 
         catch err
-          err = $errUtils.processErr(err, config)
           err = $errUtils.addCodeFrameToErr({ err, stack: err.stack })
 
           ## if our runnable.fn throw synchronously

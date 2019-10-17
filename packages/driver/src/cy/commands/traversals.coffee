@@ -6,7 +6,7 @@ traversals = "find filter not children eq closest first last next nextAll nextUn
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   _.each traversals, (traversal) ->
-    Commands.add traversal, { prevSubject: "element" }, (subject, arg1, arg2, options) ->
+    Commands.add traversal, { prevSubject: "element", isCustom: false }, (subject, arg1, arg2, options) ->
       if _.isObject(arg1) and not _.isFunction(arg1)
         options = arg1
 

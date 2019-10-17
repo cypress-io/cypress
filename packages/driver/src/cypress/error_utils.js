@@ -278,12 +278,33 @@ const getCodeFrameFromStack = (stack, lineIndex) => {
   return getCodeFrame($sourceMapUtils.getSourceContents(file), stackLineDetails)
 }
 
+const combineMessageAndStack = (err, stack = '') => {
+  if (!err || !err.message) return stack
+
+  // eslint-disable-next-line no-unused-vars
+  const [__, stackLines] = splitStack(stack)
+  const relevantStackLines = _.reject(stackLines, (line) => {
+    return line.indexOf('__getSpecFrameStack') > -1
+  })
+
+  return [err.message].concat(relevantStackLines).join('\n')
+}
+
 const addCodeFrameToErr = ({ err, stack, lineIndex = 0 }) => {
+  if (err.codeFrames) return err
+
   const codeFrame = getCodeFrameFromStack(stack, lineIndex)
 
   if (codeFrame) {
     err.codeFrames = [codeFrame]
   }
+
+  return err
+}
+
+const enhanceStack = ({ err, stack }) => {
+  err.stack = combineMessageAndStack(err, stack)
+  err.sourceMappedStack = getSourceStack(err.stack)
 
   return err
 }
@@ -375,7 +396,9 @@ const splitStack = (stack) => {
   }, [[], []])
 }
 
-const getSourceStack = (stack = '') => {
+const getSourceStack = (stack) => {
+  if (!stack) return
+
   const [messageLines, stackLines] = splitStack(stack)
   const whitespace = getWhitespace(stackLines[0])
   const stackUtil = new StackUtils()
@@ -390,10 +413,6 @@ const getSourceStack = (stack = '') => {
 //// all errors flow through this function before they're finally thrown
 //// or used to reject promises
 const processErr = (errObj = {}, config) => {
-  if (errObj.stack) {
-    errObj.sourceMappedStack = getSourceStack(errObj.stack)
-  }
-
   if (config('isInteractive') || !errObj.docsUrl) {
     return errObj
   }
@@ -421,6 +440,7 @@ module.exports = {
   errMsgByPath,
   getErrStack,
   addCodeFrameToErr,
+  enhanceStack,
   escapeErrMarkdown,
   getObjValueByPath,
   getStackLineDetails,

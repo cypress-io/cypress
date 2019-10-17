@@ -45,7 +45,7 @@ Cypress.Commands.add('failShouldAssertion', () => {
 
 Cypress.Commands.add('failAfterMultipleShoulds', () => {
   cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
-  .should('have.property', 'bar')
+  .should('equal', 'bar')
 })
 
 Cypress.Commands.add('failAfterMultipleShouldCallbacksException', () => {
