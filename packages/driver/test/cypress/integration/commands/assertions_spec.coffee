@@ -300,9 +300,7 @@ describe "src/cy/commands/assertions", ->
         cy.noop(false).should("be.true")
 
       expect(false).ok
-      it.only "should give proper error", () ->
-
-      
+      it "should give proper error", () ->
         setTimeout(()=>
         , 10)
 
