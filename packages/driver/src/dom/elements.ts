@@ -450,6 +450,10 @@ const isW3CFocusable = (el) => {
 const isType = function (el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
   el = ([] as HTMLInputElement[]).concat($jquery.unwrap(el))[0]
 
+  if (!isInput(el)) {
+    return false
+  }
+
   // NOTE: use DOMElement.type instead of getAttribute('type') since
   //       <input type="asdf"> will have type="text", and behaves like text type
   const elType = (getNativeProp(el, 'type') || '').toLowerCase()
