@@ -56,7 +56,7 @@ module.exports = {
         ## then display a warning to the user
         if not options.invokedFromCli
           warning("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
-
+        
         ## just run the gui code directly here
         ## and pass our options directly to main
         debug("running Electron currently")
@@ -131,7 +131,7 @@ module.exports = {
 
     options = require("./util/args").toObject(argv)
 
-    if (options.runProject and not options.headed) or process.env.CYPRESS_FORCE_BROWSER_SCALE
+    if options.runProject and not options.headed
       # scale the electron browser window
       # to force retina screens to not
       # upsample their images when offscreen
