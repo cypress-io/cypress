@@ -1,4 +1,4 @@
-exports['e2e forms <form> submissions passes with http on localhost 1'] = `
+exports['e2e forms / <form> submissions / passes with https on localhost'] = `
 
 ====================================================================================================
 
@@ -68,7 +68,7 @@ exports['e2e forms <form> submissions passes with http on localhost 1'] = `
 
 `
 
-exports['e2e forms <form> submissions passes with https on localhost 1'] = `
+exports['e2e forms / <form> submissions / passes with http on localhost'] = `
 
 ====================================================================================================
 

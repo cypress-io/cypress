@@ -17,13 +17,11 @@ describe('e2e cdp', function () {
     restoreEnv()
   })
 
-  it('fails when remote debugging port cannot be connected to', function () {
-    return e2e.exec(this, {
-      project: Fixtures.projectPath('remote-debugging-port-removed'),
-      spec: 'spec.ts',
-      browser: 'chrome',
-      expectedExitCode: 1,
-      snapshot: true,
-    })
+  e2e.it('fails when remote debugging port cannot be connected to', {
+    project: Fixtures.projectPath('remote-debugging-port-removed'),
+    spec: 'spec.ts',
+    browser: 'chrome',
+    expectedExitCode: 1,
+    snapshot: true,
   })
 })

@@ -1,4 +1,4 @@
-exports['e2e screenshot fullPage capture passes 1'] = `
+exports['e2e screenshot fullPage capture / passes'] = `
 
 ====================================================================================================
 

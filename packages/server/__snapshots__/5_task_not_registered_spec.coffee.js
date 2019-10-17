@@ -64,7 +64,7 @@ https://on.cypress.io/api/task
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/task_not_registered_spec.coffee/fails because t     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/task_not_registered_spec.coffee/fails because t          (YxX)
      he 'task' event is not registered in plugins file (failed).png                                 
 
 

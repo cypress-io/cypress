@@ -1,4 +1,4 @@
-exports['e2e uncaught errors failing1 1'] = `
+exports['e2e uncaught errors / failing1'] = `
 
 ====================================================================================================
 
@@ -83,7 +83,7 @@ We dynamically generated a new test to display this failure.
 
 `
 
-exports['e2e uncaught errors failing2 1'] = `
+exports['e2e uncaught errors / failing2'] = `
 
 ====================================================================================================
 
@@ -169,7 +169,7 @@ We dynamically generated a new test to display this failure.
 
 `
 
-exports['e2e uncaught errors failing3 1'] = `
+exports['e2e uncaught errors / failing3'] = `
 
 ====================================================================================================
 
@@ -248,7 +248,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 `
 
-exports['e2e uncaught errors failing4 1'] = `
+exports['e2e uncaught errors / failing4'] = `
 
 ====================================================================================================
 
@@ -332,7 +332,7 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
 `
 
-exports['e2e uncaught errors failing5 1'] = `
+exports['e2e uncaught errors / failing5'] = `
 
 ====================================================================================================
 

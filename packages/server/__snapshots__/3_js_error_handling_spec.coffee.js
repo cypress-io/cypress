@@ -1,4 +1,4 @@
-exports['e2e js error handling fails 1'] = `
+exports['e2e js error handling / fails'] = `
 
 ====================================================================================================
 

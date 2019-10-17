@@ -56,7 +56,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/spec.coffee/An uncaught error was detected outs     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/spec.coffee/An uncaught error was detected outs          (YxX)
      ide of a test (failed).png                                                                     
 
 

@@ -1,4 +1,4 @@
-exports['e2e cdp fails when remote debugging port cannot be connected to 1'] = `
+exports['e2e cdp / fails when remote debugging port cannot be connected to'] = `
 
 ====================================================================================================
 
