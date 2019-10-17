@@ -11,7 +11,6 @@ const glob = Promise.promisify(globber)
 const pathToPackages = path.join(__dirname, '..', 'node_modules', '@packages')
 
 function deleteOutputFolder () {
-
   console.log('deleting ', pathToPackages)
 
   return fs.remove(pathToPackages)

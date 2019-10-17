@@ -41,9 +41,8 @@ describe "e2e js error handling", ->
     }]
   })
 
-  it "fails", ->
-    e2e.exec(@, {
-      spec: "js_error_handling_failing_spec.coffee"
-      snapshot: true
-      expectedExitCode: 5
-    })
+  e2e.it "fails", {
+    spec: "js_error_handling_failing_spec.coffee"
+    snapshot: true
+    expectedExitCode: 5
+  }

@@ -36,7 +36,7 @@ interface CRIWrapper {
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
   */
-  send (command: CRI.Command, params: object):Promise<any>
+  send (command: CRI.Command, params: object): Promise<any>
   /**
    * Exposes Chrome remote interface Page domain,
    * buton only for certain actions that are hard to do using "send"
@@ -53,7 +53,7 @@ interface CRIWrapper {
   /**
    * Calls underlying remote interface client close
   */
-  close ():Promise<void>
+  close (): Promise<void>
 }
 
 const maybeDebugCdpMessages = (cri) => {
@@ -79,7 +79,6 @@ const maybeDebugCdpMessages = (cri) => {
 
       debugVerboseReceive('received CDP message %o', data)
     })
-
   }
 
   if (debugVerboseSend.enabled) {
@@ -115,7 +114,7 @@ export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => 
    * that logs every command sent.
    */
   const client: CRIWrapper = {
-    send (command: CRI.Command, params: object):Promise<any> {
+    send (command: CRI.Command, params: object): Promise<any> {
       return cri.send(command, params)
     },
 
@@ -125,7 +124,7 @@ export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => 
       return cri.on(eventName, cb)
     },
 
-    close ():Promise<void> {
+    close (): Promise<void> {
       return cri.close()
     },
   }
