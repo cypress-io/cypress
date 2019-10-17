@@ -344,6 +344,14 @@ const isSelect = (el): el is HTMLSelectElement => {
   return getTagName(el) === 'select'
 }
 
+const isOption = (el) => {
+  return getTagName(el) === 'option'
+}
+
+const isOptgroup = (el) => {
+  return getTagName(el) === 'optgroup'
+}
+
 const isBody = (el): el is HTMLBodyElement => {
   return getTagName(el) === 'body'
 }
@@ -755,6 +763,14 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
   return getFirstFocusableEl($el.parent())
 }
 
+const getActiveElByDocument = (doc) => {
+  const activeEl = getNativeProp(doc, 'activeElement')
+
+  if (activeEl) return activeEl
+
+  return getNativeProp(doc, 'body')
+}
+
 const getFirstParentWithTagName = ($el, tagName) => {
   // return null if we're at body/html/document
   // cuz that means nothing has fixed position
@@ -980,7 +996,6 @@ export {
   isSelector,
   isScrollOrAuto,
   isFocusable,
-
   isW3CFocusable,
   isAttached,
   isDetached,
@@ -993,6 +1008,8 @@ export {
   isDescendent,
   isContentEditable,
   isSame,
+  isOption,
+  isOptgroup,
   isBody,
   isHTML,
   isInput,
@@ -1012,6 +1029,7 @@ export {
   findParent,
   getElements,
   getFirstFocusableEl,
+  getActiveElByDocument,
   getContainsSelector,
   getFirstDeepestElement,
   getFirstCommonAncestor,
