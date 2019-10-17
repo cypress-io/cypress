@@ -8,9 +8,8 @@ describe "e2e viewport", ->
     }
   })
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "viewport_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  e2e.it "passes", {
+    spec: "viewport_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }

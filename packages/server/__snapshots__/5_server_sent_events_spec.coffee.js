@@ -1,4 +1,4 @@
-exports['e2e server sent events passes 1'] = `
+exports['e2e server sent events / passes'] = `
 
 ====================================================================================================
 
