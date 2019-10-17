@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { HttpBuffers, HttpBuffer } from '../../../../lib/http/util/buffers'
 
 describe('http/util/buffers', () => {
-  let buffers : HttpBuffers
+  let buffers: HttpBuffers
 
   beforeEach(() => {
     buffers = new HttpBuffers()

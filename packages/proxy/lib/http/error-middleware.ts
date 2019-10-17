@@ -12,12 +12,12 @@ export type ErrorMiddleware = HttpMiddleware<{
   outgoingReq?: Request
 }>
 
-const LogError : ErrorMiddleware = function () {
+const LogError: ErrorMiddleware = function () {
   debug('error proxying request %o', _.pick(this, 'error', 'req', 'res', 'incomingRes', 'outgoingReq', 'incomingResStream'))
   this.next()
 }
 
-export const AbortRequest : ErrorMiddleware = function () {
+export const AbortRequest: ErrorMiddleware = function () {
   if (this.outgoingReq) {
     debug('aborting outgoingReq')
     this.outgoingReq.abort()
@@ -26,7 +26,7 @@ export const AbortRequest : ErrorMiddleware = function () {
   this.next()
 }
 
-export const UnpipeResponse : ErrorMiddleware = function () {
+export const UnpipeResponse: ErrorMiddleware = function () {
   if (this.incomingResStream) {
     debug('unpiping resStream from response')
     this.incomingResStream.unpipe()
@@ -35,7 +35,7 @@ export const UnpipeResponse : ErrorMiddleware = function () {
   this.next()
 }
 
-export const DestroyResponse : ErrorMiddleware = function () {
+export const DestroyResponse: ErrorMiddleware = function () {
   this.res.destroy()
   this.end()
 }

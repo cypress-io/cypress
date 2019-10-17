@@ -9,8 +9,8 @@ type ConcatOpts = {
 /**
  * Wrapper for `concat-stream` to handle empty streams.
  */
-export const concatStream : typeof _concatStream = function (opts: Callback | ConcatOpts, cb?: Callback) {
-  let _cb : Callback = cb!
+export const concatStream: typeof _concatStream = function (opts: Callback | ConcatOpts, cb?: Callback) {
+  let _cb: Callback = cb!
 
   if (!_cb) {
     _cb = opts as Callback

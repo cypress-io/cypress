@@ -44,7 +44,7 @@ type HttpMiddlewareCtx<T> = {
   middleware: MiddlewareStacks
 } & T
 
-const READONLY_MIDDLEWARE_KEYS : (keyof HttpMiddlewareThis<{}>)[] = [
+const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getRemoteState',
@@ -201,7 +201,7 @@ export class Http {
   }
 
   handle (req, res) {
-    const ctx : HttpMiddlewareCtx<any> = {
+    const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
 

@@ -16,31 +16,31 @@ export type HttpBuffer = {
 }
 
 export class HttpBuffers {
-  buffers : HttpBuffer[] = []
+  buffers: HttpBuffer[] = []
 
-  all () : HttpBuffer[] {
+  all (): HttpBuffer[] {
     return this.buffers
   }
 
-  keys () : string[] {
+  keys (): string[] {
     return _.map(this.buffers, 'url')
   }
 
-  reset () : void {
+  reset (): void {
     debug('resetting buffers')
 
     this.buffers = []
   }
 
-  set (obj : HttpBuffer) {
+  set (obj: HttpBuffer) {
     return this.buffers.push(_.pick(obj, 'url', 'originalUrl', 'jar', 'stream', 'response', 'details'))
   }
 
-  getByOriginalUrl (str) : Optional<HttpBuffer> {
+  getByOriginalUrl (str): Optional<HttpBuffer> {
     return _.find(this.buffers, { originalUrl: str })
   }
 
-  get (str) : Optional<HttpBuffer> {
+  get (str): Optional<HttpBuffer> {
     const find = (str) => {
       return _.find(this.buffers, { url: str })
     }
@@ -66,7 +66,7 @@ export class HttpBuffers {
     return undefined
   }
 
-  take (str) : Optional<HttpBuffer> {
+  take (str): Optional<HttpBuffer> {
     const buffer = this.get(str)
 
     if (buffer) {

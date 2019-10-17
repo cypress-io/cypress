@@ -9,7 +9,7 @@ export type RequestMiddleware = HttpMiddleware<{
 
 const debug = debugModule('cypress:proxy:http:request-middleware')
 
-const LogRequest : RequestMiddleware = function () {
+const LogRequest: RequestMiddleware = function () {
   debug('proxying request %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
@@ -17,7 +17,7 @@ const LogRequest : RequestMiddleware = function () {
   this.next()
 }
 
-const RedirectToClientRouteIfUnloaded : RequestMiddleware = function () {
+const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
   if (this.req.cookies['__cypress.unload']) {
@@ -31,7 +31,7 @@ const RedirectToClientRouteIfUnloaded : RequestMiddleware = function () {
 
 // TODO: is this necessary? it seems to be for requesting Cypress w/o the proxy,
 // which isn't currently supported
-const RedirectToClientRouteIfNotProxied : RequestMiddleware = function () {
+const RedirectToClientRouteIfNotProxied: RequestMiddleware = function () {
   // when you access cypress from a browser which has not had its proxy setup then
   // req.url will match req.proxiedUrl and we'll know to instantly redirect them
   // to the correct client route
@@ -46,7 +46,7 @@ const RedirectToClientRouteIfNotProxied : RequestMiddleware = function () {
   this.next()
 }
 
-const EndRequestsToBlacklistedHosts : RequestMiddleware = function () {
+const EndRequestsToBlacklistedHosts: RequestMiddleware = function () {
   const { blacklistHosts } = this.config
 
   if (blacklistHosts) {
@@ -68,7 +68,7 @@ const EndRequestsToBlacklistedHosts : RequestMiddleware = function () {
   this.next()
 }
 
-const MaybeEndRequestWithBufferedResponse : RequestMiddleware = function () {
+const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   const buffer = this.buffers.take(this.req.proxiedUrl)
 
   if (buffer) {
@@ -81,7 +81,7 @@ const MaybeEndRequestWithBufferedResponse : RequestMiddleware = function () {
   this.next()
 }
 
-const StripUnsupportedAcceptEncoding : RequestMiddleware = function () {
+const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   // Cypress can only support plaintext or gzip, so make sure we don't request anything else
   const acceptEncoding = this.req.headers['accept-encoding']
 
@@ -101,7 +101,7 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }) {
   return auth && !req.headers['authorization'] && cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }
 
-const MaybeSetBasicAuthHeaders : RequestMiddleware = function () {
+const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   const remoteState = this.getRemoteState()
 
   if (reqNeedsBasicAuthHeaders(this.req, remoteState)) {
@@ -114,7 +114,7 @@ const MaybeSetBasicAuthHeaders : RequestMiddleware = function () {
   this.next()
 }
 
-const SendRequestOutgoing : RequestMiddleware = function () {
+const SendRequestOutgoing: RequestMiddleware = function () {
   const requestOptions = {
     timeout: this.config.responseTimeout,
     strictSSL: false,

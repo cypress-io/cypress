@@ -37,7 +37,7 @@ export function parseUrlIntoDomainTldPort (str) {
     port = protocol === 'https:' ? '443' : '80'
   }
 
-  let parsed : Partial<ParsedDomain> | null = parseDomain(hostname)
+  let parsed: Partial<ParsedDomain> | null = parseDomain(hostname)
 
   // if we couldn't get a parsed domain
   if (!parsed) {

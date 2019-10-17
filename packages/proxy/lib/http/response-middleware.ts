@@ -88,7 +88,7 @@ function responseMustHaveEmptyBody (req: CypressRequest, res: IncomingMessage) {
 }
 
 function setCookie (res: CypressResponse, k: string, v: string, domain: string) {
-  let opts : CookieOptions = { domain }
+  let opts: CookieOptions = { domain }
 
   if (!v) {
     v = ''
@@ -109,7 +109,7 @@ function setInitialCookie (res: CypressResponse, remoteState: any, value) {
   return setCookie(res, '__cypress.initial', value, remoteState.domainName)
 }
 
-const LogResponse : ResponseMiddleware = function () {
+const LogResponse: ResponseMiddleware = function () {
   debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
@@ -118,7 +118,7 @@ const LogResponse : ResponseMiddleware = function () {
   this.next()
 }
 
-const PatchExpressSetHeader : ResponseMiddleware = function () {
+const PatchExpressSetHeader: ResponseMiddleware = function () {
   const originalSetHeader = this.res.setHeader
 
   // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
@@ -134,7 +134,7 @@ const PatchExpressSetHeader : ResponseMiddleware = function () {
   this.next()
 }
 
-const SetInjectionLevel : ResponseMiddleware = function () {
+const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
   const getInjectionLevel = () => {
@@ -171,7 +171,7 @@ const SetInjectionLevel : ResponseMiddleware = function () {
   this.next()
 }
 
-const OmitProblematicHeaders : ResponseMiddleware = function () {
+const OmitProblematicHeaders: ResponseMiddleware = function () {
   const headers = _.omit(this.incomingRes.headers, [
     'set-cookie',
     'x-frame-options',
@@ -185,7 +185,7 @@ const OmitProblematicHeaders : ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybePreventCaching : ResponseMiddleware = function () {
+const MaybePreventCaching: ResponseMiddleware = function () {
   // do not cache injected responses
   // TODO: consider implementing etag system so even injected content can be cached
   if (this.res.wantsInjection) {
@@ -195,8 +195,8 @@ const MaybePreventCaching : ResponseMiddleware = function () {
   this.next()
 }
 
-const CopyCookiesFromIncomingRes : ResponseMiddleware = function () {
-  const cookies : string | string[] | undefined = this.incomingRes.headers['set-cookie']
+const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
+  const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (cookies) {
     ([] as string[]).concat(cookies).forEach((cookie) => {
@@ -211,10 +211,10 @@ const CopyCookiesFromIncomingRes : ResponseMiddleware = function () {
   this.next()
 }
 
-const REDIRECT_STATUS_CODES : any[] = [301, 302, 303, 307, 308]
+const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
-const MaybeSendRedirectToClient : ResponseMiddleware = function () {
+const MaybeSendRedirectToClient: ResponseMiddleware = function () {
   const { statusCode, headers } = this.incomingRes
   const newUrl = headers['location']
 
@@ -230,17 +230,17 @@ const MaybeSendRedirectToClient : ResponseMiddleware = function () {
   return this.end()
 }
 
-const CopyResponseStatusCode : ResponseMiddleware = function () {
+const CopyResponseStatusCode: ResponseMiddleware = function () {
   this.res.status(Number(this.incomingRes.statusCode))
   this.next()
 }
 
-const ClearCyInitialCookie : ResponseMiddleware = function () {
+const ClearCyInitialCookie: ResponseMiddleware = function () {
   setInitialCookie(this.res, this.getRemoteState(), false)
   this.next()
 }
 
-const MaybeEndWithEmptyBody : ResponseMiddleware = function () {
+const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (responseMustHaveEmptyBody(this.req, this.incomingRes)) {
     this.res.end()
 
@@ -250,7 +250,7 @@ const MaybeEndWithEmptyBody : ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeGunzipBody : ResponseMiddleware = function () {
+const MaybeGunzipBody: ResponseMiddleware = function () {
   if (resIsGzipped(this.incomingRes) && (this.res.wantsInjection || this.res.wantsSecurityRemoved)) {
     debug('ungzipping response body')
 
@@ -264,7 +264,7 @@ const MaybeGunzipBody : ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeInjectHtml : ResponseMiddleware = function () {
+const MaybeInjectHtml: ResponseMiddleware = function () {
   if (!this.res.wantsInjection) {
     return this.next()
   }
@@ -289,7 +289,7 @@ const MaybeInjectHtml : ResponseMiddleware = function () {
   })).on('error', this.onError)
 }
 
-const MaybeRemoveSecurity : ResponseMiddleware = function () {
+const MaybeRemoveSecurity: ResponseMiddleware = function () {
   if (!this.res.wantsSecurityRemoved) {
     return this.next()
   }
@@ -301,14 +301,14 @@ const MaybeRemoveSecurity : ResponseMiddleware = function () {
   this.next()
 }
 
-const GzipBody : ResponseMiddleware = function () {
+const GzipBody: ResponseMiddleware = function () {
   debug('regzipping response body')
   this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
 
   this.next()
 }
 
-const SendResponseBodyToClient : ResponseMiddleware = function () {
+const SendResponseBodyToClient: ResponseMiddleware = function () {
   this.incomingResStream.pipe(this.res).on('error', this.onError)
   this.res.on('end', () => this.end())
 }
