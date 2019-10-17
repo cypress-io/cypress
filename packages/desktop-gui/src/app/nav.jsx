@@ -118,7 +118,6 @@ export default class Nav extends Component {
         Log Out
       </span>
     )
-
   }
 
   _select = (item) => {

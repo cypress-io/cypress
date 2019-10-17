@@ -221,7 +221,6 @@ function testBinary (version, binaryDir, options) {
 const maybeVerify = (installedVersion, binaryDir, options) => {
   return state.getBinaryVerifiedAsync(binaryDir)
   .then((isVerified) => {
-
     debug('is Verified ?', isVerified)
 
     let shouldVerify = !isVerified
@@ -317,7 +316,6 @@ const start = (options = {}) => {
     return state.getBinaryPkgVersionAsync(binaryDir)
   })
   .then((binaryVersion) => {
-
     if (!binaryVersion) {
       debug('no Cypress binary found for cli version ', packageVersion)
 

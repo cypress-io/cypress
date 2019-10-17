@@ -15,7 +15,7 @@ describe('lib/browsers/protocol', function () {
   context('._getDelayMsForRetry', function () {
     it('retries as expected for up to 5 seconds', function () {
       let delays = []
-      let delay : number
+      let delay: number
       let i = 0
 
       while ((delay = protocol._getDelayMsForRetry(i))) {

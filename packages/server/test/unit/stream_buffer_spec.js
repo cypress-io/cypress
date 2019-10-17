@@ -221,5 +221,4 @@ describe('lib/util/stream_buffer', () => {
 
     pt.end()
   })
-
 })

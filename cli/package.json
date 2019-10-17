@@ -55,6 +55,7 @@
     "request-progress": "3.0.0",
     "supports-color": "5.5.0",
     "tmp": "0.1.0",
+    "untildify": "3.0.3",
     "url": "0.11.0",
     "yauzl": "2.10.0"
   },
@@ -86,7 +87,7 @@
     "proxyquire": "2.1.0",
     "shelljs": "0.8.3",
     "sinon": "7.2.2",
-    "snap-shot-it": "7.8.0",
+    "snap-shot-it": "7.9.0",
     "spawn-mock": "1.0.0",
     "strip-ansi": "4.0.0"
   },

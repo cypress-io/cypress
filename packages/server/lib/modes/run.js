@@ -423,7 +423,7 @@ const getChromeProps = (isHeaded, project, writeVideoFrame) => {
     if (isHeaded && writeVideoFrame) {
       props.screencastFrame = (e) => {
         // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
-        writeVideoFrame(new Buffer(e.data, 'base64'))
+        writeVideoFrame(Buffer.from(e.data, 'base64'))
       }
     }
   })

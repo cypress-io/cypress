@@ -71,7 +71,6 @@ describe('lib/exec/xvfb', function () {
   })
 
   context('#isNeeded', function () {
-
     it('does not need xvfb on osx', function () {
       os.platform.returns('darwin')
 
