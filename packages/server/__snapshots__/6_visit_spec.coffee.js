@@ -1,4 +1,4 @@
-exports['e2e visit low response timeout passes 1'] = `
+exports['e2e visit / low response timeout / passes'] = `
 
 ====================================================================================================
 
@@ -73,7 +73,7 @@ exports['e2e visit low response timeout passes 1'] = `
 
 `
 
-exports['e2e visit low response timeout fails when network connection immediately fails 1'] = `
+exports['e2e visit / low response timeout / fails when network connection immediately fails'] = `
 
 ====================================================================================================
 
@@ -120,10 +120,7 @@ The stack trace for this error is:
 
 Error: connect ECONNREFUSED 127.0.0.1:16795
     at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -182,7 +179,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
 `
 
-exports['e2e visit low response timeout fails when server responds with 500 1'] = `
+exports['e2e visit / low response timeout / fails when server responds with 500'] = `
 
 ====================================================================================================
 
@@ -220,7 +217,6 @@ The response we received from your web server was:
 This was considered a failure because the status code was not '2xx'.
 
 If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -279,7 +275,7 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 
 `
 
-exports['e2e visit low response timeout fails when file server responds with 404 1'] = `
+exports['e2e visit / low response timeout / fails when file server responds with 404'] = `
 
 ====================================================================================================
 
@@ -317,7 +313,6 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -376,7 +371,7 @@ The internal Cypress web server responded with:
 
 `
 
-exports['e2e visit low response timeout fails when content type isnt html 1'] = `
+exports['e2e visit / low response timeout / fails when content type isnt html'] = `
 
 ====================================================================================================
 
@@ -416,7 +411,6 @@ This was considered a failure because responses must have content-type: 'text/ht
 However, you can likely use cy.request() instead of cy.visit().
 
 cy.request() will automatically get and set cookies and enable you to parse responses.
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -475,7 +469,7 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
 `
 
-exports['e2e visit normal response timeouts fails when visit times out 1'] = `
+exports['e2e visit / normal response timeouts / fails when visit times out'] = `
 
 ====================================================================================================
 
@@ -527,7 +521,6 @@ When this 'load' event occurs, Cypress will continue running commands.
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
   2) when visit times out fails timeout exceeds timeout option:
      CypressError: Timed out after waiting '500ms' for your remote page to load.
@@ -539,7 +532,6 @@ You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait lon
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
 When this 'load' event occurs, Cypress will continue running commands.
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -600,7 +592,7 @@ When this 'load' event occurs, Cypress will continue running commands.
 
 `
 
-exports['e2e visit low responseTimeout, normal pageLoadTimeout fails when response never ends 1'] = `
+exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when response never ends'] = `
 
 ====================================================================================================
 
@@ -657,11 +649,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -706,11 +694,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -755,11 +739,7 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
 
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

@@ -26,6 +26,7 @@
     "minimist": "1.2.0"
   },
   "devDependencies": {
+    "electron": "5.0.10",
     "mocha": "3.5.3"
   },
   "files": [
@@ -34,6 +35,5 @@
   ],
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
-  },
-  "electronVersion": "2.0.18"
+  }
 }

@@ -1,4 +1,4 @@
-exports['e2e forms <form> submissions passes with http on localhost 1'] = `
+exports['e2e forms / <form> submissions / passes with https on localhost'] = `
 
 ====================================================================================================
 
@@ -66,7 +66,7 @@ exports['e2e forms <form> submissions passes with http on localhost 1'] = `
 
 `
 
-exports['e2e forms <form> submissions passes with https on localhost 1'] = `
+exports['e2e forms / <form> submissions / passes with http on localhost'] = `
 
 ====================================================================================================
 
@@ -162,7 +162,6 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
   1) form submission fails fails without an explicit wait when an element is immediately found:
      AssertionError: expected '<form>' to contain 'form success!'
-      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

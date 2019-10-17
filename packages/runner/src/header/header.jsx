@@ -6,6 +6,7 @@ import Tooltip from '@cypress/react-tooltip'
 import { $ } from '@packages/driver'
 
 import eventManager from '../lib/event-manager'
+import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
@@ -14,7 +15,7 @@ export default class Header extends Component {
   @observable showingViewportMenu = false
 
   render () {
-    const { state } = this.props
+    const { state, config } = this.props
 
     return (
       <header
@@ -59,7 +60,7 @@ export default class Header extends Component {
             </button>
             <div className='viewport-menu'>
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{state.defaults.width}px</strong> by <strong>{state.defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>
-              <p>Additionally you can override the default viewport dimensions by specifying these values in your <code>cypress.json</code>.</p>
+              <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
               <pre>{/* eslint-disable indent */}
                 {`{
   "viewportWidth": ${state.defaults.width},

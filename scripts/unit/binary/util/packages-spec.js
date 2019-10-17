@@ -30,7 +30,7 @@ describe('packages', () => {
       'packages': {
         'coffee': {
           'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': new Buffer('console.log()') },
+          'src': { 'main.js': Buffer.from('console.log()') },
           'lib': { 'foo.js': '{}' },
         },
       },
@@ -77,7 +77,6 @@ describe('packages', () => {
 })
 
 describe('transformRequires', () => {
-
   it('can find and replace symlink requires', async () => {
     const buildRoot = 'build/linux/Cypress/resources/app'
 
@@ -85,12 +84,12 @@ describe('transformRequires', () => {
       [buildRoot]: { 'packages': {
         'foo': {
           'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': new Buffer('console.log()') },
+          'src': { 'main.js': Buffer.from('console.log()') },
           'lib': { 'foo.js': /*js*/`require("@packages/bar/src/main")${''}` },
         },
         'bar': {
           'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': new Buffer('console.log()') },
+          'src': { 'main.js': Buffer.from('console.log()') },
           'lib': { 'foo.js': `require("@packages/foo/lib/somefoo")${''}` },
           'node_modules': { 'no-search.js': '' },
           'dist': { 'no-search.js': '' },
@@ -115,12 +114,12 @@ describe('transformRequires', () => {
       [buildRoot]: { 'packages': {
         'foo': {
           'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': new Buffer('console.log()') },
+          'src': { 'main.js': Buffer.from('console.log()') },
           'lib': { 'foo.js': /*js*/`require("@packages/bar/src/main")${''}` },
         },
         'bar': {
           'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': new Buffer('console.log()') },
+          'src': { 'main.js': Buffer.from('console.log()') },
           'lib': { 'foo.js': `require("@packages/foo/lib/somefoo")${''}` },
           'node_modules': { 'no-search.js': '' },
           'dist': { 'no-search.js': '' },
@@ -179,7 +178,6 @@ describe('testStaticAssets', () => {
       badStrings: ['some really bad string'],
     })).to.rejected.with.eventually
     .property('message').contain('assets to be found')
-
   })
 
   it('can detect asset with too many lines', async () => {
@@ -280,7 +278,6 @@ const getFs = () => {
   const cwd = process.cwd().split('/').slice(1)
 
   const recurse = (dir, d) => {
-
     if (_.isString(dir)) {
       return dir
     }
@@ -289,7 +286,6 @@ const getFs = () => {
       let nextDepth = null
 
       if (d !== null) {
-
         if (d === -1) {
           nextDepth = d + 1
         } else if (!(d > cwd.length) && key === cwd[d]) {

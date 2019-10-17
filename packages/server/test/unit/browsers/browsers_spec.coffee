@@ -6,6 +6,12 @@ browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
 
 describe "lib/browsers/index", ->
+  context ".isBrowserFamily", ->
+    it "allows only known browsers", ->
+      expect(browsers.isBrowserFamily("chrome")).to.be.true
+      expect(browsers.isBrowserFamily("electron")).to.be.true
+      expect(browsers.isBrowserFamily("my-favorite-browser")).to.be.false
+
   context ".ensureAndGetByNameOrPath", ->
     it "returns browser by name", ->
       sinon.stub(utils, "getBrowsers").resolves([
@@ -32,11 +38,17 @@ describe "lib/browsers/index", ->
         family: 'foo-bad'
       }, {
         browsers: []
-      }).then ->
+      })
+      .then (e) ->
+        console.error(e)
         throw new Error("should've failed")
-      .catch (err) ->
-        expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
-        expect(err.message).to.contain("'foo-bad-bang' was not found on your system")
+      , (err) ->
+        # by being explicit with assertions, if something is unexpected
+        # we will get good error message that includes the "err" object
+        expect(err).to.have.property("type").to.eq("BROWSER_NOT_FOUND_BY_NAME")
+        expect(err).to.have.property("message").to.contain("'foo-bad-bang' was not found on your system")
+
+    # Ooo, browser clean up tests are disabled?!!
 
     # it "calls onBrowserClose callback on close", ->
     #   onBrowserClose = sinon.stub()

@@ -6,6 +6,9 @@ import * as $document from './document'
 import $utils from '../cypress/utils.coffee'
 import * as $selection from './selection'
 import _ from '../config/lodash'
+import { parentHasDisplayNone } from './visibility'
+
+const { wrap } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -18,7 +21,7 @@ const focusable = [
   'button:not([disabled])',
   'iframe',
   '[tabindex]',
-  '[contentEditable]',
+  '[contenteditable]',
 ]
 const focusableWhenNotDisabled = [
   'a[href]',
@@ -29,21 +32,8 @@ const focusableWhenNotDisabled = [
   'button',
   'iframe',
   '[tabindex]',
-  '[contentEditable]',
+  '[contenteditable]',
 ]
-
-// const isTextInputable = (el: HTMLElement) => {
-//   if (isTextLike(el)) {
-//     return _.some([':not([readonly])'].map((sel) => $jquery.wrap(el).is(sel)))
-//   }
-
-//   return false
-
-// }
-
-// const textinputable = ['input']
-
-//'body,a[href],button,select,[tabindex],input,textarea,[contenteditable]'
 
 const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
@@ -442,15 +432,15 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
   return null
 }
 
-const isFocusedOrInFocused = (el) => {
+const isFocusedOrInFocused = (el: HTMLElement) => {
 
   const doc = $document.getDocumentFromElement(el)
 
-  const { activeElement, body } = doc
+  const { activeElement } = doc
 
-  if (activeElementIsDefault(activeElement, body)) {
-    return false
-  }
+  // if (activeElementIsDefault(activeElement, body)) {
+  //   return false
+  // }
 
   let elToCheckCurrentlyFocused
 
@@ -464,6 +454,7 @@ const isFocusedOrInFocused = (el) => {
     return true
   }
 
+  return false
 }
 
 const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
@@ -491,6 +482,16 @@ const isFocusable = ($el: JQuery<Element>) => {
  */
 const isFocusableWhenNotDisabled = ($el: JQuery<Element>) => {
   return _.some(focusableWhenNotDisabled, (sel) => $el.is(sel)) || (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
+}
+
+const isW3CRendered = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
+  return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+}
+
+const isW3CFocusable = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
 const isType = function (el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
@@ -782,13 +783,6 @@ const isScrollable = ($el) => {
   return false
 }
 
-const getFromDocCoords = (x, y, win) => {
-  return {
-    x: win.scrollX + x,
-    y: win.scrollY + y,
-  }
-}
-
 const isDescendent = ($el1, $el2) => {
   if (!$el2) {
     return false
@@ -798,7 +792,6 @@ const isDescendent = ($el1, $el2) => {
 }
 
 const findParent = (el, fn) => {
-
   const recurse = (curEl, prevEl) => {
     if (!curEl) {
       return null
@@ -1070,6 +1063,7 @@ export {
   isDisabled,
   isReadOnlyInput,
   isReadOnlyInputOrTextarea,
+  isW3CFocusable,
   isAttached,
   isDetached,
   isAttachedEl,
@@ -1102,7 +1096,6 @@ export {
   tryCallNativeMethod,
   findParent,
   getElements,
-  getFromDocCoords,
   getFirstFocusableEl,
   getActiveElByDocument,
   getContainsSelector,

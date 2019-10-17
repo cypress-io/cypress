@@ -6,6 +6,10 @@ Promise = require("bluebird")
 client  = require("./client")
 { getCookieUrl } = require('../lib/util')
 
+COOKIE_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'storeId']
+GET_ALL_PROPS = COOKIE_PROPS.concat(['session'])
+SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
+
 httpRe = /^http/
 
 debugger
@@ -64,7 +68,7 @@ connect = (host, path) ->
     ws.emit("automation:client:connected")
 
   return ws
-  
+
 automation = {
   connect
 
@@ -91,6 +95,7 @@ automation = {
     .map(clear)
 
   getAll: (filter = {}) ->
+    filter = pick(filter, GET_ALL_PROPS)
     Promise.try ->
       browser.cookies.getAll(filter)
 
@@ -109,6 +114,8 @@ automation = {
     Promise.try ->
       browser.cookies.set(props)
     .then (details) ->
+      if (err = browser.runtime.lastError)
+        reject(err)
       ## the cookie callback could be null such as the
       ## case when expirationDate is before now
       return fn(details or null)

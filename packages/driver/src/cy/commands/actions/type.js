@@ -6,6 +6,7 @@ const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
+const $Keyboard = require('../../../cy/keyboard').default
 const Debug = require('debug')
 const debug = Debug('cypress:driver:command:type')
 
@@ -16,8 +17,7 @@ const debug = Debug('cypress:driver:command:type')
 // const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 
 module.exports = function (Commands, Cypress, cy, state, config) {
-  const { keyboard } = cy.internal
-  const { Keyboard } = Cypress
+  const { keyboard } = cy.devices
 
   function type (subject, chars, options = {}) {
     // debugger
@@ -26,8 +26,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     let updateTable
 
     options = _.clone(options)
-    //# allow the el we're typing into to be
-    //# changed by options -- used by cy.clear()
+    // allow the el we're typing into to be
+    // changed by options -- used by cy.clear()
     _.defaults(options, {
       $el: subject,
       log: true,
@@ -41,7 +41,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     })
 
     if (options.log) {
-      //# figure out the options which actually change the behavior of clicks
+      // figure out the options which actually change the behavior of clicks
       const deltaOptions = $utils.filterOutOptions(options)
 
       const table = {}
@@ -51,7 +51,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          const modifiers = Keyboard.modifiersToString(Keyboard.getActiveModifiers(state))
+          const modifiers = $Keyboard.modifiersToString($Keyboard.getActiveModifiers(state))
 
           if (modifiers) {
             obj.modifiers = modifiers
@@ -74,7 +74,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         row[column] = value || 'preventedDefault'
       }
 
-      //# transform table object into object with zero based index as keys
+      // transform table object into object with zero based index as keys
       const getTableData = () => {
         return _.reduce(_.values(table), (memo, value, index) => {
           memo[index + 1] = value
@@ -93,8 +93,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             'Applied To': $dom.getElements(options.$el),
             'Options': deltaOptions,
             'table': {
-              //# mouse events tables will take up slots 1 and 2 if they're present
-              //# this preserves the order of the tables
+              // mouse events tables will take up slots 1 and 2 if they're present
+              // this preserves the order of the tables
               3: () => {
                 return {
                   name: 'Keyboard Events',
@@ -104,36 +104,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               },
             },
           }
+
         },
+
       })
 
       options._log.snapshot('before', { next: 'after' })
     }
-
-    // const verifyElementForType = ($el) => {
-    //   const el = $el.get(0)
-    //   const isTextLike = $dom.isTextLike(el)
-
-    //   const isFocusable = $elements.isFocusable($el)
-
-    //   if (!isFocusable && !isTextLike) {
-    //     const node = $dom.stringify($el)
-
-    //     $utils.throwErrByPath('type.not_on_typeable_element', {
-    //       args: { node },
-    //     })
-    //   }
-
-    //   if (!isFocusable && isTextLike) {
-    //     const node = $dom.stringify($el)
-
-    //     $utils.throwErrByPath('type.not_actionable_textlike', {
-    //       args: { node },
-    //     })
-    //   }
-    // }
-
-    // verifyElementForType(el)
 
     if (options.$el.length > 1) {
       $utils.throwErrByPath('type.multiple_elements', {
@@ -216,7 +193,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
 
           return false
-
         }
 
         const getDefaultButton = (form) => {
@@ -229,23 +205,23 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         const defaultButton = getDefaultButton(form)
 
-        //# bail if the default button is in a 'disabled' state
+        // bail if the default button is in a 'disabled' state
         if (defaultButtonisDisabled(defaultButton)) {
           return
         }
 
-        //# issue the click event to the 'default button' of the form
-        //# we need this to be synchronous so not going through our
-        //# own click command
-        //# as of now, at least in Chrome, causing the click event
-        //# on the button will indeed trigger the form submit event
-        //# so we dont need to fire it manually anymore!
+        // issue the click event to the 'default button' of the form
+        // we need this to be synchronous so not going through our
+        // own click command
+        // as of now, at least in Chrome, causing the click event
+        // on the button will indeed trigger the form submit event
+        // so we dont need to fire it manually anymore!
         if (!clickedDefaultButton(defaultButton)) {
-          //# if we werent able to click the default button
-          //# then synchronously fire the submit event
-          //# currently this is sync but if we use a waterfall
-          //# promise in the submit command it will break again
-          //# consider changing type to a Promise and juggle logging
+          // if we werent able to click the default button
+          // then synchronously fire the submit event
+          // currently this is sync but if we use a waterfall
+          // promise in the submit command it will break again
+          // consider changing type to a Promise and juggle logging
           return cy.now('submit', form, { log: false, $el: form })
         }
       }
@@ -266,7 +242,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         return $elements.isNeedSingleValueChangeInputElement(el)
       }
 
-      //# see comment in updateValue below
+      // see comment in updateValue below
       let typed = ''
 
       const isContentEditable = $elements.isContentEditable(options.$el.get(0))
@@ -298,62 +274,18 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
         },
 
-        // onFocusChange (el, chars) {
-        //   const lastIndexToType = validateTyping(el, chars)
-        //   const [charsToType, nextChars] = _splitChars(
-        //     `${chars}`,
-        //     lastIndexToType
-        //   )
-
-        //   _setCharsNeedingType(nextChars)
-
-        //   return charsToType
-        // },
-
         onAfterType () {
           if (options.release === true) {
             state('keyboardModifiers', null)
           }
-          // if (charsNeedingType) {
-          //   const lastIndexToType = validateTyping(el, charsNeedingType)
-          //   const [charsToType, nextChars] = _splitChars(
-          //     charsNeedingType,
-          //     lastIndexToType
-          //   )
-
-          //   _setCharsNeedingType(nextChars)
-
-          //   return charsToType
-          // }
-
-          // return false
         },
 
         onBeforeType (totalKeys) {
-          //# for the total number of keys we're about to
-          //# type, ensure we raise the timeout to account
-          //# for the delay being added to each keystroke
+          // for the total number of keys we're about to
+          // type, ensure we raise the timeout to account
+          // for the delay being added to each keystroke
           return cy.timeout(totalKeys * options.delay, true, 'type')
         },
-
-        onBeforeSpecialCharAction (id, key) {
-          //# don't apply any special char actions such as
-          //# inserting new lines on {enter} or moving the
-          //# caret / range on left or right movements
-          // if (isTypeableButNotAnInput) {
-          //   return false
-          // }
-        },
-
-        // onBeforeEvent (id, key, column, which) {
-        //   //# if we are an element which isnt text like but we have
-        //   //# a tabindex then it can receive keyboard events but
-        //   //# should not fire input or textInput and should not fire
-        //   //# change events
-        //   if (inputEvents.includes(column) && isTypeableButNotAnInput) {
-        //     return false
-        //   }
-        // },
 
         onEvent (...args) {
           if (updateTable) {
@@ -361,13 +293,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
         },
 
-        //# fires only when the 'value'
-        //# of input/text/contenteditable
-        //# changes
+        // fires only when the 'value'
+        // of input/text/contenteditable
+        // changes
         onValueChange (originalText, el) {
           debug('onValueChange', originalText, el)
-          //# contenteditable should never be called here.
-          //# only inputs and textareas can have change events
+          // contenteditable should never be called here.
+          // only inputs and textareas can have change events
           let changeEvent = state('changeEvent')
 
           if (changeEvent) {
@@ -395,23 +327,23 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         },
 
         onEnterPressed (id) {
-          //# dont dispatch change events or handle
-          //# submit event if we've pressed enter into
-          //# a textarea or contenteditable
+          // dont dispatch change events or handle
+          // submit event if we've pressed enter into
+          // a textarea or contenteditable
           let changeEvent = state('changeEvent')
 
           if (isTextarea || isContentEditable) {
             return
           }
 
-          //# if our value has changed since our
-          //# element was activated we need to
-          //# fire a change event immediately
+          // if our value has changed since our
+          // element was activated we need to
+          // fire a change event immediately
           if (changeEvent) {
             changeEvent(id)
           }
 
-          //# handle submit event handler here
+          // handle submit event handler here
           return simulateSubmitHandler()
         },
 
@@ -429,7 +361,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     }
 
     const handleFocused = function () {
-      //# if it's the body, don't need to worry about focus
+      // if it's the body, don't need to worry about focus
       const isBody = options.$el.is('body')
 
       if (isBody) {
@@ -439,7 +371,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       options.ensure = {
         position: true,
         visibility: true,
-        receivability: true,
+        notDisabled: true,
         notAnimating: true,
         notCovered: true,
         notReadonly: true,
@@ -450,7 +382,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       // and seeing if that is focused
       // Checking first if element is focusable accounts for focusable els inside
       // of contenteditables
-      if ($elements.isFocusedOrInFocused(options.$el.get(0))) {
+      if ($elements.isFocusedOrInFocused(options.$el[0])) {
         debug('element is already focused, only checking readOnly property')
         options.ensure = {
           notReadonly: true,
@@ -466,34 +398,48 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // if we dont have a focused element
           // or if we do and its not ourselves
           // then issue the click
-          if (!$elements.isFocusedOrInFocused($elToClick[0])) {
-            //# click the element first to simulate focus
-            //# and typical user behavior in case the window
-            //# is out of focus
-            return cy.now('click', $elToClick, {
-              $el: $elToClick,
-              log: false,
-              verify: false,
-              _log: options._log,
-              force: true, //# force the click, avoid waiting
-              timeout: options.timeout,
-              interval: options.interval,
-            })
-            .then(() => {
-
-              return type()
-
-              // BEOW DOES NOT APPLY
-              // cannot just call .focus, since children of contenteditable will not receive cursor
-              // with .focus()
-
-              // focusCursor calls focus on first focusable
-              // then moves cursor to end if in textarea, input, or contenteditable
-              // $selection.focusCursor($elToFocus[0])
-            })
+          if ($elements.isFocusedOrInFocused($elToClick[0])) {
+            return type()
           }
 
-          return type()
+          // click the element first to simulate focus
+          // and typical user behavior in case the window
+          // is out of focus
+          // cannot just call .focus, since children of contenteditable will not receive cursor
+          // with .focus()
+          return cy.now('click', $elToClick, {
+            $el: $elToClick,
+            log: false,
+            verify: false,
+            _log: options._log,
+            force: true, // force the click, avoid waiting
+            timeout: options.timeout,
+            interval: options.interval,
+          })
+          .then(() => {
+            if (!options.force && $elements.getActiveElByDocument($elToClick[0].ownerDocument) === null) {
+
+              const node = $dom.stringify($elToClick)
+              const onFail = options._log
+
+              if ($dom.isTextLike($elToClick[0])) {
+
+                $utils.throwErrByPath('type.not_actionable_textlike', {
+                  onFail,
+                  args: { node },
+                })
+              }
+
+              $utils.throwErrByPath('type.not_on_typeable_element', {
+                onFail,
+                args: { node },
+              })
+
+            }
+
+            return type()
+          })
+
         },
       })
     }
@@ -502,8 +448,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       cy.timeout($actionability.delay, true, 'type')
 
       return Promise.delay($actionability.delay, 'type').then(() => {
-        //# command which consume cy.type may
-        //# want to handle verification themselves
+        // command which consume cy.type may
+        // want to handle verification themselves
         let verifyAssertions
 
         if (options.verify === false) {
@@ -520,20 +466,20 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   }
 
   function clear (subject, options = {}) {
-    //# what about other types of inputs besides just text?
-    //# what about the new HTML5 ones?
+    // what about other types of inputs besides just text?
+    // what about the new HTML5 ones?
     _.defaults(options, {
       log: true,
       force: false,
     })
 
-    //# blow up if any member of the subject
-    //# isnt a textarea or text-like
+    // blow up if any member of the subject
+    // isnt a textarea or text-like
     const clear = function (el) {
       const $el = $dom.wrap(el)
 
       if (options.log) {
-        //# figure out the options which actually change the behavior of clicks
+        // figure out the options which actually change the behavior of clicks
         const deltaOptions = $utils.filterOutOptions(options)
 
         options._log = Cypress.log({
@@ -564,7 +510,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       .now('type', $el, '{selectall}{del}', {
         $el,
         log: false,
-        verify: false, //# handle verification ourselves
+        verify: false, // handle verification ourselves
         _log: options._log,
         force: options.force,
         timeout: options.timeout,

@@ -134,11 +134,9 @@ const getHostContenteditable = function (el) {
   }
 
   // if there's no host contenteditable, we must be in designmode
-  // so act as if the original element is the host contenteditable
-  // TODO: remove this when we no longer click before type and move
-  // cursor to the end
+  // so act as if the body element is the host contenteditable
   if (!_hasContenteditableAttr(curEl)) {
-    return el
+    return el.ownerDocument.body
   }
 
   return curEl

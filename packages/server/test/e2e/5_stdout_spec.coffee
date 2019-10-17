@@ -35,10 +35,9 @@ describe "e2e stdout", ->
       expectedExitCode: 0
     })
 
-  it "logs that chrome cannot be recorded", ->
-    e2e.exec(@, {
-      spec: "simple_spec.coffee"
-      browser: "chrome"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  e2e.it "logs that chrome cannot be recorded", {
+    spec: "simple_spec.coffee"
+    browser: "chrome"
+    snapshot: true
+    expectedExitCode: 0
+  }

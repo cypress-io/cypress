@@ -1,5 +1,6 @@
 path     = require("path")
 Promise  = require("bluebird")
+getPort  = require("get-port")
 launcher = require("@packages/launcher")
 fs       = require("../util/fs")
 extension = require("@packages/extension")
@@ -70,8 +71,7 @@ extensionDest = appData.path("web-extension")
 extensionBg = appData.path("web-extension", "background.js")
 
 module.exports = {
-  # ensureProfileDir: (name) ->
-  #   fs.ensureDirAsync(path.join(profiles, name))
+  getPort
 
   copyExtension
 

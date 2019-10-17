@@ -652,7 +652,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
 
-    internal: {
+    devices: {
       mouse: mouse
       keyboard: keyboard
     }
@@ -681,7 +681,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
     ensureNotReadonly: ensures.ensureNotReadonly
-    ensureReceivability: ensures.ensureReceivability
+    ensureNotDisabled: ensures.ensureNotDisabled
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
     ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating

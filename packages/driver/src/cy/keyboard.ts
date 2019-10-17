@@ -250,9 +250,9 @@ const shouldIgnoreEvent = <
   T extends KeyEventType,
   K extends { [key in T]?: boolean }
 >(
-  eventName: T,
-  options: K
-) => {
+    eventName: T,
+    options: K
+  ) => {
   return options[eventName] === false
 }
 
@@ -294,13 +294,13 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: {prevChar?
     if (noneSelected) {
       const ml = $elements.getNativeProp(el, 'maxLength')
 
-      //# maxlength is -1 by default when omitted
-      //# but could also be null or undefined :-/
-      //# only care if we are trying to type a key
+      // maxlength is -1 by default when omitted
+      // but could also be null or undefined :-/
+      // only care if we are trying to type a key
       if (ml === 0 || ml > 0) {
-        //# check if we should update the value
-        //# and fire the input event
-        //# as long as we're under maxlength
+        // check if we should update the value
+        // and fire the input event
+        // as long as we're under maxlength
         if (!($elements.getNativeProp(el, 'value').length < ml)) {
           return false
         }
@@ -360,26 +360,26 @@ const validateTyping = (
   const clearChars = '{selectall}{delete}'
   const isClearChars = _.startsWith(chars.toLowerCase(), clearChars)
 
-  //# TODO: tabindex can't be -1
-  //# TODO: can't be readonly
+  // TODO: tabindex can't be -1
+  // TODO: can't be readonly
 
   if (isBody) {
     return {}
   }
 
-  if (!isFocusable && !isTextLike) {
+  if (!isFocusable) {
+
     const node = $dom.stringify($el)
+
+    if (isTextLike) {
+
+      $utils.throwErrByPath('type.not_actionable_textlike', {
+        onFail,
+        args: { node },
+      })
+    }
 
     $utils.throwErrByPath('type.not_on_typeable_element', {
-      onFail,
-      args: { node },
-    })
-  }
-
-  if (!isFocusable && isTextLike) {
-    const node = $dom.stringify($el)
-
-    $utils.throwErrByPath('type.not_actionable_textlike', {
       onFail,
       args: { node },
     })
@@ -660,7 +660,7 @@ export default class Keyboard {
         options.chars.split(charsBetweenCurlyBracesRe),
         (chars) => {
           if (charsBetweenCurlyBracesRe.test(chars)) {
-            //# allow special chars and modifiers to be case-insensitive
+            // allow special chars and modifiers to be case-insensitive
             return parseCharsBetweenCurlyBraces(chars) //.toLowerCase()
           }
 
@@ -681,7 +681,7 @@ export default class Keyboard {
     options.onBeforeType(numKeys)
 
     // # should make each keystroke async to mimic
-    //# how keystrokes come into javascript naturally
+    // how keystrokes come into javascript naturally
 
     // let prevElement = $elements.getActiveElByDocument(doc)
 
@@ -984,7 +984,7 @@ export default class Keyboard {
     debug('handleModifier', key.key)
     const modifier = keyToModifierMap[key.key]
 
-    //# do nothing if already activated
+    // do nothing if already activated
     if (!!getActiveModifiers(this.state)[modifier] === setTo) {
       return false
     }

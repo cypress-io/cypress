@@ -80,6 +80,11 @@ const runSmokeTest = (binaryDir, options) => {
     const random = _.random(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
 
+    if (needsSandbox()) {
+      // electron requires --no-sandbox to run as root
+      args.unshift('--no-sandbox')
+    }
+
     if (options.dev) {
       executable = 'node'
       args.unshift(
@@ -112,14 +117,18 @@ const runSmokeTest = (binaryDir, options) => {
     .then((result) => {
       // TODO: when execa > 1.1 is released
       // change this to `result.all` for both stderr and stdout
-      const smokeTestReturned = result.stdout
+      // use lodash to be robust during tests against null result or missing stdout
+      const smokeTestStdout = _.get(result, 'stdout', '')
 
-      debug('smoke test stdout "%s"', smokeTestReturned)
+      debug('smoke test stdout "%s"', smokeTestStdout)
 
-      if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
+      if (!util.stdoutLineMatches(String(random), smokeTestStdout)) {
         debug('Smoke test failed because could not find %d in:', random, result)
 
-        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(result.stderr || result.stdout)
+        const smokeTestStderr = _.get(result, 'stderr', '')
+        const errorText = smokeTestStderr || smokeTestStdout
+
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(errorText)
       }
     })
   }
@@ -212,7 +221,6 @@ function testBinary (version, binaryDir, options) {
 const maybeVerify = (installedVersion, binaryDir, options) => {
   return state.getBinaryVerifiedAsync(binaryDir)
   .then((isVerified) => {
-
     debug('is Verified ?', isVerified)
 
     let shouldVerify = !isVerified
@@ -308,7 +316,6 @@ const start = (options = {}) => {
     return state.getBinaryPkgVersionAsync(binaryDir)
   })
   .then((binaryVersion) => {
-
     if (!binaryVersion) {
       debug('no Cypress binary found for cli version ', packageVersion)
 
@@ -347,7 +354,18 @@ const start = (options = {}) => {
   })
 }
 
+const isLinuxLike = () => process.platform !== 'win32'
+
+const isRootUser = () => process.geteuid() === 0
+
+/**
+ * Returns true if running on a system where Electron needs "--no-sandbox" flag.
+ * @see https://crbug.com/638180
+*/
+const needsSandbox = () => isLinuxLike() && isRootUser()
+
 module.exports = {
   start,
   VERIFY_TEST_RUNNER_TIMEOUT_MS,
+  needsSandbox,
 }

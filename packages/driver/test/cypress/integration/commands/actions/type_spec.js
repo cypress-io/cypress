@@ -1,6 +1,7 @@
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
+const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
 
 const _it = it
 
@@ -244,6 +245,18 @@ describe('src/cy/commands/actions/type', () => {
       })
     })
 
+    it('can type into element that redirects focus', () => {
+      cy.$$('div[tabindex]:first').on('focus', () => {
+        cy.$$('input:first').focus()
+      })
+
+      cy.get('div[tabindex]:first').type('foobar')
+
+      cy.get('input:first')
+      .should('be.focused')
+      .should('have.value', 'foobar')
+    })
+
     describe('actionability', () => {
       it('can forcibly click even when element is invisible', () => {
         const $txt = cy.$$(':text:first').hide()
@@ -395,13 +408,11 @@ describe('src/cy/commands/actions/type', () => {
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const $txt = cy.$$(':text:first')
 
-        cy.spy(cy, 'ensureElementIsNotAnimating')
-
         cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
-          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
           expect(args[2]).to.eq(1000)
         })
@@ -412,13 +423,11 @@ describe('src/cy/commands/actions/type', () => {
 
         const $txt = cy.$$(':text:first')
 
-        cy.spy(cy, 'ensureElementIsNotAnimating')
-
         cy.get(':text:first').type('foo').then(() => {
-          const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
@@ -1087,7 +1096,6 @@ describe('src/cy/commands/actions/type', () => {
 
       it('automatically moves the caret to the end if value is changed manually asynchronously', () => {
         cy.$$('#input-without-value').keypress((e) => {
-
           const $input = $(e.target)
 
           _.defer(() => {
@@ -1411,6 +1419,20 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
+      describe('input[type=datetime-local]', () => {
+        it('can change values', () => {
+          cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        })
+
+        it('overwrites existing value', () => {
+          cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        })
+
+        it('overwrites existing value input by invoking val', () => {
+          cy.get('[type="datetime-local"]').invoke('val', '2016-01-01').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        })
+      })
+
       describe('input[type=month]', () => {
         it('can change values', () => {
           cy.get('#month-without-value').type('1959-09').then(($text) => {
@@ -1594,7 +1616,7 @@ describe('src/cy/commands/actions/type', () => {
 
           cy.get('#generic-iframe')
           .then(($iframe) => {
-            $iframe.load(() => {
+            $iframe.on('load', () => {
               loaded = true
             })
           }).scrollIntoView()
@@ -1645,7 +1667,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('specialChars', () => {
-
       context('parseSpecialCharSequences: false', () => {
         it('types special character sequences literally', (done) => {
           cy.get(':text:first').invoke('val', 'foo')
@@ -2674,9 +2695,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('modifiers', () => {
-
       describe('activating modifiers', () => {
-
         it('sends keydown event for modifiers in order', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -2816,7 +2835,6 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       describe('release: false', () => {
-
         it('maintains modifiers for subsequent type commands', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -2934,7 +2952,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('case-insensitivity', () => {
-
       it('special chars are case-insensitive', () => {
         cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {
           expect($input).to.have.value('ba')
@@ -3350,7 +3367,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('caret position', () => {
-
       it('respects being formatted by input event handlers')
 
       it('accurately returns host contenteditable attr', () => {
@@ -3385,11 +3401,11 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('accurately returns same el with no falsey contenteditable="false" attr', () => {
+      it('accurately returns documentElement el with no falsey contenteditable="false" attr', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0].ownerDocument.body)
         })
       })
 
@@ -3407,7 +3423,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('inside textarea', () => {
-
           cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <textarea id="foo"></textarea>\
@@ -3419,7 +3434,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('inside contenteditable', () => {
-
           cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <div id="foo" contenteditable> \
@@ -4195,7 +4209,6 @@ describe('src/cy/commands/actions/type', () => {
           if (log.get('name') === 'type') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('$el').get(0)).to.eq($txt.get(0))
-
           }
         })
 
@@ -4246,15 +4259,15 @@ describe('src/cy/commands/actions/type', () => {
       context('#consoleProps', () => {
         it('has all of the regular options', () => {
           cy.get('input:first').type('foobar').then(function ($input) {
-            const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
+            const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
             const console = this.lastLog.invoke('consoleProps')
 
             expect(console.Command).to.eq('type')
             expect(console.Typed).to.eq('foobar')
             expect(console['Applied To']).to.eq($input.get(0))
-            expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1)
+            expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 1)
 
-            expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
+            expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 1)
           })
         })
 
@@ -4286,11 +4299,6 @@ describe('src/cy/commands/actions/type', () => {
             expect(table.data).to.deep.eq(expectedTable)
           })
         })
-
-        // table.data.forEach (item, i) ->
-        //   expect(item).to.deep.eq(expectedTable[i])
-
-        // expect(table.data).to.deep.eq(expectedTable)
 
         it('has no modifiers when there are none activated', () => {
           cy.get(':text:first').type('f').then(function () {
@@ -4382,17 +4390,17 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('throws when not textarea or text-like', () => {
-        cy.get('#specific-contains').type('foo')
+      it('throws when not textarea or text-like', (done) => {
+        cy.timeout(300)
+        cy.get('div#nested-find').type('foo')
 
-        // cy.on('fail', (err) => {
-        //   expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
-        //   expect(err.message).to.include('The element typed into was:')
-        //   expect(err.message).to.include('<form id="by-id">...</form>')
-        //   expect(err.message).to.include(`Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, any focusable 'element', or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.`)
-
-        //   done()
-        // })
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
+          expect(err.message).to.include('The element typed into was:')
+          expect(err.message).to.include('<div id="nested-find">Nested ...</div>')
+          expect(err.message).to.include(`A typeable element matches one of the following selectors:`)
+          done()
+        })
       })
 
       it('throws when subject is a collection of elements', function (done) {
@@ -4437,6 +4445,22 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         cy.get('input:text:first').type('foo')
+      })
+
+      it('throws when subject is disabled and force:true', function (done) {
+        cy.timeout(200)
+
+        cy.$$('input:text:first').prop('disabled', true)
+
+        cy.on('fail', (err) => {
+          // get + type logs
+          expect(this.logs.length).eq(2)
+          expect(err.message).to.include('cy.type() failed because it targeted a disabled element.')
+
+          done()
+        })
+
+        cy.get('input:text:first').type('foo', { force: true })
       })
 
       it('throws when submitting within nested forms')
@@ -4485,7 +4509,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
 
-          const allChars = _.keys(cy.internal.keyboard.getKeymap()).join(', ')
+          const allChars = _.keys(cy.devices.keyboard.getKeymap()).join(', ')
 
           expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
 
@@ -5018,7 +5042,7 @@ https://on.cypress.io/type`)
           expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('<form id="checkboxes">...</form>')
-          expect(err.message).to.include('Cypress considers a \'textarea\', any \'element\' with a \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid clearable elements.')
+          expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
 
           done()
         })
@@ -5031,7 +5055,7 @@ https://on.cypress.io/type`)
           expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('<div id="dom">...</div>')
-          expect(err.message).to.include('Cypress considers a \'textarea\', any \'element\' with a \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid clearable elements.')
+          expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
 
           done()
         })
@@ -5044,8 +5068,7 @@ https://on.cypress.io/type`)
           expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('<input type="radio" name="gender" value="male">')
-          expect(err.message).to.include('Cypress considers a \'textarea\', any \'element\' with a \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid clearable elements.')
-
+          expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
           done()
         })
 
@@ -5057,7 +5080,7 @@ https://on.cypress.io/type`)
           expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
           expect(err.message).to.include('<input type="checkbox" name="colors" value="blue">')
-          expect(err.message).to.include('Cypress considers a \'textarea\', any \'element\' with a \'contenteditable\' attribute, or any \'input\' with a \'type\' attribute of \'text\', \'password\', \'email\', \'number\', \'date\', \'week\', \'month\', \'time\', \'datetime\', \'datetime-local\', \'search\', \'url\', or \'tel\' to be valid clearable elements.')
+          expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
 
           done()
         })
@@ -5228,6 +5251,32 @@ https://on.cypress.io/type`)
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        })
+      })
+    })
+  })
+
+  describe('user experience', () => {
+    it('can print table of keys on click', () => {
+      cy.get('input:first').type('foo')
+
+      .then(() => {
+        return withMutableReporterState(() => {
+          const spyTableName = cy.spy(top.console, 'groupCollapsed')
+          const spyTableData = cy.spy(top.console, 'table')
+
+          const commandLogEl = getCommandLogWithText('foo')
+
+          const reactCommandInstance = findReactInstance(commandLogEl[0])
+
+          reactCommandInstance.props.appState.isRunning = false
+
+          $(commandLogEl).find('.command-wrapper').click()
+
+          expect(spyTableName.firstCall).calledWith('Mouse Move Events')
+          expect(spyTableName.secondCall).calledWith('Mouse Click Events')
+          expect(spyTableName.thirdCall).calledWith('Keyboard Events')
+          expect(spyTableData).calledThrice
         })
       })
     })

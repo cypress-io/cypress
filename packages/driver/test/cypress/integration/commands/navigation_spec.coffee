@@ -363,19 +363,19 @@ describe "src/cy/commands/navigation", ->
 
     describe ".log", ->
       beforeEach ->
-        @logs = []
+        cy.visit("/fixtures/generic.html").then ->
+          @logs = []
 
-        cy.on "log:added", (attrs, log) =>
-          if attrs.name is "go"
-            @lastLog = log
+          cy.on "log:added", (attrs, log) =>
+            if attrs.name is "go"
+              @lastLog = log
 
-          @logs.push(log)
+            @logs.push(log)
 
-        return null
+          return null
 
       it "logs go", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             lastLog = @lastLog
@@ -385,14 +385,12 @@ describe "src/cy/commands/navigation", ->
 
       it "can turn off logging", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back", {log: false}).then ->
             expect(@lastLog).to.be.undefined
 
       it "does not log 'Page Load' events", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
@@ -402,7 +400,6 @@ describe "src/cy/commands/navigation", ->
         beforeunload = false
 
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
             cy.on "window:before:unload", =>
@@ -546,11 +543,11 @@ describe "src/cy/commands/navigation", ->
 
     it "does not support file:// protocol", (done) ->
       Cypress.config("baseUrl", "")
-    
+
       cy.on "fail", (err) ->
         expect(err.message).to.contain("cy.visit() failed because the 'file://...' protocol is not supported by Cypress.")
         done()
-    
+
       cy.visit("file:///cypress/fixtures/generic.html")
 
     ## https://github.com/cypress-io/cypress/issues/1727
@@ -621,6 +618,15 @@ describe "src/cy/commands/navigation", ->
         }
       })
       cy.contains('"user-agent":"something special"')
+
+    it "can send querystring params", ->
+      qs = { "foo bar": "baz quux" }
+
+      cy
+        .visit("http://localhost:3500/dump-qs", { qs })
+        .then ->
+          cy.contains(JSON.stringify(qs))
+          cy.url().should('eq', 'http://localhost:3500/dump-qs?foo%20bar=baz%20quux')
 
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
@@ -1062,6 +1068,23 @@ describe "src/cy/commands/navigation", ->
           url: "http://foobarbaz",
           headers: "quux"
         })
+
+      [
+        "foo",
+        null,
+        false,
+      ].forEach (qs) =>
+        str = String(qs)
+
+        it "throws when qs is #{str}", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.contain "cy.visit() requires the 'qs' option to be an object, but received: '#{str}'"
+            done()
+
+          cy.visit({
+            url: "http://foobarbaz",
+            qs
+          })
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
         cy.on "fail", (err) ->
