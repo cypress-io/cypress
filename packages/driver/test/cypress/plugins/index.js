@@ -1,3 +1,4 @@
+// only required to read in webpack config, since it is .ts
 require('@packages/ts/register')
 
 const _ = require('lodash')

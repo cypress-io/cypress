@@ -12,7 +12,7 @@ const { wrap } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
-const focusable = [
+const focusableSelectors = [
   'a[href]',
   'area[href]',
   'input:not([disabled])',
@@ -431,10 +431,23 @@ const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
 }
 
 /**
- * The element can be activeElement, recieve focus events, and also recieve keyboard events
+ * The element can be activeElement, receive focus events, and also receive keyboard events
  */
 const isFocusable = ($el: JQuery<Element>) => {
-  return _.some(focusable, (sel) => $el.is(sel)) || (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
+  // matches a focusable selector
+  if (_.some(focusableSelectors, (sel) => $el.is(sel))) {
+    return true
+  }
+
+  // when document.designMode === 'on' (indicated by truthy isContentEditable)
+  // the documentElement will be focusable
+  if (
+    (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
+  ) {
+    return true
+  }
+
+  return false
 }
 
 const isW3CRendered = (el) => {
@@ -447,8 +460,10 @@ const isW3CFocusable = (el) => {
   return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
-const isType = function (el: HTMLInputElement | HTMLInputElement[] | HTMLButtonElement | HTMLButtonElement[] | JQuery<HTMLInputElement> | JQuery<HTMLButtonElement>, type) {
-  el = ([] as HTMLInputElement[]).concat($jquery.unwrap(el))[0]
+type JQueryOrEl<T extends HTMLElement> = JQuery<T> | T
+
+const isType = function (el: JQueryOrEl<HTMLElement>, type) {
+  el = ([] as HTMLElement[]).concat($jquery.unwrap(el))[0]
 
   if (!isInput(el) && !isButton(el)) {
     return false
