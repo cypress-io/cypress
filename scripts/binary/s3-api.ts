@@ -1,11 +1,12 @@
-const debug = require("debug")("cypress:binary")
+const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
 import is from 'check-more-types'
 import S3 from 'aws-sdk/clients/s3'
-import {prop, values, all} from 'ramda'
+import { prop, values, all } from 'ramda'
 
-export const hasOnlyStringValues = (o) =>
-  all(is.unemptyString, values(o))
+export const hasOnlyStringValues = (o) => {
+  return all(is.unemptyString, values(o))
+}
 
 /**
  * Utility object with methods that deal with S3.
@@ -18,7 +19,7 @@ export const s3helpers = {
 
     return new S3({
       accessKeyId: aws.key,
-      secretAccessKey: aws.secret
+      secretAccessKey: aws.secret,
     })
   },
 
@@ -29,7 +30,7 @@ export const s3helpers = {
     return new Promise((resolve, reject) => {
       s3.headObject({
         Bucket: bucket,
-        Key: zipFile
+        Key: zipFile,
       }, (err, data) => {
         if (err) {
           debug('error getting object %s', zipFile)
@@ -37,6 +38,7 @@ export const s3helpers = {
 
           return reject(err)
         }
+
         debug('s3 data for %s', zipFile)
         debug(data)
         resolve()
@@ -51,11 +53,12 @@ export const s3helpers = {
     la(is.unemptyString(uploadDir), 'invalid upload dir', uploadDir)
 
     return new Promise((resolve, reject) => {
-      const prefix = uploadDir + '/'
+      const prefix = `${uploadDir}/`
+
       s3.listObjectsV2({
         Bucket: bucket,
         Prefix: prefix,
-        Delimiter: '/'
+        Delimiter: '/',
       }, (err, result) => {
         if (err) {
           return reject(err)
@@ -82,13 +85,14 @@ export const s3helpers = {
 
       const params: S3.CopyObjectRequest = {
         Bucket: bucket,
-        CopySource: bucket + '/' + sourceKey,
+        CopySource: `${bucket}/${sourceKey}`,
         Key: destinationKey,
         // when we copy S3 object, copy the original metadata, if any
         MetadataDirective: 'COPY',
         ContentType: contentType,
-        ACL: acl
+        ACL: acl,
       }
+
       s3.copyObject(params, (err, data) => {
         if (err) {
           return reject(err)
@@ -113,7 +117,7 @@ export const s3helpers = {
 
       s3.headObject({
         Bucket: bucket,
-        Key: key
+        Key: key,
       }, (err, data) => {
         if (err) {
           return reject(err)
@@ -140,13 +144,14 @@ export const s3helpers = {
 
       const params: S3.CopyObjectRequest = {
         Bucket: bucket,
-        CopySource: bucket + '/' + key,
+        CopySource: `${bucket}/${key}`,
         Key: key,
         Metadata: metadata,
         MetadataDirective: 'REPLACE',
         ContentType: contentType,
-        ACL: acl
+        ACL: acl,
       }
+
       s3.copyObject(params, (err, data) => {
         if (err) {
           return reject(err)
@@ -157,5 +162,5 @@ export const s3helpers = {
         resolve(data)
       })
     })
-  }
+  },
 }

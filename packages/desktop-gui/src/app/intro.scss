@@ -1,11 +1,6 @@
 .intro {
-  bottom: 18px;
-  left: 0;
-  margin-bottom: 0;
-  position: fixed;
+  flex-grow: 2;
   overflow: auto;
-  right: 0;
-  top: 40px;
 
   .alert {
     margin-bottom: 20px;
@@ -71,6 +66,7 @@
   flex-direction: column;
   justify-content: center;
   margin-bottom: 40px;
+  padding: 10px 15px;
   height: 150px;
 
   .fa-stack {

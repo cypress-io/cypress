@@ -18,6 +18,7 @@ const validProps = cacheProps.concat([
   'isChosen',
   'isLoading',
   'isNew',
+  'configFile',
   'browsers',
   'onBoardingModalOpen',
   'browserState',
@@ -25,6 +26,8 @@ const validProps = cacheProps.concat([
   'parentTestsFolderDisplay',
   'integrationExampleName',
   'scaffoldedFiles',
+  'resolvedNodePath',
+  'resolvedNodeVersion',
 ])
 
 export default class Project {
@@ -53,11 +56,13 @@ export default class Project {
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
-  @observable warning
+  @observable warnings = []
   @observable apiError
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
   @observable scaffoldedFiles = []
+  @observable resolvedNodePath
+  @observable resolvedNodeVersion
   // should never change after first set
   @observable path
   // not observable
@@ -158,6 +163,7 @@ export default class Project {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)
       })
+
       // use a custom browser if one is supplied. or, if they already have
       // a browser chosen that's been saved in localStorage, then select that
       // otherwise just do the default.
@@ -209,18 +215,23 @@ export default class Project {
     this.error = null
   }
 
-  @action setWarning (warning) {
+  @action addWarning (warning) {
     if (!this.dismissedWarnings[this._serializeWarning(warning)]) {
-      this.warning = warning
+      this.warnings.push(warning)
     }
   }
 
-  @action clearWarning () {
-    if (this.warning) {
-      this.dismissedWarnings[this._serializeWarning(this.warning)] = true
+  @action clearWarning (warning) {
+    if (!warning) {
+      // calling with no warning clears all warnings
+      return this.warnings.map((warning) => {
+        return this.clearWarning(warning)
+      })
     }
 
-    this.warning = null
+    this.dismissedWarnings[this._serializeWarning(warning)] = true
+
+    this.warnings = _.without(this.warnings, warning)
   }
 
   _serializeWarning (warning) {

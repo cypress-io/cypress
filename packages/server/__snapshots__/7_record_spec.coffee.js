@@ -243,7 +243,7 @@ We dynamically generated a new test to display this failure.
 exports['e2e record api interaction errors project 404 errors and exits 1'] = `
 We could not find a project with the ID: pid123
 
-This projectId came from your cypress.json file or an environment variable.
+This projectId came from your 'cypress.json' file or an environment variable.
 
 Please log into the Dashboard and find your project.
 
@@ -1961,6 +1961,90 @@ You've exceeded the limit of test recordings under your current billing plan thi
 To upgrade your account, please visit your billing to upgrade to another billing plan.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Params:     Group: false, Parallel: false                                                      │
+  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: record_pass_spec.coffee...                                                      (1 of 1) 
+  Estimated: 8 seconds
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌───────────────────────────────────────┐
+  │ Tests:        2                       │
+  │ Passing:      1                       │
+  │ Failing:      0                       │
+  │ Pending:      1                       │
+  │ Skipped:      0                       │
+  │ Screenshots:  1                       │
+  │ Video:        true                    │
+  │ Duration:     X seconds               │
+  │ Estimated:    8 seconds               │
+  │ Spec Ran:     record_pass_spec.coffee │
+  └───────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  - /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png (202x1002)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.coffee/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ record_pass_spec.coffee                   XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+
+
+`
+
+exports['e2e record api interaction warnings create run warnings unknown warning warns with unknown warning code 1'] = `
+Warning from Cypress Dashboard: You are almost out of time
+
+Details:
+{
+  "code": "OUT_OF_TIME",
+  "name": "OutOfTime",
+  "hadTime": 1000,
+  "spentTime": 999
+}
 
 ====================================================================================================
 

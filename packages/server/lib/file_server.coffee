@@ -29,6 +29,7 @@ onRequest = (req, res, fileServerFolder) ->
   })
   .on "error", (err) ->
     res.setHeader("x-cypress-file-server-error", true)
+    res.setHeader("content-type", "text/html")
     res.statusCode = err.status
     res.end(networkFailures.get(file, err.status))
   .pipe(res)

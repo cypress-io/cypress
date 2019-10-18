@@ -2,11 +2,12 @@ _            = require("lodash")
 exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
-cookie       = require("cookie")
+concatStream = require("concat-stream")
 stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
 evilDns      = require("evil-dns")
+isHtml       = require("is-html")
 httpProxy    = require("http-proxy")
 la           = require("lazy-ass")
 check        = require("check-more-types")
@@ -34,6 +35,15 @@ fileServer   = require("./file_server")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
+isResponseHtml = (contentType, responseBuffer) ->
+  if contentType
+    return contentType is "text/html"
+
+  if body = _.invoke(responseBuffer, 'toString')
+    return isHtml(body)
+
+  return false
+
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
   return if req.proxiedUrl
@@ -43,7 +53,7 @@ setProxiedUrl = (req) ->
   ## and only leave the path which is
   ## how browsers would normally send
   ## use their url
-  req.proxiedUrl = uri.removeDefaultPort(req.url)
+  req.proxiedUrl = uri.removeDefaultPort(req.url).format()
 
   req.url = uri.getPath(req.url)
 
@@ -317,6 +327,8 @@ class Server
       options
     })
 
+    startTime = new Date()
+
     ## if we have an existing url resolver
     ## in flight then cancel it
     if @_urlResolver
@@ -357,12 +369,11 @@ class Server
       if obj = buffers.getByOriginalUrl(urlStr)
         debug("got previous request buffer for url:", urlStr)
 
-        ## reset the cookies from the existing stream's jar
+        ## reset the cookies from the buffer on the browser
         return runPhase ->
           resolve(
-            request.setJarCookies(obj.jar, automationRequest)
-            .then (c) ->
-              return obj.details
+            Promise.map obj.details.cookies, _.partial(automationRequest, 'set:cookie')
+            .return(obj.details)
           )
 
       redirects = []
@@ -400,14 +411,15 @@ class Server
             _.pick(incomingRes, "headers", "statusCode")
           )
 
-          jar = str.getJar()
+          newUrl ?= urlStr
 
           runPhase =>
-            request.setJarCookies(jar, automationRequest)
-            .then (c) =>
+            ## get the cookies that would be sent with this request so they can be rehydrated
+            automationRequest("get:cookies", {
+              domain: cors.getSuperDomain(newUrl)
+            })
+            .then (cookies) =>
               @_remoteVisitingUrl = false
-
-              newUrl ?= urlStr
 
               statusIs2xxOrAllowedFailure = ->
                 ## is our status code in the 2xx range, or have we disabled failing
@@ -416,15 +428,13 @@ class Server
 
               isOk        = statusIs2xxOrAllowedFailure()
               contentType = headersUtil.getContentType(incomingRes)
-              isHtml      = contentType is "text/html"
 
               details = {
                 isOkStatusCode: isOk
-                isHtml
                 contentType
                 url: newUrl
                 status: incomingRes.statusCode
-                cookies: c
+                cookies
                 statusText: statusCode.getText(incomingRes.statusCode)
                 redirects
                 originalUrl
@@ -437,35 +447,45 @@ class Server
 
               debug("setting details resolving url %o", details)
 
-              ## this will allow us to listen to `str`'s `end` event by putting it in flowing mode
-              responseBuffer = stream.PassThrough({
-                ## buffer forever - node's default is only to buffer 16kB
-                highWaterMark: Infinity
-              })
-
-              str.pipe(responseBuffer)
-
-              str.on "end", =>
+              concatStr = concatStream (responseBuffer) =>
                 ## buffer the entire response before resolving.
                 ## this allows us to detect & reject ETIMEDOUT errors
                 ## where the headers have been sent but the
                 ## connection hangs before receiving a body.
+
+                if !_.get(responseBuffer, 'length')
+                  ## concatStream can yield an empty array, which is
+                  ## not a valid chunk
+                  responseBuffer = undefined
+
+                ## if there is not a content-type, try to determine
+                ## if the response content is HTML-like
+                ## https://github.com/cypress-io/cypress/issues/1727
+                details.isHtml = isResponseHtml(contentType, responseBuffer)
+
                 debug("resolve:url response ended, setting buffer %o", { newUrl, details })
+
+                details.totalTime = new Date() - startTime
 
                 ## TODO: think about moving this logic back into the
                 ## frontend so that the driver can be in control of
                 ## when the server should cache the request buffer
                 ## and set the domain vs not
-                if isOk and isHtml
+                if isOk and details.isHtml
                   ## reset the domain to the new url if we're not
                   ## handling a local file
                   @_onDomainSet(newUrl, options) if not handlingLocalFile
 
+                  responseBufferStream = new stream.PassThrough({
+                    highWaterMark: Number.MAX_SAFE_INTEGER
+                  })
+
+                  responseBufferStream.end(responseBuffer)
+
                   buffers.set({
                     url: newUrl
-                    jar: jar
-                    stream: responseBuffer
-                    details: details
+                    stream: responseBufferStream
+                    details
                     originalUrl: originalUrl
                     response: incomingRes
                   })
@@ -475,6 +495,8 @@ class Server
                   restorePreviousState()
 
                 resolve(details)
+
+              str.pipe(concatStr)
             .catch(onReqError)
 
       restorePreviousState = =>
@@ -612,30 +634,7 @@ class Server
       {hostname} = url.parse("http://#{host}")
 
       onProxyErr = (err, req, res) ->
-        ## by default http-proxy will call socket.end
-        ## with no data, so we need to override the end
-        ## function and write our own response
-        ## https://github.com/nodejitsu/node-http-proxy/blob/master/lib/http-proxy/passes/ws-incoming.js#L159
-        end = socket.end
-        socket.end = ->
-          socket.end = end
-
-          response = [
-            "HTTP/#{req.httpVersion} 502 #{statusCode.getText(502)}"
-            "X-Cypress-Proxy-Error-Message: #{err.message}"
-            "X-Cypress-Proxy-Error-Code: #{err.code}"
-          ].join("\r\n") + "\r\n\r\n"
-
-          proxiedUrl = "#{protocol}//#{hostname}:#{port}"
-
-          debug(
-            "Got ERROR proxying websocket connection to url: '%s' received error: '%s' with code '%s'",
-            proxiedUrl,
-            err.toString()
-            err.code
-          )
-
-          socket.end(response)
+        debug("Got ERROR proxying websocket connection", { err, port, protocol, hostname, req })
 
       proxy.ws(req, socket, head, {
         secure: false

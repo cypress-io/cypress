@@ -3,9 +3,12 @@ require("../spec_helper")
 _             = require("lodash")
 r             = require("request")
 rp            = require("request-promise")
+compression   = require("compression")
 dns           = require("dns")
+express       = require("express")
 http          = require("http")
 path          = require("path")
+url           = require("url")
 zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
@@ -33,7 +36,7 @@ Fixtures      = require("#{root}test/support/helpers/fixtures")
 zlib = Promise.promisifyAll(zlib)
 
 ## force supertest-session to use promises provided in supertest
-Session = proxyquire("supertest-session", {supertest: supertest})
+session = proxyquire("supertest-session", {supertest: supertest})
 
 removeWhitespace = (c) ->
   c = str.clean(c)
@@ -52,6 +55,8 @@ browserifyFile = (filePath) ->
   )
 
 describe "Routes", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -93,11 +98,11 @@ describe "Routes", ->
         ## options including our proxy
         @rp = (options = {}) =>
           if _.isString(options)
-            url = options
+            targetUrl = options
             options = {}
 
           _.defaults options, {
-            url,
+            url: targetUrl,
             proxy: @proxy,
             jar,
             simple: false,
@@ -123,7 +128,7 @@ describe "Routes", ->
 
               @srv = @server.getHttpServer()
 
-              @session = new (Session({app: @srv}))
+              @session = session(@srv)
 
               @proxy = "http://localhost:" + port
           ])
@@ -268,8 +273,12 @@ describe "Routes", ->
         @rp("http://localhost:9999/__")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include("version")
-          expect(res.body).to.include(pkg.version)
+
+          base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include("version")
+          expect(configStr).to.include(pkg.version)
 
   context "GET /__cypress/runner/*", ->
     beforeEach ->
@@ -1002,6 +1011,44 @@ describe "Routes", ->
           expect(res.body).not.to.include("document.domain = 'github.com'")
           expect(res.body).to.include("</html>")
 
+      ## https://github.com/cypress-io/cypress/issues/1746
+      it "can ungzip utf-8 javascript and inject without corrupting it", ->
+        js = ""
+
+        app = express()
+
+        app.use compression({ chunkSize: 64, threshold: 1 })
+
+        app.get "/", (req, res) =>
+          res.setHeader('content-type', 'application/javascript; charset=UTF-8')
+          res.setHeader('transfer-encoding', 'chunked')
+
+          write = (chunk) =>
+            js += chunk
+            res.write(chunk)
+
+          write("function ")
+          _.times 100, =>
+            write("😡😈".repeat(10))
+          write(" () { }")
+          res.end()
+
+        server = http.createServer(app)
+
+        Promise.fromCallback (cb) =>
+          server.listen(12345, cb)
+        .then =>
+          @rp({
+            url: "http://localhost:12345"
+            gzip: true
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.deep.eq(js)
+        .finally =>
+          Promise.fromCallback (cb) =>
+            server.close(cb)
+
     context "accept-encoding", ->
       beforeEach ->
         @setup("http://www.github.com")
@@ -1673,58 +1720,88 @@ describe "Routes", ->
               "Content-Type": "text/css"
             })
 
-      it "attaches auth headers when matches origin", ->
-        username = "u"
-        password = "p"
+      context "authorization", ->
+        it "attaches auth headers when matches origin", ->
+          username = "u"
+          password = "p"
 
-        base64 = Buffer.from(username + ":" + password).toString("base64")
+          base64 = Buffer.from(username + ":" + password).toString("base64")
 
-        @server._remoteAuth = {
-          username
-          password
-        }
-
-        nock("http://localhost:8080")
-        .get("/index")
-        .matchHeader("authorization", "Basic #{base64}")
-        .reply(200, "")
-
-        @rp("http://localhost:8080/index")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      it "does not attach auth headers when not matching origin", ->
-        nock("http://localhost:8080", {
-          badheaders: ['authorization']
-        })
-        .get("/index")
-        .reply(200, "")
-
-        @rp("http://localhost:8080/index")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      it "does not modify existing auth headers when matching origin", ->
-        existing = "Basic asdf"
-
-        @server._remoteAuth = {
-          username: "u"
-          password: "p"
-        }
-
-        nock("http://localhost:8080")
-        .get("/index")
-        .matchHeader("authorization", existing)
-        .reply(200, "")
-
-        @rp({
-          url: "http://localhost:8080/index"
-          headers: {
-            "Authorization": existing
+          @server._remoteAuth = {
+            username
+            password
           }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
+
+          nock("http://localhost:8080")
+          .get("/index")
+          .matchHeader("authorization", "Basic #{base64}")
+          .reply(200, "")
+
+          @rp("http://localhost:8080/index")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        it "does not attach auth headers when not matching origin", ->
+          nock("http://localhost:8080", {
+            badheaders: ['authorization']
+          })
+          .get("/index")
+          .reply(200, "")
+
+          @rp("http://localhost:8080/index")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        it "does not modify existing auth headers when matching origin", ->
+          existing = "Basic asdf"
+
+          @server._remoteAuth = {
+            username: "u"
+            password: "p"
+          }
+
+          nock("http://localhost:8080")
+          .get("/index")
+          .matchHeader("authorization", existing)
+          .reply(200, "")
+
+          @rp({
+            url: "http://localhost:8080/index"
+            headers: {
+              "Authorization": existing
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        ## https://github.com/cypress-io/cypress/issues/4267
+        it "doesn't attach auth headers to a diff protection space on the same origin", ->
+          @setup("http://beta.something.com")
+          .then =>
+            username = "u"
+            password = "p"
+
+            base64 = Buffer.from(username + ":" + password).toString("base64")
+
+            @server._remoteAuth = {
+              username
+              password
+            }
+
+            nock(/.*\.something.com/)
+            .get("/index")
+            .matchHeader("authorization", "Basic #{base64}")
+            .reply(200, "")
+            .get("/index")
+            .matchHeader("authorization", _.isUndefined)
+            .reply(200, "")
+
+            @rp("http://beta.something.com/index")
+            .then (res) =>
+              expect(res.statusCode).to.eq(200)
+              @rp("http://cdn.something.com/index")
+            .then (res) =>
+              expect(res.statusCode).to.eq(200)
 
     context "images", ->
       beforeEach ->
@@ -2584,20 +2661,6 @@ describe "Routes", ->
               ## shouldn't be more than 500ms
               expect(reqTime).to.be.lt(500)
 
-              # b = res.body
-              #
-              # console.time("1")
-              # b.replace(topOrParentEqualityBeforeRe, "$self")
-              # console.timeEnd("1")
-              #
-              # console.time("2")
-              # b.replace(topOrParentEqualityAfterRe, "self$2")
-              # console.timeEnd("2")
-              #
-              # console.time("3")
-              # b.replace(topOrParentLocationOrFramesRe, "$1self$3$4")
-              # console.timeEnd("3")
-
       describe "off with config", ->
         beforeEach ->
           @setup("http://www.google.com", {
@@ -3061,21 +3124,51 @@ describe "Routes", ->
         es.onmessage = (m) =>
           expect(m.data).to.eq("hey")
           es.close()
-    #
-    #   it "handles errors when the event source connection cannot be made", (done) ->
-    #     ## it should call req.socket.destroy() when receiving error
-    #     @server.onRequest (req, res) =>
-    #       sinon.spy(@server._request, "create")
-    #       sinon.spy(req.socket, "destroy")
-    #
-    #       es.onerror = (e) =>
-    #         expect(@server._request.create).to.be.calledWithMatch({timeout: null})
-    #         expect(req.socket.destroy).to.be.calledOnce
-    #         done()
-    #
-    #     es = new EventSource("http://localhost:7777/sse", {
-    #       proxy: @proxy
-    #     })
+
+    context "when body should be empty", ->
+      @timeout(1000)
+
+      beforeEach (done) ->
+        @httpSrv = http.createServer (req, res) ->
+          { query } = url.parse(req.url, true)
+
+          if _.has(query, 'chunked')
+            res.setHeader('tranfer-encoding', 'chunked')
+          else
+            res.setHeader('content-length', '0')
+
+          res.writeHead(Number(query.status), {
+            'x-foo': 'bar'
+          })
+          res.end()
+
+        @httpSrv.listen =>
+          @port = @httpSrv.address().port
+
+          @setup("http://localhost:#{@port}")
+          .then(_.ary(done, 0))
+
+      afterEach ->
+        @httpSrv.close()
+
+      [204, 304].forEach (status) ->
+        it "passes through a #{status} response immediately", ->
+          @rp({
+            url: "http://localhost:#{@port}/?status=#{status}"
+            timeout: 100
+          })
+          .then (res) ->
+            expect(res.headers['x-foo']).to.eq('bar')
+            expect(res.statusCode).to.eq(status)
+
+        it "passes through a #{status} response with chunked encoding immediately", ->
+          @rp({
+            url: "http://localhost:#{@port}/?status=#{status}&chunked"
+            timeout: 100
+          })
+          .then (res) ->
+            expect(res.headers['x-foo']).to.eq('bar')
+            expect(res.statusCode).to.eq(status)
 
   context "POST *", ->
     beforeEach ->

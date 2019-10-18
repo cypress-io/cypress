@@ -573,7 +573,39 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present.")
+          expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in 'cypress.json'. Neither of those values were present.")
+          done()
+
+        cy.request("/foo/bar")
+
+      it "throws when url is not FQDN, notes that configFile is disabled", (done) ->
+        Cypress.config("baseUrl", "")
+        Cypress.config("configFile", false)
+        cy.stub(cy, "getRemoteLocation").withArgs("origin").returns("")
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in 'cypress.json' (currently disabled by --config-file=false). Neither of those values were present.")
+          done()
+
+        cy.request("/foo/bar")
+
+      it "throws when url is not FQDN, notes that configFile is non-default", (done) ->
+        Cypress.config("baseUrl", "")
+        Cypress.config("configFile", "foo.json")
+        cy.stub(cy, "getRemoteLocation").withArgs("origin").returns("")
+
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in 'foo.json'. Neither of those values were present.")
           done()
 
         cy.request("/foo/bar")
@@ -750,6 +782,16 @@ describe "src/cy/commands/request", ->
             username: "cypress"
           }
         })
+
+      ## https://github.com/cypress-io/cypress/issues/4346
+      it "throws on network failure when nested", (done) ->
+        cy.request("http://localhost:3500/dump-method")
+        .then ->
+          cy.request("http://0.0.0.0:12345")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "cy.request() failed trying to load:"
+          done()
 
       it "displays body_circular when body is circular", (done) ->
         foo = {

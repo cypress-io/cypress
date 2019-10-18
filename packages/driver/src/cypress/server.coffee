@@ -44,14 +44,11 @@ isAbortedThroughUnload = (xhr) ->
 
 warnOnStubDeprecation = (obj, type) ->
   if _.has(obj, "stub")
-    $utils.warning("""
-      Passing cy.#{type}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
-      https://on.cypress.io/deprecated-stub-false-on-#{type}
-    """)
+    $utils.warnByPath("server.stub_deprecated", { args: { type }})
 
 warnOnForce404Default = (obj) ->
   if obj.force404 is false
-    $utils.warning("Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+    $utils.warnByPath("server.force404_deprecated")
 
 whitelist = (xhr) ->
   ## whitelist if we're GET + looks like we're fetching regular resources
@@ -115,7 +112,7 @@ transformHeaders = (headers) ->
 
 normalizeStubUrl = (xhrUrl, url) ->
   if not xhrUrl
-    $utils.warning("'Server.options.xhrUrl' has not been set")
+    $utils.warnByPath("server.xhrurl_not_set")
 
   ## always ensure this is an absolute-relative url
   ## and remove any double slashes
@@ -418,7 +415,7 @@ create = (options = {}) ->
             return if isCalled
             isCalled = true
             try
-              return fn.apply(null, arguments)
+              return fn.apply(window, arguments)
             finally
               isCalled = false
 

@@ -53,6 +53,7 @@ describe('runnables store', () => {
     global.requestAnimationFrame = (cb) => {
       return cb()
     }
+
     appState = appStateStub()
     scroller = scrollerStub()
     instance = new RunnablesStore({ appState, scroller })

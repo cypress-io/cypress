@@ -1,6 +1,6 @@
 const _ = require('lodash')
-const url = require('url')
 const debug = require('debug')('cypress:server:buffers')
+const uri = require('./uri')
 
 let buffers = []
 
@@ -38,15 +38,14 @@ module.exports = {
       return b
     }
 
-    const parsed = url.parse(str)
+    let parsed = uri.parse(str)
 
     //# if we're on https and we have a port
     //# then attempt to find the buffer by
     //# slicing off the port since our buffer
     //# was likely stored without a port
     if ((parsed.protocol === 'https:') && parsed.port) {
-      parsed.host = parsed.host.split(':')[0]
-      parsed.port = null
+      parsed = uri.removePort(parsed)
 
       return find(parsed.format())
     }

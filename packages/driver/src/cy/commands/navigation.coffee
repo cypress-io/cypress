@@ -43,8 +43,11 @@ isValidVisitMethod = (method) ->
 
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
+    args: {
+      configFile: Cypress.config("configFile")
+      ms
+    }
     onFail: log
-    args: { ms }
   })
 
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
@@ -68,6 +71,14 @@ cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
     args: {
       previousDomain: previousDomainVisited
       attemptedDomain: origin
+    }
+  })
+
+specifyFileByRelativePath = (url, log) ->
+  $utils.throwErrByPath("visit.specify_file_by_relative_path", {
+    onFail: log
+    args: {
+      attemptedUrl: url
     }
   })
 
@@ -213,6 +224,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
       $utils.throwErrByPath("navigation.cross_origin", {
         onFail: options._log
         args: {
+          configFile: Cypress.config("configFile")
           message: err.message
           originPolicy: originPolicy
         }
@@ -514,6 +526,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         onLoad: ->
       })
 
+      if !_.isUndefined(options.qs) and not _.isObject(options.qs)
+        $utils.throwErrByPath("visit.invalid_qs", { args: { qs: String(options.qs) }})
+
       if options.retryOnStatusCodeFailure and not options.failOnStatusCode
         $utils.throwErrByPath("visit.status_code_flags_invalid")
 
@@ -541,6 +556,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
+
+      if qs = options.qs
+        url = $Location.mergeUrlWithParams(url, qs)
 
       cleanup = null
 
@@ -581,7 +599,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ({runOnLoadCallback}) ->
+      onLoad = ({runOnLoadCallback, totalTime}) ->
         ## reset window on load
         win = state("window")
 
@@ -589,7 +607,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if runOnLoadCallback isnt false
           options.onLoad?.call(runnable.ctx, win)
 
-        options._log.set({url: url}) if options._log
+        if options._log
+          options._log.set({
+            url
+            totalTime
+          })
 
         return Promise.resolve(win)
 
@@ -598,6 +620,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         existing = $utils.locExisting()
 
         ## TODO: $Location.resolve(existing.origin, url)
+
+        if $Location.isLocalFileUrl(url)
+          return specifyFileByRelativePath(url, options._log)
 
         ## in the case we are visiting a relative url
         ## then prepend the existing origin to it
@@ -684,7 +709,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             url = $Location.fullyQualifyUrl(url)
 
             changeIframeSrc(url, "window:load")
-            .then(onLoad)
+            .then ->
+              onLoad(resp)
           else
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop
@@ -788,8 +814,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           go()
 
       visit()
-      .then ->
-        state("window")
       .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
         timedOutWaitingForPageLoad(options.timeout, options._log)

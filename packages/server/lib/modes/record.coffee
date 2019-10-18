@@ -13,9 +13,11 @@ errors     = require("../errors")
 capture    = require("../capture")
 upload     = require("../upload")
 env        = require("../util/env")
+keys       = require("../util/keys")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 ciProvider = require("../util/ci_provider")
+settings   = require("../util/settings")
 
 onBeforeRetry = (details) ->
   errors.warning(
@@ -91,9 +93,9 @@ throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) ->
   if ciBuildId and (not parallel and not group)
     errors.throw("INCORRECT_CI_BUILD_ID_USAGE", { ciBuildId })
 
-throwIfNoProjectId = (projectId) ->
+throwIfNoProjectId = (projectId, configFile) ->
   if not projectId
-    errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
+    errors.throw("CANNOT_RECORD_NO_PROJECT_ID", configFile)
 
 getSpecRelativePath = (spec) ->
   _.get(spec, "relative", null)
@@ -246,7 +248,7 @@ billingLink = (orgId) ->
 gracePeriodMessage = (gracePeriodEnds) ->
   gracePeriodEnds or "the grace period ends"
 
-createRun = (options = {}) ->
+createRun = Promise.method (options = {}) ->
   _.defaults(options, {
     group: null,
     parallel: null,
@@ -337,6 +339,11 @@ createRun = (options = {}) ->
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
+        else
+          errors.warning("DASHBOARD_UNKNOWN_CREATE_RUN_WARNING", {
+            message: warning.message,
+            props: _.omit(warning, 'message')
+          })
 
   .catch (err) ->
     debug("failed creating run %o", {
@@ -345,7 +352,7 @@ createRun = (options = {}) ->
 
     switch err.statusCode
       when 401
-        recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+        recordKey = keys.hide(recordKey)
         errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
       when 402
         { code, payload } = err.error
@@ -382,7 +389,7 @@ createRun = (options = {}) ->
               },
             })
       when 404
-        errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
+        errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId, settings.configFile(options))
       when 412
         errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
       when 422
@@ -537,7 +544,9 @@ createRunAndRecordSpecs = (options = {}) ->
       if not resp
         ## if a forked run, can't record and can't be parallel
         ## because the necessary env variables aren't present
-        runAllSpecs({}, false)
+        runAllSpecs({
+          parallel: false
+        })
       else
         { runUrl, runId, machineId, groupId } = resp
 
@@ -618,7 +627,12 @@ createRunAndRecordSpecs = (options = {}) ->
                 instanceId
               })
 
-        runAllSpecs({ beforeSpecRun, afterSpecRun, runUrl })
+        runAllSpecs({ 
+          runUrl,
+          parallel, 
+          beforeSpecRun,
+          afterSpecRun,
+        })
 
 module.exports = {
   createRun

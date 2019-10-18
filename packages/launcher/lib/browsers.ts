@@ -10,7 +10,7 @@ export const browsers: Browser[] = [
     displayName: 'Chrome',
     versionRegex: /Google Chrome (\S+)/,
     profile: true,
-    binary: ['google-chrome', 'chrome', 'google-chrome-stable']
+    binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
   },
   {
     name: 'chromium',
@@ -18,7 +18,7 @@ export const browsers: Browser[] = [
     displayName: 'Chromium',
     versionRegex: /Chromium (\S+)/,
     profile: true,
-    binary: ['chromium-browser', 'chromium']
+    binary: ['chromium-browser', 'chromium'],
   },
   {
     name: 'canary',
@@ -47,7 +47,7 @@ export const browsers: Browser[] = [
 ]
 
 /** starts a found browser and opens URL if given one */
-export function launch(
+export function launch (
   browser: FoundBrowser,
   url: string,
   args: string[] = []
@@ -63,5 +63,6 @@ export function launch(
   }
 
   log('spawning browser %o with args %s', browser, args.join(' '))
+
   return cp.spawn(browser.path, args, { stdio: 'ignore' })
 }

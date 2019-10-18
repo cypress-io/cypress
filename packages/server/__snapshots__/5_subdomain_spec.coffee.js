@@ -1,4 +1,4 @@
-exports['e2e subdomain passes 1'] = `
+exports['e2e subdomain / passes'] = `
 
 ====================================================================================================
 
@@ -21,7 +21,7 @@ exports['e2e subdomain passes 1'] = `
     ✓ can swap to help.foobar.com:2292
     ✓ can directly visit a subdomain in another test
     ✓ issue: #207: does not duplicate or hostOnly cookies as a domain cookie
-    ✓ corrects sets domain based cookies
+    ✓ correctly sets domain based cookies
     - issue #362: do not set domain based (non hostOnly) cookies by default
     - sets a hostOnly cookie by default
     ✓ issue #361: incorrect cookie synchronization between cy.request redirects

@@ -20,16 +20,15 @@ const model = (props) => {
 describe('Command model', () => {
   let clock
 
-  before(() => {
+  beforeEach(() => {
     clock = sinon.useFakeTimers()
   })
 
-  after(() => {
+  afterEach(() => {
     clock.restore()
   })
 
   context('.isLongRunning', () => {
-
     describe('when model is pending on initialization and LONG_RUNNING_THRESHOLD passes', () => {
       let command
 

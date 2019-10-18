@@ -27,16 +27,6 @@ describe "$Cypress.Log API", ->
         two: "two"
       }
 
-    it "#snapshot", ->
-      createSnapshot = @sandbox.stub(@Cypress, "createSnapshot").returns({})
-
-      div = $("<div />")
-      @log.set "$el", div
-
-      @log.snapshot()
-
-      expect(createSnapshot).to.be.calledWith div
-
     it "#error", ->
       err = new Error
       @log.error(err)

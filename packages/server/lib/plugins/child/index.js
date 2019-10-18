@@ -1,8 +1,3 @@
-// if we are running in electron
-// we must hack around busted timers
-if (process.versions.electron) {
-  require('../../timers/parent').fix()
-}
 require('graceful-fs').gracefulify(require('fs'))
 require('@packages/coffee/register')
 require && require.extensions && delete require.extensions['.litcoffee']

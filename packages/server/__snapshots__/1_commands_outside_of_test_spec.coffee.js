@@ -1,4 +1,61 @@
-exports['e2e commands outside of test fails on cy commands 1'] = `
+exports['e2e commands outside of test / passes on passing assertions'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (assertions_passing_outside_of_test_spec.coffee)                           │
+  │ Searched:   cypress/integration/assertions_passing_outside_of_test_spec.coffee                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running: assertions_passing_outside_of_test_spec.coffee...                               (1 of 1) 
+
+
+  0 passing
+
+
+  (Results)
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                              │
+  │ Passing:      0                                              │
+  │ Failing:      0                                              │
+  │ Pending:      0                                              │
+  │ Skipped:      0                                              │
+  │ Screenshots:  0                                              │
+  │ Video:        true                                           │
+  │ Duration:     X seconds                                      │
+  │ Spec Ran:     assertions_passing_outside_of_test_spec.coffee │
+  └──────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔ assertions_passing_outside_of_test_s…     XX:XX        -        -        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    All specs passed!                           XX:XX        -        -        -        -        -  
+
+
+`
+
+exports['e2e commands outside of test / fails on cy commands'] = `
 
 ====================================================================================================
 
@@ -91,7 +148,7 @@ We dynamically generated a new test to display this failure.
 
 `
 
-exports['e2e commands outside of test fails on failing assertions 1'] = `
+exports['e2e commands outside of test / fails on failing assertions'] = `
 
 ====================================================================================================
 
@@ -166,63 +223,6 @@ We dynamically generated a new test to display this failure.
   │ ✖ assertions_failing_outside_of_test_s…     XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
-
-
-`
-
-exports['e2e commands outside of test passes on passing assertions 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (assertions_passing_outside_of_test_spec.coffee)                           │
-  │ Searched:   cypress/integration/assertions_passing_outside_of_test_spec.coffee                 │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running: assertions_passing_outside_of_test_spec.coffee...                               (1 of 1) 
-
-
-  0 passing
-
-
-  (Results)
-
-  ┌──────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                              │
-  │ Passing:      0                                              │
-  │ Failing:      0                                              │
-  │ Pending:      0                                              │
-  │ Skipped:      0                                              │
-  │ Screenshots:  0                                              │
-  │ Video:        true                                           │
-  │ Duration:     X seconds                                      │
-  │ Spec Ran:     assertions_passing_outside_of_test_spec.coffee │
-  └──────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ assertions_passing_outside_of_test_s…     XX:XX        -        -        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        -        -        -        -        -  
 
 
 `

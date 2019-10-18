@@ -4,7 +4,6 @@
 
 require("../spec_helper")
 
-through   = require("through")
 Readable  = require("stream").Readable
 proxy     = require("#{root}lib/controllers/proxy")
 

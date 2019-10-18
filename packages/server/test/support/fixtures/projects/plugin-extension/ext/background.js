@@ -1,5 +1,3 @@
-/* global document */
-
 const el = document.getElementById('extension')
 
 if (el) {

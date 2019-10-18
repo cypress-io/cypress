@@ -97,7 +97,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $utils.throwErrByPath("request.status_code_flags_invalid")
 
       if _.has(options, "failOnStatus")
-        $utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+        $utils.warnByPath("request.failonstatus_deprecated_warning")
         options.failOnStatusCode = options.failOnStatus
 
       ## normalize followRedirects -> followRedirect
@@ -129,7 +129,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
-        $utils.throwErrByPath("request.url_invalid")
+        $utils.throwErrByPath("request.url_invalid", {
+          args: {
+            configFile: Cypress.config("configFile")
+          }
+        })
 
       ## if a user has `x-www-form-urlencoded` content-type set
       ## with an object body, they meant to add 'form: true'

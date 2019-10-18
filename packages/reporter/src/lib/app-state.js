@@ -63,6 +63,7 @@ class AppState {
     _.each(defaults, (value, key) => {
       this[key] = value
     })
+
     this._resetAutoScrolling()
   }
 

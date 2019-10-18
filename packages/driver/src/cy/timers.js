@@ -4,13 +4,13 @@ const create = () => {
   let paused
   let flushing
   let timerQueue
-  let cancelledTimerIds
+  let canceledTimerIds
 
   const reset = () => {
     paused = false
     flushing = false
     timerQueue = []
-    cancelledTimerIds = {}
+    canceledTimerIds = {}
   }
 
   const isPaused = () => {
@@ -31,11 +31,11 @@ const create = () => {
     _.each(timerQueue, (timer) => {
       const { timerId, type, fnOrCode, params, contentWindow } = timer
 
-      // if we are a setInterval and we're been cancelled
+      // if we are a setInterval and we're been canceled
       // then just return. this can happen when a setInterval
       // queues many callbacks, and from within that callback
-      // we would have cancelled the original setInterval
-      if (type === 'setInterval' && cancelledTimerIds[timerId]) {
+      // we would have canceled the original setInterval
+      if (type === 'setInterval' && canceledTimerIds[timerId]) {
         return
       }
 
@@ -70,7 +70,7 @@ const create = () => {
     const wrapCancel = (fnName) => {
       return (timerId) => {
         if (flushing) {
-          cancelledTimerIds[timerId] = true
+          canceledTimerIds[timerId] = true
         }
 
         return callThrough(fnName, [timerId])

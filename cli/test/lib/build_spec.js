@@ -26,6 +26,7 @@ describe('package.json build', () => {
       name: 'test',
       engines: 'test engines',
     })
+
     sinon.stub(fs, 'outputJsonAsync').resolves()
   })
 

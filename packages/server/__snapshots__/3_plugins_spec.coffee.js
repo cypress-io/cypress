@@ -22,7 +22,6 @@ Error: Async error from plugins file
     at stack trace line
     at stack trace line
     at stack trace line
-    at stack trace line
 
 
   (Results)
@@ -180,7 +179,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
 `
 
-exports['e2e plugins works with user extensions 1'] = `
+exports['e2e plugins / works with user extensions'] = `
 
 ====================================================================================================
 
@@ -198,12 +197,6 @@ exports['e2e plugins works with user extensions 1'] = `
                                                                                                     
   Running: app_spec.coffee...                                                              (1 of 1) 
 
-Warning: Cypress can only record videos when using the built in 'electron' browser.
-
-You have set the browser to: 'chrome'
-
-A video will not be recorded when using this browser.
-
 
   ✓ can inject text from an extension
 
@@ -219,10 +212,16 @@ A video will not be recorded when using this browser.
   │ Pending:      0               │
   │ Skipped:      0               │
   │ Screenshots:  0               │
-  │ Video:        false           │
+  │ Video:        true            │
   │ Duration:     X seconds       │
   │ Spec Ran:     app_spec.coffee │
   └───────────────────────────────┘
+
+
+  (Video)
+
+  - Started processing:   Compressing to 32 CRF
+  - Finished processing:  /foo/bar/.projects/plugin-extension/cypress/videos/abc123.mp4 (X seconds)
 
 
 ====================================================================================================
@@ -350,8 +349,8 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   (Screenshots)
 
   - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (2x2)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (1280x720)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (1280x720)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (YYYYxZZZZ)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (YYYYxZZZZ)
   - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (1x1)
 
 

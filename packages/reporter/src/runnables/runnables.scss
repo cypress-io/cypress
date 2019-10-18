@@ -24,7 +24,7 @@
     overflow: auto;
     line-height: 18px;
     padding-left: 0;
-  
+
     pre {
       background-color: darken($yellow-lightest, 5%);
       border-left: 5px solid $fail;
@@ -66,7 +66,7 @@
       outline: 1px dotted #6c6c6c;
       outline-offset: -1px;
     }
-    
+
     &.runnable-active {
       .runnable-state {
         @extend .#{$fa-css-prefix}-refresh;
@@ -78,7 +78,8 @@
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
-      width: 12px;
+      min-width: 12px;
+      height: 18px;
       text-align: center;
     }
 
@@ -196,6 +197,8 @@
 
   .runnable-title {
     font-size: 12.5px;
+    min-width: $reporter-contents-min-width;
+    white-space: pre-line;
 
     &:focus {
       outline: 1px dotted #6c6c6c;
@@ -205,6 +208,7 @@
   .runnable-content-region {
     overflow: auto;
     position: relative;
+    display: inline-flex;
 
     &:focus {
       outline: 1px dotted #6c6c6c;
@@ -244,6 +248,10 @@
 
   .test.runnable-failed .runnable-controls i {
     visibility: visible;
+  }
+
+  .collapsible-header {
+    display: flex;
   }
 
   .test > .runnable-wrapper > .collapsible > .collapsible-header {
