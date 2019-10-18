@@ -2,12 +2,12 @@ import _ from 'lodash'
 import moment from 'moment'
 import Promise from 'bluebird'
 import Debug from 'debug'
+import $window from '../dom/window'
+import $utils from '../cypress/utils.coffee'
 import * as $dom from '../dom'
 import * as $elements from '../dom/elements'
 import * as $document from '../dom/document'
 import * as $selection from '../dom/selection'
-import $window from '../dom/window'
-import $utils from '../cypress/utils.coffee'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/types'
 
@@ -67,9 +67,6 @@ const weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
 const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 const charsBetweenCurlyBracesRe = /({.+?})/
-// const clearRegex = /^{selectall}{del}/i
-// const isSingleDigitRe = /^\d$/
-// const isStartingDigitRe = /^\d/
 
 const initialModifiers = {
   alt: false,
@@ -88,10 +85,6 @@ const getModifiersValue = (modifiers: keyboardModifiers) => {
     return a + b
   }, 0)
 }
-
-// const keyToStandard = (key) => {
-//   return keyStandardMap[key] || key
-// }
 
 const modifierValueMap = {
   alt: 1,
@@ -233,10 +226,6 @@ const getKeyDetails = (onKeyNotFound) => {
 const hasModifierBesidesShift = (modifiers: keyboardModifiers) => {
   return _.some(_.omit(modifiers, ['shift']))
 }
-
-// type shouldBe = <K extends Function,T>(fn:K, a:T): re
-// const shouldBeNumber = (a) => (_.isNumber(a) ? a : throwError())
-// const shouldBe = (fn: (t1)=>t1 is number, a)=>fn(a)?a:throwError()
 
 /**
  * @example '{foo}' => 'foo'
@@ -483,10 +472,6 @@ const validateTyping = (
 function _getEndIndex (str, substr) {
   return str.indexOf(substr) + substr.length
 }
-
-// function _splitChars(chars, index) {
-//   return [chars.slice(0, index), chars.slice(index)]
-// }
 
 // Simulated default actions for select few keys.
 const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
@@ -1121,12 +1106,6 @@ export default class Keyboard {
   performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {
     debug('performSimulatedDefault', key.key)
     const simulatedDefault = this.getSimulatedDefaultForKey(key, options)
-
-    // const isBody = $elements.isBody(el)
-    // const isFocusable = $elements.isFocusable($dom.wrap(el))
-    // const isTextLike = $elements.isTextLike(el)
-
-    // const isTypeableButNotTextLike = !isTextLike && isFocusable
 
     if ($elements.isTextLike(el)) {
       if ($elements.isInput(el) || $elements.isTextarea(el)) {

@@ -242,7 +242,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         parseSpecialCharSequences: options.parseSpecialCharSequences,
         window: win,
         force: options.force,
-        simulated: options.simulated,
         onFail: options._log,
 
         updateValue (el, key, charsToType) {
@@ -369,7 +368,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       // and seeing if that is focused
       // Checking first if element is focusable accounts for focusable els inside
       // of contenteditables
-      if ($elements.isFocusedOrInFocused(options.$el[0])) {
+      if ($elements.isFocusedOrInFocused(options.$el.get(0))) {
         debug('element is already focused, only checking readOnly property')
         options.ensure = {
           notReadonly: true,
