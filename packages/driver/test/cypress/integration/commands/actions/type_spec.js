@@ -13,7 +13,6 @@ function overrideIt (fn) {
 
 overrideIt(function (subFn) {
   return function (...args) {
-
     const origIt = subFn ? _it[subFn] : _it
 
     if (args.length > 2 && _.isObject(args[1])) {
@@ -37,26 +36,22 @@ overrideIt(function (subFn) {
         }
 
         return _it['skip'].apply(this, mochaArgs)
-
       }
 
       return origIt.apply(this, mochaArgs)
     }
 
     return origIt.apply(this, args)
-
   }
 })
 
 const shouldRunBrowser = (browserlist, browser) => {
-
   // return true
   let allEnabled = false
   const exclude = []
   const include = []
 
   browserlist.split(/\s+,\s+/).forEach((v) => {
-
     if (v === '*') {
       allEnabled = true
 
@@ -78,7 +73,6 @@ const shouldRunBrowser = (browserlist, browser) => {
   }
 
   return !exclude.includes(browser)
-
 }
 
 // trim new lines at the end of innerText
@@ -1259,11 +1253,9 @@ describe('src/cy/commands/actions/type', () => {
           .type('{selectAll}{del}')
           .should('have.value', '')
           .then(() => expect(sentInput).calledOnce)
-
         })
 
         it('can type {selectAll}{del} without sending input event', () => {
-
           const sentInput = cy.stub()
 
           cy.get('#number-without-value')
@@ -2986,7 +2978,6 @@ describe('src/cy/commands/actions/type', () => {
       it('{shift} does not capitalize characters', () => {
         cy.get('input:first').type('{shift}foo').should('have.value', 'foo')
       })
-
     })
 
     describe('click events', () => {
@@ -3401,7 +3392,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('accurately returns documentElement el with no falsey contenteditable="false" attr', () => {
+      it('accurately returns document body el with no falsey contenteditable="false" attr', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
@@ -4534,7 +4525,6 @@ https://on.cypress.io/type`)
       })
 
       it('throws on an empty string', function (done) {
-
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
           expect(err.message).to.eq('cy.type() cannot accept an empty String. You need to actually type something.')
@@ -4591,7 +4581,6 @@ https://on.cypress.io/type`)
       })
 
       describe('throws when trying to type', () => {
-
         _.each([NaN, Infinity, [], {}, null, undefined], (val) => {
           it(`throws when trying to type: ${val}`, function (done) {
             const logs = []
@@ -4673,7 +4662,6 @@ https://on.cypress.io/type`)
 
         it('throws when chars is invalid format', function (done) {
           cy.on('fail', (err) => {
-            // debugger
             expect(this.logs.length).to.eq(2)
             expect(err.message).to.eq('Typing into a date input with cy.type() requires a valid date with the format \'yyyy-MM-dd\'. You passed: 01-01-1989')
 

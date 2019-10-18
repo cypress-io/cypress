@@ -12,7 +12,7 @@ const { wrap } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
-const focusable = [
+const focusableSelectors = [
   'a[href]',
   'area[href]',
   'input:not([disabled])',
@@ -23,7 +23,7 @@ const focusable = [
   '[tabindex]',
   '[contenteditable]',
 ]
-const focusableWhenNotDisabled = [
+const focusableWhenNotDisabledSelectors = [
   'a[href]',
   'area[href]',
   'input',
@@ -284,9 +284,6 @@ const callNativeMethod = function (obj, fn, ...args) {
 
   return retFn
 }
-
-// const b = getNativeProp({foo:{hello:'world'}}, 'foo')
-
 const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T[K] {
   const nativeProp = nativeGetters[prop as string]
 
@@ -372,6 +369,14 @@ const isSelect = (el): el is HTMLSelectElement => {
   return getTagName(el) === 'select'
 }
 
+const isOption = (el) => {
+  return getTagName(el) === 'option'
+}
+
+const isOptgroup = (el) => {
+  return getTagName(el) === 'optgroup'
+}
+
 const isBody = (el): el is HTMLBodyElement => {
   return getTagName(el) === 'body'
 }
@@ -390,14 +395,6 @@ const isSvg = function (el): el is SVGElement {
   } catch (error) {
     return false
   }
-}
-
-const isOption = (el) => {
-  return getTagName(el) === 'option'
-}
-
-const isOptgroup = (el) => {
-  return getTagName(el) === 'optgroup'
 }
 
 // active element is the default if its null
@@ -422,25 +419,10 @@ const isFocused = (el) => {
   }
 }
 
-const getActiveElByDocument = (doc: Document): HTMLElement | null => {
-  const activeElement = getNativeProp(doc, 'activeElement')
-
-  if (isFocused(activeElement)) {
-    return activeElement as HTMLElement
-  }
-
-  return null
-}
-
 const isFocusedOrInFocused = (el: HTMLElement) => {
-
   const doc = $document.getDocumentFromElement(el)
 
   const { activeElement } = doc
-
-  // if (activeElementIsDefault(activeElement, body)) {
-  //   return false
-  // }
 
   let elToCheckCurrentlyFocused
 
@@ -469,19 +451,28 @@ const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
   }
 }
 
+const isDesignModeDocumentElement = (el: HTMLElement) => {
+  return isElement(el) && getTagName(el) === 'html' && isContentEditable(el)
+}
 /**
- * The element can be activeElement, recieve focus events, and also recieve keyboard events
+ * The element can be activeElement, receive focus events, and also receive keyboard events
  */
-const isFocusable = ($el: JQuery<Element>) => {
-  return _.some(focusable, (sel) => $el.is(sel)) || (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
+const isFocusable = ($el: JQuery<HTMLElement>) => {
+  return (
+    _.some(focusableSelectors, (sel) => $el.is(sel)) ||
+     isDesignModeDocumentElement($el.get(0))
+  )
 }
 
 /**
- * The element can be activeElement, recieve focus events, and also recieve keyboard events
+ * The element can be activeElement, receive focus events, and also receive keyboard events
  * OR, it is a disabled element that would have been focusable
  */
-const isFocusableWhenNotDisabled = ($el: JQuery<Element>) => {
-  return _.some(focusableWhenNotDisabled, (sel) => $el.is(sel)) || (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
+const isFocusableWhenNotDisabled = ($el: JQuery<HTMLElement>) => {
+  return (
+    _.some(focusableWhenNotDisabledSelectors, (sel) => $el.is(sel)) ||
+    isDesignModeDocumentElement($el.get(0))
+  )
 }
 
 const isW3CRendered = (el) => {
@@ -494,8 +485,14 @@ const isW3CFocusable = (el) => {
   return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
-const isType = function (el: HTMLInputElement | HTMLInputElement[] | JQuery<HTMLInputElement>, type) {
-  el = ([] as HTMLInputElement[]).concat($jquery.unwrap(el))[0]
+type JQueryOrEl<T extends HTMLElement> = JQuery<T> | T
+
+const isType = function (el: JQueryOrEl<HTMLElement>, type) {
+  el = ([] as HTMLElement[]).concat($jquery.unwrap(el))[0]
+
+  if (!isInput(el) && !isButton(el)) {
+    return false
+  }
 
   // NOTE: use DOMElement.type instead of getAttribute('type') since
   //       <input type="asdf"> will have type="text", and behaves like text type
@@ -553,12 +550,12 @@ const getAllParents = (el) => {
   return allParents
 }
 
-const isSelector = ($el: JQuery<HTMLElement>, selector) => {
-  return $el.is(selector)
-}
-
 const isChild = ($el, $maybeChild) => {
   return $el.children().index($maybeChild) >= 0
+}
+
+const isSelector = ($el: JQuery<HTMLElement>, selector) => {
+  return $el.is(selector)
 }
 
 const isDisabled = ($el: JQuery) => {
@@ -832,6 +829,15 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
   }
 
   return getFirstFocusableEl($el.parent())
+}
+const getActiveElByDocument = (doc: Document): HTMLElement | null => {
+  const activeElement = getNativeProp(doc, 'activeElement')
+
+  if (isFocused(activeElement)) {
+    return activeElement as HTMLElement
+  }
+
+  return null
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {

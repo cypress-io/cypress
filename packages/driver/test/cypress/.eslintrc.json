@@ -4,8 +4,5 @@
   ],
   "env": {
     "cypress/globals": true
-  },
-  "globals": {
-    "chai": false
   }
 }

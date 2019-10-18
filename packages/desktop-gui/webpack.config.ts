@@ -1,7 +1,5 @@
-import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import commonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
-
-const commonConfig = getCommonConfig()
 
 const config: typeof commonConfig = {
   ...commonConfig,

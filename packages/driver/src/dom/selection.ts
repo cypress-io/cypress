@@ -170,7 +170,6 @@ const deleteSelectionContents = function (el) {
 }
 
 const setSelectionRange = function (el, start, end) {
-
   if ($elements.canSetSelectionRangeElement(el)) {
     $elements.callNativeMethod(el, 'setSelectionRange', start, end)
 
@@ -185,7 +184,6 @@ const setSelectionRange = function (el, start, end) {
     start,
     end,
   }
-
 }
 
 const deleteRightOfCursor = function (el) {
@@ -304,7 +302,6 @@ const moveCursorLeft = function (el) {
 
     if (selection.isCollapsed) {
       return $elements.callNativeMethod(selection, 'modify', 'move', 'backward', 'character')
-
     }
 
     selection.collapseToStart()
@@ -558,9 +555,7 @@ const moveSelectionToStart = function (doc) {
   const el = doc.activeElement
 
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
-
     return setSelectionRange(el, 0, 0)
-
   }
 
   if ($elements.isContentEditable(el)) {
@@ -581,7 +576,6 @@ const moveSelectionToEnd = function (doc) {
     const { length } = $elements.getNativeProp(el, 'value')
 
     return setSelectionRange(el, length, length)
-
   }
 
   if ($elements.isContentEditable(el)) {
@@ -633,6 +627,8 @@ const replaceSelectionContents = function (el, key) {
 
     return setSelectionRange(el, start + key.length, start + key.length)
   }
+
+  // return false
 
   throw new Error('this should never happen')
 }

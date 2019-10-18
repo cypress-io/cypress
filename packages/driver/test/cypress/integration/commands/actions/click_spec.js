@@ -1627,7 +1627,7 @@ describe('src/cy/commands/actions/click', () => {
         const input = cy.$$('input:first')
 
         input.get(0).addEventListener('focus', () => {
-          done('should not have recieved focused event')
+          done('should not have received focused event')
         })
 
         input.get(0).addEventListener('mousedown', (e) => {
@@ -3087,7 +3087,6 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('el', 'mousedown contextmenu mouseup').each(shouldNotBeCalled)
 
       cy.getAll('el', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
-
     })
 
     it('rightclick cancel contextmenu', () => {
@@ -3466,7 +3465,6 @@ describe('src/cy/commands/actions/click', () => {
 
           describe('mouseout', () => {
             it('can move mouse from a div to another div', () => {
-
               const coordsChrome = {
                 clientX: 492,
                 clientY: 9,
@@ -3897,7 +3895,6 @@ describe('src/cy/commands/actions/click', () => {
               cy.getAll('btn', 'mouseover mouseenter').each((stub) => {
                 expect(stub).calledOnce
               })
-
             } else {
               cy.getAll('btn', 'pointerdown pointerup').each((stub) => {
                 expect(stub).to.be.calledOnce
@@ -3906,7 +3903,6 @@ describe('src/cy/commands/actions/click', () => {
               cy.getAll('btn', 'mouseover mouseenter').each((stub) => {
                 expect(stub).to.not.be.called
               })
-
             }
 
             cy.getAll('btn', 'mousedown mouseup click').each((stub) => {
@@ -3916,7 +3912,6 @@ describe('src/cy/commands/actions/click', () => {
             cy.getAll('btn', 'pointerover pointerenter').each((stub) => {
               expect(stub).to.be.calledOnce
             })
-
           })
 
           it('handles disabled attr added on mousedown', () => {

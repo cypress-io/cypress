@@ -40,7 +40,6 @@ const getMouseCoords = (state) => {
 }
 
 const create = (state, focused, Cypress) => {
-
   const isFirefox = Cypress.browser.family === 'firefox'
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
@@ -57,7 +56,6 @@ const create = (state, focused, Cypress) => {
   }
 
   const sendPointerup = (el, evtOptions) => {
-
     if (isFirefox && el.disabled) {
       return {}
     }
@@ -88,7 +86,6 @@ const create = (state, focused, Cypress) => {
   }
 
   const sendMouseup = (el, evtOptions) => {
-
     if (isFirefox && el.disabled) {
       return {}
     }
@@ -96,7 +93,6 @@ const create = (state, focused, Cypress) => {
     return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
   }
   const sendMousedown = (el, evtOptions) => {
-
     if (isFirefox && el.disabled) {
       return {}
     }
@@ -119,7 +115,6 @@ const create = (state, focused, Cypress) => {
     return sendMouseEvent(el, evtOptions, 'mouseout', true, true)
   }
   const sendClick = (el, evtOptions) => {
-
     if (isFirefox && el.disabled) {
       return {}
     }
@@ -127,7 +122,6 @@ const create = (state, focused, Cypress) => {
     return sendMouseEvent(el, evtOptions, 'click', true, true)
   }
   const sendDblclick = (el, evtOptions) => {
-
     if (isFirefox && el.disabled) {
       return {}
     }

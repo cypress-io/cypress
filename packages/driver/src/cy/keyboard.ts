@@ -177,7 +177,6 @@ const getFormattedKeyString = (details: KeyDetails) => {
   }
 
   return details.key
-
 }
 
 const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
@@ -326,7 +325,6 @@ const validateTyping = (
   onFail: Function,
   skipCheckUntilIndex?: number,
 ) => {
-
   const chars = joinKeyArrayToString(keys.slice(currentIndex))
   const allChars = joinKeyArrayToString(keys)
 
@@ -368,11 +366,9 @@ const validateTyping = (
   }
 
   if (!isFocusable) {
-
     const node = $dom.stringify($el)
 
     if (isTextLike) {
-
       $utils.throwErrByPath('type.not_actionable_textlike', {
         onFail,
         args: { node },
@@ -621,7 +617,9 @@ export interface typeOptions {
 export default class Keyboard {
   public foo = 'foo'
 
-  constructor (private state: State) {}
+  constructor (private state: State) {
+    null
+  }
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
@@ -668,7 +666,6 @@ export default class Keyboard {
           return _.filter(_.split(chars, ''))
         }
       )
-
     }
 
     const keyDetailsArr = _.map(
@@ -680,21 +677,12 @@ export default class Keyboard {
 
     options.onBeforeType(numKeys)
 
-    // # should make each keystroke async to mimic
-    // how keystrokes come into javascript naturally
-
-    // let prevElement = $elements.getActiveElByDocument(doc)
-
     const getActiveEl = (doc: Document) => {
       if (options.force) {
         return options.$el.get(0)
       }
 
-      const activeEl = $elements.getActiveElByDocument(doc)
-
-      if (activeEl === null) {
-        return doc.body
-      }
+      const activeEl = $elements.getActiveElByDocument(doc) || doc.body
 
       return activeEl
     }
@@ -750,7 +738,6 @@ export default class Keyboard {
                 )
               }
             }
-
           } else {
             debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
           }
@@ -765,7 +752,6 @@ export default class Keyboard {
           debug('returning null')
 
           return null
-
         }
       }
     )
@@ -921,7 +907,6 @@ export default class Keyboard {
 
     debug('event options:', eventType, eventOptions)
     if (eventConstructor === 'TextEvent' && win[eventConstructor]) {
-
       event = document.createEvent('TextEvent')
       // @ts-ignore
       event.initTextEvent(
@@ -1105,7 +1090,6 @@ export default class Keyboard {
     }
 
     return (el: HTMLElement) => {
-
       if (!shouldUpdateValue(el, key, options)) {
         debug('skip typing key', false)
         key.events.input = false
@@ -1129,12 +1113,7 @@ export default class Keyboard {
 
     const doc = $document.getDocumentFromElement(el)
 
-    let activeEl = $elements.getActiveElByDocument(doc)
-
-    // TODO: validate activeElement isn't null (aka body is active)
-    if (activeEl === null) {
-      activeEl = doc.body
-    }
+    let activeEl = $elements.getActiveElByDocument(doc) || doc.body
 
     return activeEl
   }

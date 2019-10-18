@@ -158,7 +158,6 @@ describe "lib/project", ->
       sinon.stub(scaffold, "plugins").resolves()
       sinon.stub(plugins, "init").resolves()
 
-
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
       @project.cfg = {}
