@@ -110,5 +110,4 @@ export function stripSharedDirsFromDir2 (dir1, dir2, osName) {
   })
   .join(sep)
   .value()
-
 }

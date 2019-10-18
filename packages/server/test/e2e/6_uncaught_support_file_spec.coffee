@@ -9,6 +9,7 @@ describe "e2e uncaught support file errors", ->
   it "failing", ->
     e2e.exec(@, {
       project: uncaughtSupportFile
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 1
     })

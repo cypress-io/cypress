@@ -1,4 +1,4 @@
-exports['e2e visit low response timeout passes 1'] = `
+exports['e2e visit / low response timeout / passes'] = `
 
 ====================================================================================================
 
@@ -73,7 +73,7 @@ exports['e2e visit low response timeout passes 1'] = `
 
 `
 
-exports['e2e visit low response timeout fails when network connection immediately fails 1'] = `
+exports['e2e visit / low response timeout / fails when network connection immediately fails'] = `
 
 ====================================================================================================
 
@@ -178,7 +178,7 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
 `
 
-exports['e2e visit low response timeout fails when server responds with 500 1'] = `
+exports['e2e visit / low response timeout / fails when server responds with 500'] = `
 
 ====================================================================================================
 
@@ -273,7 +273,7 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
 
 `
 
-exports['e2e visit low response timeout fails when file server responds with 404 1'] = `
+exports['e2e visit / low response timeout / fails when file server responds with 404'] = `
 
 ====================================================================================================
 
@@ -368,7 +368,7 @@ The internal Cypress web server responded with:
 
 `
 
-exports['e2e visit low response timeout fails when content type isnt html 1'] = `
+exports['e2e visit / low response timeout / fails when content type isnt html'] = `
 
 ====================================================================================================
 
@@ -465,7 +465,7 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
 `
 
-exports['e2e visit normal response timeouts fails when visit times out 1'] = `
+exports['e2e visit / normal response timeouts / fails when visit times out'] = `
 
 ====================================================================================================
 
@@ -586,7 +586,7 @@ When this \`load\` event occurs, Cypress will continue running commands.
 
 `
 
-exports['e2e visit low responseTimeout, normal pageLoadTimeout fails when response never ends 1'] = `
+exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when response never ends'] = `
 
 ====================================================================================================
 

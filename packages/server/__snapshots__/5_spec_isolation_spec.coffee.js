@@ -1,4 +1,4 @@
-exports['e2e spec_isolation failing 1'] = {
+exports['e2e spec isolation fails'] = {
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,

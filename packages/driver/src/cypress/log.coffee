@@ -485,6 +485,8 @@ create = (Cypress, cy, state, config) ->
   return logFn
 
 module.exports = {
+  CypressErrorRe
+  
   reduceMemory
 
   toSerializedJSON

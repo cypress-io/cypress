@@ -8,7 +8,6 @@ const { throwFormErrorText, errors } = require('../errors')
 
 const getVersions = () => {
   return Promise.try(() => {
-
     if (util.getEnv('CYPRESS_RUN_BINARY')) {
       let envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
 

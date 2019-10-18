@@ -1,4 +1,4 @@
-exports['e2e commands outside of test passes on passing assertions 1'] = `
+exports['e2e commands outside of test / passes on passing assertions'] = `
 
 ====================================================================================================
 
@@ -55,9 +55,6 @@ exports['e2e commands outside of test passes on passing assertions 1'] = `
 
 `
 
-exports['e2e commands outside of test [chrome] fails on cy commands 1'] = `
-
-====================================================================================================
 
   (Run Starting)
 
@@ -226,6 +223,8 @@ We dynamically generated a new test to display this failure.
 `
 
 exports['e2e commands outside of test [electron] fails on cy commands 1'] = `
+=======
+exports['e2e commands outside of test / fails on cy commands'] = `
 
 ====================================================================================================
 
@@ -316,7 +315,7 @@ https://on.cypress.io/cannot-execute-commands-outside-test
 
 `
 
-exports['e2e commands outside of test [electron] fails on failing assertions 1'] = `
+exports['e2e commands outside of test / fails on failing assertions'] = `
 
 ====================================================================================================
 

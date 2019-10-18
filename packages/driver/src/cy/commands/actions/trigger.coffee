@@ -2,6 +2,8 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $dom = require("../../../dom")
+$elements = require("../../../dom/elements")
+$window = require("../../../dom/window")
 $utils = require("../../../cypress/utils")
 $errUtils = require("../../../cypress/error_utils")
 $actionability = require("../../actionability")
@@ -83,19 +85,21 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             Cypress.action("cy:scrolled", $el, type)
 
           onReady: ($elToClick, coords) ->
-            { fromWindow, fromViewport } = coords
+            { fromElWindow, fromElViewport, fromAutWindow } = coords
 
             if options._log
               ## display the red dot at these coords
               options._log.set({
-                coords: fromWindow
+                coords: fromAutWindow
               })
 
             eventOptions = _.extend({
-              clientX: fromViewport.x
-              clientY: fromViewport.y
-              pageX: fromWindow.x
-              pageY: fromWindow.y
+              clientX: fromElViewport.x
+              clientY: fromElViewport.y
+              screenX: fromElViewport.x
+              screenY: fromElViewport.y
+              pageX: fromElWindow.x
+              pageY: fromElWindow.y
             }, eventOptions)
 
             dispatch($elToClick.get(0), eventName, eventOptions)
