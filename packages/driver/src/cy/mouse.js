@@ -54,10 +54,10 @@ const shouldFireMouseMoveEvents = (targetEl, lastHoveredEl, fromElViewport, coor
   return !_.isEqual(xy(fromElViewport), xy(coords))
 }
 
-const create = (state, keyboard, focused) => {
+const create = (state, focused) => {
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = keyboard.getActiveModifiers()
+      const _activeModifiers = $Keyboard.getActiveModifiers(state)
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
