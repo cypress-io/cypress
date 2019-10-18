@@ -267,7 +267,7 @@ jobs:
               rm -rf /var/lib/apt/lists/*
               which google-chrome-stable
               google-chrome-stable -version
-              cp -r `which google-chrome-stable` ~
+              cp -r `which google-chrome-stable` ~/google-chrome-stable
             fi
 
       ## save entire folder as artifact for other jobs to run without reinstalling
@@ -295,6 +295,7 @@ jobs:
           name: Restore Google Chrome
           command: |
             set -e
+            ls ~
             if [[ "$OSTYPE" == "darwin"* ]]; then
               hdiutil attach  ~/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
@@ -352,6 +353,7 @@ jobs:
           name: Restore Google Chrome
           command: |
             set -e
+            ls ~
             if [[ "$OSTYPE" == "darwin"* ]]; then
               hdiutil attach  ~/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
@@ -373,6 +375,7 @@ jobs:
           name: Restore Google Chrome
           command: |
             set -e
+            ls ~
             if [[ "$OSTYPE" == "darwin"* ]]; then
               hdiutil attach  ~/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
@@ -404,6 +407,7 @@ jobs:
           name: Restore Google Chrome
           command: |
             set -e
+            ls ~
             if [[ "$OSTYPE" == "darwin"* ]]; then
               hdiutil attach  ~/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
