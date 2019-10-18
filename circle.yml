@@ -278,9 +278,6 @@ jobs:
             set -e
             if [[ "$OSTYPE" == "darwin"* ]]; then
               curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/google-chrome-stable.dmg
-              hdiutil attach  ~/google-chrome-stable.dmg
-              cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications
-              touch /usr/bin/google-chrome-stable # dummy
             else
               wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
               echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
@@ -289,18 +286,8 @@ jobs:
               rm -rf /var/lib/apt/lists/*
               which google-chrome-stable
               google-chrome-stable -version
-              touch /Applications/Google\ Chrome.app # dummy
+              cp -r `which google-chrome-stable` ~
             fi
-
-      - persist_to_workspace:
-          root: /usr/bin/
-          paths:
-            - google-chrome-stable
-      
-      - persist_to_workspace:
-          root: /Applications/
-          paths:
-            - Google\ Chrome.app
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
@@ -323,6 +310,16 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - run:
+          name: Restore Google Chrome
+          command: |
+            set -e
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              hdiutil attach  ~/google-chrome-stable.dmg
+              cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
+            else
+              cp -r google-chrome-stable /usr/bin/
+            fi
       # make sure mocha runs
       - run: npm run test-mocha
       # test binary build code
@@ -382,6 +379,16 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - run:
+          name: Restore Google Chrome
+          command: |
+            set -e
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              hdiutil attach  ~/google-chrome-stable.dmg
+              cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
+            else
+              cp -r google-chrome-stable /usr/bin/
+            fi
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -404,6 +411,16 @@ jobs:
   "server-e2e-tests-chrome-1":
     <<: *defaults
     steps:
+      - run:
+          name: Restore Google Chrome
+          command: |
+            set -e
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              hdiutil attach  ~/google-chrome-stable.dmg
+              cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
+            else
+              cp -r google-chrome-stable /usr/bin/
+            fi
       - run-e2e-tests:
           browser: chrome
           chunk: 1
@@ -411,6 +428,16 @@ jobs:
   "server-e2e-tests-chrome-2":
     <<: *defaults
     steps:
+      - run:
+          name: Restore Google Chrome
+          command: |
+            set -e
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              hdiutil attach  ~/google-chrome-stable.dmg
+              cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
+            else
+              cp -r google-chrome-stable /usr/bin/
+            fi
       - run-e2e-tests:
           browser: chrome
           chunk: 2
