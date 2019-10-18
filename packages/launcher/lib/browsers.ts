@@ -26,7 +26,7 @@ export const browsers: Browser[] = [
     displayName: 'Canary',
     versionRegex: /Google Chrome Canary (\S+)/,
     profile: true,
-    binary: 'google-chrome-canary'
+    binary: 'google-chrome-canary',
   },
   {
     name: 'edgeCanary',
@@ -34,7 +34,7 @@ export const browsers: Browser[] = [
     displayName: 'Edge Canary',
     versionRegex: /Microsoft Edge Canary (\S+)/,
     profile: true,
-    binary: 'edge-canary'
+    binary: 'edge-canary',
   },
   {
     name: 'edgeDev',
@@ -42,8 +42,8 @@ export const browsers: Browser[] = [
     displayName: 'Edge Dev',
     versionRegex: /Microsoft Edge Dev (\S+)/,
     profile: true,
-    binary: 'edge-dev'
-  }
+    binary: 'edge-dev',
+  },
 ]
 
 /** starts a found browser and opens URL if given one */
