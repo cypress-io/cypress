@@ -283,6 +283,7 @@ jobs:
           root: ~/
           paths:
             - cypress
+            - google-chrome-stable*
 
   lint:
     <<: *defaults
