@@ -1,90 +1,67 @@
 require('../../../spec_helper')
 
+const _ = require('lodash')
 const validateEvent = require('../../../../lib/plugins/child/validate_event')
+
+const events = [
+  ['file:preprocessor', 'a function', () => {}],
+  ['before:browser:launch', 'a function', () => {}],
+  ['after:screenshot', 'a function', () => {}],
+  ['task', 'an object', {}],
+]
 
 describe('lib/plugins/child/validate_event', () => {
   it('returns error when called with no event name', () => {
     const { isValid, error } = validateEvent()
 
     expect(isValid).to.be.false
-    expect(error.message).to.eq('Plugin event name is undefined')
+    expect(error.message).to.equal(`You must pass a valid event name when registering a plugin.
+
+You passed: \`undefined\`
+
+The following are valid events:
+- file:preprocessor
+- before:browser:launch
+- task
+- after:screenshot
+`)
   })
 
   it('returns error when called with no event handler', () => {
-    const eventName = 'file:preprocessor'
-    const { isValid, error } = validateEvent(eventName)
+    const { isValid, error } = validateEvent('file:preprocessor')
 
     expect(isValid).to.be.false
-    expect(error.message).to.eq(`Plugin event handler is undefined (event - ${eventName})`)
+    expect(error.message).to.equal('The handler for the event `file:preprocessor` must be a function')
   })
 
   it('returns error when called with unsupported event name', () => {
-    const eventName = 'invalid:event:name'
-    const { isValid, error } = validateEvent(eventName, {})
+    const { isValid, error } = validateEvent('invalid:event:name', {})
 
     expect(isValid).to.be.false
-    expect(error.message).to.eq(`${eventName} event is not supported`)
+    expect(error.message).to.equal(`You must pass a valid event name when registering a plugin.
+
+You passed: \`invalid:event:name\`
+
+The following are valid events:
+- file:preprocessor
+- before:browser:launch
+- task
+- after:screenshot
+`)
   })
 
-  describe('invalid event handlers', () => {
-    it('returns error when event handler of file:preprocessor is not a function', () => {
-      const eventName = 'file:preprocessor'
-      const { isValid, error } = validateEvent(eventName, {})
+  _.each(events, ([event, type]) => {
+    it(`returns error when event handler of ${event} is not ${type}`, () => {
+      const { isValid, error } = validateEvent(event, 'invalid type')
 
       expect(isValid).to.be.false
-      expect(error.message).to.eq(`${eventName} event handler should be a function`)
-    })
-
-    it('returns error when event handler of before:browser:launch is not a function', () => {
-      const eventName = 'before:browser:launch'
-      const { isValid, error } = validateEvent(eventName, {})
-
-      expect(isValid).to.be.false
-      expect(error.message).to.eq(`${eventName} event handler should be a function`)
-    })
-
-    it('returns error when event handler of after:screenshot is not a function', () => {
-      const eventName = 'after:screenshot'
-      const { isValid, error } = validateEvent(eventName, {})
-
-      expect(isValid).to.be.false
-      expect(error.message).to.eq(`${eventName} event handler should be a function`)
-    })
-
-    it('returns error when event handler of task is not an object', () => {
-      const eventName = 'task'
-      const { isValid, error } = validateEvent(eventName, () => {})
-
-      expect(isValid).to.be.false
-      expect(error.message).to.eq(`${eventName} event handler should be an object`)
+      expect(error.message).to.equal(`The handler for the event \`${event}\` must be ${type}`)
     })
   })
 
-  describe('valid event handlers', () => {
-    it('returns success when event handler of file:preprocessor is a function', () => {
-      const eventName = 'file:preprocessor'
-      const { isValid } = validateEvent(eventName, () => {})
-
-      expect(isValid).to.be.true
-    })
-
-    it('returns success when event handler of before:browser:launch is a function', () => {
-      const eventName = 'before:browser:launch'
-      const { isValid } = validateEvent(eventName, () => {})
-
-      expect(isValid).to.be.true
-    })
-
-    it('returns success when event handler of after:screenshot is a function', () => {
-      const eventName = 'after:screenshot'
-      const { isValid } = validateEvent(eventName, () => {})
-
-      expect(isValid).to.be.true
-    })
-
-    it('returns success when event handler of task is an object', () => {
-      const eventName = 'task'
-      const { isValid } = validateEvent(eventName, {})
+  _.each(events, ([event, type, validValue]) => {
+    it(`returns success when event handler of ${event} is ${type}`, () => {
+      const { isValid } = validateEvent(event, validValue)
 
       expect(isValid).to.be.true
     })

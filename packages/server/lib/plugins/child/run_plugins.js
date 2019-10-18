@@ -14,10 +14,6 @@ const invoke = (eventId, args = []) => {
   return event.handler(...args)
 }
 
-const sendError = (ipc, err) => {
-  ipc.send('error', util.serializeError(err))
-}
-
 let plugins
 
 const load = (ipc, config, pluginsFile) => {
@@ -32,7 +28,7 @@ const load = (ipc, config, pluginsFile) => {
     const { isValid, error } = validateEvent(event, handler)
 
     if (!isValid) {
-      sendError(ipc, error)
+      ipc.send('validation:error', util.serializeError(error))
 
       return
     }

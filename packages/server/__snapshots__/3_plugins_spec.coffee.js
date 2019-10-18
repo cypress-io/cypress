@@ -16,7 +16,7 @@ exports['e2e plugins fails 1'] = `
                                                                                                     
   Running: app_spec.coffee...                                                              (1 of 1) 
 
-The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-async-error/cypress/plugins/index.js\`)
 
 Error: Async error from plugins file
     at stack trace line

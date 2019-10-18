@@ -79,16 +79,17 @@ module.exports = {
         pluginsProcess and pluginsProcess.kill()
         pluginsProcess = null
 
-      handleError = (err) ->
+      handleError = (type) -> (err) ->
         debug("plugins process error:", err.stack)
         return if not pluginsProcess ## prevent repeating this in case of multiple errors
         killPluginsProcess()
-        err = errors.get("PLUGINS_ERROR", err.annotated or err.stack or err.message)
+        err = errors.get(type, config.pluginsFile, err.annotated or err.stack or err.message)
         err.title = "Error running plugin"
         options.onError(err)
 
-      pluginsProcess.on("error", handleError)
-      ipc.on("error", handleError)
+      pluginsProcess.on("error", handleError("PLUGINS_UNEXPECTED_ERROR"))
+      ipc.on("error", handleError("PLUGINS_UNEXPECTED_ERROR"))
+      ipc.on("validation:error", handleError("PLUGINS_VALIDATION_ERROR"))
 
       ## see timers/parent.js line #93 for why this is necessary
       process.on("exit", killPluginsProcess)
