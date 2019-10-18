@@ -4,7 +4,6 @@
     no-cond-assign,
     no-console,
     no-unused-vars,
-    @typescript-eslint/no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
