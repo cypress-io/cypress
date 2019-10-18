@@ -269,6 +269,7 @@ jobs:
               curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/google-chrome-stable.dmg
               hdiutil attach  ~/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications
+              touch /usr/bin/google-chrome-stable # dummy
             else
               wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
               echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
@@ -277,12 +278,18 @@ jobs:
               rm -rf /var/lib/apt/lists/*
               which google-chrome-stable
               google-chrome-stable -version
+              touch /Applications/Google\ Chrome.app # dummy
             fi
 
       - persist_to_workspace:
           root: /usr/bin/
           paths:
             - google-chrome-stable
+      
+      - persist_to_workspace:
+          root: /Applications/
+          paths:
+            - Google\ Chrome.app
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
