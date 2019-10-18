@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node8.9.3-npm6.10.1-chrome76-ff68
+      - image: cypress/browsers:node12.0.0-chrome73-ff68
     environment:
       PLATFORM: linux
 
@@ -337,8 +337,8 @@ jobs:
       - store-npm-logs
 
   "server-performance-tests":
-    <<: *defaults
-    steps:
+      <<: *defaults
+      steps:
       - attach_workspace:
           at: ~/
       - run:
