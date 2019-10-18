@@ -419,24 +419,10 @@ const isFocused = (el) => {
   }
 }
 
-const getActiveElByDocument = (doc: Document): HTMLElement | null => {
-  const activeElement = getNativeProp(doc, 'activeElement')
-
-  if (isFocused(activeElement)) {
-    return activeElement as HTMLElement
-  }
-
-  return null
-}
-
 const isFocusedOrInFocused = (el: HTMLElement) => {
   const doc = $document.getDocumentFromElement(el)
 
   const { activeElement } = doc
-
-  // if (activeElementIsDefault(activeElement, body)) {
-  //   return false
-  // }
 
   let elToCheckCurrentlyFocused
 
@@ -472,15 +458,21 @@ const isDesignModeDocumentElement = (el: HTMLElement) => {
  * The element can be activeElement, receive focus events, and also receive keyboard events
  */
 const isFocusable = ($el: JQuery<HTMLElement>) => {
-  return _.some(focusableSelectors, (sel) => $el.is(sel)) || isDesignModeDocumentElement($el.get(0))
+  return (
+    _.some(focusableSelectors, (sel) => $el.is(sel)) ||
+     isDesignModeDocumentElement($el.get(0))
+  )
 }
 
 /**
  * The element can be activeElement, receive focus events, and also receive keyboard events
  * OR, it is a disabled element that would have been focusable
  */
-const isFocusableWhenNotDisabled = ($el: JQuery<Element>) => {
-  return _.some(focusableWhenNotDisabledSelectors, (sel) => $el.is(sel)) || (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
+const isFocusableWhenNotDisabled = ($el: JQuery<HTMLElement>) => {
+  return (
+    _.some(focusableWhenNotDisabledSelectors, (sel) => $el.is(sel)) ||
+    isDesignModeDocumentElement($el.get(0))
+  )
 }
 
 const isW3CRendered = (el) => {
@@ -548,12 +540,12 @@ const getAllParents = (el) => {
   return allParents
 }
 
-const isSelector = ($el: JQuery<HTMLElement>, selector) => {
-  return $el.is(selector)
-}
-
 const isChild = ($el, $maybeChild) => {
   return $el.children().index($maybeChild) >= 0
+}
+
+const isSelector = ($el: JQuery<HTMLElement>, selector) => {
+  return $el.is(selector)
 }
 
 const isDisabled = ($el: JQuery) => {
@@ -827,6 +819,15 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
   }
 
   return getFirstFocusableEl($el.parent())
+}
+const getActiveElByDocument = (doc: Document): HTMLElement | null => {
+  const activeElement = getNativeProp(doc, 'activeElement')
+
+  if (isFocused(activeElement)) {
+    return activeElement as HTMLElement
+  }
+
+  return null
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {

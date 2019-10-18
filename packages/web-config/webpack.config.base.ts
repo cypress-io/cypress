@@ -78,26 +78,6 @@ const commonConfig: webpack.Configuration = {
         },
       },
       {
-        test: /\.(ts|js|jsx|tsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: require.resolve('babel-loader'),
-          options: {
-            plugins: [
-              // "istanbul",
-              [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
-              [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
-            ],
-            presets: [
-              require.resolve('@babel/preset-env'),
-              require.resolve('@babel/preset-react'),
-              require.resolve('@babel/preset-typescript'),
-            ],
-            babelrc: false,
-          },
-        },
-      },
-      {
         test: /\.s?css$/,
         exclude: /node_modules/,
         use: [

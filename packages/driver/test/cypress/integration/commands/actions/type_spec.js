@@ -4584,7 +4584,6 @@ https://on.cypress.io/type`)
 
         it('throws when chars is invalid format', function (done) {
           cy.on('fail', (err) => {
-            // debugger
             expect(this.logs.length).to.eq(2)
             expect(err.message).to.eq('Typing into a date input with cy.type() requires a valid date with the format \'yyyy-MM-dd\'. You passed: 01-01-1989')
 

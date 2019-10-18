@@ -7,22 +7,12 @@ const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
 const $Keyboard = require('../../../cy/keyboard').default
-const Debug = require('debug')
-const debug = Debug('cypress:driver:command:type')
-
-// const dateRegex = /^\d{4}-\d{2}-\d{2}/
-// const monthRegex = /^\d{4}-(0\d|1[0-2])/
-// const weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
-// const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
-// const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
+const debug = require('debug')('cypress:driver:command:type')
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
   function type (subject, chars, options = {}) {
-    // debugger
-    //
-    debug('type:', chars)
     let updateTable
 
     options = _.clone(options)
@@ -33,9 +23,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
-      parseSpecialCharSequences: true,
       delay: 10,
       release: true,
+      parseSpecialCharSequences: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
     })
@@ -47,25 +37,27 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const table = {}
 
       const getRow = (id, key, which) => {
-        return table[id] || (function () {
-          let obj
+        if (table[id]) {
+          return table[id]
+        }
 
-          table[id] = (obj = {})
-          const modifiers = $Keyboard.modifiersToString($Keyboard.getActiveModifiers(state))
+        let obj
 
-          if (modifiers) {
-            obj.modifiers = modifiers
+        table[id] = (obj = {})
+        const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers())
+
+        if (modifiers) {
+          obj.modifiers = modifiers
+        }
+
+        if (key) {
+          obj.typed = key
+          if (which) {
+            obj.which = which
           }
+        }
 
-          if (key) {
-            obj.typed = key
-            if (which) {
-              obj.which = which
-            }
-          }
-
-          return obj
-        })()
+        return obj
       }
 
       updateTable = function (id, key, column, which, value) {
@@ -105,7 +97,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             },
           }
         },
-
       })
 
       options._log.snapshot('before', { next: 'after' })
@@ -133,10 +124,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     }
 
     chars = `${chars}`
-
-    // _setCharsNeedingType(nextChars)
-
-    // options.chars = `${charsToType}`
 
     const win = state('window')
 
@@ -329,7 +316,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // dont dispatch change events or handle
           // submit event if we've pressed enter into
           // a textarea or contenteditable
-          let changeEvent = state('changeEvent')
 
           if (isTextarea || isContentEditable) {
             return
@@ -338,6 +324,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // if our value has changed since our
           // element was activated we need to
           // fire a change event immediately
+          const changeEvent = state('changeEvent')
+
           if (changeEvent) {
             changeEvent(id)
           }
@@ -439,30 +427,32 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       })
     }
 
-    return handleFocused().then(() => {
+    return handleFocused()
+    .then(() => {
       cy.timeout($actionability.delay, true, 'type')
 
-      return Promise.delay($actionability.delay, 'type').then(() => {
+      return Promise
+      .delay($actionability.delay, 'type')
+      .then(() => {
         // command which consume cy.type may
         // want to handle verification themselves
-        let verifyAssertions
 
         if (options.verify === false) {
           return options.$el
         }
 
-        return (verifyAssertions = () => {
+        const verifyAssertions = () => {
           return cy.verifyUpcomingAssertions(options.$el, options, {
             onRetry: verifyAssertions,
           })
-        })()
+        }
+
+        return verifyAssertions()
       })
     })
   }
 
   function clear (subject, options = {}) {
-    // what about other types of inputs besides just text?
-    // what about the new HTML5 ones?
     _.defaults(options, {
       log: true,
       force: false,
@@ -501,8 +491,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         })
       }
 
-      return cy
-      .now('type', $el, '{selectall}{del}', {
+      return cy.now('type', $el, '{selectall}{del}', {
         $el,
         log: false,
         verify: false, // handle verification ourselves
@@ -510,8 +499,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         force: options.force,
         timeout: options.timeout,
         interval: options.interval,
-      })
-      .then(() => {
+      }).then(() => {
         if (options._log) {
           options._log.snapshot().end()
         }
@@ -520,16 +508,17 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       })
     }
 
-    return Promise.resolve(subject.toArray())
+    return Promise
+    .resolve(subject.toArray())
     .each(clear)
     .then(() => {
-      let verifyAssertions
-
-      return (verifyAssertions = () => {
+      const verifyAssertions = () => {
         return cy.verifyUpcomingAssertions(subject, options, {
           onRetry: verifyAssertions,
         })
-      })()
+      }
+
+      return verifyAssertions()
     })
   }
 

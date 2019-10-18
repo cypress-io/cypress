@@ -650,21 +650,12 @@ export default class Keyboard {
 
     options.onBeforeType(numKeys)
 
-    // # should make each keystroke async to mimic
-    // how keystrokes come into javascript naturally
-
-    // let prevElement = $elements.getActiveElByDocument(doc)
-
     const getActiveEl = (doc: Document) => {
       if (options.force) {
         return options.$el.get(0)
       }
 
-      const activeEl = $elements.getActiveElByDocument(doc)
-
-      if (activeEl === null) {
-        return doc.body
-      }
+      const activeEl = $elements.getActiveElByDocument(doc) || doc.body
 
       return activeEl
     }
@@ -1095,12 +1086,7 @@ export default class Keyboard {
 
     const doc = $document.getDocumentFromElement(el)
 
-    let activeEl = $elements.getActiveElByDocument(doc)
-
-    // TODO: validate activeElement isn't null (aka body is active)
-    if (activeEl === null) {
-      activeEl = doc.body
-    }
+    let activeEl = $elements.getActiveElByDocument(doc) || doc.body
 
     return activeEl
   }

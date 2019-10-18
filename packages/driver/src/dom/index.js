@@ -22,7 +22,6 @@ const isDom = (obj) => {
 // purposes or for overriding. Everything else
 // can be tucked away behind these interfaces.
 module.exports = {
-
   wrap,
   query,
   unwrap,
