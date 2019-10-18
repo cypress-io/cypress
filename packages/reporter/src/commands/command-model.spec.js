@@ -29,7 +29,6 @@ describe('Command model', () => {
   })
 
   context('.isLongRunning', () => {
-
     describe('when model is pending on initialization and LONG_RUNNING_THRESHOLD passes', () => {
       let command
 

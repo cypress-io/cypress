@@ -94,7 +94,6 @@ class UpdateBanner extends Component {
         </li>
       </ol>
     )
-
   }
 
   _checkForUpdate () {
