@@ -14,7 +14,6 @@ defaultOnRequest = (req, res) ->
 servers = []
 
 create = (onRequest) ->
-  console.log(onRequest ? defaultOnRequest)
   https.createServer(certs, onRequest ? defaultOnRequest)
 
 module.exports = {

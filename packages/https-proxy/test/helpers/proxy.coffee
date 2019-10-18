@@ -14,14 +14,12 @@ pipe = (req, res) ->
   .pipe(res)
 
 onConnect = (req, socket, head, proxy) ->
-  console.log("GOT ON CONNECT ", req.url)
   proxy.connect(req, socket, head, {
     onDirectConnection: (req, socket, head) ->
       ["localhost:8444", "localhost:12344"].includes(req.url)
   })
 
 onRequest = (req, res) ->
-  console.log("GOT ON REQUEST ", req.url, req.headers)
   pipe(req, res)
 
 module.exports = {

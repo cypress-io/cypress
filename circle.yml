@@ -461,6 +461,62 @@ jobs:
           browser: electron
           chunk: 8
 
+  "server-e2e-tests-firefox-1":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 1
+
+  "server-e2e-tests-firefox-2":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 2
+
+  "server-e2e-tests-firefox-3":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 3
+
+  "server-e2e-tests-firefox-4":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 4
+
+  "server-e2e-tests-firefox-5":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 5
+
+  "server-e2e-tests-firefox-6":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 6
+
+  "server-e2e-tests-firefox-7":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 7
+
+  "server-e2e-tests-firefox-8":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 8
+
   "driver-integration-tests-chrome":
     <<: *defaults
     parallelism: 5
@@ -933,6 +989,30 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - server-e2e-tests-electron-8:
+        requires:
+          - build
+    - server-e2e-tests-firefox-1:
+        requires:
+          - build
+    - server-e2e-tests-firefox-2:
+        requires:
+          - build
+    - server-e2e-tests-firefox-3:
+        requires:
+          - build
+    - server-e2e-tests-firefox-4:
+        requires:
+          - build
+    - server-e2e-tests-firefox-5:
+        requires:
+          - build
+    - server-e2e-tests-firefox-6:
+        requires:
+          - build
+    - server-e2e-tests-firefox-7:
+        requires:
+          - build
+    - server-e2e-tests-firefox-8:
         requires:
           - build
     - driver-integration-tests-chrome:

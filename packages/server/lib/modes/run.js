@@ -409,7 +409,19 @@ const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
     return getChromeProps(browser.isHeaded, project, writeVideoFrame)
   }
 
+  if (browser.family === 'firefox') {
+    return getFirefoxProps(browser.isHeaded, project, writeVideoFrame)
+  }
+
   return {}
+}
+
+const getFirefoxProps = (isHeaded, project, writeVideoFrame) => {
+  debug('setting Firefox properties %o', { isHeaded })
+
+  return _
+  .chain({})
+  .value()
 }
 
 const getChromeProps = (isHeaded, project, writeVideoFrame) => {
