@@ -1192,11 +1192,9 @@ describe('src/cy/commands/actions/type', () => {
           .type('{selectAll}{del}')
           .should('have.value', '')
           .then(() => expect(sentInput).calledOnce)
-
         })
 
         it('can type {selectAll}{del} without sending input event', () => {
-
           const sentInput = cy.stub()
 
           cy.get('#number-without-value')
@@ -2902,7 +2900,6 @@ describe('src/cy/commands/actions/type', () => {
       it('{shift} does not capitalize characters', () => {
         cy.get('input:first').type('{shift}foo').should('have.value', 'foo')
       })
-
     })
 
     describe('click events', () => {
@@ -3317,7 +3314,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('accurately returns documentElement el with no falsey contenteditable="false" attr', () => {
+      it('accurately returns document body el with no falsey contenteditable="false" attr', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
@@ -4450,7 +4447,6 @@ https://on.cypress.io/type`)
       })
 
       it('throws on an empty string', function (done) {
-
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
           expect(err.message).to.eq('cy.type() cannot accept an empty String. You need to actually type something.')
@@ -4507,7 +4503,6 @@ https://on.cypress.io/type`)
       })
 
       describe('throws when trying to type', () => {
-
         _.each([NaN, Infinity, [], {}, null, undefined], (val) => {
           it(`throws when trying to type: ${val}`, function (done) {
             const logs = []

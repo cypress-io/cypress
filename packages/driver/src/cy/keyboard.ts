@@ -174,7 +174,6 @@ const getFormattedKeyString = (details: KeyDetails) => {
   }
 
   return details.key
-
 }
 
 const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
@@ -247,9 +246,9 @@ const shouldIgnoreEvent = <
   T extends KeyEventType,
   K extends { [key in T]?: boolean }
 >(
-  eventName: T,
-  options: K
-) => {
+    eventName: T,
+    options: K
+  ) => {
   return options[eventName] === false
 }
 
@@ -299,7 +298,6 @@ const validateTyping = (
   onFail: Function,
   skipCheckUntilIndex?: number,
 ) => {
-
   const chars = joinKeyArrayToString(keys.slice(currentIndex))
   const allChars = joinKeyArrayToString(keys)
 
@@ -341,11 +339,9 @@ const validateTyping = (
   }
 
   if (!isFocusable) {
-
     const node = $dom.stringify($el)
 
     if (isTextLike) {
-
       $utils.throwErrByPath('type.not_actionable_textlike', {
         onFail,
         args: { node },
@@ -594,7 +590,9 @@ export interface typeOptions {
 export default class Keyboard {
   public foo = 'foo'
 
-  constructor (private state: State) {}
+  constructor (private state: State) {
+    null
+  }
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
@@ -641,7 +639,6 @@ export default class Keyboard {
           return _.filter(_.split(chars, ''))
         }
       )
-
     }
 
     const keyDetailsArr = _.map(
@@ -723,7 +720,6 @@ export default class Keyboard {
                 )
               }
             }
-
           } else {
             debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
           }
@@ -738,7 +734,6 @@ export default class Keyboard {
           debug('returning null')
 
           return null
-
         }
       }
     )
@@ -1077,7 +1072,6 @@ export default class Keyboard {
     }
 
     return (el: HTMLElement) => {
-
       if (!shouldUpdateValue(el, key)) {
         debug('skip typing key', false)
         key.events.input = false

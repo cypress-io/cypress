@@ -104,7 +104,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               },
             },
           }
-
         },
 
       })
@@ -418,12 +417,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           })
           .then(() => {
             if (!options.force && $elements.getActiveElByDocument($elToClick[0].ownerDocument) === null) {
-
               const node = $dom.stringify($elToClick)
               const onFail = options._log
 
               if ($dom.isTextLike($elToClick[0])) {
-
                 $utils.throwErrByPath('type.not_actionable_textlike', {
                   onFail,
                   args: { node },
@@ -434,12 +431,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
                 onFail,
                 args: { node },
               })
-
             }
 
             return type()
           })
-
         },
       })
     }

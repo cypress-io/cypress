@@ -1665,7 +1665,7 @@ describe('src/cy/commands/actions/click', () => {
         const input = cy.$$('input:first')
 
         input.get(0).addEventListener('focus', () => {
-          done('should not have recieved focused event')
+          done('should not have received focused event')
         })
 
         input.get(0).addEventListener('mousedown', (e) => {

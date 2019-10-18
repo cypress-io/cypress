@@ -10,7 +10,6 @@ const _getSelectionBoundsFromTextarea = (el) => {
 }
 
 const _getSelectionBoundsFromInput = function (el) {
-
   if ($elements.canSetSelectionRangeElement(el)) {
     return {
       start: $elements.getNativeProp(el, 'selectionStart'),
@@ -25,7 +24,6 @@ const _getSelectionBoundsFromInput = function (el) {
     start: range.startOffset,
     end: range.endOffset,
   }
-
 }
 
 const _getSelectionRange = (doc: Document) => {
@@ -60,7 +58,6 @@ const _getSelectionBoundsFromContentEditable = function (el) {
 
 // TODO get ACTUAL caret position in contenteditable, not line
 const _replaceSelectionContentsWithExecCommand = function (doc, text) {
-
   // NOTE: insertText will also handle '\n', and render newlines
   return $elements.callNativeMethod(doc, 'execCommand', 'insertText', true, text)
 }
@@ -204,13 +201,11 @@ const deleteLeftOfCursor = function (el) {
     }
 
     return deleteSelectionContents(el)
-
   }
 
   const selection = _getSelectionByEl(el)
 
   if (selection.isCollapsed) {
-
     $elements.callNativeMethod(
       selection,
       'modify',
@@ -223,7 +218,6 @@ const deleteLeftOfCursor = function (el) {
   deleteSelectionContents(el)
 
   return false
-
 }
 
 const _collapseInputOrTextArea = (el, toIndex) => {
@@ -354,7 +348,6 @@ const _moveCursorToLineStartOrEnd = function (el, toStart) {
 }
 
 const isCollapsed = (el: HTMLElement) => {
-
   if ($elements.canSetSelectionRangeElement(el)) {
     const { start, end } = getSelectionBounds(el)
 
@@ -364,7 +357,6 @@ const isCollapsed = (el: HTMLElement) => {
   const doc = $document.getDocumentFromElement(el)
 
   return _getSelectionRange(doc).collapsed
-
 }
 
 const selectAll = function (doc) {
@@ -480,7 +472,6 @@ const _moveSelectionTo = function (toStart, doc) {
 
 // TODO: think about renaming this
 const replaceSelectionContents = function (el: HTMLElement, key: string) {
-
   if ($elements.canSetSelectionRangeElement(el)) {
     // if ($elements.isRead)
     const { start, end } = getSelectionBounds(el)
@@ -504,7 +495,6 @@ const replaceSelectionContents = function (el: HTMLElement, key: string) {
   _replaceSelectionContentsWithExecCommand(doc, key)
 
   return false
-
 }
 
 const getCaretPosition = function (el) {
@@ -541,7 +531,6 @@ const _getActive = function (doc) {
 // }
 
 const focusCursor = function (el, doc) {
-
   const elToFocus = $elements.getFirstFocusableEl($dom.wrap(el)).get(0)
 
   const prevFocused = _getActive(doc)
