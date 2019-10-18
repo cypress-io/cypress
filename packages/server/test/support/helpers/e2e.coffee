@@ -33,6 +33,8 @@ Promise.config({
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
+DEFAULT_BROWSERS = ['electron', 'chrome']
+
 stackTraceLinesRe = /^(\s+)at\s(.+)/gm
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
@@ -99,7 +101,7 @@ normalizeStdout = (str, options = {}) ->
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3") ## fix "Require stacks" for CI
 
-  if options.browser isnt undefined and options.browser isnt 'electron'
+  if options.sanitizeScreenshotDimensions
     str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") ## screenshot dimensions
 
   return str.split("\n")
@@ -158,8 +160,96 @@ copy = ->
       )
     )
 
-module.exports = {
-  normalizeStdout
+getMochaItFn = (only, skip, browser, specifiedBrowser) ->
+  ## if we've been told to skip this test 
+  ## or if we specified a particular browser and this
+  ## doesn't match the one we're currently trying to run...
+  if skip or (specifiedBrowser and specifiedBrowser isnt browser)
+    ## then skip this test
+    return it.skip
+
+  if only
+    return it.only
+
+  return it
+  
+getBrowsers = (generateTestsForDefaultBrowsers, browser, defaultBrowsers) ->
+  ## if we're generating tests for default browsers
+  if generateTestsForDefaultBrowsers
+    ## then return an array of default browsers
+    return defaultBrowsers
+  
+  ## but if we haven't been told to generate tests for default browsers
+  ## and weren't provided a specified browser then throw
+  if not browser
+    throw new Error('A browser must be specified when { generateTestsForDefaultBrowsers: false }.')
+
+  ## otherwise return the specified browser
+  return [browser]
+
+localItFn = (title, options = {}) ->
+  options = _
+  .chain(options)
+  .clone()
+  .defaults({
+    only: false,
+    skip: false,
+    browser: process.env.BROWSER
+    generateTestsForDefaultBrowsers: true
+    onRun: (execFn, browser, ctx) ->
+      execFn()
+  })
+  .value()
+
+  { only, skip, browser, generateTestsForDefaultBrowsers, onRun, spec, expectedExitCode } = options
+
+  if not title
+    throw new Error('e2e.it(...) must be passed a title as the first argument')
+  
+  ## LOGIC FOR AUTOGENERATING DYNAMIC TESTS
+  ## - if generateTestsForDefaultBrowsers
+  ##   - create multiple tests for each default browser
+  ##   - if browser is specified in options:
+  ##     ...skip the tests for each default browser if that browser
+  ##     ...does not match the specified one (used in CI)
+  ## - else only generate a single test with the specified browser
+  
+  ## run the tests for all the default browsers, or if a browser
+  ## has been specified, only run it for that
+  specifiedBrowser = browser
+  browsersToTest = getBrowsers(generateTestsForDefaultBrowsers, browser, DEFAULT_BROWSERS)
+
+  browserToTest = (browser) ->
+    mochaItFn = getMochaItFn(only, skip, browser, specifiedBrowser)
+    
+    testTitle = "#{title} [#{browser}]"
+
+    mochaItFn testTitle, ->
+      originalTitle = @test.parent.titlePath().concat(title).join(" / ")
+
+      ctx = @
+
+      execFn = (overrides = {}) ->
+        e2e.exec(ctx, _.extend({}, options, overrides, {
+          browser, originalTitle
+        }))
+
+      onRun(execFn, browser, ctx)
+
+  return _.each(browsersToTest, browserToTest)
+
+localItFn.only = (title, options) ->
+  options.only = true
+  localItFn(title, options)
+
+localItFn.skip = (title, options) ->
+  options.skip = true
+  localItFn(title, options)
+
+module.exports = e2e = {
+  normalizeStdout,
+
+  it: localItFn
 
   snapshot: (args...) ->
     args = _.compact(args)
@@ -239,9 +329,11 @@ module.exports = {
 
   options: (ctx, options = {}) ->
     _.defaults(options, {
-      browser: process.env.BROWSER
+      browser: 'electron'
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
+      originalTitle: null
+      sanitizeScreenshotDimensions: false
     })
 
     ctx.timeout(options.timeout)
@@ -363,7 +455,11 @@ module.exports = {
             expect(headless).to.include("(headless)")
 
         str = normalizeStdout(stdout, options)
-        snapshot(str)
+
+        if options.originalTitle
+          snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+        else
+          snapshot(str)
 
       return {
         code:   code

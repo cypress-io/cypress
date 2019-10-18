@@ -179,7 +179,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
 `
 
-exports['e2e plugins works with user extensions 1'] = `
+exports['e2e plugins / works with user extensions'] = `
 
 ====================================================================================================
 
@@ -349,8 +349,8 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   (Screenshots)
 
   - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (2x2)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (1280x720)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (1280x720)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (YYYYxZZZZ)
+  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (YYYYxZZZZ)
   - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (1x1)
 
 

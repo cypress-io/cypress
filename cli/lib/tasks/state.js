@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
+const untildify = require('untildify')
 const debug = require('debug')('cypress:cli')
 
 const fs = require('../fs')
@@ -57,7 +58,7 @@ const getCacheDir = () => {
   let cache_directory = util.getCacheDir()
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
-    const envVarCacheDir = util.getEnv('CYPRESS_CACHE_FOLDER')
+    const envVarCacheDir = untildify(util.getEnv('CYPRESS_CACHE_FOLDER'))
 
     debug('using environment variable CYPRESS_CACHE_FOLDER %s', envVarCacheDir)
     cache_directory = path.resolve(envVarCacheDir)

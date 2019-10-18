@@ -1,7 +1,6 @@
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
-const $selection = require('../../../../../src/dom/selection')
 const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
 
 // trim new lines at the end of innerText
@@ -1013,7 +1012,6 @@ describe('src/cy/commands/actions/type', () => {
 
       it('automatically moves the caret to the end if value is changed manually asynchronously', () => {
         cy.$$('#input-without-value').keypress((e) => {
-
           const $input = $(e.target)
 
           _.defer(() => {
@@ -1524,7 +1522,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('specialChars', () => {
-
       context('parseSpecialCharSequences: false', () => {
         it('types special character sequences literally', (done) => {
           cy.get(':text:first').invoke('val', 'foo')
@@ -2538,9 +2535,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('modifiers', () => {
-
       describe('activating modifiers', () => {
-
         it('sends keydown event for modifiers in order', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -2680,7 +2675,6 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       describe('release: false', () => {
-
         it('maintains modifiers for subsequent type commands', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -2798,7 +2792,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('case-insensitivity', () => {
-
       it('special chars are case-insensitive', () => {
         cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {
           expect($input).to.have.value('ba')
@@ -3209,14 +3202,13 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('caret position', () => {
-
       it('respects being formatted by input event handlers')
 
       it('accurately returns host contenteditable attr', () => {
         const hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3224,7 +3216,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3232,7 +3224,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3240,7 +3232,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3248,7 +3240,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0])
         })
       })
 
@@ -3266,7 +3258,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('inside textarea', () => {
-
           cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <textarea id="foo"></textarea>\
@@ -3278,7 +3269,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('inside contenteditable', () => {
-
           cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <div id="foo" contenteditable> \
@@ -3309,7 +3299,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').invoke('attr', 'maxlength', '5').type('foobar{leftarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 4, end: 4 })
         })
       })
@@ -3318,7 +3308,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3327,7 +3317,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type(`oo{leftarrow}{leftarrow}{leftarrow}f${'{leftarrow}'.repeat(5)}`)
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 0, end: 0 })
         })
       })
@@ -3336,7 +3326,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3349,7 +3339,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('bar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3358,7 +3348,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 1, end: 1 })
         })
       })
@@ -3373,7 +3363,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get(':text:first').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$(':text:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$(':text:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3382,7 +3372,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('#comments').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('#comments').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('#comments').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -4042,7 +4032,6 @@ describe('src/cy/commands/actions/type', () => {
           if (log.get('name') === 'type') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('$el').get(0)).to.eq($txt.get(0))
-
           }
         })
 
