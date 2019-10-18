@@ -296,6 +296,7 @@ const processErr = (errObj = {}, config) => {
 }
 
 module.exports = {
+  CypressErrorRe,
   wrapErr,
   modifyErrMsg,
   mergeErrProps,

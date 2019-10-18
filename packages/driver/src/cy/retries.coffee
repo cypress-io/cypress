@@ -3,7 +3,6 @@ Promise = require("bluebird")
 debug = require('debug')('cypress:driver:retries')
 
 $errUtils = require("../cypress/error_utils")
-{ CypressErrorRe } = require("../cypress/log")
 
 create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
   return {
@@ -35,7 +34,7 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
       ## TODO: remove this once the codeframe PR is in since that
       ## correctly handles not rewrapping errors so that stack
       ## traces are correctly displayed
-      if debug.enabled and error and not CypressErrorRe.test(error.name)
+      if debug.enabled and error and not $errUtils.CypressErrorRe.test(error.name)
         debug('retrying due to caught error...')
         console.error(error)
 
