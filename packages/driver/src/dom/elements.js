@@ -172,6 +172,9 @@ const nativeGetters = {
   selectionStart: _getSelectionStart,
   selectionEnd: _getSelectionEnd,
   type: _getType,
+  activeElement: descriptor('Document', 'activeElement').get,
+  body: descriptor('Document', 'body').get,
+  frameElement: Object.getOwnPropertyDescriptor(window, 'frameElement').get,
 }
 
 const nativeSetters = {
@@ -314,6 +317,10 @@ const isBody = (el) => {
   return getTagName(el) === 'body'
 }
 
+const isIframe = (el) => {
+  return getTagName(el) === 'iframe'
+}
+
 const isHTML = (el) => {
   return getTagName(el) === 'html'
 }
@@ -349,7 +356,6 @@ const isFocused = (el) => {
 }
 
 const isFocusedOrInFocused = (el) => {
-
   const doc = $document.getDocumentFromElement(el)
 
   const { activeElement, body } = doc
@@ -369,7 +375,6 @@ const isFocusedOrInFocused = (el) => {
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
     return true
   }
-
 }
 
 const isElement = function (obj) {
@@ -419,6 +424,33 @@ const isScrollOrAuto = (prop) => {
 
 const isAncestor = ($el, $maybeAncestor) => {
   return $el.parents().index($maybeAncestor) >= 0
+}
+
+const getFirstCommonAncestor = (el1, el2) => {
+  const el1Ancestors = [el1].concat(getAllParents(el1))
+  let curEl = el2
+
+  while (curEl) {
+    if (el1Ancestors.indexOf(curEl) !== -1) {
+      return curEl
+    }
+
+    curEl = curEl.parentNode
+  }
+
+  return curEl
+}
+
+const getAllParents = (el) => {
+  let curEl = el.parentNode
+  const allParents = []
+
+  while (curEl) {
+    allParents.push(curEl)
+    curEl = curEl.parentNode
+  }
+
+  return allParents
 }
 
 const isChild = ($el, $maybeChild) => {
@@ -474,6 +506,20 @@ const isAttached = function ($el) {
   // make sure every single element
   // is attached to this document
   return $document.hasActiveWindow(doc) && _.every(els, isIn)
+}
+
+/**
+ * @param {HTMLElement} el
+ */
+const isDetachedEl = (el) => {
+  return !isAttachedEl(el)
+}
+
+/**
+ * @param {HTMLElement} el
+ */
+const isAttachedEl = function (el) {
+  return isAttached($(el))
 }
 
 const isSame = function ($el1, $el2) {
@@ -594,7 +640,6 @@ const isDescendent = ($el1, $el2) => {
 }
 
 const findParent = (el, fn) => {
-
   const recurse = (curEl, prevEl) => {
     if (!curEl) {
       return null
@@ -635,6 +680,14 @@ const getFirstFocusableEl = ($el) => {
   }
 
   return getFirstFocusableEl($el.parent())
+}
+
+const getActiveElByDocument = (doc) => {
+  const activeEl = getNativeProp(doc, 'activeElement')
+
+  if (activeEl) return activeEl
+
+  return getNativeProp(doc, 'body')
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {
@@ -733,7 +786,6 @@ const getElements = ($el) => {
   }
 
   return els
-
 }
 
 const getContainsSelector = (text, filter = '') => {
@@ -868,6 +920,10 @@ _.extend(module.exports, {
 
   isDetached,
 
+  isAttachedEl,
+
+  isDetachedEl,
+
   isAncestor,
 
   isChild,
@@ -891,6 +947,8 @@ _.extend(module.exports, {
   isHTML,
 
   isInput,
+
+  isIframe,
 
   isTextarea,
 
@@ -922,9 +980,13 @@ _.extend(module.exports, {
 
   getFirstFocusableEl,
 
+  getActiveElByDocument,
+
   getContainsSelector,
 
   getFirstDeepestElement,
+
+  getFirstCommonAncestor,
 
   getFirstParentWithTagName,
 

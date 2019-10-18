@@ -292,7 +292,6 @@ declare namespace Cypress {
       add(name: string, fn: (...args: any[]) => void): void
       add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
       overwrite(name: string, fn: (...args: any[]) => void): void
-      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
     }
 
     /**
@@ -620,7 +619,14 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<Loggable>): Chainable
+    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+
+    /**
+     * Right-click a DOM element.
+     *
+     * @see https://on.cypress.io/rightclick
+     */
+    rightclick(options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
      * Set a debugger and log what the previous command yields.

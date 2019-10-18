@@ -1,5 +1,4 @@
-const { withMutableReporterState, findReactInstance, getCommandLogWithText } = require('../../support/utils')
-const { $ } = Cypress
+const { clickCommandLog } = require('../../support/utils')
 
 // https://github.com/cypress-io/cypress/pull/5299/files
 describe('rect highlight', () => {
@@ -52,30 +51,6 @@ describe('rect highlight', () => {
   })
 })
 
-const getAndPin = (sel) => {
-  cy.get(sel)
-
-  // TODO: fix me @brian-mann plz halp ;-(
-  // arbitrary wait to allow clicking and pinning command
-  // if reduced, test is flakey
-  cy.wait(10)
-  .should(() => {
-    withMutableReporterState(() => {
-
-      const commandLogEl = getCommandLogWithText(sel)
-
-      const reactCommandInstance = findReactInstance(commandLogEl)
-
-      reactCommandInstance.props.appState.isRunning = false
-
-      $(commandLogEl).find('.command-wrapper').click()
-
-      // make sure command was pinned, otherwise throw a better error message
-      expect(cy.$$('.command-pin:visible', top.document).length, 'command should be pinned').ok
-    })
-  })
-}
-
 const ensureCorrectHighlightPositions = (sel) => {
   return cy.wrap(null, { timeout: 400 }).should(() => {
     const dims = {
@@ -91,6 +66,12 @@ const ensureCorrectHighlightPositions = (sel) => {
       expectToBeEqual(dims.border, cy.$$(sel)[0].getBoundingClientRect(), 'border-box to match selector bounding-box')
     }
   })
+}
+
+const getAndPin = (sel) => {
+  cy.get(sel)
+
+  clickCommandLog(sel)
 }
 
 const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {

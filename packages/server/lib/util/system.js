@@ -24,7 +24,6 @@ const getOsVersion = () => {
     }
 
     return os.release()
-
   })
 }
 

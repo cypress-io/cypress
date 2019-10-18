@@ -24,14 +24,14 @@ describe('src/dom/coordinates', () => {
     it('returns the leftCenter and topCenter normalized', function () {
       const win = Cypress.dom.getWindowByElement(this.$button.get(0))
 
-      const pageYOffset = Object.getOwnPropertyDescriptor(win, 'pageYOffset')
-      const pageXOffset = Object.getOwnPropertyDescriptor(win, 'pageXOffset')
+      const scrollY = Object.getOwnPropertyDescriptor(win, 'scrollY')
+      const scrollX = Object.getOwnPropertyDescriptor(win, 'scrollX')
 
-      Object.defineProperty(win, 'pageYOffset', {
+      Object.defineProperty(win, 'scrollY', {
         value: 10,
       })
 
-      Object.defineProperty(win, 'pageXOffset', {
+      Object.defineProperty(win, 'scrollX', {
         value: 20,
       })
 
@@ -42,16 +42,16 @@ describe('src/dom/coordinates', () => {
         height: 40,
       }])
 
-      const { fromViewport, fromWindow } = Cypress.dom.getElementPositioning(this.$button)
+      const { fromElViewport, fromElWindow } = Cypress.dom.getElementPositioning(this.$button)
 
-      expect(fromViewport.topCenter).to.eq(120)
-      expect(fromViewport.leftCenter).to.eq(85)
+      expect(fromElViewport.topCenter).to.eq(120)
+      expect(fromElViewport.leftCenter).to.eq(85)
 
-      expect(fromWindow.topCenter).to.eq(130)
-      expect(fromWindow.leftCenter).to.eq(105)
+      expect(fromElWindow.topCenter).to.eq(130)
+      expect(fromElWindow.leftCenter).to.eq(105)
 
-      Object.defineProperty(win, 'pageYOffset', pageYOffset)
-      Object.defineProperty(win, 'pageXOffset', pageXOffset)
+      Object.defineProperty(win, 'scrollY', scrollY)
+      Object.defineProperty(win, 'scrollX', scrollX)
     })
   })
 
@@ -79,15 +79,15 @@ describe('src/dom/coordinates', () => {
 
   context('.getElementCoordinatesByPosition', () => {
     beforeEach(function () {
-      this.fromWindowPos = (pos) => {
+      this.fromElWindowPos = (pos) => {
         return Cypress.dom.getElementCoordinatesByPosition(this.$button, pos)
-        .fromWindow
+        .fromElWindow
       }
     })
 
     describe('topLeft', () => {
       it('returns top left x/y including padding + border', function () {
-        const obj = this.fromWindowPos('topLeft')
+        const obj = this.fromElWindowPos('topLeft')
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(60)
@@ -97,7 +97,7 @@ describe('src/dom/coordinates', () => {
 
     describe('top', () => {
       it('returns top center x/y including padding + border', function () {
-        const obj = this.fromWindowPos('top')
+        const obj = this.fromElWindowPos('top')
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(110)
@@ -107,7 +107,7 @@ describe('src/dom/coordinates', () => {
 
     describe('topRight', () => {
       it('returns top right x/y including padding + border', function () {
-        const obj = this.fromWindowPos('topRight')
+        const obj = this.fromElWindowPos('topRight')
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(159)
@@ -117,7 +117,7 @@ describe('src/dom/coordinates', () => {
 
     describe('left', () => {
       it('returns center left x/y including padding + border', function () {
-        const obj = this.fromWindowPos('left')
+        const obj = this.fromElWindowPos('left')
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(60)
@@ -127,7 +127,7 @@ describe('src/dom/coordinates', () => {
 
     describe('center', () => {
       it('returns center x/y including padding + border', function () {
-        const obj = this.fromWindowPos()
+        const obj = this.fromElWindowPos()
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(110)
@@ -140,7 +140,7 @@ describe('src/dom/coordinates', () => {
         // calculation would be wrong. using getBoundingClientRect passes this test
         this.$button.css({ transform: 'rotate(90deg)' })
 
-        const obj = this.fromWindowPos()
+        const obj = this.fromElWindowPos()
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(110)
@@ -150,7 +150,7 @@ describe('src/dom/coordinates', () => {
 
     describe('right', () => {
       it('returns center right x/y including padding + border', function () {
-        const obj = this.fromWindowPos('right')
+        const obj = this.fromElWindowPos('right')
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(159)
@@ -160,7 +160,7 @@ describe('src/dom/coordinates', () => {
 
     describe('bottomLeft', () => {
       it('returns bottom left x/y including padding + border', function () {
-        const obj = this.fromWindowPos('bottomLeft')
+        const obj = this.fromElWindowPos('bottomLeft')
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(60)
@@ -170,7 +170,7 @@ describe('src/dom/coordinates', () => {
 
     context('bottom', () => {
       it('returns bottom center x/y including padding + border', function () {
-        const obj = this.fromWindowPos('bottom')
+        const obj = this.fromElWindowPos('bottom')
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(110)
@@ -180,7 +180,7 @@ describe('src/dom/coordinates', () => {
 
     context('bottomRight', () => {
       it('returns bottom right x/y including padding + border', function () {
-        const obj = this.fromWindowPos('bottomRight')
+        const obj = this.fromElWindowPos('bottomRight')
 
         // padding is added to the line-height but width includes the padding
         expect(obj.x).to.eq(159)
@@ -217,7 +217,7 @@ this is some long text with a single <span id="multiple" style="color:darkblue">
         ]
       }).as('getClientRects')
 
-      const obj = Cypress.dom.getElementCoordinatesByPosition($el, 'center').fromViewport
+      const obj = Cypress.dom.getElementCoordinatesByPosition($el, 'center').fromElViewport
 
       expect({ x: obj.x, y: obj.y }).to.deep.eq({ x: 125, y: 120 })
     })
