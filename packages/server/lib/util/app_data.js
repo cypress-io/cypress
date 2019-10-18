@@ -31,7 +31,6 @@ const getSymlinkType = function () {
   }
 
   return 'dir'
-
 }
 
 const isProduction = () => {

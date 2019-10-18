@@ -93,6 +93,7 @@ const parseOpts = (opts) => {
     'cacheClear',
     'ciBuildId',
     'config',
+    'configFile',
     'cypressVersion',
     'destination',
     'detached',
@@ -131,6 +132,7 @@ const descriptions = {
   cachePath: 'print the path to the binary cache',
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
+  configFile: 'path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.',
   detached: 'runs Cypress application in detached mode',
   dev: 'runs cypress in development and bypasses binary check',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
@@ -236,6 +238,7 @@ module.exports = {
     .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
     .option('--ci-build-id <id>', text('ciBuildId'))
     .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
     .option('-e, --env <env>', text('env'))
     .option('--group <name>', text('group'))
     .option('-k, --key <record-key>', text('key'))
@@ -264,6 +267,7 @@ module.exports = {
     .description('Opens Cypress in the interactive GUI.')
     .option('-b, --browser <browser-path>', text('browserOpenMode'))
     .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
     .option('-e, --env <env>', text('env'))
     .option('--global', text('global'))

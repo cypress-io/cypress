@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
 
-import blankContents from './blank-contents'
 import dom from '../lib/dom'
-import eventManager from '../lib/event-manager'
 import logger from '../lib/logger'
+import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
+import blankContents from './blank-contents'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 export default class AutIframe {
@@ -172,9 +172,15 @@ export default class AutIframe {
       body = this._body()
     }
 
+    // normalize
+    const el = $el.get(0)
+    const $body = body
+
+    body = $body.get(0)
+
     // scroll the top of the element into view
-    if ($el.get(0)) {
-      $el.get(0).scrollIntoView()
+    if (el) {
+      el.scrollIntoView()
       // if we have a scrollBy on our command
       // then we need to additional scroll the window
       // by these offsets
@@ -183,25 +189,28 @@ export default class AutIframe {
       }
     }
 
-    $el.each((__, el) => {
-      el = $(el)
+    $el.each((__, element) => {
+      const $_el = $(element)
+
       // bail if our el no longer exists in the parent body
-      if (!$.contains(body[0], el[0])) return
+      if (!$.contains(body, element)) return
 
       // switch to using outerWidth + outerHeight
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
-      const dimensions = dom.getOuterSize(el)
+      const dimensions = dom.getOuterSize($_el)
 
       // dont show anything if our element displaces nothing
-      if (dimensions.width === 0 || dimensions.height === 0 || el.css('display') === 'none') return
+      if (dimensions.width === 0 || dimensions.height === 0 || $_el.css('display') === 'none') {
+        return
+      }
 
-      dom.addElementBoxModelLayers(el, body).attr('data-highlight-el', true)
+      dom.addElementBoxModelLayers($_el, $body).attr('data-highlight-el', true)
     })
 
     if (coords) {
       requestAnimationFrame(() => {
-        dom.addHitBoxLayer(coords, body).attr('data-highlight-hitbox', true)
+        dom.addHitBoxLayer(coords, $body).attr('data-highlight-hitbox', true)
       })
     }
   }
@@ -318,16 +327,16 @@ export default class AutIframe {
   }
 
   getElements (cypressDom) {
-    const contents = this._contents()
-    const selector = selectorPlaygroundModel.selector
+    const { selector, method } = selectorPlaygroundModel
+    const $contents = this._contents()
 
-    if (!contents || !selector) return
+    if (!$contents || !selector) return
 
     return dom.getElementsForSelector({
+      method,
       selector,
-      method: selectorPlaygroundModel.method,
-      root: contents,
       cypressDom,
+      $root: $contents,
     })
   }
 

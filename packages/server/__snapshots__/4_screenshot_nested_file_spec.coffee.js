@@ -1,4 +1,4 @@
-exports['e2e screenshot in nested spec passes 1'] = `
+exports['e2e screenshot in nested spec / passes'] = `
 
 ====================================================================================================
 

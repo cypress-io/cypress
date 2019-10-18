@@ -6,11 +6,17 @@ divider = (num, char) ->
 format = (data) ->
   switch
     when _.isString(data)
-      _.truncate(data, { length: 100 })
+      _.truncate(data, { length: 2000 })
     when _.isObject(data)
       JSON.stringify(data, null, 2)
     else
       data
+
+formatConfigFile = (configFile) ->
+  if configFile == false
+    return "'cypress.json' (currently disabled by --config-file=false)"
+
+  return "'#{format(configFile)}'"
 
 formatRedirect = (redirect) -> "  - #{redirect}"
 
@@ -121,8 +127,8 @@ module.exports = {
     invalid_argument: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
 
   click:
-    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
-    on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
+    multiple_elements: "#{cmd('{{cmd}}')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
+    on_select_element: "#{cmd('{{cmd}}')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
 
   clock:
     already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
@@ -585,13 +591,13 @@ module.exports = {
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
 
   navigation:
-    cross_origin: """
+    cross_origin: ({ message, originPolicy, configFile }) -> """
       Cypress detected a cross origin error happened on page load:
 
-        > {{message}}
+        > #{message}
 
       Before the page load, you were bound to the origin policy:
-        > {{originPolicy}}
+        > #{originPolicy}
 
       A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -605,17 +611,17 @@ module.exports = {
 
       You may need to restructure some of your test code to avoid this problem.
 
-      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
+      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in #{formatConfigFile(configFile)}.
 
       https://on.cypress.io/cross-origin-violation
 
     """
-    timed_out: """
-      Timed out after waiting '{{ms}}ms' for your remote page to load.
+    timed_out: ({ ms, configFile }) -> """
+      Timed out after waiting '#{ms}ms' for your remote page to load.
 
-      Your page did not fire its 'load' event within '{{ms}}ms'.
+      Your page did not fire its 'load' event within '#{ms}ms'.
 
-      You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+      You can try increasing the 'pageLoadTimeout' value in #{formatConfigFile(configFile)} to wait longer.
 
       Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
@@ -738,7 +744,8 @@ module.exports = {
       No response was received within the timeout.
       """
     url_missing: "#{cmd('request')} requires a url. You did not provide a url."
-    url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present."
+    url_invalid: ({configFile}) ->
+      "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in #{formatConfigFile(configFile)}. Neither of those values were present."
     url_wrong_type: "#{cmd('request')} requires the url to be a string."
 
   route:
@@ -773,7 +780,9 @@ module.exports = {
     invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: {{arg}}"
     invalid_boolean: "{{cmd}}() '{{option}}' option must be a boolean. You passed: {{arg}}"
     invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
-    invalid_clip: "{{cmd}}() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_clip: "{{cmd}}() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_height: "#{cmd('screenshot')} only works with a screenshot area with a height greater than zero."
+    invalid_padding: "{{cmd}}() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: {{arg}}"
     invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"
     multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
@@ -825,15 +834,15 @@ module.exports = {
       """
     not_attached: (obj) ->
       """
-      #{cmd(obj.name)} failed because this element is detached from the DOM.
+      #{cmd(obj.cmd)} failed because this element is detached from the DOM.
 
-      #{obj.subject}
+      #{obj.node}
 
       Cypress requires elements be attached in the DOM to interact with them.
 
       The previous command that ran was:
 
-        > #{cmd(obj.previous)}
+        > #{cmd(obj.prev)}
 
       This DOM element likely became detached somewhere between the previous and current command.
 

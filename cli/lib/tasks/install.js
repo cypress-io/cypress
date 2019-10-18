@@ -27,7 +27,6 @@ const alreadyInstalledMsg = () => {
 }
 
 const displayCompletionMsg = () => {
-
   // check here to see if we are globally installed
   if (util.isInstalledGlobally()) {
     // if we are display a warning
@@ -103,7 +102,6 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
     {
       title: util.titleize('Finishing Installation'),
       task: (ctx, task) => {
-
         const cleanup = () => {
           debug('removing zip file %s', downloadDestination)
 
@@ -129,7 +127,6 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 }
 
 const start = (options = {}) => {
-
   // handle deprecated / removed
   if (util.getEnv('CYPRESS_BINARY_VERSION')) {
     return throwFormErrorText(errors.removed.CYPRESS_BINARY_VERSION)()
@@ -152,7 +149,6 @@ const start = (options = {}) => {
 
   // let this environment variable reset the binary version we need
   if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
-
     // because passed file paths are often double quoted
     // and might have extra whitespace around, be robust and trim the string
     const trimAndRemoveDoubleQuotes = true
@@ -175,7 +171,6 @@ const start = (options = {}) => {
     // if this doesn't match the expected version
     // then print warning to the user
     if (envVarVersion !== needVersion) {
-
       // reset the version to the env var version
       needVersion = envVarVersion
     }
@@ -211,7 +206,6 @@ const start = (options = {}) => {
     return state.getBinaryPkgVersionAsync(binaryDir)
   })
   .then((binaryVersion) => {
-
     if (!binaryVersion) {
       debug('no binary installed under cli version')
 

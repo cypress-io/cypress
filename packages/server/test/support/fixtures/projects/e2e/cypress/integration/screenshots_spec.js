@@ -60,15 +60,19 @@ describe('taking screenshots', () => {
     cy.screenshot('color-check', { capture: 'runner' })
     cy.task('ensure:pixel:color', {
       devicePixelRatio,
-      coords: [1, 0],
-      color: [255, 255, 255], // white
+      colors: [{
+        coords: [1, 0],
+        color: [255, 255, 255], // white
+      }],
       name: `${path.basename(__filename)}/color-check`,
     })
 
     cy.task('ensure:pixel:color', {
       devicePixelRatio,
-      coords: [0, 1],
-      color: [255, 255, 255], // white
+      colors: [{
+        coords: [1, 0],
+        color: [255, 255, 255], // white
+      }],
       name: `${path.basename(__filename)}/color-check`,
     })
   })
@@ -175,6 +179,24 @@ describe('taking screenshots', () => {
     })
   })
 
+  it('properly resizes the AUT iframe', () => {
+    // ensures that the aut iframe is not undersized by making sure the screenshot
+    // is completely white and doesn't have the black background showing
+    cy
+    .visit('http://localhost:3322/color/white')
+    .screenshot('aut-resize')
+    .task('ensure:pixel:color', {
+      devicePixelRatio,
+      colors: [
+        { coords: [5, 5], color: [255, 255, 255] },
+        { coords: [1275, 5], color: [255, 255, 255] },
+        { coords: [5, 715], color: [255, 255, 255] },
+        { coords: [1275, 715], color: [255, 255, 255] },
+      ],
+      name: `${path.basename(__filename)}/aut-resize`,
+    })
+  })
+
   describe('clipping', () => {
     it('can clip app screenshots', () => {
       cy.viewport(600, 200)
@@ -240,6 +262,37 @@ describe('taking screenshots', () => {
 
   it('does not take a screenshot for a pending test', function () {
     this.skip()
+  })
+
+  it('adds padding to element screenshot when specified', () => {
+    cy.visit('http://localhost:3322/element')
+    cy.get('.element')
+    .screenshot('element-padding', {
+      padding: 10,
+    })
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/element-padding.png`,
+      width: 420,
+      height: 320,
+      devicePixelRatio,
+    })
+  })
+
+  it('does not add padding to non-element screenshot', () => {
+    cy.viewport(600, 200)
+    cy.visit('http://localhost:3322/color/yellow')
+    cy.screenshot('non-element-padding', {
+      capture: 'viewport',
+      padding: 10,
+    })
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/non-element-padding.png`,
+      width: 600,
+      height: 200,
+      devicePixelRatio,
+    })
   })
 
   context('before hooks', () => {

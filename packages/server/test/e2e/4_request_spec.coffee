@@ -134,17 +134,11 @@ describe "e2e requests", ->
       "localhost:2293": 0
     }
 
-  [
-    "electron",
-    "chrome"
-  ].forEach (browser) ->
-    it "passes in #{browser}", ->
-      e2e.exec(@, {
-        spec: "request_spec.coffee"
-        snapshot: true
-        expectedExitCode: 0
-        browser
-      })
+  e2e.it "passes", {
+    spec: "request_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }
 
   it "fails when network immediately fails", ->
     e2e.exec(@, {
@@ -156,6 +150,18 @@ describe "e2e requests", ->
   it "fails on status code", ->
     e2e.exec(@, {
       spec: "request_status_code_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+      onStdout: (stdout) ->
+        stdout
+        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
+    })
+
+  it "prints long http props on fail", ->
+    e2e.exec(@, {
+      spec: "request_long_http_props_failing_spec.coffee"
       snapshot: true
       expectedExitCode: 1
       onStdout: (stdout) ->

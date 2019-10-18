@@ -2,6 +2,7 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 const $elements = require('../dom/elements')
 const $selection = require('../dom/selection')
+const $document = require('../dom/document')
 
 const isSingleDigitRe = /^\d$/
 const isStartingDigitRe = /^\d/
@@ -36,6 +37,27 @@ const initialModifiers = {
   meta: false,
   shift: false,
 }
+
+const toModifiersEventOptions = (modifiers) => {
+  return {
+    altKey: modifiers.alt,
+    ctrlKey: modifiers.ctrl,
+    metaKey: modifiers.meta,
+    shiftKey: modifiers.shift,
+  }
+}
+
+const fromModifierEventOptions = (eventOptions) => {
+  return _.pickBy({
+    alt: eventOptions.altKey,
+    ctrl: eventOptions.ctrlKey,
+    meta: eventOptions.metaKey,
+    shift: eventOptions.shiftKey,
+
+  }, Boolean)
+}
+
+const modifiersToString = (modifiers) => _.keys(_.pickBy(modifiers, Boolean)).join(', ')
 
 const create = (state) => {
   const kb = {
@@ -103,8 +125,6 @@ const create = (state) => {
         options.setKey = '{del}'
 
         return kb.ensureKey(el, null, options, () => {
-          $selection.getSelectionBounds(el)
-
           if ($selection.isCollapsed(el)) {
           // if there's no text selected, delete the prev char
           // if deleted char, send the input event
@@ -117,7 +137,6 @@ const create = (state) => {
           // contents and send the input event
           $selection.deleteSelectionContents(el)
           options.input = true
-
         })
       },
 
@@ -146,7 +165,6 @@ const create = (state) => {
         options.setKey = '{backspace}'
 
         return kb.ensureKey(el, null, options, () => {
-
           if ($selection.isCollapsed(el)) {
           // if there's no text selected, delete the prev char
           // if deleted char, send the input event
@@ -159,7 +177,6 @@ const create = (state) => {
           // contents and send the input event
           $selection.deleteSelectionContents(el)
           options.input = true
-
         })
       },
 
@@ -342,10 +359,6 @@ const create = (state) => {
       '{shift}': 'shift',
     },
 
-    boundsAreEqual (bounds) {
-      return bounds[0] === bounds[1]
-    },
-
     type (options = {}) {
       _.defaults(options, {
         delay: 10,
@@ -383,7 +396,7 @@ const create = (state) => {
         return kb.typeChars(el, key, options)
       }).then(() => {
         if (options.release !== false) {
-          return kb.resetModifiers(el, options.window)
+          return kb.resetModifiers($document.getDocumentFromElement(el))
         }
       })
     },
@@ -401,7 +414,6 @@ const create = (state) => {
         }
 
         return memo + chars.length
-
       }
       , 0)
     },
@@ -450,16 +462,6 @@ const create = (state) => {
       const code = key.charCodeAt(0)
 
       return code
-    },
-
-    expectedValueDoesNotMatchCurrentValue (expected, rng) {
-      return expected !== rng.all()
-    },
-
-    moveCaretToEnd (rng) {
-      const len = rng.length()
-
-      return rng.bounds([len, len])
     },
 
     simulateKey (el, eventType, key, options) {
@@ -527,7 +529,7 @@ const create = (state) => {
           repeat: false,
         })
 
-        kb.mixinModifiers(event)
+        _.extend(event, toModifiersEventOptions(kb.getActiveModifiers()))
       }
 
       if (keys) {
@@ -569,7 +571,6 @@ const create = (state) => {
 
     typeKey (el, key, options) {
       return kb.ensureKey(el, key, options, () => {
-
         const isDigit = isSingleDigitRe.test(key)
         const isNumberInputType = $elements.isInput(el) && $elements.isType(el, 'number')
 
@@ -629,7 +630,6 @@ const create = (state) => {
       if (kb.simulateKey(el, 'keydown', key, options)) {
         if (kb.simulateKey(el, 'keypress', key, options)) {
           if (kb.simulateKey(el, 'textInput', key, options)) {
-
             let ml
 
             if ($elements.isInput(el) || $elements.isTextarea(el)) {
@@ -658,9 +658,7 @@ const create = (state) => {
     },
 
     isSpecialChar (chars) {
-      let needle
-
-      return (needle = chars, _.keys(kb.specialChars).includes(needle))
+      return _.includes(_.keys(kb.specialChars), chars)
     },
 
     handleSpecialChars (el, chars, options) {
@@ -670,9 +668,7 @@ const create = (state) => {
     },
 
     isModifier (chars) {
-      let needle
-
-      return (needle = chars, _.keys(kb.modifierChars).includes(needle))
+      return _.includes(_.keys(kb.modifierChars), chars)
     },
 
     handleModifier (el, chars, options) {
@@ -699,56 +695,32 @@ const create = (state) => {
       }))
     },
 
-    mixinModifiers (event) {
-      const activeModifiers = kb.getActiveModifiers()
+    resetModifiers (doc) {
+      const activeEl = $elements.getActiveElByDocument(doc)
+      const activeModifiers = kb.getActiveModifiers(state)
 
-      return _.extend(event, {
-        altKey: activeModifiers.alt,
-        ctrlKey: activeModifiers.ctrl,
-        metaKey: activeModifiers.meta,
-        shiftKey: activeModifiers.shift,
-      })
-    },
+      for (let modifier in activeModifiers) {
+        const isActivated = activeModifiers[modifier]
 
-    getActiveModifiersArray () {
-      return _.reduce(kb.getActiveModifiers(), (memo, isActivated, modifier) => {
+        activeModifiers[modifier] = false
+        state('keyboardModifiers', _.clone(activeModifiers))
         if (isActivated) {
-          memo.push(modifier)
+          kb.simulateModifier(activeEl, 'keyup', modifier, {
+            window,
+            onBeforeEvent () { },
+            onEvent () { },
+          })
         }
-
-        return memo
       }
-      , [])
-    },
-
-    resetModifiers (el, window) {
-      return (() => {
-        const result = []
-
-        const activeModifiers = kb.getActiveModifiers()
-
-        for (let modifier in activeModifiers) {
-          const isActivated = activeModifiers[modifier]
-
-          activeModifiers[modifier] = false
-          state('keyboardModifiers', activeModifiers)
-          if (isActivated) {
-            result.push(kb.simulateModifier(el, 'keyup', modifier, {
-              window,
-              onBeforeEvent () {},
-              onEvent () {},
-            }))
-          } else {
-            result.push(undefined)
-          }
-        }
-
-        return result
-      })()
     },
   }
 
   return kb
 }
 
-module.exports = { create }
+module.exports = {
+  create,
+  toModifiersEventOptions,
+  modifiersToString,
+  fromModifierEventOptions,
+}

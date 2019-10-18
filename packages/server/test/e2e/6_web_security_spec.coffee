@@ -80,10 +80,9 @@ describe "e2e web security", ->
       }
     })
 
-    it "passes", ->
-      e2e.exec(@, {
-        spec: "web_security_spec.coffee"
-        browser: "chrome"
-        snapshot: true
-        expectedExitCode: 0
-      })
+    e2e.it "passes", {
+      spec: "web_security_spec.coffee"
+      browser: "chrome"
+      snapshot: true
+      expectedExitCode: 0
+    }
