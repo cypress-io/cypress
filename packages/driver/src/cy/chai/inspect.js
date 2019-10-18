@@ -50,7 +50,6 @@ module.exports = {
       'nodeType' in object &&
       object.nodeType === 1 &&
       typeof object.nodeName === 'string'
-
     }
 
     let formatValueHook
@@ -117,13 +116,11 @@ module.exports = {
           container.innerHTML = ''
 
           return html
-
         } catch (err) {
           // This could be a non-native DOM implementation,
           //   continue with the normal flow:
           //   printing the element as if it is an object.
         }
-
       }
 
       // Look up the keys of the object.
@@ -208,7 +205,6 @@ module.exports = {
         }
 
         return ctx.stylize('[Object]', 'special')
-
       }
 
       ctx.seen.push(value)

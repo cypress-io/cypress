@@ -25,7 +25,6 @@ module.exports = {
   send,
 
   setup (extensions, url) {
-
     const driver = new Marionette.Drivers.Tcp({})
 
     const connect = Promise.promisify(driver.connect.bind(driver))

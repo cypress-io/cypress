@@ -535,7 +535,6 @@ describe('intercept blur methods correctly', () => {
       cy.$$('input:first')[0].focus()
 
       cy.wait(10).get('@selectionchange').should('not.be.called')
-
     })
   })
 
@@ -548,14 +547,12 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     if (Cypress.browser.family === 'firefox') {
-
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
     }
 
     cy.wait(10).get('@selectionchange').should('not.be.called')
-
   })
 
   it('focus <select>', () => {
@@ -567,14 +564,12 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     if (Cypress.browser.family === 'firefox') {
-
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
     }
 
     cy.wait(10).get('@selectionchange').should('not.be.called')
-
   })
 
   it('focus <button>', () => {
@@ -586,14 +581,12 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     if (Cypress.browser.family === 'firefox') {
-
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
     }
 
     cy.wait(10).get('@selectionchange').should('not.be.called')
-
   })
 
   it('focus <iframe>', () => {
@@ -614,7 +607,6 @@ describe('intercept blur methods correctly', () => {
     $el[0].focus()
 
     if (Cypress.browser.family === 'firefox') {
-
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -632,7 +624,6 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     cy.get('@selectionchange').should('be.called')
-
   })
 
   it('focus [contenteditable]', () => {
@@ -643,7 +634,6 @@ describe('intercept blur methods correctly', () => {
     $el[0].focus()
 
     cy.get('@selectionchange').should('be.called')
-
   })
 
   it('cannot focus a [contenteditable] child', () => {
