@@ -359,8 +359,8 @@ const create = (state) => {
       '{shift}': 'shift',
     },
 
-    type (options = {}) {
-      _.defaults(options, {
+    type (opts = {}) {
+      const options = _.defaults(opts, {
         delay: 10,
         parseSpecialCharSequences: true,
         onEvent () {},
@@ -599,7 +599,7 @@ const create = (state) => {
       })
     },
 
-    ensureKey (el, key, options, fn) {
+    ensureKey (el, key, options, fn?: Function) {
       _.defaults(options, {
         prevText: null,
       })
@@ -697,7 +697,7 @@ const create = (state) => {
 
     resetModifiers (doc) {
       const activeEl = $elements.getActiveElByDocument(doc)
-      const activeModifiers = kb.getActiveModifiers(state)
+      const activeModifiers = kb.getActiveModifiers()
 
       for (let modifier in activeModifiers) {
         const isActivated = activeModifiers[modifier]
@@ -718,7 +718,7 @@ const create = (state) => {
   return kb
 }
 
-module.exports = {
+export {
   create,
   toModifiersEventOptions,
   modifiersToString,

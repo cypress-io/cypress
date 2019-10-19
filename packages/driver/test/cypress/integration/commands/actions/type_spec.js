@@ -1,7 +1,6 @@
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
-const $selection = require('../../../../../src/dom/selection')
 const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
 
 // trim new lines at the end of innerText
@@ -3209,7 +3208,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3217,7 +3216,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3225,7 +3224,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3233,7 +3232,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3241,7 +3240,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0])
         })
       })
 
@@ -3300,7 +3299,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').invoke('attr', 'maxlength', '5').type('foobar{leftarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 4, end: 4 })
         })
       })
@@ -3309,7 +3308,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3318,7 +3317,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type(`oo{leftarrow}{leftarrow}{leftarrow}f${'{leftarrow}'.repeat(5)}`)
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 0, end: 0 })
         })
       })
@@ -3327,7 +3326,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3340,7 +3339,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('bar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3349,7 +3348,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 1, end: 1 })
         })
       })
@@ -3364,7 +3363,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get(':text:first').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$(':text:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$(':text:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3373,7 +3372,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('#comments').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('#comments').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('#comments').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })

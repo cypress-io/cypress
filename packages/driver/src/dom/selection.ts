@@ -1,13 +1,5 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const $document = require('./document')
-const $elements = require('./elements')
+import * as $document from './document'
+import * as $elements from './elements'
 
 const INTERNAL_STATE = '__Cypress_state__'
 
@@ -222,6 +214,8 @@ const deleteRightOfCursor = function (el) {
     //# successful delete
     return true
   }
+
+  return false
 }
 
 const deleteLeftOfCursor = function (el) {
@@ -257,6 +251,8 @@ const deleteLeftOfCursor = function (el) {
     //# successful delete
     return true
   }
+
+  return false
 }
 
 const _collapseInputOrTextArea = (el, toIndex) => {
@@ -587,7 +583,7 @@ const interceptSelect = function () {
 //     el = el.firstChild
 //   return el
 
-module.exports = {
+export {
   getSelectionBounds,
   deleteRightOfCursor,
   deleteLeftOfCursor,
