@@ -57,15 +57,15 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          name: Restore Google Chrome
+          name: Install Google Chrome
           command: |
             set -e
-            ls ~
+            ls ~/installers
             if [[ "$OSTYPE" == "darwin"* ]]; then
-              hdiutil attach  ~/google-chrome-stable.dmg
+              hdiutil attach  ~/installers/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
             else
-              dpkg -i google-chrome-stable_current_amd64.deb
+              dpkg -i installers/google-chrome-stable_current_amd64.deb
             fi
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
@@ -275,10 +275,12 @@ jobs:
           name: "Download Google Chrome (stable) intaller"
           command: |
             set -e
+            mkdir ~/installers
             if [[ "$OSTYPE" == "darwin"* ]]; then
-              curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/google-chrome-stable.dmg
+              curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/installers/google-chrome-stable.dmg
             else
               wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+              mv google-chrome-stable_current_amd64.deb ~/installers
             fi
 
       ## save entire folder as artifact for other jobs to run without reinstalling
@@ -286,8 +288,7 @@ jobs:
           root: ~/
           paths:
             - cypress
-            - *.dmg
-            - *.deb
+            - installers
 
   lint:
     <<: *defaults
