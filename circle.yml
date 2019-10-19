@@ -65,7 +65,7 @@ commands:
               hdiutil attach  ~/installers/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
             else
-              dpkg -i installers/google-chrome-stable_current_amd64.deb
+              dpkg -i ~/installers/google-chrome-stable_current_amd64.deb
             fi
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
