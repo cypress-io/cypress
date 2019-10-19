@@ -9,7 +9,7 @@ la            = require("lazy-ass")
 check         = require("check-more-types")
 
 # returns true if the passed string is a known browser family name
-isBrowserFamily = check.oneOf(["electron", "chrome"])
+isBrowserFamily = check.oneOf(["electron", "chrome", "firefox"])
 
 instance = null
 
