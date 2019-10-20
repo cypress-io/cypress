@@ -66,6 +66,7 @@ commands:
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
             else
               dpkg -i ~/installers/google-chrome-stable_current_amd64.deb
+              sudo apt-get install -f
             fi
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
@@ -623,6 +624,7 @@ jobs:
             else
               echo "Not Mac platform, skipping code sign setup"
             fi
+
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
