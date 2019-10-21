@@ -116,7 +116,6 @@ class OnBoarding extends Component {
           </span>
         </li>
       )
-
     })
   }
 

@@ -1,13 +1,5 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const $document = require('./document')
-const $elements = require('./elements')
+import * as $document from './document'
+import * as $elements from './elements'
 
 const INTERNAL_STATE = '__Cypress_state__'
 
@@ -175,7 +167,6 @@ const deleteSelectionContents = function (el) {
 }
 
 const setSelectionRange = function (el, start, end) {
-
   if ($elements.canSetSelectionRangeElement(el)) {
     $elements.callNativeMethod(el, 'setSelectionRange', start, end)
 
@@ -190,7 +181,6 @@ const setSelectionRange = function (el, start, end) {
     start,
     end,
   }
-
 }
 
 const deleteRightOfCursor = function (el) {
@@ -224,6 +214,8 @@ const deleteRightOfCursor = function (el) {
     //# successful delete
     return true
   }
+
+  return false
 }
 
 const deleteLeftOfCursor = function (el) {
@@ -259,6 +251,8 @@ const deleteLeftOfCursor = function (el) {
     //# successful delete
     return true
   }
+
+  return false
 }
 
 const _collapseInputOrTextArea = (el, toIndex) => {
@@ -448,7 +442,6 @@ const moveSelectionToEnd = function (el) {
     ({ length } = $elements.getNativeProp(el, 'value'))
 
     return setSelectionRange(el, length, length)
-
   }
 
   if ($elements.isContentEditable(el)) {
@@ -590,7 +583,7 @@ const interceptSelect = function () {
 //     el = el.firstChild
 //   return el
 
-module.exports = {
+export {
   getSelectionBounds,
   deleteRightOfCursor,
   deleteLeftOfCursor,
