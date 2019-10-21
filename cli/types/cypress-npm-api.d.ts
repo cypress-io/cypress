@@ -45,7 +45,7 @@ declare module 'cypress' {
     /**
      * A String or Array of string glob pattern of the test files to load.
      */
-    testFiles: string
+    testFiles: string | string[]
 
     //
     // timeouts
