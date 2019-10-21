@@ -204,7 +204,7 @@ exports['e2e spec isolation fails'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
       "screenshots": [
         {
           "screenshotId": "some-random-id",
@@ -312,7 +312,7 @@ exports['e2e spec isolation fails'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4",
       "screenshots": [
         {
           "screenshotId": "some-random-id",
@@ -522,7 +522,7 @@ exports['e2e spec isolation fails'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_hooks_spec.coffee.mp4",
       "screenshots": [],
       "spec": {
         "name": "simple_hooks_spec.coffee",
@@ -596,7 +596,7 @@ exports['e2e spec isolation fails'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_passing_spec.coffee.mp4",
       "screenshots": [],
       "spec": {
         "name": "simple_passing_spec.coffee",

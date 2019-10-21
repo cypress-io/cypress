@@ -14,7 +14,7 @@ exports['e2e screenshot element capture / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: screenshot_element_capture_spec.coffee...                                       (1 of 1) 
+  Running:  screenshot_element_capture_spec.coffee                                          (1 of 1)
 
 
   ✓ takes consistent element captures
@@ -24,38 +24,50 @@ exports['e2e screenshot element capture / passes'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────────────────────┐
-  │ Tests:        1                                      │
-  │ Passing:      1                                      │
-  │ Failing:      0                                      │
-  │ Pending:      0                                      │
-  │ Skipped:      0                                      │
-  │ Screenshots:  11                                     │
-  │ Video:        true                                   │
-  │ Duration:     X seconds                              │
-  │ Spec Ran:     screenshot_element_capture_spec.coffee │
-  └──────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  11                                                                               │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     screenshot_element_capture_spec.coffee                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-original.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare.png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (1).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (2).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (3).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (4).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (5).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (6).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (7).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (8).png (560x302)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshot_element_capture_spec.coffee/element-compare (9).png (560x302)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     original.png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare.png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (1).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (2).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (3).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (4).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (5).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (6).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (7).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (8).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture_spec.coffee/element-      (560x302)
+     compare (9).png                                                                                
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_element_capture_spec     (X second)
+                          .coffee.mp4                                                               
 
 
 ====================================================================================================
@@ -63,11 +75,12 @@ exports['e2e screenshot element capture / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ screenshot_element_capture_spec.coff…     XX:XX        1        1        -        -        - │
+  │ ✔  screenshot_element_capture_spec.cof      XX:XX        1        1        -        -        - │
+  │    fee                                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
