@@ -18,6 +18,22 @@ interface CyCookie {
 
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
 
+const cookieMatches = (cookie: CyCookie, data) => {
+  if (data.domain && !tough.domainMatch(cookie.domain, data.domain)) {
+    return false
+  }
+
+  if (data.path && !tough.pathMatch(cookie.path, data.path)) {
+    return false
+  }
+
+  if (data.name && data.name !== cookie.name) {
+    return false
+  }
+
+  return true
+}
+
 export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
     if (cookie.expires === -1) {
@@ -37,8 +53,11 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   }
 
   const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest => {
-    cookie.name || (cookie.name = '') // name can't be undefined/null
-    cookie.value || (cookie.value = '') // ditto
+    _.defaults(cookie, {
+      name: '',
+      value: '',
+    })
+
     // @ts-ignore
     cookie.expires = cookie.expirationDate
     if (!cookie.hostOnly && cookie.domain[0] !== '.') {
@@ -61,11 +80,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     .then((result: cdp.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        return _.every([
-          !data.domain || tough.domainMatch(cookie.domain, data.domain),
-          !data.path || tough.pathMatch(cookie.path, data.path),
-          !data.name || data.name === cookie.name,
-        ])
+        return cookieMatches(cookie, data)
       })
     })
   }
@@ -106,7 +121,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
           if (!result.success) {
             // i wish CDP provided some more detail here, but this is really it in v1.3
             // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
-            throw new Error('Failed to set cookie via Network.setCookie.')
+            throw new Error(`Network.setCookie failed to set cookie: ${JSON.stringify(setCookie)}`)
           }
 
           return getCookie(data)
