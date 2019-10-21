@@ -58,17 +58,24 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
       value: '',
     })
 
+    // this logic forms a SetCookie request that will be received by Chrome
+    // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
+    // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
+
     // @ts-ignore
     cookie.expires = cookie.expirationDate
     if (!cookie.hostOnly && cookie.domain[0] !== '.') {
       let parsedDomain = cors.parseDomain(cookie.domain)
 
-      // not a top-level domain (localhost, ...) or IP address
+      // normally, a non-hostOnly cookie should be prefixed with a .
+      // so if it's not a top-level domain (localhost, ...) or IP address
+      // prefix it with a . so it becomes a non-hostOnly cookie
       if (parsedDomain && parsedDomain.tld !== cookie.domain) {
         cookie.domain = `.${cookie.domain}`
       }
     }
 
+    // not used by Chrome
     delete cookie.hostOnly
     delete cookie.expirationDate
 
