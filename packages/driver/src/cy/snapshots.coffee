@@ -1,6 +1,7 @@
 _ = require("lodash")
 $ = require("jquery")
 
+$dom = require('../dom')
 $SnapshotsCss = require("./snapshots_css")
 
 HIGHLIGHT_ATTR = "data-cypress-el"
@@ -119,8 +120,10 @@ create = ($$, state) ->
     ## which arrives here as number 1
     ## jQuery v2 allowed to silently try setting 1[HIGHLIGHT_ATTR] doing nothing
     ## jQuery v3 runs in strict mode and throws an error if you attempt to set a property
-    canHaveAttributes = _.isElement($elToHighlight && $elToHighlight[0])
-    $elToHighlight.attr(HIGHLIGHT_ATTR, true) if canHaveAttributes and $elToHighlight?.attr
+    isJqueryElement = $dom.isElement($elToHighlight) and $dom.isJquery($elToHighlight)
+
+    if isJqueryElement
+      $elToHighlight.attr(HIGHLIGHT_ATTR, true) 
 
     ## TODO: throw error here if cy is undefined!
 
@@ -152,7 +155,8 @@ create = ($$, state) ->
     ## which would reduce memory, and some CPU operations
 
     ## now remove it after we clone
-    $elToHighlight.removeAttr(HIGHLIGHT_ATTR) if canHaveAttributes and $elToHighlight?.removeAttr
+    if isJqueryElement
+      $elToHighlight.removeAttr(HIGHLIGHT_ATTR)
 
     ## preserve attributes on the <html> tag
     htmlAttrs = getHtmlAttrs($$("html")[0])

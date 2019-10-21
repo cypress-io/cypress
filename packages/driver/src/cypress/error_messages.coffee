@@ -6,7 +6,7 @@ divider = (num, char) ->
 format = (data) ->
   switch
     when _.isString(data)
-      _.truncate(data, { length: 100 })
+      _.truncate(data, { length: 2000 })
     when _.isObject(data)
       JSON.stringify(data, null, 2)
     else
@@ -127,8 +127,8 @@ module.exports = {
     invalid_argument: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
 
   click:
-    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
-    on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
+    multiple_elements: "#{cmd('{{cmd}}')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
+    on_select_element: "#{cmd('{{cmd}}')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
 
   clock:
     already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
@@ -780,7 +780,9 @@ module.exports = {
     invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: {{arg}}"
     invalid_boolean: "{{cmd}}() '{{option}}' option must be a boolean. You passed: {{arg}}"
     invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
-    invalid_clip: "{{cmd}}() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_clip: "{{cmd}}() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_height: "#{cmd('screenshot')} only works with a screenshot area with a height greater than zero."
+    invalid_padding: "{{cmd}}() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: {{arg}}"
     invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"
     multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
@@ -832,15 +834,15 @@ module.exports = {
       """
     not_attached: (obj) ->
       """
-      #{cmd(obj.name)} failed because this element is detached from the DOM.
+      #{cmd(obj.cmd)} failed because this element is detached from the DOM.
 
-      #{obj.subject}
+      #{obj.node}
 
       Cypress requires elements be attached in the DOM to interact with them.
 
       The previous command that ran was:
 
-        > #{cmd(obj.previous)}
+        > #{cmd(obj.prev)}
 
       This DOM element likely became detached somewhere between the previous and current command.
 

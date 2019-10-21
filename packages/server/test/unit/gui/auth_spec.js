@@ -110,5 +110,4 @@ describe('lib/gui/auth', function () {
       })
     })
   })
-
 })

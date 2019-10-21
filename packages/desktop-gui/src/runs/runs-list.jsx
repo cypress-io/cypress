@@ -192,7 +192,6 @@ class RunsList extends Component {
 
     // OR there are no runs to show
     if (!this.runsStore.runs.length) {
-
       // AND they've never setup CI
       if (!project.id) {
         return this._projectNotSetup()
@@ -201,7 +200,6 @@ class RunsList extends Component {
       }
 
       return this._empty()
-
     }
     //--------End Run States----------//
 

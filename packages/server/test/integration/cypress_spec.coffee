@@ -39,6 +39,7 @@ Watchers   = require("#{root}lib/watchers")
 browsers   = require("#{root}lib/browsers")
 videoCapture = require("#{root}lib/video_capture")
 browserUtils = require("#{root}lib/browsers/utils")
+chromeBrowser = require("#{root}lib/browsers/chrome")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
 system        = require("#{root}lib/util/system")
@@ -764,6 +765,10 @@ describe "lib/cypress", ->
 
         ee = new EE()
         ee.kill = ->
+          # ughh, would be nice to test logic inside the launcher
+          # that cleans up after the browser exit
+          # like calling client.close() if available to let the
+          # browser free any resources
           ee.emit("exit")
         ee.close = ->
           ee.emit("closed")
@@ -789,6 +794,18 @@ describe "lib/cypress", ->
 
       context "before:browser:launch", ->
         it "chrome", ->
+          # during testing, do not try to connect to the remote interface or
+          # use the Chrome remote interface client
+          criClient = {
+            close: sinon.stub().resolves()
+          }
+          sinon.stub(chromeBrowser, "_connectToChromeRemoteInterface").resolves(criClient)
+          # the "returns(resolves)" stub is due to curried method
+          # it accepts URL to visit and then waits for actual CRI client reference
+          # and only then navigates to that URL
+          visitPage = sinon.stub().resolves()
+          sinon.stub(chromeBrowser, "_navigateUsingCRI").returns(visitPage)
+
           cypress.start([
             "--run-project=#{@pluginBrowser}"
             "--browser=chrome"
@@ -807,6 +824,8 @@ describe "lib/cypress", ->
             ])
 
             @expectExitWith(0)
+
+            expect(visitPage).to.have.been.calledOnce
 
         it "electron", ->
           writeVideoFrame = sinon.stub()

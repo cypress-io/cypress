@@ -27,7 +27,7 @@ declare module 'http' {
   }
 
   interface ClientRequest {
-    _header: { [key: string]:string }
+    _header: { [key: string]: string }
     _implicitHeader: () => void
     output: string[]
     agent: Agent
@@ -76,7 +76,7 @@ declare type Optional<T> = T | void
 
 declare module 'plist' {
   interface Plist {
-    parse: (s:string) => any
+    parse: (s: string) => any
   }
   const plist: Plist
   export = plist
@@ -88,4 +88,8 @@ declare module 'proxy-from-env' {
 
 declare interface SymbolConstructor {
   for(str: string): SymbolConstructor
+}
+
+declare interface InternalStream {
+  queue(str: string | null): void
 }

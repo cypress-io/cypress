@@ -1,4 +1,6 @@
-describe('Settings', function () {
+const { _ } = Cypress
+
+describe('Settings', () => {
   beforeEach(function () {
     cy.fixture('user').as('user')
     cy.fixture('config').as('config')
@@ -43,7 +45,7 @@ describe('Settings', function () {
     })
   })
 
-  describe('any case / project is set up for ci', function () {
+  describe('any case / project is set up for ci', () => {
     beforeEach(function () {
       this.openProject.resolve(this.config)
       this.projectStatuses[0].id = this.config.projectId
@@ -66,7 +68,7 @@ describe('Settings', function () {
       cy.contains(this.config.projectId).should('not.exist')
     })
 
-    describe('when config panel is opened', function () {
+    describe('when config panel is opened', () => {
       beforeEach(() => {
         cy.contains('Configuration').click()
       })
@@ -80,7 +82,7 @@ describe('Settings', function () {
       })
 
       it('wraps config line in proper classes', () => {
-        cy.get('.line').first().within(function () {
+        cy.get('.line').first().within(() => {
           cy.contains('animationDistanceThreshold').should('have.class', 'key')
           cy.contains(':').should('have.class', 'colon')
           cy.contains('5').should('have.class', 'default')
@@ -111,7 +113,7 @@ describe('Settings', function () {
         .and('contain', ']')
         .and('not.contain', '0')
         .and('not.contain', '1')
-        .find('.line .config').should(function ($lines) {
+        .find('.line .config').should(($lines) => {
           expect($lines).to.have.length(2)
           expect($lines).to.contain('www.google-analytics.com')
 
@@ -126,7 +128,7 @@ describe('Settings', function () {
       })
     })
 
-    describe('when project id panel is opened', function () {
+    describe('when project id panel is opened', () => {
       beforeEach(() => {
         cy.contains('Project ID').click()
       })
@@ -136,7 +138,7 @@ describe('Settings', function () {
       })
     })
 
-    describe('when record key panel is opened', function () {
+    describe('when record key panel is opened', () => {
       beforeEach(() => {
         cy.contains('Record Key').click()
       })
@@ -159,7 +161,7 @@ describe('Settings', function () {
         cy.get('.settings-record-key .fa-spinner')
       })
 
-      describe('when record key loads', function () {
+      describe('when record key loads', () => {
         beforeEach(function () {
           this.getRecordKeys.resolve(this.keys)
         })
@@ -177,7 +179,7 @@ describe('Settings', function () {
         })
       })
 
-      describe('when there are no keys', function () {
+      describe('when there are no keys', () => {
         beforeEach(function () {
           this.getRecordKeys.resolve([])
         })
@@ -193,7 +195,7 @@ describe('Settings', function () {
         })
       })
 
-      describe('when the user is logged out', function () {
+      describe('when the user is logged out', () => {
         beforeEach(function () {
           this.getRecordKeys.resolve([])
 
@@ -204,7 +206,7 @@ describe('Settings', function () {
           cy.get('.empty-well').should('contain', 'must be logged in')
         })
 
-        it('opens login modal after clicking \'Log In\'', function () {
+        it('opens login modal after clicking \'Log In\'', () => {
           cy.get('.empty-well button').click()
           cy.get('.login')
         })
@@ -225,7 +227,7 @@ describe('Settings', function () {
       })
     })
 
-    describe('when proxy settings panel is opened', function () {
+    describe('when proxy settings panel is opened', () => {
       beforeEach(() => {
         cy.contains('Proxy Settings').click()
       })
@@ -240,7 +242,7 @@ describe('Settings', function () {
         })
       })
 
-      it('with Windows proxy settings indicates proxy and the source', function () {
+      it('with Windows proxy settings indicates proxy and the source', () => {
         cy.setAppStore({
           projectRoot: '/foo/bar',
           proxySource: 'win32',
@@ -254,7 +256,7 @@ describe('Settings', function () {
         cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
       })
 
-      it('with environment proxy settings indicates proxy and the source', function () {
+      it('with environment proxy settings indicates proxy and the source', () => {
         cy.setAppStore({
           projectRoot: '/foo/bar',
           proxyServer: 'http://foo-bar.baz',
@@ -267,7 +269,7 @@ describe('Settings', function () {
         cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
       })
 
-      it('with no bypass list but a proxy set shows \'none\' in bypass list', function () {
+      it('with no bypass list but a proxy set shows \'none\' in bypass list', () => {
         cy.setAppStore({
           projectRoot: '/foo/bar',
           proxyServer: 'http://foo-bar.baz',
@@ -277,7 +279,7 @@ describe('Settings', function () {
       })
     })
 
-    context('on:focus:tests clicked', function () {
+    context('on:focus:tests clicked', () => {
       beforeEach(function () {
         this.ipc.onFocusTests.yield()
       })
@@ -288,7 +290,7 @@ describe('Settings', function () {
     })
   })
 
-  context('on config changes', function () {
+  context('on config changes', () => {
     beforeEach(function () {
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
@@ -315,7 +317,45 @@ describe('Settings', function () {
     })
   })
 
-  describe('errors', function () {
+  describe('when node version panel is opened', () => {
+    const bundledNodeVersion = '1.2.3'
+    const systemNodePath = '/foo/bar/node'
+    const systemNodeVersion = '4.5.6'
+
+    beforeEach(function () {
+      this.navigateWithConfig = function (config) {
+        this.openProject.resolve(_.defaults(config, this.config))
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+        this.goToSettings()
+      }
+    })
+
+    it('with bundled node informs user we\'re using bundled node', function () {
+      this.navigateWithConfig({})
+
+      cy.contains(`Node.js Version (${bundledNodeVersion})`).click()
+      cy.get('.node-version')
+      .should('contain', 'bundled with Cypress')
+      .should('not.contain', systemNodePath)
+      .should('not.contain', systemNodeVersion)
+    })
+
+    it('with custom node displays path to custom node', function () {
+      this.navigateWithConfig({
+        resolvedNodePath: systemNodePath,
+        resolvedNodeVersion: systemNodeVersion,
+      })
+
+      cy.contains(`Node.js Version (${systemNodeVersion})`).click()
+      cy.get('.node-version')
+      .should('contain', systemNodePath)
+      .should('contain', systemNodeVersion)
+      .should('not.contain', bundledNodeVersion)
+    })
+  })
+
+  describe('errors', () => {
     beforeEach(function () {
       this.err = {
         message: 'Port \'2020\' is already in use.',
@@ -356,7 +396,7 @@ describe('Settings', function () {
     })
   })
 
-  context('when project is not set up for CI', function () {
+  context('when project is not set up for CI', () => {
     it('does not show ci Keys section when project has no id', function () {
       const newConfig = this.util.deepClone(this.config)
 
@@ -378,7 +418,7 @@ describe('Settings', function () {
     })
   })
 
-  context('when you are not a user of this projects org', function () {
+  context('when you are not a user of this projects org', () => {
     beforeEach(function () {
       this.openProject.resolve(this.config)
     })

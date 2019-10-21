@@ -117,7 +117,7 @@ create = (state, expect) ->
 
     # readonly can only be applied to input/textarea
     # not on checkboxes, radios, etc..
-    if $dom.isTextLike(subject) and subject.prop("readonly")
+    if $dom.isTextLike(subject.get(0)) and subject.prop("readonly")
       node = $dom.stringify(subject)
 
       $utils.throwErrByPath("dom.readonly", {
@@ -142,15 +142,13 @@ create = (state, expect) ->
 
   ensureAttached = (subject, name, onFail) ->
     if $dom.isDetached(subject)
-      prev = state("current").get("prev")
+      cmd = name ? state("current").get("name")
+      prev = state("current").get("prev").get("name")
+      node = $dom.stringify(subject)
 
       $utils.throwErrByPath("subject.not_attached", {
         onFail
-        args: {
-          name
-          subject: $dom.stringify(subject),
-          previous: prev.get("name")
-        }
+        args: { cmd, prev, node }
       })
 
   ensureElement = (subject, name, onFail) ->
