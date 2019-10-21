@@ -18,7 +18,7 @@ const isVisible = (el) => {
 // because of circular references
 const isHidden = (el, name = 'isHidden()') => {
   if (!$elements.isElement(el)) {
-    throw new Error(`Cypress.dom.${name} failed because it requires a DOM element. The subject received was: '${el}'`)
+    throw new Error(`\`Cypress.dom.${name}\` failed because it requires a DOM element. The subject received was: \`${el}\``)
   }
 
   const $el = $jquery.wrap(el)
@@ -141,7 +141,6 @@ const elHasClippableOverflow = function ($el) {
 }
 
 const canClipContent = function ($el, $ancestor) {
-
   // can't clip without overflow properties
   if (!elHasClippableOverflow($ancestor)) {
     return false
@@ -179,7 +178,7 @@ const elAtCenterPoint = function ($el) {
   const doc = $document.getDocumentFromElement($el.get(0))
   const elProps = $coordinates.getElementPositioning($el)
 
-  const { topCenter, leftCenter } = elProps.fromViewport
+  const { topCenter, leftCenter } = elProps.fromElViewport
 
   const el = $coordinates.getElementAtPointFromViewport(doc, leftCenter, topCenter)
 
@@ -232,16 +231,16 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent
     // target el is out of bounds
     if (
       // target el is to the right of the ancestor's visible area
-      (elProps.fromWindow.left > (ancestorProps.width + ancestorProps.fromWindow.left)) ||
+      (elProps.fromElWindow.left > (ancestorProps.width + ancestorProps.fromElWindow.left)) ||
 
       // target el is to the left of the ancestor's visible area
-      ((elProps.fromWindow.left + elProps.width) < ancestorProps.fromWindow.left) ||
+      ((elProps.fromElWindow.left + elProps.width) < ancestorProps.fromElWindow.left) ||
 
       // target el is under the ancestor's visible area
-      (elProps.fromWindow.top > (ancestorProps.height + ancestorProps.fromWindow.top)) ||
+      (elProps.fromElWindow.top > (ancestorProps.height + ancestorProps.fromElWindow.top)) ||
 
       // target el is above the ancestor's visible area
-      ((elProps.fromWindow.top + elProps.height) < ancestorProps.fromWindow.top)
+      ((elProps.fromElWindow.top + elProps.height) < ancestorProps.fromElWindow.top)
     ) {
       return true
     }
@@ -374,7 +373,7 @@ const getReasonIsHidden = function ($el) {
   }
 
   if ($elements.isDetached($el)) {
-    return `This element '${node}' is not visible because it is detached from the DOM`
+    return `This element \`${node}\` is not visible because it is detached from the DOM`
   }
 
   if (elHasVisibilityHidden($el)) {
@@ -404,7 +403,7 @@ const getReasonIsHidden = function ($el) {
       const covered = $elements.stringify(elAtCenterPoint($el))
 
       return `\
-This element \`${node}\` is not visible because it has CSS property: \`position: fixed\` and its being covered by another element:
+This element \`${node}\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:
 
 \`${covered}\`\
 `

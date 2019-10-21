@@ -31,7 +31,9 @@ formatProp = (memo, field) ->
   memo
 
 cmd = (command, args = "") ->
-  "`cy.#{command}(#{args})`"
+  prefix = if command.startsWith("Cypress") then "" else "cy."
+
+  "`#{prefix}#{command}(#{args})`"
 
 getScreenshotDocsPath = (cmd) ->
   if cmd is "Cypress.Screenshot.defaults" then "screenshot-api" else "screenshot"
@@ -154,11 +156,11 @@ module.exports = {
 
   click:
     multiple_elements: {
-      message: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass `{ multiple: true }` if you want to serially click each element."
+      message: "#{cmd('{{cmd}}')} can only be called on a single element. Your subject contained {{num}} elements. Pass `{ multiple: true }` if you want to serially click each element."
       docsUrl: "https://on.cypress.io/click"
     }
     on_select_element: {
-      message: "#{cmd('click')} cannot be called on a `<select>` element. Use #{cmd('select')} command instead to change the value."
+      message: "#{cmd('{{cmd}}')} cannot be called on a `<select>` element. Use #{cmd('select')} command instead to change the value."
       docsUrl: "https://on.cypress.io/select"
     }
 
@@ -1010,27 +1012,35 @@ module.exports = {
 
   screenshot:
     invalid_arg: (obj) -> {
-      message: "`{{cmd}}()` must be called with an object. You passed: `{{arg}}`"
+      message: "#{cmd(obj.cmd)} must be called with an object. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
     }
     invalid_capture: (obj) -> {
-      message: "`{{cmd}}()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `{{arg}}`"
+      message: "#{cmd(obj.cmd)} `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
     }
     invalid_boolean: (obj) -> {
-      message: "`{{cmd}}()` `{{option}}` option must be a boolean. You passed: `{{arg}}`"
+      message: "#{cmd(obj.cmd)} `{{option}}` option must be a boolean. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
     }
     invalid_blackout: (obj) -> {
-      message: "`{{cmd}}()` `blackout` option must be an array of strings. You passed: `{{arg}}`"
-      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
-    }
-    invalid_clip: (obj) -> {
-      message: "`{{cmd}}()` `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{{arg}}`"
+      message: "#{cmd(obj.cmd)} `blackout` option must be an array of strings. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
     }
     invalid_callback: (obj) -> {
-      message: "`{{cmd}}()` `{{callback}}` option must be a function. You passed: `{{arg}}`"
+      message: "#{cmd(obj.cmd)} `{{callback}}` option must be a function. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    invalid_clip: (obj) -> {
+      message: "#{cmd(obj.cmd)} `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    invalid_height: (obj) -> {
+      message: "#{cmd('screenshot')} only works with a screenshot area with a height greater than zero."
+      docsUrl: "https://on.cypress.io/screenshot"
+    }
+    invalid_padding: (obj) -> {
+      message: "#{cmd(obj.cmd)} `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
     }
     multiple_elements: {

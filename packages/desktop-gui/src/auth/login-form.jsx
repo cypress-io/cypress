@@ -80,7 +80,6 @@ class LoginForm extends Component {
         Log In to Dashboard
       </span>
     )
-
   }
 
   _error () {

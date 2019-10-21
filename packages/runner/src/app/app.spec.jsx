@@ -39,7 +39,6 @@ const shallowRender = (component) => {
 }
 
 describe('<App />', () => {
-
   it('renders the reporter wrap with the reporter width', () => {
     const props = createProps()
 

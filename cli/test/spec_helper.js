@@ -9,9 +9,7 @@ const { MockChildProcess } = require('spawn-mock')
 const _kill = MockChildProcess.prototype.kill
 
 const patchMockSpawn = () => {
-
   MockChildProcess.prototype.kill = function (...args) {
-
     this.emit('exit')
 
     return _kill.apply(this, args)

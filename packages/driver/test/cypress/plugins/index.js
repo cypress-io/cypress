@@ -1,4 +1,5 @@
-require('../../../../ts/register')
+// only required to read in webpack config, since it is .ts
+require('@packages/ts/register')
 
 const _ = require('lodash')
 const path = require('path')
@@ -6,7 +7,10 @@ const fs = require('fs-extra')
 const Promise = require('bluebird')
 const webpack = require('@cypress/webpack-preprocessor')
 
-const webpackOptions = require('../../../../runner/webpack.config.ts').default
+const webpackOptions = require('@packages/runner/webpack.config.ts').default
+
+// get rid of prismjs plugin. the driver doesn't need it
+webpackOptions.module.rules[1].use.options.plugins.pop()
 
 module.exports = (on) => {
   on('file:preprocessor', webpack({ webpackOptions }))

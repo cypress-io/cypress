@@ -1,5 +1,6 @@
 _ = require("lodash")
 Promise = require("bluebird")
+debug = require('debug')('cypress:driver:retries')
 
 $errUtils = require("../cypress/error_utils")
 
@@ -28,6 +29,15 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
         _name: current?.get("name")
       })
 
+      { error } = options
+
+      ## TODO: remove this once the codeframe PR is in since that
+      ## correctly handles not rewrapping errors so that stack
+      ## traces are correctly displayed
+      if debug.enabled and error and not $errUtils.CypressErrorRe.test(error.name)
+        debug('retrying due to caught error...')
+        console.error(error)
+
       interval = options.interval ? options._interval
 
       ## we calculate the total time we've been retrying
@@ -47,7 +57,7 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
 
         if assertions = options.assertions
           finishAssertions(assertions)
-        
+
         { error, onFail } = options
 
         prependMsg = $errUtils.errMsgByPath("miscellaneous.retry_timed_out")

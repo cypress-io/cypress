@@ -61,9 +61,6 @@ namespace CypressCommandsTests {
   Cypress.Commands.overwrite('newCommand', () => {
     return
   })
-  Cypress.Commands.overwrite('newCommand', { prevSubject: true }, () => {
-    return
-  })
 }
 
 namespace CypressLogsTest {

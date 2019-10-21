@@ -1,7 +1,7 @@
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
-const $selection = require('../../../../../src/dom/selection')
+const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
 
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
@@ -318,14 +318,14 @@ describe('src/cy/commands/actions/type', () => {
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const $txt = cy.$$(':text:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
           expect(args[2]).to.eq(1000)
         })
@@ -336,14 +336,14 @@ describe('src/cy/commands/actions/type', () => {
 
         const $txt = cy.$$(':text:first')
 
-        const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
         cy.get(':text:first').type('foo').then(() => {
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
@@ -1012,7 +1012,6 @@ describe('src/cy/commands/actions/type', () => {
 
       it('automatically moves the caret to the end if value is changed manually asynchronously', () => {
         cy.$$('#input-without-value').keypress((e) => {
-
           const $input = $(e.target)
 
           _.defer(() => {
@@ -1523,7 +1522,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('specialChars', () => {
-
       context('parseSpecialCharSequences: false', () => {
         it('types special character sequences literally', (done) => {
           cy.get(':text:first').invoke('val', 'foo')
@@ -2537,9 +2535,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('modifiers', () => {
-
       describe('activating modifiers', () => {
-
         it('sends keydown event for modifiers in order', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -2679,7 +2675,6 @@ describe('src/cy/commands/actions/type', () => {
       })
 
       describe('release: false', () => {
-
         it('maintains modifiers for subsequent type commands', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -2797,7 +2792,6 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('case-insensitivity', () => {
-
       it('special chars are case-insensitive', () => {
         cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {
           expect($input).to.have.value('ba')
@@ -3208,14 +3202,13 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('caret position', () => {
-
       it('respects being formatted by input event handlers')
 
       it('accurately returns host contenteditable attr', () => {
         const hostEl = cy.$$('<div contenteditable><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3223,7 +3216,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable="true"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3231,7 +3224,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable=""><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3239,7 +3232,7 @@ describe('src/cy/commands/actions/type', () => {
         const hostEl = cy.$$('<div contenteditable="foo"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq(hostEl[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq(hostEl[0])
         })
       })
 
@@ -3247,7 +3240,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect($selection.getHostContenteditable($el[0])).to.eq($el[0])
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0])
         })
       })
 
@@ -3265,7 +3258,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('inside textarea', () => {
-
           cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <textarea id="foo"></textarea>\
@@ -3277,7 +3269,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('inside contenteditable', () => {
-
           cy.$$('body').append(Cypress.$(/*html*/`\
 <div style="position:relative;width:100%;height:100px;background-color:salmon;top:60px;opacity:0.5"></div> \
 <div id="foo" contenteditable> \
@@ -3308,7 +3299,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').invoke('attr', 'maxlength', '5').type('foobar{leftarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 4, end: 4 })
         })
       })
@@ -3317,7 +3308,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type('foo{rightarrow}{rightarrow}{rightarrow}bar{rightarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3326,7 +3317,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:first').type(`oo{leftarrow}{leftarrow}{leftarrow}f${'{leftarrow}'.repeat(5)}`)
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('input:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('input:first').get(0)))
           .to.deep.eq({ start: 0, end: 0 })
         })
       })
@@ -3335,7 +3326,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3348,7 +3339,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('bar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3357,7 +3348,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('[contenteditable]:first').type('foo{leftarrow}{leftarrow}')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('[contenteditable]:first').get(0)))
           .to.deep.eq({ start: 1, end: 1 })
         })
       })
@@ -3372,7 +3363,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get(':text:first').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$(':text:first').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$(':text:first').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -3381,7 +3372,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('#comments').type('foobar')
 
         cy.window().then((win) => {
-          expect($selection.getSelectionBounds(Cypress.$('#comments').get(0)))
+          expect(Cypress.dom.getSelectionBounds(Cypress.$('#comments').get(0)))
           .to.deep.eq({ start: 6, end: 6 })
         })
       })
@@ -4041,7 +4032,6 @@ describe('src/cy/commands/actions/type', () => {
           if (log.get('name') === 'type') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('$el').get(0)).to.eq($txt.get(0))
-
           }
         })
 
@@ -4092,30 +4082,30 @@ describe('src/cy/commands/actions/type', () => {
       context('#consoleProps', () => {
         it('has all of the regular options', () => {
           cy.get('input:first').type('foobar').then(function ($input) {
-            const { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
+            const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
             const console = this.lastLog.invoke('consoleProps')
 
             expect(console.Command).to.eq('type')
             expect(console.Typed).to.eq('foobar')
             expect(console['Applied To']).to.eq($input.get(0))
-            expect(console.Coords.x).to.be.closeTo(fromWindow.x, 1)
+            expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 1)
 
-            expect(console.Coords.y).to.be.closeTo(fromWindow.y, 1)
+            expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 1)
           })
         })
 
         it('has a table of keys', () => {
-          cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}').then(function () {
-            const table = this.lastLog.invoke('consoleProps').table()
+          cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
+          .then(function () {
+            const table = this.lastLog.invoke('consoleProps').table[3]()
 
             // eslint-disable-next-line
             console.table(table.data, table.columns)
-
             expect(table.columns).to.deep.eq([
               'typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers',
             ])
 
-            expect(table.name).to.eq('Key Events Table')
+            expect(table.name).to.eq('Keyboard Events')
             const expectedTable = {
               1: { typed: '<meta>', which: 91, keydown: true, modifiers: 'meta' },
               2: { typed: '<alt>', which: 18, keydown: true, modifiers: 'alt, meta' },
@@ -4129,20 +4119,13 @@ describe('src/cy/commands/actions/type', () => {
               10: { typed: '{enter}', which: 13, keydown: true, keypress: true, keyup: true, modifiers: 'alt, meta' },
             }
 
-            return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => {
-              expect(table.data[i]).to.deep.eq(expectedTable[i])
-            })
+            expect(table.data).to.deep.eq(expectedTable)
           })
         })
 
-        // table.data.forEach (item, i) ->
-        //   expect(item).to.deep.eq(expectedTable[i])
-
-        // expect(table.data).to.deep.eq(expectedTable)
-
         it('has no modifiers when there are none activated', () => {
           cy.get(':text:first').type('f').then(function () {
-            const table = this.lastLog.invoke('consoleProps').table()
+            const table = this.lastLog.invoke('consoleProps').table[3]()
 
             expect(table.data).to.deep.eq({
               1: { typed: 'f', which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true },
@@ -4156,7 +4139,7 @@ describe('src/cy/commands/actions/type', () => {
           })
 
           cy.get(':text:first').type('f').then(function () {
-            const table = this.lastLog.invoke('consoleProps').table()
+            const table = this.lastLog.invoke('consoleProps').table[3]()
 
             // eslint-disable-next-line
             console.table(table.data, table.columns)
@@ -5076,6 +5059,32 @@ If you want to skip parsing special character sequences and type the text exactl
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        })
+      })
+    })
+  })
+
+  describe('user experience', () => {
+    it('can print table of keys on click', () => {
+      cy.get('input:first').type('foo')
+
+      .then(() => {
+        return withMutableReporterState(() => {
+          const spyTableName = cy.spy(top.console, 'groupCollapsed')
+          const spyTableData = cy.spy(top.console, 'table')
+
+          const commandLogEl = getCommandLogWithText('foo')
+
+          const reactCommandInstance = findReactInstance(commandLogEl[0])
+
+          reactCommandInstance.props.appState.isRunning = false
+
+          $(commandLogEl).find('.command-wrapper').click()
+
+          expect(spyTableName.firstCall).calledWith('Mouse Move Events')
+          expect(spyTableName.secondCall).calledWith('Mouse Click Events')
+          expect(spyTableName.thirdCall).calledWith('Keyboard Events')
+          expect(spyTableData).calledThrice
         })
       })
     })
