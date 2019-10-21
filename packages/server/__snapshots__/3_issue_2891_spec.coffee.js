@@ -14,7 +14,7 @@ exports['e2e issue 2891 passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: default_layout_spec.js...                                                       (1 of 1) 
+  Running:  default_layout_spec.js                                                          (1 of 1)
 
 
   ✓ works
@@ -24,23 +24,23 @@ exports['e2e issue 2891 passes 1'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────┐
-  │ Tests:        1                      │
-  │ Passing:      1                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        true                   │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     default_layout_spec.js │
-  └──────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     default_layout_spec.js                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/default-layout/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/default_layout_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -48,11 +48,11 @@ exports['e2e issue 2891 passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ default_layout_spec.js                    XX:XX        1        1        -        -        - │
+  │ ✔  default_layout_spec.js                   XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
