@@ -83,7 +83,7 @@ scrollOverrides = (win, doc) ->
 
 validateNumScreenshots = (numScreenshots, automationOptions) ->
   if numScreenshots < 1
-    $utils.throwErrByPath("screenshot.invalid_height", {
+    $errUtils.throwErrByPath("screenshot.invalid_height", {
       log: automationOptions.log
     })
 
@@ -170,7 +170,7 @@ takeElementScreenshot = ($el, state, automationOptions) ->
 
   scrolls = _.map _.times(numScreenshots), (index) ->
     y = elPosition.fromElWindow.top + (viewportHeight * index)
-    
+
     afterScroll = ->
       elPosition = applyPaddingToElementPositioning(
         $dom.getElementPositioning($el),
@@ -190,14 +190,14 @@ takeElementScreenshot = ($el, state, automationOptions) ->
       if index + 1 is numScreenshots
         overlap = (numScreenshots - 1) * viewportHeight + elPosition.fromElViewport.top
         heightLeft = elPosition.fromElViewport.bottom - overlap
-        
+
         return {
           x: x
           y: overlap
           width: width
           height: heightLeft
         }
-        
+
       return {
         x: x
         y: Math.max(0, elPosition.fromElViewport.top)
@@ -352,7 +352,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       isWin = $dom.isWindow(subject)
 
       screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "padding", "clip", "onBeforeScreenshot", "onAfterScreenshot")
-      screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
+      screenshotConfig = $Screenshot.validate(screenshotConfig, "screenshot", options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
 
       ## set this regardless of options.log b/c its used by the

@@ -676,6 +676,12 @@ describe "src/cy/commands/screenshot", ->
             @lastLog = log
             @logs.push(log)
 
+        @assertErrorMessage = (message, done) ->
+          cy.on "fail", (err) =>
+            lastErr = @lastLog.get("error")
+            expect(lastErr.message).to.eq(message)
+            done()
+
         return null
 
       it "throws if capture is not a string", (done) ->

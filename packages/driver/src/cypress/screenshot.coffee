@@ -134,7 +134,7 @@ validate = (props, cmd, log) ->
         _.every(value, _.isFinite))
     )
     if not (_.isFinite(padding) or isShorthandPadding(padding))
-      $utils.throwErrByPath("screenshot.invalid_padding", {
+      $errUtils.throwErrByPath("screenshot.invalid_padding", {
         log: log
         args: { cmd: cmd, arg: $utils.stringify(padding) }
       })

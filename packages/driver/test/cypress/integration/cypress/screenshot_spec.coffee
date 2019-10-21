@@ -104,7 +104,7 @@ describe "src/cypress/screenshot", ->
 
         expect(fn).to.throw()
         .with.property("message")
-        .and.include("`Cypress.Screenshot.defaults()` must be called with an object. You passed: ")
+        .and.include("`Cypress.Screenshot.defaults()` must be called with an object. You passed: ``")
 
         expect(fn).to.throw()
         .with.property("docsUrl")

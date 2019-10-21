@@ -31,7 +31,9 @@ formatProp = (memo, field) ->
   memo
 
 cmd = (command, args = "") ->
-  "`cy.#{command}(#{args})`"
+  prefix = if command.startsWith("Cypress") then "" else "cy."
+
+  "`#{prefix}#{command}(#{args})`"
 
 getScreenshotDocsPath = (cmd) ->
   if cmd is "Cypress.Screenshot.defaults" then "screenshot-api" else "screenshot"
@@ -1025,16 +1027,20 @@ module.exports = {
       message: "#{cmd(obj.cmd)} `blackout` option must be an array of strings. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
     }
-    invalid_clip: (obj) -> {
-      message: "#{cmd(obj.cmd)} `clip` option must be an object of with the keys `{ width, height, x, y }` and number values. You passed: `{{arg}}`"
-      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
-    }
     invalid_callback: (obj) -> {
       message: "#{cmd(obj.cmd)} `{{callback}}` option must be a function. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
     }
+    invalid_clip: (obj) -> {
+      message: "#{cmd(obj.cmd)} `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `{{arg}}`"
+      docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
+    }
+    invalid_height: (obj) -> {
+      message: "#{cmd('screenshot')} only works with a screenshot area with a height greater than zero."
+      docsUrl: "https://on.cypress.io/screenshot"
+    }
     invalid_padding: (obj) -> {
-      messge: "#{cmd(obj.cmd)} `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `{{arg}}`"
+      message: "#{cmd(obj.cmd)} `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/#{getScreenshotDocsPath(obj.cmd)}"
     }
     multiple_elements: {
