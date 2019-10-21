@@ -1,6 +1,9 @@
-import _ from 'lodash'
+import Bluebird from 'bluebird'
 import cdp from 'devtools-protocol'
+import _ from 'lodash'
 import tough from 'tough-cookie'
+
+const cors = require('../util/cors')
 
 interface CyCookie {
   name: string
@@ -13,14 +16,10 @@ interface CyCookie {
   httpOnly: boolean
 }
 
-const cors = require('../util/cors')
+type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
 
-export function CdpAutomation (opts: {
-  invokeViaDebugger: (message: string, data?: any) => Promise<any>
-}) {
-  const { invokeViaDebugger } = opts
-
-  const normalizeGetCookieProps = function (cookie: cdp.Network.Cookie): CyCookie {
+export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
+  const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
     if (cookie.expires === -1) {
       delete cookie.expires
     }
@@ -33,11 +32,11 @@ export function CdpAutomation (opts: {
     return cookie
   }
 
-  const normalizeGetCookies = function (cookies: cdp.Network.Cookie[]) {
+  const normalizeGetCookies = (cookies: cdp.Network.Cookie[]) => {
     return _.map(cookies, normalizeGetCookieProps)
   }
 
-  const normalizeSetCookieProps = function (cookie: CyCookie): cdp.Network.SetCookieRequest {
+  const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest => {
     cookie.name || (cookie.name = '') // name can't be undefined/null
     cookie.value || (cookie.value = '') // ditto
     // @ts-ignore
@@ -57,9 +56,11 @@ export function CdpAutomation (opts: {
     return cookie
   }
 
-  const getAllCookies = function (data) {
-    return invokeViaDebugger('Network.getAllCookies').then(function (result: cdp.Network.GetAllCookiesResponse) {
-      return normalizeGetCookies(result.cookies).filter(function (cookie: CyCookie) {
+  const getAllCookies = (data) => {
+    return sendDebuggerCommandFn('Network.getAllCookies')
+    .then((result: cdp.Network.GetAllCookiesResponse) => {
+      return normalizeGetCookies(result.cookies)
+      .filter((cookie: CyCookie) => {
         return _.every([
           !data.domain || tough.domainMatch(cookie.domain, data.domain),
           !data.path || tough.pathMatch(cookie.path, data.path),
@@ -69,19 +70,23 @@ export function CdpAutomation (opts: {
     })
   }
 
-  const getCookiesByUrl = function (url) {
-    return invokeViaDebugger('Network.getCookies', {
+  const getCookiesByUrl = (url) => {
+    return sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
-    }).then(function (result: cdp.Network.GetCookiesResponse) {
+    })
+    .then((result: cdp.Network.GetCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
     })
   }
 
-  const getCookie = function (data): Promise<cdp.Network.Cookie> {
-    return getAllCookies(data).then(_.partialRight(_.get, 0, null))
+  const getCookie = (data): Bluebird<CyCookie | null> => {
+    return getAllCookies(data)
+    .then((cookies) => {
+      return _.get(cookies, 0, null)
+    })
   }
 
-  const onRequest = function (message, data) {
+  const onRequest = (message, data) => {
     let setCookie
 
     switch (message) {
@@ -96,7 +101,8 @@ export function CdpAutomation (opts: {
       case 'set:cookie':
         setCookie = normalizeSetCookieProps(data)
 
-        return invokeViaDebugger('Network.setCookie', setCookie).then(function (result: cdp.Network.SetCookieResponse) {
+        return sendDebuggerCommandFn('Network.setCookie', setCookie)
+        .then((result: cdp.Network.SetCookieResponse) => {
           if (!result.success) {
             // i wish CDP provided some more detail here, but this is really it in v1.3
             // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
@@ -106,15 +112,15 @@ export function CdpAutomation (opts: {
           return getCookie(data)
         })
       case 'clear:cookie':
-        return getCookie(data).then(function (cookieToBeCleared) { // so we can resolve with the value of the removed cookie
-          return invokeViaDebugger('Network.deleteCookies', data).then(function () {
-            return cookieToBeCleared
-          })
+        return getCookie(data)
+        // so we can resolve with the value of the removed cookie
+        .tap((_cookieToBeCleared) => {
+          return sendDebuggerCommandFn('Network.deleteCookies', data)
         })
       case 'is:automation:client:connected':
         return true
       case 'take:screenshot':
-        return invokeViaDebugger('Page.captureScreenshot')
+        return sendDebuggerCommandFn('Page.captureScreenshot')
         .catch((err) => {
           throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
         })

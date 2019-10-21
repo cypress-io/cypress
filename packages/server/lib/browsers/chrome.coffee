@@ -193,9 +193,7 @@ _navigateUsingCRI = (url) ->
 
 _setAutomation = (client, automation) ->
   automation.use(
-    CdpAutomation({
-      invokeViaDebugger: client.send
-    })
+    CdpAutomation(client.send)
   )
 
 module.exports = {

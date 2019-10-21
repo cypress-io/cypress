@@ -4,20 +4,20 @@ require("../../spec_helper")
 context "lib/browsers/cdp_automation", ->
   context ".CdpAutomation", ->
     beforeEach ->
-      @invokeViaDebugger = sinon.stub()
+      @sendDebuggerCommand = sinon.stub()
 
-      @automation = CdpAutomation({
-        invokeViaDebugger: @invokeViaDebugger
-      })
+      @automation = CdpAutomation(@sendDebuggerCommand)
 
-      @invokeViaDebugger.throws()
-      .withArgs('Browser.getVersion').resolves()
+      @sendDebuggerCommand
+      .throws()
+      .withArgs('Browser.getVersion')
+      .resolves()
 
       @onRequest = @automation.onRequest
 
     describe "get:cookies", ->
       beforeEach ->
-        @invokeViaDebugger.withArgs('Network.getAllCookies')
+        @sendDebuggerCommand.withArgs('Network.getAllCookies')
         .resolves({
           cookies: [
             {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expires: 123}
@@ -35,7 +35,7 @@ context "lib/browsers/cdp_automation", ->
 
     describe "get:cookie", ->
       beforeEach ->
-        @invokeViaDebugger.withArgs('Network.getAllCookies')
+        @sendDebuggerCommand.withArgs('Network.getAllCookies')
         .resolves({
           cookies: [
             {name: "session", value: "key", path: "/login", domain: "google.com", secure: true, httpOnly: true, expires: 123}
@@ -54,7 +54,7 @@ context "lib/browsers/cdp_automation", ->
 
     describe "set:cookie", ->
       beforeEach ->
-        @invokeViaDebugger.withArgs('Network.setCookie', {domain: ".google.com", name: "session", value: "key", path: "/", expires: undefined})
+        @sendDebuggerCommand.withArgs('Network.setCookie', {domain: ".google.com", name: "session", value: "key", path: "/", expires: undefined})
         .resolves({ success: true })
         .withArgs('Network.setCookie', {domain: "foo", path: "/bar", name: "", value: "", expires: undefined})
         .rejects(new Error("some error"))
@@ -79,7 +79,7 @@ context "lib/browsers/cdp_automation", ->
 
     describe "clear:cookie", ->
       beforeEach ->
-        @invokeViaDebugger.withArgs('Network.getAllCookies')
+        @sendDebuggerCommand.withArgs('Network.getAllCookies')
         .resolves({
           cookies: [
             {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expires: 123}
@@ -87,7 +87,7 @@ context "lib/browsers/cdp_automation", ->
           ]
         })
 
-        @invokeViaDebugger.withArgs('Network.deleteCookies', { domain: "cdn.github.com", name: "shouldThrow" })
+        @sendDebuggerCommand.withArgs('Network.deleteCookies', { domain: "cdn.github.com", name: "shouldThrow" })
         .rejects(new Error("some error"))
         .withArgs('Network.deleteCookies')
         .resolves()
@@ -113,15 +113,15 @@ context "lib/browsers/cdp_automation", ->
 
     describe "take:screenshot", ->
       it "resolves with base64 data URL", ->
-        @invokeViaDebugger.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        @invokeViaDebugger.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
+        @sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
+        @sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
 
         expect(@onRequest('take:screenshot'))
         .to.eventually.equal('data:image/png;base64,foo')
 
       it "rejects nicely if Page.captureScreenshot fails", ->
-        @invokeViaDebugger.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
-        @invokeViaDebugger.withArgs('Page.captureScreenshot').rejects()
+        @sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
+        @sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
 
         expect(@onRequest('take:screenshot'))
         .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')

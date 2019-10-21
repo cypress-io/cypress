@@ -22,13 +22,12 @@ tryToCall = (win, method) ->
     debug("got error calling window method:", err.stack)
 
 getAutomation = (win) ->
-  invokeViaDebugger = (message, data) ->
-    tryToCall win, ->
+  sendDebuggerCommand = (message, data) ->
+    ## wrap in bluebird
+    tryToCall win, Promise.method ->
       win.webContents.debugger.sendCommand(message, data)
 
-  CdpAutomation({
-    invokeViaDebugger
-  })
+  CdpAutomation(sendDebuggerCommand)
 
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->

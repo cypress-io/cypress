@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import _ from 'lodash'
 
@@ -38,17 +39,17 @@ interface CRIWrapper {
   /**
    * Get the `protocolVersion` supported by the browser.
    */
-  getProtocolVersion (): Promise<string>
+  getProtocolVersion (): Bluebird<string>
   /**
    * Rejects if `protocolVersion` is less than the current version.
    * @param protocolVersion CDP version string (ex: 1.3)
    */
-  ensureMinimumProtocolVersion(protocolVersion: string): Promise<void>
+  ensureMinimumProtocolVersion(protocolVersion: string): Bluebird<void>
   /**
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
   */
-  send (command: CRI.Command, params?: object): Promise<any>
+  send (command: CRI.Command, params?: object): Bluebird<any>
   /**
    * Registers callback for particular event.
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
@@ -57,7 +58,7 @@ interface CRIWrapper {
   /**
    * Calls underlying remote interface client close
   */
-  close (): Promise<void>
+  close (): Bluebird<void>
 }
 
 const getMajorMinorVersion = (version: string) => {
@@ -111,64 +112,60 @@ const maybeDebugCdpMessages = (cri) => {
  */
 export { chromeRemoteInterface }
 
-export const create = async (debuggerUrl: websocketUrl): Promise<CRIWrapper> => {
-  const cri = await chromeRemoteInterface({
+export const create = Bluebird.method((debuggerUrl: websocketUrl): Bluebird<CRIWrapper> => {
+  return chromeRemoteInterface({
     target: debuggerUrl,
     local: true,
   })
+  .then((cri) => {
+    maybeDebugCdpMessages(cri)
 
-  maybeDebugCdpMessages(cri)
+    cri.send = Bluebird.promisify(cri.send, { context: cri })
+    cri.close = Bluebird.promisify(cri.close, { context: cri })
 
-  let cachedProtocolVersionP
+    const ensureMinimumProtocolVersion = (protocolVersion: string) => {
+      return getProtocolVersion()
+      .then((actual) => {
+        const minimum = getMajorMinorVersion(protocolVersion)
 
-  const ensureMinimumProtocolVersion = (protocolVersion: string): Promise<void> => {
-    return getProtocolVersion()
-    .then((actual) => {
-      const minimum = getMajorMinorVersion(protocolVersion)
-
-      const hasVersion = actual.major > minimum.major
+        const hasVersion = actual.major > minimum.major
          || (actual.major === minimum.major && actual.minor >= minimum.minor)
 
-      if (!hasVersion) {
-        errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
-      }
-    })
-  }
-
-  const getProtocolVersion = () => {
-    if (!cachedProtocolVersionP) {
-      cachedProtocolVersionP = cri.send('Browser.getVersion')
-      .catch(() => {
-        // could be any version <= 1.2
-        return { protocolVersion: '0.0' }
-      })
-      .then(({ protocolVersion }) => {
-        return getMajorMinorVersion(protocolVersion)
+        if (!hasVersion) {
+          errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
+        }
       })
     }
 
-    return cachedProtocolVersionP
-  }
+    const getProtocolVersion = _.memoize(() => {
+      return cri.send('Browser.getVersion')
+      // could be any version <= 1.2
+      .catchReturn({ protocolVersion: '0.0' })
+      .then(({ protocolVersion }) => {
+        return getMajorMinorVersion(protocolVersion)
+      })
+    })
 
-  /**
+    /**
    * Wrapper around Chrome remote interface client
    * that logs every command sent.
    */
-  const client: CRIWrapper = {
-    ensureMinimumProtocolVersion,
-    getProtocolVersion,
-    send: (command: CRI.Command, params?: object): Promise<any> => {
-      return cri.send(command, params)
-    },
-    on (eventName: CRI.EventNames, cb: Function) {
-      debugVerbose('registering CDP on event %o', { eventName })
+    const client: CRIWrapper = {
+      ensureMinimumProtocolVersion,
+      getProtocolVersion,
+      send: Bluebird.method((command: CRI.Command, params?: object) => {
+        return cri.send(command, params)
+      }),
+      on (eventName: CRI.EventNames, cb: Function) {
+        debugVerbose('registering CDP on event %o', { eventName })
 
-      return cri.on(eventName, cb)
-    },
-    close (): Promise<void> {
-      return cri.close()
-    },
-  }
+        return cri.on(eventName, cb)
+      },
+      close () {
+        return cri.close()
+      },
+    }
 
-  return client
-}
+    return client
+  })
+})
