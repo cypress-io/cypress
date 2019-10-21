@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird'
 import { create } from '../../../lib/browsers/cri-client'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
@@ -16,8 +17,9 @@ describe('lib/browsers/cri-client', function () {
   }
 
   beforeEach(function () {
+    sinon.stub(Bluebird, 'promisify').returnsArg(0)
+
     send = sinon.stub()
-    send.rejects()
 
     criImport = sinon.stub()
     .withArgs({

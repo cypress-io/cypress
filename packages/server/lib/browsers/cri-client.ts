@@ -5,8 +5,8 @@ import _ from 'lodash'
 const chromeRemoteInterface = require('chrome-remote-interface')
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cri-client')
-const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:[-->]')
-const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:[<--]')
+const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:send')
+const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:recv')
 const errors = require('../errors')
 
 /**
