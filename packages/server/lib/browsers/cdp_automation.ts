@@ -119,6 +119,8 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
         })
       case 'is:automation:client:connected':
         return true
+      case 'remote:debugger:protocol':
+        return sendDebuggerCommandFn(data.command, data.params)
       case 'take:screenshot':
         return sendDebuggerCommandFn('Page.captureScreenshot')
         .catch((err) => {
