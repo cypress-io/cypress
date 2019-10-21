@@ -129,7 +129,7 @@ https://on.cypress.io/api/task
     at stack trace line
     at stack trace line
     at stack trace line
-
+    at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line

@@ -123,8 +123,14 @@ normalizeStdout = (str, options = {}) ->
     .map(replaceStackTraceLines)
     .join("\n")
 
+ensurePort = (port) ->
+  if port is 5566
+    throw new Error('Specified port cannot be on 5566 because it conflicts with --inspect-brk=5566')
+    
 startServer = (obj) ->
   { onServer, port, https } = obj
+
+  ensurePort(port)
 
   app = express()
 
@@ -376,6 +382,7 @@ module.exports = e2e = {
       args.push("--spec=#{options.spec}")
 
     if options.port
+      ensurePort(options.port)
       args.push("--port=#{options.port}")
 
     if options.headed
