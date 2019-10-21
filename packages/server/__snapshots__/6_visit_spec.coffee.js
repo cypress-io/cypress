@@ -14,7 +14,7 @@ exports['e2e visit / low response timeout / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_spec.coffee...                                                            (1 of 1) 
+  Running:  visit_spec.coffee                                                               (1 of 1)
 
 
   visits
@@ -40,23 +40,23 @@ exports['e2e visit / low response timeout / passes'] = `
 
   (Results)
 
-  ┌─────────────────────────────────┐
-  │ Tests:        11                │
-  │ Passing:      11                │
-  │ Failing:      0                 │
-  │ Pending:      0                 │
-  │ Skipped:      0                 │
-  │ Screenshots:  0                 │
-  │ Video:        true              │
-  │ Duration:     X seconds         │
-  │ Spec Ran:     visit_spec.coffee │
-  └─────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        11                                                                               │
+  │ Passing:      11                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     visit_spec.coffee                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_spec.coffee.mp4               (X second)
 
 
 ====================================================================================================
@@ -64,11 +64,11 @@ exports['e2e visit / low response timeout / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ visit_spec.coffee                         XX:XX       11       11        -        -        - │
+  │ ✔  visit_spec.coffee                        XX:XX       11       11        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       11       11        -        -        -  
+    ✔  All specs passed!                        XX:XX       11       11        -        -        -  
 
 
 `
@@ -89,7 +89,7 @@ exports['e2e visit / low response timeout / fails when network connection immedi
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_http_network_error_failing_spec.coffee...                                 (1 of 1) 
+  Running:  visit_http_network_error_failing_spec.coffee                                    (1 of 1)
 
 
   when network connection cannot be established
@@ -141,28 +141,30 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
   (Results)
 
-  ┌────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                            │
-  │ Passing:      0                                            │
-  │ Failing:      1                                            │
-  │ Pending:      0                                            │
-  │ Skipped:      0                                            │
-  │ Screenshots:  1                                            │
-  │ Video:        true                                         │
-  │ Duration:     X seconds                                    │
-  │ Spec Ran:     visit_http_network_error_failing_spec.coffee │
-  └────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     visit_http_network_error_failing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_network_error_failing_spec.coffee/when network connection cannot be established -- fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_network_error_failing_spec.coffee/wh     (1280x720)
+     en network connection cannot be established -- fails (failed).png                              
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_network_error_failin     (X second)
+                          g_spec.coffee.mp4                                                         
 
 
 ====================================================================================================
@@ -170,11 +172,12 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_http_network_error_failing_spe…     XX:XX        1        -        1        -        - │
+  │ ✖  visit_http_network_error_failing_sp      XX:XX        1        -        1        -        - │
+  │    ec.coffee                                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -195,7 +198,7 @@ exports['e2e visit / low response timeout / fails when server responds with 500'
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_http_500_response_failing_spec.coffee...                                  (1 of 1) 
+  Running:  visit_http_500_response_failing_spec.coffee                                     (1 of 1)
 
 
   when server response is 500
@@ -237,28 +240,30 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────────┐
-  │ Tests:        1                                           │
-  │ Passing:      0                                           │
-  │ Failing:      1                                           │
-  │ Pending:      0                                           │
-  │ Skipped:      0                                           │
-  │ Screenshots:  1                                           │
-  │ Video:        true                                        │
-  │ Duration:     X seconds                                   │
-  │ Spec Ran:     visit_http_500_response_failing_spec.coffee │
-  └───────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     visit_http_500_response_failing_spec.coffee                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_500_response_failing_spec.coffee/when server response is 500 -- fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing_spec.coffee/whe     (1280x720)
+     n server response is 500 -- fails (failed).png                                                 
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing     (X second)
+                          _spec.coffee.mp4                                                          
 
 
 ====================================================================================================
@@ -266,11 +271,12 @@ If you do not want status codes to cause failures pass the option: 'failOnStatus
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_http_500_response_failing_spec…     XX:XX        1        -        1        -        - │
+  │ ✖  visit_http_500_response_failing_spe      XX:XX        1        -        1        -        - │
+  │    c.coffee                                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -291,7 +297,7 @@ exports['e2e visit / low response timeout / fails when file server responds with
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_file_404_response_failing_spec.coffee...                                  (1 of 1) 
+  Running:  visit_file_404_response_failing_spec.coffee                                     (1 of 1)
 
 
   when file server response is 404
@@ -333,28 +339,30 @@ The internal Cypress web server responded with:
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────────┐
-  │ Tests:        1                                           │
-  │ Passing:      0                                           │
-  │ Failing:      1                                           │
-  │ Pending:      0                                           │
-  │ Skipped:      0                                           │
-  │ Screenshots:  1                                           │
-  │ Video:        true                                        │
-  │ Duration:     X seconds                                   │
-  │ Spec Ran:     visit_file_404_response_failing_spec.coffee │
-  └───────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     visit_file_404_response_failing_spec.coffee                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_file_404_response_failing_spec.coffee/when file server response is 404 -- fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_file_404_response_failing_spec.coffee/whe     (1280x720)
+     n file server response is 404 -- fails (failed).png                                            
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing     (X second)
+                          _spec.coffee.mp4                                                          
 
 
 ====================================================================================================
@@ -362,11 +370,12 @@ The internal Cypress web server responded with:
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_file_404_response_failing_spec…     XX:XX        1        -        1        -        - │
+  │ ✖  visit_file_404_response_failing_spe      XX:XX        1        -        1        -        - │
+  │    c.coffee                                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -387,7 +396,7 @@ exports['e2e visit / low response timeout / fails when content type isnt html'] 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_non_html_content_type_failing_spec.coffee...                              (1 of 1) 
+  Running:  visit_non_html_content_type_failing_spec.coffee                                 (1 of 1)
 
 
   when content type is plain/text
@@ -431,28 +440,30 @@ cy.request() will automatically get and set cookies and enable you to parse resp
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                               │
-  │ Passing:      0                                               │
-  │ Failing:      1                                               │
-  │ Pending:      0                                               │
-  │ Skipped:      0                                               │
-  │ Screenshots:  1                                               │
-  │ Video:        true                                            │
-  │ Duration:     X seconds                                       │
-  │ Spec Ran:     visit_non_html_content_type_failing_spec.coffee │
-  └───────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     visit_non_html_content_type_failing_spec.coffee                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_non_html_content_type_failing_spec.coffee/when content type is plaintext -- fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_non_html_content_type_failing_spec.coffee     (1280x720)
+     /when content type is plaintext -- fails (failed).png                                          
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_fai     (X second)
+                          ling_spec.coffee.mp4                                                      
 
 
 ====================================================================================================
@@ -460,11 +471,12 @@ cy.request() will automatically get and set cookies and enable you to parse resp
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_non_html_content_type_failing_…     XX:XX        1        -        1        -        - │
+  │ ✖  visit_non_html_content_type_failing      XX:XX        1        -        1        -        - │
+  │    _spec.coffee                                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -485,7 +497,7 @@ exports['e2e visit / normal response timeouts / fails when visit times out'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_http_timeout_failing_spec.coffee...                                       (1 of 1) 
+  Running:  visit_http_timeout_failing_spec.coffee                                          (1 of 1)
 
 
   when visit times out
@@ -553,29 +565,32 @@ When this 'load' event occurs, Cypress will continue running commands.
 
   (Results)
 
-  ┌──────────────────────────────────────────────────────┐
-  │ Tests:        2                                      │
-  │ Passing:      0                                      │
-  │ Failing:      2                                      │
-  │ Pending:      0                                      │
-  │ Skipped:      0                                      │
-  │ Screenshots:  2                                      │
-  │ Video:        true                                   │
-  │ Duration:     X seconds                              │
-  │ Spec Ran:     visit_http_timeout_failing_spec.coffee │
-  └──────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     visit_http_timeout_failing_spec.coffee                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds pageLoadTimeout (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when visit times out -- fails timeout exceeds timeout option (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when vis     (1280x720)
+     it times out -- fails timeout exceeds pageLoadTimeout (failed).png                             
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing_spec.coffee/when vis     (1280x720)
+     it times out -- fails timeout exceeds timeout option (failed).png                              
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing_spec     (X second)
+                          .coffee.mp4                                                               
 
 
 ====================================================================================================
@@ -583,11 +598,12 @@ When this 'load' event occurs, Cypress will continue running commands.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_http_timeout_failing_spec.coff…     XX:XX        2        -        2        -        - │
+  │ ✖  visit_http_timeout_failing_spec.cof      XX:XX        2        -        2        -        - │
+  │    fee                                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 
 
 `
@@ -608,7 +624,7 @@ exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when re
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: visit_response_never_ends_failing_spec.js...                                    (1 of 1) 
+  Running:  visit_response_never_ends_failing_spec.js                                       (1 of 1)
 
 
   response timeouts result in an error
@@ -760,30 +776,37 @@ Error: ESOCKETTIMEDOUT
 
   (Results)
 
-  ┌─────────────────────────────────────────────────────────┐
-  │ Tests:        3                                         │
-  │ Passing:      0                                         │
-  │ Failing:      3                                         │
-  │ Pending:      0                                         │
-  │ Skipped:      0                                         │
-  │ Screenshots:  3                                         │
-  │ Video:        true                                      │
-  │ Duration:     X seconds                                 │
-  │ Spec Ran:     visit_response_never_ends_failing_spec.js │
-  └─────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      3                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  3                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     visit_response_never_ends_failing_spec.js                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors on the initial visit (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- handles no response errors when not initially visiting (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/visit_response_never_ends_failing_spec.js/response timeouts result in an error -- fails after reducing the responseTimeout option (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
+     nse timeouts result in an error -- handles no response errors on the initial vis               
+     it (failed).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
+     nse timeouts result in an error -- handles no response errors when not initially               
+      visiting (failed).png                                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
+     nse timeouts result in an error -- fails after reducing the responseTimeout opti               
+     on (failed).png                                                                                
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_faili     (X second)
+                          ng_spec.js.mp4                                                            
 
 
 ====================================================================================================
@@ -791,11 +814,12 @@ Error: ESOCKETTIMEDOUT
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ visit_response_never_ends_failing_sp…     XX:XX        3        -        3        -        - │
+  │ ✖  visit_response_never_ends_failing_s      XX:XX        3        -        3        -        - │
+  │    pec.js                                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
 
 
 `
