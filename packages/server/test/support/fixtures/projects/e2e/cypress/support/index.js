@@ -12,7 +12,10 @@ before(function () {
       },
     })
     .then(() => {
-      expect(window.devicePixelRatio).to.eq(1)
+      // can't tell expect() not to log, so manually throwing here
+      if (window.devicePixelRatio !== 1) {
+        throw new Error('Setting devicePixelRatio to 1 failed')
+      }
     })
   }
 })
