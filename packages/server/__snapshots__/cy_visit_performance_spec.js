@@ -14,7 +14,7 @@ exports['cy.visit performance tests pass in chrome 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+  Running:  fast_visit_spec.coffee                                                          (1 of 1)
 
 
   on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
@@ -57,17 +57,17 @@ histogram line
 
   (Results)
 
-  ┌──────────────────────────────────────┐
-  │ Tests:        2                      │
-  │ Passing:      2                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        false                  │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     fast_visit_spec.coffee │
-  └──────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fast_visit_spec.coffee                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -75,11 +75,11 @@ histogram line
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
+  │ ✔  fast_visit_spec.coffee                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -100,7 +100,7 @@ exports['cy.visit performance tests pass in electron 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: fast_visit_spec.coffee...                                                       (1 of 1) 
+  Running:  fast_visit_spec.coffee                                                          (1 of 1)
 
 
   on localhost 95% of visits are faster than XX:XX, 80% are faster than XX:XX
@@ -143,17 +143,17 @@ histogram line
 
   (Results)
 
-  ┌──────────────────────────────────────┐
-  │ Tests:        2                      │
-  │ Passing:      2                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        false                  │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     fast_visit_spec.coffee │
-  └──────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     fast_visit_spec.coffee                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -161,11 +161,11 @@ histogram line
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ fast_visit_spec.coffee                    XX:XX        2        2        -        -        - │
+  │ ✔  fast_visit_spec.coffee                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

@@ -37,6 +37,24 @@ executors:
       PLATFORM: mac
 
 commands:
+  run-e2e-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+      chunk:
+        description: e2e test chunk number
+        type: integer
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
   store-npm-logs:
     description: Saves any NPM debug logs as artifacts in case there is a problem
     steps:
@@ -331,101 +349,117 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "server-e2e-tests-1":
+  "server-e2e-tests-chrome-1":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 1
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 1
 
-  "server-e2e-tests-2":
+  "server-e2e-tests-chrome-2":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 2
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 2
 
-  "server-e2e-tests-3":
+  "server-e2e-tests-chrome-3":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 3
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 3
 
-
-  "server-e2e-tests-4":
+  "server-e2e-tests-chrome-4":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 4
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 4
 
-  "server-e2e-tests-5":
+  "server-e2e-tests-chrome-5":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 5
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 5
 
-  "server-e2e-tests-6":
+  "server-e2e-tests-chrome-6":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 6
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 6
 
-  "server-e2e-tests-7":
+  "server-e2e-tests-chrome-7":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 7
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 7
 
-  "server-e2e-tests-8":
-      <<: *defaults
-      steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 8
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+  "server-e2e-tests-chrome-8":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 8
+
+  "server-e2e-tests-electron-1":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 1
+
+  "server-e2e-tests-electron-2":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 2
+
+  "server-e2e-tests-electron-3":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 3
+
+  "server-e2e-tests-electron-4":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 4
+
+  "server-e2e-tests-electron-5":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 5
+
+  "server-e2e-tests-electron-6":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 6
+
+  "server-e2e-tests-electron-7":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 7
+
+  "server-e2e-tests-electron-8":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 8
 
   "driver-integration-tests-chrome":
     <<: *defaults
@@ -829,28 +863,52 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
-    - server-e2e-tests-1:
+    - server-e2e-tests-chrome-1:
         requires:
           - build
-    - server-e2e-tests-2:
+    - server-e2e-tests-chrome-2:
         requires:
           - build
-    - server-e2e-tests-3:
+    - server-e2e-tests-chrome-3:
         requires:
           - build
-    - server-e2e-tests-4:
+    - server-e2e-tests-chrome-4:
         requires:
           - build
-    - server-e2e-tests-5:
+    - server-e2e-tests-chrome-5:
         requires:
           - build
-    - server-e2e-tests-6:
+    - server-e2e-tests-chrome-6:
         requires:
           - build
-    - server-e2e-tests-7:
+    - server-e2e-tests-chrome-7:
         requires:
           - build
-    - server-e2e-tests-8:
+    - server-e2e-tests-chrome-8:
+        requires:
+          - build
+    - server-e2e-tests-electron-1:
+        requires:
+          - build
+    - server-e2e-tests-electron-2:
+        requires:
+          - build
+    - server-e2e-tests-electron-3:
+        requires:
+          - build
+    - server-e2e-tests-electron-4:
+        requires:
+          - build
+    - server-e2e-tests-electron-5:
+        requires:
+          - build
+    - server-e2e-tests-electron-6:
+        requires:
+          - build
+    - server-e2e-tests-electron-7:
+        requires:
+          - build
+    - server-e2e-tests-electron-8:
         requires:
           - build
     - driver-integration-tests-chrome:

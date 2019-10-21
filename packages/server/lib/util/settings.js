@@ -110,7 +110,6 @@ module.exports = {
       }
 
       return memo
-
     }
     , _.cloneDeep(obj))
   },
@@ -175,7 +174,6 @@ module.exports = {
 
       //# else write the new reduced obj
       return this._write(file, changed)
-
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
         throw err

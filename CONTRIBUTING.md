@@ -380,11 +380,22 @@ If you're curious how we manage all of these tests in CI check out our [`circle.
 
 #### Docker
 
-Sometimes tests pass locally, but fail on CI. Our CI environment should be dockerized. In order to run the same image locally, there is script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that assumes that you have pulled the image `cypress/internal:chrome61` (see [circle.yml](circle.yml) for the current image name).
+Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. In order to run the image used in CI locally:
+
+1. [Install Docker](https://docs.docker.com/install/) and get it running on your machine.
+2. Run the following command from the root of the project:
+
+  ```shell
+  npm run docker
+  ```
+
+There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [circle.yml](circle.yml) for the current image name).
 
 The image will start and will map the root of the repository to `/cypress` inside the image. Now you can modify the files using your favorite environment and rerun tests inside the docker environment.
 
-**hint** sometimes building inside the image has problems with `node-sass` library.
+##### Troubleshooting
+
+Sometimes building inside the image has problems with `node-sass` library.
 
 ```text
 Error: Missing binding /cypress/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
@@ -407,13 +418,13 @@ npm rebuild node-sass
 
 #### Docker for built binary
 
-You can also use Docker to simulate and debug built binary. In a temp folder (for example from the folder `/tmp/test-folder/`) start a Docker image
+You can also use Docker to simulate and debug the built binary. In a temporary folder (for example from the folder `/tmp/test-folder/`) start a Docker image:
 
 ```shell
 $ docker run -it -w /app -v $PWD:/app cypress/base:8 /bin/bash
 ```
 
-Point installation at a specific binary and NPM (if needed) and _set local cache folder_ to unzip downloaded binary into a subfolder.
+Point the installation at a specific binary and npm (if needed) and _set local cache folder_ to unzip the downloaded binary into a subfolder.
 
 ```shell
 $ export CYPRESS_INSTALL_BINARY=https://cdn.cypress.io/beta/.../cypress.zip
@@ -421,7 +432,7 @@ $ export CYPRESS_CACHE_FOLDER=./cypress-cache
 $ npm i https://cdn.cypress.io/beta/npm/.../cypress.tgz
 ```
 
-Note that unzipping Linux binary inside Docker container onto a mapped volume drive is slow. But once this is done you can modify application resource folder in local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
+Note that unzipping the Linux binary inside a Docker container onto a mapped volume drive is *slow*. But once this is done you can modify the application resource folder in the local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
 
 ### Packages
 

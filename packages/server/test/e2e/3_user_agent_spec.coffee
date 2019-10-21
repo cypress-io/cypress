@@ -23,18 +23,8 @@ describe "e2e user agent", ->
     }
   })
 
-  it "passes on chrome", ->
-    e2e.exec(@, {
-      browser: "chrome"
-      spec: "user_agent_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
-
-  it "passes on electron", ->
-    e2e.exec(@, {
-      browser: "electron"
-      spec: "user_agent_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  e2e.it "passes", {
+    spec: "user_agent_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }

@@ -1,4 +1,4 @@
-exports['e2e uncaught errors failing1 1'] = `
+exports['e2e uncaught errors / failing1'] = `
 
 ====================================================================================================
 
@@ -14,7 +14,7 @@ exports['e2e uncaught errors failing1 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_synchronous_before_tests_parsed.coffee...                              (1 of 1) 
+  Running:  uncaught_synchronous_before_tests_parsed.coffee                                 (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -42,28 +42,30 @@ We dynamically generated a new test to display this failure.
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                               │
-  │ Passing:      0                                               │
-  │ Failing:      1                                               │
-  │ Pending:      0                                               │
-  │ Skipped:      0                                               │
-  │ Screenshots:  1                                               │
-  │ Video:        true                                            │
-  │ Duration:     X seconds                                       │
-  │ Spec Ran:     uncaught_synchronous_before_tests_parsed.coffee │
-  └───────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     uncaught_synchronous_before_tests_parsed.coffee                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_before_tests_parsed.coffee     (1280x720)
+     /An uncaught error was detected outside of a test (failed).png                                 
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_before_tes     (X second)
+                          ts_parsed.coffee.mp4                                                      
 
 
 ====================================================================================================
@@ -71,16 +73,17 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_synchronous_before_tests_pa…     XX:XX        1        -        1        -        - │
+  │ ✖  uncaught_synchronous_before_tests_p      XX:XX        1        -        1        -        - │
+  │    arsed.coffee                                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
 
-exports['e2e uncaught errors failing2 1'] = `
+exports['e2e uncaught errors / failing2'] = `
 
 ====================================================================================================
 
@@ -96,7 +99,7 @@ exports['e2e uncaught errors failing2 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_synchronous_during_hook_spec.coffee...                                 (1 of 1) 
+  Running:  uncaught_synchronous_during_hook_spec.coffee                                    (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -125,28 +128,30 @@ We dynamically generated a new test to display this failure.
 
   (Results)
 
-  ┌────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                            │
-  │ Passing:      0                                            │
-  │ Failing:      1                                            │
-  │ Pending:      0                                            │
-  │ Skipped:      0                                            │
-  │ Screenshots:  1                                            │
-  │ Video:        true                                         │
-  │ Duration:     X seconds                                    │
-  │ Spec Ran:     uncaught_synchronous_during_hook_spec.coffee │
-  └────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     uncaught_synchronous_during_hook_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_during_hook_spec.coffee/An     (1280x720)
+      uncaught error was detected outside of a test (failed).png                                    
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_during_hoo     (X second)
+                          k_spec.coffee.mp4                                                         
 
 
 ====================================================================================================
@@ -154,16 +159,17 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_synchronous_during_hook_spe…     XX:XX        1        -        1        -        - │
+  │ ✖  uncaught_synchronous_during_hook_sp      XX:XX        1        -        1        -        - │
+  │    ec.coffee                                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
 
-exports['e2e uncaught errors failing3 1'] = `
+exports['e2e uncaught errors / failing3'] = `
 
 ====================================================================================================
 
@@ -179,7 +185,7 @@ exports['e2e uncaught errors failing3 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_during_test_spec.coffee...                                             (1 of 1) 
+  Running:  uncaught_during_test_spec.coffee                                                (1 of 1)
 
 
   foo
@@ -202,28 +208,30 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   (Results)
 
-  ┌────────────────────────────────────────────────┐
-  │ Tests:        1                                │
-  │ Passing:      0                                │
-  │ Failing:      1                                │
-  │ Pending:      0                                │
-  │ Skipped:      0                                │
-  │ Screenshots:  1                                │
-  │ Video:        true                             │
-  │ Duration:     X seconds                        │
-  │ Spec Ran:     uncaught_during_test_spec.coffee │
-  └────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     uncaught_during_test_spec.coffee                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (fa     (1280x720)
+     iled).png                                                                                      
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_test_spec.coffe     (X second)
+                          e.mp4                                                                     
 
 
 ====================================================================================================
@@ -231,16 +239,16 @@ When Cypress detects uncaught errors originating from your test code it will aut
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_during_test_spec.coffee          XX:XX        1        -        1        -        - │
+  │ ✖  uncaught_during_test_spec.coffee         XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
 
-exports['e2e uncaught errors failing4 1'] = `
+exports['e2e uncaught errors / failing4'] = `
 
 ====================================================================================================
 
@@ -256,7 +264,7 @@ exports['e2e uncaught errors failing4 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: uncaught_during_hook_spec.coffee...                                             (1 of 1) 
+  Running:  uncaught_during_hook_spec.coffee                                                (1 of 1)
 
 
   foo
@@ -284,28 +292,30 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Results)
 
-  ┌────────────────────────────────────────────────┐
-  │ Tests:        2                                │
-  │ Passing:      1                                │
-  │ Failing:      1                                │
-  │ Pending:      0                                │
-  │ Skipped:      0                                │
-  │ Screenshots:  1                                │
-  │ Video:        true                             │
-  │ Duration:     X seconds                        │
-  │ Spec Ran:     uncaught_during_hook_spec.coffee │
-  └────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     uncaught_during_hook_spec.coffee                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does not run -- before all hook (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_hook_spec.coffee/foo -- does no     (1280x720)
+     t run -- before all hook (failed).png                                                          
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/uncaught_during_hook_spec.coffe     (X second)
+                          e.mp4                                                                     
 
 
 ====================================================================================================
@@ -313,16 +323,16 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ uncaught_during_hook_spec.coffee          XX:XX        2        1        1        -        - │
+  │ ✖  uncaught_during_hook_spec.coffee         XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        1        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        1        1        -        -  
 
 
 `
 
-exports['e2e uncaught errors failing5 1'] = `
+exports['e2e uncaught errors / failing5'] = `
 
 ====================================================================================================
 
@@ -338,7 +348,7 @@ exports['e2e uncaught errors failing5 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: caught_async_sync_test_spec.coffee...                                           (1 of 1) 
+  Running:  caught_async_sync_test_spec.coffee                                              (1 of 1)
 
 
   foo
@@ -376,31 +386,36 @@ exports['e2e uncaught errors failing5 1'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────────────────┐
-  │ Tests:        8                                  │
-  │ Passing:      4                                  │
-  │ Failing:      4                                  │
-  │ Pending:      0                                  │
-  │ Skipped:      0                                  │
-  │ Screenshots:  4                                  │
-  │ Video:        true                               │
-  │ Duration:     X seconds                          │
-  │ Spec Ran:     caught_async_sync_test_spec.coffee │
-  └──────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        8                                                                                │
+  │ Passing:      4                                                                                │
+  │ Failing:      4                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  4                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     caught_async_sync_test_spec.coffee                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2 fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz f     (1280x720)
+     ails (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar f     (1280x720)
+     ails (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux      (1280x720)
+     fails (failed).png                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2     (1280x720)
+      fails (failed).png                                                                            
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test_spec.cof     (X second)
+                          fee.mp4                                                                   
 
 
 ====================================================================================================
@@ -408,11 +423,11 @@ exports['e2e uncaught errors failing5 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ caught_async_sync_test_spec.coffee        XX:XX        8        4        4        -        - │
+  │ ✖  caught_async_sync_test_spec.coffee       XX:XX        8        4        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        8        4        4        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        8        4        4        -        -  
 
 
 `

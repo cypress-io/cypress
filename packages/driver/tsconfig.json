@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "allowJs": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "strictFunctionTypes": true,
+    "preserveWatchOutput": true,
+    "sourceMap": true,
+    "importHelpers": true,
+    "strictNullChecks": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "noImplicitReturns": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "noErrorTruncation": true
+  }
+}

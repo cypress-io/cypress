@@ -127,7 +127,6 @@ class File {
       }
 
       throw err
-
     })
     .finally(() => {
       debug('read succeeded or failed for %s', this.path)

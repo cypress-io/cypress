@@ -40,7 +40,6 @@ const formatMoveEventsTable = (events) => {
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
     if (val.skipped) {
-
       const reason = val.skipped
 
       return {
