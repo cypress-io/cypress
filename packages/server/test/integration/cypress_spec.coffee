@@ -350,7 +350,7 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test1.js"})
         @expectExitWith(0)
 
-    it "runs project by limiting spec files via config.testFiles as an array of string glob patterns", ->
+    it "runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns", ->
       cypress.start(["--run-project=#{@todosPath}", "--config='[\"testFiles=**/test2.coffee\",\"**/test1.js\"]'"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
