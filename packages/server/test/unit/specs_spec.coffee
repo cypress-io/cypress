@@ -68,6 +68,17 @@ describe "lib/util/specs", ->
         expect(files[0].name).to.equal("coffee_spec.coffee")
         expect(files[1].name).to.equal("js_spec.js")
 
+    it "allows array in config.testFiles", ->
+      config.get(FixturesHelper.projectPath("various-file-types"))
+      .then (cfg) ->
+        cfg.testFiles = ["coffee_*.coffee", "js_spec.js"]
+        specsUtil.find(cfg)
+      .then (files) ->
+        debug("found spec files %o", files)
+        expect(files.length).to.equal(2)
+        expect(files[0].name).to.equal("coffee_spec.coffee")
+        expect(files[1].name).to.equal("js_spec.js")
+
     it "filters using specPattern", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
       .then (cfg) ->

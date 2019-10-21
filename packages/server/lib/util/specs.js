@@ -14,6 +14,7 @@ const path = require('path')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:specs')
 const minimatch = require('minimatch')
+const Promise = require('bluebird')
 const glob = require('./glob')
 
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
@@ -145,17 +146,27 @@ const find = function findSpecs (config, specPattern) {
   debug('globbing test files "%s"', config.testFiles)
   debug('glob options %o', options)
 
-  return glob(config.testFiles, options)
-  .tap(debug)
+  // ensure we handle either a single string or a list of strings the same way
+  const testFilesPatterns = [].concat(config.testFiles)
 
-  // filter out anything that matches our
-  // ignored test files glob
-  .filter(doesNotMatchAllIgnoredPatterns)
-  .filter(matchesSpecPattern)
-  .map(setNameParts)
-  .tap((files) => {
-    return debug('found %d spec files: %o', files.length, files)
-  })
+  /**
+   * Finds matching files for the given pattern, filters out specs to be ignored.
+   */
+  const findOnePattern = (pattern) => {
+    return glob(pattern, options)
+    .tap(debug)
+
+    // filter out anything that matches our
+    // ignored test files glob
+    .filter(doesNotMatchAllIgnoredPatterns)
+    .filter(matchesSpecPattern)
+    .map(setNameParts)
+    .tap((files) => {
+      return debug('found %d spec files: %o', files.length, files)
+    })
+  }
+
+  return Promise.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
 }
 
 module.exports = {
