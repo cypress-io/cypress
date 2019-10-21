@@ -16,7 +16,7 @@ describe('src/cypress/dom/visibility', () => {
         $dom.isHidden(null)
       }
 
-      expect(fn).to.throw('Cypress.dom.isHidden() failed because it requires a DOM element. The subject received was: `null`')
+      expect(fn).to.throw('`Cypress.dom.isHidden()` failed because it requires a DOM element. The subject received was: `null`')
     })
   })
 
@@ -30,7 +30,7 @@ describe('src/cypress/dom/visibility', () => {
         $dom.isVisible('form')
       }
 
-      expect(fn).to.throw('Cypress.dom.isVisible() failed because it requires a DOM element. The subject received was: `form`')
+      expect(fn).to.throw('`Cypress.dom.isVisible()` failed because it requires a DOM element. The subject received was: `form`')
     })
   })
 
@@ -42,7 +42,7 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     it('returns true if window and body > window height', function () {
-      this.add('<div style=`height: 1000px;` />')
+      this.add('<div style="height: 1000px; width: 10px;" />')
       const win = cy.state('window')
 
       const fn = () => {
