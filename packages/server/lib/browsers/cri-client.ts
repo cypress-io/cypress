@@ -3,11 +3,13 @@ import debugModule from 'debug'
 import _ from 'lodash'
 
 const chromeRemoteInterface = require('chrome-remote-interface')
+const errors = require('../errors')
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cri-client')
-const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:send')
-const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:recv')
-const errors = require('../errors')
+// debug using cypress-verbose:server:browsers:cri-client:send:*
+const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:send:[-->]')
+// debug using cypress-verbose:server:browsers:cri-client:recv:*
+const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:recv:[<--]')
 
 /**
  * Url returned by the Chrome Remote Interface
