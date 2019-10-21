@@ -3210,7 +3210,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           expect(rightclicked).to.eq(1)
-          expect(err.message).to.include('cy.rightclick() failed because this element')
+          expect(err.message).to.include('`cy.rightclick()` failed because this element')
 
           done()
         })
@@ -3240,7 +3240,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(this.logs.length).to.eq(4)
           expect(lastLog.get('error')).to.eq(err)
-          expect(err.message).to.include('cy.rightclick() failed because this element is not visible')
+          expect(err.message).to.include('`cy.rightclick()` failed because this element is not visible')
 
           done()
         })
