@@ -146,13 +146,13 @@ describe('src/cypress/dom/visibility', () => {
       // ensure all tests run against a scrollable window
       const scrollThisIntoView = add('<div style=`height: 1000px;` /><div>Should be in view</div>')
 
-      this.$visHidden = add('<ul style=`visibility: hidden;`></ul>')
-      this.$parentVisHidden = add('<div class=`invis` style=`visibility: hidden;`><button>parent visibility: hidden</button></div>')
-      this.$displayNone = add('<button style=`display: none`>display: none</button>')
-      this.$inputHidden = add('<input type=`hidden` value=`abcdef`>')
-      this.$btnOpacity = add('<button style=`opacity: 0;`>opacity: 0</button>')
-      this.$divNoWidth = add('<div style=`width: 0; height: 100px;`>width: 0</div>')
-      this.$divNoHeight = add('<div style=`width: 50px; height: 0px;`>height: 0</div>')
+      this.$visHidden = add('<ul style="visibility: hidden;"></ul>')
+      this.$parentVisHidden = add('<div class="invis" style="visibility: hidden;"><button>parent visibility: hidden</button></div>')
+      this.$displayNone = add('<button style="display: none">display: none</button>')
+      this.$inputHidden = add('<input type="hidden" value="abcdef">')
+      this.$btnOpacity = add('<button style="opacity: 0;">opacity: 0</button>')
+      this.$divNoWidth = add('<div style="width: 0; height: 100px;">width: 0</div>')
+      this.$divNoHeight = add('<div style="width: 50px; height: 0px;">height: 0</div>')
       this.$divDetached = $('<div>foo</div>')
 
       this.$optionInSelect = add(`\
@@ -883,10 +883,9 @@ describe('src/cypress/dom/visibility', () => {
 
       it('element is fixed and being covered', function () {
         this.reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\
-This element '<div#coveredUpPosFixed>' is not visible because it has CSS property: 'position: fixed' and it's being covered by another element:
+This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:
 
-<div style="position: fixed; bottom: 0; left: 0">on top</div>\
-`)
+\`<div style="position: fixed; bottom: 0; left: 0">on top</div>\``)
       })
 
       it('cannot determine why element is not visible', function () {

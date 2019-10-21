@@ -373,7 +373,7 @@ const getReasonIsHidden = function ($el) {
   }
 
   if ($elements.isDetached($el)) {
-    return `This element '${node}' is not visible because it is detached from the DOM`
+    return `This element \`${node}\` is not visible because it is detached from the DOM`
   }
 
   if (elHasVisibilityHidden($el)) {
