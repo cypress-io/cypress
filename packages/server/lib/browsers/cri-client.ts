@@ -61,7 +61,16 @@ interface CRIWrapper {
   close (): Bluebird<void>
 }
 
-const getMajorMinorVersion = (version: string) => {
+interface Version {
+  major: number
+  minor: number
+}
+
+const isVersionGte = (a: Version, b: Version) => {
+  return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
+}
+
+const getMajorMinorVersion = (version: string): Version => {
   const [major, minor] = version.split('.', 2).map(Number)
 
   return { major, minor }
@@ -128,10 +137,7 @@ export const create = Bluebird.method((debuggerUrl: websocketUrl): Bluebird<CRIW
       .then((actual) => {
         const minimum = getMajorMinorVersion(protocolVersion)
 
-        const hasVersion = actual.major > minimum.major
-         || (actual.major === minimum.major && actual.minor >= minimum.minor)
-
-        if (!hasVersion) {
+        if (!isVersionGte(actual, minimum)) {
           errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
         }
       })

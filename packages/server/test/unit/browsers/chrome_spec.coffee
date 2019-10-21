@@ -40,6 +40,9 @@ describe "lib/browsers/chrome", ->
       # port for Chrome remote interface communication
       sinon.stub(utils, "getPort").resolves(50505)
 
+    afterEach ->
+      expect(@criClient.ensureMinimumProtocolVersion).to.be.calledOnce
+
     it "focuses on the page and calls CRI Page.visit", ->
       chrome.open("chrome", "http://", {}, @automation)
       .then =>

@@ -338,7 +338,7 @@ module.exports = {
               criClient.close()
               .then =>
                 debug("closing chrome")
-                originalBrowserKill.call(launchedBrowser, args...)
+                originalBrowserKill.apply(launchedBrowser, args)
 
             return criClient
         .then @_maybeRecordVideo(options)

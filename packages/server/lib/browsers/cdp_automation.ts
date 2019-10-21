@@ -18,6 +18,22 @@ interface CyCookie {
 
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
 
+const cookieMatches = (cookie: CyCookie, data) => {
+  if (data.domain && !tough.domainMatch(cookie.domain, data.domain)) {
+    return false
+  }
+
+  if (data.path && !tough.pathMatch(cookie.path, data.path)) {
+    return false
+  }
+
+  if (data.name && data.name !== cookie.name) {
+    return false
+  }
+
+  return true
+}
+
 export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
     if (cookie.expires === -1) {
@@ -37,19 +53,29 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   }
 
   const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest => {
-    cookie.name || (cookie.name = '') // name can't be undefined/null
-    cookie.value || (cookie.value = '') // ditto
+    _.defaults(cookie, {
+      name: '',
+      value: '',
+    })
+
+    // this logic forms a SetCookie request that will be received by Chrome
+    // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
+    // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
+
     // @ts-ignore
     cookie.expires = cookie.expirationDate
     if (!cookie.hostOnly && cookie.domain[0] !== '.') {
       let parsedDomain = cors.parseDomain(cookie.domain)
 
-      // not a top-level domain (localhost, ...) or IP address
+      // normally, a non-hostOnly cookie should be prefixed with a .
+      // so if it's not a top-level domain (localhost, ...) or IP address
+      // prefix it with a . so it becomes a non-hostOnly cookie
       if (parsedDomain && parsedDomain.tld !== cookie.domain) {
         cookie.domain = `.${cookie.domain}`
       }
     }
 
+    // not used by Chrome
     delete cookie.hostOnly
     delete cookie.expirationDate
 
@@ -61,11 +87,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     .then((result: cdp.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        return _.every([
-          !data.domain || tough.domainMatch(cookie.domain, data.domain),
-          !data.path || tough.pathMatch(cookie.path, data.path),
-          !data.name || data.name === cookie.name,
-        ])
+        return cookieMatches(cookie, data)
       })
     })
   }
@@ -106,7 +128,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
           if (!result.success) {
             // i wish CDP provided some more detail here, but this is really it in v1.3
             // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
-            throw new Error('Failed to set cookie via Network.setCookie.')
+            throw new Error(`Network.setCookie failed to set cookie: ${JSON.stringify(setCookie)}`)
           }
 
           return getCookie(data)
