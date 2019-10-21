@@ -41,20 +41,23 @@ module.exports = (on) => {
 
   on('task', {
     'set:device:metrics' () {
-      if (cdpPort) {
-        // force chrome to 1x and 1280x720
-        return CDP({ port: cdpPort })
-        .then((client) => {
-          return client.send('Emulation.setDeviceMetricsOverride', {
-            width: 1280,
-            height: 720,
-            deviceScaleFactor: 1,
-            mobile: false,
-            screenWidth: 1280,
-            screenHeight: 720,
-          })
-        })
+      if (!cdpPort) {
+        throw new Error('Cannot set:device:metrics - cdpPort is not set')
       }
+
+      // force chrome to 1x and 1280x720
+      // so e2e screenshot sizes are consistent on all user environments and runtimes
+      return CDP({ port: cdpPort })
+      .then((client) => {
+        return client.send('Emulation.setDeviceMetricsOverride', {
+          width: 1280,
+          height: 720,
+          deviceScaleFactor: 1,
+          mobile: false,
+          screenWidth: 1280,
+          screenHeight: 720,
+        })
+      })
     },
 
     'returns:undefined' () {},
