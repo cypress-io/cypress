@@ -81,7 +81,6 @@ describe "e2e web security", ->
 
     e2e.it "passes", {
       spec: "web_security_spec.coffee"
-      browser: "chrome"
       snapshot: true
       expectedExitCode: 0
     }
