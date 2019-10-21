@@ -55,12 +55,11 @@ describe "e2e web security", ->
       }
     })
 
-    it "fails", ->
-      e2e.exec(@, {
-        spec: "web_security_spec.coffee"
-        snapshot: true
-        expectedExitCode: 3
-      })
+    e2e.it "fails", {
+      spec: "web_security_spec.coffee"
+      snapshot: true
+      expectedExitCode: 3
+    }
 
   context "when disabled", ->
     e2e.setup({
