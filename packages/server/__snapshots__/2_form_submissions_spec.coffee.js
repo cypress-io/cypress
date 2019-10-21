@@ -14,7 +14,7 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_multipart_spec.coffee...                                        (1 of 1) 
+  Running:  form_submission_multipart_spec.coffee                                           (1 of 1)
 
 
   <form> submissions
@@ -33,23 +33,24 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
 
   (Results)
 
-  ┌─────────────────────────────────────────────────────┐
-  │ Tests:        7                                     │
-  │ Passing:      7                                     │
-  │ Failing:      0                                     │
-  │ Pending:      0                                     │
-  │ Skipped:      0                                     │
-  │ Screenshots:  0                                     │
-  │ Video:        true                                  │
-  │ Duration:     X seconds                             │
-  │ Spec Ran:     form_submission_multipart_spec.coffee │
-  └─────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        7                                                                                │
+  │ Passing:      7                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     form_submission_multipart_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X second)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================
@@ -57,11 +58,12 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ form_submission_multipart_spec.coffee     XX:XX        7        7        -        -        - │
+  │ ✔  form_submission_multipart_spec.coff      XX:XX        7        7        -        -        - │
+  │    ee                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        7        7        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
@@ -82,7 +84,7 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_multipart_spec.coffee...                                        (1 of 1) 
+  Running:  form_submission_multipart_spec.coffee                                           (1 of 1)
 
 
   <form> submissions
@@ -101,23 +103,24 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
 
   (Results)
 
-  ┌─────────────────────────────────────────────────────┐
-  │ Tests:        7                                     │
-  │ Passing:      7                                     │
-  │ Failing:      0                                     │
-  │ Pending:      0                                     │
-  │ Skipped:      0                                     │
-  │ Screenshots:  0                                     │
-  │ Video:        true                                  │
-  │ Duration:     X seconds                             │
-  │ Spec Ran:     form_submission_multipart_spec.coffee │
-  └─────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        7                                                                                │
+  │ Passing:      7                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     form_submission_multipart_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X second)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================
@@ -125,11 +128,12 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ form_submission_multipart_spec.coffee     XX:XX        7        7        -        -        - │
+  │ ✔  form_submission_multipart_spec.coff      XX:XX        7        7        -        -        - │
+  │    ee                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        7        7        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
@@ -150,7 +154,7 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_failing_spec.coffee...                                          (1 of 1) 
+  Running:  form_submission_failing_spec.coffee                                             (1 of 1)
 
 
   form submission fails
@@ -182,28 +186,31 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
   (Results)
 
-  ┌───────────────────────────────────────────────────┐
-  │ Tests:        1                                   │
-  │ Passing:      0                                   │
-  │ Failing:      1                                   │
-  │ Pending:      0                                   │
-  │ Skipped:      0                                   │
-  │ Screenshots:  1                                   │
-  │ Video:        true                                │
-  │ Duration:     X seconds                           │
-  │ Spec Ran:     form_submission_failing_spec.coffee │
-  └───────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     form_submission_failing_spec.coffee                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/form_submission_failing_spec.coffee/form submission fails -- fails without an explicit wait when an element is immediately found (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/form_submission_failing_spec.coffee/form submis     (1280x720)
+     sion fails -- fails without an explicit wait when an element is immediately foun               
+     d (failed).png                                                                                 
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing_spec.co     (X second)
+                          ffee.mp4                                                                  
 
 
 ====================================================================================================
@@ -211,11 +218,11 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ form_submission_failing_spec.coffee       XX:XX        1        -        1        -        - │
+  │ ✖  form_submission_failing_spec.coffee      XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -236,7 +243,7 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: form_submission_passing_spec.coffee...                                          (1 of 1) 
+  Running:  form_submission_passing_spec.coffee                                             (1 of 1)
 
 
   form submissions
@@ -249,23 +256,24 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
 
   (Results)
 
-  ┌───────────────────────────────────────────────────┐
-  │ Tests:        2                                   │
-  │ Passing:      2                                   │
-  │ Failing:      0                                   │
-  │ Pending:      0                                   │
-  │ Skipped:      0                                   │
-  │ Screenshots:  0                                   │
-  │ Video:        true                                │
-  │ Duration:     X seconds                           │
-  │ Spec Ran:     form_submission_passing_spec.coffee │
-  └───────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     form_submission_passing_spec.coffee                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing_spec.co     (X second)
+                          ffee.mp4                                                                  
 
 
 ====================================================================================================
@@ -273,11 +281,11 @@ exports['e2e forms submissions with jquery XHR POST passing 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ form_submission_passing_spec.coffee       XX:XX        2        2        -        -        - │
+  │ ✔  form_submission_passing_spec.coffee      XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

@@ -14,7 +14,7 @@ exports['e2e issue 149 failing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: issue_149_spec.coffee...                                                        (1 of 1) 
+  Running:  issue_149_spec.coffee                                                           (1 of 1)
 
 
   1) fails
@@ -32,28 +32,28 @@ exports['e2e issue 149 failing 1'] = `
 
   (Results)
 
-  ┌─────────────────────────────────────┐
-  │ Tests:        2                     │
-  │ Passing:      1                     │
-  │ Failing:      1                     │
-  │ Pending:      0                     │
-  │ Skipped:      0                     │
-  │ Screenshots:  1                     │
-  │ Video:        true                  │
-  │ Duration:     X seconds             │
-  │ Spec Ran:     issue_149_spec.coffee │
-  └─────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     issue_149_spec.coffee                                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_149_spec.coffee/fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_149_spec.coffee/fails (failed).png            (1280x720)
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_149_spec.coffee.mp4           (X second)
 
 
 ====================================================================================================
@@ -61,11 +61,11 @@ exports['e2e issue 149 failing 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ issue_149_spec.coffee                     XX:XX        2        1        1        -        - │
+  │ ✖  issue_149_spec.coffee                    XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        1        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        1        1        -        -  
 
 
 `
