@@ -108,10 +108,7 @@ module.exports = {
       options.frame = false
       options.webPreferences.offscreen = true
 
-    if options.chromeWebSecurity is false
-      options.webPreferences.webSecurity = false
-      options.webPreferences.contextIsolation = false
-      options.webPreferences.allowRunningInsecureContent = false
+    options.webPreferences.webSecurity = !!options.chromeWebSecurity
 
     if options.partition
       options.webPreferences.partition = options.partition
