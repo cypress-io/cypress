@@ -401,6 +401,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             force: true, // force the click, avoid waiting
             timeout: options.timeout,
             interval: options.interval,
+            errorOnSelect: false,
           })
           .then(() => {
             if (!options.force && $elements.getActiveElByDocument($elToClick[0].ownerDocument) === null) {

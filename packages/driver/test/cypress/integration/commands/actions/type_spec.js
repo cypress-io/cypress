@@ -816,6 +816,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/4587
       it('borrows property getter from outer frame for input', () => {
         const $input = cy.$$(':text:first')
 
@@ -1204,6 +1205,7 @@ describe('src/cy/commands/actions/type', () => {
           .then(() => expect(sentInput).not.called)
         })
 
+        // https://github.com/cypress-io/cypress/issues/4767
         it('can type negative numbers with currently active selection', () => {
           cy.get('#number-without-value')
           .type('999')
@@ -1358,6 +1360,48 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/3661
+      describe('various focusable elements', () => {
+        it('<select> element', () => {
+          let keydown = cy.stub()
+
+          cy.get('select:first')
+          .then(($el) => $el.on('keydown', keydown))
+          .type('foo')
+          .then(() => {
+            expect(keydown).calledThrice
+          })
+        })
+
+        it('<a> element', () => {
+          let keydown = cy.stub()
+
+          cy.get('a:first')
+          .then(($el) => $el.on('keydown', keydown))
+          .focus().type('foo')
+          .then(() => expect(keydown).calledThrice)
+        })
+
+        it('<area> element', () => {
+          cy.$$(`
+          <map name="map">
+          <area shape="circle" coords="0,0,100"
+          href="#"
+          target="_blank" alt="area" />
+          </map>
+          <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
+          `).prependTo(cy.$$('body'))
+
+          let keydown = cy.stub()
+
+          cy.get('area:first')
+          .then(($el) => $el.on('keydown', keydown))
+          .focus().type('foo')
+          .then(() => expect(keydown).calledThrice)
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/2613
       describe('input[type=datetime-local]', () => {
         it('can change values', () => {
           cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
@@ -1369,6 +1413,16 @@ describe('src/cy/commands/actions/type', () => {
 
         it('overwrites existing value input by invoking val', () => {
           cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        })
+
+        it('errors when invalid datetime', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).contain('datetime')
+            expect(err.message).contain('yyyy-MM-ddThh:mm')
+            done()
+          })
+
+          cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05').type('1959-09-13')
         })
       })
 
@@ -2420,7 +2474,7 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
-        it('does not fire input event', (done) => {
+        it('does not fire input event when no text inserted', (done) => {
           cy.$$(':text:first').on('input', (e) => {
             done('input should not have fired')
           })
@@ -2428,6 +2482,15 @@ describe('src/cy/commands/actions/type', () => {
           cy.get(':text:first').invoke('val', 'ab').type('{enter}').then(() => {
             done()
           })
+        })
+
+        // https://github.com/cypress-io/cypress/issues/3405
+        it('does fire input event when text inserted', (done) => {
+          cy.$$('[contenteditable]:first').on('input', (e) => {
+            done()
+          })
+
+          cy.get('[contenteditable]:first').type('{enter}')
         })
 
         it('inserts new line into textarea', () => {
