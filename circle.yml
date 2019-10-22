@@ -266,10 +266,11 @@ jobs:
           name: "Download Google Chrome (stable) intaller"
           command: |
             mkdir -p ~/chrome_installers
+            echo $OSTYPE
             if [ ! -d "~/chrome_installers/google-chrome-stable.dmg" ] && [ "$OSTYPE" == "darwin"* ]; then
               curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/chrome_installers/google-chrome-stable.dmg
             fi
-            if [ ! -d "~/chrome_installers/google-chrome-stable_current_amd64.deb" ] && [ ! "$OSTYPE" == "darwin"* ]; then
+            if [ ! -d "~/chrome_installers/google-chrome-stable_current_amd64.deb" ] && [ "$OSTYPE" != "darwin"* ]; then
               wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
               mv google-chrome-stable_current_amd64.deb ~/chrome_installers
             fi
