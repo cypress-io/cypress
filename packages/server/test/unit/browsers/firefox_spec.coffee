@@ -19,7 +19,6 @@ describe "lib/browsers/firefox", ->
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
       sinon.stub(utils, "writeExtension").resolves("/path/to/ext")
-      sinon.stub(utils, "ensureProfile").resolves("/path/to/profile")
       sinon.stub(firefoxUtil, "findRemotePort").resolves(6005)
       @firefoxClient = { installTemporaryAddon: sinon.stub().resolves() }
       sinon.stub(firefoxUtil, "connect").resolves(@firefoxClient)
@@ -88,10 +87,6 @@ describe "lib/browsers/firefox", ->
     it "writes extension", ->
       firefox.open("firefox", "http://", @options).then =>
         expect(utils.writeExtension).to.be.calledWith(@options.proxyUrl, @options.socketIoRoute)
-
-    it "ensures profile directory", ->
-      firefox.open("firefox", "http://", @options).then =>
-        expect(utils.ensureProfile).to.be.calledWith("firefox")
 
     it "finds remote port for firefox debugger", ->
       firefox.open("firefox", "http://", @options).then =>

@@ -33,7 +33,7 @@ Promise.config({
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
-DEFAULT_BROWSERS = ['electron', 'chrome']
+DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 
 stackTraceLinesRe = /^(\s+)at\s(.+)/gm
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/

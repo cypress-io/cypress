@@ -193,6 +193,10 @@ class $Cypress
     ## other objects communicate intent
     ## and 'action' to Cypress
     switch eventName
+
+      when "recorder:frame"
+        @emit('recorder:frame', args[0])
+
       when "cypress:stop"
         @emit("stop")
 

@@ -108,6 +108,11 @@ defaultPreferences = {
   "browser.safebrowsing.malware.enabled": false
   "browser.safebrowsing.phishing.enabled": false
 
+  ## allow capturing screen through getUserMedia(...)
+  ## and auto-accept the permissions prompt
+  "media.getusermedia.browser.enabled": true
+  "media.navigator.permission.disabled": true
+
 }
 
 module.exports = {

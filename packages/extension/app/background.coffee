@@ -144,9 +144,11 @@ automation = {
 
   query: (data) ->
     code = "var s; (s = document.getElementById('#{data.element}')) && s.textContent"
+    code2 = 'console.log("foooooooooooooooooooooooo")'
 
     queryTab = (tab) ->
       Promise.try ->
+        browser.tabs.executeScript(tab.id, {code: code2})
         browser.tabs.executeScript(tab.id, {code: code})
       .then (results) ->
         if not results or results[0] isnt data.string
