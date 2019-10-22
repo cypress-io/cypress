@@ -163,7 +163,7 @@ describe('lib/exec/spawn', function () {
         })
       })
 
-      it(`if exit event fired and close event fired`, function () {
+      it('if exit event fired and close event fired', function () {
         this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
         this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
