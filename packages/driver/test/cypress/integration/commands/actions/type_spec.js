@@ -1399,6 +1399,23 @@ describe('src/cy/commands/actions/type', () => {
           .focus().type('foo')
           .then(() => expect(keydown).calledThrice)
         })
+
+        // https://github.com/cypress-io/cypress/issues/2166
+        it('<button> element', () => {
+          let keydown = cy.stub()
+          let click = cy.stub()
+
+          cy.get('button:first')
+          .then(($el) => {
+            $el.on('keydown', keydown)
+            $el.on('click', click)
+          })
+          .focus().type('foo')
+          .then(() => {
+            expect(keydown).calledThrice
+            expect(click).not.called
+          })
+        })
       })
 
       // https://github.com/cypress-io/cypress/issues/2613
