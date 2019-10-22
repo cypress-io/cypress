@@ -472,7 +472,6 @@ declare module 'cypress' {
      * property "message". Check this property before checking other properties.
      *
      * @type {number}
-     * @memberof CypressRunResult
      * @example
       ```
       const result = await cypress.run()
@@ -488,7 +487,6 @@ declare module 'cypress' {
      * the error message.
      *
      * @type {string}
-     * @memberof CypressRunResult
      */
     message?: string
   }
