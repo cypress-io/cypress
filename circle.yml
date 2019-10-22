@@ -65,9 +65,7 @@ commands:
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
             else
               dpkg -i ~/chrome_installers/google-chrome-stable_current_amd64.deb || true
-              apt-get update --fix-missing
-              dpkg --configure -a
-              apt-get install -f 
+              apt-get -f install 
             fi
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
@@ -111,6 +109,10 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
           paths:
             - node_modules
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-chrome-{{ checksum "chrome_installers" }}
+          paths:
+            - chrome_installers
       - save-cache:
           packageName: coffee
       - save-cache:
@@ -175,6 +177,9 @@ commands:
       - restore-cache:
           packageName: root
           packagePath: package.json
+      - restore-cache:
+          packageName: chrome
+          packagePath: chrome_installers
       - restore-cache:
           packageName: coffee
           packagePath: packages/coffee/package.json
@@ -278,7 +283,7 @@ jobs:
             if [ ! -d "~/chrome_installers/google-chrome-stable.dmg" ] && [ "$OSTYPE" == "darwin"* ]; then
               curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/chrome_installers/google-chrome-stable.dmg
             fi
-            if [ ! -d "~/chrome_installers/google-chrome-stable_current_amd64.deb" ] && [ "$OSTYPE" != "darwin"* ]; then
+            if [ ! -d "~/chrome_installers/google-chrome-stable_current_amd64.deb" ] && [ "$OSTYPE" == "linux"* ]; then
               wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
               mv google-chrome-stable_current_amd64.deb ~/chrome_installers
             fi
