@@ -4310,6 +4310,8 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
+        // Updated not to input text when non-shift modifier is pressed
+        // https://github.com/cypress-io/cypress/issues/3316
         it('has a table of keys', () => {
           cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
           .then(function () {
