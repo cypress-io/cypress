@@ -33,7 +33,7 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: https_passthru_spec.js...                                                       (1 of 1) 
+  Running:  https_passthru_spec.js                                                          (1 of 1)
 
 
   https passthru retries
@@ -46,23 +46,23 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
 
   (Results)
 
-  ┌──────────────────────────────────────┐
-  │ Tests:        2                      │
-  │ Passing:      2                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        true                   │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     https_passthru_spec.js │
-  └──────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     https_passthru_spec.js                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -70,11 +70,11 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ https_passthru_spec.js                    XX:XX        2        2        -        -        - │
+  │ ✔  https_passthru_spec.js                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -95,7 +95,7 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: https_passthru_spec.js...                                                       (1 of 1) 
+  Running:  https_passthru_spec.js                                                          (1 of 1)
 
 
   https passthru retries
@@ -108,23 +108,23 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
 
   (Results)
 
-  ┌──────────────────────────────────────┐
-  │ Tests:        2                      │
-  │ Passing:      2                      │
-  │ Failing:      0                      │
-  │ Pending:      0                      │
-  │ Skipped:      0                      │
-  │ Screenshots:  0                      │
-  │ Video:        true                   │
-  │ Duration:     X seconds              │
-  │ Spec Ran:     https_passthru_spec.js │
-  └──────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     https_passthru_spec.js                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -132,11 +132,11 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ https_passthru_spec.js                    XX:XX        2        2        -        -        - │
+  │ ✔  https_passthru_spec.js                   XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -157,7 +157,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: network_error_304_handling_spec.js...                                           (1 of 1) 
+  Running:  network_error_304_handling_spec.js                                              (1 of 1)
 
 
   network error 304 handling
@@ -169,23 +169,24 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
 
   (Results)
 
-  ┌──────────────────────────────────────────────────┐
-  │ Tests:        1                                  │
-  │ Passing:      1                                  │
-  │ Failing:      0                                  │
-  │ Pending:      0                                  │
-  │ Skipped:      0                                  │
-  │ Screenshots:  0                                  │
-  │ Video:        true                               │
-  │ Duration:     X seconds                          │
-  │ Spec Ran:     network_error_304_handling_spec.js │
-  └──────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     network_error_304_handling_spec.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
+                          .js.mp4                                                                   
 
 
 ====================================================================================================
@@ -193,11 +194,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ network_error_304_handling_spec.js        XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -218,7 +219,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: network_error_304_handling_spec.js...                                           (1 of 1) 
+  Running:  network_error_304_handling_spec.js                                              (1 of 1)
 
 
   network error 304 handling
@@ -230,23 +231,24 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
 
   (Results)
 
-  ┌──────────────────────────────────────────────────┐
-  │ Tests:        1                                  │
-  │ Passing:      1                                  │
-  │ Failing:      0                                  │
-  │ Pending:      0                                  │
-  │ Skipped:      0                                  │
-  │ Screenshots:  0                                  │
-  │ Video:        true                               │
-  │ Duration:     X seconds                          │
-  │ Spec Ran:     network_error_304_handling_spec.js │
-  └──────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     network_error_304_handling_spec.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
+                          .js.mp4                                                                   
 
 
 ====================================================================================================
@@ -254,11 +256,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ network_error_304_handling_spec.js        XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -279,7 +281,7 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: network_error_304_handling_spec.js...                                           (1 of 1) 
+  Running:  network_error_304_handling_spec.js                                              (1 of 1)
 
 
   network error 304 handling
@@ -291,23 +293,24 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
 
   (Results)
 
-  ┌──────────────────────────────────────────────────┐
-  │ Tests:        1                                  │
-  │ Passing:      1                                  │
-  │ Failing:      0                                  │
-  │ Pending:      0                                  │
-  │ Skipped:      0                                  │
-  │ Screenshots:  0                                  │
-  │ Video:        true                               │
-  │ Duration:     X seconds                          │
-  │ Spec Ran:     network_error_304_handling_spec.js │
-  └──────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     network_error_304_handling_spec.js                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
+                          .js.mp4                                                                   
 
 
 ====================================================================================================
@@ -315,11 +318,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ network_error_304_handling_spec.js        XX:XX        1        1        -        -        - │
+  │ ✔  network_error_304_handling_spec.js       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

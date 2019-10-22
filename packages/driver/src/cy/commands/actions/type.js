@@ -7,6 +7,7 @@ const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
+const $Keyboard = require('../../../cy/keyboard')
 
 const inputEvents = 'textInput input'.split(' ')
 
@@ -51,10 +52,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           let obj
 
           table[id] = (obj = {})
-          const modifiers = keyboard.getActiveModifiersArray()
+          const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers())
 
-          if (modifiers.length) {
-            obj.modifiers = modifiers.join(', ')
+          if (modifiers) {
+            obj.modifiers = modifiers
           }
 
           if (key) {
@@ -91,12 +92,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               'Typed': chars,
               'Applied To': $dom.getElements(options.$el),
               'Options': deltaOptions,
-              'table' () {
-                return {
-                  name: 'Key Events Table',
-                  data: getTableData(),
-                  columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
-                }
+              'table': {
+                // mouse events tables will take up slots 1 and 2 if they're present
+                // this preserves the order of the tables
+                3: () => {
+                  return {
+                    name: 'Keyboard Events',
+                    data: getTableData(),
+                    columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
+                  }
+                },
               },
             }
           },
@@ -106,7 +111,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       const isBody = options.$el.is('body')
-      const isTextLike = $dom.isTextLike(options.$el)
+      const isTextLike = $dom.isTextLike(options.$el.get(0))
       const isDate = $dom.isType(options.$el, 'date')
       const isTime = $dom.isType(options.$el, 'time')
       const isMonth = $dom.isType(options.$el, 'month')
@@ -241,7 +246,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             }
 
             return false
-
           }
 
           const getDefaultButton = (form) => {
@@ -416,7 +420,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               onFail: options._log,
               args: { chars, allChars },
             })
-
           },
 
         })
@@ -475,7 +478,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             }
 
             return type()
-
           },
         })
       }
@@ -535,7 +537,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         const node = $dom.stringify($el)
 
-        if (!$dom.isTextLike($el)) {
+        if (!$dom.isTextLike($el.get(0))) {
           const word = $utils.plural(subject, 'contains', 'is')
 
           $utils.throwErrByPath('clear.invalid_element', {
@@ -572,7 +574,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         }
 
         return verifyAssertions()
-
       })
     },
   })

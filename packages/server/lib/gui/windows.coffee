@@ -95,7 +95,7 @@ module.exports = {
       onNewWindow: ->
       webPreferences:  {
         partition:            null
-        chromeWebSecurity:    true
+        webSecurity:          true
         nodeIntegration:      false
         backgroundThrottling: false
       }
@@ -108,8 +108,7 @@ module.exports = {
       options.frame = false
       options.webPreferences.offscreen = true
 
-    if options.chromeWebSecurity is false
-      options.webPreferences.webSecurity = false
+    options.webPreferences.webSecurity = !!options.chromeWebSecurity
 
     if options.partition
       options.webPreferences.partition = options.partition

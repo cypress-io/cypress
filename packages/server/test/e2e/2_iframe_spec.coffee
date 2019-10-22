@@ -66,15 +66,14 @@ describe "e2e iframes", ->
     }
   })
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "iframe_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-      config: {
-        hosts: {
-          "*.foo.com": "127.0.0.1"
-          "*.bar.com": "127.0.0.1"
-        }
+  e2e.it "passes", {
+    spec: "iframe_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+    config: {
+      hosts: {
+        "*.foo.com": "127.0.0.1"
+        "*.bar.com": "127.0.0.1"
       }
-    })
+    }
+  }

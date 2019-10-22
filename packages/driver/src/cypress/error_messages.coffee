@@ -127,8 +127,8 @@ module.exports = {
     invalid_argument: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
 
   click:
-    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
-    on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
+    multiple_elements: "#{cmd('{{cmd}}')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
+    on_select_element: "#{cmd('{{cmd}}')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
 
   clock:
     already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
@@ -141,6 +141,7 @@ module.exports = {
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
 
   cookies:
+    invalid_name: "#{cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
     removed_method: """
       The Cypress.Cookies.{{method}}() method has been removed.
 
@@ -780,7 +781,9 @@ module.exports = {
     invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: {{arg}}"
     invalid_boolean: "{{cmd}}() '{{option}}' option must be a boolean. You passed: {{arg}}"
     invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
-    invalid_clip: "{{cmd}}() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_clip: "{{cmd}}() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_height: "#{cmd('screenshot')} only works with a screenshot area with a height greater than zero."
+    invalid_padding: "{{cmd}}() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: {{arg}}"
     invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"
     multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
@@ -810,7 +813,13 @@ module.exports = {
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
+    backend_error: """
+    #{cmd('setCookie')} had an unexpected error setting the requested cookie in {{browserDisplayName}}.
+
+    {{errStack}}
+    """
     invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
+    invalid_value: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
 
   spread:
     invalid_type: "#{cmd('spread')} requires the existing subject be array-like."

@@ -61,15 +61,13 @@ describe "e2e page_loading", ->
     }]
   })
 
-  it "passes", ->
-    ## this tests that __cypress.initial is set correctly whilst navigating
-    ## between pages, or during cy.reload
-    ## additionally this creates an edge case where after __cypress.initial is
-    ## set we send an XHR which should not inject because its requested for JSON
-    ## but that another XHR which is requested for html should inject
-
-    e2e.exec(@, {
-      spec: "page_loading_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  ## this tests that __cypress.initial is set correctly whilst navigating
+  ## between pages, or during cy.reload
+  ## additionally this creates an edge case where after __cypress.initial is
+  ## set we send an XHR which should not inject because its requested for JSON
+  ## but that another XHR which is requested for html should inject
+  e2e.it "passes", {
+    spec: "page_loading_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }
