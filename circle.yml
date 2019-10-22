@@ -52,13 +52,14 @@ commands:
           name: Install Google Chrome
           command: |
             set -e
-            ls ~/installers
             if [[ "$OSTYPE" == "darwin"* ]]; then
-              hdiutil attach  ~/installers/google-chrome-stable.dmg
+              hdiutil attach  ~/chrome_installers/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
             else
-              dpkg -i ~/installers/google-chrome-stable_current_amd64.deb
-              sudo apt-get install -f
+              dpkg -i ~/chrome_installers/google-chrome-stable_current_amd64.deb || true
+              apt-get update --fix-missing
+              dpkg --configure -a
+              apt-get install -f 
             fi
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
@@ -261,20 +262,20 @@ jobs:
       # Prune so we do not save removed dependencies to cache
       - run: npm run all prune
 
-      - save-caches
-      - store-npm-logs
-
       - run:
           name: "Download Google Chrome (stable) intaller"
           command: |
-            set -e
-            mkdir ~/installers
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/installers/google-chrome-stable.dmg
-            else
-              wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-              mv google-chrome-stable_current_amd64.deb ~/installers
+            mkdir -p ~/chrome_installers
+            if [ ! -d "~/installers/google-chrome-stable.dmg" ]; then
+              curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/chrome_installers/google-chrome-stable.dmg
             fi
+            if [ ! -d "~/installers/google-chrome-stable_current_amd64.deb" ]; then
+              wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+              mv google-chrome-stable_current_amd64.deb ~/chrome_installers
+            fi
+
+      - save-caches
+      - store-npm-logs
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
