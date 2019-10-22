@@ -51,7 +51,7 @@ describe('lib/browsers/protocol', function () {
       .and.include(innerErr.message)
     })
 
-    it('returns the debugger URL of the first about:blank tab', function () {
+    it('returns the debugger URL of the first about:blank tab', async function () {
       const targets = [
         {
           type: 'page',
@@ -65,12 +65,15 @@ describe('lib/browsers/protocol', function () {
         },
       ]
 
+      const end = sinon.stub()
+
       sinon.stub(CRI, 'List').withArgs({ port: 12345 }).resolves(targets)
-      sinon.stub(connect, 'createRetryingSocket').callsArg(1)
+      sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
       const p = protocol.getWsTargetFor(12345)
 
-      return expect(p).to.eventually.equal('bar')
+      await expect(p).to.eventually.equal('bar')
+      expect(end).to.be.calledOnce
     })
   })
 })

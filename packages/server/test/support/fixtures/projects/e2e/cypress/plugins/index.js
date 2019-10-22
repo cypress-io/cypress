@@ -1,8 +1,9 @@
+require('@packages/ts/register')
+
 const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
-
 const performance = require('../../../../test/support/helpers/performance')
 
 module.exports = (on) => {
@@ -22,17 +23,6 @@ module.exports = (on) => {
       return image
     })
   }
-
-  on('before:browser:launch', (browser, args) => {
-    if (browser.family === 'chrome') {
-      // so that screenshot sizes match those of Electron
-      args.push('--window-size=1280,720')
-      // removes stuff from the top of the window to make `window-size` equal the viewport size
-      args.push('--kiosk')
-    }
-
-    return args
-  })
 
   on('task', {
     'returns:undefined' () {},

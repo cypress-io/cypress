@@ -14,7 +14,7 @@ exports['e2e server sent events / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: server_sent_events_spec.coffee...                                               (1 of 1) 
+  Running:  server_sent_events_spec.coffee                                                  (1 of 1)
 
 
   server sent events
@@ -27,23 +27,24 @@ exports['e2e server sent events / passes'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────────────┐
-  │ Tests:        2                              │
-  │ Passing:      2                              │
-  │ Failing:      0                              │
-  │ Pending:      0                              │
-  │ Skipped:      0                              │
-  │ Screenshots:  0                              │
-  │ Video:        true                           │
-  │ Duration:     X seconds                      │
-  │ Spec Ran:     server_sent_events_spec.coffee │
-  └──────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     server_sent_events_spec.coffee                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/server_sent_events_spec.coffee.     (X second)
+                          mp4                                                                       
 
 
 ====================================================================================================
@@ -51,11 +52,11 @@ exports['e2e server sent events / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ server_sent_events_spec.coffee            XX:XX        2        2        -        -        - │
+  │ ✔  server_sent_events_spec.coffee           XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

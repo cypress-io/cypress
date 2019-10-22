@@ -14,7 +14,7 @@ exports['e2e cookies / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: cookies_spec.coffee...                                                          (1 of 1) 
+  Running:  cookies_spec.coffee                                                             (1 of 1)
 
 
   cookies
@@ -36,23 +36,23 @@ exports['e2e cookies / passes'] = `
 
   (Results)
 
-  ┌───────────────────────────────────┐
-  │ Tests:        9                   │
-  │ Passing:      9                   │
-  │ Failing:      0                   │
-  │ Pending:      0                   │
-  │ Skipped:      0                   │
-  │ Screenshots:  0                   │
-  │ Video:        true                │
-  │ Duration:     X seconds           │
-  │ Spec Ran:     cookies_spec.coffee │
-  └───────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        9                                                                                │
+  │ Passing:      9                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     cookies_spec.coffee                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec.coffee.mp4             (X second)
 
 
 ====================================================================================================
@@ -60,11 +60,11 @@ exports['e2e cookies / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ cookies_spec.coffee                       XX:XX        9        9        -        -        - │
+  │ ✔  cookies_spec.coffee                      XX:XX        9        9        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
 
 
 `
