@@ -95,6 +95,9 @@ class Project extends EE
 
         updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
         debug("updated config: %o", modifiedCfg)
+
+        config.validateBrowserList(updatedConfig)
+
         return updatedConfig
     .then (cfg) =>
       @server.open(cfg, @, options.onWarning)

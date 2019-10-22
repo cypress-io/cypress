@@ -1,11 +1,12 @@
 _        = require("lodash")
 R        = require("ramda")
+la       = require("lazy-ass")
 path     = require("path")
+check    = require("check-more-types")
 Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
-findSystemNode = require("./util/find_system_node")
 fs       = require("./util/fs")
 keys     = require("./util/keys")
 origin   = require("./util/origin")
@@ -14,6 +15,7 @@ settings = require("./util/settings")
 v        = require("./util/validation")
 debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
+findSystemNode = require("./util/find_system_node")
 
 CYPRESS_ENV_PREFIX = "CYPRESS_"
 CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
@@ -212,6 +214,22 @@ validateFile = (file) ->
     validate settings, (errMsg) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
+validateBrowserList = (cfg) ->
+  la(cfg.browsers, "Missing browsers list in the config")
+  la(check.array(cfg.browsers), "Expected a list of browsers", cfg.browsers)
+  la(cfg.browsers.length, "expected at list one browser", cfg.browsers)
+
+  isValidBrowser = check.schema({
+    name: check.unemptyString,
+    family: check.oneOf(["electron", "chrome"]),
+    displayName: check.unemptyString,
+    version: check.unemptyString,
+    path: path.isAbsolute,
+    majorVersion: check.unemptyString
+  })
+  cfg.browsers.forEach (browser) ->
+    la(isValidBrowser(browser), "invalid browser", browser)
+
 hideSpecialVals = (val, key) ->
   if _.includes(CYPRESS_SPECIAL_ENV_VARS, key)
     return keys.hide(val)
@@ -219,6 +237,8 @@ hideSpecialVals = (val, key) ->
   return val
 
 module.exports = {
+  validateBrowserList
+
   getConfigKeys: -> configKeys
 
   isValidCypressEnvValue: (value) ->
