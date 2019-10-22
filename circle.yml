@@ -77,7 +77,8 @@ commands:
             if [[ "$OSTYPE" == "darwin"* ]]; then
               hdiutil attach  ~/chrome_installers/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
-            else
+            fi
+            if [[ "$OSTYPE" == "linux"* ]]; then
               dpkg -i ~/chrome_installers/google-chrome-stable_current_amd64.deb || true
               apt-get -f install
               which google-chrome
@@ -126,7 +127,7 @@ commands:
           paths:
             - node_modules
       - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-chrome-{{ checksum "~/chrome_installers" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-chrome
           paths:
             - ~/chrome_installers
       - save-cache:
@@ -193,9 +194,9 @@ commands:
       - restore-cache:
           packageName: root
           packagePath: package.json
-      - restore-cache:
-          packageName: chrome
-          packagePath: ~/chrome_installers
+      - restore_cache:
+          name: Restoring cache for chrome
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-chrome
       - restore-cache:
           packageName: coffee
           packagePath: packages/coffee/package.json
