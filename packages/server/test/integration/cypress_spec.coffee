@@ -772,7 +772,6 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
-
     describe "plugins", ->
       beforeEach ->
         plugins.init.restore()
