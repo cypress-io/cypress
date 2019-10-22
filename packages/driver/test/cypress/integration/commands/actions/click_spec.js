@@ -378,49 +378,6 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('div', 'pointerover pointerenter pointerdown mousedown pointerup mouseup click').each(shouldBeCalled)
     })
 
-    it('events when element removed on pointerdown', () => {
-      const btn = cy.$$('button:first')
-      const div = cy.$$('div#tabindex')
-
-      attachFocusListeners({ btn })
-      attachMouseClickListeners({ btn, div })
-      attachMouseHoverListeners({ div })
-
-      btn.on('pointerdown', () => {
-        // synchronously remove this button
-
-        btn.remove()
-      })
-
-      // return
-      cy.contains('button').click()
-
-      cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
-      cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
-      cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
-    })
-
-    it('events when element removed on pointerover', () => {
-      const btn = cy.$$('button:first')
-      const div = cy.$$('div#tabindex')
-
-      // attachFocusListeners({ btn })
-      attachMouseClickListeners({ btn, div })
-      attachMouseHoverListeners({ btn, div })
-
-      btn.on('pointerover', () => {
-        // synchronously remove this button
-
-        btn.remove()
-      })
-
-      cy.contains('button').click()
-
-      cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalled)
-      cy.getAll('btn', 'pointerdown mousedown mouseover mouseenter').each(shouldNotBeCalled)
-      cy.getAll('div', 'pointerover pointerenter pointerdown mousedown pointerup mouseup click').each(shouldBeCalled)
-    })
-
     it('does not fire a click when element has been removed on mouseup', () => {
       const $btn = cy.$$('button:first')
 
@@ -1687,23 +1644,6 @@ describe('src/cy/commands/actions/click', () => {
         cy
         .get('#button-covered-in-span').click()
         .focused().should('have.id', 'button-covered-in-span')
-      })
-
-      it('focus window', () => {
-        const stub = cy.stub()
-        .callsFake(() => {
-          // debugger
-        })
-        // const win = cy.state('window')
-        const win = cy.$$('*')
-
-        cy.$$(cy.state('window')).on('focus', cy.stub().as('win'))
-
-        cy.$$(cy.state('document')).on('focus', cy.stub().as('doc'))
-
-        win.on('focus', stub)
-
-        cy.get('li').first().then((el) => el.focus().focus().focus())
       })
 
       it('will not fire focus events when nothing can receive focus', () => {

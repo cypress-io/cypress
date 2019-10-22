@@ -138,16 +138,6 @@ const _getSelectionByEl = function (el) {
   return doc.getSelection()!
 }
 
-// const _getSelectionRangeByEl = function (el) {
-//   const sel = _getSelectionByEl(el)
-
-//   if (sel.rangeCount > 0) {
-//     return sel.getRangeAt(0)
-//   }
-
-//   throw new Error('No selection in document')
-// }
-
 const deleteSelectionContents = function (el: HTMLElement) {
   if ($elements.isContentEditable(el)) {
     const doc = $document.getDocumentFromElement(el)
@@ -438,14 +428,6 @@ const _moveSelectionTo = function (toStart, doc) {
   const direction = toStart ? 'backward' : 'forward'
 
   selection.modify('move', direction, 'line')
-
-  // if (selection.rangeCount > 0) {
-  // const range = selection.getRangeAt(0)
-  // range.collapse(toStart)
-  // doc.getSelection().removeAllRanges()
-  // selection.addRange(range)
-  // }
-  // }
 }
 
 // if $elements.isInput(el) || $elements.isTextarea(el)
@@ -519,16 +501,6 @@ const _getActive = function (doc) {
 
   return activeEl
 }
-
-// const getFirstFocusable = (el) => {
-//   if ($elements.isContentEditable(el)) {
-//     const hostContenteditable = _getHostContenteditable(el)
-
-//     return hostContenteditable
-//   }
-
-//   return el
-// }
 
 const focusCursor = function (el, doc) {
   const elToFocus = $elements.getFirstFocusableEl($dom.wrap(el)).get(0)

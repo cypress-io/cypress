@@ -56,7 +56,6 @@ interface KeyDetails {
     [key in KeyEventType]?: boolean;
   }
 }
-// const $Cypress = require('../cypress')
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}/
 const monthRegex = /^\d{4}-(0\d|1[0-2])/
