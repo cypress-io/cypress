@@ -323,7 +323,7 @@ describe "lib/config", ->
           @expectValidationPasses()
 
         it "passes if an array of strings", ->
-          @setup({ignoreTestFiles: ["**/*.coffee", "**/*.jsx"]})
+          @setup({testFiles: ["**/*.coffee", "**/*.jsx"]})
           @expectValidationPasses()
 
         it "fails if not a string or array", ->
@@ -331,7 +331,7 @@ describe "lib/config", ->
           @expectValidationFails("be a string or an array of string")
 
         it "fails if not an array of strings", ->
-          @setup({ignoreTestFiles: [5]})
+          @setup({testFiles: [5]})
           @expectValidationFails("be a string or an array of string")
           @expectValidationFails("the value was: `[5]`")
 
