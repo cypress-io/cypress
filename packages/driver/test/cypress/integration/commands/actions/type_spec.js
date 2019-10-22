@@ -557,9 +557,7 @@ describe('src/cy/commands/actions/type', () => {
         const $txt = cy.$$(':text:first')
 
         $txt.on('keydown', (e) => {
-          const obj = _.pick(e.originalEvent, 'altKey', 'bubbles', 'cancelable', 'charCode', 'ctrlKey', 'detail', 'keyCode', 'view', 'layerX', 'layerY', 'location', 'metaKey', 'pageX', 'pageY', 'repeat', 'shiftKey', 'type', 'which', 'key')
-
-          expect(obj).to.deep.eq({
+          expect(_.toPlainObject(e.originalEvent)).to.include({
             altKey: false,
             bubbles: true,
             cancelable: true,
@@ -567,13 +565,14 @@ describe('src/cy/commands/actions/type', () => {
             ctrlKey: false,
             detail: 0,
             key: 'a',
+            // has code property https://github.com/cypress-io/cypress/issues/3722
+            code: 'KeyA',
             keyCode: 65, // deprecated but fired by chrome always uppercase in the ASCII table
             location: 0,
             metaKey: false,
             repeat: false,
             shiftKey: false,
             type: 'keydown',
-            view: cy.state('window'),
             which: 65, // deprecated but fired by chrome
           })
 
@@ -587,9 +586,7 @@ describe('src/cy/commands/actions/type', () => {
         const $txt = cy.$$(':text:first')
 
         $txt.on('keypress', (e) => {
-          const obj = _.pick(e.originalEvent, 'altKey', 'bubbles', 'cancelable', 'charCode', 'ctrlKey', 'detail', 'keyCode', 'view', 'layerX', 'layerY', 'location', 'metaKey', 'pageX', 'pageY', 'repeat', 'shiftKey', 'type', 'which', 'key')
-
-          expect(obj).to.deep.eq({
+          expect(_.toPlainObject(e.originalEvent)).to.include({
             altKey: false,
             bubbles: true,
             cancelable: true,
@@ -597,13 +594,13 @@ describe('src/cy/commands/actions/type', () => {
             ctrlKey: false,
             detail: 0,
             key: 'a',
+            code: 'KeyA',
             keyCode: 97, // deprecated
             location: 0,
             metaKey: false,
             repeat: false,
             shiftKey: false,
             type: 'keypress',
-            view: cy.state('window'),
             which: 97, // deprecated
           })
 
@@ -617,9 +614,7 @@ describe('src/cy/commands/actions/type', () => {
         const $txt = cy.$$(':text:first')
 
         $txt.on('keyup', (e) => {
-          const obj = _.pick(e.originalEvent, 'altKey', 'bubbles', 'cancelable', 'charCode', 'ctrlKey', 'detail', 'keyCode', 'view', 'layerX', 'layerY', 'location', 'metaKey', 'pageX', 'pageY', 'repeat', 'shiftKey', 'type', 'which', 'key')
-
-          expect(obj).to.deep.eq({
+          expect(_.toPlainObject(e.originalEvent)).to.include({
             altKey: false,
             bubbles: true,
             cancelable: true,
@@ -627,6 +622,7 @@ describe('src/cy/commands/actions/type', () => {
             ctrlKey: false,
             detail: 0,
             key: 'a',
+            code: 'KeyA',
             keyCode: 65, // deprecated but fired by chrome always uppercase in the ASCII table
             location: 0,
             metaKey: false,
