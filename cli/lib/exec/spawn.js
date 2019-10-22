@@ -138,6 +138,7 @@ module.exports = {
         const child = cp.spawn(executable, electronArgs, stdioOptions)
 
         child.on('close', resolve)
+        child.on('exit', resolve)
         child.on('error', reject)
 
         // if stdio options is set to 'pipe', then
@@ -234,7 +235,8 @@ module.exports = {
       }
 
       return spawn(overrides)
-      .then((code) => {
+      .then((code, signal) => {
+        debug('child exited %o', { code, signal })
         if (code !== 0 && brokenGtkDisplay) {
           util.logBrokenGtkDisplayWarning()
 

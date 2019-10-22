@@ -154,6 +154,16 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    context('closes', function () {
+      ['close', 'exit'].forEach((event) => {
+        it(`if '${event}' event fired`, function () {
+          this.spawnedProcess.on.withArgs(event).yieldsAsync(0)
+
+          return spawn.start('--foo')
+        })
+      })
+    })
+
     it('does not start xvfb when its not needed', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
