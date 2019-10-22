@@ -648,7 +648,7 @@ export default class Keyboard {
 
     const typeKeyFns = _.map(
       keyDetailsArr,
-      (key: KeyDetails, i: number) => {
+      (key: KeyDetails, currentKeyIndex: number) => {
         return () => {
           debug('typing key:', key.key)
 
@@ -660,7 +660,7 @@ export default class Keyboard {
             const { skipCheckUntilIndex, isClearChars } = validateTyping(
               activeEl,
               keyDetailsArr,
-              i,
+              currentKeyIndex,
               options.onFail,
               _skipCheckUntilIndex,
             )
@@ -669,27 +669,27 @@ export default class Keyboard {
 
             if (
               _skipCheckUntilIndex
-              && $elements.isNeedSingleValueChangeInputElement(el)
+              && $elements.isNeedSingleValueChangeInputElement(activeEl)
             ) {
-              const originalText = el.value
+              const originalText = $elements.getNativeProp(activeEl, 'value')
 
               debug('skip validate until:', _skipCheckUntilIndex)
-              const keysType = keyDetailsArr.slice(0, _skipCheckUntilIndex)
+              const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
 
-              _.each(keysType, (key) => {
+              _.each(keysToType, (key) => {
                 key.simulatedDefaultOnly = true
                 key.simulatedDefault = _.noop
               })
 
-              _.last(keysType)!.simulatedDefault = () => {
-                options.onValueChange(originalText, el)
+              _.last(keysToType)!.simulatedDefault = () => {
+                options.onValueChange(originalText, activeEl)
 
-                const valToSet = isClearChars ? '' : joinKeyArrayToString(keysType)
+                const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
 
-                debug('setting element value', valToSet, el)
+                debug('setting element value', valToSet, activeEl)
 
                 return $elements.setNativeProp(
-                  el as HTMLTextLikeInputElement,
+                  activeEl as HTMLTextLikeInputElement,
                   'value',
                   valToSet
                 )

@@ -1651,7 +1651,8 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      // TODO: fix this with 4.0 updates
+      // type follows focus
+      // https://github.com/cypress-io/cypress/issues/2240
       describe('element reference loss', () => {
         it('follows the focus of the cursor', () => {
           let charCount = 0
@@ -1669,6 +1670,43 @@ describe('src/cy/commands/actions/type', () => {
 
             cy.get('input').eq(1).should('have.value', 'bar')
           })
+        })
+
+        it('follows focus into date input', () => {
+          let charCount = 0
+
+          cy.$$('input:first').on('input', (e) => {
+            charCount++
+            if (charCount === 3) {
+              cy.$$('input[type=date]:first').focus()
+            }
+          })
+
+          cy.get('input:first')
+          .type('foo2010-10-10')
+          .should('have.value', 'foo')
+
+          cy.get('input[type=date]:first').should('have.value', '2010-10-10')
+        })
+
+        it('validates input after following focus change', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).contain('fooBAR')
+            expect(err.message).contain('requires a valid date')
+            done()
+          })
+
+          let charCount = 0
+
+          cy.$$('input:first').on('input', (e) => {
+            charCount++
+            if (charCount === 3) {
+              cy.$$('input[type=date]:first').focus()
+            }
+          })
+
+          cy.get('input:first')
+          .type('fooBAR')
         })
       })
     })
