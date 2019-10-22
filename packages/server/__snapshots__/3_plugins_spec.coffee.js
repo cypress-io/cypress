@@ -14,7 +14,7 @@ exports['e2e plugins fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running:  app_spec.coffee                                                                 (1 of 1)
 
 The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
@@ -26,23 +26,23 @@ Error: Async error from plugins file
 
   (Results)
 
-  ┌───────────────────────────────┐
-  │ Tests:        0               │
-  │ Passing:      0               │
-  │ Failing:      1               │
-  │ Pending:      0               │
-  │ Skipped:      0               │
-  │ Screenshots:  0               │
-  │ Video:        true            │
-  │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
-  └───────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.coffee                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/plugins-async-error/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
 
 
 ====================================================================================================
@@ -50,11 +50,11 @@ Error: Async error from plugins file
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
+  │ ✖  app_spec.coffee                          XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `
@@ -75,7 +75,7 @@ exports['e2e plugins passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running:  app_spec.coffee                                                                 (1 of 1)
 
 
   ✓ is another spec
@@ -86,23 +86,23 @@ exports['e2e plugins passes 1'] = `
 
   (Results)
 
-  ┌───────────────────────────────┐
-  │ Tests:        2               │
-  │ Passing:      2               │
-  │ Failing:      0               │
-  │ Pending:      0               │
-  │ Skipped:      0               │
-  │ Screenshots:  0               │
-  │ Video:        true            │
-  │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
-  └───────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.coffee                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/working-preprocessor/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
 
 
 ====================================================================================================
@@ -110,11 +110,11 @@ exports['e2e plugins passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                           XX:XX        2        2        -        -        - │
+  │ ✔  app_spec.coffee                          XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -135,7 +135,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running:  app_spec.coffee                                                                 (1 of 1)
 
 
   ✓ overrides config
@@ -146,23 +146,23 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
   (Results)
 
-  ┌───────────────────────────────┐
-  │ Tests:        2               │
-  │ Passing:      2               │
-  │ Failing:      0               │
-  │ Pending:      0               │
-  │ Skipped:      0               │
-  │ Screenshots:  0               │
-  │ Video:        true            │
-  │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
-  └───────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.coffee                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 20 CRF
-  - Finished processing:  /foo/bar/.projects/plugin-config/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 20 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
 
 
 ====================================================================================================
@@ -170,11 +170,11 @@ exports['e2e plugins can modify config from plugins 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                           XX:XX        2        2        -        -        - │
+  │ ✔  app_spec.coffee                          XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
@@ -195,7 +195,7 @@ exports['e2e plugins / works with user extensions'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running:  app_spec.coffee                                                                 (1 of 1)
 
 
   ✓ can inject text from an extension
@@ -205,23 +205,23 @@ exports['e2e plugins / works with user extensions'] = `
 
   (Results)
 
-  ┌───────────────────────────────┐
-  │ Tests:        1               │
-  │ Passing:      1               │
-  │ Failing:      0               │
-  │ Pending:      0               │
-  │ Skipped:      0               │
-  │ Screenshots:  0               │
-  │ Video:        true            │
-  │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
-  └───────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.coffee                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/plugin-extension/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
 
 
 ====================================================================================================
@@ -229,11 +229,11 @@ exports['e2e plugins / works with user extensions'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ app_spec.coffee                           XX:XX        1        1        -        -        - │
+  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -254,7 +254,7 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: absolute_spec.coffee...                                                         (1 of 1) 
+  Running:  absolute_spec.coffee                                                            (1 of 1)
 
 
   ✓ uses the plugins file
@@ -264,23 +264,23 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
 
   (Results)
 
-  ┌────────────────────────────────────┐
-  │ Tests:        1                    │
-  │ Passing:      1                    │
-  │ Failing:      0                    │
-  │ Pending:      0                    │
-  │ Skipped:      0                    │
-  │ Screenshots:  0                    │
-  │ Video:        true                 │
-  │ Duration:     X seconds            │
-  │ Spec Ran:     absolute_spec.coffee │
-  └────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     absolute_spec.coffee                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/plugins-absolute-path/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/absolute_spec.coffee.mp4            (X second)
 
 
 ====================================================================================================
@@ -288,11 +288,11 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ absolute_spec.coffee                      XX:XX        1        1        -        -        - │
+  │ ✔  absolute_spec.coffee                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -313,7 +313,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: after_screenshot_spec.coffee...                                                 (1 of 1) 
+  Running:  after_screenshot_spec.coffee                                                    (1 of 1)
 
 
   ✓ cy.screenshot() - replacement
@@ -333,31 +333,32 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
   (Results)
 
-  ┌────────────────────────────────────────────┐
-  │ Tests:        4                            │
-  │ Passing:      3                            │
-  │ Failing:      1                            │
-  │ Pending:      0                            │
-  │ Skipped:      0                            │
-  │ Screenshots:  4                            │
-  │ Video:        true                         │
-  │ Duration:     X seconds                    │
-  │ Spec Ran:     after_screenshot_spec.coffee │
-  └────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  4                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     after_screenshot_spec.coffee                                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (2x2)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png (YYYYxZZZZ)
-  - /foo/bar/.projects/plugin-after-screenshot/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png (YYYYxZZZZ)
-  - /foo/bar/.projects/plugin-after-screenshot/screenshot-replacement.png (1x1)
+  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
+  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png          (YxX)
+  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png          (YxX)
+  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/plugin-after-screenshot/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_spec.coffee.mp     (X second)
+                          4                                                                         
 
 
 ====================================================================================================
@@ -365,11 +366,11 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ after_screenshot_spec.coffee              XX:XX        4        3        1        -        - │
+  │ ✖  after_screenshot_spec.coffee             XX:XX        4        3        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        4        3        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        4        3        1        -        -  
 
 
 `

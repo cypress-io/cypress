@@ -96,3 +96,10 @@ afterEach ->
   nock.enableNetConnect()
 
   process.env = _.clone(env)
+
+module.exports = {
+  expect: global.expect
+  nock: global.nock
+  proxyquire: global.proxyquire
+  sinon: global.sinon
+}

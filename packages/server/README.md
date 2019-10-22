@@ -40,6 +40,7 @@ Since this is slow, it's better to drive your development with tests.
 
 * `npm run test-unit` executes unit tests in [`test/unit`](./test/unit)
 * `npm run test-integration` executes integration tests in [`test/integration`](./test/integration)
+* `npm run test-performance` executes performance tests in [`test/performance`](./test/performance)
 * `npm run test-e2e` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
 
 Each of these tasks can run in "watch" mode by appending `-watch` to the task:
@@ -54,7 +55,7 @@ Because of the large number of dependencies of the server, it's much more perfor
 ## runs only this one test file
 npm run test ./test/unit/api_spec.coffee
 
-## works for integration tests too
+## works for integration tests
 npm run test ./test/integration/server_spec.coffee
 ```
 

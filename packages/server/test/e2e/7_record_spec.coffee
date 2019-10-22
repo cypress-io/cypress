@@ -297,7 +297,7 @@ describe "e2e record", ->
         secondInstancePut = requests[6]
         expect(secondInstancePut.body.error).to.be.null
         expect(secondInstancePut.body.tests).to.have.length(2)
-        expect(secondInstancePut.body.hooks).to.have.length(1)
+        expect(secondInstancePut.body.hooks).to.have.length(2)
         expect(secondInstancePut.body.screenshots).to.have.length(1)
         expect(secondInstancePut.body.stats.tests).to.eq(2)
         expect(secondInstancePut.body.stats.failures).to.eq(1)
@@ -318,7 +318,7 @@ describe "e2e record", ->
         thirdInstancePut = requests[11]
         expect(thirdInstancePut.body.error).to.be.null
         expect(thirdInstancePut.body.tests).to.have.length(2)
-        expect(thirdInstancePut.body.hooks).to.have.length(0)
+        expect(thirdInstancePut.body.hooks).to.have.length(1)
         expect(thirdInstancePut.body.screenshots).to.have.length(1)
         expect(thirdInstancePut.body.stats.tests).to.eq(2)
         expect(thirdInstancePut.body.stats.passes).to.eq(1)
@@ -340,7 +340,7 @@ describe "e2e record", ->
         fourthInstancePut = requests[15]
         expect(fourthInstancePut.body.error).to.be.null
         expect(fourthInstancePut.body.tests).to.have.length(1)
-        expect(fourthInstancePut.body.hooks).to.have.length(0)
+        expect(fourthInstancePut.body.hooks).to.have.length(1)
         expect(fourthInstancePut.body.screenshots).to.have.length(1)
         expect(fourthInstancePut.body.stats.tests).to.eq(1)
         expect(fourthInstancePut.body.stats.failures).to.eq(1)

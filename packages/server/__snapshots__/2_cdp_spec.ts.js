@@ -14,7 +14,7 @@ exports['e2e cdp / fails when remote debugging port cannot be connected to'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: spec.ts...                                                                      (1 of 1) 
+  Running:  spec.ts                                                                         (1 of 1)
 Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 5 seconds.
 
 This usually indicates there was a problem opening the Chrome browser.

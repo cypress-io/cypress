@@ -14,7 +14,7 @@ exports['e2e requests / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_spec.coffee...                                                          (1 of 1) 
+  Running:  request_spec.coffee                                                             (1 of 1)
 
 
   redirects + requests
@@ -37,23 +37,23 @@ exports['e2e requests / passes'] = `
 
   (Results)
 
-  ┌───────────────────────────────────┐
-  │ Tests:        12                  │
-  │ Passing:      12                  │
-  │ Failing:      0                   │
-  │ Pending:      0                   │
-  │ Skipped:      0                   │
-  │ Screenshots:  0                   │
-  │ Video:        true                │
-  │ Duration:     X seconds           │
-  │ Spec Ran:     request_spec.coffee │
-  └───────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        12                                                                               │
+  │ Passing:      12                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     request_spec.coffee                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.coffee.mp4             (X second)
 
 
 ====================================================================================================
@@ -61,11 +61,11 @@ exports['e2e requests / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ request_spec.coffee                       XX:XX       12       12        -        -        - │
+  │ ✔  request_spec.coffee                      XX:XX       12       12        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       12       12        -        -        -  
+    ✔  All specs passed!                        XX:XX       12       12        -        -        -  
 
 
 `
@@ -86,7 +86,7 @@ exports['e2e requests fails when network immediately fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_http_network_error_failing_spec.coffee...                               (1 of 1) 
+  Running:  request_http_network_error_failing_spec.coffee                                  (1 of 1)
 
 
   when network connection cannot be established
@@ -158,28 +158,30 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 
   (Results)
 
-  ┌──────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                              │
-  │ Passing:      0                                              │
-  │ Failing:      1                                              │
-  │ Pending:      0                                              │
-  │ Skipped:      0                                              │
-  │ Screenshots:  1                                              │
-  │ Video:        true                                           │
-  │ Duration:     X seconds                                      │
-  │ Spec Ran:     request_http_network_error_failing_spec.coffee │
-  └──────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     request_http_network_error_failing_spec.coffee                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/request_http_network_error_failing_spec.coffee/when network connection cannot be established -- fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing_spec.coffee/     (1280x720)
+     when network connection cannot be established -- fails (failed).png                            
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail     (X second)
+                          ing_spec.coffee.mp4                                                       
 
 
 ====================================================================================================
@@ -187,11 +189,12 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ request_http_network_error_failing_s…     XX:XX        1        -        1        -        - │
+  │ ✖  request_http_network_error_failing_      XX:XX        1        -        1        -        - │
+  │    spec.coffee                                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -212,7 +215,7 @@ exports['e2e requests fails on status code 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_status_code_failing_spec.coffee...                                      (1 of 1) 
+  Running:  request_status_code_failing_spec.coffee                                         (1 of 1)
 
 
   when status code isnt 2xx or 3xx
@@ -281,28 +284,30 @@ Body: Service Unavailable
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────┐
-  │ Tests:        1                                       │
-  │ Passing:      0                                       │
-  │ Failing:      1                                       │
-  │ Pending:      0                                       │
-  │ Skipped:      0                                       │
-  │ Screenshots:  1                                       │
-  │ Video:        true                                    │
-  │ Duration:     X seconds                               │
-  │ Spec Ran:     request_status_code_failing_spec.coffee │
-  └───────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     request_status_code_failing_spec.coffee                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/request_status_code_failing_spec.coffee/when status code isnt 2xx or 3xx -- fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing_spec.coffee/when st     (1280x720)
+     atus code isnt 2xx or 3xx -- fails (failed).png                                                
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe     (X second)
+                          c.coffee.mp4                                                              
 
 
 ====================================================================================================
@@ -310,11 +315,12 @@ Body: Service Unavailable
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ request_status_code_failing_spec.cof…     XX:XX        1        -        1        -        - │
+  │ ✖  request_status_code_failing_spec.co      XX:XX        1        -        1        -        - │
+  │    ffee                                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
@@ -335,7 +341,7 @@ exports['e2e requests prints long http props on fail 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: request_long_http_props_failing_spec.coffee...                                  (1 of 1) 
+  Running:  request_long_http_props_failing_spec.coffee                                     (1 of 1)
 
 
   when status code isnt 2xx or 3xx
@@ -413,28 +419,30 @@ Body: <!DOCTYPE html>
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────────┐
-  │ Tests:        1                                           │
-  │ Passing:      0                                           │
-  │ Failing:      1                                           │
-  │ Pending:      0                                           │
-  │ Skipped:      0                                           │
-  │ Screenshots:  1                                           │
-  │ Video:        true                                        │
-  │ Duration:     X seconds                                   │
-  │ Spec Ran:     request_long_http_props_failing_spec.coffee │
-  └───────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     request_long_http_props_failing_spec.coffee                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/request_long_http_props_failing_spec.coffee/when status code isnt 2xx or 3xx -- fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing_spec.coffee/whe     (1280x720)
+     n status code isnt 2xx or 3xx -- fails (failed).png                                            
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing     (X second)
+                          _spec.coffee.mp4                                                          
 
 
 ====================================================================================================
@@ -442,11 +450,12 @@ Body: <!DOCTYPE html>
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ request_long_http_props_failing_spec…     XX:XX        1        -        1        -        - │
+  │ ✖  request_long_http_props_failing_spe      XX:XX        1        -        1        -        - │
+  │    c.coffee                                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
