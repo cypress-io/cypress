@@ -51,13 +51,15 @@ commands:
       - run:
           name: Install Google Chrome
           command: |
-            set -e
+            ls ~/chrome_installers
             if [[ "$OSTYPE" == "darwin"* ]]; then
               hdiutil attach  ~/chrome_installers/google-chrome-stable.dmg
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
             else
               dpkg -i ~/chrome_installers/google-chrome-stable_current_amd64.deb || true
-              apt-get -f install 
+              apt-get -f install
+              which google-chrome
+              which google-chrome-stable
             fi
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
@@ -102,9 +104,9 @@ commands:
           paths:
             - node_modules
       - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-chrome-{{ checksum "chrome_installers" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-chrome-{{ checksum "~/chrome_installers" }}
           paths:
-            - chrome_installers
+            - ~/chrome_installers
       - save-cache:
           packageName: coffee
       - save-cache:
@@ -171,7 +173,7 @@ commands:
           packagePath: package.json
       - restore-cache:
           packageName: chrome
-          packagePath: chrome_installers
+          packagePath: ~/chrome_installers
       - restore-cache:
           packageName: coffee
           packagePath: packages/coffee/package.json
