@@ -1656,14 +1656,9 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('follows focus into date input', () => {
-          let charCount = 0
-
-          cy.$$('input:first').on('input', (e) => {
-            charCount++
-            if (charCount === 3) {
-              cy.$$('input[type=date]:first').focus()
-            }
-          })
+          cy.$$('input:first').on('input', _.after(4, (e) => {
+            cy.$$('input[type=date]:first').focus()
+          }))
 
           cy.get('input:first')
           .type('foo2010-10-10')
@@ -1679,14 +1674,9 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          let charCount = 0
-
-          cy.$$('input:first').on('input', (e) => {
-            charCount++
-            if (charCount === 3) {
-              cy.$$('input[type=date]:first').focus()
-            }
-          })
+          cy.$$('input:first').on('input', _.after(4, (e) => {
+            cy.$$('input[type=date]:first').focus()
+          }))
 
           cy.get('input:first')
           .type('fooBAR')

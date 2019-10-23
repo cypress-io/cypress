@@ -253,9 +253,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             if (typed === charsToType) {
               return $elements.setNativeProp(el, 'value', charsToType)
             }
-          } else {
-            return $selection.replaceSelectionContents(el, key)
           }
+
+          return $selection.replaceSelectionContents(el, key)
         },
 
         onAfterType () {

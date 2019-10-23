@@ -291,7 +291,6 @@ const validateTyping = (
 
   debug('validateTyping:', chars, el)
 
-  // debug('validateTyping', el, chars)
   const $el = $dom.wrap(el)
   const numElements = $el.length
   const isBody = $el.is('body')
@@ -711,9 +710,7 @@ export class Keyboard {
       }
     )
 
-    const modifierKeys = _.filter(keyDetailsArr, (key) => {
-      return isModifier(key)
-    })
+    const modifierKeys = _.filter(keyDetailsArr, isModifier)
 
     if (options.simulated && !options.delay) {
       _.each(typeKeyFns, (fn) => {
@@ -754,19 +751,20 @@ export class Keyboard {
     eventType: KeyEventType,
     keyDetails: KeyDetails,
     opts: {
-      onBeforeEvent?: (...args) => boolean
-      onEvent?: (...args) => boolean
       id: string
+      onEvent?: (...args) => boolean
+      onBeforeEvent?: (...args) => boolean
     }
   ) {
     debug('fireSimulatedEvent', eventType, keyDetails)
+
     const options = _.defaults(opts, {
       onBeforeEvent: _.noop,
       onEvent: _.noop,
     })
-
     const win = $window.getWindowByElement(el)
     const text = keyDetails.text
+
     let charCode: number | undefined
     let keyCode: number | undefined
     let which: number | undefined
@@ -776,7 +774,6 @@ export class Keyboard {
     let code: string | undefined = keyDetails.code
     let eventConstructor = 'KeyboardEvent'
     let cancelable = true
-
     let addModifiers = true
 
     switch (eventType) {
@@ -860,6 +857,7 @@ export class Keyboard {
     let event: Event
 
     debug('event options:', eventType, eventOptions)
+
     if (eventConstructor === 'TextEvent') {
       event = document.createEvent('TextEvent')
       // @ts-ignore
@@ -1071,9 +1069,7 @@ export class Keyboard {
 
     const doc = $document.getDocumentFromElement(el)
 
-    let activeEl = $elements.getActiveElByDocument(doc) || doc.body
-
-    return activeEl
+    return $elements.getActiveElByDocument(doc) || doc.body
   }
 
   performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {
