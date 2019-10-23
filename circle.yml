@@ -746,6 +746,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: ls -l
+      - run: ls -l cli/build
+      - run: ls -l /tmp
       - run: ls -l /tmp/urls
       # NPM package file should have filename cypress-<version>.tgz
       - run:
