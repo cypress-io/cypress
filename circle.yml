@@ -737,8 +737,9 @@ jobs:
       - run: ls -l /tmp/urls
       - store-npm-logs
       - run: pwd
+      - run: ls -l
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - cypress.tgz
       - persist_to_workspace:
