@@ -154,6 +154,13 @@ const setSelectionRange = function (el, start, end) {
   $elements.callNativeMethod(el, 'setSelectionRange', start, end)
 }
 
+// Whether or not the selection contains any text
+// since Selection.isCollapsed will be true when selection
+// is inside non-selectionRange input (e.g. input[type=email])
+const isSelectionCollapsed = function (selection: Selection) {
+  return !selection.toString()
+}
+
 const deleteRightOfCursor = function (el) {
   if ($elements.canSetSelectionRangeElement(el)) {
     const { start, end } = getSelectionBounds(el)
@@ -167,7 +174,7 @@ const deleteRightOfCursor = function (el) {
 
   const selection = _getSelectionByEl(el)
 
-  if (selection.isCollapsed) {
+  if (isSelectionCollapsed(selection)) {
     $elements.callNativeMethod(
       selection,
       'modify',
@@ -195,7 +202,7 @@ const deleteLeftOfCursor = function (el) {
 
   const selection = _getSelectionByEl(el)
 
-  if (selection.isCollapsed) {
+  if (isSelectionCollapsed(selection)) {
     $elements.callNativeMethod(
       selection,
       'modify',
