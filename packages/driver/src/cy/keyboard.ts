@@ -1,15 +1,15 @@
-import _ from 'lodash'
-import moment from 'moment'
 import Promise from 'bluebird'
 import Debug from 'debug'
-import $window from '../dom/window'
+import _ from 'lodash'
+import moment from 'moment'
 import $utils from '../cypress/utils.coffee'
-import * as $dom from '../dom'
-import * as $elements from '../dom/elements'
-import * as $document from '../dom/document'
-import * as $selection from '../dom/selection'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
+import * as $dom from '../dom'
+import * as $document from '../dom/document'
+import * as $elements from '../dom/elements'
+import * as $selection from '../dom/selection'
 import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/types'
+import $window from '../dom/window'
 
 const debug = Debug('cypress:driver:keyboard')
 
@@ -307,12 +307,12 @@ const validateTyping = (
   let isDateTime = false
 
   if ($elements.isInput(el)) {
-    isDate = $dom.isType(el, 'date')
-    isTime = $dom.isType(el, 'time')
-    isMonth = $dom.isType(el, 'month')
-    isWeek = $dom.isType(el, 'week')
+    isDate = $dom.isInputType(el, 'date')
+    isTime = $dom.isInputType(el, 'time')
+    isMonth = $dom.isInputType(el, 'month')
+    isWeek = $dom.isInputType(el, 'week')
     isDateTime =
-      $dom.isType(el, 'datetime') || $dom.isType(el, 'datetime-local')
+      $dom.isInputType(el, 'datetime') || $dom.isInputType(el, 'datetime-local')
   }
 
   const isFocusable = $elements.isFocusable($el)

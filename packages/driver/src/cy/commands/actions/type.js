@@ -132,8 +132,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         const $el = $dom.wrap(el)
 
         return (
-          ($dom.isSelector($el, 'input') && $dom.isType($el, 'submit')) ||
-          ($dom.isSelector($el, 'button') && !$dom.isType($el, 'button') && !$dom.isType($el, 'reset'))
+          ($dom.isSelector($el, 'input') && $dom.isInputType($el, 'submit')) ||
+          ($dom.isSelector($el, 'button') && !$dom.isInputType($el, 'button') && !$dom.isInputType($el, 'reset'))
         )
       })
     }

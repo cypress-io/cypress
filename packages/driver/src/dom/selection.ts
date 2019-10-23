@@ -1,6 +1,6 @@
+import * as $dom from '../dom'
 import * as $document from './document'
 import * as $elements from './elements'
-import * as $dom from '../dom'
 
 const _getSelectionBoundsFromTextarea = (el) => {
   return {
@@ -291,7 +291,7 @@ const _moveCursorUpOrDown = function (el, up) {
     // on an input, instead of moving the cursor
     // we want to perform the native browser action
     // which is to increment the step/interval
-    if ($elements.isType(el, 'number')) {
+    if ($elements.isInputType(el, 'number')) {
       if (up) {
         if (typeof el.stepUp === 'function') {
           el.stepUp()
