@@ -183,7 +183,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('actionability', () => {
-      it('can forcibly click even when element is invisible', () => {
+      it('can forcibly type + click even when element is invisible', () => {
         const $txt = cy.$$(':text:first').hide()
 
         expect($txt).not.to.have.value('foo')
@@ -199,7 +199,13 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('can forcibly click even when being covered by another element', () => {
+      it('can force type when element is disabled', function () {
+        cy.$$('input:text:first').prop('disabled', true)
+        cy.get('input:text:first').type('foo', { force: true })
+        .should('have.value', 'foo')
+      })
+
+      it('can forcibly type + click even when being covered by another element', () => {
         const $input = $('<input />')
         .attr('id', 'input-covered-in-span')
         .css({
@@ -1808,6 +1814,13 @@ describe('src/cy/commands/actions/type', () => {
           cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{backspace}u').then(($input) => {
             expect($input).to.have.value('bur')
           })
+        })
+
+        it('can delete all with {selectall}{backspace} in non-selectionrange element', () => {
+          cy.get('input[type=email]:first')
+          .should(($el) => $el.val('sdfsdf'))
+          .type('{selectall}{backspace}')
+          .should('have.value', '')
         })
 
         it('can backspace a selection range of characters', () => {
@@ -4415,22 +4428,6 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('input:text:first').type('foo')
       })
 
-      it('throws when subject is disabled and force:true', function (done) {
-        cy.timeout(200)
-
-        cy.$$('input:text:first').prop('disabled', true)
-
-        cy.on('fail', (err) => {
-          // get + type logs
-          expect(this.logs.length).eq(2)
-          expect(err.message).to.include('cy.type() failed because it targeted a disabled element.')
-
-          done()
-        })
-
-        cy.get('input:text:first').type('foo', { force: true })
-      })
-
       it('throws when submitting within nested forms')
 
       it('logs once when not dom subject', function (done) {
@@ -4532,11 +4529,11 @@ https://on.cypress.io/type`)
         })
       })
 
-      describe('naughtly strings', () => {
+      describe('naughty strings', () => {
         _.each(['Ω≈ç√∫˜µ≤≥÷', '2.2250738585072011e-308', '田中さんにあげて下さい',
           '<foo val=`bar\' />', '⁰⁴⁵₀₁₂', '🐵 🙈 🙉 🙊',
           '<script>alert(123)</script>', '$USER'], (val) => {
-          it(`allows typing some naughtly strings (${val})`, () => {
+          it(`allows typing some naughty strings (${val})`, () => {
             cy
             .get(':text:first').type(val)
             .should('have.value', val)

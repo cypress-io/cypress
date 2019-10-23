@@ -211,7 +211,7 @@ const getKeyDetails = (onKeyNotFound) => {
 
     onKeyNotFound(key, _.keys(getKeymap()).join(', '))
 
-    throw Error(`Not a valid key: ${key}`)
+    throw new Error('this can never happen')
   }
 }
 
@@ -280,7 +280,8 @@ const validateTyping = (
   keys: KeyDetails[],
   currentIndex: number,
   onFail: Function,
-  skipCheckUntilIndex?: number,
+  skipCheckUntilIndex: number | undefined,
+  force: boolean
 ) => {
   const chars = joinKeyArrayToString(keys.slice(currentIndex))
   const allChars = joinKeyArrayToString(keys)
@@ -328,15 +329,20 @@ const validateTyping = (
     return {}
   }
 
-  if (!isFocusable) {
+  // throw error if element, which is normally typeable, is disabled for some reason
+  // don't throw if force: true
+  if (!isFocusable && isTextLike && !force) {
     const node = $dom.stringify($el)
 
-    if (isTextLike) {
-      $utils.throwErrByPath('type.not_actionable_textlike', {
-        onFail,
-        args: { node },
-      })
-    }
+    $utils.throwErrByPath('type.not_actionable_textlike', {
+      onFail,
+      args: { node },
+    })
+  }
+
+  // throw error if element cannot receive keyboard events under any conditions
+  if (!isFocusable && !isTextLike) {
+    const node = $dom.stringify($el)
 
     $utils.throwErrByPath('type.not_on_typeable_element', {
       onFail,
@@ -660,6 +666,7 @@ export class Keyboard {
               currentKeyIndex,
               options.onFail,
               _skipCheckUntilIndex,
+              options.force
             )
 
             _skipCheckUntilIndex = skipCheckUntilIndex
