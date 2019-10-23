@@ -211,7 +211,7 @@ const getKeyDetails = (onKeyNotFound) => {
 
     onKeyNotFound(key, _.keys(getKeymap()).join(', '))
 
-    throw Error(`Not a valid key: ${key}`)
+    throw new Error('this can never happen')
   }
 }
 
