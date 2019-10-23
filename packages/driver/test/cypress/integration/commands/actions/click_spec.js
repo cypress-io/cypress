@@ -2152,7 +2152,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups MouseDown', () => {
-        cy.$$('input:first').mousedown(() => false)
+        cy.$$('input:first').mousedown(_.stubFalse)
 
         cy.get('input:first').click().then(function () {
           const consoleProps = this.lastLog.invoke('consoleProps')
@@ -2226,7 +2226,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups MouseUp', () => {
-        cy.$$('input:first').mouseup(() => false)
+        cy.$$('input:first').mouseup(_.stubFalse)
 
         cy.get('input:first').click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
@@ -2265,7 +2265,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups Click', () => {
-        cy.$$('input:first').click(() => false)
+        cy.$$('input:first').click(_.stubFalse)
 
         cy.get('input:first').click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
@@ -2370,7 +2370,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups have activated modifiers', () => {
-        cy.$$('input:first').click(() => false)
+        cy.$$('input:first').click(_.stubFalse)
 
         cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
