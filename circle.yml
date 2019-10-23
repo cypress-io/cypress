@@ -600,38 +600,32 @@ jobs:
             DEBUG: electron-builder,electron-osx-sign*
           command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
+      # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
-      - run: mkdir /tmp/urls
-      - run: cp cypress.zip /tmp/urls
-      - run: ls -l /tmp/urls
       - store-npm-logs
       - persist_to_workspace:
-          root: /tmp/urls
+          root: ~/
           paths:
-            - cypress.zip
+            - cypress/cypress.zip
 
   upload-binary:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
-      - run: ls -l .
-      - run: ls -l /tmp/urls
+      - run: ls -l
       - run:
           name: upload unique binary
           command: |
             node scripts/binary.js upload-unique-binary \
-              --file /tmp/urls/cypress.zip \
+              --file cypress.zip \
               --version $NEXT_DEV_VERSION
       - run: cat binary-url.json
-      - run: cp binary-url.json /tmp/urls
-      - run: ls -l /tmp/urls
       - store-npm-logs
       - persist_to_workspace:
-          root: /tmp/urls
+          root: ~/
           paths:
-            - binary-url.json
-            - cypress.zip
+            - cypress/binary-url.json
 
   test-kitchensink:
     <<: *defaults
@@ -742,10 +736,6 @@ jobs:
           root: ~/
           paths:
             - cypress/cypress.tgz
-      # - persist_to_workspace:
-      #     root: /tmp/urls
-      #     paths:
-      #       - cypress.tgz
 
   upload-npm-package:
     <<: *defaults
@@ -753,9 +743,6 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: ls -l
-      # - run: ls -l cli/build
-      # - run: ls -l /tmp
-      # - run: ls -l /tmp/urls
       # NPM package file should have filename cypress-<version>.tgz
       - run:
           name: upload NPM package
@@ -763,15 +750,13 @@ jobs:
             node scripts/binary.js upload-npm-package \
               --file cypress.tgz \
               --version $NEXT_DEV_VERSION
-      - run: cat npm-package-url.json
-      - run: cp npm-package-url.json .
-      - run: ls -l
       - store-npm-logs
+      - run: ls -l
+      - run: cat npm-package-url.json
       - persist_to_workspace:
           root: ~/
           paths:
             - cypress/npm-package-url.json
-            # - cypress/cypress.tgz
 
   "test-binary-and-npm-against-other-projects":
     <<: *defaults
@@ -780,8 +765,8 @@ jobs:
           at: ~/
       - attach_workspace:
           at: /tmp/urls
-      - run: ls -la /tmp/urls
-      - run: cat /tmp/urls/*.json
+      - run: ls -la
+      - run: cat *.json
       - run: mkdir /tmp/testing
       - run:
           name: create dummy package
@@ -792,8 +777,8 @@ jobs:
           name: Install Cypress
           command: |
             node scripts/test-unique-npm-and-binary.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
+              --npm npm-package-url.json \
+              --binary binary-url.json \
               --cwd /tmp/testing
       - run:
           name: Verify Cypress binary
