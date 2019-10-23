@@ -601,23 +601,47 @@ jobs:
           command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
       - run: ls -l *.zip
-      - run:
-          name: upload unique binary
-          command: |
-            node scripts/binary.js upload-unique-binary \
-              --file cypress.zip \
-              --version $NEXT_DEV_VERSION
-      - run: cat binary-url.json
+      # - run:
+      #     name: upload unique binary
+      #     command: |
+      #       node scripts/binary.js upload-unique-binary \
+      #         --file cypress.zip \
+      #         --version $NEXT_DEV_VERSION
+      # - run: cat binary-url.json
       - run: mkdir /tmp/urls
-      - run: cp binary-url.json /tmp/urls
+      # - run: cp binary-url.json /tmp/urls
       - run: cp cypress.zip /tmp/urls
       - run: ls /tmp/urls
       - store-npm-logs
       - persist_to_workspace:
           root: /tmp/urls
           paths:
-            - binary-url.json
+            # - binary-url.json
             - cypress.zip
+
+  upload-binary:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: ls -l
+      # - run:
+      #     name: upload unique binary
+      #     command: |
+      #       node scripts/binary.js upload-unique-binary \
+      #         --file cypress.zip \
+      #         --version $NEXT_DEV_VERSION
+      - run: cat binary-url.json
+      # - run: mkdir /tmp/urls
+      - run: cp binary-url.json /tmp/urls
+      # - run: cp cypress.zip /tmp/urls
+      - run: ls /tmp/urls
+      - store-npm-logs
+      - persist_to_workspace:
+          root: /tmp/urls
+          paths:
+            - binary-url.json
+            # - cypress.zip
 
   test-kitchensink:
     <<: *defaults
@@ -983,13 +1007,16 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-binary:
+        requires:
+          - build
+    - upload-binary:
         context: test-runner:upload
         filters:
           branches:
             only:
               - develop
         requires:
-          - build
+          - build-binary
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         filters:
