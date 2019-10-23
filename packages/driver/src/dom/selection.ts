@@ -154,6 +154,9 @@ const setSelectionRange = function (el, start, end) {
   $elements.callNativeMethod(el, 'setSelectionRange', start, end)
 }
 
+// Whether or not the selection contains any text
+// since Selection.isCollapsed will be true when selection
+// is inside non-selectionRange input (e.g. input[type=email])
 const isSelectionCollapsed = function (selection: Selection) {
   return !selection.toString()
 }

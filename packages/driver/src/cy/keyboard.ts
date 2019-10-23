@@ -329,6 +329,8 @@ const validateTyping = (
     return {}
   }
 
+  // throw error if element, which is normally typeable, is disabled for some reason
+  // don't throw if force: true
   if (!isFocusable && isTextLike && !force) {
     const node = $dom.stringify($el)
 
@@ -338,6 +340,7 @@ const validateTyping = (
     })
   }
 
+  // throw error if element cannot receive keyboard events under any conditions
   if (!isFocusable && !isTextLike) {
     const node = $dom.stringify($el)
 
