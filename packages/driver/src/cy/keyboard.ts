@@ -57,11 +57,11 @@ interface KeyDetails {
   }
 }
 
-const dateRegex = /^\d{4}-\d{2}-\d{2}/
-const monthRegex = /^\d{4}-(0\d|1[0-2])/
-const weekRegex = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
-const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
-const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
+const dateRe = /^\d{4}-\d{2}-\d{2}/
+const monthRe = /^\d{4}-(0\d|1[0-2])/
+const weekRe = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
+const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
+const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 const charsBetweenCurlyBracesRe = /({.+?})/
 
 const INITIAL_MODIFIERS = {
@@ -296,6 +296,13 @@ const validateTyping = (
   const numElements = $el.length
   const isBody = $el.is('body')
   const isTextLike = $dom.isTextLike(el)
+
+  let dateChars
+  let monthChars
+  let weekChars
+  let timeChars
+  let dateTimeChars
+
   let isDate = false
   let isTime = false
   let isMonth = false
@@ -352,11 +359,11 @@ const validateTyping = (
   }
 
   if (isDate) {
-    let dateChars
+    dateChars = dateRe.exec(chars)
 
     if (
       _.isString(chars) &&
-      (dateChars = dateRegex.exec(chars)) !== null &&
+      dateChars &&
       moment(dateChars[0]).isValid()
     ) {
       skipCheckUntilIndex = _getEndIndex(chars, dateChars[0])
@@ -372,9 +379,9 @@ const validateTyping = (
   }
 
   if (isMonth) {
-    let monthChars
+    monthChars = monthRe.exec(chars)
 
-    if (_.isString(chars) && (monthChars = monthRegex.exec(chars)) !== null) {
+    if (_.isString(chars) && monthChars) {
       skipCheckUntilIndex = _getEndIndex(chars, monthChars[0])
 
       return { skipCheckUntilIndex }
@@ -387,9 +394,9 @@ const validateTyping = (
   }
 
   if (isWeek) {
-    let weekChars
+    weekChars = weekRe.exec(chars)
 
-    if (_.isString(chars) && (weekChars = weekRegex.exec(chars)) !== null) {
+    if (_.isString(chars) && weekChars) {
       skipCheckUntilIndex = _getEndIndex(chars, weekChars[0])
 
       return { skipCheckUntilIndex }
@@ -402,9 +409,9 @@ const validateTyping = (
   }
 
   if (isTime) {
-    let timeChars
+    timeChars = timeRe.exec(chars)
 
-    if (_.isString(chars) && (timeChars = timeRegex.exec(chars)) !== null) {
+    if (_.isString(chars) && timeChars) {
       skipCheckUntilIndex = _getEndIndex(chars, timeChars[0])
 
       return { skipCheckUntilIndex }
@@ -417,12 +424,9 @@ const validateTyping = (
   }
 
   if (isDateTime) {
-    let dateTimeChars
+    dateTimeChars = dateTimeRe.exec(chars)
 
-    if (
-      _.isString(chars) &&
-      (dateTimeChars = dateTimeRegex.exec(chars)) !== null
-    ) {
+    if (_.isString(chars) && dateTimeChars) {
       skipCheckUntilIndex = _getEndIndex(chars, dateTimeChars[0])
 
       return { skipCheckUntilIndex }
