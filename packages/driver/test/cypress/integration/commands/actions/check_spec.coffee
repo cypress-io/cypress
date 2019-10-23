@@ -432,8 +432,8 @@ describe "src/cy/commands/actions/check", ->
       it "passes in coords", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
           lastLog = @lastLog
-          { fromWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
-          expect(lastLog.get("coords")).to.deep.eq(fromWindow)
+          { fromElWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
+          expect(lastLog.get("coords")).to.deep.eq(fromElWindow)
 
       it "ends command when checkbox is already checked", ->
         cy.get("[name=colors][value=blue]").check().check().then ->
@@ -445,13 +445,13 @@ describe "src/cy/commands/actions/check", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
           lastLog = @lastLog
 
-          { fromWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
+          { fromElWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
           console = lastLog.invoke("consoleProps")
           expect(console.Command).to.eq "check"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords).to.deep.eq(
-            _.pick(fromWindow, "x", "y")
+            _.pick(fromElWindow, "x", "y")
           )
 
       it "#consoleProps when checkbox is already checked", ->
@@ -836,13 +836,13 @@ describe "src/cy/commands/actions/check", ->
         cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
           lastLog = @lastLog
 
-          { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
+          { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
           console = lastLog.invoke("consoleProps")
           expect(console.Command).to.eq "uncheck"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
           expect(console.Elements).to.eq(1)
           expect(console.Coords).to.deep.eq(
-            _.pick(fromWindow, "x", "y")
+            _.pick(fromElWindow, "x", "y")
           )
 
       it "#consoleProps when checkbox is already unchecked", ->

@@ -10,7 +10,6 @@ export default (props) => {
   }
 
   const getStatus = () => {
-
     if (!status) {
       return ''
     }

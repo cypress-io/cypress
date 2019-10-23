@@ -83,7 +83,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   location = $Location.create(state)
   focused = $Focused.create(state)
   keyboard = $Keyboard.create(state)
-  mouse = $Mouse.create(state, keyboard)
+  mouse = $Mouse.create(state, keyboard, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -166,9 +166,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.SVGElement.prototype.blur = ->
         focused.interceptBlur(@)
-
-      contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(@)
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)

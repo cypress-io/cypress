@@ -326,7 +326,6 @@ const util = {
       }
 
       return os.release()
-
     })
   },
 

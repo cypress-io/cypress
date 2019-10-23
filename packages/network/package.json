@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "bin-up": "1.2.0",
+    "bin-up": "1.2.2",
     "express": "4.16.4",
     "request": "2.88.0",
     "request-promise": "4.2.4",
