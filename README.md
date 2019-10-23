@@ -90,7 +90,7 @@ Source maps are always enabled unless explicitly disabled by specifying `devtool
 
 ### watchOptions
 
-Object of options for watching. See [webpack's docs](https://webpack.github.io/docs/node.js-api.html#compiler).
+Object of options for watching. See [webpack's docs](https://webpack.js.org/configuration/watch).
 
 **Default**: `{}`
 
