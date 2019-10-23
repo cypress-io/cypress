@@ -183,7 +183,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('actionability', () => {
-      it('can forcibly click even when element is invisible', () => {
+      it('can forcibly type + click even when element is invisible', () => {
         const $txt = cy.$$(':text:first').hide()
 
         expect($txt).not.to.have.value('foo')
@@ -199,13 +199,13 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('can force click when element is disabled', function () {
+      it('can force type when element is disabled', function () {
         cy.$$('input:text:first').prop('disabled', true)
         cy.get('input:text:first').type('foo', { force: true })
         .should('have.value', 'foo')
       })
 
-      it('can forcibly click even when being covered by another element', () => {
+      it('can forcibly type + click even when being covered by another element', () => {
         const $input = $('<input />')
         .attr('id', 'input-covered-in-span')
         .css({
