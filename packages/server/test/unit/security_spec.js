@@ -138,12 +138,12 @@ const expected = `\
 `
 
 function match (varName, prop) {
-  return `(window.top.Cypress.resolveWindowReference(window, ${varName}, '${prop}'))`
+  return `window.top.Cypress.resolveWindowReference(window, ${varName}, '${prop}')`
 }
 
 describe('lib/util/security', () => {
   context('.strip', () => {
-    context('injects Cypress window property resolver', () => {
+    context.only('injects Cypress window property resolver', () => {
       [
         ['window.top', match('window', 'top')],
         ['window.parent', match('window', 'parent')],
@@ -155,8 +155,8 @@ describe('lib/util/security', () => {
         ['foowindow[\'top\']', match('foowindow', 'top')],
         ['window.topfoo'],
         ['window[\'topfoo\']'],
-        ['window.top.foo', `${match('window', 'top')}.foo`],
         ['window[\'top\'].foo', `${match('window', 'top')}.foo`],
+        ['window.top.foo', `${match('window', 'top')}.foo`],
         ['window.top["foo"]', `${match('window', 'top')}["foo"]`],
         ['window[\'top\']["foo"]', `${match('window', 'top')}["foo"]`],
         [
@@ -178,9 +178,21 @@ describe('lib/util/security', () => {
         // fun construct found in Apple's analytics code
         [
           'n = (c = n).parent',
-          `n = ${match('(c = n)', 'parent')}`,
+          `n = ${match('c = n', 'parent')}`,
         ],
-      ].forEach(([string, expected]) => {
+        // more apple goodness - `e` is an element
+        [
+          'e.top = "0"',
+          `(window.top.Cypress.resolveWindowReference(window, e, 'top', "0"))`,
+        ],
+        // test that double quotes remain double-quoted
+        [
+          'a = "b"; window.top',
+          `a = "b"; ${match('window', 'top')}`,
+        ],
+      ]
+      // .slice(0, 1)
+      .forEach(([string, expected]) => {
         if (!expected) {
           expected = string
         }
@@ -221,7 +233,6 @@ for (; !function (n) {
     })
 
     describe('libs', () => {
-
       const cdnUrl = 'https://cdnjs.cloudflare.com/ajax/libs'
 
       const needsDash = ['backbone', 'underscore']

@@ -1,5 +1,4 @@
-import _ from 'lodash'
-import { HtmlJsRewriter, rewriteHtmlJs, rewriteJs } from '@packages/rewriter'
+import { HtmlJsRewriter, rewriteHtmlJs, rewriteJs, RewriteNodeFn } from '@packages/rewriter'
 import duplexify from 'duplexify'
 import concatStream from 'concat-stream'
 import stream from 'stream'
@@ -7,14 +6,10 @@ import stream from 'stream'
 const pumpify = require('pumpify')
 const utf8Stream = require('utf8-stream')
 
-function match (varName, prop) {
-  return `(window.top.Cypress.resolveWindowReference(window, ${varName}, '${prop}'))`
-}
-
 // need to inject a ternary to determine if `prop === window.prop` (has not been redefined in a closure), now we're having fun
-const closureDetectionTern = (prop) => {
-  return `(${prop} === window['${prop}'] ? ${match('window', prop)} : ${prop})`
-}
+// const closureDetectionTern = (prop) => {
+//   return `(${prop} === window['${prop}'] ? ${match('window', prop)} : ${prop})`
+// }
 
 /**
  * Given an ESTree node and the corresponding source code, either:
@@ -27,61 +22,114 @@ const closureDetectionTern = (prop) => {
  * @param js Full JS source that `node` comes from
  * @param node ESTree node with range metadata
  */
-function rewriteJsFn (js: string, node) {
-  function get (path: string) {
-    return _.get(node, path)
+const rewriteJsFnsCb: RewriteNodeFn = (js, n) => {
+  const b = n.builders
+
+  function match (accessedObject, prop: string) {
+    return b.callExpression(
+      b.memberExpression(
+        b.memberExpression(
+          b.memberExpression(
+            b.identifier('window'),
+            b.identifier('top')
+          ),
+          b.identifier('Cypress')
+        ),
+        b.identifier('resolveWindowReference')
+      ),
+      [
+        // window
+        b.identifier('window'),
+        // accessedObject
+        accessedObject,
+        // 'prop'
+        b.stringLiteral(prop),
+      ]
+    )
   }
 
-  function eq (path: string, value: string) {
-    return get(path) === value
+  // (PROP === window['PROP'] ? MATCH : PROP)
+  function closureDetectionTern (prop) {
+    return b.conditionalExpression(
+      b.binaryExpression(
+        '===',
+        b.identifier(prop),
+        b.memberExpression(
+          b.identifier('window'),
+          b.stringLiteral(prop),
+          true
+        )
+      ),
+      match(b.identifier('window'), prop),
+      b.identifier(prop)
+    )
   }
 
-  // is it a property access?
-  if (eq('type', 'MemberExpression')) {
-    let prop
+  return {
+    visitMemberExpression (path) {
+      // is it a property access?
+      let prop
+      const { node } = path
 
-    // something.(top|parent)
-    if (eq('property.type', 'Identifier') && ['parent', 'top', 'location', 'frames'].includes(get('property.name'))) {
-      prop = get('property.name')
-    }
+      // function get (path: string) {
+      //   return _.get(node, path)
+      // }
 
-    // something['(top|parent)']
-    if (eq('property.type', 'Literal') && ['parent', 'top', 'location', 'frames'].includes(get('property.value'))) {
-      prop = get('property.value')
-    }
+      // function eq (path: string, value: string) {
+      //   return get(path) === value
+      // }
 
-    if (!prop) {
-      return
-    }
+      // something.(top|parent)
+      if (node.property.type === 'Identifier' && ['parent', 'top', 'location', 'frames'].includes(node.property.name)) {
+        prop = node.property.name
+      }
 
-    // don't use _.slice since it converts js to an array first
-    const objSrc = _.chain(js.slice(node.range[0], node.property.range[0]))
-    // sometimes the slice has a . or [ in it, wish i could find a more
-    // elegant way to fix
-    .trimEnd('.[')
-    .value()
+      // something['(top|parent)']
+      if (node.property.type === 'Literal' && ['parent', 'top', 'location', 'frames'].includes(String(node.property.value))) {
+        prop = String(node.property.value)
+      }
 
-    return match(objSrc, prop)
+      if (!prop) {
+        this.traverse(path)
+
+        return
+      }
+
+      // // don't use _.slice since it converts js to an array first
+      // const objSrc = _.chain(js.slice(node.range[0], node.property.range[0]))
+      // // sometimes the slice has a . or [ in it, wish i could find a more
+      // // elegant way to fix
+      // .trimEnd('.[')
+      // .value()
+
+      // TODO: this stringification can be thrown out when match is refactored not to use recast
+      // const objSrc = recast.print(path.node.original.object).code
+
+      path.replace(match(path.get('object').node, prop))
+
+      return false
+    },
+    visitBinaryExpression (path) {
+      const { node } = path
+
+      // is it a direct `top` or `parent` reference in a conditional?
+      // (top|parent) != .*
+      if (node.left.type === 'Identifier' && ['parent', 'top'].includes(node.left.name)) {
+        path.get('left').replace(closureDetectionTern(node.left.name))
+
+        return false
+      }
+
+      // .* != (top|parent)
+      if (node.right.type === 'Identifier' && ['parent', 'top'].includes(node.right.name)) {
+        path.get('right').replace(closureDetectionTern(node.right.name))
+
+        return false
+      }
+
+      this.traverse(path)
+    },
   }
-
-  // is it a direct `top` or `parent` reference in a conditional?
-  if (eq('type', 'BinaryExpression')) {
-    // (top|parent) != .*
-    if (eq('left.type', 'Identifier') && ['parent', 'top'].includes(get('left.name'))) {
-      const remainingSrc = js.slice(node.left.range[1], node.range[1])
-
-      return closureDetectionTern(get('left.name')) + remainingSrc
-    }
-
-    // .* != (top|parent)
-    if (eq('right.type', 'Identifier') && ['parent', 'top'].includes(get('right.name'))) {
-      const leadingSrc = js.slice(node.range[0], node.right.range[0])
-
-      return leadingSrc + closureDetectionTern(get('right.name'))
-    }
-  }
-
-  return
 }
 
 type SecurityOpts = {
@@ -90,17 +138,17 @@ type SecurityOpts = {
 
 const strip = (source, opts: SecurityOpts = {}) => {
   if (opts.isHtml) {
-    return rewriteHtmlJs(source, rewriteJsFn)
+    return rewriteHtmlJs(source, rewriteJsFnsCb)
   }
 
-  return rewriteJs(source, rewriteJsFn)
+  return rewriteJs(source, rewriteJsFnsCb)
 }
 
 const stripStream = (opts: SecurityOpts = {}) => {
   if (opts.isHtml) {
     return pumpify(
       utf8Stream(),
-      HtmlJsRewriter(rewriteJsFn)
+      HtmlJsRewriter(rewriteJsFnsCb)
     )
   }
 
@@ -110,7 +158,7 @@ const stripStream = (opts: SecurityOpts = {}) => {
     pumpify(
       utf8Stream(),
       concatStream((body) => {
-        pt.write(rewriteJs(body.toString(), rewriteJsFn))
+        pt.write(rewriteJs(body.toString(), rewriteJsFnsCb))
         pt.end()
       })
     ),

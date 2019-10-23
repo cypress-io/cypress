@@ -38,7 +38,7 @@ describe('src/cypress/resolve_window_reference', function () {
       cy.spy(unboundFn, 'bind')
 
       // @ts-ignore
-      const actual = Cypress.resolveWindowReference(null, unboundFnWindow, 'parent')
+      const actual = Cypress.resolveWindowReference({}, unboundFnWindow, 'parent')
 
       expect(actual).to.be.instanceOf(Function)
       expect(actual()).to.eq(unboundFnWindow)
@@ -49,47 +49,47 @@ describe('src/cypress/resolve_window_reference', function () {
       {
         name: 'returns autIframe given parent call in autIframe',
         currentWindow: autIframe,
-        maybeWindow: autIframe,
-        prop: 'parent',
+        accessedObject: autIframe,
+        accessedProp: 'parent',
         expected: autIframe,
       },
       {
         name: 'returns autIframe given top call in autIframe',
         currentWindow: autIframe,
-        maybeWindow: autIframe,
-        prop: 'top',
+        accessedObject: autIframe,
+        accessedProp: 'top',
         expected: autIframe,
       },
       {
         name: 'returns autIframe given parent call in nestedIframe',
         currentWindow: nestedIframe,
-        maybeWindow: nestedIframe,
-        prop: 'parent',
+        accessedObject: nestedIframe,
+        accessedProp: 'parent',
         expected: autIframe,
       },
       {
         name: 'returns autIframe given top call in nestedIframe',
         currentWindow: nestedIframe,
-        maybeWindow: nestedIframe,
-        prop: 'top',
+        accessedObject: nestedIframe,
+        accessedProp: 'top',
         expected: autIframe,
       },
       {
         name: 'returns nestedIframe given parent call in doublyNestedIframe',
         currentWindow: doublyNestedIframe,
-        maybeWindow: doublyNestedIframe,
-        prop: 'parent',
+        accessedObject: doublyNestedIframe,
+        accessedProp: 'parent',
         expected: nestedIframe,
       },
       {
         name: 'returns autIframe given top call in doublyNestedIframe',
         currentWindow: doublyNestedIframe,
-        maybeWindow: doublyNestedIframe,
-        prop: 'top',
+        accessedObject: doublyNestedIframe,
+        accessedProp: 'top',
         expected: autIframe,
       },
     ]
-    // .slice(2, 3)
+    // .slice(0, 1)
     .forEach((test) => {
       it(test.name, function () {
         const isWindow = cy.stub(Cypress.dom, 'isWindow')
@@ -106,7 +106,7 @@ describe('src/cypress/resolve_window_reference', function () {
         })
 
         // @ts-ignore
-        const actual = Cypress.resolveWindowReference(test.currentWindow, test.maybeWindow, test.prop)
+        const actual = Cypress.resolveWindowReference(test.currentWindow, test.accessedObject, test.accessedProp)
 
         expect(actual).to.eq(test.expected)
       })

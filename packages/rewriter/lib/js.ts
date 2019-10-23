@@ -1,57 +1,29 @@
-import _ from 'lodash'
 import debugModule from 'debug'
-import esprima = require('esprima')
-import { Node } from 'estree'
+import * as astTypes from 'ast-types'
+import * as recast from 'recast'
 
-export type RewriteNodeFn = (js: string, node: Node, meta: any) => string | undefined
-
-type Splice = {
-  start: number
-  end: number
-  contents: string
-}
+export type RewriteNodeFn = (js: string, n: typeof astTypes) => astTypes.Visitor
 
 const debug = debugModule('cypress:rewriter:js')
 
-export function rewriteJs (js: string, rewriteNodeFn: RewriteNodeFn) {
-  const splices : Splice[] = []
+export function rewriteJs (js: string, rewriteNodeFnsCb: RewriteNodeFn) {
+  const rewriteNodeFns = rewriteNodeFnsCb(js, astTypes)
 
   try {
-    esprima.parseScript(js, {
-      comment: true,
-      range: true,
-      tolerant: true,
-      tokens: true,
-    }, (node, meta) => {
-      const newContents = rewriteNodeFn(js, node, meta)
+    const ast = recast.parse(js)
 
-      if (!_.isUndefined(newContents)) {
-        splices.push({
-          start: meta.start.offset,
-          end: meta.end.offset,
-          contents: newContents,
-        })
-      }
-    })
+    astTypes.visit(ast, rewriteNodeFns)
+
+    return recast.print(ast, {
+      quote: 'single',
+    }).code
   } catch (err) {
     debug('got an error rewriting JS, returning unmodified %o', { err, js })
 
-    return js
-  }
-
-  let lastSpliceStart = js.length
-
-  splices
-  // splice from the end backwards so indices don't shift as we go
-  .sort((a, b) => b.end - a.end)
-  .forEach(({ start, end, contents }) => {
-    if (end > lastSpliceStart) {
-      return
+    if (process.env.CYPRESS_ENV !== 'production') {
+      throw err // TODO: remove?
     }
 
-    lastSpliceStart = start
-    js = js.slice(0, start) + contents + js.slice(end)
-  })
-
-  return js
+    return js
+  }
 }
