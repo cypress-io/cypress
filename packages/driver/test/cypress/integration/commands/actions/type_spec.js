@@ -2832,6 +2832,7 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
+        // sends keyboard events for modifiers https://github.com/cypress-io/cypress/issues/3316
         it('sends keyup event for activated modifiers when typing is finished', (done) => {
           const $input = cy.$$('input:text:first')
           const events = []
@@ -4251,7 +4252,7 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         // Updated not to input text when non-shift modifier is pressed
-        // https://github.com/cypress-io/cypress/issues/3316
+        // https://github.com/cypress-io/cypress/issues/5424
         it('has a table of keys', () => {
           cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
           .then(function () {
