@@ -19,10 +19,10 @@
     "watch": "webpack --watch --progress"
   },
   "devDependencies": {
-    "@cypress/react-tooltip": "0.5.2",
+    "@cypress/react-tooltip": "0.5.3",
     "@types/enzyme": "3.9.1",
     "@types/react": "16.8.17",
-    "bin-up": "1.2.0",
+    "bin-up": "1.2.2",
     "bluebird": "3.5.0",
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",

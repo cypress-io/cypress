@@ -1,5 +1,6 @@
 import mockRequire from 'mock-require'
 import { JSDOM } from 'jsdom'
+import * as ansiEscapes from 'ansi-escapes'
 
 declare global {
   module NodeJS {
@@ -59,12 +60,12 @@ export const register = ({
   const Module = require('module')
 
   const overrideRequire = () => {
-
     const _load = Module._load
 
     Module._load = function (...args) {
       let browserPkg = args
 
+      // Follow browser-field spec for importing modules
       if (!['path'].includes(args[0])) {
         try {
           browserPkg = [bresolve.sync.apply(this, args)]
@@ -73,13 +74,24 @@ export const register = ({
         }
       }
 
-      return _load.apply(this, browserPkg)
-    }
+      // Stub out all webpack-specific imports
+      if (args[0].includes('!')) {
+        return {}
+      }
 
+      const ret = _load.apply(this, browserPkg)
+
+      return ret
+    }
   }
 
   overrideRequire()
 }
+
+// eslint-disable-next-line
+after(() => {
+  process.stdout.write(ansiEscapes.cursorShow)
+})
 
 export const returnMockRequire = (name, modExport = {}) => {
   mockRequire(name, modExport)

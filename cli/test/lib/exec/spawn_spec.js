@@ -11,6 +11,7 @@ const mockedEnv = require('mocked-env')
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
 const spawn = require(`${lib}/exec/spawn`)
+const verify = require(`${lib}/tasks/verify`)
 const util = require(`${lib}/util.js`)
 const expect = require('chai').expect
 
@@ -39,7 +40,10 @@ describe('lib/exec/spawn', function () {
       },
     }
 
-    sinon.stub(process, 'stdin').value(new EE)
+    // process.stdin is both an event emitter and a readable stream
+    this.processStdin = new EE()
+    this.processStdin.pipe = sinon.stub().returns(undefined)
+    sinon.stub(process, 'stdin').value(this.processStdin)
     sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
     sinon.stub(xvfb, 'start').resolves()
     sinon.stub(xvfb, 'stop').resolves()
@@ -73,8 +77,17 @@ describe('lib/exec/spawn', function () {
   })
 
   context('.start', function () {
+    // ️️⚠️ NOTE ⚠️
+    // when asserting the calls made to spawn the child Cypress process
+    // we have to be _very_ careful. Spawn uses process.env object, if an assertion
+    // fails, it will print the entire process.env object to the logs, which
+    // might contain sensitive environment variables. Think about what the
+    // failed assertion might print to the public CI logs and limit
+    // the environment variables when running tests on CI.
+
     it('passes args + options to spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(false)
 
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
@@ -89,8 +102,30 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    it('uses --no-sandbox when needed', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(true)
+
+      return spawn.start('--foo', { foo: 'bar' })
+      .then(() => {
+        // skip the options argument: we do not need anything about it
+        // and also less risk that a failed assertion would dump the
+        // entire ENV object with possible sensitive variables
+        const args = cp.spawn.firstCall.args.slice(0, 2)
+        const expectedCliArgs = [
+          '--foo',
+          '--cwd',
+          cwd,
+          '--no-sandbox',
+        ]
+
+        expect(args).to.deep.equal(['/path/to/cypress', expectedCliArgs])
+      })
+    })
+
     it('uses npm command when running in dev mode', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(false)
 
       const p = path.resolve('..', 'scripts', 'start.js')
 
@@ -116,6 +151,23 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo')
       .then(() => {
         expect(xvfb.start).to.be.calledOnce
+      })
+    })
+
+    context('closes', function () {
+      ['close', 'exit'].forEach((event) => {
+        it(`if '${event}' event fired`, function () {
+          this.spawnedProcess.on.withArgs(event).yieldsAsync(0)
+
+          return spawn.start('--foo')
+        })
+      })
+
+      it('if exit event fired and close event fired', function () {
+        this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
+        this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+        return spawn.start('--foo')
       })
     })
 
@@ -292,6 +344,9 @@ describe('lib/exec/spawn', function () {
       return spawn.start()
       .then(() => {
         expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq('pipe')
+        // parent process STDIN was piped to child process STDIN
+        expect(this.processStdin.pipe, 'process.stdin').to.have.been.calledOnce
+        .and.to.have.been.calledWith(this.spawnedProcess.stdin)
       })
     })
 
@@ -401,24 +456,28 @@ describe('lib/exec/spawn', function () {
       })
     })
 
-    it('catches process.stdin errors and returns when code=EPIPE', function () {
-      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+    // https://github.com/cypress-io/cypress/issues/1841
+    // https://github.com/cypress-io/cypress/issues/5241
+    ;['EPIPE', 'ENOTCONN'].forEach((errCode) => {
+      it(`catches process.stdin errors and returns when code=${errCode}`, function () {
+        this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      return spawn.start()
-      .then(() => {
-        let called = false
+        return spawn.start()
+        .then(() => {
+          let called = false
 
-        const fn = () => {
-          called = true
-          const err = new Error()
+          const fn = () => {
+            called = true
+            const err = new Error()
 
-          err.code = 'EPIPE'
+            err.code = errCode
 
-          return process.stdin.emit('error', err)
-        }
+            return process.stdin.emit('error', err)
+          }
 
-        expect(fn).not.to.throw()
-        expect(called).to.be.true
+          expect(fn).not.to.throw()
+          expect(called).to.be.true
+        })
       })
     })
 

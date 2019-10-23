@@ -39,6 +39,7 @@ Watchers   = require("#{root}lib/watchers")
 browsers   = require("#{root}lib/browsers")
 videoCapture = require("#{root}lib/video_capture")
 browserUtils = require("#{root}lib/browsers/utils")
+chromeBrowser = require("#{root}lib/browsers/chrome")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
 system        = require("#{root}lib/util/system")
@@ -123,7 +124,7 @@ describe "lib/cypress", ->
     .callThrough()
     .withArgs("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
     .returns(null)
-    
+
     sinon.spy(errors, "log")
     sinon.spy(errors, "logException")
     sinon.spy(console, "log")
@@ -383,7 +384,7 @@ describe "lib/cypress", ->
         ])
       .each(ensureDoesNotExist)
       .then =>
-        @expectExitWithErr("PROJECT_DOES_NOT_EXIST", @pristinePath)
+        @expectExitWithErr("CONFIG_FILE_NOT_FOUND", @pristinePath)
 
     it "does not scaffold integration or example specs when runMode", ->
       settings.write(@pristinePath, {})
@@ -646,9 +647,8 @@ describe "lib/cypress", ->
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
-      if process.env.CI
-        ## Gleb: disabling this because Node 8 docker image runs as root
-        ## which makes accessing everything possible.
+      ## test disabled if running as root - root can write all things at all times
+      if process.geteuid() == 0
         return
 
       permissionsPath = path.resolve("./permissions")
@@ -765,6 +765,10 @@ describe "lib/cypress", ->
 
         ee = new EE()
         ee.kill = ->
+          # ughh, would be nice to test logic inside the launcher
+          # that cleans up after the browser exit
+          # like calling client.close() if available to let the
+          # browser free any resources
           ee.emit("exit")
         ee.close = ->
           ee.emit("closed")
@@ -775,7 +779,7 @@ describe "lib/cypress", ->
           debugger: {
             on: sinon.stub()
             attach: sinon.stub()
-            sendCommand: sinon.stub()
+            sendCommand: sinon.stub().resolves()
           }
           setUserAgent: sinon.stub()
           session: {
@@ -787,10 +791,23 @@ describe "lib/cypress", ->
 
         sinon.stub(browserUtils, "launch").resolves(ee)
         sinon.stub(Windows, "create").returns(ee)
-        sinon.stub(Windows, "automation")
 
       context "before:browser:launch", ->
         it "chrome", ->
+          # during testing, do not try to connect to the remote interface or
+          # use the Chrome remote interface client
+          criClient = {
+            ensureMinimumProtocolVersion: sinon.stub().resolves()
+            close: sinon.stub().resolves()
+          }
+          sinon.stub(chromeBrowser, "_connectToChromeRemoteInterface").resolves(criClient)
+          # the "returns(resolves)" stub is due to curried method
+          # it accepts URL to visit and then waits for actual CRI client reference
+          # and only then navigates to that URL
+          sinon.stub(chromeBrowser, "_navigateUsingCRI").resolves()
+
+          sinon.stub(chromeBrowser, "_setAutomation").returns()
+
           cypress.start([
             "--run-project=#{@pluginBrowser}"
             "--browser=chrome"
@@ -809,6 +826,10 @@ describe "lib/cypress", ->
             ])
 
             @expectExitWith(0)
+
+            expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
+            expect(chromeBrowser._setAutomation).to.have.been.calledOnce
+            expect(chromeBrowser._connectToChromeRemoteInterface).to.have.been.calledOnce
 
         it "electron", ->
           writeVideoFrame = sinon.stub()
@@ -891,6 +912,35 @@ describe "lib/cypress", ->
           })
 
           @expectExitWith(0)
+
+    describe "--config-file", ->
+      it "false does not require cypress.json to run", ->
+        fs.statAsync(path.join(@pristinePath, 'cypress.json'))
+          .then =>
+            throw new Error("cypress.json should not exist")
+          .catch {code: "ENOENT"}, =>
+            cypress.start([
+              "--run-project=#{@pristinePath}"
+              "--no-run-mode",
+              "--config-file",
+              "false"
+            ]).then =>
+              @expectExitWith(0)
+
+      it "with a custom config file fails when it doesn't exist", ->
+        @filename = "abcdefgh.test.json"
+
+        fs.statAsync(path.join(@todosPath, @filename))
+          .then =>
+            throw new Error("#{@filename} should not exist")
+          .catch {code: "ENOENT"}, =>
+            cypress.start([
+              "--run-project=#{@todosPath}"
+              "--no-run-mode",
+              "--config-file",
+              @filename
+            ]).then =>
+              @expectExitWithErr("CONFIG_FILE_NOT_FOUND", @filename, @todosPath)
 
   ## most record mode logic is covered in e2e tests.
   ## we only need to cover the edge cases / warnings
@@ -1395,6 +1445,49 @@ describe "lib/cypress", ->
         Events.handleEvent(options, bus, event, 123, "open:project", @todosPath)
       .then ->
         expect(event.sender.send.withArgs("response").firstCall.args[1].data).to.eql(warning)
+
+    describe "--config-file", ->
+      beforeEach ->
+        @filename = "foo.bar.baz.asdf.quux.json"
+        @open = sinon.stub(Server.prototype, "open").resolves([])
+
+      it "reads config from a custom config file", ->
+        sinon.stub(fs, "readJsonAsync")
+        fs.readJsonAsync.withArgs(path.join(@pristinePath, @filename)).resolves({
+          env: { foo: "bar" },
+          port: 2020
+        })
+        fs.readJsonAsync.callThrough()
+
+        cypress.start([
+          "--config-file=#{@filename}"
+        ])
+        .then =>
+          options = Events.start.firstCall.args[0]
+          Events.handleEvent(options, {}, {}, 123, "open:project", @pristinePath)
+        .then =>
+          expect(@open).to.be.called
+
+          cfg = @open.getCall(0).args[0]
+
+          expect(cfg.env.foo).to.equal("bar")
+          expect(cfg.port).to.equal(2020)
+
+      it "creates custom config file if it does not exist", ->
+        write = sinon.spy(settings, "_write")
+
+        cypress.start([
+          "--config-file=#{@filename}"
+        ])
+        .then =>
+          options = Events.start.firstCall.args[0]
+          Events.handleEvent(options, {}, {}, 123, "open:project", @pristinePath)
+        .then =>
+          expect(@open).to.be.called
+
+          fs.readJsonAsync(path.join(@pristinePath, @filename))
+          .then (json) =>
+            expect(json).to.deep.equal({})
 
   context "--cwd", ->
     beforeEach ->

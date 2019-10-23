@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "3.4.1",
+  "version": "3.5.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -27,6 +27,7 @@
     "cypress:verify": "node ./cli/bin/cypress verify --dev",
     "predecaffeinate-bulk": "shx cp .eslintrc.decaffeinate.js .eslintrc.js",
     "decaffeinate-bulk": "bulk-decaffeinate",
+    "postdecaffeinate-bulk": "shx rm .eslintrc.js || true",
     "dev": "node ./scripts/start.js",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
@@ -46,7 +47,7 @@
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "npm run check-deps-pre",
     "start": "node ./cli/bin/cypress open --dev --global",
-    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,spec_helper.coffee",
+    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components --exclude e2e.coffee",
     "stop-only-all": "npm run stop-only -- --folder packages",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "test-debug-package": "node ./scripts/test-debug-package.js",
@@ -63,11 +64,10 @@
     }
   },
   "devDependencies": {
-    "@cypress/bumpercar": "2.0.9",
+    "@cypress/bumpercar": "2.0.12",
     "@cypress/commit-message-install": "2.7.0",
     "@cypress/env-or-json-file": "2.0.0",
-    "@cypress/eslint-plugin-dev": "3.7.1",
-    "@cypress/eslint-plugin-json": "3.2.1",
+    "@cypress/eslint-plugin-dev": "5.0.0",
     "@cypress/github-commit-status-check": "1.5.0",
     "@cypress/npm-run-all": "4.0.5",
     "@cypress/questions-remain": "1.0.1",
@@ -99,17 +99,16 @@
     "chalk": "2.4.2",
     "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
-    "cloudflare-cli": "3.2.2",
     "coffeelint": "1.16.2",
     "common-tags": "1.8.0",
-    "console.table": "0.10.0",
     "debug": "4.1.1",
     "decaffeinate": "6.0.1",
     "del": "3.0.0",
     "electron-builder": "20.39.0",
-    "eslint": "5.16.0",
+    "eslint": "6.1.0",
     "eslint-plugin-cypress": "2.6.0",
-    "eslint-plugin-mocha": "5.3.0",
+    "eslint-plugin-json-format": "2.0.0",
+    "eslint-plugin-mocha": "6.1.0",
     "eslint-plugin-react": "7.14.2",
     "execa": "1.0.0",
     "execa-wrap": "1.4.0",
@@ -132,7 +131,7 @@
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
-    "lint-staged": "8.2.1",
+    "lint-staged": "9.4.1",
     "lodash": "4.17.15",
     "make-empty-github-commit": "1.2.0",
     "mocha": "3.5.3",
@@ -148,19 +147,21 @@
     "print-arch": "1.0.0",
     "proxyquire": "2.1.0",
     "ramda": "0.24.1",
+    "request": "2.88.0",
+    "request-promise": "4.2.4",
     "shelljs": "0.8.3",
     "shx": "0.3.2",
     "sinon": "7.3.2",
-    "snap-shot-it": "7.8.0",
+    "snap-shot-it": "7.9.0",
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",
-    "ts-node": "8.2.0",
-    "typescript": "3.4.5",
+    "ts-node": "8.3.0",
+    "typescript": "3.5.3",
     "vinyl-paths": "2.1.0"
   },
   "engines": {
-    "node": ">=8.9.3"
+    "node": "12.0.0"
   },
   "productName": "Cypress",
   "license": "MIT",
@@ -189,7 +190,11 @@
     "testing"
   ],
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,coffee,json,eslintrc}": [
+    "*.coffee": [
+      "npm run stop-only -- --folder",
+      "git add"
+    ],
+    "*.{js,jsx,ts,tsx,json,eslintrc}": [
       "npm run stop-only -- --folder",
       "eslint --fix",
       "git add"

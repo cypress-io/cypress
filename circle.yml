@@ -23,7 +23,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node8.9.3-npm6.10.1-chrome75
+      - image: cypress/browsers:node12.0.0-chrome73
     environment:
       PLATFORM: linux
 
@@ -37,6 +37,30 @@ executors:
       PLATFORM: mac
 
 commands:
+  run-e2e-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+      chunk:
+        description: e2e test chunk number
+        type: integer
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
+  store-npm-logs:
+    description: Saves any NPM debug logs as artifacts in case there is a problem
+    steps:
+      - store_artifacts:
+          path: ~/.npm/_logs
+
   # for caching node modules use project environment variable
   # like CACHE_VERSION=15
   save-cache:
@@ -226,6 +250,7 @@ jobs:
       - run: npm run all prune
 
       - save-caches
+      - store-npm-logs
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
@@ -240,6 +265,7 @@ jobs:
           at: ~/
       ## this will catch .only's in js/coffee as well
       - run: npm run lint-all
+      - store-npm-logs
 
   unit-tests:
     <<: *defaults
@@ -269,6 +295,7 @@ jobs:
       - run: npm run all test -- --package static
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   lint-types:
     <<: *defaults
@@ -285,6 +312,7 @@ jobs:
       - run:
           command: npm run dtslint
           working_directory: cli
+      - store-npm-logs
 
   "server-unit-tests":
     <<: *defaults
@@ -295,6 +323,7 @@ jobs:
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-integration-tests":
     <<: *defaults
@@ -305,6 +334,7 @@ jobs:
       - run: npm run all test-integration -- --package server
       - store_test_results:
           path: /tmp/cypress
+      - store-npm-logs
 
   "server-performance-tests":
       <<: *defaults
@@ -317,98 +347,123 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
 
-  "server-e2e-tests-1":
+  "server-e2e-tests-chrome-1":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 1
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 1
 
-  "server-e2e-tests-2":
+  "server-e2e-tests-chrome-2":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 2
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 2
 
-  "server-e2e-tests-3":
+  "server-e2e-tests-chrome-3":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 3
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 3
 
-  "server-e2e-tests-4":
+  "server-e2e-tests-chrome-4":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 4
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 4
 
-  "server-e2e-tests-5":
+  "server-e2e-tests-chrome-5":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 5
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 5
 
-  "server-e2e-tests-6":
+  "server-e2e-tests-chrome-6":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 6
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 6
 
-  "server-e2e-tests-7":
+  "server-e2e-tests-chrome-7":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 7
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 7
 
-  "server-e2e-tests-8":
-      <<: *defaults
-      steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 8
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-
-  "driver-integration-tests-3x":
+  "server-e2e-tests-chrome-8":
     <<: *defaults
-    parallelism: 3
+    steps:
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 8
+
+  "server-e2e-tests-electron-1":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 1
+
+  "server-e2e-tests-electron-2":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 2
+
+  "server-e2e-tests-electron-3":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 3
+
+  "server-e2e-tests-electron-4":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 4
+
+  "server-e2e-tests-electron-5":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 5
+
+  "server-e2e-tests-electron-6":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 6
+
+  "server-e2e-tests-electron-7":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 7
+
+  "server-e2e-tests-electron-8":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 8
+
+  "driver-integration-tests-chrome":
+    <<: *defaults
+    parallelism: 5
     steps:
       - attach_workspace:
           at: ~/
@@ -423,12 +478,38 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 3x-driver-chrome --browser chrome
+            npm run cypress:run -- --record --parallel --group 5x-driver-chrome --browser chrome
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
+
+  # "driver-integration-tests-electron":
+  #   <<: *defaults
+  #   parallelism: 5
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         command: npm start
+  #         background: true
+  #         working_directory: packages/driver
+  #     - run:
+  #         command: $(npm bin)/wait-on http://localhost:3500
+  #         working_directory: packages/driver
+  #     - run:
+  #         command: |
+  #           CYPRESS_KONFIG_ENV=production \
+  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+  #           npm run cypress:run -- --record --parallel --group 5x-driver-electron --browser electron
+  #         working_directory: packages/driver
+  #     - store_test_results:
+  #         path: /tmp/cypress
+  #     - store_artifacts:
+  #         path: /tmp/artifacts
+  #     - store-npm-logs
 
   "desktop-gui-integration-tests-2x":
     <<: *defaults
@@ -449,6 +530,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
 
   "reporter-integration-tests":
     <<: *defaults
@@ -468,6 +550,7 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
 
   "run-launcher":
     <<: *defaults
@@ -529,6 +612,7 @@ jobs:
       - run: cp binary-url.json /tmp/urls
       - run: cp cypress.zip /tmp/urls
       - run: ls /tmp/urls
+      - store-npm-logs
       - persist_to_workspace:
           root: /tmp/urls
           paths:
@@ -560,6 +644,7 @@ jobs:
             CYPRESS_ENV=staging \
             CYPRESS_video=false \
             npm run cypress:run -- --project /tmp/repo --record
+      - store-npm-logs
 
   "test-against-staging":
     <<: *defaults
@@ -576,6 +661,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
             npm run cypress:run -- --project /tmp/repo --record
+      - store-npm-logs
 
   "build-npm-package":
     <<: *defaults
@@ -616,6 +702,7 @@ jobs:
       - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
       - run: cp npm-package-url.json /tmp/urls
       - run: ls /tmp/urls
+      - store-npm-logs
       - persist_to_workspace:
           root: /tmp/urls
           paths:
@@ -661,6 +748,7 @@ jobs:
               --npm /tmp/urls/npm-package-url.json \
               --binary /tmp/urls/binary-url.json \
               --provider circle
+      - store-npm-logs
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
@@ -690,6 +778,7 @@ jobs:
           name: Verify Cypress binary
           working_directory: test-binary
           command: $(npm bin)/cypress verify
+      - store-npm-logs
 
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
@@ -719,6 +808,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
             $(npm bin)/cypress run --record
+      - store-npm-logs
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -748,6 +838,7 @@ jobs:
       - run:
           working_directory: /tmp/kitchensink
           command: npm run e2e
+      - store-npm-logs
 
 linux-workflow: &linux-workflow
   jobs:
@@ -772,33 +863,61 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
-    - server-e2e-tests-1:
+    - server-e2e-tests-chrome-1:
         requires:
           - build
-    - server-e2e-tests-2:
+    - server-e2e-tests-chrome-2:
         requires:
           - build
-    - server-e2e-tests-3:
+    - server-e2e-tests-chrome-3:
         requires:
           - build
-    - server-e2e-tests-4:
+    - server-e2e-tests-chrome-4:
         requires:
           - build
-    - server-e2e-tests-5:
+    - server-e2e-tests-chrome-5:
         requires:
           - build
-    - server-e2e-tests-6:
+    - server-e2e-tests-chrome-6:
         requires:
           - build
-    - server-e2e-tests-7:
+    - server-e2e-tests-chrome-7:
         requires:
           - build
-    - server-e2e-tests-8:
+    - server-e2e-tests-chrome-8:
         requires:
           - build
-    - driver-integration-tests-3x:
+    - server-e2e-tests-electron-1:
         requires:
           - build
+    - server-e2e-tests-electron-2:
+        requires:
+          - build
+    - server-e2e-tests-electron-3:
+        requires:
+          - build
+    - server-e2e-tests-electron-4:
+        requires:
+          - build
+    - server-e2e-tests-electron-5:
+        requires:
+          - build
+    - server-e2e-tests-electron-6:
+        requires:
+          - build
+    - server-e2e-tests-electron-7:
+        requires:
+          - build
+    - server-e2e-tests-electron-8:
+        requires:
+          - build
+    - driver-integration-tests-chrome:
+        requires:
+          - build
+    ## TODO: add these back in when flaky tests are fixed
+    # - driver-integration-tests-electron:
+    #     requires:
+    #       - build
     - desktop-gui-integration-tests-2x:
         requires:
           - build
@@ -811,6 +930,7 @@ linux-workflow: &linux-workflow
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
@@ -818,6 +938,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
@@ -825,6 +946,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-npm-package:
+        context: test-runner:upload
         filters:
           branches:
             only:
@@ -832,6 +954,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-binary:
+        context: test-runner:upload
         filters:
           branches:
             only:
@@ -839,6 +962,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - test-binary-and-npm-against-other-projects:
+        context: test-runner:trigger-test-jobs
         filters:
           branches:
             only:
@@ -855,6 +979,7 @@ linux-workflow: &linux-workflow
           - build-npm-package
           - build-binary
     - test-binary-against-staging:
+        context: test-runner:record-tests
         filters:
           branches:
             only:
@@ -886,6 +1011,7 @@ mac-workflow: &mac-workflow
 
     - build-npm-package:
         name: Mac NPM package
+        context: test-runner:upload
         executor: mac
         filters:
           branches:
@@ -920,6 +1046,7 @@ mac-workflow: &mac-workflow
           - Mac binary
 
     - test-binary-against-staging:
+        context: test-runner:record-tests
         name: Test Mac binary against staging
         executor: mac
         filters:
@@ -931,6 +1058,7 @@ mac-workflow: &mac-workflow
           - Mac binary
 
     - test-binary-and-npm-against-other-projects:
+        context: test-runner:trigger-test-jobs
         name: Test Mac binary against other projects
         executor: mac
         filters:

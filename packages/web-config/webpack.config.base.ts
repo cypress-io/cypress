@@ -22,7 +22,7 @@ if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reload
 
 process.env.NODE_ENV = env
 
-const config: webpack.Configuration = {
+const commonConfig: webpack.Configuration = {
   mode: 'none',
   node: {
     fs: 'empty',
@@ -82,6 +82,13 @@ const config: webpack.Configuration = {
         exclude: /node_modules/,
         use: [
           { loader: MiniCSSExtractWebpackPlugin.loader },
+        ],
+      },
+      {
+        test: /\.s?css$/,
+        exclude: /node_modules/,
+        enforce: 'pre',
+        use: [
           {
             loader: require.resolve('css-loader'),
             options: {
@@ -184,9 +191,8 @@ const config: webpack.Configuration = {
   ],
 
   cache: true,
-
 }
 
-export default config
+export default commonConfig
 
 export { HtmlWebpackPlugin }

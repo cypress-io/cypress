@@ -15,12 +15,13 @@ $Commands = require("./cypress/commands")
 $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
+$Keyboard = require("./cy/keyboard")
 $SetterGetter = require("./cypress/setter_getter")
-$Keyboard = require("./cypress/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
+$Mouse = require("./cy/mouse")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
 $Screenshot = require("./cypress/screenshot")
@@ -171,7 +172,7 @@ class $Cypress
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @state, @config, @log)
+    @Commands = $Commands.create(@, @cy, @state, @config)
 
     @events.proxyTo(@cy)
 
@@ -472,6 +473,7 @@ class $Cypress
   Log: $Log
   LocalStorage: $LocalStorage
   Mocha: $Mocha
+  Mouse: $Mouse
   Runner: $Runner
   Server: $Server
   Screenshot: $Screenshot
@@ -500,5 +502,6 @@ class $Cypress
 ## attaching these so they are accessible
 ## via the runner + integration spec helper
 $Cypress.$ = $
+$Cypress.dom = $dom
 
 module.exports = $Cypress

@@ -33,7 +33,7 @@ class UpdateBanner extends Component {
     document.getElementsByTagName('html')[0].classList.add('has-updates')
 
     return (
-      <div id='updates-available'>
+      <div className='updates-available'>
         New updates are available
         <strong onClick={() => this._toggleModal(true)}>
           <i className='fa fa-download'></i>{' '}
@@ -94,7 +94,6 @@ class UpdateBanner extends Component {
         </li>
       </ol>
     )
-
   }
 
   _checkForUpdate () {

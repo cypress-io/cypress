@@ -2,12 +2,7 @@ bodyParser   = require("body-parser")
 cookieParser = require("cookie-parser")
 e2e          = require("../support/helpers/e2e")
 
-counts = {
-  "localhost:2290": 0
-  "localhost:2291": 0
-  "localhost:2292": 0
-  "localhost:2293": 0
-}
+counts = null
 
 urlencodedParser = bodyParser.urlencoded({ extended: false })
 jsonParser       = bodyParser.json()
@@ -131,12 +126,19 @@ describe "e2e requests", ->
     }]
   })
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "request_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  beforeEach ->
+    counts = {
+      "localhost:2290": 0
+      "localhost:2291": 0
+      "localhost:2292": 0
+      "localhost:2293": 0
+    }
+
+  e2e.it "passes", {
+    spec: "request_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }
 
   it "fails when network immediately fails", ->
     e2e.exec(@, {
@@ -148,6 +150,18 @@ describe "e2e requests", ->
   it "fails on status code", ->
     e2e.exec(@, {
       spec: "request_status_code_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+      onStdout: (stdout) ->
+        stdout
+        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
+    })
+
+  it "prints long http props on fail", ->
+    e2e.exec(@, {
+      spec: "request_long_http_props_failing_spec.coffee"
       snapshot: true
       expectedExitCode: 1
       onStdout: (stdout) ->

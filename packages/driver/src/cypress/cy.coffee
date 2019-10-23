@@ -13,6 +13,8 @@ $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
+$Mouse = require("../cy/mouse")
+$Keyboard = require("../cy/keyboard")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -80,6 +82,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  keyboard = $Keyboard.create(state)
+  mouse = $Mouse.create(state, keyboard, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -152,19 +156,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         })
 
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.HTMLElement.prototype.blur = ->
-        focused.interceptBlur(this)
+        focused.interceptBlur(@)
 
       contentWindow.SVGElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
       contentWindow.SVGElement.prototype.blur = ->
-        focused.interceptBlur(this)
-
-      contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(this)
+        focused.interceptBlur(@)
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
@@ -533,8 +534,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
     if state("runnable")
-      ## make sure we don't ever time out this runnable now
-      timeouts.clearTimeout()
+      ## make sure we reset the runnable's timeout now
+      state("runnable").resetTimeout()
 
     ## if a command fails then after each commands
     ## could also fail unless we clear this out
@@ -648,6 +649,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
 
+    devices: {
+      mouse: mouse
+      keyboard: keyboard
+    }
+
     ## timer sync methods
     pauseTimers: timers.pauseTimers
 
@@ -671,7 +677,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
-    ensureReceivability: ensures.ensureReceivability
+    ensureNotReadonly: ensures.ensureNotReadonly
+    ensureNotDisabled: ensures.ensureNotDisabled
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
     ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating

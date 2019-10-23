@@ -21,10 +21,10 @@
   </a>
   <a href="https://gitter.im/cypress-io/cypress">
     <img src="https://img.shields.io/gitter/room/cypress-io/cypress.svg" alt="Gitter chat"/>
-  </a><br />
-  <a href="https://opencollective.com/cypressio">
-    <object type="image/svg+xml" data="https://opencollective.com/cypressio/tiers/corporate-backer.svg?avatarHeight=64&width=600" />
   </a>
+    <a href="https://stackshare.io/cypress">
+    <img src="https://img.stackshare.io/misc/follow-on-stackshare-badge.svg" alt="StackShare"/>
+  </a><br />
 </p>
 
 ## What is Cypress?
@@ -57,9 +57,9 @@ Please see our [Contributing Guideline](/CONTRIBUTING.md) which explains repo or
 
 ## License
 
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE.md)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
 
-This project is licensed under the terms of the [MIT license](/LICENSE.md).
+This project is licensed under the terms of the [MIT license](/LICENSE).
 
 ## Badges
 
