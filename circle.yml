@@ -619,6 +619,32 @@ jobs:
             - binary-url.json
             - cypress.zip
 
+  test-kitchensink:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - run:
+          name: Install prod dependencies
+          command: npm install --production
+          working_directory: /tmp/repo
+      - run:
+          name: Example server
+          command: npm start
+          working_directory: /tmp/repo
+          background: true
+      - run:
+          name: Run Kitchensink example project
+          command: npm run cypress:run -- --project /tmp/repo
+      - store_artifacts:
+          path: /tmp/repo/cypress/screenshots
+      - store_artifacts:
+          path: /tmp/repo/cypress/videos
+      - store-npm-logs
+
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
@@ -937,6 +963,9 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build
+    - test-kitchensink:
+        requires:
+          - build
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         filters:
@@ -1031,6 +1060,12 @@ mac-workflow: &mac-workflow
               - develop
               - binary-metadata
               - test-example-repos-on-mac-4526
+        requires:
+          - Mac build
+
+    - test-kitchensink:
+        name: Test Mac Kitchensink
+        executor: mac
         requires:
           - Mac build
 
