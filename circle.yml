@@ -1006,7 +1006,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - run-more-tests
         requires:
           - build-npm-package
     - build-binary:
@@ -1018,7 +1017,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - run-more-tests
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
@@ -1083,7 +1081,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - run-more-tests
         requires:
           - Mac NPM package
 
@@ -1095,7 +1092,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - run-more-tests
         requires:
           - Mac build
 
@@ -1107,7 +1103,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - run-more-tests
         requires:
           - Mac binary
 
