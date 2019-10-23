@@ -2900,9 +2900,6 @@ describe('src/cy/commands/actions/click', () => {
             'Command': 'dblclick',
             'Applied To': {},
             'Elements': 1,
-            'Options': {
-              'multiple': true,
-            },
             'table': {},
           })
 
