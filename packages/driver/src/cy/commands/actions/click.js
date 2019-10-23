@@ -71,7 +71,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
 
     _.defaults(options, {
-      ...defaultOptions,
       $el: subject,
       log: true,
       verify: true,
@@ -83,6 +82,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       errorOnSelect: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
+      ...defaultOptions,
     })
 
     // throw if we're trying to click multiple elements
