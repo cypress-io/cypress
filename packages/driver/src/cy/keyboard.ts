@@ -731,10 +731,11 @@ export class Keyboard {
       return
     }
 
-    return Promise.each(typeKeyFns, (fn) => {
-      return Promise.try(() => {
-        return fn()
-      }).delay(options.delay)
+    return Promise
+    .each(typeKeyFns, (fn) => {
+      return Promise
+      .try(fn)
+      .delay(options.delay)
     })
     .then(() => {
       if (options.release !== false) {
@@ -745,9 +746,7 @@ export class Keyboard {
 
       return []
     })
-    .then(() => {
-      options.onAfterType()
-    })
+    .then(options.onAfterType)
   }
 
   fireSimulatedEvent (
@@ -1088,8 +1087,6 @@ export class Keyboard {
         simulatedDefault(el, key, options)
         if (key.events.input !== false) {
           options.onValueChange(curText, el)
-        } else {
-          // key.events.textInput = false
         }
       } else {
         // el is contenteditable
