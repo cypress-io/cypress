@@ -615,6 +615,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - run: ls -l .
       - run: ls -l /tmp/urls
       - run:
           name: upload unique binary
@@ -744,8 +745,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-          command: ls -l /tmp/urls
-      # created file should have filename cypress-<version>.tgz
+      - run: ls -l /tmp/urls
+      # NPM package file should have filename cypress-<version>.tgz
       - run:
           name: upload NPM package
           command: |
