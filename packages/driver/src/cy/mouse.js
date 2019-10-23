@@ -2,7 +2,7 @@ const $ = require('jquery')
 const _ = require('lodash')
 const $dom = require('../dom')
 const $elements = require('../dom/elements')
-const $Keyboard = require('./keyboard').default
+const $Keyboard = require('./keyboard')
 const $selection = require('../dom/selection')
 const debug = require('debug')('cypress:driver:mouse')
 
@@ -54,10 +54,10 @@ const shouldFireMouseMoveEvents = (targetEl, lastHoveredEl, fromElViewport, coor
   return !_.isEqual(xy(fromElViewport), xy(coords))
 }
 
-const create = (state, focused) => {
+const create = (state, keyboard, focused) => {
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = $Keyboard.getActiveModifiers(state)
+      const _activeModifiers = keyboard.getActiveModifiers(state)
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 

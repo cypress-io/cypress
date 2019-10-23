@@ -6,7 +6,7 @@ const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
-const $Keyboard = require('../../../cy/keyboard').default
+const $Keyboard = require('../../../cy/keyboard')
 const debug = require('debug')('cypress:driver:command:type')
 
 module.exports = function (Commands, Cypress, cy, state, config) {
@@ -44,7 +44,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         let obj
 
         table[id] = (obj = {})
-        const modifiers = $Keyboard.modifiersToString($Keyboard.getActiveModifiers(state))
+        const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers(state))
 
         if (modifiers) {
           obj.modifiers = modifiers

@@ -64,7 +64,7 @@ const timeRegex = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 const charsBetweenCurlyBracesRe = /({.+?})/
 
-const initialModifiers = {
+const INITIAL_MODIFIERS = {
   alt: false,
   ctrl: false,
   meta: false,
@@ -124,10 +124,6 @@ const fromModifierEventOptions = (eventOptions: {
     meta: false,
     shift: false,
   })
-}
-
-const getActiveModifiers = (state: State) => {
-  return _.clone(state('keyboardModifiers')) || _.clone(initialModifiers)
 }
 
 const modifiersToString = (modifiers: keyboardModifiers) => {
@@ -571,9 +567,7 @@ export interface typeOptions {
   onBeforeSpecialCharAction?: Function
 }
 
-export default class Keyboard {
-  public foo = 'foo'
-
+export class Keyboard {
   constructor (private state: State) {
     null
   }
@@ -831,7 +825,7 @@ export default class Keyboard {
     } = {}
 
     if (addModifiers) {
-      const modifierEventOptions = toModifiersEventOptions(getActiveModifiers(this.state))
+      const modifierEventOptions = toModifiersEventOptions(this.getActiveModifiers())
 
       eventOptions = {
         ...eventOptions,
@@ -898,8 +892,12 @@ export default class Keyboard {
     return dispatched
   }
 
+  getActiveModifiers () {
+    return _.clone(this.state('keyboardModifiers')) || _.clone(INITIAL_MODIFIERS)
+  }
+
   getModifierKeyDetails (key: KeyDetails) {
-    const modifiers = getActiveModifiers(this.state)
+    const modifiers = this.getActiveModifiers()
     const details = { ...key, modifiers: getModifiersValue(modifiers) }
 
     if (modifiers.shift && details.shiftKey) {
@@ -927,11 +925,11 @@ export default class Keyboard {
     const modifier = keyToModifierMap[key.key]
 
     // do nothing if already activated
-    if (!!getActiveModifiers(this.state)[modifier] === setTo) {
+    if (Boolean(this.getActiveModifiers()[modifier]) === setTo) {
       return false
     }
 
-    const _activeModifiers = getActiveModifiers(this.state)
+    const _activeModifiers = this.getActiveModifiers()
 
     _activeModifiers[modifier] = setTo
 
@@ -1039,7 +1037,7 @@ export default class Keyboard {
     debug('getSimulatedDefaultForKey', key.key)
     if (key.simulatedDefault) return key.simulatedDefault
 
-    let nonShiftModifierPressed = hasModifierBesidesShift(getActiveModifiers(this.state))
+    let nonShiftModifierPressed = hasModifierBesidesShift(this.getActiveModifiers())
 
     debug({ nonShiftModifierPressed, key })
     if (!nonShiftModifierPressed && simulatedDefaultKeyMap[key.key]) {
@@ -1102,13 +1100,16 @@ export default class Keyboard {
 
     return simulatedDefault(el, key, options)
   }
+}
 
-  static toModifiersEventOptions = toModifiersEventOptions
-  static getActiveModifiers = getActiveModifiers
-  static modifierChars = modifierChars
-  static modifiersToString = modifiersToString
-  static fromModifierEventOptions = fromModifierEventOptions
-  static validateTyping = validateTyping
-  getKeymap = getKeymap
-  static keyboardMappings = keyboardMappings
+const create = (state) => {
+  return new Keyboard(state)
+}
+
+export {
+  create,
+  getKeymap,
+  modifiersToString,
+  toModifiersEventOptions,
+  fromModifierEventOptions,
 }
