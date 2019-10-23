@@ -739,7 +739,7 @@ jobs:
       - run: pwd
       - run: ls -l
       - persist_to_workspace:
-          root: ~
+          root: ~/cypress
           paths:
             - cypress.tgz
       # - persist_to_workspace:
