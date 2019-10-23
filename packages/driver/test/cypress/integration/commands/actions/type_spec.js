@@ -1656,9 +1656,9 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('follows focus into date input', () => {
-          cy.$$('input:first').on('input', _.after(4, (e) => {
+          cy.$$('input:first').on('input', _.after(3, _.once((e) => {
             cy.$$('input[type=date]:first').focus()
-          }))
+          })))
 
           cy.get('input:first')
           .type('foo2010-10-10')
@@ -1674,7 +1674,7 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
 
-          cy.$$('input:first').on('input', _.after(4, (e) => {
+          cy.$$('input:first').on('input', _.after(3, (e) => {
             cy.$$('input[type=date]:first').focus()
           }))
 
