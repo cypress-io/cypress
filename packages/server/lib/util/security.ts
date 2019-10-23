@@ -25,7 +25,21 @@ const utf8Stream = require('utf8-stream')
 const rewriteJsFnsCb: RewriteNodeFn = (js, n) => {
   const b = n.builders
 
-  function match (accessedObject, prop: string) {
+  function match (accessedObject, prop: string, maybeVal?: any) {
+    const args = [
+      // window
+      b.identifier('window'),
+      // accessedObject
+      accessedObject,
+      // 'prop'
+      b.stringLiteral(prop),
+    ]
+
+    if (maybeVal) {
+      // maybeVal is a Node
+      args.push(maybeVal)
+    }
+
     return b.callExpression(
       b.memberExpression(
         b.memberExpression(
@@ -37,14 +51,7 @@ const rewriteJsFnsCb: RewriteNodeFn = (js, n) => {
         ),
         b.identifier('resolveWindowReference')
       ),
-      [
-        // window
-        b.identifier('window'),
-        // accessedObject
-        accessedObject,
-        // 'prop'
-        b.stringLiteral(prop),
-      ]
+      args
     )
   }
 
@@ -65,45 +72,30 @@ const rewriteJsFnsCb: RewriteNodeFn = (js, n) => {
     )
   }
 
+  function getReplaceablePropOfMemberExpression (node) {
+    // something.(top|parent)
+    if (node.property.type === 'Identifier' && ['parent', 'top', 'location', 'frames'].includes(node.property.name)) {
+      return node.property.name
+    }
+
+    // something['(top|parent)']
+    if (node.property.type === 'Literal' && ['parent', 'top', 'location', 'frames'].includes(String(node.property.value))) {
+      return String(node.property.value)
+    }
+  }
+
   return {
     visitMemberExpression (path) {
       // is it a property access?
-      let prop
       const { node } = path
 
-      // function get (path: string) {
-      //   return _.get(node, path)
-      // }
-
-      // function eq (path: string, value: string) {
-      //   return get(path) === value
-      // }
-
-      // something.(top|parent)
-      if (node.property.type === 'Identifier' && ['parent', 'top', 'location', 'frames'].includes(node.property.name)) {
-        prop = node.property.name
-      }
-
-      // something['(top|parent)']
-      if (node.property.type === 'Literal' && ['parent', 'top', 'location', 'frames'].includes(String(node.property.value))) {
-        prop = String(node.property.value)
-      }
+      const prop = getReplaceablePropOfMemberExpression(node)
 
       if (!prop) {
         this.traverse(path)
 
         return
       }
-
-      // // don't use _.slice since it converts js to an array first
-      // const objSrc = _.chain(js.slice(node.range[0], node.property.range[0]))
-      // // sometimes the slice has a . or [ in it, wish i could find a more
-      // // elegant way to fix
-      // .trimEnd('.[')
-      // .value()
-
-      // TODO: this stringification can be thrown out when match is refactored not to use recast
-      // const objSrc = recast.print(path.node.original.object).code
 
       path.replace(match(path.get('object').node, prop))
 
@@ -128,6 +120,29 @@ const rewriteJsFnsCb: RewriteNodeFn = (js, n) => {
       }
 
       this.traverse(path)
+    },
+    visitAssignmentExpression (path) {
+      const { node } = path
+
+      const finish = () => {
+        this.traverse(path)
+      }
+
+      if (node.left.type !== 'MemberExpression' || node.operator !== '=') {
+        return finish()
+      }
+
+      const propBeingSet = getReplaceablePropOfMemberExpression(node.left)
+
+      if (!propBeingSet) {
+        return finish()
+      }
+
+      const objBeingSetOn = node.left.object
+
+      path.replace(match(objBeingSetOn, propBeingSet, node.right))
+
+      return false
     },
   }
 }

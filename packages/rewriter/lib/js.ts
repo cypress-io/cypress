@@ -15,6 +15,7 @@ export function rewriteJs (js: string, rewriteNodeFnsCb: RewriteNodeFn) {
     astTypes.visit(ast, rewriteNodeFns)
 
     return recast.print(ast, {
+      // will only affect reprinted quotes
       quote: 'single',
     }).code
   } catch (err) {
