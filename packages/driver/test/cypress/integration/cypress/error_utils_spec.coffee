@@ -554,12 +554,14 @@ describe "driver/src/cypress/error_utils", ->
 
   context ".getSourceStack", ->
     beforeEach ->
+      cwd = "/Users/me/dev/app"
+
+      cy.stub(process, "cwd").returns(cwd)
       cy.stub($sourceMapUtils, "getSourcePosition").returns({
-        source: 'some_other_file.ts'
+        source: "#{cwd}/some_other_file.ts"
         line: 2
         column: 1
       })
-
       $sourceMapUtils.getSourcePosition.onCall(1).returns({
         source: 'tests?p=cypress/integration/features/source_map_spec.coffee'
         line: 4
@@ -571,39 +573,64 @@ describe "driver/src/cypress/error_utils", ->
       #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.js:6:4)
       """
 
-    it "receives generated stack and returns source stack", ->
-      sourceStack = _.trim($errUtils.getSourceStack(@generatedStack))
+    it "receives generated stack and returns object with source stack and parsed source stack", ->
+      sourceStack = $errUtils.getSourceStack(@generatedStack)
 
-      expect(sourceStack).to.equal("""Error: spec iframe stack
-      #{"    "}at foo.bar (some_other_file.ts:2:1)
-      #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:3)
+      expect(sourceStack.sourceMapped).to.equal("""Error: spec iframe stack
+        #{"    "}at foo.bar (some_other_file.ts:2:1)
+        #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:3)
       """)
+      expect(sourceStack.parsed).to.eql([
+        {
+          message: "Error: spec iframe stack"
+          whitespace: ""
+        }
+        {
+          function: "foo.bar",
+          relativeFile: "some_other_file.ts"
+          absoluteFile: "/Users/me/dev/app/some_other_file.ts"
+          line: 2,
+          column: 1,
+          whitespace: "    ",
+        }
+        {
+          function: "Context.<anonymous>",
+          relativeFile: "tests?p=cypress/integration/features/source_map_spec.coffee"
+          absoluteFile: "tests?p=cypress/integration/features/source_map_spec.coffee"
+          line: 4,
+          column: 3,
+          whitespace: "    ",
+        }
+      ])
 
     it "works when first line is the error message", ->
-      sourceStack = _.trim($errUtils.getSourceStack(@generatedStack))
+      sourceStack = $errUtils.getSourceStack(@generatedStack)
 
-      expect(sourceStack).to.equal("""Error: spec iframe stack
-      #{"    "}at foo.bar (some_other_file.ts:2:1)
-      #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:3)
+      expect(sourceStack.sourceMapped).to.equal("""Error: spec iframe stack
+        #{"    "}at foo.bar (some_other_file.ts:2:1)
+        #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:3)
       """)
 
     it "works when first line is not the error message", ->
       @generatedStack = @generatedStack.split("\n").slice(1).join("\n")
-      sourceStack = _.trim($errUtils.getSourceStack(@generatedStack))
+      sourceStack = $errUtils.getSourceStack(@generatedStack)
 
-      expect(sourceStack).to.equal("""at foo.bar (some_other_file.ts:2:1)
-      #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:3)
+      expect(sourceStack.sourceMapped).to.equal("""    at foo.bar (some_other_file.ts:2:1)
+        #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:3)
       """)
 
     it "works when first several lines are the error message", ->
       @generatedStack = "Some\nmore\nlines\n\n#{@generatedStack}"
-      sourceStack = _.trim($errUtils.getSourceStack(@generatedStack))
+      sourceStack = $errUtils.getSourceStack(@generatedStack)
 
-      expect(sourceStack).to.equal("""Some
-      more
-      lines
+      expect(sourceStack.sourceMapped).to.equal("""Some
+        more
+        lines
 
-      Error: spec iframe stack
-      #{"    "}at foo.bar (some_other_file.ts:2:1)
-      #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:3)
+        Error: spec iframe stack
+        #{"    "}at foo.bar (some_other_file.ts:2:1)
+        #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:3)
       """)
+
+    it "returns empty object if there's no stack", ->
+      expect($errUtils.getSourceStack()).to.eql({})

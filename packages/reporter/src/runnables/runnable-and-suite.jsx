@@ -9,7 +9,7 @@ import { indent } from '../lib/util'
 import Test from '../test/test'
 import Collapsible from '../collapsible/collapsible'
 
-const Suite = observer(({ model, config }) => {
+const Suite = observer(({ model }) => {
   if (!model.shouldRender) return null
 
   return (
@@ -21,7 +21,7 @@ const Suite = observer(({ model, config }) => {
       isOpen={true}
     >
       <ul className='runnables'>
-        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} config={config} />)}
+        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
       </ul>
     </Collapsible>
   )
@@ -32,7 +32,7 @@ class Runnable extends Component {
   @observable isHovering = false
 
   render () {
-    const { model, config } = this.props
+    const { model } = this.props
 
     return (
       <li
@@ -42,7 +42,7 @@ class Runnable extends Component {
         onMouseOver={this._hover(true)}
         onMouseOut={this._hover(false)}
       >
-        {model.type === 'test' ? <Test model={model} config={config} /> : <Suite model={model} config={config} />}
+        {model.type === 'test' ? <Test model={model} /> : <Suite model={model} />}
       </li>
     )
   }

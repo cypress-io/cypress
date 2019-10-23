@@ -7,7 +7,7 @@ const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
 const $sourceMapUtils = require('./source_map_utils')
 
-const ERROR_PROPS = 'message type name stack sourceMappedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrames'.split(' ')
+const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrames'.split(' ')
 
 const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
@@ -260,8 +260,18 @@ const getCodeFrame = (sourceCode, { line, column, source: file }) => {
 const getSourceDetails = (generatedDetails) => {
   // stack-utils removes the // in http:// for some reason, so put it back
   const file = generatedDetails.file.replace(/(https?):/, '$1://')
+  const sourceDetails = $sourceMapUtils.getSourcePosition(file, generatedDetails)
 
-  return $sourceMapUtils.getSourcePosition(file, generatedDetails)
+  if (!sourceDetails) return generatedDetails
+
+  const { line, column, source } = sourceDetails
+
+  return {
+    line,
+    column,
+    file: source,
+    function: generatedDetails.function,
+  }
 }
 
 const getCodeFrameFromStack = (stack, lineIndex) => {
@@ -278,6 +288,9 @@ const getCodeFrameFromStack = (stack, lineIndex) => {
   return getCodeFrame($sourceMapUtils.getSourceContents(file), stackLineDetails)
 }
 
+// stacks from command failures and assertion failures have the right message
+// but the stack points to cypress internals. here we combine the message
+// with the invocation stack, which points to the user's code
 const combineMessageAndStack = (err, stack = '') => {
   if (!err || !err.message) return stack
 
@@ -298,13 +311,6 @@ const addCodeFrameToErr = ({ err, stack, lineIndex = 0 }) => {
   if (codeFrame) {
     err.codeFrames = [codeFrame]
   }
-
-  return err
-}
-
-const enhanceStack = ({ err, stack }) => {
-  err.stack = combineMessageAndStack(err, stack)
-  err.sourceMappedStack = getSourceStack(err.stack)
 
   return err
 }
@@ -355,20 +361,6 @@ const getStackLineDetails = (stack, lineIndex = 0) => {
   return stackUtil.parseLine(line)
 }
 
-const translateStackLine = (stackUtil, stackLine) => {
-  const generatedDetails = stackUtil.parseLine(stackLine)
-
-  if (!generatedDetails) return `at ${stackLine}`
-
-  const sourceDetails = getSourceDetails(generatedDetails)
-
-  if (!sourceDetails) return `at ${stackLine}`
-
-  const { source, line, column } = sourceDetails
-
-  return `at ${generatedDetails.function} (${source}:${line}:${column})`
-}
-
 const stackLineRegex = /^(\s*)at /
 
 const getWhitespace = (line) => {
@@ -377,7 +369,7 @@ const getWhitespace = (line) => {
   // eslint-disable-next-line no-unused-vars
   const [__, whitespace] = line.match(stackLineRegex) || []
 
-  return whitespace
+  return whitespace || ''
 }
 
 // returns tuple of [message, stack]
@@ -396,18 +388,71 @@ const splitStack = (stack) => {
   }, [[], []])
 }
 
+const reconstructStack = (parsedStack) => {
+  return _.map(parsedStack, (parsedLine) => {
+    if (parsedLine.message != null) {
+      return `${parsedLine.whitespace}${parsedLine.message}`
+    }
+
+    const { whitespace, relativeFile, function: fn, line, column } = parsedLine
+
+    return `${whitespace}at ${fn || '<unknown>'} (${relativeFile || '<unknown>'}:${line}:${column})`
+  }).join('\n')
+}
+
+const backslackRegex = /\\/g
+
+const getSourceDetailsForLine = (stackUtil, line) => {
+  const whitespace = getWhitespace(line)
+
+  const generatedDetails = stackUtil.parseLine(line)
+
+  // if it couldn't be parsed, it's a message line
+  if (!generatedDetails) {
+    return {
+      message: line,
+      whitespace,
+    }
+  }
+
+  // TODO: need to do a better job with cwd
+  // currently getting absolute path like 'http:localhost:52463/__cypress/tests?p=cypress/integration/features/source_map_spec.js:31:8'
+  // but need that to be absolute system path or translate it somewhere along the line
+
+  const sourceDetails = getSourceDetails(generatedDetails)
+  const cwd = process.cwd().replace(backslackRegex, '/')
+
+  return {
+    function: sourceDetails.function,
+    relativeFile: (sourceDetails.file || '').replace(`${cwd}/`, ''),
+    absoluteFile: sourceDetails.file,
+    line: sourceDetails.line,
+    column: sourceDetails.column,
+    whitespace,
+  }
+}
+
 const getSourceStack = (stack) => {
-  if (!stack) return
+  if (!_.isString(stack)) return {}
 
-  const [messageLines, stackLines] = splitStack(stack)
-  const whitespace = getWhitespace(stackLines[0])
-  const stackUtil = new StackUtils()
-  const cleanedLines = _.compact(getCleanedStackLines(stackUtil, stackLines))
-  const translated = _.map(cleanedLines, (line) => {
-    return `${whitespace}${translateStackLine(stackUtil, line)}`
-  })
+  const getSourceDetails = _.partial(getSourceDetailsForLine, new StackUtils())
+  const parsed = _.map(stack.split('\n'), getSourceDetails)
 
-  return messageLines.concat(translated).join('\n')
+  return {
+    parsed,
+    sourceMapped: reconstructStack(parsed),
+  }
+}
+
+const enhanceStack = ({ err, stack }) => {
+  err.stack = combineMessageAndStack(err, stack)
+
+  const { sourceMapped, parsed } = getSourceStack(err.stack)
+
+  err.sourceMappedStack = sourceMapped
+  err.parsedStack = parsed
+
+  return err
 }
 
 //// all errors flow through this function before they're finally thrown

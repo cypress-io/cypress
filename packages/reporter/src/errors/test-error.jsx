@@ -10,53 +10,43 @@ const md = new Markdown('zero')
 
 md.enable(['backticks', 'emphasis', 'escape'])
 
-const stackLineRegex = /^\s*at .*?\((.*)\)/
-const filePathRegex = /^(.*?):(\d+):(\d+$)/
-
-const parseFilePath = (filePath) => {
-  // eslint-disable-next-line no-unused-vars
-  let [__, file, line, column] = filePath.match(filePathRegex) || []
-
-  return {
-    file: file || filePath,
-    line: _.toInteger(line) || 0,
-    column: _.toInteger(column || 0) + 1,
-  }
-}
-
 const StackWithLinks = ({ stack, onClick }) => {
-  if (!stack) return ''
+  if (!stack) return null
 
-  const lines = stack.split('\n')
+  // TODO: fall back better if there's no parsed stack
 
-  return _.map(lines, (stackLine, index) => {
-    // eslint-disable-next-line no-unused-vars
-    const [__, filePath] = stackLine.match(stackLineRegex) || []
+  const makeLine = (key, content) => (
+    <div key={key}>{content}</div>
+  )
 
-    if (filePath) {
-      const splitLine = stackLine.split(filePath)
-      const fileObject = parseFilePath(filePath)
-      const { file, line, column } = fileObject
+  return _.map(stack, (stackLine, index) => {
+    const key = `${relativeFile}${index}`
 
-      const onLinkClick = (e) => {
-        e.preventDefault()
-
-        onClick(fileObject)
-      }
-
-      const link = (
-        <a onClick={onLinkClick} key={`${filePath}${index}`} href='#'>
-          {file}:{line}:{column}
-        </a>
-      )
-
-      splitLine.splice(1, 0, link)
-      stackLine = splitLine
+    if (stackLine.message != null) {
+      return makeLine(key, stackLine.message)
     }
 
-    return (
-      <div key={`${stackLine}${index}`}>{stackLine}</div>
+    const { relativeFile, absoluteFile, line, column, function: fn, whitespace } = stackLine
+
+    const onLinkClick = (e) => {
+      e.preventDefault()
+
+      onClick({
+        file: absoluteFile,
+        line,
+        column,
+      })
+    }
+
+    const link = (
+      <a onClick={onLinkClick} key={key} href='#'>
+        {relativeFile}:{line}:{column}
+      </a>
     )
+
+    stackLine = [whitespace, `at ${fn} (`, link, ')']
+
+    return makeLine(key, stackLine)
   })
 }
 
@@ -94,7 +84,7 @@ const TestError = observer(({ model, onOpenFile }) => {
             contentClass='runnable-err-stack-trace'
           >
             <StackWithLinks
-              stack={err.sourceMappedStack || err.stack}
+              stack={err.parsedStack}
               onClick={onOpenFile}
             />
           </Collapsible> :

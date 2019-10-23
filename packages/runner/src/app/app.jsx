@@ -40,7 +40,6 @@ class App extends Component {
             specPath={specPath}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
-            config={this.props.config}
           />
         </div>
         <div
