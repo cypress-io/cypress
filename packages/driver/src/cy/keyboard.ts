@@ -280,7 +280,8 @@ const validateTyping = (
   keys: KeyDetails[],
   currentIndex: number,
   onFail: Function,
-  skipCheckUntilIndex?: number,
+  skipCheckUntilIndex: number | undefined,
+  force: boolean
 ) => {
   const chars = joinKeyArrayToString(keys.slice(currentIndex))
   const allChars = joinKeyArrayToString(keys)
@@ -328,15 +329,17 @@ const validateTyping = (
     return {}
   }
 
-  if (!isFocusable) {
+  if (!isFocusable && isTextLike && !force) {
     const node = $dom.stringify($el)
 
-    if (isTextLike) {
-      $utils.throwErrByPath('type.not_actionable_textlike', {
-        onFail,
-        args: { node },
-      })
-    }
+    $utils.throwErrByPath('type.not_actionable_textlike', {
+      onFail,
+      args: { node },
+    })
+  }
+
+  if (!isFocusable && !isTextLike) {
+    const node = $dom.stringify($el)
 
     $utils.throwErrByPath('type.not_on_typeable_element', {
       onFail,
@@ -660,6 +663,7 @@ export class Keyboard {
               currentKeyIndex,
               options.onFail,
               _skipCheckUntilIndex,
+              options.force
             )
 
             _skipCheckUntilIndex = skipCheckUntilIndex
