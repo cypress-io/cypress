@@ -732,9 +732,15 @@ jobs:
           command: ls -l
       # created file should have filename cypress-<version>.tgz
       - run: mkdir /tmp/urls
+      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz cypress.tgz
       - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
       - run: ls -l /tmp/urls
       - store-npm-logs
+      - run: pwd
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress.tgz
       - persist_to_workspace:
           root: /tmp/urls
           paths:
