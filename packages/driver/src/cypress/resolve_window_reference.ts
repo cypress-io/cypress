@@ -6,59 +6,45 @@ interface State {
   (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): Optional<JQuery<HTMLIFrameElement>>
 }
 
-export function resolveWindowReference (this: typeof $Cypress, currentWindow: Window, accessedObject: Window | any, accessedProp: string, value?: any) {
+export function resolveWindowReference (this: typeof $Cypress, currentWindow: Window, maybeWindow: Window | any, prop: string) {
   const Cypress = this // TODO: don't do this terrible thing
   const { dom } = Cypress
   const state = Cypress.state as State
-
-  const isValSet = arguments.length === 4
-
-  function getOrSet (obj: any = accessedObject, prop: string): typeof obj {
-    if (isValSet) { // setting
-      return (obj[prop] = value)
-    }
-
-    // getting
-    if (_.isFunction(actualValue)) {
-      return actualValue.bind(accessedObject)
-    }
-
-    return actualValue
-  }
-
-  const actualValue = accessedObject[accessedProp]
+  const actualValue = maybeWindow[prop]
 
   const $autIframe = state('$autIframe')
 
   if (!$autIframe) {
     // TODO: warning?
-    return getOrSet()
+    return actualValue
   }
 
   const contentWindow = $autIframe.prop('contentWindow')
 
-  if (accessedObject === currentWindow.top && ['frames', 'location'].includes(accessedProp)) {
+  if (maybeWindow === currentWindow.top && ['frames', 'location'].includes(prop)) {
     // doing a property access to `top`
-    return getOrSet(contentWindow)
+    return contentWindow[prop]
+  }
+
+  if (_.isFunction(actualValue)) {
+    return actualValue.bind(maybeWindow)
   }
 
   if (!dom.isWindow(actualValue) || dom.isJquery(actualValue)) {
-    return getOrSet()
+    return actualValue
   }
 
   // actualValue is a reference to a Window
-  if (accessedProp === 'top') {
-    return getOrSet(contentWindow)
+  if (prop === 'top') {
+    return contentWindow
   }
 
-  if (accessedProp === 'parent') {
+  if (prop === 'parent') {
     if (actualValue === currentWindow.top) {
-      return getOrSet(contentWindow)
-
       return contentWindow
     }
 
     // else, return the actual parent
-    return getOrSet()
+    return actualValue
   }
 }
