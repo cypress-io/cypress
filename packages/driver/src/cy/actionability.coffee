@@ -216,6 +216,7 @@ verify = (cy, $el, options, callbacks) ->
       visibility: true,
       notDisabled: true,
       notCovered: true,
+      notAnimating: true,
       notReadonly: false,
       custom: false
     }
@@ -271,7 +272,7 @@ verify = (cy, $el, options, callbacks) ->
 
       ## if force is true OR waitForAnimations is false
       ## then do not perform these additional ensures...
-      if (force isnt true) and (options.waitForAnimations isnt false)
+      if (options.ensure.notAnimating) and (force isnt true) and (options.waitForAnimations isnt false)
         ## store the coords that were absolute
         ## from the window or from the viewport for sticky elements
         ## (see https://github.com/cypress-io/cypress/pull/1478)
