@@ -13,7 +13,7 @@ import $window from '../dom/window'
 
 const debug = Debug('cypress:driver:keyboard')
 
-export interface keyboardModifiers {
+export interface KeyboardModifiers {
   alt: boolean
   ctrl: boolean
   meta: boolean
@@ -21,7 +21,7 @@ export interface keyboardModifiers {
 }
 
 export interface KeyboardState {
-  keyboardModifiers?: keyboardModifiers
+  keyboardModifiers?: KeyboardModifiers
 }
 
 export interface ProxyState<T> {
@@ -72,14 +72,16 @@ const INITIAL_MODIFIERS = {
 }
 
 /**
- * @example {meta: true, ctrl: false, shift:false, alt: true} => 5
+ * @example {meta: true, ctrl: false, shift: false, alt: true} => 5
  */
-const getModifiersValue = (modifiers: keyboardModifiers) => {
-  return _.map(modifiers, (value, key) => {
+const getModifiersValue = (modifiers: KeyboardModifiers) => {
+  return _
+  .chain(modifiers)
+  .map((value, key) => {
     return value && modifierValueMap[key]
-  }).reduce((a, b) => {
-    return a + b
-  }, 0)
+  })
+  .sum()
+  .value()
 }
 
 const modifierValueMap = {
@@ -96,7 +98,7 @@ export type KeyEventType =
   | 'input'
   | 'textInput'
 
-const toModifiersEventOptions = (modifiers: keyboardModifiers) => {
+const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
   return {
     altKey: modifiers.alt,
     ctrlKey: modifiers.ctrl,
@@ -107,26 +109,25 @@ const toModifiersEventOptions = (modifiers: keyboardModifiers) => {
 
 const fromModifierEventOptions = (eventOptions: {
   [key: string]: string
-}): keyboardModifiers => {
-  const modifiers = _.pickBy(
-    {
-      alt: eventOptions.altKey,
-      ctrl: eventOptions.ctrlKey,
-      meta: eventOptions.metaKey,
-      shift: eventOptions.shiftKey,
-    },
-    _.identity
-  )
-
-  return _.defaults(modifiers, {
+}): KeyboardModifiers => {
+  return _
+  .chain({
+    alt: eventOptions.altKey,
+    ctrl: eventOptions.ctrlKey,
+    meta: eventOptions.metaKey,
+    shift: eventOptions.shiftKey,
+  })
+  .pickBy() // remove falsy values
+  .defaults({
     alt: false,
     ctrl: false,
     meta: false,
     shift: false,
   })
+  .value()
 }
 
-const modifiersToString = (modifiers: keyboardModifiers) => {
+const modifiersToString = (modifiers: KeyboardModifiers) => {
   return _.keys(_.pickBy(modifiers, (val) => {
     return val
   })).join(', ')
@@ -186,8 +187,7 @@ const getKeyDetails = (onKeyNotFound) => {
     let foundKey: KeyDetailsPartial
 
     if (getTextLength(key) === 1) {
-      foundKey = USKeyboard[key]
-      foundKey = foundKey || { key }
+      foundKey = USKeyboard[key] || { key }
     } else {
       foundKey = findKeyDetailsOrLowercase(key)
     }
@@ -215,7 +215,7 @@ const getKeyDetails = (onKeyNotFound) => {
   }
 }
 
-const hasModifierBesidesShift = (modifiers: keyboardModifiers) => {
+const hasModifierBesidesShift = (modifiers: KeyboardModifiers) => {
   return _.some(_.omit(modifiers, ['shift']))
 }
 
