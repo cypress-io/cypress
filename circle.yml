@@ -702,7 +702,7 @@ jobs:
             npm run cypress:run -- --project /tmp/repo --record
       - store-npm-logs
 
-  "build-npm-package":
+  build-npm-package:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -730,17 +730,31 @@ jobs:
           working_directory: cli/build
           command: ls -l
       # created file should have filename cypress-<version>.tgz
+      - run: mkdir /tmp/urls
+      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
+      - run: ls -l /tmp/urls
+      - store-npm-logs
+      - persist_to_workspace:
+          root: /tmp/urls
+          paths:
+            - cypress.tgz
+
+  upload-npm-package:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+          command: ls -l /tmp/urls
+      # created file should have filename cypress-<version>.tgz
       - run:
           name: upload NPM package
           command: |
             node scripts/binary.js upload-npm-package \
-              --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
+              --file /tmp/urls/cypress-$NEXT_DEV_VERSION.tgz \
               --version $NEXT_DEV_VERSION
       - run: cat npm-package-url.json
-      - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
       - run: cp npm-package-url.json /tmp/urls
-      - run: ls /tmp/urls
+      - run: ls -l /tmp/urls
       - store-npm-logs
       - persist_to_workspace:
           root: /tmp/urls
@@ -988,13 +1002,16 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-npm-package:
+        requires:
+          - build
+    - upload-npm-package:
         context: test-runner:upload
         filters:
           branches:
             only:
               - develop
         requires:
-          - build
+          - build-npm-package
     - build-binary:
         requires:
           - build
@@ -1056,6 +1073,12 @@ mac-workflow: &mac-workflow
 
     - build-npm-package:
         name: Mac NPM package
+        executor: mac
+        requires:
+          - Mac build
+
+    - upload-npm-package:
+        name: Mac NPM package upload
         context: test-runner:upload
         executor: mac
         filters:
@@ -1063,7 +1086,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
         requires:
-          - Mac build
+          - Mac NPM package
 
     - build-binary:
         name: Mac binary
