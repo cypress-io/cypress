@@ -3,6 +3,7 @@ import path from 'path'
 export default {
   /**
  * Correctly decodes Unicode string in encoded in base64
+ * @see https://github.com/cypress-io/cypress/issues/5435
  * @see https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
  *
  * @example
