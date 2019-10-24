@@ -394,10 +394,19 @@ module.exports = e2e = {
 
   args: (options = {}) ->
     args = [
+      "index.js",
       ## hides a user warning to go through NPM module
       "--cwd=#{process.cwd()}",
       "--run-project=#{options.project}"
     ]
+
+    if options.useCli
+      args = [
+        "#{path.join(__dirname, '../../../../../cli/bin/cypress')}",
+        "run",
+        "--dev",
+        "--project=#{options.project}"
+      ]
 
     if options.spec
       args.push("--spec=#{options.spec}")
@@ -442,7 +451,9 @@ module.exports = e2e = {
     if options.outputPath
       args.push("--output-path", options.outputPath)
 
-    if options.exit?
+    if options.useCli and options.exit is false
+      args.push("--no-exit")
+    else if options.exit?
       args.push("--exit", options.exit)
 
     if options.inspectBrk
@@ -462,8 +473,6 @@ module.exports = e2e = {
   exec: (ctx, options = {}) ->
     options = @options(ctx, options)
     args    = @args(options)
-
-    args = ["index.js"].concat(args)
 
     stdout = ""
     stderr = ""
