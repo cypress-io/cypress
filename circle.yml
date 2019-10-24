@@ -1002,7 +1002,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-npm-package
     - build-binary:
@@ -1014,7 +1013,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
@@ -1023,7 +1021,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - upload-npm-package
           - upload-binary
@@ -1032,7 +1029,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1042,7 +1038,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1051,7 +1046,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1083,7 +1077,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - Mac NPM package
 
@@ -1095,7 +1088,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - Mac build
 
@@ -1148,7 +1140,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - Mac NPM package upload
           - Mac binary upload
