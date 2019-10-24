@@ -193,7 +193,21 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
+    .extend(util.getNodeOptions())
     .value()
+  },
+
+  getNodeOptions () {
+    // https://github.com/cypress-io/cypress/issues/5431
+    const NODE_OPTIONS = `--max-http-header-size=${1024 * 1024}`
+
+    if (_.isString(process.env.NODE_OPTIONS)) {
+      return {
+        NODE_OPTIONS: `${process.env.NODE_OPTIONS} ${NODE_OPTIONS}`,
+      }
+    }
+
+    return { NODE_OPTIONS }
   },
 
   getForceTty () {
