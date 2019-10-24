@@ -249,7 +249,7 @@ describe('util', () => {
         NODE_OPTIONS: undefined,
       })
 
-      expect(util.getNodeOptions()).to.deep.eq({
+      expect(util.getNodeOptions({})).to.deep.eq({
         NODE_OPTIONS: expectedNodeOptions,
       })
     })
@@ -259,9 +259,15 @@ describe('util', () => {
         NODE_OPTIONS: '--foo --bar',
       })
 
-      expect(util.getNodeOptions()).to.deep.eq({
+      expect(util.getNodeOptions({})).to.deep.eq({
         NODE_OPTIONS: `--foo --bar ${expectedNodeOptions}`,
       })
+    })
+
+    it('does not return if dev is set', () => {
+      expect(util.getNodeOptions({
+        dev: true,
+      })).to.be.undefined
     })
   })
 

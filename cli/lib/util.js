@@ -184,7 +184,7 @@ const util = {
     return isCi
   },
 
-  getEnvOverrides () {
+  getEnvOverrides (options = {}) {
     return _
     .chain({})
     .extend(util.getEnvColors())
@@ -193,11 +193,18 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
-    .extend(util.getNodeOptions())
+    .extend(util.getNodeOptions(options))
     .value()
   },
 
-  getNodeOptions () {
+  getNodeOptions (options) {
+    if (options.dev && Number(process.versions.node.split('.', 2).join('.')) < 11.10) {
+      // `node` is used when --dev is passed, so this won't work if Node is too old
+      logger.warn('(dev-mode warning only) NODE_OPTIONS=--max-http-header-size could not be set. See https://github.com/cypress-io/cypress/pull/5452')
+
+      return
+    }
+
     // https://github.com/cypress-io/cypress/issues/5431
     const NODE_OPTIONS = `--max-http-header-size=${1024 * 1024}`
 
