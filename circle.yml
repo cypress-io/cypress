@@ -835,12 +835,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
-      # make sure we have the binary
-      - run: ls -l /tmp/urls/cypress.zip
-      # make sure we have the NPM package
-      - run: ls -l /tmp/urls/cypress.tgz
+      - run: ls -l
+      # make sure we have the binary and NPM package
+      - run: ls -l cypress.zip cypress.tgz
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
@@ -848,7 +845,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -1025,6 +1022,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1033,6 +1031,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1042,6 +1041,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1050,6 +1050,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
