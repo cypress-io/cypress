@@ -241,7 +241,8 @@ jobs:
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
       # Install sub packages dependencies and build all sub packages via postinstall script
-      - run: npm install
+      # try several times, because flaky NPM installs ...
+      - run: npm install || npm install
       - run:
           name: Top level packages
           command: npm ls --depth=0 || true
