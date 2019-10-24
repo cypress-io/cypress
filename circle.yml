@@ -600,7 +600,20 @@ jobs:
             DEBUG: electron-builder,electron-osx-sign*
           command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
       - run: npm run binary-zip -- --platform $PLATFORM
+      # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.zip
+
+  upload-binary:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: ls -l
       - run:
           name: upload unique binary
           command: |
@@ -608,16 +621,37 @@ jobs:
               --file cypress.zip \
               --version $NEXT_DEV_VERSION
       - run: cat binary-url.json
-      - run: mkdir /tmp/urls
-      - run: cp binary-url.json /tmp/urls
-      - run: cp cypress.zip /tmp/urls
-      - run: ls /tmp/urls
       - store-npm-logs
       - persist_to_workspace:
-          root: /tmp/urls
+          root: ~/
           paths:
-            - binary-url.json
-            - cypress.zip
+            - cypress/binary-url.json
+
+  test-kitchensink:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - run:
+          name: Install prod dependencies
+          command: npm install --production
+          working_directory: /tmp/repo
+      - run:
+          name: Example server
+          command: npm start
+          working_directory: /tmp/repo
+          background: true
+      - run:
+          name: Run Kitchensink example project
+          command: npm run cypress:run -- --project /tmp/repo
+      - store_artifacts:
+          path: /tmp/repo/cypress/screenshots
+      - store_artifacts:
+          path: /tmp/repo/cypress/videos
+      - store-npm-logs
 
   "test-kitchensink-against-staging":
     <<: *defaults
@@ -663,7 +697,7 @@ jobs:
             npm run cypress:run -- --project /tmp/repo --record
       - store-npm-logs
 
-  "build-npm-package":
+  build-npm-package:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -691,23 +725,38 @@ jobs:
           working_directory: cli/build
           command: ls -l
       # created file should have filename cypress-<version>.tgz
+      - run: mkdir /tmp/urls
+      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz cypress.tgz
+      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
+      - run: ls -l /tmp/urls
+      - store-npm-logs
+      - run: pwd
+      - run: ls -l
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.tgz
+
+  upload-npm-package:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: ls -l
+      # NPM package file should have filename cypress-<version>.tgz
       - run:
           name: upload NPM package
           command: |
             node scripts/binary.js upload-npm-package \
-              --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
+              --file cypress.tgz \
               --version $NEXT_DEV_VERSION
-      - run: cat npm-package-url.json
-      - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
-      - run: cp npm-package-url.json /tmp/urls
-      - run: ls /tmp/urls
       - store-npm-logs
+      - run: ls -l
+      - run: cat npm-package-url.json
       - persist_to_workspace:
-          root: /tmp/urls
+          root: ~/
           paths:
-            - npm-package-url.json
-            - cypress.tgz
+            - cypress/npm-package-url.json
 
   "test-binary-and-npm-against-other-projects":
     <<: *defaults
@@ -716,8 +765,8 @@ jobs:
           at: ~/
       - attach_workspace:
           at: /tmp/urls
-      - run: ls -la /tmp/urls
-      - run: cat /tmp/urls/*.json
+      - run: ls -la
+      - run: cat *.json
       - run: mkdir /tmp/testing
       - run:
           name: create dummy package
@@ -728,8 +777,8 @@ jobs:
           name: Install Cypress
           command: |
             node scripts/test-unique-npm-and-binary.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
+              --npm npm-package-url.json \
+              --binary binary-url.json \
               --cwd /tmp/testing
       - run:
           name: Verify Cypress binary
@@ -937,6 +986,9 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build
+    - test-kitchensink:
+        requires:
+          - build
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         filters:
@@ -946,21 +998,27 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-npm-package:
+        requires:
+          - build
+    - upload-npm-package:
         context: test-runner:upload
         filters:
           branches:
             only:
               - develop
         requires:
-          - build
+          - build-npm-package
     - build-binary:
+        requires:
+          - build
+    - upload-binary:
         context: test-runner:upload
         filters:
           branches:
             only:
               - develop
         requires:
-          - build
+          - build-binary
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         filters:
@@ -1011,26 +1069,46 @@ mac-workflow: &mac-workflow
 
     - build-npm-package:
         name: Mac NPM package
+        executor: mac
+        requires:
+          - Mac build
+
+    - upload-npm-package:
+        name: Mac NPM package upload
         context: test-runner:upload
         executor: mac
         filters:
           branches:
             only:
               - develop
-              - test-example-repos-on-mac-4526
         requires:
-          - Mac build
+          - Mac NPM package
 
     - build-binary:
         name: Mac binary
-        executor: mac
         context: org-global
+        executor: mac
         filters:
           branches:
             only:
               - develop
-              - binary-metadata
-              - test-example-repos-on-mac-4526
+        requires:
+          - Mac build
+
+    - upload-binary:
+        name: Mac binary upload
+        executor: mac
+        context: test-runner:upload
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac binary
+
+    - test-kitchensink:
+        name: Test Mac Kitchensink
+        executor: mac
         requires:
           - Mac build
 
