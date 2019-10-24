@@ -901,6 +901,9 @@ jobs:
       # the user should be "node"
       - run: whoami
       - run: pwd
+      # prints the current user's effective user id
+      # for root it is 0
+      - run: node -e 'console.log(process.geteuid())'
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -922,11 +925,11 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(npm bin)/cypress verify
+          command: DEBUG=cypress:cli $(npm bin)/cypress verify
       - run:
           name: Run Cypress binary
           working_directory: test-binary
-          command: $(npm bin)/cypress run
+          command: DEBUG=cypress:cli $(npm bin)/cypress run
       - store-npm-logs
 
 linux-workflow: &linux-workflow
