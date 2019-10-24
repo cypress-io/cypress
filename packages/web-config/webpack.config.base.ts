@@ -22,7 +22,7 @@ if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reload
 
 process.env.NODE_ENV = env
 
-const config: webpack.Configuration = {
+const commonConfig: webpack.Configuration = {
   mode: 'none',
   node: {
     fs: 'empty',
@@ -191,9 +191,8 @@ const config: webpack.Configuration = {
   ],
 
   cache: true,
-
 }
 
-export default config
+export default commonConfig
 
 export { HtmlWebpackPlugin }

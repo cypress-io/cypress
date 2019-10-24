@@ -14,7 +14,7 @@ exports['e2e screenshot in nested spec / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: nested-1/nested-2/screenshot_nested_file_spec.coffee...                         (1 of 1) 
+  Running:  nested-1/nested-2/screenshot_nested_file_spec.coffee                            (1 of 1)
 
 
   ✓ nests the file based on spec path
@@ -24,28 +24,30 @@ exports['e2e screenshot in nested spec / passes'] = `
 
   (Results)
 
-  ┌────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                    │
-  │ Passing:      1                                                    │
-  │ Failing:      0                                                    │
-  │ Pending:      0                                                    │
-  │ Skipped:      0                                                    │
-  │ Screenshots:  1                                                    │
-  │ Video:        true                                                 │
-  │ Duration:     X seconds                                            │
-  │ Spec Ran:     nested-1/nested-2/screenshot_nested_file_spec.coffee │
-  └────────────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     nested-1/nested-2/screenshot_nested_file_spec.coffee                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.coffee/nests the file based on spec path.png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.c     (1280x720)
+     offee/nests the file based on spec path.png                                                    
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/nested-1/nested-2/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/screenshot_ne     (X second)
+                          sted_file_spec.coffee.mp4                                                 
 
 
 ====================================================================================================
@@ -53,11 +55,12 @@ exports['e2e screenshot in nested spec / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ nested-1/nested-2/screenshot_nested_…     XX:XX        1        1        -        -        - │
+  │ ✔  nested-1/nested-2/screenshot_nested      XX:XX        1        1        -        -        - │
+  │    _file_spec.coffee                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
