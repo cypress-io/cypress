@@ -805,14 +805,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
       # make sure we have cypress.zip received
-      - run: ls -l /tmp/urls/cypress.zip
-      # build NPM package
-      - run:
-          command: npm run build
-          working_directory: cli
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
       - run: mkdir test-binary
       - run:
           name: Create new NPM package
@@ -823,7 +818,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
