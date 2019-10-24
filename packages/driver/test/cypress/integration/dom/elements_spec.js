@@ -99,7 +99,7 @@ describe('src/dom/elements', () => {
     })
   })
 
-  context('.isType', () => {
+  context('.isInputType', () => {
     beforeEach(() => {
       cy.visit('/fixtures/dom.html')
     })
@@ -107,15 +107,15 @@ describe('src/dom/elements', () => {
     it('when type is a string', () => {
       const $el = $('input[type="number"]')
 
-      expect(Cypress.dom.isType($el, 'number')).to.be.true
-      expect(Cypress.dom.isType($el, 'text')).to.be.false
+      expect(Cypress.dom.isInputType($el, 'number')).to.be.true
+      expect(Cypress.dom.isInputType($el, 'text')).to.be.false
     })
 
     it('when type is an array', () => {
       const $el = $('input[type="number"]')
 
-      expect(Cypress.dom.isType($el, ['number', 'text', 'email'])).to.be.true
-      expect(Cypress.dom.isType($el, ['text', 'email'])).to.be.false
+      expect(Cypress.dom.isInputType($el, ['number', 'text', 'email'])).to.be.true
+      expect(Cypress.dom.isInputType($el, ['text', 'email'])).to.be.false
     })
   })
 })
