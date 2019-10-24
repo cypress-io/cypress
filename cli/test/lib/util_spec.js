@@ -260,14 +260,15 @@ describe('util', () => {
       })
 
       expect(util.getNodeOptions({})).to.deep.eq({
-        NODE_OPTIONS: `--foo --bar ${expectedNodeOptions}`,
+        NODE_OPTIONS: `${expectedNodeOptions} --foo --bar`,
+        ORIGINAL_NODE_OPTIONS: '--foo --bar',
       })
     })
 
-    it('does not return if dev is set', () => {
+    it('does not return if dev is set and version < 12', () => {
       expect(util.getNodeOptions({
         dev: true,
-      })).to.be.undefined
+      }, 11)).to.be.undefined
     })
   })
 

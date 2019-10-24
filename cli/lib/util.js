@@ -197,8 +197,12 @@ const util = {
     .value()
   },
 
-  getNodeOptions (options) {
-    if (options.dev && Number(process.versions.node.split('.', 2).join('.')) < 11.10) {
+  getNodeOptions (options, nodeVersion) {
+    if (!nodeVersion) {
+      nodeVersion = Number(process.versions.node.split('.')[0])
+    }
+
+    if (options.dev && nodeVersion < 12) {
       // `node` is used when --dev is passed, so this won't work if Node is too old
       logger.warn('(dev-mode warning only) NODE_OPTIONS=--max-http-header-size could not be set. See https://github.com/cypress-io/cypress/pull/5452')
 
@@ -210,7 +214,8 @@ const util = {
 
     if (_.isString(process.env.NODE_OPTIONS)) {
       return {
-        NODE_OPTIONS: `${process.env.NODE_OPTIONS} ${NODE_OPTIONS}`,
+        NODE_OPTIONS: `${NODE_OPTIONS} ${process.env.NODE_OPTIONS}`,
+        ORIGINAL_NODE_OPTIONS: process.env.NODE_OPTIONS || '',
       }
     }
 
