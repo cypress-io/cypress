@@ -432,7 +432,8 @@ module.exports = e2e = {
 
     if options.useCli and options.exit is false
       args.push("--no-exit")
-    else if options.exit?
+
+    if not options.useCli and options.exit?
       args.push("--exit", options.exit)
 
     if options.inspectBrk
