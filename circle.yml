@@ -764,6 +764,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      # needs uploaded NPM and test binary
       - attach_workspace:
           at: /tmp/urls
       - run: ls -la
@@ -1006,6 +1007,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
     - build-binary:
@@ -1017,6 +1019,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
@@ -1027,8 +1030,8 @@ linux-workflow: &linux-workflow
               - develop
               - use-correct-folder
         requires:
-          - build-npm-package
-          - build-binary
+          - upload-npm-package
+          - upload-binary
     - test-npm-module-and-verify-binary:
         filters:
           branches:
@@ -1085,6 +1088,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - Mac NPM package
 
@@ -1096,6 +1100,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - Mac build
 
@@ -1107,6 +1112,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - Mac binary
 
@@ -1147,10 +1153,10 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - test-example-repos-on-mac-4526
+              - use-correct-folder
         requires:
-          - Mac NPM package
-          - Mac binary
+          - Mac NPM package upload
+          - Mac binary upload
 
 workflows:
   linux:
