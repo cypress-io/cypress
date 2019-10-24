@@ -1049,7 +1049,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-npm-package
     - build-binary:
