@@ -241,7 +241,8 @@ jobs:
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
       # Install sub packages dependencies and build all sub packages via postinstall script
-      - run: npm install
+      # try several times, because flaky NPM installs ...
+      - run: npm install || npm install
       - run:
           name: Top level packages
           command: npm ls --depth=0 || true
@@ -761,12 +762,14 @@ jobs:
   "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
+      # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
       - run: ls -la
-      - run: cat *.json
+      # make sure JSON files with uploaded urls are present
+      - run: ls -la binary-url.json npm-package-url.json
+      - run: cat binary-url.json
+      - run: cat npm-package-url.json
       - run: mkdir /tmp/testing
       - run:
           name: create dummy package
@@ -788,14 +791,14 @@ jobs:
           name: Post pre-release install comment
           command: |
             node scripts/add-install-comment.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json
+              --npm npm-package-url.json \
+              --binary binary-url.json
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
+              --npm npm-package-url.json \
+              --binary binary-url.json \
               --provider circle
       - store-npm-logs
 
@@ -804,14 +807,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
       # make sure we have cypress.zip received
-      - run: ls -l /tmp/urls/cypress.zip
-      # build NPM package
-      - run:
-          command: npm run build
-          working_directory: cli
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
       - run: mkdir test-binary
       - run:
           name: Create new NPM package
@@ -822,7 +820,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -835,12 +833,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
-      # make sure we have the binary
-      - run: ls -l /tmp/urls/cypress.zip
-      # make sure we have the NPM package
-      - run: ls -l /tmp/urls/cypress.tgz
+      - run: ls -l
+      # make sure we have the binary and NPM package
+      - run: ls -l cypress.zip cypress.tgz
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
@@ -848,7 +843,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -864,8 +859,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
       - run:
           name: Cloning kitchensink project
           command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
@@ -876,7 +872,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/kitchensink
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
       - run:
           working_directory: /tmp/kitchensink
           command: npm run build
@@ -1006,6 +1002,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
     - build-binary:
@@ -1017,6 +1014,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
@@ -1025,14 +1023,16 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
-          - build-npm-package
-          - build-binary
+          - upload-npm-package
+          - upload-binary
     - test-npm-module-and-verify-binary:
         filters:
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1042,6 +1042,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1050,6 +1051,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1081,6 +1083,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - Mac NPM package
 
@@ -1092,6 +1095,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - Mac build
 
@@ -1103,6 +1107,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - use-correct-folder
         requires:
           - Mac binary
 
@@ -1143,10 +1148,10 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - test-example-repos-on-mac-4526
+              - use-correct-folder
         requires:
-          - Mac NPM package
-          - Mac binary
+          - Mac NPM package upload
+          - Mac binary upload
 
 workflows:
   linux:
