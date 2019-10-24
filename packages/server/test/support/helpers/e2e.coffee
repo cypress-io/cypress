@@ -504,8 +504,7 @@ module.exports = e2e = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
-          ## FYI: color will be disabled
-          ## because we are piping the child process
+          NO_COLOR: 1
           COLUMNS: 100
           LINES: 24
         })
