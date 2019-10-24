@@ -2826,6 +2826,21 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      // TODO: remove this after 4.0 when {multiple:true} is no longer default
+      // https://github.com/cypress-io/cypress/issues/5406
+      it('does not log default option {multiple:true}', () => {
+        const logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+
+        cy.get('button:first').dblclick().then(() => {
+          expect(logs[1].get('message')).to.eq('')
+          expect(logs[1].invoke('consoleProps').Options).not.ok
+        })
+      })
+
       it('returns only the $el for the element of the subject that was dblclicked', () => {
         const dblclicks = []
 
@@ -2886,9 +2901,6 @@ describe('src/cy/commands/actions/click', () => {
             'Command': 'dblclick',
             'Applied To': {},
             'Elements': 1,
-            'Options': {
-              'multiple': true,
-            },
             'table': {},
           })
 
