@@ -767,7 +767,13 @@ jobs:
       - attach_workspace:
           at: /tmp/urls
       - run: ls -la
-      - run: cat *.json
+      # make sure JSON files with uploaded urls are present
+      - run:
+          command: ls -la
+          working_directory: /tmp/urls
+      - run:
+          command: cat *.json
+          working_directory: /tmp/urls
       - run: mkdir /tmp/testing
       - run:
           name: create dummy package
@@ -778,8 +784,8 @@ jobs:
           name: Install Cypress
           command: |
             node scripts/test-unique-npm-and-binary.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json \
+              --npm /tmp/urls/npm-package-url.json \
+              --binary /tmp/urls/binary-url.json \
               --cwd /tmp/testing
       - run:
           name: Verify Cypress binary
