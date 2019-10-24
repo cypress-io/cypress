@@ -762,19 +762,12 @@ jobs:
   "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
       # needs uploaded NPM and test binary
       - attach_workspace:
-          at: /tmp/urls
+          at: ~/
       - run: ls -la
       # make sure JSON files with uploaded urls are present
-      - run:
-          command: ls -la
-          working_directory: /tmp/urls
-      - run:
-          command: cat *.json
-          working_directory: /tmp/urls
+      - run: ls -la binary-url.json npm-package-url.json
       - run: mkdir /tmp/testing
       - run:
           name: create dummy package
@@ -785,8 +778,8 @@ jobs:
           name: Install Cypress
           command: |
             node scripts/test-unique-npm-and-binary.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
+              --npm /root/cypress/npm-package-url.json \
+              --binary /root/cypress/binary-url.json \
               --cwd /tmp/testing
       - run:
           name: Verify Cypress binary
@@ -796,14 +789,14 @@ jobs:
           name: Post pre-release install comment
           command: |
             node scripts/add-install-comment.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json
+              --npm /root/cypress/npm-package-url.json \
+              --binary /root/cypress/binary-url.json
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
+              --npm /root/cypress/npm-package-url.json \
+              --binary /root/cypress/binary-url.json \
               --provider circle
       - store-npm-logs
 
