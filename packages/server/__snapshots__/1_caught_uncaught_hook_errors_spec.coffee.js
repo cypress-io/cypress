@@ -14,7 +14,7 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: hook_caught_error_failing_spec.coffee...                                        (1 of 1) 
+  Running:  hook_caught_error_failing_spec.coffee                                           (1 of 1)
 
 
   ✓ t1a
@@ -74,30 +74,34 @@ Because this error occurred during a 'before all' hook we are skipping the remai
 
   (Results)
 
-  ┌─────────────────────────────────────────────────────┐
-  │ Tests:        11                                    │
-  │ Passing:      5                                     │
-  │ Failing:      3                                     │
-  │ Pending:      0                                     │
-  │ Skipped:      3                                     │
-  │ Screenshots:  3                                     │
-  │ Video:        true                                  │
-  │ Duration:     X seconds                             │
-  │ Spec Ran:     hook_caught_error_failing_spec.coffee │
-  └─────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        11                                                                               │
+  │ Passing:      5                                                                                │
+  │ Failing:      3                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      3                                                                                │
+  │ Screenshots:  3                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     hook_caught_error_failing_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s1a -- t2a -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s3a -- t8a -- before all hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_caught_error_failing_spec.coffee/s4a -- t10a -- before all hook (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s1a -- t2     (1280x720)
+     a -- before each hook (failed).png                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s3a -- t8     (1280x720)
+     a -- before all hook (failed).png                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.coffee/s4a -- t1     (1280x720)
+     0a -- before all hook (failed).png                                                             
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing_spec.     (X second)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================
@@ -105,11 +109,12 @@ Because this error occurred during a 'before all' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_caught_error_failing_spec.coffee     XX:XX       11        5        3        -        3 │
+  │ ✖  hook_caught_error_failing_spec.coff      XX:XX       11        5        3        -        3 │
+  │    ee                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       11        5        3        -        3  
+    ✖  1 of 1 failed (100%)                     XX:XX       11        5        3        -        3  
 
 
 `
@@ -130,7 +135,7 @@ exports['e2e caught and uncaught hooks errors failing2 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: hook_uncaught_error_failing_spec.coffee...                                      (1 of 1) 
+  Running:  hook_uncaught_error_failing_spec.coffee                                         (1 of 1)
 
 
   ✓ t1b
@@ -165,28 +170,30 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Results)
 
-  ┌───────────────────────────────────────────────────────┐
-  │ Tests:        7                                       │
-  │ Passing:      4                                       │
-  │ Failing:      1                                       │
-  │ Pending:      0                                       │
-  │ Skipped:      2                                       │
-  │ Screenshots:  1                                       │
-  │ Video:        true                                    │
-  │ Duration:     X seconds                               │
-  │ Spec Ran:     hook_uncaught_error_failing_spec.coffee │
-  └───────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        7                                                                                │
+  │ Passing:      4                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      2                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     hook_uncaught_error_failing_spec.coffee                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_failing_spec.coffee/s1b -- t2b -- before each hook (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_failing_spec.coffee/s1b --      (1280x720)
+     t2b -- before each hook (failed).png                                                           
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing_spe     (X second)
+                          c.coffee.mp4                                                              
 
 
 ====================================================================================================
@@ -194,11 +201,12 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_uncaught_error_failing_spec.cof…     XX:XX        7        4        1        -        2 │
+  │ ✖  hook_uncaught_error_failing_spec.co      XX:XX        7        4        1        -        2 │
+  │    ffee                                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        7        4        1        -        2  
+    ✖  1 of 1 failed (100%)                     XX:XX        7        4        1        -        2  
 
 
 `
@@ -219,7 +227,7 @@ exports['e2e caught and uncaught hooks errors failing3 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: hook_uncaught_root_error_failing_spec.coffee...                                 (1 of 1) 
+  Running:  hook_uncaught_root_error_failing_spec.coffee                                    (1 of 1)
 
 
   1) "before each" hook for "t1c"
@@ -246,28 +254,30 @@ Because this error occurred during a 'before each' hook we are skipping all of t
 
   (Results)
 
-  ┌────────────────────────────────────────────────────────────┐
-  │ Tests:        4                                            │
-  │ Passing:      0                                            │
-  │ Failing:      1                                            │
-  │ Pending:      0                                            │
-  │ Skipped:      3                                            │
-  │ Screenshots:  1                                            │
-  │ Video:        true                                         │
-  │ Duration:     X seconds                                    │
-  │ Spec Ran:     hook_uncaught_root_error_failing_spec.coffee │
-  └────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      3                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     hook_uncaught_root_error_failing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_root_error_failing_spec.coffee/t1c -- before each hook (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_root_error_failing_spec.coffee/t1     (1280x720)
+     c -- before each hook (failed).png                                                             
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failin     (X second)
+                          g_spec.coffee.mp4                                                         
 
 
 ====================================================================================================
@@ -275,11 +285,12 @@ Because this error occurred during a 'before each' hook we are skipping all of t
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_uncaught_root_error_failing_spe…     XX:XX        4        -        1        -        3 │
+  │ ✖  hook_uncaught_root_error_failing_sp      XX:XX        4        -        1        -        3 │
+  │    ec.coffee                                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        4        -        1        -        3  
+    ✖  1 of 1 failed (100%)                     XX:XX        4        -        1        -        3  
 
 
 `
@@ -300,7 +311,7 @@ exports['e2e caught and uncaught hooks errors failing4 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: hook_uncaught_error_events_failing_spec.coffee...                               (1 of 1) 
+  Running:  hook_uncaught_error_events_failing_spec.coffee                                  (1 of 1)
 
 
   uncaught hook error should continue to fire all mocha events
@@ -333,28 +344,31 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 
   (Results)
 
-  ┌──────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                              │
-  │ Passing:      2                                              │
-  │ Failing:      1                                              │
-  │ Pending:      0                                              │
-  │ Skipped:      0                                              │
-  │ Screenshots:  1                                              │
-  │ Video:        true                                           │
-  │ Duration:     X seconds                                      │
-  │ Spec Ran:     hook_uncaught_error_events_failing_spec.coffee │
-  └──────────────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     hook_uncaught_error_events_failing_spec.coffee                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/hook_uncaught_error_events_failing_spec.coffee/uncaught hook error should continue to fire all mocha events -- s1 -- does not run -- before each hook (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_events_failing_spec.coffee/     (1280x720)
+     uncaught hook error should continue to fire all mocha events -- s1 -- does not r               
+     un -- before each hook (failed).png                                                            
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_fail     (X second)
+                          ing_spec.coffee.mp4                                                       
 
 
 ====================================================================================================
@@ -362,11 +376,12 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ hook_uncaught_error_events_failing_s…     XX:XX        3        2        1        -        - │
+  │ ✖  hook_uncaught_error_events_failing_      XX:XX        3        2        1        -        - │
+  │    spec.coffee                                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        3        2        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        3        2        1        -        -  
 
 
 `

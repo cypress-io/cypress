@@ -3,7 +3,7 @@ e2e = require("../support/helpers/e2e")
 
 onServer = (app) ->
   app.get "/link", (req, res) ->
-    res.send("<html><h1>link</h1><a href='https://www.foo.com:55665/cross_origin'>second</a></html>")
+    res.send("<html><h1>link</h1><a href='https://www.foo.com:44665/cross_origin'>second</a></html>")
 
   app.get "/cross_origin", (req, res) ->
     res.send("<html><h1>cross origin</h1></html>")
@@ -12,14 +12,14 @@ onServer = (app) ->
     res.send("""
       <html>
         <h1>form</h1>
-        <form method='POST' action='https://www.foo.com:55665/submit'>
+        <form method='POST' action='https://www.foo.com:44665/submit'>
           <input type='submit' name='foo' value='bar' />
         </form>
       </html>
     """)
 
   app.post "/submit", (req, res) ->
-    res.redirect("https://www.foo.com:55665/cross_origin")
+    res.redirect("https://www.foo.com:44665/cross_origin")
 
   app.get "/javascript", (req, res) ->
     res.send("""
@@ -27,7 +27,7 @@ onServer = (app) ->
         <script type='text/javascript'>
           window.redirect = function(){
             debugger
-            window.location.href = 'https://www.foo.com:55665/cross_origin'
+            window.location.href = 'https://www.foo.com:44665/cross_origin'
           }
         </script>
         <h1>javascript</h1>
@@ -41,10 +41,10 @@ describe "e2e web security", ->
   context "when enabled", ->
     e2e.setup({
       servers: [{
-        port: 5566
+        port: 4466
         onServer: onServer
       }, {
-        port: 55665
+        port: 44665
         https: true
         onServer: onServer
       }]
@@ -55,20 +55,19 @@ describe "e2e web security", ->
       }
     })
 
-    it "fails", ->
-      e2e.exec(@, {
-        spec: "web_security_spec.coffee"
-        snapshot: true
-        expectedExitCode: 3
-      })
+    e2e.it "fails", {
+      spec: "web_security_spec.coffee"
+      snapshot: true
+      expectedExitCode: 3
+    }
 
   context "when disabled", ->
     e2e.setup({
       servers: [{
-        port: 5566
+        port: 4466
         onServer: onServer
       }, {
-        port: 55665
+        port: 44665
         https: true
         onServer: onServer
       }]
@@ -82,7 +81,6 @@ describe "e2e web security", ->
 
     e2e.it "passes", {
       spec: "web_security_spec.coffee"
-      browser: "chrome"
       snapshot: true
       expectedExitCode: 0
     }

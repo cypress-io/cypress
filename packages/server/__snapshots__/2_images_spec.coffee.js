@@ -14,7 +14,7 @@ exports['e2e images / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: images_spec.coffee...                                                           (1 of 1) 
+  Running:  images_spec.coffee                                                              (1 of 1)
 
 
   images
@@ -27,23 +27,23 @@ exports['e2e images / passes'] = `
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        2                  │
-  │ Passing:      2                  │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        true               │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     images_spec.coffee │
-  └──────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     images_spec.coffee                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/images_spec.coffee.mp4              (X second)
 
 
 ====================================================================================================
@@ -51,11 +51,11 @@ exports['e2e images / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ images_spec.coffee                        XX:XX        2        2        -        -        - │
+  │ ✔  images_spec.coffee                       XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

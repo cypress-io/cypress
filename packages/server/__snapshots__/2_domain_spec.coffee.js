@@ -14,7 +14,7 @@ exports['e2e domain / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: domain_2_spec.coffee...                                                         (1 of 2) 
+  Running:  domain_2_spec.coffee                                                            (1 of 2)
 
 
   localhost
@@ -32,28 +32,28 @@ exports['e2e domain / passes'] = `
 
   (Results)
 
-  ┌────────────────────────────────────┐
-  │ Tests:        3                    │
-  │ Passing:      3                    │
-  │ Failing:      0                    │
-  │ Pending:      0                    │
-  │ Skipped:      0                    │
-  │ Screenshots:  0                    │
-  │ Video:        true                 │
-  │ Duration:     X seconds            │
-  │ Spec Ran:     domain_2_spec.coffee │
-  └────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     domain_2_spec.coffee                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/domain_2_spec.coffee.mp4            (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: domain_spec.coffee...                                                           (2 of 2) 
+  Running:  domain_spec.coffee                                                              (2 of 2)
 
 
   localhost
@@ -71,23 +71,23 @@ exports['e2e domain / passes'] = `
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        3                  │
-  │ Passing:      3                  │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        true               │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     domain_spec.coffee │
-  └──────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     domain_spec.coffee                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/domain_spec.coffee.mp4              (X second)
 
 
 ====================================================================================================
@@ -95,13 +95,13 @@ exports['e2e domain / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ domain_2_spec.coffee                      XX:XX        3        3        -        -        - │
+  │ ✔  domain_2_spec.coffee                     XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔ domain_spec.coffee                        XX:XX        3        3        -        -        - │
+  │ ✔  domain_spec.coffee                       XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        6        6        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `

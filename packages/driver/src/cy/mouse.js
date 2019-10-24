@@ -57,7 +57,7 @@ const shouldFireMouseMoveEvents = (targetEl, lastHoveredEl, fromElViewport, coor
 const create = (state, keyboard, focused) => {
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = keyboard.getActiveModifiers()
+      const _activeModifiers = keyboard.getActiveModifiers(state)
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
@@ -333,12 +333,6 @@ const create = (state, keyboard, focused) => {
         return mouseDownEvents
       }
 
-      if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
-        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
-          $selection.moveSelectionToEnd(el)
-        }
-      }
-
       //# retrieve the first focusable $el in our parent chain
       const $elToFocus = $elements.getFirstFocusableEl($(el))
 
@@ -355,6 +349,13 @@ const create = (state, keyboard, focused) => {
         } else {
           // the user clicked inside a focusable element
           focused.fireFocus($elToFocus.get(0))
+        }
+      }
+
+      if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
+        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
+          debug('moveSelectionToEnd due to click')
+          $selection.moveSelectionToEnd($dom.getDocumentFromElement(el))
         }
       }
 
