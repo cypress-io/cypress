@@ -898,6 +898,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      # the user should be "node"
+      - run: whoami
+      - run: pwd
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -911,7 +914,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/home/node/cypress/cypress.zip npm i /home/node/cypress/cypress.tgz
       - run:
           name: Add Cypress demo
           working_directory: test-binary
