@@ -4,7 +4,6 @@
   "private": true,
   "main": "src/main.jsx",
   "scripts": {
-    "prebuild": "npm run check-deps-pre",
     "build": "webpack",
     "build-prod": "npm run build",
     "check-deps": "node ../../scripts/check-deps.js --verbose",

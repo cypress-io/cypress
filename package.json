@@ -12,8 +12,7 @@
     "binary-release": "node ./scripts/binary.js release",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
-    "prebuild": "npm run check-deps-pre && npm run all prebuild",
-    "build": "npm run all build",
+    "build": "lerna run build --parallel --stream",
     "bump": "node ./scripts/binary.js bump",
     "check-deps": "node ./scripts/check-deps.js --verbose",
     "check-deps-pre": "node ./scripts/check-deps.js --verbose --prescript",
@@ -32,8 +31,7 @@
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
-    "preinstall": "npx shx rm -rf node_modules/@packages",
-    "postinstall": "echo 'root postinstall' && npm run link && npm run all install && npm run build",
+    "postinstall": "echo 'root postinstall' && yarn build",
     "install-filtered": "npm run all install -- --package $(node ./scripts/check-deps.js --list)",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "link": "node ./scripts/link-packages.js",
@@ -126,11 +124,12 @@
     "husky": "2.4.1",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
-    "js-codemod": "cpojer/js-codemod#29dafed",
+    "js-codemod": "cpojer/js-codemod",
     "jscodemods": "cypress-io/jscodemods#01b546e",
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
+    "lerna": "3.18.3",
     "lint-staged": "9.4.1",
     "lodash": "4.17.15",
     "make-empty-github-commit": "1.2.0",
@@ -189,6 +188,10 @@
     "stubs",
     "test",
     "testing"
+  ],
+  "workspaces": [
+    "cli",
+    "packages/*"
   ],
   "lint-staged": {
     "*.coffee": [
