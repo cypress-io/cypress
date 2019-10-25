@@ -32,7 +32,6 @@
     "pretest-integration-watch": "npm run check-deps-pre",
     "test-integration-watch": "./test/support/watch test-integration",
     "test-performance": "node ./test/scripts/run.js test/performance",
-    "pretest-unit": "npm run check-deps-pre",
     "test-unit": "node ./test/scripts/run.js test/unit",
     "pretest-unit-watch": "npm run check-deps-pre",
     "test-unit-watch": "./test/support/watch test/unit",

@@ -18,7 +18,6 @@
     "test": "npm run test-unit",
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
     "test-dependencies": "npm run check-deps && dependency-check . --no-dev",
-    "pretest-unit": "npm run check-deps-pre",
     "test-unit": "npm run unit",
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run unit -- --watch",
