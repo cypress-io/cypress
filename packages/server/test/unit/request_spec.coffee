@@ -3,8 +3,43 @@ require("../spec_helper")
 _       = require("lodash")
 http    = require("http")
 Request = require("#{root}lib/request")
+snapshot = require("snap-shot-it")
 
 request = Request({timeout: 100})
+
+testAttachingCookiesWith = (fn) ->
+  set = sinon.spy(request, 'setCookiesOnBrowser')
+  get = sinon.spy(request, 'setRequestCookieHeader')
+
+  nock("http://localhost:1234")
+  .get("/")
+  .reply(302, "", {
+    'set-cookie': 'foo=bar'
+    location: "/B"
+  })
+  .get("/B")
+  .reply(302, "", {
+    'set-cookie': 'bar=baz'
+    location: "/B"
+  })
+  .get("/B")
+  .reply(200, "", {
+    'set-cookie': 'quuz=quux'
+  })
+
+  fn()
+  .then ->
+    snapshot({
+      setCalls: set.getCalls().map (call) ->
+        {
+          currentUrl: call.args[1],
+          setCookie: call.args[0].headers['set-cookie']
+        }
+      getCalls: get.getCalls().map (call) ->
+        {
+          newUrl: _.get(call, 'args.1')
+        }
+    })
 
 describe "lib/request", ->
   beforeEach ->
@@ -722,6 +757,12 @@ describe "lib/request", ->
           expect(resp.status).to.eq(200)
           expect(resp).not.to.have.property("redirectedToUrl")
 
+      it "gets + attaches the cookies at each redirect", ->
+        testAttachingCookiesWith =>
+          request.sendPromise({}, @fn, {
+            url: "http://localhost:1234/"
+          })
+
     context "form=true", ->
       beforeEach ->
         nock("http://localhost:8080")
@@ -843,3 +884,16 @@ describe "lib/request", ->
         beginFn()
         expect(request.create).to.be.calledOnce
         expect(request.create).to.be.calledWith(options)
+
+    it "gets + attaches the cookies at each redirect", ->
+      testAttachingCookiesWith =>
+        request.sendStream({}, @fn, {
+          url: "http://localhost:1234/"
+          followRedirect: _.stubTrue
+        })
+        .then (fn) =>
+          req = fn()
+
+          new Promise (resolve, reject) =>
+            req.on('response', resolve)
+            req.on('error', reject)
