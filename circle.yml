@@ -30,7 +30,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/base:12.12.0
+      - image: cypress/base:12.0.0
         user: node
     environment:
       PLATFORM: linux
