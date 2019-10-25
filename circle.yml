@@ -893,7 +893,7 @@ jobs:
           command: npm run e2e
       - store-npm-logs
 
-  test-binary-as-non-root-user:
+  test-binary-as-specific-user:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -1097,13 +1097,14 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
           - build-binary
-    - test-binary-as-non-root-user:
+    - test-binary-as-specific-user:
+        name: "test binary as a non-root user"
         executor: non-root-docker-user
         requires:
           - build-npm-package
           - build-binary
-    - test-binary-as-non-root-user:
-        name: "test binary as root user"
+    - test-binary-as-specific-user:
+        name: "test binary as a root user"
         requires:
           - build-npm-package
           - build-binary
