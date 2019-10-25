@@ -4,7 +4,7 @@ Thanks for taking the time to contribute! :smile:
 
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
-- Join the [Cypress chat](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
+- Join the [Cypress Gitter chat](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
 - Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
 - Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
@@ -117,12 +117,23 @@ Some opened issue are questions, not bug reports or feature requests. Issues are
 
 ### Does this issue belong in this repository?
 
+#### Other open source repos
+
 Issues may be opened about wanting changes to our [documentation](), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
 
 - Thank them for their contribution.
 - Explain that this repo is only for bugs or feature requests of the Cypress product.
 - If you have permission to 'Transfer the issue', do so. If not, explain that they can open an issue in our other repository and link to the repository.
 - Close the issue (if not already transferred).
+
+#### Our Dashboard Service
+
+Issues may be opened about wanting features in our Dashboard Service. In this case you should:
+
+- Thank them for expressing interest in a new feature.
+- Refer them to the Dashboard ProductBoard: "You can express interest and see progress for this feature on our Roadmap from our Dashboard's product board here: https://portal.productboard.com/cypress-io/1-cypress-dashboard All related work for the Dashboard features is handled in that ProductBoard and will be handled by the Dashboard team directly when you comment there."
+- Close the issue
+- Close the issue to comments
 
 ### Is this already an open issue?
 
