@@ -128,7 +128,7 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project, onWarning) ->
+  open: (config = {}, { project, onError, onWarning }) ->
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -152,6 +152,7 @@ class Server
 
       @createRoutes(app, config, {
         project
+        onError,
         getRemoteState
         request: @_request
         nodeProxy: @_nodeProxy
