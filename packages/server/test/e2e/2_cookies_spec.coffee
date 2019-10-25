@@ -65,22 +65,97 @@ onServer = (app) ->
 
     res.send("<html></html>")
 
+  app.get "/setCascadingCookies", (req, res) ->
+    n = Number(req.query.n)
+
+    ## alternates between base URLs
+    a = req.query.a
+    b = req.query.b
+
+    res.header("Set-Cookie", [
+      "namefoo#{n}=valfoo#{n}"
+      "namebar#{n}=valbar#{n}"
+    ])
+
+    console.log('to', a, 'from', b)
+
+    if n > 0
+      res.redirect("#{a}/setCascadingCookies?n=#{n-1}&a=#{b}&b=#{a}")
+
+    res.send("<html>finished setting cookies</html>")
+
+haveRoot = !process.env.USE_HIGH_PORTS && process.geteuid() == 0
+
+if not haveRoot
+  console.warn('(e2e tests warning) You are not running as root; therefore, 2_cookies_spec')
+  console.warn('  cannot cover the case where the default (80/443) HTTP(s) port is used.')
+
+httpPort = 2121
+httpsPort = 2323
+
+if haveRoot
+  httpPort = 80
+  httpsPort = 443
+
+otherUrl = "http://quux.bar.net#{if haveRoot then '' else httpPort}"
+otherHttpsUrl = "http://quux.bar.net#{if haveRoot then '' else httpPort}"
+
 describe "e2e cookies", ->
   e2e.setup({
     servers: [{
       onServer
-      port: 2121
+      port: httpPort
     }, {
       onServer
-      port: 2323
+      port: httpsPort
       https: true
     }]
     settings: {
-      baseUrl: "https://localhost:2323/",
+      hosts: {
+        "*.foo.com": "127.0.0.1"
+        "*.bar.net": "127.0.0.1"
+      }
     }
   })
 
-  e2e.it "passes", {
+  [
+    ["https localhost", true, "localhost", "localhost"],
+    ["http localhost", false, "localhost", "localhost"],
+    ["https FQDN", true, "www.bar.foo.com", ".foo.com"],
+    ["http FQDN", false, "www.bar.foo.com", ".foo.com"],
+  ]
+  # .slice(3,4)
+  .forEach ([protocol, https, baseDomain, expectedDomain]) =>
+    httpUrl = "http://#{baseDomain}#{if haveRoot then '' else ":#{httpPort}"}"
+    httpsUrl = "https://#{baseDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
+
+    baseUrl = if https then httpsUrl else httpUrl
+
+    e2e.it "passes with #{protocol} baseurl", {
+      config: {
+        baseUrl
+        env: {
+          baseUrl
+          expectedDomain
+          https
+          httpUrl
+          httpsUrl
+          otherUrl
+          otherHttpsUrl
+        }
+      }
+      spec: "cookies_spec.coffee"
+      snapshot: true
+      expectedExitCode: 0
+    }
+
+  e2e.it "passes with no baseurl", {
+    config: {
+      env: {
+        noBaseUrl: true
+        expectedDomain: 'localhost'
+      }
+    }
     spec: "cookies_spec.coffee"
     snapshot: true
     expectedExitCode: 0

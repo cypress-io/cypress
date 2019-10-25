@@ -1,4 +1,20 @@
+expectedDomain = Cypress.env('expectedDomain')
+httpUrl = Cypress.env('httpUrl')
+httpsUrl = Cypress.env('httpsUrl')
+otherUrl = Cypress.env('otherUrl')
+otherHttpsUrl = Cypress.env('otherHttpsUrl')
+
 describe "cookies", ->
+  before ->
+    ## assert we're running on expected baseurl,
+    ## otherwise these tests are useless
+    if Cypress.env('noBaseUrl')
+      return
+
+    expect(Cypress.env('baseUrl')).to.be.a('string')
+    .and.have.length.gt(0)
+    .and.eq(Cypress.config('baseUrl'))
+
   beforeEach ->
     cy.wrap({foo: "bar"})
 
@@ -12,7 +28,7 @@ describe "cookies", ->
       cy
         .clearCookie("foo1")
         .setCookie("foo", "bar").then (c) ->
-          expect(c.domain).to.eq("localhost")
+          expect(c.domain).to.eq(expectedDomain)
           expect(c.httpOnly).to.eq(false)
           expect(c.name).to.eq("foo")
           expect(c.value).to.eq("bar")
@@ -28,7 +44,7 @@ describe "cookies", ->
           .then (cookies) ->
             c = cookies[0]
 
-            expect(c.domain).to.eq("localhost")
+            expect(c.domain).to.eq(expectedDomain)
             expect(c.httpOnly).to.eq(false)
             expect(c.name).to.eq("foo")
             expect(c.value).to.eq("bar")
@@ -43,7 +59,7 @@ describe "cookies", ->
           .should("be.null")
         .setCookie("wtf", "bob", {httpOnly: true, path: "/foo", secure: true})
         .getCookie("wtf").then (c) ->
-          expect(c.domain).to.eq("localhost")
+          expect(c.domain).to.eq(expectedDomain)
           expect(c.httpOnly).to.eq(true)
           expect(c.name).to.eq("wtf")
           expect(c.value).to.eq("bob")
@@ -75,7 +91,7 @@ describe "cookies", ->
       cy.getCookies().should("have.length", 2)
 
     it "handles undefined cookies", ->
-      cy.visit("http://localhost:2121/cookieWithNoName")
+      cy.visit("/cookieWithNoName")
 
   context "without whitelist", ->
     before ->
@@ -87,31 +103,31 @@ describe "cookies", ->
       cy
         .clearCookies()
         .setCookie("asdf", "jkl")
-        .request("http://localhost:2121/requestCookies")
+        .request("/requestCookies")
           .its("body").should("deep.eq", { asdf: "jkl" })
 
     it "handles expired cookies secure", ->
       cy
-        .visit("http://localhost:2121/set")
+        .visit("/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("http://localhost:2121/expirationMaxAge")
+        .visit("/expirationMaxAge")
         .getCookie("shouldExpire").should("not.exist")
-        .visit("http://localhost:2121/set")
+        .visit("/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("http://localhost:2121/expirationExpires")
+        .visit("/expirationExpires")
         .getCookie("shouldExpire").should("not.exist")
 
     it "issue: #224 sets expired cookies between redirects", ->
       cy
-        .visit("http://localhost:2121/set")
+        .visit("/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("http://localhost:2121/expirationRedirect")
+        .visit("/expirationRedirect")
         .url().should("include", "/logout")
         .getCookie("shouldExpire").should("not.exist")
 
-        .visit("http://localhost:2121/set")
+        .visit("/set")
         .getCookie("shouldExpire").should("exist")
-        .request("http://localhost:2121/expirationRedirect")
+        .request("/expirationRedirect")
         .getCookie("shouldExpire").should("not.exist")
 
     it "issue: #1321 failing to set or parse cookie", ->
@@ -119,19 +135,51 @@ describe "cookies", ->
       ## with a secure flag, and then expired without the secure
       ## flag.
       cy
-        .visit("https://localhost:2323/setOneHourFromNowAndSecure")
+        .visit("#{httpsUrl}/setOneHourFromNowAndSecure")
         .getCookies().should("have.length", 1)
 
         ## secure cookies should have been attached
-        .request("https://localhost:2323/requestCookies")
+        .request("#{httpsUrl}/requestCookies")
           .its("body").should("deep.eq", { shouldExpire: "oneHour" })
 
         ## secure cookies should not have been attached
-        .request("http://localhost:2121/requestCookies")
+        .request("#{httpUrl}/requestCookies")
           .its("body").should("deep.eq", {})
 
-        .visit("https://localhost:2323/expirationMaxAge")
+        .visit("#{httpsUrl}/expirationMaxAge")
         .getCookies().should("be.empty")
 
     it "issue: #2724 does not fail on invalid cookies", ->
-      cy.request('https://localhost:2323/invalidCookies')
+      cy.request("#{httpsUrl}/invalidCookies")
+
+    ## https://github.com/cypress-io/cypress/issues/5453
+    it "can set and clear cookie", ->
+      cy.setCookie('foo', 'bar')
+      cy.clearCookie('foo')
+      cy.getCookie('foo').should('be.null')
+
+    [
+      ['HTTPS', otherHttpsUrl],
+      ['HTTP', otherUrl]
+    ].forEach ([protocol, altUrl]) =>
+      it "can set cookies on way too many redirects with #{protocol} intermediary", ->
+        n = 8
+        baseLoc = new Cypress.Location(Cypress.env('baseUrl'))
+        otherLoc = new Cypress.Location(altUrl)
+
+        expectedCookie = (loc, n, tag) =>
+          {
+            name: "name#{tag}#{n}"
+            value: "val#{tag}#{n}"
+            domain: if loc.remote.domain == 'localhost' then 'localhost' else ".#{loc.getSuperDomain()}"
+            httpOnly: false
+            secure: false
+          }
+
+        cy.request("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
+
+        cy.getCookies().then (cookies) ->
+          cy.task('console:log', 'baseUrl cookies:', cookies)
+
+        cy.getCookies({ domain: otherLoc.remote.domain }).then (cookies) ->
+          cy.task('console:log', 'altUrl cookies:', cookies)
