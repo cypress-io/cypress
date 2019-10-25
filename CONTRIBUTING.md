@@ -117,12 +117,23 @@ Some opened issue are questions, not bug reports or feature requests. Issues are
 
 ### Does this issue belong in this repository?
 
+#### Other open source repos
+
 Issues may be opened about wanting changes to our [documentation](), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
 
 - Thank them for their contribution.
 - Explain that this repo is only for bugs or feature requests of the Cypress product.
 - If you have permission to 'Transfer the issue', do so. If not, explain that they can open an issue in our other repository and link to the repository.
 - Close the issue (if not already transferred).
+
+#### Our Dashboard Service
+
+Issues may be opened about wanting features in our Dashboard Service. In this case you should:
+
+- Thank them for expressing interest in a new feature.
+- Refer them to the Dashboard ProductBoard: "You can express interest and see progress for this feature on our Roadmap from our Dashboard's product board here: https://portal.productboard.com/cypress-io/1-cypress-dashboard All related work for the Dashboard features is handled in that ProductBoard and will be handled by the Dashboard team directly when you comment there."
+- Close the issue
+- Close the issue to comments
 
 ### Is this already an open issue?
 
