@@ -918,7 +918,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/home/node/cypress/cypress.zip npm i /home/node/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Add Cypress demo
           working_directory: test-binary
