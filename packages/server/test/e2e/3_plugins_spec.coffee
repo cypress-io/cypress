@@ -6,6 +6,7 @@ Fixtures = require("../support/helpers/fixtures")
 pluginExtension = Fixtures.projectPath("plugin-extension")
 pluginConfig = Fixtures.projectPath("plugin-config")
 workingPreprocessor = Fixtures.projectPath("working-preprocessor")
+pluginsRootAsyncError = Fixtures.projectPath("plugins-root-async-error")
 pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
 pluginsAbsolutePath = Fixtures.projectPath("plugins-absolute-path")
 pluginAfterScreenshot = Fixtures.projectPath("plugin-after-screenshot")
@@ -13,7 +14,7 @@ pluginAfterScreenshot = Fixtures.projectPath("plugin-after-screenshot")
 describe "e2e plugins", ->
   e2e.setup()
 
-  it "passes", ->
+  it "works with custom preprocessor", ->
     e2e.exec(@, {
       spec: "app_spec.coffee"
       project: workingPreprocessor
@@ -22,7 +23,16 @@ describe "e2e plugins", ->
       expectedExitCode: 0
     })
 
-  it "fails", ->
+  it "fails when there is an async error", ->
+    e2e.exec(@, {
+      spec: "app_spec.js"
+      project: pluginsRootAsyncError
+      sanitizeScreenshotDimensions: true
+      snapshot: true
+      expectedExitCode: 1
+    })
+
+  it "fails when there is an async error inside an event handler", ->
     e2e.exec(@, {
       spec: "app_spec.coffee"
       project: pluginsAsyncError

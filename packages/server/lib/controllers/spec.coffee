@@ -4,7 +4,7 @@ errors = require("../errors")
 preprocessor = require("../plugins/preprocessor")
 
 module.exports = {
-  handle: (spec, req, res, config, next, project) ->
+  handle: (spec, req, res, config, next, onError) ->
     debug("request for %o", { spec })
 
     res.set({
@@ -50,7 +50,7 @@ module.exports = {
         console.log("")
         errors.log(err)
 
-        project.emit("exitEarlyWithErr", err.message)
+        onError(err)
       else
         res.send(preprocessor.clientSideError(err))
 }

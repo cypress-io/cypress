@@ -45,8 +45,10 @@ describe "lib/modes/run", ->
   context ".openProjectCreate", ->
     beforeEach ->
       sinon.stub(openProject, "create").resolves()
+      @onError = sinon.spy()
 
       options = {
+        onError: @onError
         port: 8080
         env: {foo: "bar"}
         isTextTerminal: true
@@ -67,11 +69,12 @@ describe "lib/modes/run", ->
         isTextTerminal: true
       })
 
-    it "emits 'exitEarlyWithErr' with error message onError", ->
-      sinon.stub(openProject, "emit")
+    it "calls options.onError with error message onError", ->
+      error = { message: "the message" }
+
       expect(openProject.create.lastCall.args[2].onError).to.be.a("function")
-      openProject.create.lastCall.args[2].onError({ message: "the message" })
-      expect(openProject.emit).to.be.calledWith("exitEarlyWithErr", "the message")
+      openProject.create.lastCall.args[2].onError(error)
+      expect(@onError).to.be.calledWith(error)
 
   context ".getElectronProps", ->
     it "sets width and height", ->
@@ -94,7 +97,7 @@ describe "lib/modes/run", ->
         toJPEG: sinon.stub().returns("imgdata")
       }
 
-      props = runMode.getElectronProps(true, {}, write)
+      props = runMode.getElectronProps(true, write)
 
       expect(props.recordFrameRate).to.eq(20)
 
@@ -103,7 +106,7 @@ describe "lib/modes/run", ->
       expect(write).to.be.calledWith("imgdata")
 
     it "does not set recordFrameRate or onPaint when write is falsy", ->
-      props = runMode.getElectronProps(true, {}, false)
+      props = runMode.getElectronProps(true, false)
 
       expect(props).not.to.have.property("recordFrameRate")
       expect(props).not.to.have.property("onPaint")
@@ -116,19 +119,19 @@ describe "lib/modes/run", ->
 
       expect(options.show).to.eq(false)
 
-    it "emits exitEarlyWithErr when webContents crashed", ->
+    it "calls onError when webContents crashes", ->
       sinon.spy(errors, "get")
       sinon.spy(errors, "log")
+      onError = sinon.spy()
 
-      emit = sinon.stub(@projectInstance, "emit")
-
-      props = runMode.getElectronProps(true, @projectInstance)
+      props = runMode.getElectronProps(true, true, onError)
 
       props.onCrashed()
 
       expect(errors.get).to.be.calledWith("RENDERER_CRASHED")
       expect(errors.log).to.be.calledOnce
-      expect(emit).to.be.calledWithMatch("exitEarlyWithErr", "We detected that the Chromium Renderer process just crashed.")
+      expect(onError).to.be.called
+      expect(onError.lastCall.args[0].message).to.include("We detected that the Chromium Renderer process just crashed.")
 
   context ".launchBrowser", ->
     beforeEach ->
@@ -237,16 +240,18 @@ describe "lib/modes/run", ->
       sinon.stub(runMode, "waitForSocketConnection").callsFake ->
         Promise.delay(1000)
 
+      onError = sinon.spy()
       emit = sinon.stub(@projectInstance, "emit")
 
-      runMode.waitForBrowserToConnect({project: @projectInstance, timeout: 10})
+      runMode.waitForBrowserToConnect({timeout: 10, onError})
       .then ->
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
         expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying...")
         expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying again...")
         expect(errors.get).to.be.calledWith("TESTS_DID_NOT_START_FAILED")
-        expect(emit).to.be.calledWith("exitEarlyWithErr", "The browser never connected. Something is wrong. The tests cannot run. Aborting...")
+        expect(onError).to.be.called
+        expect(onError.lastCall.args[0].message).to.include("The browser never connected. Something is wrong. The tests cannot run. Aborting...")
 
   context ".waitForSocketConnection", ->
     beforeEach ->
@@ -373,7 +378,7 @@ describe "lib/modes/run", ->
           }
         })
 
-    it "exitEarlyWithErr event resolves with no tests, and error", ->
+    it "exiting early resolves with no tests, and error", ->
       sinon.useFakeTimers({ shouldAdvanceTime: true })
 
       err = new Error("foo")
@@ -388,9 +393,7 @@ describe "lib/modes/run", ->
       sinon.spy(Promise.prototype, "delay")
 
       process.nextTick =>
-        expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
-        @projectInstance.emit("exitEarlyWithErr", err.message)
-        expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
+        runMode.exitEarly(err)
 
       runMode.waitForTestsToFinishRunning({
         project: @projectInstance,

@@ -24,9 +24,10 @@ describe "lib/controllers/spec", ->
     }
 
     sinon.stub(preprocessor, "getFile").resolves(outputFilePath)
+    @onError = sinon.spy()
 
     @handle = (filePath, config = {}) =>
-      spec.handle(filePath, {}, @res, config, (->), @project)
+      spec.handle(filePath, {}, @res, config, (->), @onError)
 
   it "sets the correct content type", ->
     @handle(specName)
@@ -55,8 +56,9 @@ describe "lib/controllers/spec", ->
     @handle(specName, {isTextTerminal: true}).then =>
       expect(errors.log).to.be.called
       expect(errors.log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
-      expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Oops...we found an error preparing this test file")
-      expect(@project.emit).to.be.calledWithMatch("exitEarlyWithErr", "Reason request failed")
+      expect(@onError).to.be.called
+      expect(@onError.lastCall.args[0].message).to.include("Oops...we found an error preparing this test file")
+      expect(@onError.lastCall.args[0].message).to.include("Reason request failed")
 
   it "errors when sending file errors", ->
     sendFileErr = new Error("ENOENT")

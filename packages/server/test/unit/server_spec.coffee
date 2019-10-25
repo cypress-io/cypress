@@ -59,7 +59,7 @@ describe "lib/server", ->
 
       _.extend @config, {port: 54321, morgan: false}
 
-      @server.open(@config)
+      @server.open(@config, {})
       .then =>
         expect(@server.createExpressApp).to.be.calledWith(false)
 
@@ -71,7 +71,7 @@ describe "lib/server", ->
       sinon.stub(@server, "createRoutes")
       sinon.stub(@server, "createExpressApp").returns(obj)
 
-      @server.open(@config)
+      @server.open(@config, {})
       .then =>
         expect(@server.createServer).to.be.calledWith(obj, @config)
 
@@ -81,7 +81,7 @@ describe "lib/server", ->
       sinon.stub(@server, "createRoutes")
       sinon.stub(@server, "createExpressApp").returns(obj)
 
-      @server.open(@config)
+      @server.open(@config, {})
       .then =>
         expect(@server.createRoutes).to.be.calledWith(obj)
 
@@ -91,14 +91,14 @@ describe "lib/server", ->
       sinon.stub(@server, "createRoutes")
       sinon.stub(@server, "createExpressApp").returns(obj)
 
-      @server.open(@config)
+      @server.open(@config, {})
       .then =>
         expect(@server.createServer).to.be.calledWith(obj, @config)
 
     it "calls logger.setSettings with config", ->
       sinon.spy(logger, "setSettings")
 
-      @server.open(@config)
+      @server.open(@config, {})
       .then (ret) =>
         expect(logger.setSettings).to.be.calledWith(@config)
 
@@ -185,7 +185,7 @@ describe "lib/server", ->
       @startListening = sinon.stub(Socket.prototype, "startListening")
 
     it "sets _socket and calls _socket#startListening", ->
-      @server.open(@config)
+      @server.open(@config, {})
       .then =>
         @server.startWebsockets(1, 2, 3)
 
@@ -213,12 +213,12 @@ describe "lib/server", ->
       expect(@server.close()).to.be.instanceof Promise
 
     it "calls close on this.server", ->
-      @server.open(@config)
+      @server.open(@config, {})
       .then =>
         @server.close()
 
     it "isListening=false", ->
-      @server.open(@config)
+      @server.open(@config, {})
       .then =>
         @server.close()
       .then =>

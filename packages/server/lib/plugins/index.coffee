@@ -28,7 +28,21 @@ module.exports = {
   init: (config, options) ->
     debug("plugins.init", config.pluginsFile)
 
-    new Promise (resolve, reject) ->
+    new Promise (_resolve, _reject) ->
+      ## provide a safety net for fulfilling the promise because the
+      ## 'handleError' function below can potentially be triggered
+      ## before or after the promise is already fulfilled
+      fulfilled = false
+
+      fulfill = (_fulfill) -> (value) ->
+        return if fulfilled
+
+        fulfilled = true
+        _fulfill(value)
+
+      resolve = fulfill(_resolve)
+      reject = fulfill(_reject)
+
       return resolve() if not config.pluginsFile
 
       if pluginsProcess
@@ -85,11 +99,16 @@ module.exports = {
         killPluginsProcess()
         err = errors.get(type, config.pluginsFile, err.annotated or err.stack or err.message)
         err.title = "Error running plugin"
-        options.onError(err)
+
+        ## this can sometimes trigger before the promise is fulfilled and
+        ## sometimes after, so we need to handle each case differently
+        if fulfilled
+          options.onError(err)
+        else
+          reject(err)
 
       pluginsProcess.on("error", handleError("PLUGINS_UNEXPECTED_ERROR"))
       ipc.on("error", handleError("PLUGINS_UNEXPECTED_ERROR"))
-      ipc.on("validation:error", handleError("PLUGINS_VALIDATION_ERROR"))
 
       ## see timers/parent.js line #93 for why this is necessary
       process.on("exit", killPluginsProcess)
