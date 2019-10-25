@@ -903,6 +903,7 @@ jobs:
       - run: pwd
       # prints the current user's effective user id
       # for root it is 0
+      # for other users it is a positive integer
       - run: node -e 'console.log(process.geteuid())'
       # make sure the binary and NPM package files are present
       - run: ls -l
@@ -1098,6 +1099,11 @@ linux-workflow: &linux-workflow
           - build-binary
     - test-binary-as-non-root-user:
         executor: non-root-docker-user
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-as-non-root-user:
+        name: "test binary as root user"
         requires:
           - build-npm-package
           - build-binary
