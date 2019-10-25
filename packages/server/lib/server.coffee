@@ -150,7 +150,12 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
+      @createRoutes(app, config, {
+        project
+        getRemoteState
+        request: @_request
+        nodeProxy: @_nodeProxy
+      })
 
       @createServer(app, config, project, @_request, onWarning)
 
