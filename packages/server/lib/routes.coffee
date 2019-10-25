@@ -15,7 +15,7 @@ files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 staticCtrl  = require("./controllers/static")
 
-module.exports = (app, config, { request, getRemoteState, project, nodeProxy, project, onError }) ->
+module.exports = (app, config, { request, getRemoteState, project, nodeProxy, onError }) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
