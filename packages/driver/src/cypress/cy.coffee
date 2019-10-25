@@ -167,9 +167,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.SVGElement.prototype.blur = ->
         focused.interceptBlur(@)
 
-      contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(@)
-
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
 
