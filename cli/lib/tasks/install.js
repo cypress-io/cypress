@@ -127,6 +127,11 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 }
 
 const start = (options = {}) => {
+  // if CYPRESS_FORCE_INSTALL is set set options force to true
+  if (util.getEnv('CYPRESS_FORCE_INSTALL')) {
+    options.force = true
+  }
+
   // handle deprecated / removed
   if (util.getEnv('CYPRESS_BINARY_VERSION')) {
     return throwFormErrorText(errors.removed.CYPRESS_BINARY_VERSION)()
