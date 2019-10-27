@@ -1,4 +1,4 @@
-const minimist = require('minimist')
+const minim = require('minim')
 const debug = require('debug')('cypress:cli')
 const args = minimist(process.argv.slice(2))
 const util = require('./lib/util')
