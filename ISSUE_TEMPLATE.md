@@ -1,4 +1,4 @@
-<!-- Is this a question? Don't open an issue. Ask in our chat https://on.cypress.io/chat  -->
+<!-- Is this a question? Don't open an issue. Ask in our chat here https://on.cypress.io/chat  -->
 
 ### Current behavior:
 
@@ -16,4 +16,4 @@
 
 ### Versions
 
-<!-- Cypress, operating system, browser -->
+<!-- Cypress, operating system, browser, search enginer -->
