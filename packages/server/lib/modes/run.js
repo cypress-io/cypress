@@ -548,13 +548,7 @@ const openProjectCreate = (projectRoot, socketId, options) => {
     onWarning,
     onError (err) {
       console.log('')
-      if (err.details) {
-        console.log(chalk.red(err.message))
-        console.log('')
-        console.log(chalk.yellow(err.details))
-      } else {
-        console.log(chalk.red(err.stack))
-      }
+      errors.log(err)
 
       options.onError(err)
     },

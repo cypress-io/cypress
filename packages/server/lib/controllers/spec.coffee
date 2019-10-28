@@ -47,9 +47,6 @@ module.exports = {
 
         err = errors.get("BUNDLE_ERROR", filePath, preprocessor.errorMessage(err))
 
-        console.log("")
-        errors.log(err)
-
         onError(err)
       else
         res.send(preprocessor.clientSideError(err))
