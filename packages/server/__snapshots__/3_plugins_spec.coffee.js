@@ -318,7 +318,7 @@ exports['e2e plugins fails when there is an async error 1'] = `
 
 The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-root-async-error/cypress/plugins/index.js\`)
 
-Error: Root async error from plugins file
+ Error: Root async error from plugins file
     at stack trace line
     at stack trace line
     at stack trace line
@@ -395,7 +395,7 @@ exports['e2e plugins fails when there is an async error inside an event handler 
 
 The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-async-error/cypress/plugins/index.js\`)
 
-Error: Async error from plugins file
+ Error: Async error from plugins file
     at stack trace line
     at stack trace line
     at stack trace line
