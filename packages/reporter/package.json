@@ -6,18 +6,13 @@
   "scripts": {
     "build": "webpack",
     "build-prod": "npm run build",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "postinstall": "echo '@packages/reporter needs: npm run build'",
     "lint": "bin-up eslint --fix lib/*.js src/*.js* src/**/*.js*",
-    "preclean": "npm run check-deps-pre",
-    "pretest": "npm run check-deps-pre",
     "test": "mocha 'src/**/*.spec.*'",
     "test-watch": "npm run test -- --watch",
-    "prewatch": "npm run check-deps-pre",
     "watch": "npm run build -- --watch --progress"
   },
   "devDependencies": {

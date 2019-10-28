@@ -5,16 +5,11 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack",
-    "prebuild-prod": "npm run check-deps-pre",
     "build-prod": "cross-env NODE_ENV=production npm run build",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/runner needs: npm run build'",
-    "pretest": "npm run check-deps-pre",
     "test": "mocha src/**/*.spec.*",
     "test-watch": "npm run test -- --watch",
-    "prewatch": "npm run check-deps-pre",
     "watch": "webpack --watch --progress"
   },
   "devDependencies": {

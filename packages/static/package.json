@@ -6,11 +6,8 @@
   "scripts": {
     "build": "gulp build",
     "build-prod": "npm run build",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/static needs: npm run build'",
-    "pretest": "npm run check-deps-pre",
     "test": "echo 'Nothing to test yet'"
   },
   "devDependencies": {
