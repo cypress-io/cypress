@@ -3356,6 +3356,7 @@ describe('src/cy/commands/actions/type', () => {
     })
 
     describe('single value change inputs', () => {
+      // https://github.com/cypress-io/cypress/issues/5476
       it('fires all keyboard events', () => {
         const els = {
           $date: cy.$$('input[type=date]:first'),
