@@ -54,6 +54,26 @@ const shouldFireMouseMoveEvents = (targetEl, lastHoveredEl, fromElViewport, coor
   return !_.isEqual(xy(fromElViewport), xy(coords))
 }
 
+const shouldMoveCursorToEndAfterMousedown = (el) => {
+  if (!$elements.isElement(el)) {
+    return false
+  }
+
+  if (!($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el))) {
+    return false
+  }
+
+  if (!$elements.isFocused(el)) {
+    return false
+  }
+
+  if ($elements.isNeedSingleValueChangeInputElement(el)) {
+    return false
+  }
+
+  return true
+}
+
 const create = (state, keyboard, focused) => {
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
@@ -352,15 +372,9 @@ const create = (state, keyboard, focused) => {
         }
       }
 
-      if (
-        $elements.isElement($elToFocus[0]) &&
-        ($elements.isInput($elToFocus[0]) || $elements.isTextarea($elToFocus[0]) || $elements.isContentEditable($elToFocus[0])) &&
-        $elements.isFocused($elToFocus[0])
-      ) {
-        if (!$elements.isNeedSingleValueChangeInputElement($elToFocus[0])) {
-          debug('moveSelectionToEnd due to click')
-          $selection.moveSelectionToEnd($dom.getDocumentFromElement($elToFocus[0]), { onlyIfEmptySelection: true })
-        }
+      if (shouldMoveCursorToEndAfterMousedown($elToFocus[0])) {
+        debug('moveSelectionToEnd due to click')
+        $selection.moveSelectionToEnd($dom.getDocumentFromElement($elToFocus[0]), { onlyIfEmptySelection: true })
       }
 
       return mouseDownEvents
@@ -409,11 +423,25 @@ const create = (state, keyboard, focused) => {
       const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       // Only send click event if the same element received both pointerdown and pointerup, and it's not detached.
-      // This will always be false for force click, so short circuit it here with !forceEl
-      const skipClickEvent = !forceEl && (
-        ($elements.isDetachedEl(mouseDownEvents.pointerdownProps.el) && 'Element was detached') ||
-        (!mouseUpEvents.pointerupProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el && 'Element did not receive pointerup event')
-      )
+      const getSkipClickEventAndReason = () => {
+        // Never skip the click event when force:true
+        if (forceEl) {
+          return false
+        }
+
+        if ($elements.isDetachedEl(mouseDownEvents.pointerdownProps.el)) {
+          return 'element was detached'
+        }
+
+        if (!mouseUpEvents.pointerupProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el) {
+          return 'mouseup and mousedown not received by same element'
+        }
+
+        // No reason to skip the click event
+        return false
+      }
+
+      const skipClickEvent = getSkipClickEventAndReason()
 
       const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, mouseDownEvents.pointerdownProps.el, forceEl, skipClickEvent, mouseEvtOptionsExtend)
 
