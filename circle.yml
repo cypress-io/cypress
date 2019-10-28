@@ -27,6 +27,14 @@ executors:
     environment:
       PLATFORM: linux
 
+  # Docker image with non-root "node" user
+  non-root-docker-user:
+    docker:
+      - image: cypress/base:12.0.0
+        user: node
+    environment:
+      PLATFORM: linux
+
   # executor to run on Mac OS
   # https://circleci.com/docs/2.0/executor-types/#using-macos
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
@@ -843,7 +851,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -872,7 +880,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/kitchensink
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           working_directory: /tmp/kitchensink
           command: npm run build
@@ -883,6 +891,46 @@ jobs:
       - run:
           working_directory: /tmp/kitchensink
           command: npm run e2e
+      - store-npm-logs
+
+  test-binary-as-specific-user:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      # the user should be "node"
+      - run: whoami
+      - run: pwd
+      # prints the current user's effective user id
+      # for root it is 0
+      # for other users it is a positive integer
+      - run: node -e 'console.log(process.geteuid())'
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir test-binary
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
+      - run:
+          # install NPM from built NPM package folder
+          name: Install Cypress
+          working_directory: test-binary
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          name: Add Cypress demo
+          working_directory: test-binary
+          command: npx @bahmutov/cly init
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: DEBUG=cypress:cli $(npm bin)/cypress verify
+      - run:
+          name: Run Cypress binary
+          working_directory: test-binary
+          command: DEBUG=cypress:cli $(npm bin)/cypress run
       - store-npm-logs
 
 linux-workflow: &linux-workflow
@@ -1002,7 +1050,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-npm-package
     - build-binary:
@@ -1014,7 +1061,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
@@ -1023,7 +1069,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - upload-npm-package
           - upload-binary
@@ -1032,7 +1077,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1042,7 +1086,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - build-npm-package
           - build-binary
@@ -1051,7 +1094,17 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-as-specific-user:
+        name: "test binary as a non-root user"
+        executor: non-root-docker-user
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-as-specific-user:
+        name: "test binary as a root user"
         requires:
           - build-npm-package
           - build-binary
@@ -1083,7 +1136,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - Mac NPM package
 
@@ -1095,7 +1147,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - Mac build
 
@@ -1107,7 +1158,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - Mac binary
 
@@ -1148,7 +1198,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - use-correct-folder
         requires:
           - Mac NPM package upload
           - Mac binary upload
