@@ -57,8 +57,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
-          working_directory: packages/server
+          command: yarn lerna run test-e2e --scope @packages/server -- --chunk << parameters.chunk >> --browser << parameters.browser >>
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -212,7 +211,7 @@ commands:
           packagePath: packages/web-config/package.json
 
 jobs:
-  ## code checkout and NPM installs
+  ## code checkout and yarn installs
   build:
     <<: *defaults
     steps:
@@ -221,42 +220,39 @@ jobs:
           name: Print working folder
           command: echo $PWD
       - run:
-          name: print global NPM cache path
-          command: echo $(npm -g bin)
+          name: print global yarn cache path
+          command: echo $(yarn global bin)
       - run:
           name: print Node version
           command: node -v
       - run:
-          name: print NPM version
-          command: npm -v
-      - run: npm run check-node-version
+          name: print yarn version
+          command: yarn -v
+      - run: yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run: npm run check-terminal
+      - run: yarn check-terminal
 
-      - run: npm run stop-only-all
+      - run: yarn stop-only-all
 
       - restore-caches
 
       # show what is already cached globally
-      - run: ls $(npm -g bin)
-      - run: ls $(npm -g bin)/../lib/node_modules
+      - run: ls $(yarn global bin)
+      - run: ls $(yarn global bin)/../lib/node_modules
 
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
       # Install sub packages dependencies and build all sub packages via postinstall script
       # try several times, because flaky NPM installs ...
-      - run: npm install || npm install
+      - run: yarn || yarn
       - run:
           name: Top level packages
-          command: npm ls --depth=0 || true
-
-      # Prune so we do not save removed dependencies to cache
-      - run: npm run all prune
+          command: yarn list --depth=0 || true
 
       - save-caches
       - store-npm-logs
@@ -273,7 +269,7 @@ jobs:
       - attach_workspace:
           at: ~/
       ## this will catch .only's in js/coffee as well
-      - run: npm run lint-all
+      - run: yarn lint-all
       - store-npm-logs
 
   unit-tests:
@@ -283,25 +279,25 @@ jobs:
       - attach_workspace:
           at: ~/
       # make sure mocha runs
-      - run: npm run test-mocha
+      - run: yarn test-mocha
       # test binary build code
-      - run: npm run test-scripts
+      - run: yarn test-scripts
       # make sure our snapshots are compared correctly
-      - run: npm run test-mocha-snapshot
+      - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
-      - run: npm run all build-js
+      - run: yarn lerna run build-js --parallel --stream
       # run unit tests from individual packages
-      - run: npm run all test -- --package cli
-      - run: npm run all test -- --package electron
-      - run: npm run all test -- --package extension
-      - run: npm run all test -- --package https-proxy
-      - run: npm run all test -- --package launcher
-      - run: npm run all test -- --package network
+      - run: yarn lerna run test --scope @packages/cli
+      - run: yarn lerna run test --scope @packages/electron
+      - run: yarn lerna run test --scope @packages/extension
+      - run: yarn lerna run test --scope @packages/https-proxy
+      - run: yarn lerna run test --scope @packages/launcher
+      - run: yarn lerna run test --scope @packages/network
       # how to pass Mocha reporter through zunder?
-      - run: npm run all test -- --package reporter
-      - run: npm run all test -- --package runner
-      - run: npm run all test -- --package socket
-      - run: npm run all test -- --package static
+      - run: yarn lerna run test --scope @packages/reporter
+      - run: yarn lerna run test --scope @packages/runner
+      - run: yarn lerna run test --scope @packages/socket
+      - run: yarn lerna run test --scope @packages/static
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -319,8 +315,7 @@ jobs:
           command: ls -la chai
           working_directory: cli/types
       - run:
-          command: npm run dtslint
-          working_directory: cli
+          command: yarn lerna run dtslint --scope cypress
       - store-npm-logs
 
   "server-unit-tests":
@@ -329,7 +324,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: npm run all test-unit -- --package server
+      - run: yarn lerna run test-unit --scope @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -340,7 +335,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: npm run all test-integration -- --package server
+      - run: yarn lerna run test-integration --scope @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -351,7 +346,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm run all test-performance -- --package server
+          command: yarn lerna run test-performance --scope @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -477,18 +472,15 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm start
+          command: yarn lerna run start --scope @packages/driver
           background: true
-          working_directory: packages/driver
       - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
+          command: yarn wait-on http://localhost:3500
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 5x-driver-chrome --browser chrome
-          working_directory: packages/driver
+            yarn lerna run cypress:run --scope @packages/driver -- --record --parallel --group 5x-driver-chrome --browser chrome
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -527,14 +519,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm run build-prod
-          working_directory: packages/desktop-gui
+          command: yarn lerna run build-prod --scope @packages/desktop-gui
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 2x-desktop-gui
-          working_directory: packages/desktop-gui
+            yarn lerna run cypress:run --scope @packages/desktop-gui -- --record --parallel --group 2x-desktop-gui
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -547,14 +537,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm run build-prod
-          working_directory: packages/reporter
+          command: yarn lerna run build-prod --scope @packages/reporter
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group reporter
-          working_directory: packages/reporter
+            yarn lerna run cypress:run --scope @packages/reporter -- --record --parallel --group reporter
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -603,15 +591,12 @@ jobs:
 
       - attach_workspace:
           at: ~/
-      - run: $(npm bin)/print-arch
+      - run: $(yarn bin)/print-arch
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
-          # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
-          # won't be set and we will use default version, since we are not going to
-          # upload the dev binary build anywhere
-          command: npm run binary-build -- --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
-      - run: npm run binary-zip -- --platform $PLATFORM
+          command: yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+      - run: yarn binary-zip --platform $PLATFORM
       # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
       - store-npm-logs
@@ -649,16 +634,16 @@ jobs:
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
       - run:
           name: Install prod dependencies
-          command: npm install --production
+          command: yarn --production
           working_directory: /tmp/repo
       - run:
           name: Example server
-          command: npm start
+          command: yarn start
           working_directory: /tmp/repo
           background: true
       - run:
           name: Run Kitchensink example project
-          command: npm run cypress:run -- --project /tmp/repo
+          command: yarn cypress:run --project /tmp/repo
       - store_artifacts:
           path: /tmp/repo/cypress/screenshots
       - store_artifacts:
@@ -675,11 +660,11 @@ jobs:
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
       - run:
           name: Install prod dependencies
-          command: npm install --production
+          command: yarn --production
           working_directory: /tmp/repo
       - run:
           name: Example server
-          command: npm start
+          command: yarn start
           working_directory: /tmp/repo
           background: true
       - run:
@@ -689,7 +674,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_ENV=staging \
             CYPRESS_video=false \
-            npm run cypress:run -- --project /tmp/repo --record
+            yarn cypress:run --project /tmp/repo --record
       - store-npm-logs
 
   "test-against-staging":
@@ -706,7 +691,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
-            npm run cypress:run -- --project /tmp/repo --record
+            yarn cypress:run --project /tmp/repo --record
       - store-npm-logs
 
   build-npm-package:
@@ -716,22 +701,21 @@ jobs:
           at: ~/
       - run:
           name: bump NPM version
-          command: npm --no-git-tag-version version ${NEXT_DEV_VERSION:-0.0.0-development}
+          command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
-          working_directory: cli
-          command: npm run build
+          command: yarn lerna run build --scope @packages/cli
       - run:
           command: ls -la types
           working_directory: cli/build
       - run:
           name: list NPM package contents
           working_directory: cli/build
-          command: npm run size
+          command: yarn size
       - run:
           name: pack NPM package
           working_directory: cli/build
-          command: npm pack
+          command: yarn pack
       - run:
           name: list created NPM package
           working_directory: cli/build
@@ -1121,7 +1105,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-        
+
     - lint:
         name: Mac lint
         executor: mac
