@@ -4,8 +4,6 @@
 require('@packages/ts/register')
 require('@packages/coffee/register')
 
-require('./lib/util/reset_node_options').reset()
-
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
@@ -27,4 +25,10 @@ process.enablePromiseAPIs = process.env.CYPRESS_ENV !== 'production'
 
 require('./lib/util/suppress_unauthorized_warning').suppress()
 
-module.exports = require('./lib/cypress').start(process.argv)
+const nodeOptions = require('./lib/util/node_options')
+
+if (!nodeOptions.maybeFork()) {
+  nodeOptions.reset()
+
+  module.exports = require('./lib/cypress').start(process.argv)
+}

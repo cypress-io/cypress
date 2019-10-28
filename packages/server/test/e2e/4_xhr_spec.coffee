@@ -1,4 +1,5 @@
 bodyParser = require("body-parser")
+mockedEnv  = require("mocked-env")
 e2e        = require("../support/helpers/e2e")
 
 onServer = (app) ->
@@ -26,7 +27,13 @@ describe "e2e xhr", ->
     }
   })
 
-  e2e.it "passes", {
+  e2e.it "passes in global mode", {
+    spec: "xhr_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }
+
+  e2e.it "passes through CLI", {
     spec: "xhr_spec.coffee"
     snapshot: true
     expectedExitCode: 0

@@ -1,6 +1,8 @@
 require('@packages/ts/register')
 
 const _ = require('lodash')
+const { expect } = require('chai')
+const http = require('http')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
@@ -121,6 +123,12 @@ module.exports = (on) => {
 
       return performance.track('fast_visit_spec percentiles', data)
       .return(null)
+    },
+
+    'assert:http:max:header:size' (expectedBytes) {
+      expect(http.maxHeaderSize).to.eq(expectedBytes)
+
+      return null
     },
   })
 }
