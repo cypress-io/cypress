@@ -1283,7 +1283,13 @@ module.exports = {
 
     const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName } = options
 
-    options.onError = this.exitEarly
+    // this needs to be a closure over `this.exitEarly` and not a reference
+    // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
+    const onError = (err) => {
+      this.exitEarly(err)
+    }
+
+    options.onError = onError
 
     // alias and coerce to null
     let specPattern = options.spec || null
@@ -1343,7 +1349,7 @@ module.exports = {
             config,
             specs,
             sys,
-            onError: this.exitEarly,
+            onError,
             videosFolder: config.videosFolder,
             video: config.video,
             videoCompression: config.videoCompression,
