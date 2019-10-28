@@ -6,8 +6,8 @@
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "postinstall": "npx patch-package",
-    "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch"
+    "test": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },
   "dependencies": {
     "socket.io": "2.2.0",
@@ -15,9 +15,9 @@
     "socket.io-client": "2.2.0"
   },
   "devDependencies": {
-    "bin-up": "1.2.2",
     "chai": "3.5.0",
     "cross-env": "5.2.1",
+    "mocha": "3.5.3",
     "patch-package": "6.1.2"
   },
   "files": [

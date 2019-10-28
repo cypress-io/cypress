@@ -4,15 +4,15 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "bin-up tsc --project .",
-    "build-js": "bin-up tsc --project .",
+    "build": "tsc --project .",
+    "build-js": "tsc --project .",
     "build-prod": "npm run build",
     "clean": "node scripts/clean.js || true",
     "clean-deps": "rm -rf node_modules",
     "clean-js": "npm run clean",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "npm run unit",
-    "unit": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -24,11 +24,12 @@
     "ramda": "0.24.1"
   },
   "devDependencies": {
-    "bin-up": "1.2.2",
     "chai": "3.5.0",
+    "mocha": "3.5.3",
     "shelljs": "0.8.3",
     "sinon": "2.4.1",
-    "sinon-chai": "3.3.0"
+    "sinon-chai": "3.3.0",
+    "typescript": "3.5.3"
   },
   "files": [
     "lib"

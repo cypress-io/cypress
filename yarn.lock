@@ -5278,13 +5278,6 @@ big.js@^5.2.2:
   resolved "https://registry.yarnpkg.com/big.js/-/big.js-5.2.2.tgz#65f0af382f578bcdc742bd9c281e9cb2d7768328"
   integrity sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==
 
-bin-up@1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/bin-up/-/bin-up-1.2.2.tgz#9ce84950b9a001903dc71adfbebb963e17d9f869"
-  integrity sha512-lLK9RtONn+vgxbOkt0UXtLf2BXdnUdBJJRL4LEXN9TMM3t2KnXoQ3LmC3UOBL9MljGAr/0FsuytAlVsYygZbbw==
-  dependencies:
-    execa "2.0.5"
-
 binary-extensions@^1.0.0:
   version "1.13.1"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-1.13.1.tgz#598afe54755b2868a5330d2aff9d4ebb53209b65"
@@ -7400,13 +7393,12 @@ create-thenable@~1.0.0:
     object.omit "~2.0.0"
     unique-concat "~0.2.2"
 
-cross-env@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-5.2.0.tgz#6ecd4c015d5773e614039ee529076669b9d126f2"
-  integrity sha512-jtdNFfFW1hB7sMhr/H6rW1Z45LFqyI431m3qU6bFXcQ3Eh7LtBuG3h74o7ohHZ3crrRkkqHlo4jYHFPcjroANg==
+cross-env@5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-5.2.1.tgz#b2c76c1ca7add66dc874d11798466094f551b34d"
+  integrity sha512-1yHhtcfAd1r4nwQgknowuUNfIT9E8dOMMspC36g45dN+iD1blloi7xp8X/xAIDnjHWyt1uQ8PHk2fkNaym7soQ==
   dependencies:
     cross-spawn "^6.0.5"
-    is-windows "^1.0.0"
 
 cross-spawn-async@^2.1.1:
   version "2.2.5"
@@ -7626,13 +7618,14 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cypress-example-kitchensink@1.7.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.7.1.tgz#1844f688343609bb3ce3ca939c9c87e9faf00f9c"
-  integrity sha512-WUD4zvB8af7Xek7VGTh/m06UzwxdWtw7PQ0KULP4f4+/k8GkF2GW8LVfovpPas0VPXRzrLaZzPoBx7PDqmbOfA==
+cypress-example-kitchensink@1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.8.0.tgz#94a5aac1e7849fa3f4560983dc69e7e86580aa44"
+  integrity sha512-1j++Bim4N/oazkqpoGDrdneIvtxERC8rLM4MoCdbQxf5gvQcPva/zrwlsj3MEpfGVNe5Nu1WGfzAe6hrf9phIg==
   dependencies:
     npm-run-all "^4.1.2"
-    serve "11.1.0"
+    patch-package "6.2.0"
+    serve "11.2.0"
 
 d@1, d@^1.0.1:
   version "1.0.1"
@@ -9371,21 +9364,6 @@ execa@1.0.0, execa@^1.0.0:
     p-finally "^1.0.0"
     signal-exit "^3.0.0"
     strip-eof "^1.0.0"
-
-execa@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/execa/-/execa-2.0.5.tgz#5be3e2ea7e61bd038da5a0e11dc6ab2097357f2f"
-  integrity sha512-SwmwZZyJjflcqLSgllk4EQlMLst2p9muyzwNugKGFlpAz6rZ7M+s2nBR97GAq4Vzjwx2y9rcMcmqzojwN+xwNA==
-  dependencies:
-    cross-spawn "^6.0.5"
-    get-stream "^5.0.0"
-    is-stream "^2.0.0"
-    merge-stream "^2.0.0"
-    npm-run-path "^3.0.0"
-    onetime "^5.1.0"
-    p-finally "^2.0.0"
-    signal-exit "^3.0.2"
-    strip-final-newline "^2.0.0"
 
 execa@^0.2.2:
   version "0.2.2"
@@ -16415,6 +16393,25 @@ patch-package@6.1.2:
     tmp "^0.0.33"
     update-notifier "^2.5.0"
 
+patch-package@6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/patch-package/-/patch-package-6.2.0.tgz#677de858e352b6ca4e6cb48a6efde2cec9fde566"
+  integrity sha512-HWlQflaBBMjLBfOWomfolF8aqsFDeNbSNro1JDUgYqnVvPM5OILJ9DQdwIRiKmGaOsmHvhkl1FYkvv1I9r2ZJw==
+  dependencies:
+    "@yarnpkg/lockfile" "^1.1.0"
+    chalk "^2.4.2"
+    cross-spawn "^6.0.5"
+    find-yarn-workspace-root "^1.2.1"
+    fs-extra "^7.0.1"
+    is-ci "^2.0.0"
+    klaw-sync "^6.0.0"
+    minimist "^1.2.0"
+    rimraf "^2.6.3"
+    semver "^5.6.0"
+    slash "^2.0.0"
+    tmp "^0.0.33"
+    update-notifier "^2.5.0"
+
 path-browserify@0.0.1, path-browserify@~0.0.0:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-0.0.1.tgz#e6c4ddd7ed3aa27c68a20cc4e50e1a4ee83bbc4a"
@@ -18762,10 +18759,10 @@ serialize-javascript@^1.7.0:
   resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-1.9.1.tgz#cfc200aef77b600c47da9bb8149c943e798c2fdb"
   integrity sha512-0Vb/54WJ6k5v8sSWN09S0ora+Hnr+cX40r9F170nT+mSkaxltoE/7R3OrIdBSUv1OoiobH1QoWQbCnAO+e8J1A==
 
-serve-handler@6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/serve-handler/-/serve-handler-6.1.0.tgz#f1606dc6ff8f9029a1ee042c11dfe7903a5cb92e"
-  integrity sha512-63N075Tn3PsFYcu0NVV7tb367UbiW3gnC+/50ohL4oqOhAG6bmbaWqiRcXQgbzqc0ALBjSAzg7VTfa0Qw4E3hA==
+serve-handler@6.1.2:
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/serve-handler/-/serve-handler-6.1.2.tgz#f05b0421a313fff2d257838cba00cbcc512cd2b6"
+  integrity sha512-RFh49wX7zJmmOVDcIjiDSJnMH+ItQEvyuYLYuDBVoA/xmQSCuj+uRmk1cmBB5QQlI3qOiWKp6p4DUGY+Z5AB2A==
   dependencies:
     bytes "3.0.0"
     content-disposition "0.5.2"
@@ -18786,10 +18783,10 @@ serve-static@1.13.2:
     parseurl "~1.3.2"
     send "0.16.2"
 
-serve@11.1.0:
-  version "11.1.0"
-  resolved "https://registry.yarnpkg.com/serve/-/serve-11.1.0.tgz#1bfe2f4a08d0130cbf44711cdb7996cb742172e0"
-  integrity sha512-+4wpDtOSS+4ZLyDWMxThutA3iOTawX2+yDovOI8cjOUOmemyvNlHyFAsezBlSgbZKTYChI3tzA1Mh0z6XZ62qA==
+serve@11.2.0:
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/serve/-/serve-11.2.0.tgz#0405ce95c4e4a6abd9cd3d3a04ebaa7d94638627"
+  integrity sha512-THZcLzDGk3vJqjhAbLkLag43tiE3V0B7wVe98Xtl+1KyAsr+4iShg+9hke4pLZmrCJu0pUg0TrbhJmdqn/MKoA==
   dependencies:
     "@zeit/schemas" "2.6.0"
     ajv "6.5.3"
@@ -18798,7 +18795,7 @@ serve@11.1.0:
     chalk "2.4.1"
     clipboardy "1.2.3"
     compression "1.7.3"
-    serve-handler "6.1.0"
+    serve-handler "6.1.2"
     update-check "1.5.2"
 
 set-blocking@^2.0.0, set-blocking@~2.0.0:
