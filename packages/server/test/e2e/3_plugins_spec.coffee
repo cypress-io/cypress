@@ -10,6 +10,7 @@ pluginsRootAsyncError = Fixtures.projectPath("plugins-root-async-error")
 pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
 pluginsAbsolutePath = Fixtures.projectPath("plugins-absolute-path")
 pluginAfterScreenshot = Fixtures.projectPath("plugin-after-screenshot")
+pluginValidationError = Fixtures.projectPath("plugin-validation-error")
 
 describe "e2e plugins", ->
   e2e.setup()
@@ -80,6 +81,15 @@ describe "e2e plugins", ->
     e2e.exec(@, {
       spec: "after_screenshot_spec.coffee"
       project: pluginAfterScreenshot
+      sanitizeScreenshotDimensions: true
+      snapshot: true
+      expectedExitCode: 1
+    })
+
+  it "fails when invalid event is registered", ->
+    e2e.exec(@, {
+      spec: "app_spec.js"
+      project: pluginValidationError
       sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 1
