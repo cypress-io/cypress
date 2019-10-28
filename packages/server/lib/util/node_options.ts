@@ -45,6 +45,9 @@ export function maybeFork (): boolean {
     }
   )
   .on('error', () => {})
+  .on('exit', (code) => {
+    process.exit(code)
+  })
 
   return true
 }
