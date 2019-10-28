@@ -1,3 +1,5 @@
+// type tests for Cypress NPM module
+// https://on.cypress.io/module-api
 import cypress from 'cypress'
 
 cypress.run // $ExpectType (options?: Partial<CypressRunOptions> | undefined) => Promise<CypressRunResult>
@@ -7,6 +9,8 @@ cypress.run({}).then(results => {
 })
 cypress.run().then(results => {
   results // $ExpectType CypressRunResult
+  results.failures // $ExpectType number | undefined
+  results.message // $ExpectType string | undefined
 })
 cypress.open() // $ExpectType Promise<void>
 cypress.run() // $ExpectType Promise<CypressRunResult>

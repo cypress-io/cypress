@@ -552,9 +552,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#three-buttons button').click({ multiple: true }).then(() => {
         const calls = cy.timeout.getCalls()
 
-        const num = _.filter(calls, (call) => {
-          return _.isEqual(call.args, [50, true, 'click'])
-        })
+        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true, 'click']))
 
         expect(num.length).to.eq(count)
       })
@@ -1624,7 +1622,7 @@ describe('src/cy/commands/actions/click', () => {
         const input = cy.$$('input:first')
 
         input.get(0).addEventListener('focus', () => {
-          done('should not have recieved focused event')
+          done('should not have received focused event')
         })
 
         input.get(0).addEventListener('mousedown', (e) => {
@@ -1650,7 +1648,6 @@ describe('src/cy/commands/actions/click', () => {
 
       it('will not fire focus events when nothing can receive focus', () => {
         const onFocus = cy.stub()
-
         const win = cy.state('window')
         const $body = cy.$$('body')
         const $div = cy.$$('#nested-find')
@@ -1772,9 +1769,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           const { lastLog, logs } = this
-          const logsArr = logs.map((log) => {
-            return log.get().consoleProps()
-          })
+          const logsArr = logs.map((log) => log.get().consoleProps())
 
           expect(logsArr).to.have.length(4)
           expect(lastLog.get('error')).to.eq(err)
@@ -2157,9 +2152,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups MouseDown', () => {
-        cy.$$('input:first').mousedown(() => {
-          return false
-        })
+        cy.$$('input:first').mousedown(_.stubFalse)
 
         cy.get('input:first').click().then(function () {
           const consoleProps = this.lastLog.invoke('consoleProps')
@@ -2233,9 +2226,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups MouseUp', () => {
-        cy.$$('input:first').mouseup(() => {
-          return false
-        })
+        cy.$$('input:first').mouseup(_.stubFalse)
 
         cy.get('input:first').click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
@@ -2274,9 +2265,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups Click', () => {
-        cy.$$('input:first').click(() => {
-          return false
-        })
+        cy.$$('input:first').click(_.stubFalse)
 
         cy.get('input:first').click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
@@ -2381,9 +2370,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups have activated modifiers', () => {
-        cy.$$('input:first').click(() => {
-          return false
-        })
+        cy.$$('input:first').click(_.stubFalse)
 
         cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
@@ -2719,9 +2706,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#three-buttons button').dblclick().then(() => {
         const calls = cy.timeout.getCalls()
 
-        const num = _.filter(calls, (call) => {
-          return _.isEqual(call.args, [50, true, 'dblclick'])
-        })
+        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true, 'dblclick']))
 
         expect(num.length).to.eq(count)
       })
@@ -2841,6 +2826,21 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      // TODO: remove this after 4.0 when {multiple:true} is no longer default
+      // https://github.com/cypress-io/cypress/issues/5406
+      it('does not log default option {multiple:true}', () => {
+        const logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+
+        cy.get('button:first').dblclick().then(() => {
+          expect(logs[1].get('message')).to.eq('')
+          expect(logs[1].invoke('consoleProps').Options).not.ok
+        })
+      })
+
       it('returns only the $el for the element of the subject that was dblclicked', () => {
         const dblclicks = []
 
@@ -2901,9 +2901,6 @@ describe('src/cy/commands/actions/click', () => {
             'Command': 'dblclick',
             'Applied To': {},
             'Elements': 1,
-            'Options': {
-              'multiple': true,
-            },
             'table': {},
           })
 

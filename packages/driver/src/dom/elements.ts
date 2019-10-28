@@ -1,12 +1,12 @@
 // NOT patched jquery
 import $ from 'jquery'
-import * as $jquery from './jquery'
-import * as $window from './window'
-import * as $document from './document'
-import $utils from '../cypress/utils.coffee'
-import * as $selection from './selection'
 import _ from '../config/lodash'
+import $utils from '../cypress/utils.coffee'
+import * as $document from './document'
+import * as $jquery from './jquery'
+import * as $selection from './selection'
 import { parentHasDisplayNone } from './visibility'
+import * as $window from './window'
 
 const { wrap } = $jquery
 
@@ -23,7 +23,19 @@ const focusableSelectors = [
   '[tabindex]',
   '[contenteditable]',
 ]
-const inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
+const focusableWhenNotDisabledSelectors = [
+  'a[href]',
+  'area[href]',
+  'input',
+  'select',
+  'textarea',
+  'button',
+  'iframe',
+  '[tabindex]',
+  '[contenteditable]',
+]
+
+const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
 
 declare global {
@@ -200,6 +212,18 @@ const _getType = function () {
   throw new Error('this should never happen, cannot get type')
 }
 
+const _getMaxLength = function () {
+  if (isInput(this)) {
+    return descriptor('HTMLInputElement', 'maxLength').get
+  }
+
+  if (isTextarea(this)) {
+    return descriptor('HTMLTextAreaElement', 'maxLength').get
+  }
+
+  throw new Error('this should never happen, cannot get maxLength')
+}
+
 const nativeGetters = {
   value: _getValue,
   isContentEditable: _isContentEditable,
@@ -210,6 +234,7 @@ const nativeGetters = {
   activeElement: descriptor('Document', 'activeElement').get,
   body: descriptor('Document', 'body').get,
   frameElement: Object.getOwnPropertyDescriptor(window, 'frameElement')!.get,
+  maxLength: _getMaxLength,
 }
 
 const nativeSetters = {
@@ -394,14 +419,10 @@ const isFocused = (el) => {
   }
 }
 
-const isFocusedOrInFocused = (el) => {
+const isFocusedOrInFocused = (el: HTMLElement) => {
   const doc = $document.getDocumentFromElement(el)
 
-  const { activeElement, body } = doc
-
-  if (activeElementIsDefault(activeElement, body)) {
-    return false
-  }
+  const { activeElement } = doc
 
   let elToCheckCurrentlyFocused
 
@@ -430,24 +451,28 @@ const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
   }
 }
 
+const isDesignModeDocumentElement = (el: HTMLElement) => {
+  return isElement(el) && getTagName(el) === 'html' && isContentEditable(el)
+}
 /**
  * The element can be activeElement, receive focus events, and also receive keyboard events
  */
-const isFocusable = ($el: JQuery<Element>) => {
-  // matches a focusable selector
-  if (_.some(focusableSelectors, (sel) => $el.is(sel))) {
-    return true
-  }
+const isFocusable = ($el: JQuery<HTMLElement>) => {
+  return (
+    _.some(focusableSelectors, (sel) => $el.is(sel)) ||
+     isDesignModeDocumentElement($el.get(0))
+  )
+}
 
-  // when document.designMode === 'on' (indicated by truthy isContentEditable)
-  // the documentElement will be focusable
-  if (
-    (isElement($el[0]) && getTagName($el[0]) === 'html' && isContentEditable($el[0]))
-  ) {
-    return true
-  }
-
-  return false
+/**
+ * The element can be activeElement, receive focus events, and also receive keyboard events
+ * OR, it is a disabled element that would have been focusable
+ */
+const isFocusableWhenNotDisabled = ($el: JQuery<HTMLElement>) => {
+  return (
+    _.some(focusableWhenNotDisabledSelectors, (sel) => $el.is(sel)) ||
+    isDesignModeDocumentElement($el.get(0))
+  )
 }
 
 const isW3CRendered = (el) => {
@@ -462,7 +487,7 @@ const isW3CFocusable = (el) => {
 
 type JQueryOrEl<T extends HTMLElement> = JQuery<T> | T
 
-const isType = function (el: JQueryOrEl<HTMLElement>, type) {
+const isInputType = function (el: JQueryOrEl<HTMLElement>, type) {
   el = ([] as HTMLElement[]).concat($jquery.unwrap(el))[0]
 
   if (!isInput(el) && !isButton(el)) {
@@ -521,6 +546,20 @@ const isChild = ($el, $maybeChild) => {
 
 const isSelector = ($el: JQuery<HTMLElement>, selector) => {
   return $el.is(selector)
+}
+
+const isDisabled = ($el: JQuery) => {
+  return $el.prop('disabled')
+}
+
+const isReadOnlyInputOrTextarea = (
+  el: HTMLInputElement | HTMLTextAreaElement
+) => {
+  return el.readOnly
+}
+
+const isReadOnlyInput = ($el: JQuery) => {
+  return $el.prop('readonly')
 }
 
 const isDetached = ($el) => {
@@ -629,7 +668,7 @@ const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
   }
   const type = (type) => {
     if (isInput(el)) {
-      return isType(el, type)
+      return isInputType(el, type)
     }
 
     return false
@@ -661,7 +700,7 @@ const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
 
 const isInputAllowingImplicitFormSubmission = function ($el) {
   const type = (type) => {
-    return isType($el, type)
+    return isInputType($el, type)
   }
 
   // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
@@ -781,13 +820,14 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
 
   return getFirstFocusableEl($el.parent())
 }
+const getActiveElByDocument = (doc: Document): HTMLElement | null => {
+  const activeElement = getNativeProp(doc, 'activeElement')
 
-const getActiveElByDocument = (doc) => {
-  const activeEl = getNativeProp(doc, 'activeElement')
+  if (isFocused(activeElement)) {
+    return activeElement as HTMLElement
+  }
 
-  if (activeEl) return activeEl
-
-  return getNativeProp(doc, 'body')
+  return null
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {
@@ -1015,6 +1055,10 @@ export {
   isSelector,
   isScrollOrAuto,
   isFocusable,
+  isFocusableWhenNotDisabled,
+  isDisabled,
+  isReadOnlyInput,
+  isReadOnlyInputOrTextarea,
   isW3CFocusable,
   isAttached,
   isDetached,
@@ -1034,7 +1078,7 @@ export {
   isInput,
   isIframe,
   isTextarea,
-  isType,
+  isInputType,
   isFocused,
   isFocusedOrInFocused,
   isInputAllowingImplicitFormSubmission,

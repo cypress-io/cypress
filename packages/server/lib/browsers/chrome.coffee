@@ -7,12 +7,13 @@ Promise   = require("bluebird")
 la        = require('lazy-ass')
 check     = require('check-more-types')
 extension = require("@packages/extension")
-debug     = require("debug")("cypress:server:browsers")
+debug     = require("debug")("cypress:server:browsers:chrome")
 plugins   = require("../plugins")
 fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 protocol  = require("./protocol")
+{ CdpAutomation } = require("./cdp_automation")
 CriClient = require("./cri-client")
 
 LOAD_EXTENSION = "--load-extension="
@@ -190,6 +191,11 @@ _navigateUsingCRI = (url) ->
     .then ->
       client.send("Page.navigate", { url })
 
+_setAutomation = (client, automation) ->
+  automation.use(
+    CdpAutomation(client.send)
+  )
+
 module.exports = {
   ##
   ## tip:
@@ -206,6 +212,8 @@ module.exports = {
   _maybeRecordVideo
 
   _navigateUsingCRI
+
+  _setAutomation
 
   _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
@@ -315,18 +323,24 @@ module.exports = {
         .then (criClient) =>
           la(criClient, "expected Chrome remote interface reference", criClient)
 
-          ## monkey-patch the .kill method to that the CDP connection is closed
-          originalBrowserKill = launchedBrowser.kill
+          criClient.ensureMinimumProtocolVersion('1.3')
+          .catch (err) =>
+            throw new Error("Cypress requires at least Chrome 64.\n\nDetails:\n#{err.message}")
+          .then =>
+            @_setAutomation(criClient, automation)
 
-          launchedBrowser.kill = (args...) =>
-            debug("closing remote interface client")
+            ## monkey-patch the .kill method to that the CDP connection is closed
+            originalBrowserKill = launchedBrowser.kill
 
-            criClient.close()
-            .then =>
-              debug("closing chrome")
-              originalBrowserKill.call(launchedBrowser, args...)
+            launchedBrowser.kill = (args...) =>
+              debug("closing remote interface client")
 
-          return criClient
+              criClient.close()
+              .then =>
+                debug("closing chrome")
+                originalBrowserKill.apply(launchedBrowser, args)
+
+            return criClient
         .then @_maybeRecordVideo(options)
         .then @_navigateUsingCRI(url)
         ## return the launched browser process

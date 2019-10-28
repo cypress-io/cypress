@@ -117,7 +117,16 @@ module.exports = {
 
         > {{node}}
 
-      Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.
+      A clearable element matches one of the following selectors:
+        'a[href]'
+        'area[href]'
+        'input'
+        'select'
+        'textarea'
+        'button'
+        'iframe'
+        '[tabindex]'
+        '[contenteditable]'
     """
 
   clearCookie:
@@ -141,6 +150,7 @@ module.exports = {
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
 
   cookies:
+    invalid_name: "#{cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
     removed_method: """
       The Cypress.Cookies.{{method}}() method has been removed.
 
@@ -812,7 +822,13 @@ module.exports = {
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
+    backend_error: """
+    #{cmd('setCookie')} had an unexpected error setting the requested cookie in {{browserDisplayName}}.
+
+    {{errStack}}
+    """
     invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
+    invalid_value: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
 
   spread:
     invalid_type: "#{cmd('spread')} requires the existing subject be array-like."
@@ -934,6 +950,7 @@ module.exports = {
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
+    invalid_dateTime: "Typing into a datetime input with #{cmd('type')} requires a valid datetime with the format 'yyyy-MM-ddThh:mm', for example '2017-06-01T08:30'. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
     not_on_typeable_element: """
       #{cmd('type')} failed because it requires a valid typeable element.
@@ -942,7 +959,25 @@ module.exports = {
 
         > {{node}}
 
-      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
+      A typeable element matches one of the following selectors:
+        'a[href]'
+        'area[href]'
+        'input'
+        'select'
+        'textarea'
+        'button'
+        'iframe'
+        '[tabindex]'
+        '[contenteditable]'
+    """
+    not_actionable_textlike: """
+      #{cmd('type')} failed because it targeted a disabled element.
+
+      The element typed into was:
+
+        > {{node}}
+
+      You should ensure the element does not have an attribute named 'disabled' before typing into it.
     """
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
     wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
