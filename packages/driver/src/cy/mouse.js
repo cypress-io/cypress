@@ -352,10 +352,14 @@ const create = (state, keyboard, focused) => {
         }
       }
 
-      if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
-        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
+      if (
+        $elements.isElement($elToFocus[0]) &&
+        ($elements.isInput($elToFocus[0]) || $elements.isTextarea($elToFocus[0]) || $elements.isContentEditable($elToFocus[0])) &&
+        $elements.isFocused($elToFocus[0])
+      ) {
+        if (!$elements.isNeedSingleValueChangeInputElement($elToFocus[0])) {
           debug('moveSelectionToEnd due to click')
-          $selection.moveSelectionToEnd($dom.getDocumentFromElement(el))
+          $selection.moveSelectionToEnd($dom.getDocumentFromElement($elToFocus[0]), { onlyIfEmptySelection: true })
         }
       }
 
@@ -392,8 +396,8 @@ const create = (state, keyboard, focused) => {
     * el2 = moveToCoordsOrNoop(coords)
     * sendMouseup(el2)
     * el3 = moveToCoordsOrNoop(coords)
-    * if (notDetached(el1))
-    * sendClick(el3)
+    * if (notDetached(el1) && el1 === el2)
+    *   sendClick(el3)
     */
     click (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       debug('mouse.click', { fromElViewport, forceEl })
@@ -404,9 +408,14 @@ const create = (state, keyboard, focused) => {
 
       const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      const skipClickEvent = $elements.isDetachedEl(mouseDownEvents.pointerdownProps.el)
+      // Only send click event if the same element received both pointerdown and pointerup, and it's not detached.
+      // This will always be false for force click, so short circuit it here with !forceEl
+      const skipClickEvent = !forceEl && (
+        ($elements.isDetachedEl(mouseDownEvents.pointerdownProps.el) && 'Element was detached') ||
+        (!mouseUpEvents.pointerupProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el && 'Element did not receive pointerup event')
+      )
 
-      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend)
+      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, mouseDownEvents.pointerdownProps.el, forceEl, skipClickEvent, mouseEvtOptionsExtend)
 
       return _.extend({}, mouseDownEvents, mouseUpEvents, mouseClickEvents)
     },
@@ -453,8 +462,18 @@ const create = (state, keyboard, focused) => {
       }
     },
 
-    _mouseClickEvents (fromElViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
-      const el = forceEl || mouse.moveToCoords(fromElViewport)
+    _mouseClickEvents (fromElViewport, el, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
+      if (skipClickEvent) {
+        return {
+          clickProps: {
+            skipped: formatReasonNotFired(skipClickEvent),
+          },
+        }
+      }
+
+      if (!forceEl) {
+        mouse.moveToCoords(fromElViewport)
+      }
 
       const win = $dom.getWindowByElement(el)
 
@@ -464,14 +483,6 @@ const create = (state, keyboard, focused) => {
         buttons: 0,
         detail: 1,
       }, mouseEvtOptionsExtend)
-
-      if (skipClickEvent) {
-        return {
-          clickProps: {
-            skipped: formatReasonNotFired('Element was detached'),
-          },
-        }
-      }
 
       let clickProps = sendClick(el, clickEventOptions)
 
