@@ -2851,6 +2851,17 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
+        // https://github.com/cypress-io/cypress/issues/5439
+        it('do not replace selection during modifier key', () => {
+          cy
+          .get('input:first').type('123')
+          .then(($el) => {
+            $el[0].setSelectionRange(0, 3)
+          })
+          .type('{ctrl}')
+          .should('have.value', '123')
+        })
+
         // sends keyboard events for modifiers https://github.com/cypress-io/cypress/issues/3316
         it('sends keyup event for activated modifiers when typing is finished', (done) => {
           const $input = cy.$$('input:text:first')
