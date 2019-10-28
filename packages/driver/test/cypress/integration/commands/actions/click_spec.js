@@ -2534,7 +2534,7 @@ describe('src/cy/commands/actions/click', () => {
             },
             {
               'Event Name': 'click',
-              'Target Element': '⚠️ not fired (Element was detached)',
+              'Target Element': '⚠️ not fired (element was detached)',
               'Prevented Default?': null,
               'Stopped Propagation?': null,
               'Modifiers': null,
@@ -2583,7 +2583,7 @@ describe('src/cy/commands/actions/click', () => {
             },
             {
               'Event Name': 'click',
-              'Target Element': '⚠️ not fired (Element did not receive pointerup event)',
+              'Target Element': '⚠️ not fired (mouseup and mousedown not received by same element)',
               'Prevented Default?': null,
               'Stopped Propagation?': null,
               'Modifiers': null,
