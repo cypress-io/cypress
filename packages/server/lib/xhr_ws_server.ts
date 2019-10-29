@@ -12,14 +12,14 @@ function trunc (str) {
 }
 
 export function create () {
-  let incomingXhrs: any[] = []
+  let incomingXhrs: any = {}
 
   function onIncomingXhr (id, data) {
     debug('onIncomingXhr %o', { id, res: trunc(data) })
-    const resolve = incomingXhrs[id]
+    const deferred = incomingXhrs[id]
 
-    if (resolve) {
-      return resolve({
+    if (deferred) {
+      return deferred.resolve({
         data,
       })
     }
@@ -43,9 +43,9 @@ export function create () {
       return res
     }
 
-    return new Bluebird((resolve) => {
+    return new Bluebird((resolve, reject) => {
       debug('do not have response, waiting %o', { id })
-      incomingXhrs[id] = resolve
+      incomingXhrs[id] = { resolve, reject }
     })
     .tap((res) => {
       debug('deferred response found %o', { id, res: trunc(res) })
@@ -53,7 +53,13 @@ export function create () {
   }
 
   function onBeforeTestRun () {
+    debug('resetting incomingXhrs %o', { length: incomingXhrs.length })
 
+    _.forEach(incomingXhrs, ({ reject }) => {
+      reject(new Error('This stubbed XHR was pending on a stub response object from the driver, but the test ended before that happened.'))
+    })
+
+    incomingXhrs = {}
   }
 
   return {

@@ -150,11 +150,9 @@ class Server
 
       getRemoteState = => @_getRemoteState()
 
-      getDeferredResponse = @_xhrServer.getDeferredResponse.bind(@_xhrServer)
-
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, getDeferredResponse, project, @_nodeProxy)
+      @createRoutes(app, config, @_request, getRemoteState, @_xhrServer.getDeferredResponse, project, @_nodeProxy)
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -706,11 +704,11 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
-    options.onIncomingXhr = @_xhrServer.onIncomingXhr.bind(@_xhrServer)
+    options.onIncomingXhr = @_xhrServer.onIncomingXhr
+    options.onBeforeTestRun = @_xhrServer.onBeforeTestRun
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
-    # handleListeners(@_server)
 
 module.exports = Server
