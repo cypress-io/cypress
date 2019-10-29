@@ -1646,23 +1646,6 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      // https://github.com/cypress-io/cypress/issues/5449
-      it('can type into input inside iframe with hover state', () => {
-        cy.$$('<iframe src="/fixtures/dom.html"/>').prependTo(cy.$$('body'))
-
-        // type into aut
-        cy.get('input:first').click()
-
-        // type into iframe
-        cy.get('iframe:first')
-        .should((iframe) => expect(iframe.contents().find('input:first')).to.exist)
-        .then((iframe) => cy.wrap(iframe.contents().find('input:first'), { log: false }))
-        .type('foo')
-
-        // type into aut again
-        cy.get('input:first').type('bar')
-      })
-
       // type follows focus
       // https://github.com/cypress-io/cypress/issues/2240
       describe('element reference loss', () => {
