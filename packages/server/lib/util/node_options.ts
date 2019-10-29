@@ -68,7 +68,7 @@ export function forkWithCorrectOptions (): void {
  */
 export function restoreOriginalOptions (): void {
   // @ts-ignore
-  if (!process.versions.electron) {
+  if (!process.versions || !process.versions.electron) {
     debug('not restoring NODE_OPTIONS since not yet in Electron')
 
     return
