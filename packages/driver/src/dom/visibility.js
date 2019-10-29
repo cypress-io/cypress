@@ -219,7 +219,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent
 
   // if we've reached the top parent, which is document
   // then we're in bounds all the way up, return false
-  if ($ancestor.is('body,html') || $document.isDocument($ancestor)) {
+  if ($ancestor.is('body,html') || $document.isDocument($ancestor) || $ancestor[0].parentNode.nodeType === 11) {
     return false
   }
 

@@ -849,7 +849,7 @@ const getFirstParentWithTagName = ($el, tagName) => {
 const getFirstFixedOrStickyPositionParent = ($el) => {
   // return null if we're at body/html/document
   // cuz that means nothing has fixed position
-  if (!$el || $el.is('body,html') || $document.isDocument($el)) {
+  if (!$el || $el.is('body,html') || $document.isDocument($el) || $el[0].parentNode.nodeType === 11) {
     return null
   }
 
