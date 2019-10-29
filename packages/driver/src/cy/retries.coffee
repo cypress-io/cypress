@@ -35,7 +35,10 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
       ## correctly handles not rewrapping errors so that stack
       ## traces are correctly displayed
       if debug.enabled and error and not CypressErrorRe.test(error.name)
-        debug('retrying due to caught error...')
+        if debug.prevError && debug.prevError is error.message
+          debug('exiting due to catching same error twice...')
+          throw error
+        debug.prevError = error.message
         console.error(error)
 
       interval = options.interval ? options._interval
