@@ -840,7 +840,7 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K): Chainable<Subject[K]>
+    its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
 
     /**
      * Get the last DOM element within a set of DOM elements.

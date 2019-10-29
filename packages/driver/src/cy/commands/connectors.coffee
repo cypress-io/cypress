@@ -135,8 +135,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       }
     .finally(cleanup)
 
+  invokeItsFn = (subject, str, options, args...) ->
+    return invokeBaseFn(options || { log: true }, subject, str, args...)
+
   invokeFn = (subject, str, args...) ->
-    options = {}
+    return invokeBaseFn({ log: true }, subject, str, args...)
+
+  invokeBaseFn = (options, subject, str, args...) ->
 
     ## name could be invoke or its!
     name = state("current").get("name")
@@ -154,21 +159,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     traversalErr = null
 
-    options._log = Cypress.log
-      message: message
-      $el: if $dom.isElement(subject) then subject else null
-      consoleProps: ->
-        Subject: subject
+    if options.log
+      options._log = Cypress.log()
+
+    log = () -> 
+      return if options.log is false
+
+      options._log.set({
+        message: message
+        $el: if $dom.isElement(subject) then subject else null
+        consoleProps: ->
+          Subject: subject
+      })
 
     if not _.isString(str)
       $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
-        onFail: options._log
-        args: { cmd: name }
-      })
-
-    if isCmdIts and args.length > 0
-      $utils.throwErrByPath("invoke_its.invalid_num_of_args", {
-        onFail: options._log
+        onFail: log
         args: { cmd: name }
       })
 
@@ -279,7 +285,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## else throw that prop isn't a function
       $utils.throwErrByPath("invoke.prop_not_a_function", {
-        onFail: options._log
+        onFail: log
         args: {
           prop: propAtLastPath
           type: $utils.stringifyFriendlyTypeof(value)
@@ -449,6 +455,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     invoke: ->
       invokeFn.apply(@, arguments)
 
-    its: ->
-      invokeFn.apply(@, arguments)
+    its: (subject, str, options, args...) ->
+      invokeItsFn.apply(@, [subject, str, options, args...])
   })
