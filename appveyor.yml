@@ -62,13 +62,8 @@ install:
   - has-env GH
   # clean cache to prevent install permission issues
   - yarn cache clean
-  # install root modules only, and retry automatically if install fails
-  - yarn preinstall
-  - yarn --ignore-scripts || yarn --ignore-scripts || yarn --ignore-scripts
+  - yarn || yarn || yarn
   - .\node_modules\.bin\print-arch
-  # - npm prune
-  # - npm run all prune -- --serial
-  - yarn lerna run build --stream
 
 # Post-install test scripts.
 test_script:
