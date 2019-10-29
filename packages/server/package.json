@@ -10,7 +10,7 @@
     "dev": "node index.js",
     "lint-coffee": "coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
     "repl": "node repl.js",
-    "start": "node ../../cli/bin/cypress open --dev --global",
+    "start": "node ../.$(yarn bin cypress) open --dev --global",
     "test": "node ./test/scripts/run.js",
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./test/support/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
