@@ -612,16 +612,6 @@ describe "src/cy/commands/connectors", ->
 
           cy.invoke("queue")
 
-        it "throws when first argument isnt a string", (done) ->
-          cy.on "fail", (err) =>
-            lastLog = @lastLog
-
-            expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
-            expect(lastLog.get("error")).to.eq err
-            done()
-
-          cy.wrap({}).invoke({})
-
         it "logs once when not dom subject", (done) ->
           cy.on "fail", (err) =>
             lastLog = @lastLog

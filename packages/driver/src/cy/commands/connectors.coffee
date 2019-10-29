@@ -139,13 +139,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     return invokeBaseFn(options or { log: true }, subject, str, args...)
 
   invokeFn = (subject, optionsOrStr, args...) ->
-    optionsPassed =  not _.isString(optionsOrStr)
-    options = if optionsPassed then optionsOrStr else { log: true }
+    optionsPassed = not _.isString(optionsOrStr)
+    options = null 
     str = null
 
     if not optionsPassed
       str = optionsOrStr
+      options = { log: true }
     else if args.length > 0
+      options = optionsOrStr
       str = args[0]
       args = args.slice(1)
 
@@ -171,16 +173,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     if options.log
       options._log = Cypress.log()
-
-    log = () -> 
-      return if options.log is false
-
       options._log.set({
         message: message
         $el: if $dom.isElement(subject) then subject else null
         consoleProps: ->
           Subject: subject
       })
+
+    log = () -> 
+      return if options.log is false
 
     if not _.isString(str)
       $utils.throwErrByPath("invoke_its.invalid_1st_arg", {

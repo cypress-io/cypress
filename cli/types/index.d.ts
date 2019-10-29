@@ -829,6 +829,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
+    invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
 
     /**
      * Get a property’s value on the previously yielded subject.
