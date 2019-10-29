@@ -175,12 +175,14 @@ describe('lib/agent', function () {
         })
 
         it('HTTP websocket connections can be established and used', function () {
+          const socket = Io.client(`http://localhost:${HTTP_PORT}`, {
+            agent: this.agent,
+            transports: ['websocket'],
+            rejectUnauthorized: false,
+          })
+
           return new Bluebird((resolve) => {
-            Io.client(`http://localhost:${HTTP_PORT}`, {
-              agent: this.agent,
-              transports: ['websocket'],
-              rejectUnauthorized: false,
-            }).on('message', resolve)
+            socket.on('message', resolve)
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
@@ -188,16 +190,20 @@ describe('lib/agent', function () {
               expect(this.debugProxy.requests[0].ws).to.be.true
               expect(this.debugProxy.requests[0].url).to.include('http://localhost:31080')
             }
+
+            socket.close()
           })
         })
 
         it('HTTPS websocket connections can be established and used', function () {
+          const socket = Io.client(`https://localhost:${HTTPS_PORT}`, {
+            agent: this.agent,
+            transports: ['websocket'],
+            rejectUnauthorized: false,
+          })
+
           return new Bluebird((resolve) => {
-            Io.client(`https://localhost:${HTTPS_PORT}`, {
-              agent: this.agent,
-              transports: ['websocket'],
-              rejectUnauthorized: false,
-            }).on('message', resolve)
+            socket.on('message', resolve)
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
@@ -206,6 +212,8 @@ describe('lib/agent', function () {
                 url: 'localhost:31443',
               })
             }
+
+            socket.close()
           })
         })
       })
@@ -427,14 +435,15 @@ describe('lib/agent', function () {
 
       it(`detects correctly from ${testCase.protocol} websocket requests`, () => {
         const spy = sinon.spy(testCase.agent, 'addRequest')
+        const socket = Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
+          agent: <any>testCase.agent,
+          transports: ['websocket'],
+          timeout: 1,
+          rejectUnauthorized: false,
+        })
 
         return new Bluebird((resolve, reject) => {
-          Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
-            agent: <any>testCase.agent,
-            transports: ['websocket'],
-            timeout: 1,
-            rejectUnauthorized: false,
-          })
+          socket
           .on('message', reject)
           .on('connect_error', resolve)
         })
@@ -442,6 +451,8 @@ describe('lib/agent', function () {
           const requestOptions = spy.getCall(0).args[1]
 
           expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
+
+          socket.close()
         })
       })
     })
