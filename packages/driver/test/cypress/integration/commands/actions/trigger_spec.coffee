@@ -18,7 +18,7 @@ describe "src/cy/commands/actions/trigger", ->
       $btn = cy.$$("#button")
 
       $btn.on "mouseover", (e) =>
-        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         obj = _.pick(e.originalEvent, "bubbles", "cancelable", "target", "type")
         expect(obj).to.deep.eq {
@@ -28,8 +28,8 @@ describe "src/cy/commands/actions/trigger", ->
           type: "mouseover"
         }
 
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(e.clientX).to.be.closeTo(fromElViewport.x, 1)
+        expect(e.clientY).to.be.closeTo(fromElViewport.y, 1)
         done()
 
       cy.get("#button").trigger("mouseover")
@@ -90,10 +90,10 @@ describe "src/cy/commands/actions/trigger", ->
       win = cy.state("window")
 
       $btn.on "mouseover", (e) =>
-        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        expect(win.pageXOffset).to.be.gt(0)
-        expect(e.clientX).to.be.closeTo(fromViewport.x, 1)
+        expect(win.scrollX).to.be.gt(0)
+        expect(e.clientX).to.be.closeTo(fromElViewport.x, 1)
         done()
 
       cy.get("#scrolledBtn").trigger("mouseover")
@@ -104,10 +104,24 @@ describe "src/cy/commands/actions/trigger", ->
       win = cy.state("window")
 
       $btn.on "mouseover", (e) =>
-        { fromViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        expect(win.pageXOffset).to.be.gt(0)
-        expect(e.clientY).to.be.closeTo(fromViewport.y, 1)
+        expect(win.scrollX).to.be.gt(0)
+        expect(e.clientY).to.be.closeTo(fromElViewport.y, 1)
+        done()
+
+      cy.get("#scrolledBtn").trigger("mouseover")
+
+    it "records correct pageX and pageY el scrolled", (done) ->
+      $btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo cy.$$("body")
+
+      win = cy.state("window")
+
+      $btn.on "mouseover", (e) =>
+        { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+
+        expect(e.pageX).to.be.closeTo(win.scrollX + e.clientX, 1)
+        expect(e.pageY).to.be.closeTo(win.scrollY + e.clientY, 1)
         done()
 
       cy.get("#scrolledBtn").trigger("mouseover")
@@ -165,6 +179,9 @@ describe "src/cy/commands/actions/trigger", ->
     describe "actionability", ->
       it "can trigger on elements which are hidden until scrolled within parent container", ->
         cy.get("#overflow-auto-container").contains("quux").trigger("mousedown")
+
+      it "can trigger on readonly inputs", ->
+        cy.get("#readonly-attr").trigger("mousedown")
 
       it "does not scroll when being forced", ->
         scrolled = []
@@ -435,14 +452,14 @@ describe "src/cy/commands/actions/trigger", ->
       it "passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
         $btn = cy.$$("button:first")
 
-        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
         cy.get("button:first").trigger("tap", {animationDistanceThreshold: 1000}).then ->
           args = cy.ensureElementIsNotAnimating.firstCall.args
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
           expect(args[2]).to.eq(1000)
 
       it "passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating", ->
@@ -450,14 +467,14 @@ describe "src/cy/commands/actions/trigger", ->
 
         $btn = cy.$$("button:first")
 
-        { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
         cy.spy(cy, "ensureElementIsNotAnimating")
 
         cy.get("button:first").trigger("mouseover").then ->
           args = cy.ensureElementIsNotAnimating.firstCall.args
 
-          expect(args[1]).to.deep.eq([fromWindow, fromWindow])
+          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
           expect(args[2]).to.eq(animationDistanceThreshold)
 
     describe "assertion verification", ->
@@ -770,17 +787,17 @@ describe "src/cy/commands/actions/trigger", ->
         cy.get("button:first").trigger("mouseover").then ($btn) ->
           lastLog = @lastLog
 
-          { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          expect(lastLog.get("coords")).to.deep.eq(fromWindow, "x", "y")
+          { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+          expect(lastLog.get("coords")).to.deep.eq(fromElWindow, "x", "y")
 
       it "#consoleProps", ->
         cy.get("button:first").trigger("mouseover").then ($button) =>
           consoleProps = @lastLog.invoke("consoleProps")
-          { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
+          { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
           logCoords    = @lastLog.get("coords")
           eventOptions = consoleProps["Event options"]
-          expect(logCoords.x).to.be.closeTo(fromWindow.x, 1) ## ensure we are within 1
-          expect(logCoords.y).to.be.closeTo(fromWindow.y, 1) ## ensure we are within 1
+          expect(logCoords.x).to.be.closeTo(fromElWindow.x, 1) ## ensure we are within 1
+          expect(logCoords.y).to.be.closeTo(fromElWindow.y, 1) ## ensure we are within 1
           expect(consoleProps.Command).to.eq "trigger"
           expect(eventOptions.bubbles).to.be.true
           expect(eventOptions.cancelable).to.be.true
@@ -788,3 +805,5 @@ describe "src/cy/commands/actions/trigger", ->
           expect(eventOptions.clientY).to.be.be.a("number")
           expect(eventOptions.pageX).to.be.be.a("number")
           expect(eventOptions.pageY).to.be.be.a("number")
+          expect(eventOptions.screenX).to.be.be.a("number").and.eq(eventOptions.clientX)
+          expect(eventOptions.screenY).to.be.be.a("number").and.eq(eventOptions.clientY)

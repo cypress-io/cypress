@@ -546,6 +546,20 @@ describe "src/cy/commands/window", ->
 
         cy.viewport("ipad-mini")
 
+      it "iphone-xr", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 896}
+          done()
+
+        cy.viewport("iphone-xr")
+
+      it "iphone-x", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 375, viewportHeight: 812}
+          done()
+
+        cy.viewport("iphone-x")
+
       it "iphone-6+", (done) ->
         cy.on "viewport:changed", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 736}
@@ -581,6 +595,20 @@ describe "src/cy/commands/window", ->
 
         cy.viewport("iphone-5", "portrait")
 
+      it "samsung-s10", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 360, viewportHeight: 760}
+          done()
+
+        cy.viewport("samsung-s10")
+
+      it "samsung-note9", (done) ->
+        cy.on "viewport:changed", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 846}
+          done()
+
+        cy.viewport("samsung-note9")
+
     context "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)
@@ -596,7 +624,7 @@ describe "src/cy/commands/window", ->
       it "throws with passed invalid preset", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() could not find a preset for: 'foo'. Available presets are: macbook-15, macbook-13, macbook-11, ipad-2, ipad-mini, iphone-6+, iphone-6, iphone-5, iphone-4, iphone-3"
+          expect(err.message).to.match /^cy.viewport\(\) could not find a preset for: 'foo'. Available presets are: /
           done()
 
         cy.viewport("foo")
@@ -612,7 +640,7 @@ describe "src/cy/commands/window", ->
       it "throws when passed negative numbers", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
+          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 4000px."
           done()
 
         cy.viewport(800, -600)
@@ -620,7 +648,7 @@ describe "src/cy/commands/window", ->
       it "throws when passed width less than 20", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
+          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 4000px."
           done()
 
         cy.viewport(19, 600)
@@ -628,16 +656,16 @@ describe "src/cy/commands/window", ->
       it "does not throw when passed width equal to 20", ->
         cy.viewport(20, 600)
 
-      it "throws when passed height greater than than 3000", (done) ->
+      it "throws when passed height greater than than 4000", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
+          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 4000px."
           done()
 
-        cy.viewport(1000, 3001)
+        cy.viewport(1000, 4001)
 
-      it "does not throw when passed width equal to 3000", ->
-        cy.viewport(200, 3000)
+      it "does not throw when passed width equal to 4000", ->
+        cy.viewport(200, 4000)
 
       it "throws when passed an empty string as width", (done) ->
         cy.on "fail", (err) =>

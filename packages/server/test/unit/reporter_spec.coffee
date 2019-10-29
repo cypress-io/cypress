@@ -59,7 +59,7 @@ describe "lib/reporter", ->
   context ".create", ->
     it "can create mocha-teamcity-reporter", ->
       teamCityFn = sinon.stub()
-      mockery.registerMock("@cypress/mocha-teamcity-reporter", teamCityFn)
+      mockery.registerMock("mocha-teamcity-reporter", teamCityFn)
 
       reporter = Reporter.create("teamcity")
       reporter.setRunnables(@root)

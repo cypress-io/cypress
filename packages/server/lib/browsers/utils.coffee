@@ -1,5 +1,6 @@
 path     = require("path")
 Promise  = require("bluebird")
+getPort  = require("get-port")
 launcher = require("@packages/launcher")
 fs       = require("../util/fs")
 appData  = require("../util/app_data")
@@ -65,6 +66,8 @@ removeOldProfiles = ->
   ])
 
 module.exports = {
+  getPort
+
   copyExtension
 
   getProfileDir

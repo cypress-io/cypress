@@ -29,6 +29,7 @@ class Dropdown extends Component {
         this.setState({ open: false })
       }
     }
+
     document.body.addEventListener('click', this.outsideClickHandler)
   }
 
@@ -59,7 +60,6 @@ class Dropdown extends Component {
         {this._buttonContent()}
       </span>
     )
-
   }
 
   _buttonContent () {

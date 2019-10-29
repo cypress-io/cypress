@@ -19,6 +19,7 @@ describe('Hook model', () => {
       hook.addCommand({ isMatchingEvent: () => {
         return false
       } })
+
       expect(hook.commands.length).to.equal(1)
       hook.addCommand({})
       expect(hook.commands.length).to.equal(2)

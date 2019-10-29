@@ -1,3 +1,4 @@
+import './main.scss'
 import { configure as configureMobx, toJS } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'

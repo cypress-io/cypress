@@ -5,6 +5,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const proxyquire = require('proxyquire')
 const mockfs = require('mock-fs')
+const debug = require('debug')('test')
 
 const fs = require(`${lib}/fs`)
 const logger = require(`${lib}/logger`)
@@ -37,6 +38,7 @@ describe('lib/tasks/state', function () {
       .stub(fs, 'pathExistsAsync')
       .withArgs(binaryPkgPath)
       .resolves(true)
+
       sinon
       .stub(fs, 'readJsonAsync')
       .withArgs(binaryPkgPath)
@@ -66,6 +68,7 @@ describe('lib/tasks/state', function () {
       .stub(fs, 'pathExistsAsync')
       .withArgs(customBinaryPackageDir)
       .resolves(true)
+
       sinon
       .stub(fs, 'readJsonAsync')
       .withArgs(customBinaryPackageDir)
@@ -88,6 +91,7 @@ describe('lib/tasks/state', function () {
         macExecutable
       )
     })
+
     it('resolves path on linux', function () {
       os.platform.returns('linux')
       const linuxExecutable = '.cache/Cypress/1.2.3/Cypress/Cypress'
@@ -96,10 +100,12 @@ describe('lib/tasks/state', function () {
         linuxExecutable
       )
     })
+
     it('resolves path on windows', function () {
       os.platform.returns('win32')
       expect(state.getPathToExecutable(state.getBinaryDir())).to.endWith('.exe')
     })
+
     it('resolves from custom binaryDir', function () {
       const customBinaryDir = 'home/downloads/cypress.app'
 
@@ -144,8 +150,7 @@ describe('lib/tasks/state', function () {
       os.platform.returns('unknown')
       expect(() => {
         return state.getBinaryDir().to.throw('Platform: "unknown" is not supported.')
-      }
-      )
+      })
     })
   })
 
@@ -159,6 +164,7 @@ describe('lib/tasks/state', function () {
         return expect(isVerified).to.be.equal(true)
       })
     })
+
     it('resolves undefined if not verified', function () {
       const err = new Error()
 
@@ -171,6 +177,7 @@ describe('lib/tasks/state', function () {
         return expect(isVerified).to.be.equal(undefined)
       })
     })
+
     it('can accept custom binaryDir', function () {
       const customBinaryDir = '/custom/binary/dir'
 
@@ -178,6 +185,7 @@ describe('lib/tasks/state', function () {
       .stub(fs, 'pathExistsAsync')
       .withArgs('/custom/binary/dir/binary_state.json')
       .resolves({ verified: true })
+
       sinon
       .stub(fs, 'readJsonAsync')
       .withArgs('/custom/binary/dir/binary_state.json')
@@ -190,13 +198,16 @@ describe('lib/tasks/state', function () {
       })
     })
   })
+
   context('.writeBinaryVerified', function () {
     beforeEach(() => {
       mockfs({})
     })
+
     afterEach(() => {
       mockfs.restore()
     })
+
     it('writes to binary state verified:true', function () {
       sinon.stub(fs, 'outputJsonAsync').resolves()
 
@@ -224,10 +235,10 @@ describe('lib/tasks/state', function () {
           { verified: false },
           { spaces: 2 }
         )
-      }
-      )
+      })
     })
   })
+
   context('.getCacheDir', function () {
     it('uses cachedir()', function () {
       const ret = state.getCacheDir()
@@ -248,7 +259,41 @@ describe('lib/tasks/state', function () {
 
       expect(ret).to.eql(path.resolve('local-cache/folder'))
     })
+
+    it('CYPRESS_CACHE_FOLDER resolves from relative path during postinstall', () => {
+      process.env.CYPRESS_CACHE_FOLDER = './local-cache/folder'
+      // simulates current folder when running "npm postinstall" hook
+      sinon.stub(process, 'cwd').returns('/my/project/folder/node_modules/cypress')
+      const ret = state.getCacheDir()
+
+      debug('returned cache dir %s', ret)
+      expect(ret).to.eql(path.resolve('/my/project/folder/local-cache/folder'))
+    })
+
+    it('CYPRESS_CACHE_FOLDER resolves from absolute path during postinstall', () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/cache/folder/Cypress'
+      // simulates current folder when running "npm postinstall" hook
+      sinon.stub(process, 'cwd').returns('/my/project/folder/node_modules/cypress')
+      const ret = state.getCacheDir()
+
+      debug('returned cache dir %s', ret)
+      expect(ret).to.eql(path.resolve('/cache/folder/Cypress'))
+    })
+
+    it('resolves ~ with user home folder', () => {
+      const homeDir = os.homedir()
+
+      process.env.CYPRESS_CACHE_FOLDER = '~/.cache/Cypress'
+
+      const ret = state.getCacheDir()
+
+      debug('cache dir is "%s"', ret)
+      expect(path.isAbsolute(ret), ret).to.be.true
+      expect(ret, '~ has been resolved').to.not.contain('~')
+      expect(ret, 'replaced ~ with home directory').to.equal(`${homeDir}/.cache/Cypress`)
+    })
   })
+
   context('.parseRealPlatformBinaryFolderAsync', function () {
     beforeEach(function () {
       sinon.stub(fs, 'realpathAsync').callsFake((path) => {
@@ -267,6 +312,7 @@ describe('lib/tasks/state', function () {
         return expect(path).to.eql('/Documents/Cypress.app')
       })
     })
+
     it('can parse on linux', function () {
       os.platform.returns('linux')
 
@@ -276,6 +322,7 @@ describe('lib/tasks/state', function () {
         return expect(path).to.eql('/Documents/Cypress')
       })
     })
+
     it('can parse on darwin', function () {
       os.platform.returns('win32')
 
@@ -285,6 +332,7 @@ describe('lib/tasks/state', function () {
         return expect(path).to.eql('/Documents/Cypress')
       })
     })
+
     it('throws when invalid on darwin', function () {
       os.platform.returns('darwin')
 
@@ -294,6 +342,7 @@ describe('lib/tasks/state', function () {
         return expect(path).to.eql(false)
       })
     })
+
     it('throws when invalid on linux', function () {
       os.platform.returns('linux')
 
@@ -303,6 +352,7 @@ describe('lib/tasks/state', function () {
         return expect(path).to.eql(false)
       })
     })
+
     it('throws when invalid on windows', function () {
       os.platform.returns('win32')
 

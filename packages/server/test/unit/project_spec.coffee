@@ -211,10 +211,12 @@ describe "lib/project", ->
         expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
         expect(config.state).to.eql({ autoScrollingEnabled: false })
 
+    # TODO: skip this for now
     it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->
         expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
-
+    
+    # TODO: skip this for now
     it.skip "passes watchers to Socket.startListening", ->
       options = {}
 
@@ -222,6 +224,7 @@ describe "lib/project", ->
         startListening = Socket::startListening
         expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
         expect(startListening.getCall(0).args[1]).to.eq(options)
+    null
 
   context "#close", ->
     beforeEach ->
@@ -300,7 +303,7 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("/_test-output/path/to/project")
       @project.server = {startWebsockets: ->}
-      sinon.stub(settings, "pathToCypressJson").returns("/path/to/cypress.json")
+      sinon.stub(settings, "pathToConfigFile").returns("/path/to/cypress.json")
       sinon.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json")
       @watch = sinon.stub(@project.watchers, "watch")
 
@@ -311,7 +314,7 @@ describe "lib/project", ->
       expect(@watch).to.be.calledWith("/path/to/cypress.env.json")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: ->done()})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -530,7 +533,7 @@ describe "lib/project", ->
       @pristinePath = Fixtures.projectPath("pristine")
 
     it "inserts path into cache", ->
-      Project.add(@pristinePath)
+      Project.add(@pristinePath, {})
       .then =>
         cache.read()
       .then (json) =>
@@ -540,7 +543,7 @@ describe "lib/project", ->
       it "returns object containing path and id", ->
         sinon.stub(settings, "read").resolves({projectId: "id-123"})
 
-        Project.add(@pristinePath)
+        Project.add(@pristinePath, {})
         .then (project) =>
           expect(project.id).to.equal("id-123")
           expect(project.path).to.equal(@pristinePath)
@@ -549,10 +552,20 @@ describe "lib/project", ->
       it "returns object containing just the path", ->
         sinon.stub(settings, "read").rejects()
 
-        Project.add(@pristinePath)
+        Project.add(@pristinePath, {})
         .then (project) =>
           expect(project.id).to.be.undefined
           expect(project.path).to.equal(@pristinePath)
+
+    describe "if configFile is non-default", ->
+      it "doesn't cache anything and returns object containing just the path", ->
+        Project.add(@pristinePath, { configFile: false })
+        .then (project) =>
+          expect(project.id).to.be.undefined
+          expect(project.path).to.equal(@pristinePath)
+          cache.read()
+        .then (json) =>
+          expect(json.PROJECTS).to.deep.eq([])
 
   context "#createCiProject", ->
     beforeEach ->

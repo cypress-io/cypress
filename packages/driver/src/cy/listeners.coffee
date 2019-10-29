@@ -46,7 +46,7 @@ module.exports = {
     contentWindow.onerror = callbacks.onError
 
     addListener contentWindow, "beforeunload", (e) ->
-      ## bail if we've cancelled this event (from another source)
+      ## bail if we've canceled this event (from another source)
       ## or we've set a returnValue on the original event
       return if e.defaultPrevented or eventHasReturnValue(e)
 

@@ -2,10 +2,11 @@ map     = require("lodash/map")
 pick    = require("lodash/pick")
 once    = require("lodash/once")
 Promise = require("bluebird")
-{ client, circularParser } = require("@packages/socket")
+client  = require("./client")
 
-HOST = "CHANGE_ME_HOST"
-PATH = "CHANGE_ME_PATH"
+COOKIE_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'storeId']
+GET_ALL_PROPS = COOKIE_PROPS.concat(['session'])
+SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
 
 httpRe = /^http/
 
@@ -35,11 +36,7 @@ connect = (host, path) ->
     .catch (err) ->
       fail(id, err)
 
-  ws = client.connect(host, {
-    path: path,
-    transports: ["websocket"]
-    parser: circularParser
-  })
+  ws = client.connect(host, path)
 
   ws.on "automation:request", (id, msg, data) ->
     switch msg
@@ -69,9 +66,6 @@ connect = (host, path) ->
 
   return ws
 
-## initially connect
-connect(HOST, PATH)
-
 automation = {
   connect
 
@@ -95,6 +89,7 @@ automation = {
     .map(clear)
 
   getAll: (filter = {}) ->
+    filter = pick(filter, GET_ALL_PROPS)
     get = ->
       new Promise (resolve) ->
         chrome.cookies.getAll(filter, resolve)
@@ -115,6 +110,7 @@ automation = {
       new Promise (resolve, reject) =>
         ## only get the url if its not already set
         props.url ?= @getUrl(props)
+        props = pick(props, SET_PROPS)
         chrome.cookies.set props, (details) ->
           switch
             when details

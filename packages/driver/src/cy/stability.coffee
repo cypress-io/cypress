@@ -5,20 +5,20 @@ tryFn = (fn) ->
   Promise.try(fn)
 
 create = (Cypress, state) ->
-  isStable = (bool = true, event) ->
-    return if state("isStable") is bool
+  isStable = (stable = true, event) ->
+    return if state("isStable") is stable
 
     ## if we are going back to stable and we have
     ## a whenStable callback
-    if bool and whenStable = state("whenStable")
+    if stable and whenStable = state("whenStable")
       ## invoke it
       whenStable()
 
-    state("isStable", bool)
+    state("isStable", stable)
 
     ## we notify the outside world because this is what the runner uses to
     ## show the 'loading spinner' during an app page loading transition event
-    Cypress.action("cy:stability:changed", bool, event)
+    Cypress.action("cy:stability:changed", stable, event)
 
   whenStable = (fn) ->
     ## if we are not stable

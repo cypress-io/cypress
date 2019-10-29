@@ -149,6 +149,7 @@ describe "src/cy/commands/navigation", ->
             expect(win.foo).to.be.undefined
 
       it "throws when reload times out", (done) ->
+        cy.timeout(1000)
         locReload = cy.spy(Cypress.utils, "locReload")
 
         cy
@@ -303,7 +304,7 @@ describe "src/cy/commands/navigation", ->
 
         return null
 
-      _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
+      _.each [null, undefined, NaN, Infinity, {}, [], ->{}], (val) =>
         it "throws on: '#{val}'", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.eq("cy.go() accepts only a string or number argument")
@@ -326,6 +327,7 @@ describe "src/cy/commands/navigation", ->
         cy.go(0)
 
       it "throws when go times out", (done) ->
+        cy.timeout(1000)
         cy
           .visit("/timeout?ms=100")
           .visit("/fixtures/jquery.html")
@@ -360,19 +362,19 @@ describe "src/cy/commands/navigation", ->
 
     describe ".log", ->
       beforeEach ->
-        @logs = []
+        cy.visit("/fixtures/generic.html").then ->
+          @logs = []
 
-        cy.on "log:added", (attrs, log) =>
-          if attrs.name is "go"
-            @lastLog = log
+          cy.on "log:added", (attrs, log) =>
+            if attrs.name is "go"
+              @lastLog = log
 
-          @logs.push(log)
+            @logs.push(log)
 
-        return null
+          return null
 
       it "logs go", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             lastLog = @lastLog
@@ -382,14 +384,12 @@ describe "src/cy/commands/navigation", ->
 
       it "can turn off logging", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back", {log: false}).then ->
             expect(@lastLog).to.be.undefined
 
       it "does not log 'Page Load' events", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
@@ -399,7 +399,6 @@ describe "src/cy/commands/navigation", ->
         beforeunload = false
 
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
             cy.on "window:before:unload", =>
@@ -541,6 +540,15 @@ describe "src/cy/commands/navigation", ->
         .then ->
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
 
+    it "does not support file:// protocol", (done) ->
+      Cypress.config("baseUrl", "")
+
+      cy.on "fail", (err) ->
+        expect(err.message).to.contain("cy.visit() failed because the 'file://...' protocol is not supported by Cypress.")
+        done()
+
+      cy.visit("file:///cypress/fixtures/generic.html")
+
     ## https://github.com/cypress-io/cypress/issues/1727
     it "can visit a page with undefined content type and html-shaped body", ->
       cy
@@ -609,6 +617,15 @@ describe "src/cy/commands/navigation", ->
         }
       })
       cy.contains('"user-agent":"something special"')
+
+    it "can send querystring params", ->
+      qs = { "foo bar": "baz quux" }
+
+      cy
+        .visit("http://localhost:3500/dump-qs", { qs })
+        .then ->
+          cy.contains(JSON.stringify(qs))
+          cy.url().should('eq', 'http://localhost:3500/dump-qs?foo%20bar=baz%20quux')
 
     describe "can send a POST request", ->
       it "automatically urlencoded using an object body", ->
@@ -1050,6 +1067,23 @@ describe "src/cy/commands/navigation", ->
           url: "http://foobarbaz",
           headers: "quux"
         })
+
+      [
+        "foo",
+        null,
+        false,
+      ].forEach (qs) =>
+        str = String(qs)
+
+        it "throws when qs is #{str}", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.contain "cy.visit() requires the 'qs' option to be an object, but received: '#{str}'"
+            done()
+
+          cy.visit({
+            url: "http://foobarbaz",
+            qs
+          })
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
         cy.on "fail", (err) ->

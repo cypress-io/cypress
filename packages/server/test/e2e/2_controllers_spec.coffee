@@ -10,6 +10,7 @@ describe "e2e plugins", ->
     e2e.exec(@, {
       spec: "spec.js"
       project: nonExistentSpec
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 1
     })

@@ -11,6 +11,7 @@ describe('issue #761 - aborted XHRs from previous tests', () => {
           // and should not throw
           xhr.abort()
         }
+
         xhr.send()
       })
     })

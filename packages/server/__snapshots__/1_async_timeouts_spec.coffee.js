@@ -14,17 +14,22 @@ exports['e2e async timeouts failing1 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: async_timeouts_spec.coffee...                                                   (1 of 1) 
+  Running:  async_timeouts_spec.coffee                                                      (1 of 1)
 
 
   async
     1) bar fails
+    2) fails async after cypress command
 
 
   0 passing
-  1 failing
+  2 failing
 
   1) async bar fails:
+     Error: Timed out after '100ms'. The done() callback was never invoked!
+      at stack trace line
+
+  2) async fails async after cypress command:
      Error: Timed out after '100ms'. The done() callback was never invoked!
       at stack trace line
 
@@ -33,28 +38,31 @@ exports['e2e async timeouts failing1 1'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        1                          │
-  │ Passing:      0                          │
-  │ Failing:      1                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  1                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     async_timeouts_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     async_timeouts_spec.coffee                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/async_timeouts_spec.coffee/async -- bar fails (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts_spec.coffee/async -- bar fails (     (1280x720)
+     failed).png                                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/async_timeouts_spec.coffee/async -- fails async     (1280x720)
+      after cypress command (failed).png                                                            
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/async_timeouts_spec.coffee.mp4      (X second)
 
 
 ====================================================================================================
@@ -62,11 +70,11 @@ exports['e2e async timeouts failing1 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ async_timeouts_spec.coffee                XX:XX        1        -        1        -        - │
+  │ ✖  async_timeouts_spec.coffee               XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 
 
 `

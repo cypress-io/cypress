@@ -15,8 +15,6 @@ recentlyCreatedWindow = false
 
 getUrl = (type) ->
   switch type
-    when "GITHUB_LOGIN"
-      user.getLoginUrl()
     when "INDEX"
       cyDesktop.getPathToIndex()
     else
@@ -64,70 +62,14 @@ module.exports = {
     ## else hide all windows
     _.invoke windows, "hide"
 
+  focusMainWindow: ->
+    getByType('INDEX').show()
+
   getByWebContents: (webContents) ->
     BrowserWindow.fromWebContents(webContents)
 
-  getBrowserAutomation: (webContents) ->
-    win = @getByWebContents(webContents)
-
-    @automation(win)
-
   _newBrowserWindow: (options) ->
     new BrowserWindow(options)
-
-  automation: (win) ->
-    cookies = Promise.promisifyAll(win.webContents.session.cookies)
-
-    return {
-      clear: (filter = {}) ->
-        clear = (cookie) =>
-          url = getCookieUrl(cookie)
-
-          cookies.removeAsync(url, cookie.name)
-          .return(cookie)
-
-        @getAll(filter)
-        .map(clear)
-
-      getAll: (filter) ->
-        cookies
-        .getAsync(filter)
-
-      getCookies: (filter) ->
-        @getAll(filter)
-
-      getCookie: (filter) ->
-        @getAll(filter)
-        .then(firstOrNull)
-
-      setCookie: (props = {}) ->
-        ## only set the url if its not already present
-        props.url ?= getCookieUrl(props)
-
-        ## resolve with the cookie props. the extension
-        ## calls back with the cookie details but electron
-        ## chrome API's do not. but it doesn't matter because
-        ## we always send a fully complete cookie props object
-        ## which can simply be returned.
-        cookies
-        .setAsync(props)
-        .return(props)
-
-      clearCookie: (filter) ->
-        @clear(filter)
-        .then(firstOrNull)
-
-      clearCookies: (filter) ->
-        @clear(filter)
-
-      isAutomationConnected: ->
-        true
-
-      takeScreenshot: ->
-        new Promise (resolve) ->
-          win.capturePage (img) ->
-            resolve(img.toDataURL())
-    }
 
   defaults: (options = {}) ->
     _.defaultsDeep(options, {
@@ -153,7 +95,7 @@ module.exports = {
       onNewWindow: ->
       webPreferences:  {
         partition:            null
-        chromeWebSecurity:    true
+        webSecurity:          true
         nodeIntegration:      false
         backgroundThrottling: false
       }
@@ -166,8 +108,7 @@ module.exports = {
       options.frame = false
       options.webPreferences.offscreen = true
 
-    if options.chromeWebSecurity is false
-      options.webPreferences.webSecurity = false
+    options.webPreferences.webSecurity = !!options.chromeWebSecurity
 
     if options.partition
       options.webPreferences.partition = options.partition
@@ -237,12 +178,7 @@ module.exports = {
     if win = getByType(options.type)
       win.show()
 
-      if options.type is "GITHUB_LOGIN"
-        err = new Error
-        err.alreadyOpen = true
-        return Promise.reject(err)
-      else
-        return Promise.resolve(win)
+      return Promise.resolve(win)
 
     recentlyCreatedWindow = true
 
@@ -250,29 +186,13 @@ module.exports = {
       width:  600
       height: 500
       show:   true
-      url:    getUrl(options.type)
       webPreferences: {
         preload: cwd("lib", "ipc", "ipc.js")
       }
     })
 
-    urlChanged = (url, resolve) ->
-      parsed = uri.parse(url, true)
-
-      if code = parsed.query.code
-        ## there is a bug with electron
-        ## crashing when attemping to
-        ## destroy this window synchronously
-        _.defer -> win.destroy()
-
-        resolve(code)
-
-    # if args.transparent and args.show
-    #   {width, height} = args
-
-    #   args.show = false
-    #   args.width = 0
-    #   args.height = 0
+    if not options.url
+      options.url = getUrl(options.type)
 
     win = @create(projectRoot, options)
 
@@ -293,35 +213,12 @@ module.exports = {
       setWindowProxy(win)
     )
     .spread (url) ->
-      if options.type is "GITHUB_LOGIN"
-        ## remove the GitHub warning banner about an outdated browser
-        ## TODO: remove this once we have upgraded Electron or added native browser auth
-        newUserAgent = win.webContents.getUserAgent()
-        .replace(/Chrome\/\d+\.\d+\.\d+\.\d+/, 'Chrome/72.0.3626.121')
-        .replace(/Electron\/\d+\.\d+\.\d+/, 'Electron/4.0.5')
-        debug('changing user agent to ', newUserAgent)
-        win.webContents.setUserAgent(newUserAgent)
-
       ## navigate the window here!
       win.loadURL(url)
 
       ## reset this back to false
       recentlyCreatedWindow = false
-
-      if options.type is "GITHUB_LOGIN"
-        new Promise (resolve, reject) ->
-          win.once "closed", ->
-            err = new Error("Window closed by user")
-            err.windowClosed = true
-            reject(err)
-
-          win.webContents.on "will-navigate", (e, url) ->
-            urlChanged(url, resolve)
-
-          win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
-            urlChanged(newUrl, resolve)
-      else
-        return win
+    .thenReturn(win)
 
   trackState: (projectRoot, isTextTerminal, win, keys) ->
     isDestroyed = ->

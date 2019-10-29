@@ -81,11 +81,13 @@ testBeforeRunAsync = (test, Cypress) ->
       fire("runner:test:before:run:async", test, Cypress)
 
 runnableAfterRunAsync = (runnable, Cypress) ->
+  runnable.clearTimeout()
   Promise.try ->
     if not fired("runner:runnable:after:run:async", runnable)
       fire("runner:runnable:after:run:async", runnable, Cypress)
 
 testAfterRun = (test, Cypress) ->
+  test.clearTimeout()
   if not fired(TEST_AFTER_RUN_EVENT, test)
     setWallClockDuration(test)
     fire(TEST_AFTER_RUN_EVENT, test, Cypress)
@@ -289,7 +291,7 @@ overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests)
         testAfterRun(test, Cypress)
 
         ## and now invoke next(err)
-        originalFn.apply(null, arguments)
+        originalFn.apply(window, arguments)
 
     switch name
       when "afterEach"

@@ -9,6 +9,27 @@
     display: block;
   }
 
+  .node-version {
+    .well {
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+
+    ul {
+      margin-top: 10px;
+    }
+
+    a>code {
+      color: #1079c3;
+
+      &:hover {
+        color: #0c65a5;
+        background-color: #e5ecf6;
+        border-bottom: 0;
+      }
+    }
+  }
+
   .learn-more {
     position: absolute;
     top: 15px;
@@ -147,6 +168,7 @@
     font-size: 1em;
     position: relative;
     left: -15px;
+    max-width: calc(100% - 85px);
 
     .arrow {
       @extend .#{$fa-css-prefix};
@@ -208,20 +230,22 @@
   margin: 1em;
 }
 
-.proxy-settings {
-  .proxy-table {
-    width: 100%;
+.node-version-text {
+  margin-top: 15px;
+}
 
-    th:first-child {
-      width: 150px;
-    }
+.proxy-table, .node-table {
+  width: 100%;
 
-    .no-bypass {
-      opacity: .8;
-    }
+  th:first-child {
+    width: 150px;
+  }
 
-    td, th {
-      padding: 3px;
-    }
+  .no-bypass {
+    opacity: .8;
+  }
+
+  td, th {
+    padding: 3px;
   }
 }

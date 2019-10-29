@@ -24,9 +24,9 @@ describe "src/cy/commands/connectors", ->
 
       it "spreads a jQuery wrapper into individual arguments", ->
         cy.noop($("div")).spread (first, second) ->
-          expect(first.tagName).to.eq('DIV');
+          expect(first.tagName).to.eq('DIV')
           expect(first.innerText).to.eq("div")
-          expect(second.tagName).to.eq('DIV');
+          expect(second.tagName).to.eq('DIV')
           expect(second.innerText).to.contain("Nested Find")
 
       it "passes timeout option to spread", ->
@@ -480,8 +480,8 @@ describe "src/cy/commands/connectors", ->
                 memo + num
               , 0
             math: {
-              sum: =>
-                @obj.sum.apply(@obj, arguments)
+              sum: (args...) =>
+                @obj.sum.apply(@obj, args)
             }
           }
 
@@ -1222,7 +1222,7 @@ describe "src/cy/commands/connectors", ->
       it "awaits promises returned", ->
         count = 0
 
-        start = new Date
+        start = new Date()
 
         cy.get("#list li").each ($li, i, arr) ->
           new Promise (resolve, reject) ->
@@ -1232,7 +1232,7 @@ describe "src/cy/commands/connectors", ->
             , 20
         .then ($lis) ->
           expect(count).to.eq(3)
-          expect(new Date - start).to.be.gt(60)
+          expect(new Date() - start).to.be.gt(60)
 
       it "supports array like structures", ->
         count = 0

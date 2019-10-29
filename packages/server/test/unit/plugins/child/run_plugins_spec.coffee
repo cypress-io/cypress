@@ -12,12 +12,10 @@ Fixtures = require("#{root}../../test/support/helpers/fixtures")
 
 colorCodeRe = /\[[0-9;]+m/gm
 pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
-stackPathRe = /\(?\/?([a-z0-9_-]+\/)*([a-z0-9_-]+\.\w+)[:0-9]+\)?/gmi
 
 withoutStack = (err) -> _.omit(err, "stack")
 withoutColorCodes = (str) -> str.replace(colorCodeRe, "<color-code>")
 withoutPath = (str) -> str.replace(pathRe, '<path>$2)')
-withoutStackPaths = (stack) -> stack.replace(stackPathRe, '<path>$2')
 
 describe "lib/plugins/child/run_plugins", ->
   beforeEach ->
@@ -35,7 +33,7 @@ describe "lib/plugins/child/run_plugins", ->
     mockery.registerSubstitute("plugins-file", "/does/not/exist.coffee")
     runPlugins(@ipc, "plugins-file")
     expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
-    snapshot(withoutStackPaths(@ipc.send.lastCall.args[3]))
+    snapshot(@ipc.send.lastCall.args[3].split('\n')[0])
 
   it "sends error message if requiring pluginsFile errors", ->
     ## path for substitute is relative to lib/plugins/child/plugins_child.js
@@ -45,7 +43,7 @@ describe "lib/plugins/child/run_plugins", ->
     )
     runPlugins(@ipc, "plugins-file")
     expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
-    snapshot(withoutStackPaths(@ipc.send.lastCall.args[3]))
+    snapshot(@ipc.send.lastCall.args[3].split('\n')[0])
 
   it "sends error message if pluginsFile has syntax error", ->
     ## path for substitute is relative to lib/plugins/child/plugins_child.js
@@ -72,7 +70,7 @@ describe "lib/plugins/child/run_plugins", ->
       @ipc.on.withArgs("load").yields({})
       runPlugins(@ipc, "plugins-file")
 
-      @ipc.send = (event, errorType, pluginsFile, stack) ->
+      @ipc.send = _.once (event, errorType, pluginsFile, stack) ->
         expect(event).to.eq("load:error")
         expect(errorType).to.eq("PLUGINS_FUNCTION_ERROR")
         expect(pluginsFile).to.eq("plugins-file")
@@ -96,7 +94,7 @@ describe "lib/plugins/child/run_plugins", ->
       runPlugins(@ipc, "plugins-file")
       @ipc.on.withArgs("load").yield()
 
-      @ipc.send = (event, errorType, pluginsFile, stack) ->
+      @ipc.send = _.once (event, errorType, pluginsFile, stack) ->
         expect(event).to.eq("load:error")
         expect(errorType).to.eq("PLUGINS_FUNCTION_ERROR")
         expect(pluginsFile).to.eq("plugins-file")

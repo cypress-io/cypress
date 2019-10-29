@@ -14,19 +14,19 @@ exports['package.json build outputs expected properties 1'] = {
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "keywords": [
+    "automation",
     "browser",
     "cypress",
     "cypress.io",
-    "automation",
-    "end-to-end",
     "e2e",
+    "end-to-end",
     "integration",
     "mocks",
-    "test",
-    "testing",
     "runner",
     "spies",
-    "stubs"
+    "stubs",
+    "test",
+    "testing"
   ],
   "types": "types",
   "scripts": {

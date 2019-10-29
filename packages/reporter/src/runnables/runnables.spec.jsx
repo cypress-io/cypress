@@ -92,6 +92,7 @@ describe('<Runnables />', () => {
         specPath=''
       />
     )
+
     scroller.setContainer.callArg(1)
     expect(appState.temporarilySetAutoScrolling).to.have.been.calledWith(false)
   })
@@ -108,6 +109,7 @@ describe('<Runnables />', () => {
         specPath=''
       />
     )
+
     scroller.setContainer.callArg(1)
     expect(appState.temporarilySetAutoScrolling).not.to.have.been.called
   })

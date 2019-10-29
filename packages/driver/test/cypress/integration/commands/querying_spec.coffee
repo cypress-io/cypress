@@ -3,16 +3,8 @@ _ = Cypress._
 Promise = Cypress.Promise
 
 describe "src/cy/commands/querying", ->
-  before ->
-    cy
-      .visit("/fixtures/dom.html")
-      .then (win) ->
-        @body = win.document.body.outerHTML
-
   beforeEach ->
-    doc = cy.state("document")
-
-    $(doc.body).empty().html(@body)
+    cy.visit("/fixtures/dom.html")
 
   context "#focused", ->
     it "returns the activeElement", ->
@@ -442,7 +434,8 @@ describe "src/cy/commands/querying", ->
       cy.get("#list").then ($list) ->
         expect($list.get(0)).to.eq list.get(0)
 
-    it.skip "FLAKY retries finding elements until something is found", ->
+    # NOTE: FLAKY in CI, need to investigate further
+    it.skip "retries finding elements until something is found", ->
       missingEl = $("<div />", id: "missing-el")
 
       ## wait until we're ALMOST about to time out before
@@ -1180,7 +1173,14 @@ describe "src/cy/commands/querying", ->
           .server()
           .route(/users/, {}).as("getUsers")
           .get("@getUsers.all ")
+      _.each ["", "foo", [], 1, null ], (value) =>
+        it "throws when options property is not an object. Such as: #{value}", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "only accepts an options object for its second argument. You passed #{value}"
+            done()
 
+          cy.get("foobar", value)
+          
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = cy.$$("#button").hide()
 
@@ -1201,6 +1201,14 @@ describe "src/cy/commands/querying", ->
     it "is scoped to the body and will not return title elements", ->
       cy.contains("DOM Fixture").then ($el) ->
         expect($el).not.to.match("title")
+
+    it 'will not find script elements', ->
+      cy.$$('<script>// some-script-content </script>').appendTo(cy.$$('body'))
+      cy.contains('some-script-content').should('not.match', 'script')
+
+    it 'will not find style elements', ->
+      cy.$$('<style> some-style-content {} </style>').appendTo(cy.$$('body'))
+      cy.contains('some-style-content').should('not.match', 'style')
 
     it "finds the nearest element by :contains selector", ->
       cy.contains("li 0").then ($el) ->
@@ -1373,6 +1381,8 @@ describe "src/cy/commands/querying", ->
       it "returns invisible element when parent chain is visible", ->
         cy.get("#form-header-region").contains("Back").should("not.be.visible")
 
+    # NOTE: not sure why this is skipped... last edit was 3 years ago...
+    # @bkucera maybe take a look at this
     describe.skip "handles whitespace", ->
       it "finds el with new lines", ->
         btn = $("""

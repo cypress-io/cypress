@@ -19,6 +19,8 @@ expectToEqDetails = (actual, expected) ->
   expect(actual).to.deep.eq(expected)
 
 describe "Server", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     sinon.stub(Server.prototype, "reset")
 
@@ -29,8 +31,8 @@ describe "Server", ->
       nock.enableNetConnect()
 
       @automationRequest = sinon.stub()
-      .withArgs("get:cookies").resolves([])
-      .withArgs("set:cookie").resolves({})
+      @automationRequest.withArgs("get:cookies").resolves([])
+      @automationRequest.withArgs("set:cookie").resolves({})
 
       @setup = (initialUrl, obj = {}) =>
         if _.isObject(initialUrl)
@@ -65,36 +67,26 @@ describe "Server", ->
             }
             rp(options)
 
-          open = =>
-            Promise.all([
-              ## open our https server
-              httpsServer.start(8443),
+          return Promise.all([
+            ## open our https server
+            httpsServer.start(8443),
 
-              ## and open our cypress server
-              @server = Server()
+            ## and open our cypress server
+            @server = Server()
 
-              @server.open(cfg)
-              .spread (port) =>
-                if initialUrl
-                  @server._onDomainSet(initialUrl)
+            @server.open(cfg)
+            .spread (port) =>
+              if initialUrl
+                @server._onDomainSet(initialUrl)
 
-                @srv = @server.getHttpServer()
+              @srv = @server.getHttpServer()
 
-                # @session = new (Session({app: @srv}))
+              # @session = new (Session({app: @srv}))
 
-                @proxy = "http://localhost:" + port
+              @proxy = "http://localhost:" + port
 
-                @fileServer = @server._fileServer.address()
-            ])
-
-          if @server
-            Promise.join(
-              httpsServer.stop()
-              @server.close()
-            )
-            .then(open)
-          else
-            open()
+              @fileServer = @server._fileServer.address()
+          ])
 
     afterEach ->
       nock.cleanAll()
@@ -320,7 +312,7 @@ describe "Server", ->
 
             Promise.delay(100)
             .then =>
-              ## the p1 should not have a current promise phase or reqStream until it's cancelled
+              ## the p1 should not have a current promise phase or reqStream until it's canceled
               expect(p1).not.to.have.property('currentPromisePhase')
               expect(p1).not.to.have.property('reqStream')
 
@@ -649,7 +641,6 @@ describe "Server", ->
         @server._onResolveUrl("http://localhost:64646", {}, @automationRequest)
         .catch (err) ->
           expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:64646")
-          expect(err.stack).to.include("._errnoException")
           expect(err.port).to.eq(64646)
           expect(err.code).to.eq("ECONNREFUSED")
 

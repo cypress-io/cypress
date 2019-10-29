@@ -77,14 +77,12 @@ const sourceShellCommand = function (cmd, shell) {
   //# so suppress it by sending it to /dev/null and ignore
   //# any failures with this
   return `source ${profilePath} > /dev/null 2>&1; ${cmd}`
-
 }
 
 const findBash = () => {
   return execa.shell('which bash')
   .then(R.prop('stdout'))
 }
-
 
 const getShell = function (shell) {
   let s

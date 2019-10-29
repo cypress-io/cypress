@@ -74,7 +74,7 @@ class Default extends Component {
   _selectProject = (e) => {
     e.preventDefault()
     ipc.showDirectoryDialog().then((path) => {
-      if (!path) return // user cancelled
+      if (!path) return // user canceled
 
       return this._addProject(path)
     })

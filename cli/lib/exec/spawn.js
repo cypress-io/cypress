@@ -9,12 +9,14 @@ const debugElectron = require('debug')('cypress:electron')
 const util = require('../util')
 const state = require('../tasks/state')
 const xvfb = require('./xvfb')
+const verify = require('../tasks/verify')
 const { throwFormErrorText, errors } = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
+const isRenderWorkerRe = /\.RenderWorker-/
 
-const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe]
+const GARBAGE_WARNINGS = [isXlibOrLibudevRe, isHighSierraWarningRe, isRenderWorkerRe]
 
 const isGarbageLineWarning = (str) => {
   return _.some(GARBAGE_WARNINGS, (re) => {
@@ -59,6 +61,8 @@ function getStdio (needsXvfb) {
 }
 
 module.exports = {
+  isGarbageLineWarning,
+
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
     let executable = state.getPathToExecutable(state.getBinaryDir())
@@ -70,6 +74,8 @@ module.exports = {
     debug('needs to start own Xvfb?', needsXvfb)
 
     // always push cwd into the args
+    // which additionally acts as a signal to the
+    // binary that it was invoked through the NPM module
     args = [].concat(args, '--cwd', process.cwd())
 
     _.defaults(options, {
@@ -96,9 +102,13 @@ module.exports = {
         }
 
         const { onStderrData, electronLogging } = overrides
-        const envOverrides = util.getEnvOverrides()
+        const envOverrides = util.getEnvOverrides(options)
         const electronArgs = _.clone(args)
         const node11WindowsFix = isPlatform('win32')
+
+        if (verify.needsSandbox()) {
+          electronArgs.push('--no-sandbox')
+        }
 
         // strip dev out of child process options
         let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
@@ -127,15 +137,36 @@ module.exports = {
 
         const child = cp.spawn(executable, electronArgs, stdioOptions)
 
-        child.on('close', resolve)
+        function resolveOn (event) {
+          return function (code, signal) {
+            debug('child event fired %o', { event, code, signal })
+            resolve(code)
+          }
+        }
+
+        child.on('close', resolveOn('close'))
+        child.on('exit', resolveOn('exit'))
         child.on('error', reject)
 
-        child.stdin && child.stdin.pipe(process.stdin)
-        child.stdout && child.stdout.pipe(process.stdout)
+        // if stdio options is set to 'pipe', then
+        //   we should set up pipes:
+        //  process STDIN (read stream) => child STDIN (writeable)
+        //  child STDOUT => process STDOUT
+        //  child STDERR => process STDERR with additional filtering
+        if (child.stdin) {
+          debug('piping process STDIN into child STDIN')
+          process.stdin.pipe(child.stdin)
+        }
+
+        if (child.stdout) {
+          debug('piping child STDOUT to process STDOUT')
+          child.stdout.pipe(process.stdout)
+        }
 
         // if this is defined then we are manually piping for linux
         // to filter out the garbage
-        child.stderr &&
+        if (child.stderr) {
+          debug('piping child STDERR to process STDERR')
           child.stderr.on('data', (data) => {
             const str = data.toString()
 
@@ -153,15 +184,17 @@ module.exports = {
             // else pass it along!
             process.stderr.write(data)
           })
+        }
 
         // https://github.com/cypress-io/cypress/issues/1841
+        // https://github.com/cypress-io/cypress/issues/5241
         // In some versions of node, it will throw on windows
         // when you close the parent process after piping
         // into the child process. unpiping does not seem
         // to have any effect. so we're just catching the
         // error here and not doing anything.
         process.stdin.on('error', (err) => {
-          if (err.code === 'EPIPE') {
+          if (['EPIPE', 'ENOTCONN'].includes(err.code)) {
             return
           }
 
