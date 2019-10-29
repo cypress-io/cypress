@@ -1646,6 +1646,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/5449
       it('can type into input inside iframe with hover state', () => {
         cy.$$('<iframe src="/fixtures/dom.html"/>').prependTo(cy.$$('body'))
 
