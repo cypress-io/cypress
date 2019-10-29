@@ -76,7 +76,7 @@
     "eslint": "6.1.0",
     "execa-wrap": "1.4.0",
     "hasha": "5.0.0",
-    "mocha": "3.5.3",
+    "mocha": "6.2.2",
     "mock-fs": "4.9.0",
     "mocked-env": "1.2.4",
     "nock": "9.6.1",

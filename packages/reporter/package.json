@@ -31,7 +31,7 @@
     "markdown-it": "6.1.1",
     "mobx": "5.11.0",
     "mobx-react": "5.4.4",
-    "mocha": "3.5.3",
+    "mocha": "6.2.2",
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",

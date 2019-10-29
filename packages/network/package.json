@@ -17,7 +17,7 @@
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
     "express": "4.16.4",
-    "mocha": "3.5.3",
+    "mocha": "6.2.2",
     "request": "2.88.0",
     "request-promise": "4.2.4",
     "sinon": "7.3.1",
