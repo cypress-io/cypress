@@ -286,18 +286,8 @@ jobs:
       - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
       - run: yarn lerna run build-js --parallel --stream
-      # run unit tests from individual packages
-      - run: yarn lerna run test --scope @packages/cli
-      - run: yarn lerna run test --scope @packages/electron
-      - run: yarn lerna run test --scope @packages/extension
-      - run: yarn lerna run test --scope @packages/https-proxy
-      - run: yarn lerna run test --scope @packages/launcher
-      - run: yarn lerna run test --scope @packages/network
-      # how to pass Mocha reporter through zunder?
-      - run: yarn lerna run test --scope @packages/reporter
-      - run: yarn lerna run test --scope @packages/runner
-      - run: yarn lerna run test --scope @packages/socket
-      - run: yarn lerna run test --scope @packages/static
+      # run unit tests from each individual package (10 total)
+      - run: yarn test
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -704,7 +694,7 @@ jobs:
           command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
-          command: yarn lerna run build --scope @packages/cli
+          command: yarn lerna run build --scope cypress
       - run:
           command: ls -la types
           working_directory: cli/build
