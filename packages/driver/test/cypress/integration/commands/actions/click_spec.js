@@ -61,6 +61,8 @@ const shouldBeCalledOnce = (stub) => wrapped(stub).should('be.calledOnce')
 const shouldBeCalledWithCount = (num) => (stub) => wrapped(stub).should('have.callCount', num)
 const shouldNotBeCalled = (stub) => wrapped(stub).should('not.be.called')
 
+const overlayStyle = { position: 'fixed', top: 0, width: '100%', height: '100%', opacity: 0.5 }
+
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -304,6 +306,24 @@ describe('src/cy/commands/actions/click', () => {
       cy.get(':text:first').click().should('have.focus')
 
       cy.getAll('el', 'focus focusin').each(shouldBeCalledOnce)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/5430
+    it('does not attempt to click element outside viewport', (done) => {
+      cy.timeout(100)
+      cy.on('fail', (err) => {
+        expect(err.message).contain('id="email-with-value"')
+        expect(err.message).contain('hidden from view')
+        done()
+      })
+
+      cy.$$('#tabindex').css(overlayStyle)
+      cy.get('#email-with-value').click()
+    })
+
+    it('can click element outside viewport with force:true', () => {
+      cy.$$('#tabindex').css(overlayStyle)
+      cy.get('#email-with-value').click({ force: true })
     })
 
     it('does not fire a focus, mouseup, or click event when element has been removed on mousedown', () => {
