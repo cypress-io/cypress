@@ -246,7 +246,7 @@ jobs:
       - run: ls $(yarn global bin)/../lib/node_modules
 
       # try several times, because flaky NPM installs ...
-      - run: yarn || yarn
+      - run: yarn --ignore-engines || yarn --ignore-engines
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
