@@ -168,6 +168,7 @@ ensureElIsNotCovered = (cy, win, $el, fromElViewport, options, log, onScroll) ->
                 ## if we haven't see it before
                 return possiblyScrollMultipleTimes($fixed)
               
+              ## getElementAtPoint was falsey, so target element is no longer in the viewport
               throw err
           else
             scrollContainers(scrollables)
