@@ -69,7 +69,12 @@ describe('src/cy/commands/actions/type', () => {
 
     it('appends subsequent type commands', () => {
       cy
-      .get('input:first').type('123').type('456')
+      .get('input:first').type('123')
+      .then(($el) => {
+        $el[0].setSelectionRange(0, 0)
+      })
+      .blur()
+      .type('456')
       .should('have.value', '123456')
     })
 
@@ -121,6 +126,7 @@ describe('src/cy/commands/actions/type', () => {
       })
     })
 
+    // cursor should be moved to the end before type, so text is appended
     it('can type into contenteditable', () => {
       const oldText = cy.$$('#contenteditable').get(0).innerText
 
@@ -949,6 +955,19 @@ describe('src/cy/commands/actions/type', () => {
         cy.$$('#input-without-value').val('0').click(function () {
           $(this).select()
         })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/5456
+      it('respects changed selection in focus handler', () => {
+        cy.get('#input-without-value')
+        .then(($el) => {
+          $el.val('foo')
+          .on('focus', function (e) {
+            e.currentTarget.setSelectionRange(0, 1)
+          })
+        })
+        .type('bar')
+        .should('have.value', 'baroo')
       })
 
       it('overwrites text when selectAll in mouseup handler', () => {
@@ -2830,6 +2849,17 @@ describe('src/cy/commands/actions/type', () => {
 
             done()
           })
+        })
+
+        // https://github.com/cypress-io/cypress/issues/5439
+        it('do not replace selection during modifier key', () => {
+          cy
+          .get('input:first').type('123')
+          .then(($el) => {
+            $el[0].setSelectionRange(0, 3)
+          })
+          .type('{ctrl}')
+          .should('have.value', '123')
         })
 
         // sends keyboard events for modifiers https://github.com/cypress-io/cypress/issues/3316
