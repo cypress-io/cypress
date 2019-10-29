@@ -1,4 +1,4 @@
-import { dom } from '@packages/driver'
+import dom from '@packages/driver/src/dom'
 import events from './events'
 
 class Shortcuts {

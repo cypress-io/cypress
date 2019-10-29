@@ -498,6 +498,5 @@ class $Cypress
 ## attaching these so they are accessible
 ## via the runner + integration spec helper
 $Cypress.$ = $
-$Cypress.dom = $dom
 
 module.exports = $Cypress
