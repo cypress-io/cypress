@@ -32,16 +32,16 @@
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "link": "node ./scripts/link-packages.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.eslintrc .",
-    "lint-all": "npm run lint-coffee && npm run lint",
+    "lint-all": "yarn lint-coffee && yarn lint",
     "lint-changed": "lint-changed",
-    "lint-changed-fix": "npm run lint-changed -- --fix",
-    "lint-coffee": "coffeelint scripts/**/*.coffee && lerna run lint-coffee --parallel --stream && npm run stop-only-all",
-    "lint-fix": "npm run lint -- --fix",
+    "lint-changed-fix": "yarn lint-changed --fix",
+    "lint-coffee": "coffeelint scripts/**/*.coffee && lerna run lint-coffee --parallel --stream && yarn stop-only-all",
+    "lint-fix": "yarn lint --fix",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "start": "node ./cli/bin/cypress open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components --exclude e2e.coffee",
-    "stop-only-all": "npm run stop-only -- --folder packages",
+    "stop-only-all": "yarn stop-only --folder packages",
     "test": "echo '⚠️ This root monorepo is only for local development and new contributions. There are no tests.'",
     "test-debug-package": "node ./scripts/test-debug-package.js",
     "test-integration": "lerna run test-integration --parallel --stream",
@@ -49,7 +49,7 @@
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js",
     "test-s3-api": "node -r ./packages/coffee/register -r ./packages/ts/register scripts/binary/s3-api-demo.ts",
     "test-scripts": "mocha -r packages/coffee/register -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
-    "test-scripts-watch": "npm run test-scripts -- --watch --watch-extensions 'ts,js,coffee'",
+    "test-scripts-watch": "yarn test-scripts --watch --watch-extensions 'ts,js,coffee'",
     "test-unit": "lerna run test-unit --parallel --stream",
     "watch": "lerna run watch --parallel --stream"
   },
@@ -191,11 +191,11 @@
   ],
   "lint-staged": {
     "*.coffee": [
-      "npm run stop-only -- --folder",
+      "yarn stop-only --folder",
       "git add"
     ],
     "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "npm run stop-only -- --folder",
+      "yarn stop-only --folder",
       "eslint --fix",
       "git add"
     ]

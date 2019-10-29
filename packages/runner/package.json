@@ -5,11 +5,11 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack",
-    "build-prod": "cross-env NODE_ENV=production npm run build",
+    "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "echo '@packages/runner needs: npm run build'",
+    "postinstall": "echo '@packages/runner needs: yarn build'",
     "test": "mocha src/**/*.spec.*",
-    "test-watch": "npm run test -- --watch",
+    "test-watch": "yarn test --watch",
     "watch": "webpack --watch --progress"
   },
   "devDependencies": {

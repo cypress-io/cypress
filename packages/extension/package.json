@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp build",
-    "build-prod": "npm run build",
+    "build-prod": "yarn build",
     "clean": "gulp clean",
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "echo '@packages/extension needs: npm run build'",
+    "postinstall": "echo '@packages/extension needs: yarn build'",
     "test": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "npm run test -- --watch",
+    "test-watch": "yarn test --watch",
     "watch": "gulp watch"
   },
   "dependencies": {

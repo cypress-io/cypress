@@ -4,13 +4,13 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "postinstall": "echo '@packages/example needs: npm run build'",
+    "postinstall": "echo '@packages/example needs: yarn build'",
     "clean-deps": "rm -rf node_modules",
     "test": "cross-env NODE_ENV=test mocha",
     "test-e2e": "cypress run",
     "build": "node ./bin/build.js && gulp build",
-    "build-prod": "npm run build",
-    "predeploy": "npm run build",
+    "build-prod": "yarn build",
+    "predeploy": "yarn build",
     "deploy": "gulp deploy"
   },
   "files": [

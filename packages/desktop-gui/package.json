@@ -5,12 +5,12 @@
   "main": "lib/gui.js",
   "scripts": {
     "build": "webpack",
-    "build-prod": "cross-env NODE_ENV=production npm run build",
+    "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "TZ=America/New_York node ../../scripts/cypress open --project .",
     "cypress:run": "TZ=America/New_York node ../../scripts/cypress run --project .",
-    "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
-    "watch": "npm run build -- --watch --progress"
+    "postinstall": "echo '@packages/desktop-gui needs: yarn build'",
+    "watch": "yarn build -- --watch --progress"
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",

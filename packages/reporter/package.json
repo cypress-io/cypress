@@ -5,15 +5,15 @@
   "main": "src/main.jsx",
   "scripts": {
     "build": "webpack",
-    "build-prod": "npm run build",
+    "build-prod": "yarn build",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
-    "postinstall": "echo '@packages/reporter needs: npm run build'",
+    "postinstall": "echo '@packages/reporter needs: yarn build'",
     "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js*",
     "test": "mocha 'src/**/*.spec.*'",
-    "test-watch": "npm run test -- --watch",
-    "watch": "npm run build -- --watch --progress"
+    "test-watch": "yarn test --watch",
+    "watch": "yarn build --watch --progress"
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",

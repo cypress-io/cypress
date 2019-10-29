@@ -6,7 +6,7 @@
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project ./test",
     "cypress:run": "node ../../scripts/cypress run --project ./test",
-    "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee"
+    "start": "$(yarn bin coffee) test/support/server.coffee"
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",

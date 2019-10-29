@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "npx patch-package",
+    "postinstall": "patch-package",
     "test": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },

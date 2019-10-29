@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp build",
-    "build-prod": "npm run build",
+    "build-prod": "yarn build",
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "echo '@packages/static needs: npm run build'",
+    "postinstall": "echo '@packages/static needs: yarn build'",
     "test": "echo 'Nothing to test yet'"
   },
   "devDependencies": {
