@@ -1,4 +1,4 @@
-import { $, dom } from '@packages/driver'
+import { dom } from '@packages/driver'
 import events from './events'
 
 class Shortcuts {
@@ -12,7 +12,7 @@ class Shortcuts {
 
   _handleKeyDownEvent (event) {
     // if typing into an input, textarea, etc, don't trigger any shortcuts
-    if (dom.isTextLike($(event.target))) return
+    if (dom.isTextLike(event.target)) return
 
     switch (event.key) {
       case 'r': events.emit('restart')

@@ -137,7 +137,15 @@ module.exports = {
 
         const child = cp.spawn(executable, electronArgs, stdioOptions)
 
-        child.on('close', resolve)
+        function resolveOn (event) {
+          return function (code, signal) {
+            debug('child event fired %o', { event, code, signal })
+            resolve(code)
+          }
+        }
+
+        child.on('close', resolveOn('close'))
+        child.on('exit', resolveOn('exit'))
         child.on('error', reject)
 
         // if stdio options is set to 'pipe', then

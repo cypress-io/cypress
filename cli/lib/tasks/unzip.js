@@ -14,7 +14,6 @@ const util = require('../util')
 
 // expose this function for simple testing
 const unzip = ({ zipFilePath, installDir, progress }) => {
-
   debug('unzipping from %s', zipFilePath)
   debug('into', installDir)
 

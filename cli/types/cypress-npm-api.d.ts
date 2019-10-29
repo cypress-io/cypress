@@ -445,6 +445,7 @@ declare module 'cypress' {
 
   /**
    * Results returned by the test run.
+   * @see https://on.cypress.io/module-api
    */
   interface CypressRunResult {
     startedTestsAt: dateTimeISO
@@ -465,6 +466,29 @@ declare module 'cypress' {
     cypressVersion: string
     // TODO add resolved object to the configuration
     config: CypressConfiguration
+    /**
+     * If Cypress fails to run at all (for example, if there are no spec files to run),
+     * then it will set failures to 1 and will have actual error message in the
+     * property "message". Check this property before checking other properties.
+     *
+     * @type {number}
+     * @example
+      ```
+      const result = await cypress.run()
+      if (result.failures) {
+        console.error(result.message)
+        process.exit(result.failures)
+      }
+      ```
+     */
+    failures?: number
+    /**
+     * If returned result has "failures" set, then this property gives
+     * the error message.
+     *
+     * @type {string}
+     */
+    message?: string
   }
 
   /**

@@ -20,7 +20,6 @@ export default class Suite extends Runnable {
     }
 
     return 'processing'
-
   }
 
   @computed get _childStates () {

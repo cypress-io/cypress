@@ -1,17 +1,18 @@
-const _ = require('lodash')
-const $ = require('jquery')
-const $jquery = require('./jquery')
-const $window = require('./window')
-const $document = require('./document')
-const $utils = require('../cypress/utils')
-const $selection = require('./selection')
-const { parentHasDisplayNone } = require('./visibility')
+// NOT patched jquery
+import $ from 'jquery'
+import _ from '../config/lodash'
+import $utils from '../cypress/utils.coffee'
+import * as $document from './document'
+import * as $jquery from './jquery'
+import * as $selection from './selection'
+import { parentHasDisplayNone } from './visibility'
+import * as $window from './window'
 
 const { wrap } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
-const focusable = [
+const focusableSelectors = [
   'a[href]',
   'area[href]',
   'input:not([disabled])',
@@ -20,17 +21,55 @@ const focusable = [
   'button:not([disabled])',
   'iframe',
   '[tabindex]',
-  '[contentEditable]',
+  '[contenteditable]',
 ]
-const inputTypeNeedSingleValueChangeRe = /^(date|time|month|week)$/
+const focusableWhenNotDisabledSelectors = [
+  'a[href]',
+  'area[href]',
+  'input',
+  'select',
+  'textarea',
+  'button',
+  'iframe',
+  '[tabindex]',
+  '[contenteditable]',
+]
+
+const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
+
+declare global {
+  interface Window {
+    Element: typeof Element
+    HTMLElement: typeof HTMLElement
+    HTMLInputElement: typeof HTMLInputElement
+    HTMLSelectElement: typeof HTMLSelectElement
+    HTMLButtonElement: typeof HTMLButtonElement
+    HTMLOptionElement: typeof HTMLOptionElement
+    HTMLTextAreaElement: typeof HTMLTextAreaElement
+    Selection: typeof Selection
+    SVGElement: typeof SVGElement
+    EventTarget: typeof EventTarget
+    Document: typeof Document
+  }
+
+  interface Selection {
+    modify: Function
+  }
+}
 
 // rules for native methods and props
 // if a setter or getter or function then add a native method
 // if a traversal, don't
 
-const descriptor = (klass, prop) => {
-  return Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
+const descriptor = <T extends keyof Window, K extends keyof Window[T]['prototype']>(klass: T, prop: K) => {
+  const descriptor = Object.getOwnPropertyDescriptor(window[klass].prototype, prop)
+
+  if (descriptor === undefined) {
+    throw new Error(`Error, could not get property descriptor for ${klass}  ${prop}. This should never happen`)
+  }
+
+  return descriptor
 }
 
 const _getValue = function () {
@@ -83,6 +122,8 @@ const _getSelectionStart = function () {
   if (isTextarea(this)) {
     return descriptor('HTMLTextAreaElement', 'selectionStart').get
   }
+
+  throw new Error('this should never happen, cannot get selectionStart')
 }
 
 const _getSelectionEnd = function () {
@@ -93,6 +134,8 @@ const _getSelectionEnd = function () {
   if (isTextarea(this)) {
     return descriptor('HTMLTextAreaElement', 'selectionEnd').get
   }
+
+  throw new Error('this should never happen, cannot get selectionEnd')
 }
 
 const _nativeFocus = function () {
@@ -153,6 +196,8 @@ const _setType = function () {
   if (isButton(this)) {
     return descriptor('HTMLButtonElement', 'type').set
   }
+
+  throw new Error('this should never happen, cannot set type')
 }
 
 const _getType = function () {
@@ -163,6 +208,20 @@ const _getType = function () {
   if (isButton(this)) {
     return descriptor('HTMLButtonElement', 'type').get
   }
+
+  throw new Error('this should never happen, cannot get type')
+}
+
+const _getMaxLength = function () {
+  if (isInput(this)) {
+    return descriptor('HTMLInputElement', 'maxLength').get
+  }
+
+  if (isTextarea(this)) {
+    return descriptor('HTMLTextAreaElement', 'maxLength').get
+  }
+
+  throw new Error('this should never happen, cannot get maxLength')
 }
 
 const nativeGetters = {
@@ -172,6 +231,10 @@ const nativeGetters = {
   selectionStart: _getSelectionStart,
   selectionEnd: _getSelectionEnd,
   type: _getType,
+  activeElement: descriptor('Document', 'activeElement').get,
+  body: descriptor('Document', 'body').get,
+  frameElement: Object.getOwnPropertyDescriptor(window, 'frameElement')!.get,
+  maxLength: _getMaxLength,
 }
 
 const nativeSetters = {
@@ -196,9 +259,9 @@ const nativeMethods = {
   select: _nativeSelect,
 }
 
-const tryCallNativeMethod = (...args) => {
+const tryCallNativeMethod = (obj, fn, ...args) => {
   try {
-    return callNativeMethod(...args)
+    return callNativeMethod(obj, fn, ...args)
   } catch (err) {
     return
   }
@@ -221,9 +284,8 @@ const callNativeMethod = function (obj, fn, ...args) {
 
   return retFn
 }
-
-const getNativeProp = function (obj, prop) {
-  const nativeProp = nativeGetters[prop]
+const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T[K] {
+  const nativeProp = nativeGetters[prop as string]
 
   if (!nativeProp) {
     const props = _.keys(nativeGetters).join(', ')
@@ -242,8 +304,8 @@ const getNativeProp = function (obj, prop) {
   return retProp
 }
 
-const setNativeProp = function (obj, prop, val) {
-  const nativeProp = nativeSetters[prop]
+const setNativeProp = function<T, K extends keyof T> (obj: T, prop: K, val) {
+  const nativeProp = nativeSetters[prop as string]
 
   if (!nativeProp) {
     const fns = _.keys(nativeSetters).join(', ')
@@ -260,7 +322,11 @@ const setNativeProp = function (obj, prop, val) {
   return retProp
 }
 
-const isNeedSingleValueChangeInputElement = (el) => {
+export interface HTMLSingleValueChangeInputElement extends HTMLInputElement {
+  type: 'date' | 'time' | 'week' | 'month'
+}
+
+const isNeedSingleValueChangeInputElement = (el: HTMLElement): el is HTMLSingleValueChangeInputElement => {
   if (!isInput(el)) {
     return false
   }
@@ -268,7 +334,8 @@ const isNeedSingleValueChangeInputElement = (el) => {
   return inputTypeNeedSingleValueChangeRe.test(el.type)
 }
 
-const canSetSelectionRangeElement = (el) => {
+const canSetSelectionRangeElement = (el): el is HTMLElementCanSetSelectionRange => {
+  //TODO: If IE, all inputs can set selection range
   return isTextarea(el) || (isInput(el) && canSetSelectionRangeElementRe.test(getNativeProp(el, 'type')))
 }
 
@@ -282,23 +349,23 @@ const getTagName = (el) => {
 // should be true for elements:
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
-const isContentEditable = (el) => {
+const isContentEditable = (el: any): el is HTMLContentEditableElement => {
   return getNativeProp(el, 'isContentEditable')
 }
 
-const isTextarea = (el) => {
+const isTextarea = (el): el is HTMLTextAreaElement => {
   return getTagName(el) === 'textarea'
 }
 
-const isInput = (el) => {
+const isInput = (el): el is HTMLInputElement => {
   return getTagName(el) === 'input'
 }
 
-const isButton = (el) => {
+const isButton = (el): el is HTMLButtonElement => {
   return getTagName(el) === 'button'
 }
 
-const isSelect = (el) => {
+const isSelect = (el): el is HTMLSelectElement => {
   return getTagName(el) === 'select'
 }
 
@@ -310,15 +377,19 @@ const isOptgroup = (el) => {
   return getTagName(el) === 'optgroup'
 }
 
-const isBody = (el) => {
+const isBody = (el): el is HTMLBodyElement => {
   return getTagName(el) === 'body'
+}
+
+const isIframe = (el) => {
+  return getTagName(el) === 'iframe'
 }
 
 const isHTML = (el) => {
   return getTagName(el) === 'html'
 }
 
-const isSvg = function (el) {
+const isSvg = function (el): el is SVGElement {
   try {
     return 'ownerSVGElement' in el
   } catch (error) {
@@ -329,7 +400,7 @@ const isSvg = function (el) {
 // active element is the default if its null
 // or its equal to document.body
 const activeElementIsDefault = (activeElement, body) => {
-  return (!activeElement) || (activeElement === body)
+  return !activeElement || activeElement === body
 }
 
 const isFocused = (el) => {
@@ -348,15 +419,10 @@ const isFocused = (el) => {
   }
 }
 
-const isFocusedOrInFocused = (el) => {
-
+const isFocusedOrInFocused = (el: HTMLElement) => {
   const doc = $document.getDocumentFromElement(el)
 
-  const { activeElement, body } = doc
-
-  if (activeElementIsDefault(activeElement, body)) {
-    return false
-  }
+  const { activeElement } = doc
 
   let elToCheckCurrentlyFocused
 
@@ -370,9 +436,10 @@ const isFocusedOrInFocused = (el) => {
     return true
   }
 
+  return false
 }
 
-const isElement = function (obj) {
+const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
   try {
     if ($jquery.isJquery(obj)) {
       obj = obj[0]
@@ -384,10 +451,28 @@ const isElement = function (obj) {
   }
 }
 
-const isFocusable = ($el) => {
-  return _.some(focusable, (sel) => {
-    return $el.is(sel)
-  })
+const isDesignModeDocumentElement = (el: HTMLElement) => {
+  return isElement(el) && getTagName(el) === 'html' && isContentEditable(el)
+}
+/**
+ * The element can be activeElement, receive focus events, and also receive keyboard events
+ */
+const isFocusable = ($el: JQuery<HTMLElement>) => {
+  return (
+    _.some(focusableSelectors, (sel) => $el.is(sel)) ||
+     isDesignModeDocumentElement($el.get(0))
+  )
+}
+
+/**
+ * The element can be activeElement, receive focus events, and also receive keyboard events
+ * OR, it is a disabled element that would have been focusable
+ */
+const isFocusableWhenNotDisabled = ($el: JQuery<HTMLElement>) => {
+  return (
+    _.some(focusableWhenNotDisabledSelectors, (sel) => $el.is(sel)) ||
+    isDesignModeDocumentElement($el.get(0))
+  )
 }
 
 const isW3CRendered = (el) => {
@@ -400,8 +485,15 @@ const isW3CFocusable = (el) => {
   return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
-const isType = function ($el, type) {
-  const el = [].concat($jquery.unwrap($el))[0]
+type JQueryOrEl<T extends HTMLElement> = JQuery<T> | T
+
+const isInputType = function (el: JQueryOrEl<HTMLElement>, type) {
+  el = ([] as HTMLElement[]).concat($jquery.unwrap(el))[0]
+
+  if (!isInput(el) && !isButton(el)) {
+    return false
+  }
+
   // NOTE: use DOMElement.type instead of getAttribute('type') since
   //       <input type="asdf"> will have type="text", and behaves like text type
   const elType = (getNativeProp(el, 'type') || '').toLowerCase()
@@ -414,19 +506,60 @@ const isType = function ($el, type) {
 }
 
 const isScrollOrAuto = (prop) => {
-  return (prop === 'scroll') || (prop === 'auto')
+  return prop === 'scroll' || prop === 'auto'
 }
 
 const isAncestor = ($el, $maybeAncestor) => {
   return $el.parents().index($maybeAncestor) >= 0
 }
 
+const getFirstCommonAncestor = (el1, el2) => {
+  const el1Ancestors = [el1].concat(getAllParents(el1))
+  let curEl = el2
+
+  while (curEl) {
+    if (el1Ancestors.indexOf(curEl) !== -1) {
+      return curEl
+    }
+
+    curEl = curEl.parentNode
+  }
+
+  return curEl
+}
+
+const getAllParents = (el) => {
+  let curEl = el.parentNode
+  const allParents: any[] = []
+
+  while (curEl) {
+    allParents.push(curEl)
+    curEl = curEl.parentNode
+  }
+
+  return allParents
+}
+
 const isChild = ($el, $maybeChild) => {
   return $el.children().index($maybeChild) >= 0
 }
 
-const isSelector = ($el, selector) => {
+const isSelector = ($el: JQuery<HTMLElement>, selector) => {
   return $el.is(selector)
+}
+
+const isDisabled = ($el: JQuery) => {
+  return $el.prop('disabled')
+}
+
+const isReadOnlyInputOrTextarea = (
+  el: HTMLInputElement | HTMLTextAreaElement
+) => {
+  return el.readOnly
+}
+
+const isReadOnlyInput = ($el: JQuery) => {
+  return $el.prop('readonly')
 }
 
 const isDetached = ($el) => {
@@ -466,7 +599,7 @@ const isAttached = function ($el) {
   // is technically bound to a differnet document
   // but c'mon
   const isIn = (el) => {
-    return $.contains(doc, el)
+    return $.contains((doc as unknown) as Element, el)
   }
 
   // make sure the document is currently
@@ -476,6 +609,20 @@ const isAttached = function ($el) {
   return $document.hasActiveWindow(doc) && _.every(els, isIn)
 }
 
+/**
+ * @param {HTMLElement} el
+ */
+const isDetachedEl = (el) => {
+  return !isAttachedEl(el)
+}
+
+/**
+ * @param {HTMLElement} el
+ */
+const isAttachedEl = function (el) {
+  return isAttached($(el))
+}
+
 const isSame = function ($el1, $el2) {
   const el1 = $jquery.unwrap($el1)
   const el2 = $jquery.unwrap($el2)
@@ -483,15 +630,53 @@ const isSame = function ($el1, $el2) {
   return el1 && el2 && _.isEqual(el1, el2)
 }
 
-const isTextLike = function ($el) {
+export interface HTMLContentEditableElement extends HTMLElement {
+  isContenteditable: true
+}
+
+export interface HTMLTextLikeInputElement extends HTMLInputElement {
+  type:
+  | 'text'
+  | 'password'
+  | 'email'
+  | 'number'
+  | 'date'
+  | 'week'
+  | 'month'
+  | 'time'
+  | 'datetime'
+  | 'datetime-local'
+  | 'search'
+  | 'url'
+  | 'tel'
+  setSelectionRange: HTMLInputElement['setSelectionRange']
+}
+
+export interface HTMLElementCanSetSelectionRange extends HTMLElement {
+  setSelectionRange: HTMLInputElement['setSelectionRange']
+  value: HTMLInputElement['value']
+  selectionStart: number
+  selectionEnd: number
+}
+
+export type HTMLTextLikeElement = HTMLTextAreaElement | HTMLTextLikeInputElement | HTMLContentEditableElement
+
+const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
+  const $el = $jquery.wrap(el)
   const sel = (selector) => {
     return isSelector($el, selector)
   }
   const type = (type) => {
-    return isType($el, type)
+    if (isInput(el)) {
+      return isInputType(el, type)
+    }
+
+    return false
   }
 
-  const isContentEditableElement = isContentEditable($el.get(0))
+  const isContentEditableElement = isContentEditable(el)
+
+  if (isContentEditableElement) return true
 
   return _.some([
     isContentEditableElement,
@@ -515,7 +700,7 @@ const isTextLike = function ($el) {
 
 const isInputAllowingImplicitFormSubmission = function ($el) {
   const type = (type) => {
-    return isType($el, type)
+    return isInputType($el, type)
   }
 
   // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
@@ -590,11 +775,10 @@ const isDescendent = ($el1, $el2) => {
     return false
   }
 
-  return !!(($el1.get(0) === $el2.get(0)) || $el1.has($el2).length)
+  return !!($el1.get(0) === $el2.get(0) || $el1.has($el2).length)
 }
 
 const findParent = (el, fn) => {
-
   const recurse = (curEl, prevEl) => {
     if (!curEl) {
       return null
@@ -619,7 +803,7 @@ const findParent = (el, fn) => {
 // 2. check to figure out the element listed at those coordinates
 // 3. if this element is ourself or our descendants, click whatever was returned
 // 4. else throw an error because something is covering us up
-const getFirstFocusableEl = ($el) => {
+const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
   if (isFocusable($el)) {
     return $el
   }
@@ -635,6 +819,15 @@ const getFirstFocusableEl = ($el) => {
   }
 
   return getFirstFocusableEl($el.parent())
+}
+const getActiveElByDocument = (doc: Document): HTMLElement | null => {
+  const activeElement = getNativeProp(doc, 'activeElement')
+
+  if (isFocused(activeElement)) {
+    return activeElement as HTMLElement
+  }
+
+  return null
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {
@@ -733,7 +926,6 @@ const getElements = ($el) => {
   }
 
   return els
-
 }
 
 const getContainsSelector = (text, filter = '') => {
@@ -804,8 +996,15 @@ const stringify = (el, form = 'long') => {
   const $el = $jquery.wrap(el)
 
   const long = () => {
-    const str = $el.clone().empty().prop('outerHTML')
-    const text = _.chain($el.text()).clean().truncate({ length: 10 }).value()
+    const str = $el
+    .clone()
+    .empty()
+    .prop('outerHTML')
+
+    const text = (_.chain($el.text()) as any)
+    .clean()
+    .truncate({ length: 10 })
+    .value()
     const children = $el.children().length
 
     if (children) {
@@ -851,86 +1050,54 @@ const stringify = (el, form = 'long') => {
   })
 }
 
-// We extend `module.exports` to allow circular dependencies using `require`
-// Otherwise we would not be able to `require` this util from `./selection`, for example.
-_.extend(module.exports, {
+export {
   isElement,
-
   isSelector,
-
   isScrollOrAuto,
-
   isFocusable,
-
+  isFocusableWhenNotDisabled,
+  isDisabled,
+  isReadOnlyInput,
+  isReadOnlyInputOrTextarea,
   isW3CFocusable,
-
   isAttached,
-
   isDetached,
-
+  isAttachedEl,
+  isDetachedEl,
   isAncestor,
-
   isChild,
-
   isScrollable,
-
   isTextLike,
-
   isDescendent,
-
   isContentEditable,
-
   isSame,
-
   isOption,
-
   isOptgroup,
-
   isBody,
-
   isHTML,
-
   isInput,
-
+  isIframe,
   isTextarea,
-
-  isType,
-
+  isInputType,
   isFocused,
-
   isFocusedOrInFocused,
-
   isInputAllowingImplicitFormSubmission,
-
   isNeedSingleValueChangeInputElement,
-
   canSetSelectionRangeElement,
-
   stringify,
-
   getNativeProp,
-
   setNativeProp,
-
   callNativeMethod,
-
   tryCallNativeMethod,
-
   findParent,
-
   getElements,
-
   getFirstFocusableEl,
-
+  getActiveElByDocument,
   getContainsSelector,
-
   getFirstDeepestElement,
-
+  getFirstCommonAncestor,
   getFirstParentWithTagName,
-
   getFirstFixedOrStickyPositionParent,
-
   getFirstStickyPositionParent,
-
   getFirstScrollableParent,
-})
+}

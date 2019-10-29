@@ -126,7 +126,7 @@ describe "lib/modes/record", ->
           runAllSpecs
         })
         .then ->
-          expect(runAllSpecs).to.have.been.calledWith({}, false)
+          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
           expect(createRun).to.have.been.calledOnce
           expect(createRun.firstCall.args).to.have.length(1)
           { commit } = createRun.firstCall.args[0]
@@ -177,7 +177,7 @@ describe "lib/modes/record", ->
           runAllSpecs
         })
         .then ->
-          expect(runAllSpecs).to.have.been.calledWith({}, false)
+          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
           expect(createRun).to.have.been.calledOnce
           expect(createRun.firstCall.args).to.have.length(1)
           { commit } = createRun.firstCall.args[0]

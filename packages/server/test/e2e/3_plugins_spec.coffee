@@ -17,6 +17,7 @@ describe "e2e plugins", ->
     e2e.exec(@, {
       spec: "app_spec.coffee"
       project: workingPreprocessor
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 0
     })
@@ -25,6 +26,7 @@ describe "e2e plugins", ->
     e2e.exec(@, {
       spec: "app_spec.coffee"
       project: pluginsAsyncError
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 1
     })
@@ -35,18 +37,19 @@ describe "e2e plugins", ->
       env: "foo=foo,bar=bar"
       config: { pageLoadTimeout: 10000 }
       project: pluginConfig
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 0
     })
 
-  it "works with user extensions", ->
-    e2e.exec(@, {
-      browser: "chrome"
-      spec: "app_spec.coffee"
-      project: pluginExtension
-      snapshot: true
-      expectedExitCode: 0
-    })
+  e2e.it "works with user extensions", {
+    browser: "chrome"
+    spec: "app_spec.coffee"
+    project: pluginExtension
+    sanitizeScreenshotDimensions: true
+    snapshot: true
+    expectedExitCode: 0
+  }
 
   it "handles absolute path to pluginsFile", ->
     e2e.exec(@, {
@@ -58,6 +61,7 @@ describe "e2e plugins", ->
         )
       }
       project: pluginsAbsolutePath
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 0
     })
@@ -66,6 +70,7 @@ describe "e2e plugins", ->
     e2e.exec(@, {
       spec: "after_screenshot_spec.coffee"
       project: pluginAfterScreenshot
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 1
     })
