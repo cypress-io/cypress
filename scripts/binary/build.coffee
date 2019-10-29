@@ -24,7 +24,6 @@ meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
 xvfb = require("../../cli/lib/exec/xvfb")
-linkPackages = require('../link-packages')
 { transformRequires } = require('./util/transform-requires')
 { testStaticAssets } = require('./util/testStaticAssets')
 
