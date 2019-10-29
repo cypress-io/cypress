@@ -931,6 +931,14 @@ describe "src/cy/commands/connectors", ->
               Yielded: 123
             }
 
+        it "can be disabled", ->
+          cy.noop(@obj).its("num", { log: true }).then ->
+            expect(@lastLog.invoke("consoleProps")).to.have.property("Property", ".num")
+            @lastLog = undefined
+          
+          cy.noop(@obj).its("num", { log: false }).then ->
+            expect(@lastLog).to.be.undefined
+
       describe "errors", ->
         beforeEach ->
           Cypress.config("defaultCommandTimeout", 50)
