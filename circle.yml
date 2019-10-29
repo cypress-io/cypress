@@ -245,9 +245,6 @@ jobs:
       - run: ls $(yarn global bin)
       - run: ls $(yarn global bin)/../lib/node_modules
 
-      # Install the root packages
-      # Link sup packages in ./node_modules/@packages/*
-      # Install sub packages dependencies and build all sub packages via postinstall script
       # try several times, because flaky NPM installs ...
       - run: yarn || yarn
       - run:
