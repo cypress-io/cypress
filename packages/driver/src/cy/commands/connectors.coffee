@@ -136,10 +136,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     .finally(cleanup)
 
   invokeItsFn = (subject, str, options, args...) ->
-    return invokeBaseFn(options || { log: true }, subject, str, args...)
+    return invokeBaseFn(options or { log: true }, subject, str, args...)
 
-  invokeFn = (subject, str, args...) ->
-    return invokeBaseFn({ log: true }, subject, str, args...)
+  invokeFn = (subject, optionsOrStr, args...) ->
+    optionsPassed =  not _.isString(optionsOrStr)
+    options = if optionsPassed then optionsOrStr else { log: true }
+    str = null
+
+    if not optionsPassed
+      str = optionsOrStr
+    else if args.length > 0
+      str = args[0]
+      args = args.slice(1)
+
+    return invokeBaseFn(options, subject, str, args...)
 
   invokeBaseFn = (options, subject, str, args...) ->
 
@@ -452,8 +462,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## return values are undefined.  prob should rethink
     ## this and investigate why that is the default behavior
     ## of child commands
-    invoke: ->
-      invokeFn.apply(@, arguments)
+    invoke: (subject, optionsOrStr, args...) ->
+      invokeFn.apply(@, [subject, optionsOrStr, args...])
 
     its: (subject, str, options, args...) ->
       invokeItsFn.apply(@, [subject, str, options, args...])

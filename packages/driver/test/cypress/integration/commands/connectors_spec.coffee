@@ -566,6 +566,14 @@ describe "src/cy/commands/connectors", ->
               Yielded: $btn.get(0)
             }
 
+        it "can be disabled", ->
+          cy.noop(@obj).invoke({ log: true }, "sum", 1, 2).then ->
+             expect(@lastLog.invoke("consoleProps")).to.have.property("Function", ".sum(1, 2)")
+             @lastLog = undefined
+
+          cy.noop(@obj).invoke({ log: false }, "sum", 1, 2).then ->
+             expect(@lastLog).to.be.undefined
+
       describe "errors", ->
         beforeEach ->
           Cypress.config("defaultCommandTimeout", 50)
