@@ -107,12 +107,12 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
+  │ Tests:        3                                                                                │
   │ Passing:      0                                                                                │
-  │ Failing:      2                                                                                │
+  │ Failing:      3                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  3                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     return_value_spec.coffee                                                         │
@@ -124,7 +124,9 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
   -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when invoking c     (1280x720)
      ommands and return a different value (failed).png                                              
   -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when invoking c     (1280x720)
-     ommands in custom command and returning differnet value (failed).png                           
+     ommands in custom command and returning different value (failed).png                           
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when not invoki     (1280x720)
+     ng commands, invoking done callback, and returning a promise (failed).png                      
 
 
   (Video)
@@ -140,9 +142,9 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  return_value_spec.coffee                 XX:XX        2        -        2        -        - │
+  │ ✖  return_value_spec.coffee                 XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
 
 
 `
