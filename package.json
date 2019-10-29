@@ -41,7 +41,7 @@
     "start": "node $(yarn bin cypress) open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components --exclude e2e.coffee",
     "stop-only-all": "yarn stop-only --folder packages",
-    "test": "yarn lerna run test --stream --parallel --scope \"'{cypress,@packages/{electron,extension,https-proxy,launcher,network,reporter,runner,socket,static}}'\"",
+    "test": "yarn lerna run test --stream --parallel --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,network,reporter,runner,socket,static}'\"",
     "test-debug-package": "node ./scripts/test-debug-package.js",
     "test-e2e": "lerna run test-e2e --stream",
     "test-integration": "lerna run test-integration --stream",
