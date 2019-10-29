@@ -7,12 +7,12 @@ module.exports = {
   cache,
 
   render (filePath, options, cb) {
-    const cached = cache[filePath]
+    const cachedFn = cache[filePath]
 
-    // if we already have a cached function
-    if (cached) {
+    // if we already have a cachedFn function
+    if (cachedFn) {
       // just return it and move in
-      return cb(null, cached(options))
+      return cb(null, cachedFn(options, Sqrl))
     }
 
     // else go read it off the filesystem
