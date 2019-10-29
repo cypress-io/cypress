@@ -23,21 +23,20 @@ exports['e2e xhr / passes'] = `
     ✓ does not inject into json's contents from http server even requesting text/html
     ✓ does not inject into json's contents from file server even requesting text/html
     ✓ works prior to visit
-    ✓ can stub a 100kb response
     server with 1 visit
       ✓ response body
       ✓ request body
       ✓ aborts
 
 
-  9 passing
+  8 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        9                                                                                │
-  │ Passing:      9                                                                                │
+  │ Tests:        8                                                                                │
+  │ Passing:      8                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -61,9 +60,9 @@ exports['e2e xhr / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  xhr_spec.coffee                          XX:XX        9        9        -        -        - │
+  │ ✔  xhr_spec.coffee                          XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX        8        8        -        -        -  
 
 
 `
