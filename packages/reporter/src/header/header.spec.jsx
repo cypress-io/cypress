@@ -16,7 +16,8 @@ describe('<Header />', () => {
   it('renders a tooltip around focus tests button', () => {
     const component = shallow(<Header />)
 
-    expect(component.find('Tooltip')).to.have.prop('title', 'View All Tests')
+    expect(component.find('Tooltip')).to.have.prop('title')
+    expect(component.find('Tooltip').prop('title').props.children[0]).to.equal('View All Tests ')
   })
 
   it('emits the focus:tests event when the focus tests button is clicked', () => {

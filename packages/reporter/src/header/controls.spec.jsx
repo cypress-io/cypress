@@ -73,8 +73,10 @@ describe('<Controls />', () => {
 
     it('renders tooltip around stop button', () => {
       const component = shallow(<Controls events={eventsStub()} appState={appStateStub()} />)
+      const stopButton = component.find('.stop').parent()
 
-      expect(component.find('.stop').parent()).to.have.prop('title', 'Stop Running')
+      expect(stopButton).to.have.prop('title')
+      expect(stopButton.prop('title').props.children[0]).to.equal('Stop Running ')
     })
 
     it('emits stop event when stop button is clicked', () => {
@@ -185,8 +187,10 @@ describe('<Controls />', () => {
 
     it('renders tooltip around restart button', () => {
       const component = shallow(<Controls events={eventsStub()} appState={appState} />)
+      const rerunButton = component.find('.restart').parent()
 
-      expect(component.find('.restart').parent()).to.have.prop('title', 'Run all tests')
+      expect(rerunButton).to.have.prop('title')
+      expect(rerunButton.prop('title').props.children[0]).to.equal('Run All Tests ')
     })
 
     it('emits restart event when restart button is clicked', () => {
