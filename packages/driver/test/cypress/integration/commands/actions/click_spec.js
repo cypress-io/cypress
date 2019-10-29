@@ -1572,6 +1572,25 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    describe('iframes', () => {
+      // https://github.com/cypress-io/cypress/issues/5449
+      it('can type into click inside iframe with hover state', () => {
+        cy.$$('<iframe src="/fixtures/dom.html"/>').prependTo(cy.$$('body'))
+
+        // type into aut
+        cy.get('input:first').click()
+
+        // type into iframe
+        cy.get('iframe:first')
+        .should((iframe) => expect(iframe.contents().find('#tabindex')).to.exist)
+        .then((iframe) => cy.wrap(iframe.contents().find('#tabindex'), { log: false }))
+        .click()
+
+        // type into aut again
+        cy.get('input:first').click()
+      })
+    })
+
     describe('mousedown', () => {
       it('gives focus after mousedown', (done) => {
         const input = cy.$$('input:first')

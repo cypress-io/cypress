@@ -163,7 +163,7 @@ const create = (state, keyboard, focused) => {
 
         const elsToSendMouseleave = []
 
-        while (curParent && curParent !== commonAncestor) {
+        while (curParent && curParent.ownerDocument && curParent !== commonAncestor) {
           elsToSendMouseleave.push(curParent)
           curParent = curParent.parentNode
         }
