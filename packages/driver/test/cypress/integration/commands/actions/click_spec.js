@@ -312,22 +312,6 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('el', 'focus focusin').each(shouldBeCalledOnce)
     })
 
-    it('does not attempt to click element outside viewport', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).contain('id="email-with-value"')
-        expect(err.message).contain('hidden from view')
-        done()
-      })
-
-      cy.$$('#tabindex').css(overlayStyle)
-      cy.get('#email-with-value').click()
-    })
-
-    it('can click element outside viewport with force:true', () => {
-      cy.$$('#tabindex').css(overlayStyle)
-      cy.get('#email-with-value').click()
-    })
-
     it('does not fire a focus, mouseup, or click event when element has been removed on mousedown', () => {
       const $btn = cy.$$('button:first')
 

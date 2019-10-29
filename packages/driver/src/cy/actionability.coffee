@@ -1,7 +1,6 @@
 _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
-debug = require('debug')('cypress:driver:actionability')
 
 $dom = require("../dom")
 $utils = require("../cypress/utils")
@@ -50,10 +49,8 @@ ensureElIsNotCovered = (cy, win, $el, fromElViewport, options, log, onScroll) ->
     ## figure out the deepest element we are about to interact
     ## with at these coordinates
     $elAtCoords = getElementAtPointFromViewport(fromElViewport)
-    debug('elAtCoords', $elAtCoords)
-    debug('el has pointer-events none?')
+
     cy.ensureElDoesNotHaveCSS($el, 'pointer-events', 'none', log)
-    debug('is descendent of elAtCoords?')
     cy.ensureDescendents($el, $elAtCoords, log)
 
     return $elAtCoords
@@ -68,8 +65,6 @@ ensureElIsNotCovered = (cy, win, $el, fromElViewport, options, log, onScroll) ->
       ## from underneath this fixed position element until we can't
       ## anymore
       $fixed = getFixedOrStickyEl($elAtCoords)
-      
-      debug('elAtCoords is fixed', !!$fixed)
 
       ## if we dont have a fixed position
       ## then just bail, cuz we need to retry async
@@ -166,9 +161,7 @@ ensureElIsNotCovered = (cy, win, $el, fromElViewport, options, log, onScroll) ->
 
                 ## and possibly recursively scroll past it
                 ## if we haven't see it before
-                return possiblyScrollMultipleTimes($fixed)
-              
-              throw err
+                possiblyScrollMultipleTimes($fixed)
           else
             scrollContainers(scrollables)
 
