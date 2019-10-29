@@ -7,6 +7,7 @@ const appData = require('../util/app_data')
 const open = require('../util/open')
 
 let onLogOutClicked = function () {}
+let onToggleTheme = function () {}
 
 module.exports = {
   set (options = {}) {
@@ -18,6 +19,10 @@ module.exports = {
     // is set again by launcher.coffee when the Electron browser is run
     if (options.onLogOutClicked) {
       ({ onLogOutClicked } = options)
+    }
+
+    if (options.onToggleTheme) {
+      ({ onToggleTheme } = options)
     }
 
     const template = [
@@ -117,6 +122,14 @@ module.exports = {
             label: 'Zoom Out',
             accelerator: 'CmdOrCtrl+-',
             role: 'zoomout',
+          },
+          {
+            type: 'separator',
+          },
+          {
+            label: 'Toggle Light/Dark',
+            accelerator: 'CmdOrCtrl+T',
+            click: onToggleTheme,
           },
         ],
       },

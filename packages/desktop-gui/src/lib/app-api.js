@@ -1,4 +1,5 @@
 import authApi from '../auth/auth-api'
+import ThemeProvider from '../theme/theme'
 import ipc from './ipc'
 
 const appApi = {
@@ -7,6 +8,9 @@ const appApi = {
       switch (item) {
         case 'log:out':
           authApi.logOut()
+          break
+        case 'toggle:theme':
+          ThemeProvider.toggleTheme()
           break
         default:
           return

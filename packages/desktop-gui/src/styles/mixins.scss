@@ -46,3 +46,17 @@
   white-space: normal;
   word-wrap: break-word;
 }
+
+@mixin themed {
+  @each $themeName, $themeValue in $themes {
+    .theme-#{$themeName} & {
+      $themeToGenerate: map-get($themes, $themeName) !global;
+      @content;
+      $themeToGenerate: null !global;
+    }
+  }
+};
+
+@function themeVar($varName) {
+  @return map-get($themeToGenerate, $varName)
+}

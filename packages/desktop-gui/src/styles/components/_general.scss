@@ -1,5 +1,7 @@
-#app {
-  background: #fff;
+#content {
+  @include themed {
+    background: themeVar('background');
+  };
   display: flex;
   flex-direction: column;
   height: 100%;

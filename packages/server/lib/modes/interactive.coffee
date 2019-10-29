@@ -80,6 +80,8 @@ module.exports = {
       withDevTools: isDev()
       onLogOutClicked: ->
         bus.emit("menu:item:clicked", "log:out")
+      onToggleTheme: ->
+        bus.emit('menu:item:clicked', 'toggle:theme')
     })
 
     savedState(projectRoot, false)

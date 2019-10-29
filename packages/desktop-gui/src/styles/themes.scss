@@ -1,0 +1,42 @@
+$themes: (
+  light: (
+    brandPrimary: #476fc9,
+    background: #fff,
+    introH1: #555,
+    introP: #636668,
+    introPreColor: #eee,
+    introPreBack: #252831,
+    projectDropBack: #F6F7F8,
+    projectDropBorder: #e3e4e5,
+    projectDropIcon: #d3d6d8,
+    projectDropInnerIcon: #fff,
+    projectDropP: #939698,
+    projectDropDragOver: #F6F7F8,
+    projectListBorder: #eee,
+    projectListName: #666,
+    projectListPath: #8e8e8e,
+    projectListHover: #476fc9,
+    projectListRemove: #d3d3d3,
+    projectListRemoveHover: #e94f5f
+  ),
+  dark: (
+    brandPrimary: #748eca,
+    background: #1a1c22,
+    introH1: #eee,
+    introP: #eee,
+    introPreColor: #eee,
+    introPreBack: #252831,
+    projectDropBack: #272a34,
+    projectDropBorder: #51576b,
+    projectDropIcon: #464c5d,
+    projectDropInnerIcon: #9097ab,
+    projectDropP: #aeb2b4,
+    projectDropDragOver: #F6F7F8,
+    projectListBorder: #777,
+    projectListName: #a3a3a3,
+    projectListPath: #7c7c7c,
+    projectListHover: #748eca,
+    projectListRemove: #d3d3d3,
+    projectListRemoveHover: #e94f5f
+  )
+);
