@@ -29,7 +29,7 @@
 
 ## What is Cypress?
 
-It is a fast, easy and reliable testing tool for anything that runs in a browser, for acceptance testing or e2e (end-to-end). It enables you to write automated tests easily, quickly and reliably, making it easy to set up, run and debug your tests.
+Visit [www.cypress.io](https://www.cypress.io) for full details.
 
 <p align="center">
   <a href="https://player.vimeo.com/video/237527670">
