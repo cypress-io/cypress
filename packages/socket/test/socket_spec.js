@@ -5,6 +5,7 @@ const client = require('socket.io-client')
 const expect = require('chai').expect
 const pkg = require('../package.json')
 const lib = require('../index')
+const resolvePkg = require('resolve-pkg')
 
 describe('Socket', function () {
   it('exports server', function () {
@@ -35,7 +36,7 @@ describe('Socket', function () {
 
   context('.getClientSource', function () {
     it('returns client source as a string', function (done) {
-      const clientPath = path.join(process.cwd(), 'node_modules', 'socket.io-client', 'dist', 'socket.io.js')
+      const clientPath = path.join(resolvePkg('socket.io-client', { cwd: path.join(__dirname, '..', '..', '..') }), 'dist', 'socket.io.js')
 
       fs.readFile(clientPath, 'utf8', function (err, str) {
         if (err) done(err)
