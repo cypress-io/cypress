@@ -11,7 +11,7 @@
       "type": "node",
       "request": "launch",
       "name": "test: active",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "yarn",
       "runtimeArgs": [
         "run",
         "test-debug-package"
@@ -33,7 +33,7 @@
       "request": "launch",
       "name": "dev-debug",
       "port": 5566,
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "yarn",
       "runtimeArgs": [
         "run",
         "dev-debug"
