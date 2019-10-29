@@ -705,7 +705,7 @@ class Server
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
     options.onIncomingXhr = @_xhrServer.onIncomingXhr
-    options.onBeforeTestRun = @_xhrServer.onBeforeTestRun
+    options.onResetXhrServer = @_xhrServer.reset
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)

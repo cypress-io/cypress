@@ -52,7 +52,7 @@ export function create () {
     })
   }
 
-  function onBeforeTestRun () {
+  function reset () {
     debug('resetting incomingXhrs %o', { length: incomingXhrs.length })
 
     _.forEach(incomingXhrs, ({ reject }) => {
@@ -65,6 +65,6 @@ export function create () {
   return {
     onIncomingXhr,
     getDeferredResponse,
-    onBeforeTestRun,
+    reset,
   }
 }

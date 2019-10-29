@@ -28,7 +28,7 @@ describe('lib/xhr_ws_server', function () {
     it('rejects a response when incomingXhr is received and test gets reset', function () {
       const p = xhrServer.getDeferredResponse('foo')
 
-      xhrServer.onBeforeTestRun()
+      xhrServer.reset()
 
       return expect(p).to.be.rejectedWith('This stubbed XHR was pending')
     })
