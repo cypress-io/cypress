@@ -7,6 +7,8 @@
 window.top.hasRunOnce ?= false
 window.top.previousHash ?= window.top.location.hash
 
+isTextTerminal = Cypress.config("isTextTerminal")
+
 describe "rerun state bugs", ->
   it "stores viewport globally and does not hang on re-runs", ->
     ## NOTE: there's probably other ways to cause a re-run
@@ -28,8 +30,8 @@ describe "rerun state bugs", ->
       else
         if window.top.location.hash is window.top.previousHash
           ## 3rd time around
-          ## let the mocha end events fire
-          Cypress.config("isTextTerminal", true)
+          ## let the mocha end events fire if they're supposed to
+          Cypress.config("isTextTerminal", isTextTerminal)
         else
           ## our test has already run so remove
           ## the query param
