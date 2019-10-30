@@ -296,10 +296,6 @@ const eventManager = {
       })
     })
 
-    Cypress.on('test:before:run:async', () => {
-      Cypress.backend('reset:xhr:server')
-    })
-
     Cypress.on('script:error', (err) => {
       Cypress.stop()
       localBus.emit('script:error', err)

@@ -253,6 +253,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## reset the existing server
     reset()
 
+    ## reset any state on the backend
+    Cypress.backend('reset:xhr:server')
+
     ## create the server before each test run
     ## its possible for this to fail if the
     ## last test we ran ended with an invalid

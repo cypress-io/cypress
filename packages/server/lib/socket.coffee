@@ -132,8 +132,8 @@ class Socket
 
     _.defaults options,
       socketId: null
-      onBeforeTestRun: ->
       onIncomingXhr: ->
+      onResetXhrServer: ->
       onSetRunnables: ->
       onMocha: ->
       onConnect: ->
@@ -340,8 +340,6 @@ class Socket
 
       socket.on "external:open", (url) ->
         require("electron").shell.openExternal(url)
-
-      socket.on "test:before:run:async", options.onBeforeTestRun
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>

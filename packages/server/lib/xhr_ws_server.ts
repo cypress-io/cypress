@@ -11,55 +11,76 @@ function trunc (str) {
   })
 }
 
+type DeferredPromise<T> = {
+  resolve: Function
+  reject: Function
+  p: Bluebird<T>
+}
+
 export function create () {
-  let incomingXhrs: any = {}
+  let incomingXhrResponses: {
+    [key: string]: string | DeferredPromise<string>
+  } = {}
 
-  function onIncomingXhr (id, data) {
+  function onIncomingXhr (id: string, data: string) {
     debug('onIncomingXhr %o', { id, res: trunc(data) })
-    const deferred = incomingXhrs[id]
+    const deferred = incomingXhrResponses[id]
 
-    if (deferred) {
+    if (deferred && typeof deferred !== 'string') {
+      // request came before response, resolve with it
       return deferred.resolve({
         data,
       })
     }
 
-    incomingXhrs[id] = data
+    // response came before request, cache the data
+    incomingXhrResponses[id] = data
   }
 
   function getDeferredResponse (id) {
     debug('getDeferredResponse %o', { id })
     // if we already have it, send it
-    const res = incomingXhrs[id]
+    const res = incomingXhrResponses[id]
 
     if (res) {
-      if (res.then) {
-        debug('returning existing deferred promise for %o', { id })
+      if (typeof res === 'object') {
+        debug('returning existing deferred promise for %o', { id, res })
+
+        return res.p
       }
 
       debug('already have deferred response %o', { id, res: trunc(res) })
-      delete incomingXhrs[id]
+      delete incomingXhrResponses[id]
 
       return res
     }
 
-    return new Bluebird((resolve, reject) => {
+    let deferred: Partial<DeferredPromise<string>> = {}
+
+    deferred.p = new Bluebird((resolve, reject) => {
       debug('do not have response, waiting %o', { id })
-      incomingXhrs[id] = { resolve, reject }
+      deferred.resolve = resolve
+      deferred.reject = reject
     })
     .tap((res) => {
       debug('deferred response found %o', { id, res: trunc(res) })
-    })
+    }) as Bluebird<string>
+
+    incomingXhrResponses[id] = deferred as DeferredPromise<string>
+
+    return deferred.p
   }
 
   function reset () {
-    debug('resetting incomingXhrs %o', { length: incomingXhrs.length })
+    debug('resetting incomingXhrs')
 
-    _.forEach(incomingXhrs, ({ reject }) => {
-      reject(new Error('This stubbed XHR was pending on a stub response object from the driver, but the test ended before that happened.'))
+    _.forEach(incomingXhrResponses, (res) => {
+      if (typeof res !== 'string') {
+        res.reject(new Error('This stubbed XHR was pending on a stub response object from the driver, but the test ended before that happened.'))
+      }
     })
 
-    incomingXhrs = {}
+    incomingXhrResponses = {}
   }
 
   return {

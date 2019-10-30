@@ -17,12 +17,14 @@ describe('lib/xhr_ws_server', function () {
       expect(xhrServer.getDeferredResponse('foo')).to.eq('bar')
     })
 
-    it('resolves a response when incomingXhr is received after request', function () {
+    it('resolves a response when incomingXhr is received after request', async function () {
       const p = xhrServer.getDeferredResponse('foo')
+      const q = xhrServer.getDeferredResponse('foo')
 
       xhrServer.onIncomingXhr('foo', 'bar')
 
-      return expect(p).to.eventually.deep.eq({ data: 'bar' })
+      await expect(p).to.eventually.deep.eq({ data: 'bar' })
+      await expect(q).to.eventually.deep.eq({ data: 'bar' })
     })
 
     it('rejects a response when incomingXhr is received and test gets reset', function () {
