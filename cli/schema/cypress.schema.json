@@ -48,7 +48,7 @@
         "array"
       ],
       "default": "**/*.*",
-      "description": "A String or Array of glob patterns of the test files to load. See https://on.cypress.io/configuration#Global"
+      "description": "A String or Array of string glob patterns of the test files to load. See https://on.cypress.io/configuration#Global"
     },
     "watchForFileChanges": {
       "type": "boolean",
