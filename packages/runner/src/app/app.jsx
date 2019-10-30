@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
-import $Cypress from '@packages/driver'
+import { $ } from '@packages/driver'
 
 import errorMessages from '../errors/error-messages'
 import util from '../lib/util'
@@ -15,8 +15,6 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import Resizer from './resizer'
-
-const $ = $Cypress.$
 
 @observer
 class App extends Component {
