@@ -2,6 +2,11 @@ _ = Cypress._
 $ = Cypress.$
 Promise = Cypress.Promise
 
+uncaughtExceptionHookCalled = false
+
+Cypress.on 'uncaught:exception', ->
+  uncaughtExceptionHookCalled = true
+
 describe "src/cy/commands/xhr", ->
   before ->
     cy
@@ -14,6 +19,7 @@ describe "src/cy/commands/xhr", ->
         @body = win.document.body.outerHTML
 
   beforeEach ->
+    uncaughtExceptionHookCalled = false
     doc = cy.state("document")
 
     $(doc.head).empty().html(@head)
@@ -786,7 +792,10 @@ describe "src/cy/commands/xhr", ->
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("name")).to.eq("xhr")
-          expect(lastLog.get("error")).to.eq err
+          expect(lastLog.get("error").message).contain('foo is not defined')
+          ## since this is AUT code, we should allow error to be caught in 'uncaught:exception' hook
+          ## https://github.com/cypress-io/cypress/issues/987
+          expect(uncaughtExceptionHookCalled).eql(true)
           done()
 
         cy

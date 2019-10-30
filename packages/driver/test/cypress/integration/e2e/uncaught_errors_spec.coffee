@@ -110,3 +110,12 @@ describe "uncaught errors", ->
         .appendTo(win.document.body)
 
       .contains("visit").click()
+
+  ## https://github.com/cypress-io/cypress/issues/987
+  it 'global onerror', (done) ->
+    cy.once 'uncaught:exception', ->
+      setTimeout ->
+        done()
+      false
+
+    cy.visit('/fixtures/global-error.html')

@@ -108,6 +108,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     Cypress.action("app:navigation:changed", "page navigation event (#{event})")
 
   contentWindowListeners = (contentWindow) ->
+
+    top.onerror = ->
+      cy.onUncaughtException.apply(cy, arguments)
+
     $Listeners.bindTo(contentWindow, {
       onError: ->
         ## use a function callback here instead of direct
@@ -931,6 +935,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       wrapNativeMethods(contentWindow)
 
       snapshots.onBeforeWindowLoad()
+
 
       timers.wrap(contentWindow)
 
