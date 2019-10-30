@@ -65,7 +65,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   ## Since the setter will change which event handler gets invoked, we make it a noop
   Object.defineProperty(top, 'onerror', {
     set: ->
-    get: onTopError
+    get: -> onTopError
     configurable: false
     enumerable: true
   })
