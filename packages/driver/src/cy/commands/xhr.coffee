@@ -183,8 +183,10 @@ startXhrServer = (cy, state, config) ->
       if log = logs[xhr.id]
         log.snapshot("error").error(err)
 
-      if r = state("reject")
-        r(err)
+      ## re-throw the error since this came from AUT code, and needs to
+      ## cause an 'uncaught:exception' event. This error will be caught in
+      ## top.onerror with stack as 5th argument.
+      throw err
 
     onXhrAbort: (xhr, stack) =>
       setResponse(state, xhr)
