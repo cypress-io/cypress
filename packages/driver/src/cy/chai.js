@@ -1,338 +1,397 @@
-## tests in driver/test/cypress/integration/commands/assertions_spec.coffee
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+//# tests in driver/test/cypress/integration/commands/assertions_spec.coffee
 
-_ = require("lodash")
-$ = require("jquery")
-chai = require("chai")
-sinonChai = require("@cypress/sinon-chai")
+const _ = require("lodash");
+const $ = require("jquery");
+const chai = require("chai");
+const sinonChai = require("@cypress/sinon-chai");
 
-$dom = require("../dom")
-$utils = require("../cypress/utils")
-$chaiJquery = require("../cypress/chai_jquery")
+const $dom = require("../dom");
+const $utils = require("../cypress/utils");
+const $chaiJquery = require("../cypress/chai_jquery");
 
-## all words between single quotes which are at
-## the end of the string
-allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
+//# all words between single quotes which are at
+//# the end of the string
+const allPropertyWordsBetweenSingleQuotes = /('.*?')$/g;
 
-## grab all words between single quotes except
-## when the single quote word is the LAST word
-allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
+//# grab all words between single quotes except
+//# when the single quote word is the LAST word
+const allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g;
 
-allBetweenFourStars = /\*\*.*\*\*/
-allSingleQuotes = /'/g
-allEscapedSingleQuotes = /\\'/g
-allQuoteMarkers = /__quote__/g
-allWordsBetweenCurlyBraces  = /(#{.+?})/g
-allQuadStars = /\*\*\*\*/g
+const allBetweenFourStars = /\*\*.*\*\*/;
+const allSingleQuotes = /'/g;
+const allEscapedSingleQuotes = /\\'/g;
+const allQuoteMarkers = /__quote__/g;
+const allWordsBetweenCurlyBraces  = /(#{.+?})/g;
+const allQuadStars = /\*\*\*\*/g;
 
-assertProto = null
-matchProto = null
-lengthProto = null
-containProto = null
-existProto = null
-getMessage = null
-chaiUtils = null
+let assertProto = null;
+let matchProto = null;
+let lengthProto = null;
+let containProto = null;
+let existProto = null;
+let getMessage = null;
+let chaiUtils = null;
 
-chai.use(sinonChai)
+chai.use(sinonChai);
 
-chai.use (chai, u) ->
-  chaiUtils = u
+chai.use(function(chai, u) {
+  chaiUtils = u;
 
   $chaiJquery(chai, chaiUtils, {
-    onInvalid: (method, obj) ->
-      err = $utils.cypressErr(
+    onInvalid(method, obj) {
+      const err = $utils.cypressErr(
         $utils.errMessageByPath(
           "chai.invalid_jquery_obj", {
-            assertion: method
+            assertion: method,
             subject: $utils.stringifyActual(obj)
           }
         )
-      )
+      );
 
-      throw err
+      throw err;
+    },
 
-    onError: (err, method, obj, negated) ->
-      switch method
-        when "visible"
-          if not negated
-            ## add reason hidden unless we expect the element to be hidden
-            reason = $dom.getReasonIsHidden(obj)
-            err.message += "\n\n" + reason
+    onError(err, method, obj, negated) {
+      switch (method) {
+        case "visible":
+          if (!negated) {
+            //# add reason hidden unless we expect the element to be hidden
+            const reason = $dom.getReasonIsHidden(obj);
+            err.message += `\n\n${reason}`;
+          }
+          break;
+      }
 
-      ## always rethrow the error!
-      throw err
-  })
+      //# always rethrow the error!
+      throw err;
+    }
+  });
 
-  assertProto  = chai.Assertion::assert
-  matchProto   = chai.Assertion::match
-  lengthProto  = chai.Assertion::__methods.length.method
-  containProto = chai.Assertion::__methods.contain.method
-  existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
-  getMessage   = chaiUtils.getMessage
+  assertProto  = chai.Assertion.prototype.assert;
+  matchProto   = chai.Assertion.prototype.match;
+  lengthProto  = chai.Assertion.prototype.__methods.length.method;
+  containProto = chai.Assertion.prototype.__methods.contain.method;
+  existProto   = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, "exist").get;
+  ({ getMessage }   = chaiUtils);
 
-  removeOrKeepSingleQuotesBetweenStars = (message) ->
-    ## remove any single quotes between our **, preserving escaped quotes
-    ## and if an empty string, put the quotes back
-    message.replace allBetweenFourStars, (match) ->
+  const removeOrKeepSingleQuotesBetweenStars = message =>
+    //# remove any single quotes between our **, preserving escaped quotes
+    //# and if an empty string, put the quotes back
+    message.replace(allBetweenFourStars, match =>
       match
-        .replace(allEscapedSingleQuotes, "__quote__") # preserve escaped quotes
+        .replace(allEscapedSingleQuotes, "__quote__") // preserve escaped quotes
         .replace(allSingleQuotes, "")
-        .replace(allQuoteMarkers, "'") ## put escaped quotes back
-        .replace(allQuadStars, "**''**") ## fix empty strings that end up as ****
+        .replace(allQuoteMarkers, "'") //# put escaped quotes back
+        .replace(allQuadStars, "**''**")
+    ) //# fix empty strings that end up as ****
+  ;
 
-  replaceArgMessages = (args, str) ->
-    _.reduce args, (memo, value, index) =>
-      if _.isString(value)
+  const replaceArgMessages = (args, str) =>
+    _.reduce(args, (memo, value, index) => {
+      if (_.isString(value)) {
         value = value
           .replace(allWordsBetweenCurlyBraces,          "**$1**")
           .replace(allEscapedSingleQuotes,              "__quote__")
           .replace(allButLastWordsBetweenSingleQuotes,  "**$1**$2")
-          .replace(allPropertyWordsBetweenSingleQuotes, "**$1**")
-        memo.push value
-      else
-        memo.push value
+          .replace(allPropertyWordsBetweenSingleQuotes, "**$1**");
+        memo.push(value);
+      } else {
+        memo.push(value);
+      }
 
-      memo
-    , []
+      return memo;
+    }
+    , [])
+  ;
 
-  restoreAsserts = ->
-    chaiUtils.getMessage = getMessage
+  const restoreAsserts = function() {
+    chaiUtils.getMessage = getMessage;
 
-    chai.Assertion::assert = assertProto
-    chai.Assertion::match = matchProto
-    chai.Assertion::__methods.length.method = lengthProto
-    chai.Assertion::__methods.contain.method = containProto
+    chai.Assertion.prototype.assert = assertProto;
+    chai.Assertion.prototype.match = matchProto;
+    chai.Assertion.prototype.__methods.length.method = lengthProto;
+    chai.Assertion.prototype.__methods.contain.method = containProto;
 
-    Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
+    return Object.defineProperty(chai.Assertion.prototype, "exist", {get: existProto});
+  };
 
-  overrideChaiAsserts = (assertFn) ->
-    _this = @
+  const overrideChaiAsserts = function(assertFn) {
+    let fn1, fn2;
+    const _this = this;
 
-    chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
+    chai.Assertion.prototype.assert = createPatchedAssert(assertFn);
 
-    chaiUtils.getMessage = (assert, args) ->
-      obj = assert._obj
+    chaiUtils.getMessage = function(assert, args) {
+      const obj = assert._obj;
 
-      ## if we are formatting a DOM object
-      if $dom.isDom(obj)
-        ## replace object with our formatted one
-        assert._obj = $dom.stringify(obj, "short")
+      //# if we are formatting a DOM object
+      if ($dom.isDom(obj)) {
+        //# replace object with our formatted one
+        assert._obj = $dom.stringify(obj, "short");
+      }
 
-      msg = getMessage.call(@, assert, args)
+      const msg = getMessage.call(this, assert, args);
 
-      ## restore the real obj if we changed it
-      if obj isnt assert._obj
-        assert._obj = obj
+      //# restore the real obj if we changed it
+      if (obj !== assert._obj) {
+        assert._obj = obj;
+      }
 
-      return msg
+      return msg;
+    };
 
-    chai.Assertion.overwriteMethod "match", (_super) ->
-      return (regExp) ->
-        if _.isRegExp(regExp) or $dom.isDom(@_obj)
-          _super.apply(@, arguments)
-        else
-          err = $utils.cypressErr($utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
-          err.retry = false
-          throw err
+    chai.Assertion.overwriteMethod("match", _super =>
+      function(regExp) {
+        if (_.isRegExp(regExp) || $dom.isDom(this._obj)) {
+          return _super.apply(this, arguments);
+        } else {
+          const err = $utils.cypressErr($utils.errMessageByPath("chai.match_invalid_argument", { regExp }));
+          err.retry = false;
+          throw err;
+        }
+      }
+    );
 
-    containFn1 = (_super) ->
-      return (text) ->
-        obj = @_obj
+    const containFn1 = _super =>
+      function(text) {
+        let obj = this._obj;
 
-        if not ($dom.isJquery(obj) or $dom.isElement(obj))
-          return _super.apply(@, arguments)
+        if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
+          return _super.apply(this, arguments);
+        }
 
-        escText = $utils.escapeQuotes(text)
+        const escText = $utils.escapeQuotes(text);
 
-        selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
+        const selector = `:contains('${escText}'), [type='submit'][value~='${escText}']`;
 
-        ## the assert checks below only work if $dom.isJquery(obj)
-        ## https://github.com/cypress-io/cypress/issues/3549
-        if not ($dom.isJquery(obj)) 
-          obj = $(obj)
+        //# the assert checks below only work if $dom.isJquery(obj)
+        //# https://github.com/cypress-io/cypress/issues/3549
+        if (!($dom.isJquery(obj))) { 
+          obj = $(obj);
+        }
 
-        @assert(
-          obj.is(selector) or !!obj.find(selector).length
-          'expected #{this} to contain #{exp}'
-          'expected #{this} not to contain #{exp}'
+        return this.assert(
+          obj.is(selector) || !!obj.find(selector).length,
+          'expected #{this} to contain #{exp}',
+          'expected #{this} not to contain #{exp}',
           text
-        )
+        );
+      }
+    ;
 
-    containFn2 = (_super) ->
-      return ->
-        _super.apply(@, arguments)
+    const containFn2 = _super =>
+      function() {
+        return _super.apply(this, arguments);
+      }
+    ;
 
-    chai.Assertion.overwriteChainableMethod("contain", containFn1, containFn2)
+    chai.Assertion.overwriteChainableMethod("contain", containFn1, containFn2);
 
-    chai.Assertion.overwriteChainableMethod "length",
-      fn1 = (_super) ->
-        return (length) ->
-          obj = @_obj
+    chai.Assertion.overwriteChainableMethod("length",
+      (fn1 = _super =>
+        function(length) {
+          let obj = this._obj;
 
-          if not ($dom.isJquery(obj) or $dom.isElement(obj))
-            return _super.apply(@, arguments)
+          if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
+            return _super.apply(this, arguments);
+          }
 
-          length = $utils.normalizeNumber(length)
+          length = $utils.normalizeNumber(length);
 
-          ## filter out anything not currently in our document
-          if $dom.isDetached(obj)
-            obj = @_obj = obj.filter (index, el) ->
-              $dom.isAttached(el)
+          //# filter out anything not currently in our document
+          if ($dom.isDetached(obj)) {
+            obj = (this._obj = obj.filter((index, el) => $dom.isAttached(el)));
+          }
 
-          node = if obj and obj.length then $dom.stringify(obj, "short") else obj.selector
+          const node = obj && obj.length ? $dom.stringify(obj, "short") : obj.selector;
 
-          ## if our length assertion fails we need to check to
-          ## ensure that the length argument is a finite number
-          ## because if its not, we need to bail on retrying
-          try
-            @assert(
-              obj.length is length,
-              "expected '#{node}' to have a length of \#{exp} but got \#{act}",
-              "expected '#{node}' to not have a length of \#{act}",
+          //# if our length assertion fails we need to check to
+          //# ensure that the length argument is a finite number
+          //# because if its not, we need to bail on retrying
+          try {
+            return this.assert(
+              obj.length === length,
+              `expected '${node}' to have a length of \#{exp} but got \#{act}`,
+              `expected '${node}' to not have a length of \#{act}`,
               length,
               obj.length
-            )
+            );
 
-          catch e1
-            e1.node = node
-            e1.negated = chaiUtils.flag(@, "negate")
-            e1.type = "length"
+          } catch (e1) {
+            e1.node = node;
+            e1.negated = chaiUtils.flag(this, "negate");
+            e1.type = "length";
 
-            if _.isFinite(length)
-              getLongLengthMessage = (len1, len2) ->
-                if len1 > len2
-                  "Too many elements found. Found '#{len1}', expected '#{len2}'."
-                else
-                  "Not enough elements found. Found '#{len1}', expected '#{len2}'."
+            if (_.isFinite(length)) {
+              const getLongLengthMessage = function(len1, len2) {
+                if (len1 > len2) {
+                  return `Too many elements found. Found '${len1}', expected '${len2}'.`;
+                } else {
+                  return `Not enough elements found. Found '${len1}', expected '${len2}'.`;
+                }
+              };
 
-              e1.displayMessage = getLongLengthMessage(obj.length, length)
-              throw e1
+              e1.displayMessage = getLongLengthMessage(obj.length, length);
+              throw e1;
+            }
 
-            e2 = $utils.cypressErr($utils.errMessageByPath("chai.length_invalid_argument", { length }))
-            e2.retry = false
-            throw e2
+            const e2 = $utils.cypressErr($utils.errMessageByPath("chai.length_invalid_argument", { length }));
+            e2.retry = false;
+            throw e2;
+          }
+        }
+      ),
 
-      fn2 = (_super) ->
-        return ->
-          _super.apply(@, arguments)
+      (fn2 = _super =>
+        function() {
+          return _super.apply(this, arguments);
+        }
+      )
+    );
 
-    chai.Assertion.overwriteProperty "exist", (_super) ->
-      return ->
-        obj = @_obj
+    return chai.Assertion.overwriteProperty("exist", _super =>
+      function() {
+        const obj = this._obj;
 
-        if not ($dom.isJquery(obj) or $dom.isElement(obj))
-          try
-            _super.apply(@, arguments)
-          catch e
-            e.type = "existence"
-            throw e
-        else
-          if not obj.length
-            @_obj = null
+        if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
+          try {
+            return _super.apply(this, arguments);
+          } catch (e) {
+            e.type = "existence";
+            throw e;
+          }
+        } else {
+          let isAttached;
+          if (!obj.length) {
+            this._obj = null;
+          }
 
-          node = if obj and obj.length then $dom.stringify(obj, "short") else obj.selector
+          const node = obj && obj.length ? $dom.stringify(obj, "short") : obj.selector;
 
-          try
-            @assert(
-              isAttached = $dom.isAttached(obj),
+          try {
+            return this.assert(
+              (isAttached = $dom.isAttached(obj)),
               "expected \#{act} to exist in the DOM",
               "expected \#{act} not to exist in the DOM",
               node,
               node
-            )
-          catch e1
-            e1.node = node
-            e1.negated = chaiUtils.flag(@, "negate")
-            e1.type = "existence"
+            );
+          } catch (e1) {
+            e1.node = node;
+            e1.negated = chaiUtils.flag(this, "negate");
+            e1.type = "existence";
 
-            getLongExistsMessage = (obj) ->
-              ## if we expected not for an element to exist
-              if isAttached
-                "Expected #{node} not to exist in the DOM, but it was continuously found."
-              else
-                "Expected to find element: '#{obj.selector}', but never found it."
+            const getLongExistsMessage = function(obj) {
+              //# if we expected not for an element to exist
+              if (isAttached) {
+                return `Expected ${node} not to exist in the DOM, but it was continuously found.`;
+              } else {
+                return `Expected to find element: '${obj.selector}', but never found it.`;
+              }
+            };
 
-            e1.displayMessage = getLongExistsMessage(obj)
-            throw e1
+            e1.displayMessage = getLongExistsMessage(obj);
+            throw e1;
+          }
+        }
+      }
+    );
+  };
 
-  createPatchedAssert = (assertFn) ->
-    return (args...) ->
-      passed    = chaiUtils.test(@, args)
-      value     = chaiUtils.flag(@, "object")
-      expected  = args[3]
+  var createPatchedAssert = assertFn =>
+    function(...args) {
+      let err;
+      const passed    = chaiUtils.test(this, args);
+      const value     = chaiUtils.flag(this, "object");
+      const expected  = args[3];
 
-      customArgs = replaceArgMessages(args, @_obj)
+      const customArgs = replaceArgMessages(args, this._obj);
 
-      message   = chaiUtils.getMessage(@, customArgs)
-      actual    = chaiUtils.getActual(@, customArgs)
+      let message   = chaiUtils.getMessage(this, customArgs);
+      const actual    = chaiUtils.getActual(this, customArgs);
 
-      message = removeOrKeepSingleQuotesBetweenStars(message)
+      message = removeOrKeepSingleQuotesBetweenStars(message);
 
-      try
-        assertProto.apply(@, args)
-      catch e
-        err = e
+      try {
+        assertProto.apply(this, args);
+      } catch (e) {
+        err = e;
+      }
 
-      assertFn(passed, message, value, actual, expected, err)
+      assertFn(passed, message, value, actual, expected, err);
 
-      throw err if err
+      if (err) { throw err; }
+    }
+  ;
 
-  overrideExpect = ->
-    ## only override assertions for this specific
-    ## expect function instance so we do not affect
-    ## the outside world
-    return (val, message) ->
-      ## make the assertion
-      return new chai.Assertion(val, message)
+  const overrideExpect = () =>
+    //# only override assertions for this specific
+    //# expect function instance so we do not affect
+    //# the outside world
+    (val, message) =>
+      //# make the assertion
+      new chai.Assertion(val, message)
+    
+  ;
 
-  overrideAssert = ->
-    fn = (express, errmsg) ->
-      chai.assert(express, errmsg)
+  const overrideAssert = function() {
+    const fn = (express, errmsg) => chai.assert(express, errmsg);
 
-    fns = _.functions(chai.assert)
+    const fns = _.functions(chai.assert);
 
-    _.each fns, (name) ->
-      fn[name] = ->
-        chai.assert[name].apply(@, arguments)
+    _.each(fns, name =>
+      fn[name] = function() {
+        return chai.assert[name].apply(this, arguments);
+      }
+    );
 
-    return fn
+    return fn;
+  };
 
-  setSpecWindowGlobals = (specWindow, assertFn) ->
-    expect = overrideExpect()
-    assert = overrideAssert()
+  const setSpecWindowGlobals = function(specWindow, assertFn) {
+    const expect = overrideExpect();
+    const assert = overrideAssert();
 
-    specWindow.chai   = chai
-    specWindow.expect = expect
-    specWindow.assert = assert
+    specWindow.chai   = chai;
+    specWindow.expect = expect;
+    specWindow.assert = assert;
 
     return {
-      chai
-      expect
+      chai,
+      expect,
       assert
-    }
+    };
+  };
 
-  create = (specWindow, assertFn) ->
-    # restoreOverrides()
-    restoreAsserts()
+  const create = function(specWindow, assertFn) {
+    // restoreOverrides()
+    restoreAsserts();
 
-    # overrideChai()
-    overrideChaiAsserts(assertFn)
+    // overrideChai()
+    overrideChaiAsserts(assertFn);
 
-    return setSpecWindowGlobals(specWindow)
+    return setSpecWindowGlobals(specWindow);
+  };
 
-  module.exports = {
-    replaceArgMessages
+  return module.exports = {
+    replaceArgMessages,
 
-    removeOrKeepSingleQuotesBetweenStars
+    removeOrKeepSingleQuotesBetweenStars,
 
-    setSpecWindowGlobals
+    setSpecWindowGlobals,
 
-    # overrideChai: overrideChai
+    // overrideChai: overrideChai
 
-    restoreAsserts
+    restoreAsserts,
 
-    overrideExpect
+    overrideExpect,
 
-    overrideChaiAsserts
+    overrideChaiAsserts,
 
     create
-  }
+  };});
