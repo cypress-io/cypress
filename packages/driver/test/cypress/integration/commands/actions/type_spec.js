@@ -1,7 +1,16 @@
 const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
-const { getCommandLogWithText, findReactInstance, withMutableReporterState } = require('../../../support/utils')
+const { getCommandLogWithText, findReactInstance, withMutableReporterState, attachListeners, shouldBeCalledWithCount } = require('../../../support/utils')
+
+const keyEvents = [
+  'keydown',
+  'keyup',
+  'keypress',
+  'input',
+  'textInput',
+]
+const attachKeyListeners = attachListeners(keyEvents)
 
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
@@ -3373,6 +3382,22 @@ describe('src/cy/commands/actions/type', () => {
         .then(() => {
           expect(changed).not.to.be.called
         })
+      })
+    })
+
+    describe('single value change inputs', () => {
+      // https://github.com/cypress-io/cypress/issues/5476
+      it('fires all keyboard events', () => {
+        const els = {
+          $date: cy.$$('input[type=date]:first'),
+        }
+
+        attachKeyListeners(els)
+
+        cy.get('input[type=date]:first')
+        .type('2019-12-10')
+
+        cy.getAll('$date', keyEvents.join(' ')).each(shouldBeCalledWithCount(10))
       })
     })
 
