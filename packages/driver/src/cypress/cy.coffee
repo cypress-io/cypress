@@ -56,6 +56,19 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
 
+  top.onerror = ->
+    cy.onUncaughtException.apply(cy, arguments)
+
+  ## Prevent Mocha from setting top.onerror which would override our handler
+  ## Since the setter will change which event handler gets invoked, we make it a noop
+  _getTopOnerror = Object.getOwnPropertyDescriptor(top, 'onerror').get
+  Object.defineProperty(top, 'onerror', {
+    set: ->
+    get: _getTopOnerror
+    configurable: false
+    enumerable: true
+  })
+
   isStopped = -> stopped
 
   onFinishAssertions = ->
@@ -108,9 +121,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     Cypress.action("app:navigation:changed", "page navigation event (#{event})")
 
   contentWindowListeners = (contentWindow) ->
-    top.onerror = ->
-      cy.onUncaughtException.apply(cy, arguments)
-
     $Listeners.bindTo(contentWindow, {
       onError: ->
         ## use a function callback here instead of direct

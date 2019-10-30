@@ -9,8 +9,20 @@
 <body>
   <script>
     setTimeout(()=>{
-      foo.bar()
+      one()
     }, 0)
+
+    function one() {
+      two()
+    }
+
+    function two() {
+      three()
+    }
+
+    function three() {
+      foo.bar()      
+    }
   </script>
 </body>
 </html>

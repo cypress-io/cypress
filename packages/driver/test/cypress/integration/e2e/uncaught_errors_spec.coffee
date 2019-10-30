@@ -113,9 +113,11 @@ describe "uncaught errors", ->
 
   ## https://github.com/cypress-io/cypress/issues/987
   it 'global onerror', (done) ->
-    cy.once 'uncaught:exception', ->
-      setTimeout ->
-        done()
-      false
+    cy.once 'uncaught:exception', (err) ->
+      expect(err.stack).contain('foo is not defined')
+      expect(err.stack).contain('one')
+      expect(err.stack).contain('two')
+      expect(err.stack).contain('three')
+      done()
 
     cy.visit('/fixtures/global-error.html')
