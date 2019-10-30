@@ -14,7 +14,7 @@ function trunc (str) {
 type DeferredPromise<T> = {
   resolve: Function
   reject: Function
-  p: Bluebird<T>
+  promise: Bluebird<T>
 }
 
 export function create () {
@@ -46,7 +46,7 @@ export function create () {
       if (typeof res === 'object') {
         debug('returning existing deferred promise for %o', { id, res })
 
-        return res.p
+        return res.promise
       }
 
       debug('already have deferred response %o', { id, res: trunc(res) })
@@ -57,7 +57,7 @@ export function create () {
 
     let deferred: Partial<DeferredPromise<string>> = {}
 
-    deferred.p = new Bluebird((resolve, reject) => {
+    deferred.promise = new Bluebird((resolve, reject) => {
       debug('do not have response, waiting %o', { id })
       deferred.resolve = resolve
       deferred.reject = reject
@@ -68,15 +68,19 @@ export function create () {
 
     incomingXhrResponses[id] = deferred as DeferredPromise<string>
 
-    return deferred.p
+    return deferred.promise
   }
 
   function reset () {
-    debug('resetting incomingXhrs')
+    debug('resetting incomingXhrs %o', { incomingXhrResponses })
 
     _.forEach(incomingXhrResponses, (res) => {
       if (typeof res !== 'string') {
-        res.reject(new Error('This stubbed XHR was pending on a stub response object from the driver, but the test ended before that happened.'))
+        const err: any = new Error('This stubbed XHR was pending on a stub response object from the driver, but the test ended before that happened.')
+
+        err.testEndedBeforeResponseReceived = true
+
+        res.reject(err)
       }
     })
 

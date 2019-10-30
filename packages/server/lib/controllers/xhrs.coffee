@@ -58,6 +58,10 @@ module.exports = {
         .set(headers)
         .status(status)
         .end(chunk)
+      .catch { testEndedBeforeResponseReceived: true }, ->
+        res
+        .socket
+        .destroy()
       .catch (err) ->
         res
         .status(400)

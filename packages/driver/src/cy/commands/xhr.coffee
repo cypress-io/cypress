@@ -249,12 +249,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## correctly
   Cypress.on("window:unload", cancelPendingXhrs)
 
+  Cypress.on "test:before:run:async", ->
+    ## reset any state on the backend
+    Cypress.backend('reset:xhr:server')
+
   Cypress.on "test:before:run", ->
     ## reset the existing server
     reset()
-
-    ## reset any state on the backend
-    Cypress.backend('reset:xhr:server')
 
     ## create the server before each test run
     ## its possible for this to fail if the
