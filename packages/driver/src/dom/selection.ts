@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import * as $dom from '../dom'
 import * as $document from './document'
 import * as $elements from './elements'
@@ -402,18 +403,20 @@ const getSelectionBounds = function (el) {
   }
 }
 
-const moveSelectionToEnd = (doc) => {
-  return _moveSelectionTo(false, doc)
-}
+const _moveSelectionTo = function (toStart: boolean, doc: Document, options = {}) {
+  const opts = _.defaults({}, options, {
+    onlyIfEmptySelection: false,
+  })
 
-const moveSelectionToStart = (doc) => {
-  return _moveSelectionTo(true, doc)
-}
-
-const _moveSelectionTo = function (toStart, doc) {
   const el = _getActive(doc)
 
   if ($elements.canSetSelectionRangeElement(el)) {
+    if (opts.onlyIfEmptySelection) {
+      const { start, end } = getSelectionBounds(el)
+
+      if (start !== end) return
+    }
+
     let cursorPosition
 
     if (toStart) {
@@ -430,6 +433,10 @@ const _moveSelectionTo = function (toStart, doc) {
   $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
   const selection = doc.getSelection()
 
+  if (!selection) {
+    return
+  }
+
   // collapsing the range doesn't work on input/textareas, since the range contains more than the input element
   // However, IE can always* set selection range, so only modern browsers (with the selection API) will need this
   const direction = toStart ? 'backward' : 'forward'
@@ -437,29 +444,10 @@ const _moveSelectionTo = function (toStart, doc) {
   selection.modify('move', direction, 'line')
 }
 
-// if $elements.isInput(el) || $elements.isTextarea(el)
-//   length = $elements.getNativeProp(el, "value").length
-//   setSelectionRange(el, length, length)
+const moveSelectionToEnd = _.curry(_moveSelectionTo)(false)
 
-// else if $elements.isContentEditable(el)
-//   ## NOTE: can't use execCommand API here because we would have
-//   ## to selectAll and then collapse so we use the Selection API
-//   # doc = $document.getDocumentFromElement(el)
-//   # range = $elements.callNativeMethod(doc, "createRange")
-//   # hostContenteditable = _getHostContenteditable(el)
-//   # lastTextNode = _getInnerLastChild(hostContenteditable)
+const moveSelectionToStart = _.curry(_moveSelectionTo)(true)
 
-//   # if lastTextNode.tagName is "BR"
-//   #   lastTextNode = lastTextNode.parentNode
-
-//   # range.setStart(lastTextNode, lastTextNode.length)
-//   # range.setEnd(lastTextNode, lastTextNode.length)
-
-//   # sel = $elements.callNativeMethod(doc, "getSelection")
-//   # $elements.callNativeMethod(sel, "removeAllRanges")
-//   # $elements.callNativeMethod(sel, "addRange", range)
-
-// TODO: think about renaming this
 const replaceSelectionContents = function (el: HTMLElement, key: string) {
   if ($elements.canSetSelectionRangeElement(el)) {
     // if ($elements.isRead)
