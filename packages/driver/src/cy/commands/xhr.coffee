@@ -87,6 +87,9 @@ startXhrServer = (cy, state, config) ->
     xhrUrl: config("xhrUrl")
     stripOrigin: stripOrigin
 
+    emitIncoming: (id, route) ->
+      Cypress.backend('incoming:xhr', id, route)
+
     ## shouldnt these stubs be called routes?
     ## rename everything related to stubs => routes
     onSend: (xhr, stack, route) =>
@@ -246,6 +249,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## correctly
   Cypress.on("window:unload", cancelPendingXhrs)
 
+  Cypress.on "test:before:run:async", ->
+    ## reset any state on the backend
+    Cypress.backend('reset:xhr:server')
+
   Cypress.on "test:before:run", ->
     ## reset the existing server
     reset()
@@ -256,7 +263,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## window such as if the last test ended
     ## with a cross origin window
     try
-      server = startXhrServer(cy, state, config)
+      server = startXhrServer(cy, state, config, Cypress)
     catch err
       ## in this case, just don't bind to the server
       server = null
