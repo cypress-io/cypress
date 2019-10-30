@@ -935,7 +935,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       snapshots.onBeforeWindowLoad()
 
-
       timers.wrap(contentWindow)
 
     onSpecWindowUncaughtException: ->
