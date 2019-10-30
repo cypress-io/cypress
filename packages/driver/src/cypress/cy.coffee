@@ -56,15 +56,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
 
-  top.onerror = ->
+  onTopError = ->
     cy.onUncaughtException.apply(cy, arguments)
+
+  top.onerror = onTopError
 
   ## Prevent Mocha from setting top.onerror which would override our handler
   ## Since the setter will change which event handler gets invoked, we make it a noop
-  _getTopOnerror = Object.getOwnPropertyDescriptor(top, 'onerror').get
   Object.defineProperty(top, 'onerror', {
     set: ->
-    get: _getTopOnerror
+    get: onTopError
     configurable: false
     enumerable: true
   })
