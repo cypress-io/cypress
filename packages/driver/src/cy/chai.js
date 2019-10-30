@@ -1,17 +1,4 @@
-/* eslint-disable
-    brace-style,
-    default-case,
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-//# tests in driver/test/cypress/integration/commands/assertions_spec.coffee
+// tests in driver/test/cypress/integration/commands/assertions_spec.coffee
 
 const _ = require('lodash')
 const $ = require('jquery')
@@ -22,12 +9,12 @@ const $dom = require('../dom')
 const $utils = require('../cypress/utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 
-//# all words between single quotes which are at
-//# the end of the string
+// all words between single quotes which are at
+// the end of the string
 const allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
 
-//# grab all words between single quotes except
-//# when the single quote word is the LAST word
+// grab all words between single quotes except
+// when the single quote word is the LAST word
 const allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
 
 const allBetweenFourStars = /\*\*.*\*\*/
@@ -68,16 +55,18 @@ chai.use((chai, u) => {
       switch (method) {
         case 'visible':
           if (!negated) {
-            //# add reason hidden unless we expect the element to be hidden
+            // add reason hidden unless we expect the element to be hidden
             const reason = $dom.getReasonIsHidden(obj)
 
             err.message += `\n\n${reason}`
           }
 
           break
+        default:
+          break
       }
 
-      //# always rethrow the error!
+      // always rethrow the error!
       throw err
     },
   })
@@ -89,18 +78,17 @@ chai.use((chai, u) => {
   existProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exist').get;
   ({ getMessage } = chaiUtils)
 
-  const removeOrKeepSingleQuotesBetweenStars = (message) =>
-  //# remove any single quotes between our **, preserving escaped quotes
-  //# and if an empty string, put the quotes back
-  {
+  // remove any single quotes between our **, preserving escaped quotes
+  // and if an empty string, put the quotes back
+  const removeOrKeepSingleQuotesBetweenStars = (message) => {
     return message.replace(allBetweenFourStars, (match) => {
       return match
       .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
       .replace(allSingleQuotes, '')
-      .replace(allQuoteMarkers, '\'') //# put escaped quotes back
+      .replace(allQuoteMarkers, '\'') // put escaped quotes back
       .replace(allQuadStars, '**\'\'**')
     })
-  } //# fix empty strings that end up as ****
+  } // fix empty strings that end up as ****
 
   const replaceArgMessages = (args, str) => {
     return _.reduce(args, (memo, value, index) => {
@@ -117,8 +105,7 @@ chai.use((chai, u) => {
       }
 
       return memo
-    }
-    , [])
+    }, [])
   }
 
   const restoreAsserts = function () {
@@ -133,23 +120,20 @@ chai.use((chai, u) => {
   }
 
   const overrideChaiAsserts = function (assertFn) {
-    let fn1; let fn2
-    const _this = this
-
     chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
 
     chaiUtils.getMessage = function (assert, args) {
       const obj = assert._obj
 
-      //# if we are formatting a DOM object
+      // if we are formatting a DOM object
       if ($dom.isDom(obj)) {
-        //# replace object with our formatted one
+        // replace object with our formatted one
         assert._obj = $dom.stringify(obj, 'short')
       }
 
       const msg = getMessage.call(this, assert, args)
 
-      //# restore the real obj if we changed it
+      // restore the real obj if we changed it
       if (obj !== assert._obj) {
         assert._obj = obj
       }
@@ -158,9 +142,9 @@ chai.use((chai, u) => {
     }
 
     chai.Assertion.overwriteMethod('match', (_super) => {
-      return (function (regExp) {
+      return (function (regExp, ...args) {
         if (_.isRegExp(regExp) || $dom.isDom(this._obj)) {
-          return _super.apply(this, arguments)
+          return _super.apply(this, [regExp, ...args])
         }
 
         const err = $utils.cypressErr($utils.errMessageByPath('chai.match_invalid_argument', { regExp }))
@@ -171,24 +155,24 @@ chai.use((chai, u) => {
     })
 
     const containFn1 = (_super) => {
-      return (function (text) {
+      return (function (text, ...args) {
         let obj = this._obj
 
         if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
-          return _super.apply(this, arguments)
+          return _super.apply(this, [text, ...args])
         }
 
         const escText = $utils.escapeQuotes(text)
 
         const selector = `:contains('${escText}'), [type='submit'][value~='${escText}']`
 
-        //# the assert checks below only work if $dom.isJquery(obj)
-        //# https://github.com/cypress-io/cypress/issues/3549
+        // the assert checks below only work if $dom.isJquery(obj)
+        // https://github.com/cypress-io/cypress/issues/3549
         if (!($dom.isJquery(obj))) {
           obj = $(obj)
         }
 
-        return this.assert(
+        this.assert(
           obj.is(selector) || !!obj.find(selector).length,
           'expected #{this} to contain #{exp}',
           'expected #{this} not to contain #{exp}',
@@ -198,25 +182,25 @@ chai.use((chai, u) => {
     }
 
     const containFn2 = (_super) => {
-      return (function () {
-        return _super.apply(this, arguments)
+      return (function (...args) {
+        _super.apply(this, args)
       })
     }
 
     chai.Assertion.overwriteChainableMethod('contain', containFn1, containFn2)
 
     chai.Assertion.overwriteChainableMethod('length',
-      (fn1 = (_super) => {
-        return (function (length) {
+      (_super) => {
+        return (function (length, ...args) {
           let obj = this._obj
 
           if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
-            return _super.apply(this, arguments)
+            return _super.apply(this, [length, ...args])
           }
 
           length = $utils.normalizeNumber(length)
 
-          //# filter out anything not currently in our document
+          // filter out anything not currently in our document
           if ($dom.isDetached(obj)) {
             obj = (this._obj = obj.filter((index, el) => {
               return $dom.isAttached(el)
@@ -225,9 +209,9 @@ chai.use((chai, u) => {
 
           const node = obj && obj.length ? $dom.stringify(obj, 'short') : obj.selector
 
-          //# if our length assertion fails we need to check to
-          //# ensure that the length argument is a finite number
-          //# because if its not, we need to bail on retrying
+          // if our length assertion fails we need to check to
+          // ensure that the length argument is a finite number
+          // because if its not, we need to bail on retrying
           try {
             return this.assert(
               obj.length === length,
@@ -260,23 +244,20 @@ chai.use((chai, u) => {
             throw e2
           }
         })
-      }
-      ),
-
-      (fn2 = (_super) => {
-        return (function () {
-          return _super.apply(this, arguments)
+      },
+      (_super) => {
+        return (function (...args) {
+          return _super.apply(this, args)
         })
-      }
-      ))
+      })
 
     return chai.Assertion.overwriteProperty('exist', (_super) => {
-      return (function () {
+      return (function (...args) {
         const obj = this._obj
 
         if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
           try {
-            return _super.apply(this, arguments)
+            return _super.apply(this, args)
           } catch (e) {
             e.type = 'existence'
             throw e
@@ -304,7 +285,7 @@ chai.use((chai, u) => {
             e1.type = 'existence'
 
             const getLongExistsMessage = function (obj) {
-              //# if we expected not for an element to exist
+              // if we expected not for an element to exist
               if (isAttached) {
                 return `Expected ${node} not to exist in the DOM, but it was continuously found.`
               }
@@ -348,14 +329,12 @@ chai.use((chai, u) => {
     })
   }
 
-  const overrideExpect = () =>
-  //# only override assertions for this specific
-  //# expect function instance so we do not affect
-  //# the outside world
-  {
-    return (val, message) =>
-    //# make the assertion
-    {
+  // only override assertions for this specific
+  // expect function instance so we do not affect
+  // the outside world
+  const overrideExpect = () => {
+    // make the assertion
+    return (val, message) => {
       return new chai.Assertion(val, message)
     }
   }
@@ -368,8 +347,8 @@ chai.use((chai, u) => {
     const fns = _.functions(chai.assert)
 
     _.each(fns, (name) => {
-      return fn[name] = function () {
-        return chai.assert[name].apply(this, arguments)
+      return fn[name] = function (...args) {
+        return chai.assert[name].apply(this, args)
       }
     })
 
