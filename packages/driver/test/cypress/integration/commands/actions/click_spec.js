@@ -4209,8 +4209,8 @@ describe('mouse state', () => {
 
       cy.wrap(null)
       .should(() => {
-        spyTableName.reset()
-        spyTableData.reset()
+        spyTableName.resetHistory()
+        spyTableData.resetHistory()
 
         return withMutableReporterState(() => {
           const commandLogEl = getCommandLogWithText('click')
