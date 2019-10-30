@@ -52,12 +52,19 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
-create = (specWindow, Cypress, Cookies, state, config, log) ->
-  stopped = false
-  commandFns = {}
+
+## We only set top.onerror once since we make it configurable:false
+## but we update cy instance every run (page reload or rerun button)
+curCy = null
+setTopOnError = (cy) ->
+  if curCy
+    curCy = cy
+    return
+  
+  curCy = cy
 
   onTopError = ->
-    cy.onUncaughtException.apply(cy, arguments)
+    curCy.onUncaughtException.apply(curCy, arguments)
 
   top.onerror = onTopError
 
@@ -69,6 +76,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     configurable: false
     enumerable: true
   })
+  
+
+create = (specWindow, Cypress, Cookies, state, config, log) ->
+  stopped = false
+  commandFns = {}
 
   isStopped = -> stopped
 
@@ -1121,6 +1133,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           args: obj
         })
     })
+  
+  setTopOnError(cy)
 
   ## make cy global in the specWindow
   specWindow.cy = cy
