@@ -976,6 +976,24 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
+  context('format', () => {
+    it('format number strings', function (done) {
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'assert') {
+          cy.removeAllListeners('log:added')
+
+          expect(log.get('message')).to.eq('expected **25** to equal **\'25\'**')
+
+          done()
+        }
+      })
+
+      cy.then(() => {
+        expect(25).to.eq('25')
+      })
+    })
+  })
+
   context('chai overrides', () => {
     beforeEach(function () {
       this.$body = cy.$$('body')
