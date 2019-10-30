@@ -781,7 +781,7 @@ describe "src/cy/commands/xhr", ->
       it "sets err on log when caused by code errors", (done) ->
         finalThenCalled = false
         uncaughtException = cy.stub().returns(true)
-        Cypress.on 'uncaught:exception', uncaughtException
+        cy.on 'uncaught:exception', uncaughtException
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
