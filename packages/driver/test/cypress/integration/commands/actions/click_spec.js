@@ -1,10 +1,14 @@
-const $ = Cypress.$.bind(Cypress)
-const { _ } = Cypress
-const { Promise } = Cypress
-const chaiSubset = require('chai-subset')
-const { getCommandLogWithText, findReactInstance, withMutableReporterState, clickCommandLog } = require('../../../support/utils')
-
-chai.use(chaiSubset)
+const { _, $, Promise } = Cypress
+const { getCommandLogWithText,
+  findReactInstance,
+  withMutableReporterState,
+  clickCommandLog,
+  attachListeners,
+  shouldBeCalledWithCount,
+  shouldBeCalled,
+  shouldBeCalledOnce,
+  shouldNotBeCalled,
+} = require('../../../support/utils')
 
 const fail = function (str) {
   throw new Error(str)
@@ -25,41 +29,11 @@ const mouseHoverEvents = [
 ]
 const focusEvents = ['focus', 'focusin']
 
-const attachListeners = (listenerArr) => {
-  return (els) => {
-    _.each(els, (el, elName) => {
-      return listenerArr.forEach((evtName) => {
-        el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
-      })
-    })
-  }
-}
-
 const attachFocusListeners = attachListeners(focusEvents)
 const attachMouseClickListeners = attachListeners(mouseClickEvents)
 const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
 const attachMouseDblclickListeners = attachListeners(['dblclick'])
 const attachContextmenuListeners = attachListeners(['contextmenu'])
-
-const getAllFn = (...aliases) => {
-  if (aliases.length > 1) {
-    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
-  }
-
-  return Cypress.Promise.all(
-    aliases[0].split(' ').map((alias) => {
-      return cy.now('get', alias)
-    })
-  )
-}
-
-Cypress.Commands.add('getAll', getAllFn)
-
-const wrapped = (obj) => cy.wrap(obj, { log: false })
-const shouldBeCalled = (stub) => wrapped(stub).should('be.called')
-const shouldBeCalledOnce = (stub) => wrapped(stub).should('be.calledOnce')
-const shouldBeCalledWithCount = (num) => (stub) => wrapped(stub).should('have.callCount', num)
-const shouldNotBeCalled = (stub) => wrapped(stub).should('not.be.called')
 
 const overlayStyle = { position: 'fixed', top: 0, width: '100%', height: '100%', opacity: 0.5 }
 
