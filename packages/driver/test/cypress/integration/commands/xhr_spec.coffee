@@ -2,11 +2,6 @@ _ = Cypress._
 $ = Cypress.$
 Promise = Cypress.Promise
 
-uncaughtExceptionHookCalled = false
-
-Cypress.on 'uncaught:exception', ->
-  uncaughtExceptionHookCalled = true
-
 describe "src/cy/commands/xhr", ->
   before ->
     cy
@@ -19,7 +14,6 @@ describe "src/cy/commands/xhr", ->
         @body = win.document.body.outerHTML
 
   beforeEach ->
-    uncaughtExceptionHookCalled = false
     doc = cy.state("document")
 
     $(doc.head).empty().html(@head)
@@ -786,6 +780,8 @@ describe "src/cy/commands/xhr", ->
 
       it "sets err on log when caused by code errors", (done) ->
         finalThenCalled = false
+        uncaughtException = cy.stub().returns(true)
+        Cypress.on 'uncaught:exception', uncaughtException
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
@@ -795,7 +791,7 @@ describe "src/cy/commands/xhr", ->
           expect(lastLog.get("error").message).contain('foo is not defined')
           ## since this is AUT code, we should allow error to be caught in 'uncaught:exception' hook
           ## https://github.com/cypress-io/cypress/issues/987
-          expect(uncaughtExceptionHookCalled).eql(true)
+          expect(uncaughtException).calledOnce
           done()
 
         cy
