@@ -89,6 +89,8 @@ module.exports = {
   getResponse: (resp, config) ->
     if resp.then
       return resp
+      .then (data) =>
+        { data }
 
     if fixturesRe.test(resp)
       return @_get(resp, config)

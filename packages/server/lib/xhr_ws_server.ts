@@ -28,9 +28,7 @@ export function create () {
 
     if (deferred && typeof deferred !== 'string') {
       // request came before response, resolve with it
-      return deferred.resolve({
-        data,
-      })
+      return deferred.resolve(data)
     }
 
     // response came before request, cache the data

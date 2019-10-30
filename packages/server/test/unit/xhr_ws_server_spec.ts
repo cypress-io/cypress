@@ -23,8 +23,8 @@ describe('lib/xhr_ws_server', function () {
 
       xhrServer.onIncomingXhr('foo', 'bar')
 
-      await expect(p).to.eventually.deep.eq({ data: 'bar' })
-      await expect(q).to.eventually.deep.eq({ data: 'bar' })
+      await expect(p).to.eventually.deep.eq('bar')
+      await expect(q).to.eventually.deep.eq('bar')
     })
 
     it('rejects a response when incomingXhr is received and test gets reset', function () {
