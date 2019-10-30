@@ -1,5 +1,4 @@
 _            = require("lodash")
-exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
 concatStream = require("concat-stream")
@@ -31,6 +30,7 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -85,11 +85,7 @@ class Server
 
     ## since we use absolute paths, configure express-handlebars to not automatically find layouts
     ## https://github.com/cypress-io/cypress/issues/2891
-    app.engine("html", exphbs({
-      defaultLayout: false
-      layoutsDir: []
-      partialsDir: []
-    }))
+    app.engine("html", templateEngine.render)
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server

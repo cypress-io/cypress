@@ -607,7 +607,10 @@ jobs:
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
-          command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
+          # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
+          # won't be set and we will use default version, since we are not going to
+          # upload the dev binary build anywhere
+          command: npm run binary-build -- --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run: npm run binary-zip -- --platform $PLATFORM
       # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
@@ -713,7 +716,7 @@ jobs:
           at: ~/
       - run:
           name: bump NPM version
-          command: npm --no-git-tag-version version $NEXT_DEV_VERSION
+          command: npm --no-git-tag-version version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
           working_directory: cli
@@ -735,8 +738,8 @@ jobs:
           command: ls -l
       # created file should have filename cypress-<version>.tgz
       - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz cypress.tgz
-      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
+      - run: cp cli/build/cypress-${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
+      - run: cp cli/build/cypress-${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
       - run: ls -l /tmp/urls
       - store-npm-logs
       - run: pwd
@@ -1114,11 +1117,20 @@ mac-workflow: &mac-workflow
     - build:
         name: Mac build
         executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+        
     - lint:
         name: Mac lint
         executor: mac
         requires:
           - Mac build
+        filters:
+          branches:
+            only:
+              - develop
 
     # maybe run unit tests?
 
@@ -1127,6 +1139,10 @@ mac-workflow: &mac-workflow
         executor: mac
         requires:
           - Mac build
+        filters:
+          branches:
+            only:
+              - develop
 
     - upload-npm-package:
         name: Mac NPM package upload
@@ -1164,6 +1180,10 @@ mac-workflow: &mac-workflow
     - test-kitchensink:
         name: Test Mac Kitchensink
         executor: mac
+        filters:
+          branches:
+            only:
+              - develop
         requires:
           - Mac build
 
