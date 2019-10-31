@@ -237,7 +237,7 @@ const shouldIgnoreEvent = <
 }
 
 const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
-  if (!key.text) return true
+  if (!key.text) return false
 
   const bounds = $selection.getSelectionBounds(el)
   const noneSelected = bounds.start === bounds.end
@@ -681,7 +681,9 @@ export class Keyboard {
               const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
 
               _.each(keysToType, (key) => {
-                key.simulatedDefaultOnly = true
+                // singleValueChange inputs must have their value set once at the end
+                // performing the simulatedDefault for a key would try to insert text on each character
+                // we still send all the events as normal, however
                 key.simulatedDefault = _.noop
               })
 
@@ -703,8 +705,9 @@ export class Keyboard {
             debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
           }
 
-          if (key.simulatedDefaultOnly && key.simulatedDefault) {
-            key.simulatedDefault(activeEl, key, options)
+          // simulatedDefaultOnly keys will not send any events, and cannot be canceled
+          if (key.simulatedDefaultOnly) {
+            key.simulatedDefault!(activeEl, key, options)
 
             return null
           }

@@ -17,12 +17,12 @@
       })(window.opener || window.parent);
     </script>
 
-    {{#each javascripts}}
-      <script type="text/javascript" src="{{{this}}}"></script>
+    {{each(options.javascripts)}}
+      <script type="text/javascript" src="{{@this}}"></script>
     {{/each}}
 
-    {{#each specs}}
-      <script type="text/javascript" src="{{{this}}}"></script>
+    {{each(options.specs)}}
+      <script type="text/javascript" src="{{@this}}"></script>
     {{/each}}
   </body>
 </html>

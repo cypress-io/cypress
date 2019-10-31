@@ -1114,11 +1114,20 @@ mac-workflow: &mac-workflow
     - build:
         name: Mac build
         executor: mac
+        filters:
+          branches:
+            only:
+              - develop
+        
     - lint:
         name: Mac lint
         executor: mac
         requires:
           - Mac build
+        filters:
+          branches:
+            only:
+              - develop
 
     # maybe run unit tests?
 
@@ -1127,6 +1136,10 @@ mac-workflow: &mac-workflow
         executor: mac
         requires:
           - Mac build
+        filters:
+          branches:
+            only:
+              - develop
 
     - upload-npm-package:
         name: Mac NPM package upload
@@ -1164,6 +1177,10 @@ mac-workflow: &mac-workflow
     - test-kitchensink:
         name: Test Mac Kitchensink
         executor: mac
+        filters:
+          branches:
+            only:
+              - develop
         requires:
           - Mac build
 
