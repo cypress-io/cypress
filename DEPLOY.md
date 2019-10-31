@@ -146,7 +146,7 @@ Once all test projects are reliably working with new changes, publishing can pro
     npm run binary-release -- --version 3.4.0 --commit`
     ```
 9. If needed, push out the updated changes to the docs manifest to `on.cypress.io`.
-10. If needed, push out an updated [`cypress-example-kitchensink`][cypress-example-kitchensink] on `example.cypress.io`
+10. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
 11. Close the release in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release).
 12. Bump `version` in `package.json` and commit it to `develop` using a commit message like `release 3.4.0 [skip ci]`
 13. Tag this commit with `v3.4.0` and push that tag up.
