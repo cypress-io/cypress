@@ -991,7 +991,6 @@ jobs:
       - store-npm-logs
 
   win-build:
-    executor: win/vs2019
     steps:
       - win-prebuild
       - build
