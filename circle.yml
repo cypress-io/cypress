@@ -238,7 +238,8 @@ commands:
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
       - run: npm run check-terminal
 
-      - run: npm run stop-only-all
+      ## TODO: this is busted on windows
+      # - run: npm run stop-only-all
 
       - restore-caches
 
