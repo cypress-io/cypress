@@ -18,6 +18,8 @@ function getNameAndBinary (args = process.argv) {
     console.log('loading NPM url from', options.npm)
     npm = require(path.resolve(options.npm)).url
     la(is.url(npm), 'not an url', npm)
+  } else {
+    console.log('NPM option "%s" is not a file', options.npm)
   }
 
   let binary = options.binary
@@ -26,6 +28,8 @@ function getNameAndBinary (args = process.argv) {
     console.log('loading binary url from', options.binary)
     binary = require(path.resolve(options.binary)).url
     la(is.url(binary), 'not an url', binary)
+  } else {
+    console.log('binary option "%s" is not a file', options.binary)
   }
 
   return {
