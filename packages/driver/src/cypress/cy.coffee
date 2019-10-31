@@ -52,6 +52,32 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
+
+## We only set top.onerror once since we make it configurable:false
+## but we update cy instance every run (page reload or rerun button)
+curCy = null
+setTopOnError = (cy) ->
+  if curCy
+    curCy = cy
+    return
+  
+  curCy = cy
+
+  onTopError = ->
+    curCy.onUncaughtException.apply(curCy, arguments)
+
+  top.onerror = onTopError
+
+  ## Prevent Mocha from setting top.onerror which would override our handler
+  ## Since the setter will change which event handler gets invoked, we make it a noop
+  Object.defineProperty(top, 'onerror', {
+    set: ->
+    get: -> onTopError
+    configurable: false
+    enumerable: true
+  })
+  
+
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
@@ -1113,6 +1139,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           args: obj
         })
     })
+  
+  setTopOnError(cy)
 
   ## make cy global in the specWindow
   specWindow.cy = cy
