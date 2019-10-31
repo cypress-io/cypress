@@ -230,6 +230,9 @@ commands:
             Expand-Archive nvm.zip -DestinationPath .\
             ./nvm install $env:nodejs_version << parameters.arch >>
             ./nvm use $env:nodejs_version << parameters.arch >>
+      - run:
+          shell: cmd.exe
+          command: |
             # upgrade npm
             npm install -g npm@6
             npm install -g @bahmutov/print-env@1
@@ -264,7 +267,7 @@ commands:
     description: windows-specific test steps
     steps:
       - run:
-          shell: powershell.exe
+          shell: cmd.exe
           command: |
             # Output useful info for debugging.
             # beware of echo-ing environment variables that may have batch syntax (e.g. commit messages)
