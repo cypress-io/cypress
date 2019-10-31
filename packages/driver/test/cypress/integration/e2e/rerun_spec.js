@@ -21,7 +21,7 @@ describe('rerun state bugs', () => {
   it('stores viewport globally and does not hang on re-runs', () => {
     cy.viewport(500, 500).then(() => {
       if (!window.top.hasRunOnce) {
-      // turn off mocha events for a second
+        // turn off mocha events for a second
         Cypress.config('isTextTerminal', false)
 
         // 1st time around
