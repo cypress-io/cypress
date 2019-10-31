@@ -214,6 +214,59 @@ commands:
           packageName: web-config
           packagePath: packages/web-config/package.json
 
+  build:
+    - steps:
+      - checkout
+      - run:
+          name: Print working folder
+          command: echo $PWD
+      - run:
+          name: print global NPM cache path
+          command: echo $(npm -g bin)
+      - run:
+          name: print Node version
+          command: node -v
+      - run:
+          name: print NPM version
+          command: npm -v
+      - run: npm run check-node-version
+
+      ## make sure the TERM is set to 'xterm' in node (Linux only)
+      ## else colors (and tests) will fail
+      ## See the following information
+      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+      - run: npm run check-terminal
+
+      - run: npm run stop-only-all
+
+      - restore-caches
+
+      # show what is already cached globally
+      - run: ls $(npm -g bin)
+      - run: ls $(npm -g bin)/../lib/node_modules
+
+      # Install the root packages
+      # Link sup packages in ./node_modules/@packages/*
+      # Install sub packages dependencies and build all sub packages via postinstall script
+      # try several times, because flaky NPM installs ...
+      - run: npm install || npm install
+      - run:
+          name: Top level packages
+          command: npm ls --depth=0 || true
+
+      # Prune so we do not save removed dependencies to cache
+      - run: npm run all prune
+
+      - save-caches
+      - store-npm-logs
+
+      ## save entire folder as artifact for other jobs to run without reinstalling
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress
+
   win-prebuild:
     description: windows-specific prebuild steps
     steps:
@@ -270,56 +323,7 @@ jobs:
   build:
     <<: *defaults
     steps:
-      - checkout
-      - run:
-          name: Print working folder
-          command: echo $PWD
-      - run:
-          name: print global NPM cache path
-          command: echo $(npm -g bin)
-      - run:
-          name: print Node version
-          command: node -v
-      - run:
-          name: print NPM version
-          command: npm -v
-      - run: npm run check-node-version
-
-      ## make sure the TERM is set to 'xterm' in node (Linux only)
-      ## else colors (and tests) will fail
-      ## See the following information
-      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
-      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run: npm run check-terminal
-
-      - run: npm run stop-only-all
-
-      - restore-caches
-
-      # show what is already cached globally
-      - run: ls $(npm -g bin)
-      - run: ls $(npm -g bin)/../lib/node_modules
-
-      # Install the root packages
-      # Link sup packages in ./node_modules/@packages/*
-      # Install sub packages dependencies and build all sub packages via postinstall script
-      # try several times, because flaky NPM installs ...
-      - run: npm install || npm install
-      - run:
-          name: Top level packages
-          command: npm ls --depth=0 || true
-
-      # Prune so we do not save removed dependencies to cache
-      - run: npm run all prune
-
-      - save-caches
-      - store-npm-logs
-
-      ## save entire folder as artifact for other jobs to run without reinstalling
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress
+      - build
 
   lint:
     <<: *defaults
