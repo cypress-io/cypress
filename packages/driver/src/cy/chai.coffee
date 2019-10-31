@@ -18,6 +18,7 @@ allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
 allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
 
 allBetweenFourStars = /\*\*.*\*\*/
+allNumberStrings = /'([0-9]+)'/g
 allSingleQuotes = /'/g
 allEscapedSingleQuotes = /\\'/g
 allQuoteMarkers = /__quote__/g
@@ -74,6 +75,7 @@ chai.use (chai, u) ->
     ## and if an empty string, put the quotes back
     message.replace allBetweenFourStars, (match) ->
       match
+        .replace(allNumberStrings, "__quote__$1__quote__")
         .replace(allEscapedSingleQuotes, "__quote__") # preserve escaped quotes
         .replace(allSingleQuotes, "")
         .replace(allQuoteMarkers, "'") ## put escaped quotes back

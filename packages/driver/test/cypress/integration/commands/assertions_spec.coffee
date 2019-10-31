@@ -742,6 +742,18 @@ describe "src/cy/commands/assertions", ->
       assert.isFalse(false, "is false")
       expect(@logs[0].get("message")).to.eq("is false: expected **false** to be false")
 
+  context "format", ->
+    it "format number strings", (done) -> 
+      cy.on "log:added", (attrs, log) ->
+        if attrs.name is "assert"
+          cy.removeAllListeners("log:added")
+
+          expect(log.get("message")).to.eq "expected **25** to equal **\'25\'**"
+          done()
+
+      cy.then ->
+        expect(25).to.eq('25')
+
   context "chai overrides", ->
     beforeEach ->
       @$body = cy.$$("body")
