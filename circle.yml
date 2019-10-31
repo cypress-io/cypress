@@ -1025,6 +1025,7 @@ jobs:
     environment:
       npm_config_target_arch: ia32
     steps:
+      - checkout
       - win-install:
           arch: ia32
       - win-test
@@ -1034,6 +1035,7 @@ jobs:
     environment:
       npm_config_target_arch: x64
     steps:
+      - checkout
       - win-install:
           arch: x64
       - win-test
