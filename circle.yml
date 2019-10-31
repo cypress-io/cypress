@@ -129,7 +129,7 @@ commands:
       - save_cache:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-chrome
           paths:
-            - ~/chrome_installers
+            - google-chrome-stable_current_amd64.deb
       - save-cache:
           packageName: coffee
       - save-cache:
@@ -295,17 +295,10 @@ jobs:
       - run:
           name: "Download Google Chrome (stable) intaller"
           command: |
-            mkdir -p ~/chrome_installers
-            echo $OSTYPE
-            if [ ! -d "~/chrome_installers/google-chrome-stable.dmg" ] && [ "$OSTYPE" == "darwin"* ]; then
-              curl https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg > ~/chrome_installers/google-chrome-stable.dmg
-            fi
-            if [ ! -d "~/chrome_installers/google-chrome-stable_current_amd64.deb" ] && [ "$OSTYPE" == "linux"* ]; then
-              wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-              mv google-chrome-stable_current_amd64.deb ~/chrome_installers
-            fi
+            cd ~/
+            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            cp *.deb cypress
             ls -lath .
-            ls -lath ~/chrome_installers
 
       - save-caches
       - store-npm-logs
@@ -315,7 +308,6 @@ jobs:
           root: ~/
           paths:
             - cypress
-            - chrome_installers
 
   lint:
     <<: *defaults
