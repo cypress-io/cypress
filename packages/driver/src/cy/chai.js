@@ -18,6 +18,7 @@ const allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
 const allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
 
 const allBetweenFourStars = /\*\*.*\*\*/
+const allNumberStrings = /'([0-9]+)'/g
 const allSingleQuotes = /'/g
 const allEscapedSingleQuotes = /\\'/g
 const allQuoteMarkers = /__quote__/g
@@ -83,6 +84,7 @@ chai.use((chai, u) => {
   const removeOrKeepSingleQuotesBetweenStars = (message) => {
     return message.replace(allBetweenFourStars, (match) => {
       return match
+      .replace(allNumberStrings, '__quote__$1__quote__')
       .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
       .replace(allSingleQuotes, '')
       .replace(allQuoteMarkers, '\'') // put escaped quotes back
