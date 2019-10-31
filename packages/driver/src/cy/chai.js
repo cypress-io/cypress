@@ -19,6 +19,7 @@ const allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
 
 const allBetweenFourStars = /\*\*.*\*\*/
 const allNumberStrings = /'([0-9]+)'/g
+const allEmptyStrings = /''/g
 const allSingleQuotes = /'/g
 const allEscapedSingleQuotes = /\\'/g
 const allQuoteMarkers = /__quote__/g
@@ -79,18 +80,18 @@ chai.use((chai, u) => {
   existProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exist').get;
   ({ getMessage } = chaiUtils)
 
-  // remove any single quotes between our **, preserving escaped quotes
-  // and if an empty string, put the quotes back
+  // remove any single quotes between our **,
+  // except escaped quotes, empty strings and number strings.
   const removeOrKeepSingleQuotesBetweenStars = (message) => {
     return message.replace(allBetweenFourStars, (match) => {
       return match
-      .replace(allNumberStrings, '__quote__$1__quote__')
       .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
+      .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')
+      .replace(allEmptyStrings, '__quote____quote__') // preserve empty strings (e.g. '')
       .replace(allSingleQuotes, '')
       .replace(allQuoteMarkers, '\'') // put escaped quotes back
-      .replace(allQuadStars, '**\'\'**')
     })
-  } // fix empty strings that end up as ****
+  }
 
   const replaceArgMessages = (args, str) => {
     return _.reduce(args, (memo, value, index) => {
@@ -100,6 +101,9 @@ chai.use((chai, u) => {
         .replace(allEscapedSingleQuotes, '__quote__')
         .replace(allButLastWordsBetweenSingleQuotes, '**$1**$2')
         .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
+        // when a value has ** in it, **** are sometimes created after the process above.
+        // remove them with this.
+        .replace(allQuadStars, '**')
 
         memo.push(value)
       } else {

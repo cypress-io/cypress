@@ -976,8 +976,8 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
-  context('format', () => {
-    it('format number strings', function (done) {
+  context('format quotation marks', () => {
+    it('preserves quotation marks in number strings', function (done) {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
@@ -993,6 +993,28 @@ describe('src/cy/commands/assertions', () => {
           expect(25).to.eq('25')
         } catch (error) {} /* eslint-disable-line no-empty */
       })
+    })
+
+    it('preserves quotation marks in empty string', function () {
+      try {
+        expect(42).to.eq('')
+      } catch (error) {} /* eslint-disable-line no-empty */
+    })
+
+    it('preserves quotation marks if escaped', function () {
+      expect('\'cypress\'').to.eq('\'cypress\'')
+    })
+
+    it('removes quotation marks in DOM elements', function () {
+      cy.get('body').should('contain', 'div')
+    })
+
+    it('removes quotation marks in strings', function () {
+      expect('cypress').to.eq('cypress')
+    })
+
+    it('removes quotation marks in objects', function () {
+      expect({ foo: 'bar' }).to.deep.eq({ foo: 'bar' })
     })
   })
 
