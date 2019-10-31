@@ -3,7 +3,6 @@ require('../../spec_helper')
 const _ = require('lodash')
 const cp = require('child_process')
 const os = require('os')
-const snapshot = require('snap-shot-it')
 const tty = require('tty')
 const path = require('path')
 const EE = require('events')
@@ -288,7 +287,14 @@ describe('lib/exec/spawn', function () {
 
       return spawn.start([], { env: {} })
       .then(() => {
-        snapshot(cp.spawn.firstCall.args[2].env)
+        expect(cp.spawn.firstCall.args[2].env).to.deep.eq({
+          FORCE_COLOR: '1',
+          DEBUG_COLORS: '1',
+          MOCHA_COLORS: '1',
+          FORCE_STDERR_TTY: '1',
+          FORCE_STDIN_TTY: '1',
+          FORCE_STDOUT_TTY: '1',
+        })
       })
     })
 
@@ -320,7 +326,13 @@ describe('lib/exec/spawn', function () {
 
       return spawn.start([], { env: {} })
       .then(() => {
-        snapshot(cp.spawn.firstCall.args[2].env)
+        expect(cp.spawn.firstCall.args[2].env).to.deep.eq({
+          FORCE_COLOR: '0',
+          DEBUG_COLORS: '0',
+          FORCE_STDERR_TTY: '0',
+          FORCE_STDIN_TTY: '0',
+          FORCE_STDOUT_TTY: '0',
+        })
       })
     })
 
