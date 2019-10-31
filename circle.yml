@@ -993,6 +993,7 @@ jobs:
   win-build:
     <<: *defaults
     parameters:
+      <<: *defaults.parameters
       arch:
         type: string
     environment:
