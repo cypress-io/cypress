@@ -214,46 +214,22 @@ commands:
           packageName: web-config
           packagePath: packages/web-config/package.json
 
-  win-install:
-    description: windows-specific install steps
-    parameters:
-      arch:
-        description: arch of node to install
-        type: string
+  win-prebuild:
+    description: windows-specific prebuild steps
     steps:
       - run:
           environment:
             nodejs_version: "12.0.0"
-          shell: powershell.exe
-          command: |
-            choco install nvm
-            nvm install $env:nodejs_version << parameters.arch >>
-            nvm use $env:nodejs_version << parameters.arch >>
-      - run:
           shell: bash.exe
           command: |
             set -ev
-            # Output useful info for debugging.
-            node --version
-            npm --version
-            7z
-            # prints all public variables relevant to the build
-            npm run check-node-version
-            # clean cache to prevent install permission issues
-            npm cache clean --force
-            # install root modules only, and retry automatically if install fails
-            npm run preinstall
-            npm install --ignore-scripts || npm install --ignore-scripts || npm install --ignore-scripts
-            ./node_modules/.bin/print-arch
-            # because we skipped scripts, we need to do
-            # everything from "postinstall" script as commands
-            npm run link
-            # install every package one by one
-            # try to do several attempts, because on AppVeyor random install errors happen
-            npm run all install -- --serial || npm run all install -- --serial || npm run all install -- --serial
-            # - npm prune
-            # - npm run all prune -- --serial
-            npm run all build -- --serial
+            choco install nvm
+            nvm install $nodejs_version $TARGET_ARCH
+            nvm use $nodejs_version $TARGET_ARCH
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress
 
   win-test:
     description: windows-specific test steps
@@ -1014,25 +990,11 @@ jobs:
           command: DEBUG=cypress:cli $(npm bin)/cypress run
       - store-npm-logs
 
-  win-ia32:
+  win-build:
     executor: win/vs2019
-    environment:
-      npm_config_target_arch: ia32
     steps:
-      - checkout
-      - win-install:
-          arch: ia32
-      - win-test
-
-  win-x64:
-    executor: win/vs2019
-    environment:
-      npm_config_target_arch: x64
-    steps:
-      - checkout
-      - win-install:
-          arch: x64
-      - win-test
+      - win-prebuild
+      - build
 
 linux-workflow: &linux-workflow
   jobs:
@@ -1322,8 +1284,72 @@ mac-workflow: &mac-workflow
 
 win-workflow: &win-workflow
   jobs:
-    - win-ia32
-    - win-x64
+    - win-build:
+        name: win-build-ia32
+        executor: win/vs2019
+        environment:
+          TARGET_ARCH: ia32
+
+    - build-npm-package:
+        name: win-build-npm-package-ia32
+        executor: win/vs2019
+        requires:
+          - win-build-ia32
+
+    - upload-npm-package:
+        name: win-upload-npm-package-ia32
+        context: test-runner:upload
+        executor: win/vs2019
+        requires:
+          - win-build-npm-package-ia32
+
+    - build-binary:
+        name: win-build-binary-ia32
+        context: org-global
+        executor: win/vs2019
+        requires:
+          - win-build-ia32
+
+    - upload-binary:
+        name: win-upload-binary-ia32
+        executor: win/vs2019
+        context: test-runner:upload
+        requires:
+          - win-build-binary-ia32
+
+    - win-build:
+        name: win-build-x64
+        executor: win/vs2019
+        environment:
+          TARGET_ARCH: x64
+
+    - build-npm-package:
+        name: win-build-npm-package-x64
+        executor: win/vs2019
+        requires:
+          - win-build-x64
+
+    - upload-npm-package:
+        name: win-upload-npm-package-x64
+        context: test-runner:upload
+        executor: win/vs2019
+        requires:
+          - win-build-npm-package-x64
+
+    - build-binary:
+        name: win-build-binary-x64
+        context: org-global
+        executor: win/vs2019
+        requires:
+          - win-build-x64
+
+    - upload-binary:
+        name: win-upload-binary-x64
+        executor: win/vs2019
+        context: test-runner:upload
+        requires:
+          - win-build-binary-x64
+
 
 workflows:
   linux:
