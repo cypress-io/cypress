@@ -41,17 +41,18 @@
     "start": "node $(yarn bin cypress) open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components --exclude e2e.coffee",
     "stop-only-all": "yarn stop-only --folder packages",
-    "test": "yarn lerna run test --stream --parallel --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,network,reporter,runner,socket,static}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,network,reporter,runner,socket,static}'\"",
     "test-debug-package": "node ./scripts/test-debug-package.js",
-    "test-e2e": "lerna run test-e2e --stream",
-    "test-integration": "lerna run test-integration --stream",
+    "test-e2e": "lerna exec yarn test-e2e --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
+    "test-integration": "lerna exec yarn test-integration --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js",
     "test-s3-api": "node -r ./packages/coffee/register -r ./packages/ts/register scripts/binary/s3-api-demo.ts",
     "test-scripts": "mocha -r packages/coffee/register -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-scripts-watch": "yarn test-scripts --watch --watch-extensions 'ts,js,coffee'",
-    "test-unit": "lerna run test-unit --parallel --stream",
-    "watch": "lerna run watch --parallel --stream"
+    "test-unit": "lerna exec yarn test-unit --ignore \"'@packages/{coffee,launcher,desktop-gui,driver,root,static,web-config}'\"",
+    "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
+    "watch": "lerna exec yarn watch --parallel --stream"
   },
   "husky": {
     "hooks": {
@@ -80,7 +81,6 @@
     "@types/sinon-chai": "3.2.2",
     "@typescript-eslint/eslint-plugin": "1.11.0",
     "@typescript-eslint/parser": "1.11.0",
-    "ansi-styles": "3.2.1",
     "arg": "4.1.0",
     "ascii-table": "0.0.9",
     "aws-sdk": "2.447.0",
