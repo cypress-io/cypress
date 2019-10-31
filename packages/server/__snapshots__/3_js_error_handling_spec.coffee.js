@@ -14,7 +14,7 @@ exports['e2e js error handling / fails'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: js_error_handling_failing_spec.coffee...                                        (1 of 1) 
+  Running:  js_error_handling_failing_spec.coffee                                           (1 of 1)
 
 
   s1
@@ -50,7 +50,15 @@ https://on.cypress.io/uncaught-exception-from-application
       at stack trace line
 
   2) s1 without an afterEach hook t2:
-     ReferenceError: bar is not defined
+     Uncaught ReferenceError: bar is not defined
+
+This error originated from your application code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
+
+https://on.cypress.io/uncaught-exception-from-application
       at stack trace line
       at stack trace line
       at stack trace line
@@ -105,32 +113,38 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Results)
 
-  ┌─────────────────────────────────────────────────────┐
-  │ Tests:        8                                     │
-  │ Passing:      3                                     │
-  │ Failing:      5                                     │
-  │ Pending:      0                                     │
-  │ Skipped:      0                                     │
-  │ Screenshots:  5                                     │
-  │ Video:        true                                  │
-  │ Duration:     X seconds                             │
-  │ Spec Ran:     js_error_handling_failing_spec.coffee │
-  └─────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        8                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      5                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  5                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     js_error_handling_failing_spec.coffee                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t1 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- without an afterEach hook -- t2 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t4 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- with an afterEach hook -- t5 (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cross origin script errors -- explains where script errored (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wit     (1280x720)
+     hout an afterEach hook -- t1 (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wit     (1280x720)
+     hout an afterEach hook -- t2 (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wit     (1280x720)
+     h an afterEach hook -- t4 (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- wit     (1280x720)
+     h an afterEach hook -- t5 (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.coffee/s1 -- cro     (1280x720)
+     ss origin script errors -- explains where script errored (failed).png                          
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/js_error_handling_failing_spec.     (X second)
+                          coffee.mp4                                                                
 
 
 ====================================================================================================
@@ -138,11 +152,12 @@ https://on.cypress.io/uncaught-exception-from-application
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ js_error_handling_failing_spec.coffee     XX:XX        8        3        5        -        - │
+  │ ✖  js_error_handling_failing_spec.coff      XX:XX        8        3        5        -        - │
+  │    ee                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        8        3        5        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        8        3        5        -        -  
 
 
 `

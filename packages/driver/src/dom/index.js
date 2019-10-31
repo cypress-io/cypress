@@ -9,7 +9,7 @@ const { isWindow, getWindowByElement } = $window
 const { isDocument, getDocumentFromElement } = $document
 const { wrap, unwrap, isJquery, query } = $jquery
 const { isVisible, isHidden, getReasonIsHidden } = $visibility
-const { isType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent } = $elements
+const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent } = $elements
 const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
 const { getHostContenteditable, getSelectionBounds } = require('./selection')
 const isDom = (obj) => {
@@ -26,7 +26,7 @@ module.exports = {
   query,
   unwrap,
   isDom,
-  isType,
+  isInputType,
   isVisible,
   isHidden,
   isFocusable,
