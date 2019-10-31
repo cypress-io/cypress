@@ -44,6 +44,9 @@ executors:
     environment:
       PLATFORM: mac
 
+  win:
+    windows:
+
 commands:
   run-e2e-tests:
     parameters:
@@ -210,6 +213,74 @@ commands:
       - restore-cache:
           packageName: web-config
           packagePath: packages/web-config/package.json
+
+  win-install:
+    description: windows-specific install steps
+    steps:
+      - run:
+          environment:
+            nodejs_version: "12.0.0"
+          command: Install-Product node $env:nodejs_version $env:platform
+          shell: powershell.exe
+      - run:
+          shell: powershell.exe
+          command: |
+            # upgrade npm
+            npm install -g npm@6
+            npm install -g @bahmutov/print-env@1
+            # Output useful info for debugging.
+            node --version
+            node --print process.arch
+            npm --version
+            # prints all public variables relevant to the build
+            print-env Platform
+            npm run check-node-version
+            print-env APPVEYOR
+            # prints if we have sensitive variables that start with a prefix GH
+            # which are used to trigger other projects
+            has-env GH
+            # clean cache to prevent install permission issues
+            npm cache clean --force
+            # install root modules only, and retry automatically if install fails
+            npm run preinstall
+            npm install --ignore-scripts || npm install --ignore-scripts || npm install --ignore-scripts
+            .\node_modules\.bin\print-arch
+            # because we skipped scripts, we need to do
+            # everything from "postinstall" script as commands
+            npm run link
+            # install every package one by one
+            # try to do several attempts, because on AppVeyor random install errors happen
+            npm run all install -- --serial || npm run all install -- --serial || npm run all install -- --serial
+            # - npm prune
+            # - npm run all prune -- --serial
+            npm run all build -- --serial
+
+  win-test:
+    description: windows-specific test steps
+    steps:
+      - run:
+          shell: powershell.exe
+          command: |
+            # Output useful info for debugging.
+            # beware of echo-ing environment variables that may have batch syntax (e.g. commit messages)
+            node --version
+            npm --version
+            7z
+            cd packages/launcher && node index.js && cd ../..
+            # make sure mocha runs
+            npm run test-mocha
+            # make sure our snapshots are compared correctly
+            # - npm run test-mocha-snapshot
+            # the other larger tests
+            echo Building Windows NPM package %NEXT_DEV_VERSION%
+            npm --no-git-tag-version version %NEXT_DEV_VERSION%
+            cd cli
+            npm install
+            npm run build
+            cd build
+            npm pack
+            cd ../..
+            node ./scripts/win-appveyor-build.js
 
 jobs:
   ## code checkout and NPM installs
@@ -1121,7 +1192,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-        
+
     - lint:
         name: Mac lint
         executor: mac
@@ -1222,8 +1293,27 @@ mac-workflow: &mac-workflow
           - Mac NPM package upload
           - Mac binary upload
 
+win-workflow: &win-workflow
+  jobs:
+    - win-ia32:
+        executor: win
+        environment:
+          npm_config_target_arch: ia32
+        steps:
+          - win-install
+          - win-test
+    - win-x64:
+        executor: win
+        environment:
+          npm_config_target_arch: x32
+        steps:
+          - win-install
+          - win-test
+
 workflows:
   linux:
     <<: *linux-workflow
   mac:
     <<: *mac-workflow
+  win:
+    <<: *win-workflow
