@@ -43,9 +43,12 @@
       "description": "The reporter options used. Supported options depend on the reporter. See https://on.cypress.io/reporters#Reporter-Options"
     },
     "testFiles": {
-      "type": "string",
+      "type": [
+        "string",
+        "array"
+      ],
       "default": "**/*.*",
-      "description": "A String glob pattern of the test files to load"
+      "description": "A String or Array of string glob patterns of the test files to load. See https://on.cypress.io/configuration#Global"
     },
     "watchForFileChanges": {
       "type": "boolean",
