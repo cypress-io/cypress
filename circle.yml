@@ -226,7 +226,7 @@ commands:
             nodejs_version: "12.0.0"
           shell: powershell.exe
           command: |
-            Invoke-Webrequest -Uri https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip -OutFile nvm.zip
+            wget https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip -O nvm.zip
             Expand-Archive nvm.zip -DestinationPath .\
             ./nvm install $env:nodejs_version << parameters.arch >>
             ./nvm use $env:nodejs_version << parameters.arch >>
