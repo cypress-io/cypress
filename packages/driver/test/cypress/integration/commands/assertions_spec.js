@@ -989,7 +989,9 @@ describe('src/cy/commands/assertions', () => {
       })
 
       cy.then(() => {
-        expect(25).to.eq('25')
+        try {
+          expect(25).to.eq('25')
+        } catch (error) {} /* eslint-disable-line no-empty */
       })
     })
   })
