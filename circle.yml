@@ -991,6 +991,7 @@ jobs:
       - store-npm-logs
 
   win-build:
+    <<: *defaults
     steps:
       - win-prebuild
       - build
