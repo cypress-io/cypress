@@ -24,7 +24,6 @@ executors:
   cy-doc:
     docker:
       - image: cypress/base:12.12.0
-<<<<<<< HEAD
     environment:
       PLATFORM: linux
 
@@ -33,8 +32,6 @@ executors:
     docker:
       - image: cypress/base:12.12.0
         user: node
-=======
->>>>>>> Download installer in build step. Install browser in run-e2e-tests
     environment:
       PLATFORM: linux
 
@@ -307,6 +304,8 @@ jobs:
               wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
               mv google-chrome-stable_current_amd64.deb ~/chrome_installers
             fi
+            ls -lath .
+            ls -lath ~/chrome_installers
 
       - save-caches
       - store-npm-logs
