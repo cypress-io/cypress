@@ -233,15 +233,12 @@ commands:
           shell: bash.exe
           command: |
             set -ev
-            npm install -g @bahmutov/print-env@1
             # Output useful info for debugging.
             node --version
             npm --version
             7z
             # prints all public variables relevant to the build
-            print-env Platform
             npm run check-node-version
-            print-env APPVEYOR
             # prints if we have sensitive variables that start with a prefix GH
             # which are used to trigger other projects
             has-env GH
@@ -283,8 +280,8 @@ commands:
             # make sure our snapshots are compared correctly
             # - npm run test-mocha-snapshot
             # the other larger tests
-            echo Building Windows NPM package %NEXT_DEV_VERSION%
-            npm --no-git-tag-version version %NEXT_DEV_VERSION%
+            echo Building Windows NPM package $NEXT_DEV_VERSION
+            npm --no-git-tag-version version $NEXT_DEV_VERSION
             cd cli
             echo "Running npm install for cli"
             npm install
