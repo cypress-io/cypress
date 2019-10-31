@@ -10,7 +10,7 @@ const shell = require('shelljs')
 const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const pkg = require('./package.json')
+const pkg = require('../package.json')
 // const assert = require('assert')
 
 shell.set('-v') // verbose
