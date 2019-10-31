@@ -13,6 +13,7 @@
     "start": "node ../.$(yarn bin cypress) open --dev --global",
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./test/support/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-e2e": "node ./test/scripts/e2e.js",
     "test-e2e-chrome": "node ./test/scripts/run.js test/e2e chrome",
     "test-integration": "node ./test/scripts/run.js test/integration",

@@ -13,7 +13,6 @@
       "name": "test: active",
       "runtimeExecutable": "yarn",
       "runtimeArgs": [
-        "run",
         "test-debug-package"
       ],
       "args": [
@@ -35,7 +34,6 @@
       "port": 5566,
       "runtimeExecutable": "yarn",
       "runtimeArgs": [
-        "run",
         "dev-debug"
       ]
     }
