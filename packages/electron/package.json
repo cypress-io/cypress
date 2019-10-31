@@ -9,7 +9,10 @@
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "start": "./bin/cypress-electron",
-    "test": "mocha --compilers coffee:@packages/coffee/register"
+    "test": "yarn test-unit",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "mocha --compilers coffee:@packages/coffee/register",
+    "test-watch": "yarn test-unit --watch"
   },
   "dependencies": {
     "@cypress/icons": "0.7.0",

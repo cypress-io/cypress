@@ -6,8 +6,11 @@
   "scripts": {
     "postinstall": "echo '@packages/example needs: yarn build'",
     "clean-deps": "rm -rf node_modules",
-    "test": "cross-env NODE_ENV=test mocha",
+    "test": "yarn test-unit",
     "test-e2e": "cypress run",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "cross-env NODE_ENV=test mocha",
+    "test-watch": "yarn test-unit --watch",
     "build": "node ./bin/build.js && gulp build",
     "build-prod": "yarn build",
     "predeploy": "yarn build",

@@ -8,8 +8,10 @@
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/runner needs: yarn build'",
-    "test": "mocha src/**/*.spec.*",
-    "test-watch": "yarn test --watch",
+    "test": "yarn test-unit",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "mocha src/**/*.spec.*",
+    "test-watch": "yarn test-unit --watch",
     "watch": "webpack --watch --progress"
   },
   "devDependencies": {

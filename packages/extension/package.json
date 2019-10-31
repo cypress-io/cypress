@@ -9,8 +9,10 @@
     "clean": "gulp clean",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
-    "test": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "yarn test --watch",
+    "test": "yarn test-unit",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "yarn test-unit --watch",
     "watch": "gulp watch"
   },
   "dependencies": {

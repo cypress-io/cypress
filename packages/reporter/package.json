@@ -11,8 +11,10 @@
     "cypress:run": "node ../../scripts/cypress run --project .",
     "postinstall": "echo '@packages/reporter needs: yarn build'",
     "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js*",
-    "test": "mocha 'src/**/*.spec.*'",
-    "test-watch": "yarn test --watch",
+    "test": "yarn test-unit",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "mocha 'src/**/*.spec.*'",
+    "test-watch": "yarn test-unit --watch",
     "watch": "yarn build --watch --progress"
   },
   "devDependencies": {

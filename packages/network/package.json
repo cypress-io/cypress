@@ -6,7 +6,10 @@
   "scripts": {
     "build-js": "tsc --project .",
     "clean-deps": "rm -rf node_modules",
-    "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "test": "yarn test-unit",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "yarn test-unit --watch"
   },
   "dependencies": {
     "bluebird": "3.5.3",

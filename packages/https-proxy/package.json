@@ -7,8 +7,9 @@
     "clean-deps": "rm -rf node_modules",
     "https": "node https.js",
     "start": "node index.js",
-    "test": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-debug": "cross-env NODE_ENV=test mocha --inspect-brk --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test": "yarn test-unit",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },
   "dependencies": {
