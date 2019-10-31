@@ -47,19 +47,7 @@ if (!shouldBuildBinary()) {
 
 console.log('building Windows binary')
 
-const getNextDevVersion = () => {
-  if (process.env.NEXT_DEV_VERSION) {
-    console.log('using environment var NEXT_DEV_VERSION for version')
-
-    return process.env.NEXT_DEV_VERSION
-  }
-
-  console.log('using package.json version as NEXT_DEV_VERSION')
-
-  return pkg.version
-}
-
-const version = getNextDevVersion()
+const version = pkg.version
 const filename = `cypress-${version}.tgz`
 
 la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
