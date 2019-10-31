@@ -1,3 +1,8 @@
+/* eslint-disable
+    brace-style,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -10,42 +15,46 @@
 
 //# store these on our outer top window
 //# so they are globally preserved
-if (window.top.hasRunOnce == null) { window.top.hasRunOnce = false; }
-if (window.top.previousHash == null) { window.top.previousHash = window.top.location.hash; }
+if (window.top.hasRunOnce == null) {
+  window.top.hasRunOnce = false
+}
 
-const isTextTerminal = Cypress.config("isTextTerminal");
+if (window.top.previousHash == null) {
+  window.top.previousHash = window.top.location.hash
+}
 
-describe("rerun state bugs", () =>
-  it("stores viewport globally and does not hang on re-runs", () =>
-    //# NOTE: there's probably other ways to cause a re-run
-    //# event more programatically (like firing it through Cypress)
-    //# but we get the hashchange coverage for free on this.
+const isTextTerminal = Cypress.config('isTextTerminal')
 
-    cy.viewport(500, 500).then(function() {
-      let hash;
+describe('rerun state bugs', () => {
+  it('stores viewport globally and does not hang on re-runs', () =>
+  //# NOTE: there's probably other ways to cause a re-run
+  //# event more programatically (like firing it through Cypress)
+  //# but we get the hashchange coverage for free on this.
+
+  {
+    return cy.viewport(500, 500).then(() => {
+      let hash
+
       if (!window.top.hasRunOnce) {
-        //# turn off mocha events for a second
-        Cypress.config("isTextTerminal", false);
+      //# turn off mocha events for a second
+        Cypress.config('isTextTerminal', false)
 
         //# 1st time around
         window.top.hasRunOnce = true;
 
         //# cause a rerun event to occur
         //# by changing the hash
-        ({ hash } = window.top.location);
-        return window.top.location.hash = hash + "?rerun";
+        ({ hash } = window.top.location)
+        window.top.location.hash = `${hash}?rerun`
       } else {
         if (window.top.location.hash === window.top.previousHash) {
-          //# 3rd time around
-          //# let the mocha end events fire if they're supposed to
-          return Cypress.config("isTextTerminal", isTextTerminal);
-        } else {
-          //# our test has already run so remove
-          //# the query param
-          //# 2nd time around
-          return window.top.location.hash = window.top.previousHash;
+        //# 3rd time around
+        //# let the mocha end events fire if they're supposed to
+          return Cypress.config('isTextTerminal', isTextTerminal)
         }
+
+        window.top.location.hash = window.top.previousHash
       }
     })
-  )
-);
+  })
+})
