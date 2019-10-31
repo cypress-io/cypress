@@ -1295,20 +1295,20 @@ mac-workflow: &mac-workflow
 
 win-workflow: &win-workflow
   jobs:
-    - win-ia32:
-        executor: win
-        environment:
-          npm_config_target_arch: ia32
-        steps:
-          - win-install
+    win-ia32:
+      executor: win
+      environment:
+        npm_config_target_arch: ia32
+      steps:
+        - win-install
           - win-test
-    - win-x64:
-        executor: win
-        environment:
-          npm_config_target_arch: x32
-        steps:
-          - win-install
-          - win-test
+    win-x64:
+      executor: win
+      environment:
+        npm_config_target_arch: x32
+      steps:
+        - win-install
+        - win-test
 
 workflows:
   linux:
