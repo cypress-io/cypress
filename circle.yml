@@ -992,8 +992,8 @@ jobs:
 
   win-build:
     <<: *defaults
+    executor: win/vs2019
     parameters:
-      <<: *defaults.parameters
       arch:
         type: string
     environment:
@@ -1292,7 +1292,6 @@ win-workflow: &win-workflow
   jobs:
     - win-build:
         name: win-build-ia32
-        executor: win/vs2019
         arch: ia32
 
     - build-npm-package:
@@ -1324,7 +1323,6 @@ win-workflow: &win-workflow
 
     - win-build:
         name: win-build-x64
-        executor: win/vs2019
         arch: x64
 
     - build-npm-package:
