@@ -234,7 +234,7 @@ jobs:
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
-      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      ##   * http://andykdocs.de/next-version-in-manifestment/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
       - run: npm run check-terminal
 
@@ -581,7 +581,7 @@ jobs:
           # by default, electron-builder will NOT sign app built in a pull request
           # even our internal one (!)
           # Usually this is not a problem, since we only build and test binary
-          # built on "develop" and "master" branches
+          # built on "next-version-in-manifest" and "master" branches
           # but if you need to really build and sign a Mac binary in a PR
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
@@ -1027,7 +1027,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - build
     - test-kitchensink:
@@ -1038,7 +1038,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - build
     - build-npm-package:
@@ -1049,7 +1049,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - build-npm-package
     - build-binary:
@@ -1060,7 +1060,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
@@ -1068,7 +1068,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - upload-npm-package
           - upload-binary
@@ -1076,7 +1076,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - build-npm-package
           - build-binary
@@ -1085,7 +1085,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - build-npm-package
           - build-binary
@@ -1093,7 +1093,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - build-npm-package
           - build-binary
@@ -1117,8 +1117,8 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
-        
+              - next-version-in-manifest
+
     - lint:
         name: Mac lint
         executor: mac
@@ -1127,7 +1127,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
 
     # maybe run unit tests?
 
@@ -1139,7 +1139,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
 
     - upload-npm-package:
         name: Mac NPM package upload
@@ -1148,7 +1148,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - Mac NPM package
 
@@ -1159,7 +1159,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - Mac build
 
@@ -1170,7 +1170,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - Mac binary
 
@@ -1180,7 +1180,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - Mac build
 
@@ -1190,7 +1190,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - Mac NPM package
           - Mac binary
@@ -1202,7 +1202,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - Mac NPM package
           - Mac binary
@@ -1214,7 +1214,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - next-version-in-manifest
         requires:
           - Mac NPM package upload
           - Mac binary upload
