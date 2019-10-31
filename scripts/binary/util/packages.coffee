@@ -22,32 +22,40 @@ pathToPackageJson = (packageFolder) ->
   la(check.unemptyString(packageFolder), "expected package path", packageFolder)
   path.join(packageFolder, "package.json")
 
-npmRun = (args, cwd, env = {}) ->
-  command = "npm " + args.join(" ")
-  console.log(command)
-  if cwd
-    console.log("in folder:", cwd)
+createCLIExecutable = (command) ->
+  (args, cwd, env = {}) ->
+    commandToExecute = "#{command} " + args.join(" ")
+    console.log(commandToExecute)
+    if cwd
+      console.log("in folder:", cwd)
 
-  la(check.maybe.string(cwd), "invalid CWD string", cwd)
-  execa("npm", args, { stdio: "inherit", cwd, env })
-  # if everything is ok, resolve with nothing
-  .then R.always(undefined)
-  .catch (result) ->
-    msg = "#{command} failed with exit code: #{result.code}"
-    throw new Error(msg)
+    la(check.maybe.string(cwd), "invalid CWD string", cwd)
+    execa(command, args, { stdio: "inherit", cwd, env })
+    # if everything is ok, resolve with nothing
+    .then R.always(undefined)
+    .catch (result) ->
+      msg = "#{commandToExecute} failed with exit code: #{result.code}"
+      throw new Error(msg)
 
-runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js", "--skip-packages", "cli"])
+npm = createCLIExecutable('npm')
+npx = createCLIExecutable('npx')
+
+runAllBuildJs = _.partial(npx, ["lerna", "run", "build-js", "--ignore", "cli"])
 
 # removes transpiled JS files in the original package folders
-runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js", "--skip-packages", "cli"])
+runAllCleanJs = _.partial(npx, ["lerna", "run", "clean-js", "--ignore", "cli"])
 
 # builds all the packages except for cli
 runAllBuild = (args...) ->
   getPackagesWithScript('build')
   .then (pkgNameArr) ->
-    pkgs = pkgNameArr.join(' ')
-    npmRun(
-      ["run", "all", "build-prod", "--", "--serial", "--packages", pkgs, "--skip-packages", "cli"]
+    pkgs = pkgNameArr
+      .map((pkgName) ->
+        "@packages/#{pkgName}"
+      )
+      .join(',')
+    npx(
+      ["lerna", "run", "build-prod", "--scope", "\"{#{pkgs}}\"", "--ignore", "cli"]
       args...
     )
 
@@ -112,7 +120,7 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)
   console.log("in %s", packagePath)
   la(check.unemptyString(packageToInstall), "missing package to install")
-  npmRun(["install", "--force", packageToInstall], packagePath)
+  npm(["install", "--force", packageToInstall], packagePath)
 
 removeDevDependencies = (packageFolder) ->
   packagePath = pathToPackageJson(packageFolder)
@@ -147,7 +155,7 @@ npmInstallAll = (pathToPackages) ->
 
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
-    npmInstall = _.partial(npmRun, ["install", "--only=production", "--quiet"])
+    npmInstall = _.partial(npm, ["install", "--only=production", "--quiet"])
 
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
@@ -230,7 +238,7 @@ module.exports = {
   runAllCleanJs
 
   forceNpmInstall
-  
+
   getPackagesWithScript
 }
 
