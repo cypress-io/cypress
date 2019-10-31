@@ -144,7 +144,7 @@ uploadUniqueBinary = (args = []) ->
 
   options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
-  maybeSetNextVersionOption(options)
+  uploadUtils.maybeSetVersionOption(options)
   .then ->
     uploadFile(options)
   .then (key) ->

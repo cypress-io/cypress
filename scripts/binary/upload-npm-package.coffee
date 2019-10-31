@@ -85,7 +85,7 @@ uploadNpmPackage = (args = []) ->
 
   la(fs.existsSync(options.file), "cannot find file", options.file)
 
-  maybeSetVersionOption(options)
+  uploadUtils.maybeSetVersionOption(options)
   .then ->
     uploadFile(options)
   .then () ->
