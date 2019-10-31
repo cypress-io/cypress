@@ -47,6 +47,10 @@ executors:
     environment:
       PLATFORM: mac
 
+  win:
+    windows:
+      shell: bash.exe
+
 commands:
   run-e2e-tests:
     parameters:
@@ -997,7 +1001,7 @@ jobs:
 
   win-build:
     <<: *defaults
-    executor: win/vs2019
+    executor: win
     parameters:
       arch:
         type: string
@@ -1301,27 +1305,27 @@ win-workflow: &win-workflow
 
     - build-npm-package:
         name: win-build-npm-package-ia32
-        executor: win/vs2019
+        executor: win
         requires:
           - win-build-ia32
 
     - upload-npm-package:
         name: win-upload-npm-package-ia32
         context: test-runner:upload
-        executor: win/vs2019
+        executor: win
         requires:
           - win-build-npm-package-ia32
 
     - build-binary:
         name: win-build-binary-ia32
         context: org-global
-        executor: win/vs2019
+        executor: win
         requires:
           - win-build-ia32
 
     - upload-binary:
         name: win-upload-binary-ia32
-        executor: win/vs2019
+        executor: win
         context: test-runner:upload
         requires:
           - win-build-binary-ia32
@@ -1332,27 +1336,27 @@ win-workflow: &win-workflow
 
     - build-npm-package:
         name: win-build-npm-package-x64
-        executor: win/vs2019
+        executor: win
         requires:
           - win-build-x64
 
     - upload-npm-package:
         name: win-upload-npm-package-x64
         context: test-runner:upload
-        executor: win/vs2019
+        executor: win
         requires:
           - win-build-npm-package-x64
 
     - build-binary:
         name: win-build-binary-x64
         context: org-global
-        executor: win/vs2019
+        executor: win
         requires:
           - win-build-x64
 
     - upload-binary:
         name: win-upload-binary-x64
-        executor: win/vs2019
+        executor: win
         context: test-runner:upload
         requires:
           - win-build-binary-x64
