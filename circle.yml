@@ -216,15 +216,20 @@ commands:
 
   win-install:
     description: windows-specific install steps
+    parameters:
+      arch:
+        description: arch of node to install
+        type: string
     steps:
       - run:
           environment:
             nodejs_version: "12.0.0"
-          command: Install-Product node $env:nodejs_version $env:platform
-          shell: powershell.exe
-      - run:
           shell: powershell.exe
           command: |
+            Invoke-Webrequest -Uri https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip -OutFile nvm.zip
+            Expand-Archive nvm.zip -DestinationPath .\
+            ./nvm install $env:nodejs_version << parameters.arch >>
+            ./nvm use $env:nodejs_version << parameters.arch >>
             # upgrade npm
             npm install -g npm@6
             npm install -g @bahmutov/print-env@1
@@ -1012,14 +1017,17 @@ jobs:
     environment:
       npm_config_target_arch: ia32
     steps:
-      - win-install
+      - win-install:
+          arch: ia32
       - win-test
+
   win-x64:
     executor: win/vs2019
     environment:
-      npm_config_target_arch: x32
+      npm_config_target_arch: x64
     steps:
-      - win-install
+      - win-install:
+          arch: x64
       - win-test
 
 linux-workflow: &linux-workflow
