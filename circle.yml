@@ -233,8 +233,6 @@ commands:
           shell: bash.exe
           command: |
             set -ev
-            # upgrade npm
-            npm install -g npm
             npm install -g @bahmutov/print-env@1
             # Output useful info for debugging.
             node --version
