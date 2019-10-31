@@ -232,13 +232,14 @@ commands:
       - run:
           shell: bash.exe
           command: |
+            set -ev
             # upgrade npm
-            npm install -g npm@6
+            npm install -g npm
             npm install -g @bahmutov/print-env@1
             # Output useful info for debugging.
             node --version
-            node --print process.arch
             npm --version
+            7z
             # prints all public variables relevant to the build
             print-env Platform
             npm run check-node-version
@@ -268,13 +269,18 @@ commands:
       - run:
           shell: bash.exe
           command: |
+            set -ev
             # Output useful info for debugging.
             # beware of echo-ing environment variables that may have batch syntax (e.g. commit messages)
             node --version
             npm --version
             7z
-            cd packages/launcher && node index.js && cd ../..
+            pushd packages/launcher
+            echo "Testing launcher..."
+            node index.js
+            popd
             # make sure mocha runs
+            echo "Testing Mocha..."
             npm run test-mocha
             # make sure our snapshots are compared correctly
             # - npm run test-mocha-snapshot
@@ -282,7 +288,9 @@ commands:
             echo Building Windows NPM package %NEXT_DEV_VERSION%
             npm --no-git-tag-version version %NEXT_DEV_VERSION%
             cd cli
+            echo "Running npm install for cli"
             npm install
+            echo "Building cli"
             npm run build
             cd build
             npm pack
