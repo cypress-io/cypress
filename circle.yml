@@ -230,7 +230,7 @@ commands:
             nvm install $env:nodejs_version << parameters.arch >>
             nvm use $env:nodejs_version << parameters.arch >>
       - run:
-          shell: cmd.exe
+          shell: bash.exe
           command: |
             # upgrade npm
             npm install -g npm@6
@@ -266,7 +266,7 @@ commands:
     description: windows-specific test steps
     steps:
       - run:
-          shell: cmd.exe
+          shell: bash.exe
           command: |
             # Output useful info for debugging.
             # beware of echo-ing environment variables that may have batch syntax (e.g. commit messages)
