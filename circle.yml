@@ -19,6 +19,9 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+orbs:
+  win: circleci/windows@1.0.0
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -43,9 +46,6 @@ executors:
       xcode: "10.1.0"
     environment:
       PLATFORM: mac
-
-  win:
-    windows:
 
 commands:
   run-e2e-tests:
@@ -1008,14 +1008,14 @@ jobs:
       - store-npm-logs
 
   win-ia32:
-    executor: win
+    executor: win/vs2019
     environment:
       npm_config_target_arch: ia32
     steps:
       - win-install
       - win-test
   win-x64:
-    executor: win
+    executor: win/vs2019
     environment:
       npm_config_target_arch: x32
     steps:
