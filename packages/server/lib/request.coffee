@@ -419,7 +419,7 @@ module.exports = (options = {}) ->
     setRequestCookieHeader: (req, reqUrl, automationFn) ->
       automationFn('get:cookies', { url: reqUrl })
       .then (cookies) ->
-        debug('getting cookies from browser %o', { reqUrl, cookies })
+        debug('got cookies from browser %o', { reqUrl, cookies })
         header = cookies.map (cookie) ->
           "#{cookie.name}=#{cookie.value}"
         .join("; ") || undefined
@@ -475,10 +475,12 @@ module.exports = (options = {}) ->
 
       followRedirect = options.followRedirect
 
+      currentUrl = options.url
+
       options.followRedirect = (incomingRes) ->
         req = @
 
-        newUrl = url.resolve(options.url, incomingRes.headers.location)
+        newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 
         ## and when we know we should follow the redirect
         ## we need to override the init method and
@@ -486,10 +488,11 @@ module.exports = (options = {}) ->
         ## and then grab the cookies for the new url
         req.init = _.wrap req.init, (orig, opts) =>
           options.onBeforeReqInit ->
-            self.setCookiesOnBrowser(incomingRes, options.url, automationFn)
+            self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
             .then (cookies) ->
               self.setRequestCookieHeader(req, newUrl, automationFn)
             .then (cookieHeader) ->
+              currentUrl = newUrl
               orig.call(req, opts)
 
         followRedirect.call(req, incomingRes)
@@ -552,8 +555,10 @@ module.exports = (options = {}) ->
           requestResponses.push(pick(response))
 
         if options.followRedirect
+          currentUrl = options.url
+
           options.followRedirect = (incomingRes) ->
-            newUrl = url.resolve(options.url, incomingRes.headers.location)
+            newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 
             ## normalize the url
             redirects.push([incomingRes.statusCode, newUrl].join(": "))
@@ -567,10 +572,11 @@ module.exports = (options = {}) ->
             ## first set the new cookies on the browser
             ## and then grab the cookies for the new url
             req.init = _.wrap req.init, (orig, opts) =>
-              self.setCookiesOnBrowser(incomingRes, options.url, automationFn)
+              self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
               .then ->
                 self.setRequestCookieHeader(req, newUrl, automationFn)
               .then ->
+                currentUrl = newUrl
                 orig.call(req, opts)
 
             ## cause the redirect to happen
