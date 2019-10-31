@@ -45,6 +45,18 @@ executors:
       PLATFORM: mac
 
 commands:
+  install-google-chrome:
+    steps:
+      - run:
+          command: |
+            ls ~/
+            ls ~/chrome_installer
+            apt update
+            apt install -y fonts-liberation libappindicator3-1  lsb-release xdg-utils libdbusmenu-glib4 libdbusmenu-gtk3-4 distro-info-data libindicator3-7
+            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            dpkg -i google-chrome-stable_current_amd64.deb
+            which google-chrome
+            google-chrome -version
   run-e2e-tests:
     parameters:
       browser:
@@ -56,23 +68,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - run:
-          name: Install Google Chrome
-          command: |
-            ls -lah ~/chrome_installers
-            find ~/ -name *.deb
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              hdiutil attach  ~/chrome_installers/google-chrome-stable.dmg
-              cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
-            fi
-            if [[ "$OSTYPE" == "linux"* ]]; then
-              apt update
-              apt install -y fonts-liberation libappindicator3-1  lsb-release xdg-utils libdbusmenu-glib4 libdbusmenu-gtk3-4 distro-info-data libindicator3-7
-              wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-              dpkg -i google-chrome-stable_current_amd64.deb
-              which google-chrome
-              which google-chrome-stable
-            fi
+      - install-google-chrome
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
@@ -294,6 +290,8 @@ jobs:
               wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
               mv google-chrome-stable_current_amd64.deb ~/chrome_installers
             fi
+            ls -lath .
+            ls -lath ~/chrome_installers
 
       - save-caches
       - store-npm-logs
@@ -367,6 +365,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-google-chrome
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -388,6 +387,7 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
+      - install-google-chrome
       - run:
           command: npm run all test-performance -- --package server
       - store_test_results:
@@ -514,6 +514,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-google-chrome
       - run:
           command: npm start
           background: true
@@ -642,6 +643,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
+      - run: 
+          name: Install zip
+          command: apt install zip -y
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
