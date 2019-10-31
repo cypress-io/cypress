@@ -215,7 +215,7 @@ commands:
           packagePath: packages/web-config/package.json
 
   build:
-    - steps:
+    steps:
       - checkout
       - run:
           name: Print working folder
