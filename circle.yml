@@ -20,7 +20,7 @@ defaults: &defaults
     LINES: 24
 
 executors:
-  # the Docker image with Cypress dependencies and Chrome browser
+  # the Docker image with Cypress dependencies
   cy-doc:
     docker:
       - image: cypress/base:12.12.0
@@ -65,8 +65,9 @@ commands:
               cp -r /Volumes/Google\ Chrome/Google\ Chrome.app /Applications/
             fi
             if [[ "$OSTYPE" == "linux"* ]]; then
+              apt update
+              apt install fonts-liberation libappindicator3-1  lsb-release xdg-utils libdbusmenu-glib4 libdbusmenu-gtk3-4 distro-info-data libindicator3-7
               dpkg -i ~/chrome_installers/google-chrome-stable_current_amd64.deb || true
-              apt-get -f install
               which google-chrome
               which google-chrome-stable
             fi
