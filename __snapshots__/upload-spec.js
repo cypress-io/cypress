@@ -1,6 +1,7 @@
 exports['test runner manifest'] = {
   "name": "Cypress",
   "version": "3.3.0",
+  "nextDevVersion": "3.3.1",
   "packages": {
     "mac": {
       "url": "https://cdn.cypress.io/desktop/3.3.0/darwin-x64/cypress.zip"
