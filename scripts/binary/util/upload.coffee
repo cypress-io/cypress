@@ -7,6 +7,7 @@ check = require("check-more-types")
 cp = require("child_process")
 fse = require("fs-extra")
 os = require("os")
+rp = require("request-promise")
 Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
 konfig = require('../../binary/get-config')()
@@ -125,6 +126,18 @@ saveUrl = (filename) -> (url) ->
   .then =>
     console.log("saved url", url, "into file", filename)
 
+getLiveManifest: ->
+  rp('https://download.cypress.io/desktop.json', { json: true })
+
+maybeSetVersionOption = Promise.method (options, throwOnNoVersion = true) ->
+  if throwOnNoVersion and not options['use-next-dev-version']
+    la(check.unemptyString(options.version), "missing version and use-next-dev-version not passed", options)
+
+  if not options.version and options['use-next-dev-version']
+    return getLiveManifest()
+    .then ({ nextDevVersion }) ->
+      options.version = nextDevVersion
+
 module.exports = {
   getS3Credentials,
   getPublisher,
@@ -135,5 +148,6 @@ module.exports = {
   getValidPlatformArchs,
   isValidPlatformArch,
   saveUrl,
-  formHashFromEnvironment
+  formHashFromEnvironment,
+  getLiveManifest
 }

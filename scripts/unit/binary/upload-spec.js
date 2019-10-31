@@ -13,7 +13,8 @@ describe('upload', () => {
     it('returns object with download urls for each platform', () => {
       const folder = 'desktop'
       const version = '3.3.0'
-      const manifest = upload.getRemoteManifest(folder, version)
+      const nextVersion = '3.3.1'
+      const manifest = upload.getRemoteManifest(folder, version, nextVersion)
 
       snapshot('test runner manifest', manifest)
     })

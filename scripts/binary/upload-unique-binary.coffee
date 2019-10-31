@@ -12,6 +12,7 @@ human = require("human-interval")
 R = require("ramda")
 hasha = require('hasha')
 
+{ getLiveManifest } = require('./util/upload')
 konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
 s3helpers = require("./s3-api").s3helpers
@@ -116,14 +117,16 @@ setChecksum = (filename, key) =>
 uploadUniqueBinary = (args = []) ->
   options = minimist(args, {
     string: ["version", "file", "hash", "platform"],
+    boolean: ["use-next-dev-version"]
     alias: {
       version: "v",
       file: "f",
       hash: "h"
+      "use-next-dev-version": "n"
     }
   })
   console.log("Upload unique binary options")
-  pickOptions = R.pick(["file", "version", "hash"])
+  pickOptions = R.pick(["file", "version", "hash", "use-next-dev-version"])
   console.log(pickOptions(options))
 
   la(check.unemptyString(options.file), "missing file to upload", options)
@@ -134,7 +137,6 @@ uploadUniqueBinary = (args = []) ->
     options.hash = uploadUtils.formHashFromEnvironment()
 
   la(check.unemptyString(options.hash), "missing hash to give", options)
-  la(check.unemptyString(options.version), "missing version", options)
 
   la(fs.existsSync(options.file), "cannot find file", options.file)
 
@@ -142,7 +144,9 @@ uploadUniqueBinary = (args = []) ->
 
   options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
-  uploadFile(options)
+  maybeSetNextVersionOption(options)
+  .then ->
+    uploadFile(options)
   .then (key) ->
     setChecksum(options.file, key)
   .then () ->

@@ -10,6 +10,7 @@ const shell = require('shelljs')
 const os = require('os')
 const la = require('lazy-ass')
 const is = require('check-more-types')
+const pkg = require('./package.json')
 // const assert = require('assert')
 
 shell.set('-v') // verbose
@@ -46,8 +47,20 @@ if (!shouldBuildBinary()) {
 
 console.log('building Windows binary')
 
-const filename = `cypress-${process.env.NEXT_DEV_VERSION}.tgz`
-const version = process.env.NEXT_DEV_VERSION
+const getNextDevVersion = () => {
+  if (process.env.NEXT_DEV_VERSION) {
+    console.log('using environment var NEXT_DEV_VERSION for version')
+
+    return process.env.NEXT_DEV_VERSION
+  }
+
+  console.log('using package.json version as NEXT_DEV_VERSION')
+
+  return pkg.version
+}
+
+const version = getNextDevVersion()
+const filename = `cypress-${version}.tgz`
 
 la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
 

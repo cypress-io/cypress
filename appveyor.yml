@@ -89,8 +89,8 @@ test_script:
   # make sure our snapshots are compared correctly
   # - npm run test-mocha-snapshot
   # the other larger tests
-  - echo Building Windows NPM package %NEXT_DEV_VERSION%
-  - npm --no-git-tag-version version %NEXT_DEV_VERSION%
+  - echo Building Windows NPM package
+  - npm run set-local-version-to-next
   - cd cli
   - npm install
   - npm run build

@@ -63,10 +63,12 @@ uploadNpmPackage = (args = []) ->
   console.log(args)
   options = minimist(args, {
     string: ["version", "file", "hash"],
+    boolean: ["use-next-dev-version"]
     alias: {
       version: "v",
       file: "f",
       hash: "h"
+      "use-next-dev-version": "n"
     }
   })
   console.log("Upload NPM package options")
@@ -80,11 +82,12 @@ uploadNpmPackage = (args = []) ->
     options.hash = uploadUtils.formHashFromEnvironment()
 
   la(check.unemptyString(options.hash), "missing hash to give", options)
-  la(check.unemptyString(options.version), "missing version", options)
 
   la(fs.existsSync(options.file), "cannot find file", options.file)
 
-  uploadFile(options)
+  maybeSetVersionOption(options)
+  .then ->
+    uploadFile(options)
   .then () ->
     cdnUrl = getCDN({
       version: options.version,

@@ -149,24 +149,6 @@ module.exports = {
 
   getFilterByProvider,
 
-  nextVersion: (version) ->
-    MAIN_PROJECTS = remapMain(_PROVIDERS)
-    console.log("Setting next version to build", version)
-    console.log("In these projects:")
-    console.table(MAIN_PROJECTS)
-
-    la(check.unemptyString(version),
-      "missing next version to set", version)
-
-    setNextDevVersion = (project, provider) ->
-      console.log("setting env var NEXT_DEV_VERSION to %s on %s in project %s",
-        version, provider, project)
-      car.updateProjectEnv(project, provider, {
-        NEXT_DEV_VERSION: version,
-      })
-
-    awaitEachProjectAndProvider(MAIN_PROJECTS, setNextDevVersion)
-
   # in each project, set a couple of environment variables
   version: (nameOrUrl, binaryVersionOrUrl, platform, providerName) ->
     console.log("All possible projects:")

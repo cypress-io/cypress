@@ -63,7 +63,7 @@ module.exports = {
       url: [konfig('cdn_url'), folder, version, uploadOsName, zipName].join("/")
     }
 
-  getRemoteManifest: (folder, version) ->
+  getRemoteManifest: (folder, version, nextDevVersion) ->
     la(check.unemptyString(folder), 'missing manifest folder', folder)
     la(check.semver(version), 'invalid manifest version', version)
 
@@ -72,6 +72,7 @@ module.exports = {
     {
       name: "Cypress"
       version: version
+      nextDevVersion
       packages: {
         ## keep these for compatibility purposes
         ## although they are now deprecated
@@ -93,13 +94,19 @@ module.exports = {
       }
     }
 
-  createRemoteManifest: (folder, version) ->
-    obj = @getRemoteManifest(folder, version)
+  createRemoteManifest: (folder, version, nextDevVersion) ->
+    obj = @getRemoteManifest(folder, version, nextDevVersion)
+
+    if process.env.DRY_RUN
+      console.log('New desktop.json:')
+      console.log(obj)
+      console.log('Dry run, exiting')
+      process.exit(1)
 
     src = path.resolve("manifest.json")
     fs.outputJsonAsync(src, obj).return(src)
 
-  s3Manifest: (version) ->
+  s3Manifest: (version, nextDevVersion) ->
     publisher = @getPublisher()
 
     aws = @getAwsObj()
@@ -110,7 +117,7 @@ module.exports = {
     manifest = null
 
     new Promise (resolve, reject) =>
-      @createRemoteManifest(aws.folder, version)
+      @createRemoteManifest(aws.folder, version, nextDevVersion)
       .then (src) ->
         manifest = src
 

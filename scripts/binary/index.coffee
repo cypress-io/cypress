@@ -13,6 +13,7 @@ check    = require("check-more-types")
 debug    = require("debug")("cypress:binary")
 questionsRemain = require("@cypress/questions-remain")
 R        = require("ramda")
+rp       = require("request-promise")
 
 zip      = require("./zip")
 ask      = require("./ask")
@@ -113,20 +114,41 @@ deploy = {
     options = @parseOptions(process.argv)
 
     askMissingOptions(['nextVersion'])(options)
-    .then ({nextVersion}) ->
-      bump.nextVersion(nextVersion)
+    .then ({ nextVersion }) ->
+      ## since we are just bumping the nextVersion, use the live version string
+      rp('https://download.cypress.io/desktop.json', { json: true })
+      .then ({ version }) ->
+        upload.s3Manifest(version, nextVersion)
+
+  ## sets environment variable on each CI provider
+  ## to NEXT version to build
+  setNextVersion: ->
+    options = @parseOptions(process.argv)
+
+    askMissingOptions(['nextVersion'])(options)
+    .then ({ nextVersion }) ->
+      ## since we are just bumping the nextVersion, use the live version string
+      uploadUtils.getLiveManifest()
+      .then ({ version }) ->
+        upload.s3Manifest(version, nextVersion)
+
+  setLocalVersionToNext: ->
+    uploadUtils.getLiveManifest()
+    .then ({ nextDevVersion }) ->
+      console.log("Setting package.json version to #{nextDevVersion}")
+      cmd = "npm --no-git-tag-version version #{nextDevVersion}"
+      console.log("running `#{cmd}`")
+      require('execa').shell(cmd)
 
   release: ->
     ## read off the argv
     options = @parseOptions(process.argv)
 
     release = ({ version, commit, nextVersion }) =>
-      upload.s3Manifest(version)
+      upload.s3Manifest(version, nextVersion)
       .then ->
         if commit
           commitVersion(version)
-      .then ->
-        bump.nextVersion(nextVersion)
       .then ->
         success("Release Complete")
       .catch (err) ->
@@ -140,7 +162,8 @@ deploy = {
     console.log('#build')
     options ?= @parseOptions(process.argv)
 
-    askMissingOptions(['version', 'platform'])(options)
+    uploadUtils.maybeSetVersionOption(options, false).then ->
+      askMissingOptions(['version', 'platform'])(options)
     .then ->
       build(options.platform, options.version, options)
 
