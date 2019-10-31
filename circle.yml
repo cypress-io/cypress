@@ -239,9 +239,6 @@ commands:
             7z
             # prints all public variables relevant to the build
             npm run check-node-version
-            # prints if we have sensitive variables that start with a prefix GH
-            # which are used to trigger other projects
-            has-env GH
             # clean cache to prevent install permission issues
             npm cache clean --force
             # install root modules only, and retry automatically if install fails
