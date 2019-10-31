@@ -116,18 +116,6 @@ deploy = {
     askMissingOptions(['nextVersion'])(options)
     .then ({ nextVersion }) ->
       ## since we are just bumping the nextVersion, use the live version string
-      rp('https://download.cypress.io/desktop.json', { json: true })
-      .then ({ version }) ->
-        upload.s3Manifest(version, nextVersion)
-
-  ## sets environment variable on each CI provider
-  ## to NEXT version to build
-  setNextVersion: ->
-    options = @parseOptions(process.argv)
-
-    askMissingOptions(['nextVersion'])(options)
-    .then ({ nextVersion }) ->
-      ## since we are just bumping the nextVersion, use the live version string
       uploadUtils.getLiveManifest()
       .then ({ version }) ->
         upload.s3Manifest(version, nextVersion)

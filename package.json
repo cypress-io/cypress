@@ -44,6 +44,7 @@
     "lint-coffee": "coffeelint scripts/**/*.coffee && npm run all lint-coffee && npm run stop-only-all",
     "lint-fix": "npm run lint -- --fix",
     "move-binaries": "node ./scripts/binary.js move-binaries",
+    "set-local-version-to-next": "node ./scripts/binary.js setLocalVersionToNext",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "npm run check-deps-pre",
     "start": "node ./cli/bin/cypress open --dev --global",

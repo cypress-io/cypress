@@ -126,7 +126,7 @@ saveUrl = (filename) -> (url) ->
   .then =>
     console.log("saved url", url, "into file", filename)
 
-getLiveManifest: ->
+getLiveManifest = ->
   rp('https://download.cypress.io/desktop.json', { json: true })
 
 maybeSetVersionOption = Promise.method (options, throwOnNoVersion = true) ->
@@ -149,5 +149,6 @@ module.exports = {
   isValidPlatformArch,
   saveUrl,
   formHashFromEnvironment,
-  getLiveManifest
+  getLiveManifest,
+  maybeSetVersionOption
 }
