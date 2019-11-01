@@ -225,6 +225,10 @@ module.exports = {
       ## copy the extension src to the extension dist
       utils.copyExtension(pathToExtension, extensionDest)
       .then ->
+        ## make background.js writable (in case it was copied from a
+        ## read-only partition)
+        fs.chmodAsync(extensionBg, 0o0644)
+      .then ->
         ## and overwrite background.js with the final string bytes
         fs.writeFileAsync(extensionBg, str)
       .return(extensionDest)
