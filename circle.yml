@@ -47,14 +47,24 @@ executors:
 commands:
   install-google-chrome:
     description: Download and install Google Chrome (stable) and its dependencies
+    parameters:
+      browser:
+        description: browser shortname (chrome or electron)
+        type: string
+        default: chrome
     steps:
       - run:
           command: |
-            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-            echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
-            apt update
-            apt install -y google-chrome-stable
-            google-chrome -version
+            if [ << parameters.browser >> == "chrome" ];
+            then
+              wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - ;
+              echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list;
+              apt update;
+              apt install -y google-chrome-stable;
+              google-chrome -version;
+            else
+              echo "Chrome is not installed because the browser is set to "<< parameters.browser >>;
+            fi
   run-e2e-tests:
     parameters:
       browser:
@@ -66,7 +76,8 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - install-google-chrome
+      - install-google-chrome:
+          browser: << parameters.browser >>
       - run:
           name: Install Google Chrome
           command: |
@@ -356,7 +367,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - install-google-chrome
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -378,7 +388,8 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
-      - install-google-chrome
+      - install-google-chrome:
+          browser: chrome
       - run:
           command: npm run all test-performance -- --package server
       - store_test_results:
@@ -505,7 +516,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - install-google-chrome
+      - install-google-chrome:
+          browser: chrome
       - run:
           command: npm start
           background: true
