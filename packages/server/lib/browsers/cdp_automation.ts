@@ -147,7 +147,6 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
 
           return sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
         })
-        .return(null)
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':
