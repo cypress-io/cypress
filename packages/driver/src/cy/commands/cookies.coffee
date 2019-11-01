@@ -18,13 +18,8 @@ mergeDefaults = (obj) ->
   ## we always want to be able to see and influence cookies
   ## on our superdomain
   { superDomain } = $Location.create(window.location.href)
-  # { hostname } = $Location.create(window.location.href)
 
   merge = (o) ->
-    ## we are hostOnly if we dont have an
-    ## explicit domain
-    # o.hostOnly = !o.domain
-
     ## and if the user did not provide a domain
     ## then we know to set the default to be origin
     _.defaults o, {domain: superDomain}
@@ -137,7 +132,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
-      automateCookies("get:cookies", {}, options._log, options.timeout)
+      automateCookies("get:cookies", { domain: null }, options._log, options.timeout)
       .then (resp) ->
         options.cookies = resp
 
