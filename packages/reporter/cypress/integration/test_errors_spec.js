@@ -1,5 +1,9 @@
 const { EventEmitter } = require('events')
 
+const cleanWhitespace = (text) => {
+  return text.replace(/\s+/gm, '')
+}
+
 describe('test errors', function () {
   beforeEach(function () {
     cy.fixture('runnables_error').as('runnablesErr')
@@ -8,7 +12,25 @@ describe('test errors', function () {
       name: 'CommandError',
       message: '`foo` \\`bar\\` **baz** *fizz* ** buzz **',
       mdMessage: '`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`',
-      stack: 'failed to visit\n\ncould not visit http: //localhost:3000',
+      stack: `Some Error
+      at foo.bar (my/app.js:2:7)
+      at baz.qux (cypress/integration/foo_spec.js:5:2)
+      `,
+      parsedStack: [{
+        message: 'Some Error',
+      }, {
+        relativeFile: 'my/app.js',
+        absoluteFile: '/me/dev/my/app.js',
+        function: 'foo.bar',
+        line: 2,
+        column: 7,
+      }, {
+        relativeFile: 'cypress/integration/foo_spec.js',
+        absoluteFile: '/me/dev/cypress/integration/foo_spec.js',
+        function: 'baz.qux',
+        line: 5,
+        column: 2,
+      }],
       docsUrl: 'https://on.cypress.io/type',
       codeFrames: [
         {
@@ -57,50 +79,36 @@ describe('test errors', function () {
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace')
       .should('be.visible')
-      .should('have.text', this.commandErr.stack.replace(/\n/g, ''))
-    })
-
-    it('shows source-mapped stack if present', function () {
-      this.commandErr.sourceMappedStack = 'the source mapped stack'
-      this.setError(this.commandErr)
-
-      cy.get('.runnable-err-stack-trace').should('have.text', 'the source mapped stack')
+      .invoke('text')
+      .should((content) => {
+        expect(cleanWhitespace(content)).to.equal(cleanWhitespace(this.commandErr.stack))
+      })
     })
 
     it('turns files into links', function () {
-      this.commandErr.sourceMappedStack = `Some Error
-      at foo.bar (my/app.js:2:7)
-      at baz.qux (cypress/integration/foo_spec.js:5:2)
-      `
-
       this.setError(this.commandErr)
 
       cy.get('.runnable-err-stack-trace a')
       .should('have.length', 2)
       .first()
-      .should('have.text', 'my/app.js:2:8')
+      .should('have.text', 'my/app.js:2:7')
 
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace a').eq(1)
-      .should('have.text', 'cypress/integration/foo_spec.js:5:3')
+      .should('have.text', 'cypress/integration/foo_spec.js:5:2')
     })
 
     it('opens the file when clicked', function () {
       cy.spy(this.runner, 'emit')
-
-      this.commandErr.sourceMappedStack = `Some Error
-      at foo.bar (my/app.js:2:7)
-      at baz.qux (cypress/integration/foo_spec.js:5:2)
-      `
 
       this.setError(this.commandErr)
 
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace a').first().click().then(() => {
         expect(this.runner.emit).to.be.calledWith('open:file', {
-          file: '/root/my/app.js',
+          file: '/me/dev/my/app.js',
           line: 2,
-          column: 8,
+          column: 7,
         })
       })
     })
