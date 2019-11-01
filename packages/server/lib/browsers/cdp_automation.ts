@@ -137,10 +137,17 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
         })
       case 'clear:cookie':
         return getCookie(data)
-        // so we can resolve with the value of the removed cookie
-        .tap((_cookieToBeCleared) => {
-          return sendDebuggerCommandFn('Network.deleteCookies', data)
+        // tap, so we can resolve with the value of the removed cookie
+        // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
+        // that matches the cookie domain that is really stored
+        .tap((cookieToBeCleared) => {
+          if (!cookieToBeCleared) {
+            return
+          }
+
+          return sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
         })
+        .return(null)
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':
