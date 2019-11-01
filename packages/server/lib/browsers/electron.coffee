@@ -26,13 +26,14 @@ getAutomation = (win) ->
     ## wrap in bluebird
     tryToCall win, Promise.method ->
       debug('debugger: sending %s with params %o', message, data)
-      Promise.promisify(win.webContents.debugger.sendCommand, {context: win.webContents.debugger})(message, data)
-      .tap (res) ->
-        if res.data && res.data.length > 100
-          res.data = res.data.slice(0, 100) + ' [truncated]'
-        debug('debugger: received response to %s: %o', message, res)
-      .tapCatch (err) ->
-        debug('debugger: received error on %s: %o', messsage, err)
+      win.webContents.debugger.sendCommand(message, data)
+    .tap (res) ->
+      if debug.enabled && res.data && res.data.length > 100
+        res = _.clone(res)
+        res.data = res.data.slice(0, 100) + ' [truncated]'
+      debug('debugger: received response to %s: %o', message, res)
+    .tapCatch (err) ->
+      debug('debugger: received error on %s: %o', messsage, err)
 
   CdpAutomation(sendDebuggerCommand)
 
