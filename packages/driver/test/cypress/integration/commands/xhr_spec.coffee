@@ -1435,6 +1435,7 @@ describe "src/cy/commands/xhr", ->
             url: '/test-xhr',
             response: 'fixture:valid.json',
           })
+          .visit('/fixtures/xhr-triggered.html')
           .get('#trigger-xhr')
           .click()
 
@@ -1446,6 +1447,7 @@ describe "src/cy/commands/xhr", ->
             url: '/test-xhr',
             response: 'fixture:null.json',
           })
+          .visit('/fixtures/xhr-triggered.html')
           .get('#trigger-xhr')
           .click()
 
