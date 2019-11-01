@@ -1127,11 +1127,11 @@ describe "src/cy/commands/connectors", ->
 
             cy.wrap(val).its("foo")
 
-        it "throws two args were passed as subject", (done) ->
+        it "throws does not accept additional arguments", (done) ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "cy.its() only accepts a single argument."
+            expect(err.message).to.include "cy.its() does not accept additional arguments."
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -1139,7 +1139,7 @@ describe "src/cy/commands/connectors", ->
           fn.bar = -> "bar"
           fn.bar.baz = "baz"
 
-          cy.wrap(fn).its("bar", "baz").should("eq", "baz")
+          cy.wrap(fn).its("bar", { log: false }, "baz").should("eq", "baz")
 
         it "resets traversalErr and throws the right assertion", (done) ->
           cy.timeout(200)

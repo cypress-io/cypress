@@ -189,6 +189,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         args: { cmd: name }
       })
 
+    if isCmdIts and args and args.length > 0	
+      $utils.throwErrByPath("invoke_its.invalid_num_of_args", {	
+        onFail: options._log	
+        args: { cmd: name }
+      })
+
     ## TODO: use the new error utils that are part of
     ## the error message enhancements PR
     propertyNotOnSubjectErr = (prop) ->
