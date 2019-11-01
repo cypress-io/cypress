@@ -446,6 +446,87 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('div', 'focus click mouseup mousedown').each(shouldNotBeCalled)
     })
 
+    it('click when mouseup el is child of mousedown el', () => {
+      const btn = cy.$$('button:first')
+      const span = $('<span>foooo</span>')
+
+      attachFocusListeners({ btn, span })
+      attachMouseClickListeners({ btn, span })
+      attachMouseHoverListeners({ btn, span })
+
+      // let clicked = false
+
+      btn.on('mousedown', () => {
+        // clicked = true
+        btn.html('')
+        btn.append(span)
+      })
+
+      cy.contains('button').click()
+      // cy.wrap(null).should(() => expect(clicked).ok)
+
+      cy.getAll('btn', 'mousedown focus click mouseup').each(shouldBeCalled)
+      cy.getAll('span', 'mouseup').each(shouldBeCalled)
+      cy.getAll('span', 'focus click mousedown').each(shouldNotBeCalled)
+    })
+
+    it('click when mousedown el is child of mouseup el', () => {
+      const btn = cy.$$('button:first')
+      const span = $('<span>foooo</span>')
+
+      attachFocusListeners({ btn, span })
+      attachMouseClickListeners({ btn, span })
+      attachMouseHoverListeners({ btn, span })
+
+      btn.html('')
+      btn.append(span)
+
+      // let clicked = false
+
+      btn.on('mousedown', () => {
+        // clicked = true
+        span.css({ marginLeft: 50 })
+      })
+
+      cy.get('button:first').click()
+      // cy.wrap(null).should(() => expect(clicked).ok)
+
+      cy.getAll('btn', 'mousedown focus click mouseup').each(shouldBeCalled)
+      cy.getAll('span', 'mousedown').each(shouldBeCalled)
+      cy.getAll('span', 'focus click mouseup').each(shouldNotBeCalled)
+    })
+
+    it('no click when new element at coords is not ancestor', () => {
+      const btn = cy.$$('button:first')
+      const span1 = $('<span>foooo</span>')
+      const span2 = $('<span>baaaar</span>')
+
+      attachFocusListeners({ btn, span1, span2 })
+      attachMouseClickListeners({ btn, span1, span2 })
+      attachMouseHoverListeners({ btn, span1, span2 })
+
+      // let clicked = false
+
+      btn.html('')
+      btn.append(span1)
+
+      btn.on('mousedown', () => {
+        // clicked = true
+        btn.html('')
+        btn.append(span2)
+      })
+
+      cy.get('button:first').click()
+      // cy.wrap(null).should(() => expect(clicked).ok)
+
+      cy.getAll('btn', 'mouseenter mousedown mouseup').each(shouldBeCalled)
+      cy.getAll('btn', 'click focus').each(shouldNotBeCalled)
+      cy.getAll('span1', 'mouseover mouseenter mousedown').each(shouldBeCalled)
+      cy.getAll('span1', 'focus click mouseup').each(shouldNotBeCalled)
+      cy.getAll('span2', 'mouseup mouseover mouseenter').each(shouldBeCalled)
+      cy.getAll('span2', 'focus click mousedown').each(shouldNotBeCalled)
+    })
+
     it('does not fire a click when element has been removed on mouseup', () => {
       const $btn = cy.$$('button:first')
 
@@ -2594,9 +2675,9 @@ describe('src/cy/commands/actions/click', () => {
             },
             {
               'Event Name': 'click',
-              'Target Element': '⚠️ not fired (mouseup and mousedown not received by same element)',
-              'Prevented Default?': null,
-              'Stopped Propagation?': null,
+              'Target Element': { id: 'dom' },
+              'Prevented Default?': false,
+              'Stopped Propagation?': false,
               'Modifiers': null,
             },
           ])

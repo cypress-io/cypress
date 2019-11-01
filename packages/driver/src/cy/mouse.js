@@ -422,28 +422,34 @@ const create = (state, keyboard, focused) => {
 
       const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      // Only send click event if the same element received both pointerdown and pointerup, and it's not detached.
-      const getSkipClickEventAndReason = () => {
+      const getElementToClick = () => {
         // Never skip the click event when force:true
         if (forceEl) {
-          return false
+          return { elToClick: forceEl }
         }
 
+        // Only send click event if mousedown element is not detached.
         if ($elements.isDetachedEl(mouseDownEvents.pointerdownProps.el)) {
-          return 'element was detached'
+          return { skipClickEventReason: 'element was detached' }
         }
 
-        if (!mouseUpEvents.pointerupProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el) {
-          return 'mouseup and mousedown not received by same element'
-        }
+        const commonAncestor = mouseUpEvents.pointerupProps.el &&
+        mouseDownEvents.pointerdownProps.el &&
+        $elements.getFirstCommonAncestor(mouseUpEvents.pointerupProps.el, mouseDownEvents.pointerdownProps.el)
+
+        return { elToClick: commonAncestor }
+        // if (!mouseUpEvents.pointerupProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el) {
+        //   return {skipClickEvent: 'mouseup and mousedown not in the same tree'}
+        // }
 
         // No reason to skip the click event
-        return false
+        // return false
       }
 
-      const skipClickEvent = getSkipClickEventAndReason()
+      const { skipClickEventReason, elToClick } = getElementToClick()
 
-      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, mouseDownEvents.pointerdownProps.el, forceEl, skipClickEvent, mouseEvtOptionsExtend)
+      debug('sending click to', elToClick)
+      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, elToClick, forceEl, skipClickEventReason, mouseEvtOptionsExtend)
 
       return _.extend({}, mouseDownEvents, mouseUpEvents, mouseClickEvents)
     },
