@@ -37,7 +37,7 @@ mergeDefaults = (obj) ->
 
 validateCookieName = (cmd, name, onFail) ->
   if cookieParser.isCookieName(name) isnt true
-    Cypress.utils.throwErrByPath("cookies.invalid_name", { args: { cmd, name }, onFail })
+    $errUtils.throwErrByPath("cookies.invalid_name", { args: { cmd, name }, onFail })
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   automateCookies = (event, obj = {}, log, timeout) ->
@@ -187,7 +187,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         return resp
       .catch (err) ->
-        Cypress.utils.throwErrByPath("setCookie.backend_error", {
+        $errUtils.throwErrByPath("setCookie.backend_error", {
           args: {
             browserDisplayName: Cypress.browser.displayName,
             errStack: err.stack

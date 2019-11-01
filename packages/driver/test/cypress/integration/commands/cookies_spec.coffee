@@ -297,7 +297,7 @@ describe "src/cy/commands/cookies", ->
 
       it "throws an error if the cookie name is invalid", (done) ->
         cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.getCookie() must be passed an RFC-6265-compliant cookie name.")
+          expect(err.message).to.include("`cy.getCookie()` must be passed an RFC-6265-compliant cookie name.")
           expect(err.message).to.include('You passed:\n\n`m=m`')
 
           done()
@@ -464,7 +464,7 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("name")).to.eq("setCookie")
           expect(lastLog.get("message")).to.eq("foo, bar")
-          expect(err.message).to.eq("`cy.setCookie()` timed out waiting `50ms` to complete.")
+          expect(err.message).to.include("`cy.setCookie()` timed out waiting `50ms` to complete.")
           expect(err.docsUrl).to.eq("https://on.cypress.io/setcookie")
           done()
 
@@ -497,7 +497,7 @@ describe "src/cy/commands/cookies", ->
       context "when setting an invalid cookie", ->
         it "throws an error if the cookie name is invalid", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.include("cy.setCookie() must be passed an RFC-6265-compliant cookie name.")
+            expect(err.message).to.include("`cy.setCookie()` must be passed an RFC-6265-compliant cookie name.")
             expect(err.message).to.include('You passed:\n\n`m=m`')
 
             done()
@@ -517,22 +517,16 @@ describe "src/cy/commands/cookies", ->
           cy.setCookie("foo", " bar")
 
         it "throws an error if the backend responds with an error", (done) ->
+          err = new Error("backend could not set cookie")
+
+          Cypress.automation.withArgs("set:cookie").rejects(err)
+
           cy.on "fail", (err) =>
-            expect(skipErrStub).to.be.calledOnce
-            expect(errStub).to.be.calledTwice
             expect(err.message).to.contain('unexpected error setting the requested cookie')
+            expect(err.message).to.contain(err.message)
             done()
 
-          errStub = cy.stub(Cypress.utils, "throwErrByPath")
-          errStub.callThrough()
-
-          ## stub cookie validation so this invalid cookie can make it to the backend
-          skipErrStub = errStub
-          .withArgs("setCookie.invalid_value")
-          .returns()
-
-          ## browser backend should yell since this is invalid
-          cy.setCookie("foo", " bar")
+          cy.setCookie("foo", "bar")
 
     describe ".log", ->
       beforeEach ->
@@ -682,7 +676,7 @@ describe "src/cy/commands/cookies", ->
 
       it "throws an error if the cookie name is invalid", (done) ->
         cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.clearCookie() must be passed an RFC-6265-compliant cookie name.")
+          expect(err.message).to.include("`cy.clearCookie()` must be passed an RFC-6265-compliant cookie name.")
           expect(err.message).to.include('You passed:\n\n`m=m`')
 
           done()
