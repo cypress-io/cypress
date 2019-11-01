@@ -311,7 +311,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn lerna exec --scope @packages/server "yarn test-unit"
+      - run: yarn test-unit --scope @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -322,7 +322,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn lerna exec --scope @packages/server "yarn test-integration"
+      - run: yarn test-integration --scope @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -333,7 +333,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec yarn test-performance --scope @packages/server
+          command: yarn lerna exec --scope @packages/server "yarn test-performance"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
