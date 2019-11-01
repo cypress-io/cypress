@@ -57,7 +57,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna run test-e2e --scope @packages/server -- --chunk << parameters.chunk >> --browser << parameters.browser >>
+          command: yarn lerna exec --scope @packages/server "yarn test-e2e --chunk << parameters.chunk >> --browser << parameters.browser >>"
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -302,7 +302,7 @@ jobs:
           command: ls -la chai
           working_directory: cli/types
       - run:
-          command: yarn lerna run dtslint --scope cypress
+          command: yarn lerna exec  --scope cypress "yarn dtslint"
       - store-npm-logs
 
   "server-unit-tests":
@@ -311,7 +311,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn lerna run test-unit --scope @packages/server
+      - run: yarn lerna exec  --scope @packages/server "yarn test-unit"
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -322,7 +322,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn lerna run test-integration --scope @packages/server
+      - run: yarn lerna exec --scope @packages/server "yarn test-integration"
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -333,7 +333,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna run test-performance --scope @packages/server
+          command: yarn lerna exec yarn test-performance --scope @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -459,7 +459,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna run start --scope @packages/driver
+          command: yarn lerna exec --scope @packages/driver "yarn start"
           background: true
       - run:
           command: yarn wait-on http://localhost:3500
@@ -467,7 +467,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna run cypress:run --scope @packages/driver -- --record --parallel --group 5x-driver-chrome --browser chrome
+            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-chrome --browser chrome"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -491,7 +491,7 @@ jobs:
   #         command: |
   #           CYPRESS_KONFIG_ENV=production \
   #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-  #           npm run cypress:run -- --record --parallel --group 5x-driver-electron --browser electron
+  #           npm run cypress:run --record --parallel --group 5x-driver-electron --browser electron
   #         working_directory: packages/driver
   #     - store_test_results:
   #         path: /tmp/cypress
@@ -506,12 +506,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna run build-prod --scope @packages/desktop-gui
+          command: yarn lerna exec --scope @packages/desktop-gui "yarn build-prod"
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna run cypress:run --scope @packages/desktop-gui -- --record --parallel --group 2x-desktop-gui
+            yarn lerna exec --scope @packages/desktop-gui "yarn cypress:run --record --parallel --group 2x-desktop-gui"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -524,12 +524,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna run build-prod --scope @packages/reporter
+          command: yarn lerna exec  --scope @packages/reporter "yarn build-prod"
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna run cypress:run --scope @packages/reporter -- --record --parallel --group reporter
+            yarn lerna exec  --scope @packages/reporter "yarn cypress:run --record --parallel --group reporter"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -691,7 +691,7 @@ jobs:
           command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
-          command: yarn lerna run build --scope cypress
+          command: yarn lerna exec --scope cypress "yarn build"
       - run:
           command: ls -la types
           working_directory: cli/build
