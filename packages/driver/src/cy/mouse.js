@@ -410,8 +410,8 @@ const create = (state, keyboard, focused) => {
     * el2 = moveToCoordsOrNoop(coords)
     * sendMouseup(el2)
     * el3 = moveToCoordsOrNoop(coords)
-    * if (notDetached(el1) && el1 === el2)
-    *   sendClick(el3)
+    * if (notDetached(el1))
+    *   sendClick(ancestorOf(el1, el2))
     */
     click (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       debug('mouse.click', { fromElViewport, forceEl })
@@ -438,17 +438,10 @@ const create = (state, keyboard, focused) => {
         $elements.getFirstCommonAncestor(mouseUpEvents.pointerupProps.el, mouseDownEvents.pointerdownProps.el)
 
         return { elToClick: commonAncestor }
-        // if (!mouseUpEvents.pointerupProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el) {
-        //   return {skipClickEvent: 'mouseup and mousedown not in the same tree'}
-        // }
-
-        // No reason to skip the click event
-        // return false
       }
 
       const { skipClickEventReason, elToClick } = getElementToClick()
 
-      debug('sending click to', elToClick)
       const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, elToClick, forceEl, skipClickEventReason, mouseEvtOptionsExtend)
 
       return _.extend({}, mouseDownEvents, mouseUpEvents, mouseClickEvents)

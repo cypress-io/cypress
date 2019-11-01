@@ -380,9 +380,10 @@ describe('src/cy/commands/actions/click', () => {
     it('events when element moved on mousedown', () => {
       const btn = cy.$$('button:first')
       const div = cy.$$('div#tabindex')
+      const root = cy.$$('#dom')
 
       attachFocusListeners({ btn, div })
-      attachMouseClickListeners({ btn, div })
+      attachMouseClickListeners({ btn, div, root })
       attachMouseHoverListeners({ btn, div })
 
       // let clicked = false
@@ -399,6 +400,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('btn', 'click mouseup').each(shouldNotBeCalled)
       cy.getAll('div', 'mouseover mouseenter mouseup').each(shouldBeCalled)
       cy.getAll('div', 'click focus').each(shouldNotBeCalled)
+      cy.getAll('root', 'click').each(shouldBeCalled)
     })
 
     it('events when element moved on mouseup', () => {
@@ -538,6 +540,10 @@ describe('src/cy/commands/actions/click', () => {
 
       $btn.on('click', () => {
         fail('should not have gotten click')
+      })
+
+      cy.$$('body').on('click', (e) => {
+        throw new Error('should not have happened')
       })
 
       cy.contains('button').click()
