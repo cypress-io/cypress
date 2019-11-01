@@ -867,7 +867,7 @@ declare namespace Cypress {
      *    // Assert on the href of the location
      *    cy.location('href').should('contain', '/tag/tutorials')
      */
-    location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location(key: keyof Window['location'], options?: Partial<Loggable & Timeoutable>): Chainable<Location>
 
     /**
      * Print a message to the Cypress Command Log.
