@@ -1,4 +1,4 @@
-exports['e2e web security when enabled fails 1'] = `
+exports['e2e web security / when enabled / fails'] = `
 
 ====================================================================================================
 
@@ -14,7 +14,7 @@ exports['e2e web security when enabled fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: web_security_spec.coffee...                                                     (1 of 1) 
+  Running:  web_security_spec.coffee                                                        (1 of 1)
 
 
   web security
@@ -29,10 +29,10 @@ exports['e2e web security when enabled fails 1'] = `
   1) web security fails when clicking <a> to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:5566" from accessing a cross-origin frame.
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
-  > http://localhost:5566
+  > http://localhost:4466
 
   A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -60,10 +60,10 @@ https://on.cypress.io/cross-origin-violation
   2) web security fails when submitted a form and being redirected to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:5566" from accessing a cross-origin frame.
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
-  > http://localhost:5566
+  > http://localhost:4466
 
   A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -91,10 +91,10 @@ https://on.cypress.io/cross-origin-violation
   3) web security fails when using a javascript redirect to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:5566" from accessing a cross-origin frame.
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
-  > http://localhost:5566
+  > http://localhost:4466
 
   A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -124,30 +124,33 @@ https://on.cypress.io/cross-origin-violation
 
   (Results)
 
-  ┌────────────────────────────────────────┐
-  │ Tests:        3                        │
-  │ Passing:      0                        │
-  │ Failing:      3                        │
-  │ Pending:      0                        │
-  │ Skipped:      0                        │
-  │ Screenshots:  3                        │
-  │ Video:        true                     │
-  │ Duration:     X seconds                │
-  │ Spec Ran:     web_security_spec.coffee │
-  └────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      3                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  3                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     web_security_spec.coffee                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.coffee/web security -- fails when clicking a to another origin (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.coffee/web security -- fails when submitted a form and being redirected to another origin (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/web_security_spec.coffee/web security -- fails when using a javascript redirect to another origin (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
+     when clicking a to another origin (failed).png                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
+     when submitted a form and being redirected to another origin (failed).png                      
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
+     when using a javascript redirect to another origin (failed).png                                
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.coffee.mp4        (X second)
 
 
 ====================================================================================================
@@ -155,11 +158,11 @@ https://on.cypress.io/cross-origin-violation
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ web_security_spec.coffee                  XX:XX        3        -        3        -        - │
+  │ ✖  web_security_spec.coffee                 XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        3        -        3        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
 
 
 `
@@ -180,7 +183,7 @@ exports['e2e web security / when disabled / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: web_security_spec.coffee...                                                     (1 of 1) 
+  Running:  web_security_spec.coffee                                                        (1 of 1)
 
 
   web security
@@ -194,23 +197,23 @@ exports['e2e web security / when disabled / passes'] = `
 
   (Results)
 
-  ┌────────────────────────────────────────┐
-  │ Tests:        3                        │
-  │ Passing:      3                        │
-  │ Failing:      0                        │
-  │ Pending:      0                        │
-  │ Skipped:      0                        │
-  │ Screenshots:  0                        │
-  │ Video:        true                     │
-  │ Duration:     X seconds                │
-  │ Spec Ran:     web_security_spec.coffee │
-  └────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     web_security_spec.coffee                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.coffee.mp4        (X second)
 
 
 ====================================================================================================
@@ -218,11 +221,11 @@ exports['e2e web security / when disabled / passes'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ web_security_spec.coffee                  XX:XX        3        3        -        -        - │
+  │ ✔  web_security_spec.coffee                 XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `

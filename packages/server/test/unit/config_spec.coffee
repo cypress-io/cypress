@@ -225,11 +225,11 @@ describe "lib/config", ->
 
         it "fails if not a string or array", ->
           @setup({ignoreTestFiles: 5})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
 
         it "fails if not an array of strings", ->
           @setup({ignoreTestFiles: [5]})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
 
       context "integrationFolder", ->
@@ -322,9 +322,18 @@ describe "lib/config", ->
           @setup({testFiles: "**/*.coffee"})
           @expectValidationPasses()
 
-        it "fails if not a string", ->
+        it "passes if an array of strings", ->
+          @setup({testFiles: ["**/*.coffee", "**/*.jsx"]})
+          @expectValidationPasses()
+
+        it "fails if not a string or array", ->
           @setup({testFiles: 42})
-          @expectValidationFails("be a string")
+          @expectValidationFails("be a string or an array of strings")
+
+        it "fails if not an array of strings", ->
+          @setup({testFiles: [5]})
+          @expectValidationFails("be a string or an array of strings")
+          @expectValidationFails("the value was: `[5]`")
 
       context "supportFile", ->
         it "passes if a string", ->
@@ -435,11 +444,11 @@ describe "lib/config", ->
 
         it "fails if not a string or array", ->
           @setup({blacklistHosts: 5})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
 
         it "fails if not an array of strings", ->
           @setup({blacklistHosts: [5]})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
 
   context ".getConfigKeys", ->

@@ -137,7 +137,16 @@ module.exports = {
 
           > `{{node}}`
 
-        Cypress considers a `textarea`, any `element` with a `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid clearable elements.
+        A clearable element matches one of the following selectors:
+          'a[href]'
+          'area[href]'
+          'input'
+          'select'
+          'textarea'
+          'button'
+          'iframe'
+          '[tabindex]'
+          '[contenteditable]'
       """
       docsUrl: "https://on.cypress.io/clear"
     }
@@ -189,6 +198,10 @@ module.exports = {
     }
 
   cookies:
+    invalid_name: (obj) -> {
+      message: "#{cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
+      docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
+      }
     timed_out: (obj) -> {
       message: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
       docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
@@ -1105,9 +1118,21 @@ module.exports = {
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
+    backend_error: {
+      message: """
+        #{cmd('setCookie')} had an unexpected error setting the requested cookie in {{browserDisplayName}}.
+
+        {{errStack}}
+      """
+      docsUrl: "https://on.cypress.io/setcookie"
+    }
     invalid_arguments: {
       message: "#{cmd('setCookie')} must be passed two string arguments for `name` and `value`."
-      docsUrl: "https://on.cypress.io/#{_.toLower("setCookie")}"
+      docsUrl: "https://on.cypress.io/setcookie"
+    }
+    invalid_value: {
+      message: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
+      docsUrl: "https://on.cypress.io/setcookie"
     }
 
   spread:
@@ -1253,14 +1278,18 @@ module.exports = {
     }
     invalid: {
       message: """
-        Special character sequence: `{{chars}}` is not recognized. Available sequences are: {{allChars}}
+      Special character sequence: `{{chars}}` is not recognized. Available sequences are: `{{allChars}}`
 
-        If you want to skip parsing special character sequences and type the text exactly as written, pass the option: `{parseSpecialCharSequences: false}`
+      If you want to skip parsing special character sequences and type the text exactly as written, pass the option: `{ parseSpecialCharSequences: false }`
       """
       docsUrl: "https://on.cypress.io/type"
     }
     invalid_date: {
       message: "Typing into a `date` input with #{cmd('type')} requires a valid date with the format `yyyy-MM-dd`. You passed: `{{chars}}`"
+      docsUrl: "https://on.cypress.io/type"
+    }
+    invalid_datetime: {
+      message: "Typing into a datetime input with #{cmd('type')} requires a valid datetime with the format `yyyy-MM-ddThh:mm`, for example `2017-06-01T08:30`. You passed: `{{chars}}`"
       docsUrl: "https://on.cypress.io/type"
     }
     invalid_month: {
@@ -1279,6 +1308,18 @@ module.exports = {
       message: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
       docsUrl: "https://on.cypress.io/type"
     }
+    not_actionable_textlike: {
+      message: """
+        #{cmd('type')} failed because it targeted a disabled element.
+
+        The element typed into was:
+
+          > {{node}}
+
+        Ensure the element does not have an attribute named `disabled` before typing into it.
+      """
+      docsUrl: "https://on.cypress.io/type"
+    }
     not_on_typeable_element: {
       message: """
         #{cmd('type')} failed because it requires a valid typeable element.
@@ -1287,8 +1328,21 @@ module.exports = {
 
           > `{{node}}`
 
-        Cypress considers the `body`, `textarea`, any `element` with a `tabindex` or `contenteditable` attribute, or any `input` with a `type` attribute of `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`, `datetime`, `datetime-local`, `search`, `url`, or `tel` to be valid typeable elements.
+          A typeable element matches one of the following selectors:
+          `a[href]`
+          `area[href]`
+          `input`
+          `select`
+          `textarea`
+          `button`
+          `iframe`
+          `[tabindex]`
+          `[contenteditable]`
       """
+      docsUrl: "https://on.cypress.io/type"
+    }
+    readonly: {
+      message: "#{cmd('type')} cannot type into an element with a `readonly` attribute. The element typed into was: `{{node}}`"
       docsUrl: "https://on.cypress.io/type"
     }
     tab: {
