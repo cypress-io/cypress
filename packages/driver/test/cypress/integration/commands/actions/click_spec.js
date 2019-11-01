@@ -446,6 +446,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('div', 'focus click mouseup mousedown').each(shouldNotBeCalled)
     })
 
+    // https://github.com/cypress-io/cypress/issues/5578
     it('click when mouseup el is child of mousedown el', () => {
       const btn = cy.$$('button:first')
       const span = $('<span>foooo</span>')
