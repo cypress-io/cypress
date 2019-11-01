@@ -23,7 +23,6 @@
     "patch-package": "6.1.2"
   },
   "files": [
-    "lib",
-    "patches"
+    "lib"
   ]
 }
