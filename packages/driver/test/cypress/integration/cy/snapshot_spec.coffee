@@ -89,9 +89,17 @@ describe "driver/src/cy/snapshots", ->
       it "replaces with placeholders that have src in content", ->
         $("<iframe src='generic.html' />").appendTo(cy.$$("body"))
 
+        ## NOTE: possibly switch to visual screenshot diffing in future
+        ## since data: iframes are considered cross-origin and we cannot
+        ## query into them and assert on contents
+        ## e.g. cy.get('iframe').toMatchScreenshot()
+
+        ## For now we parse the src attr and assert on base64 encoded content
         { body } = cy.createSnapshot(null, @$el)
         expect(body.find("iframe").length).to.equal(1)
-        expect(body.find("iframe")[0].src).to.include("generic.html")
+        expect(body.find("iframe")[0].src).to.include(";base64")
+
+        expect(atob(body.find("iframe")[0].src.split(',')[1])).to.include("generic.html")
 
       it "placeholders have same id", ->
         $("<iframe id='foo-bar' />").appendTo(cy.$$("body"))

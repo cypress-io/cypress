@@ -262,7 +262,7 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
   // in case there is no body
   // or if parent is the document which can
   // happen if we already have an <html> element
-  if ($parent.is('body,html') || $document.isDocument($parent)) {
+  if (!$parent.length || $parent.is('body,html') || $document.isDocument($parent)) {
     return false
   }
 

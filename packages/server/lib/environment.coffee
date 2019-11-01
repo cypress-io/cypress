@@ -32,6 +32,10 @@ try
   ## https://github.com/cypress-io/cypress/issues/2376
   app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
 
+  ## allows webSecurity: false to work as expected in webPreferences
+  ## https://github.com/electron/electron/issues/18214
+  app.commandLine.appendSwitch("disable-site-isolation-trials")
+
   if os.platform() is "linux"
     app.disableHardwareAcceleration()
 

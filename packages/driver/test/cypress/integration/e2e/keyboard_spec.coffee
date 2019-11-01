@@ -27,7 +27,11 @@ describe "keyboard", ->
       characters = [
         ['.', 46, 190],
         ['/', 47, 191],
-        ['{enter}', 13, 13]
+        ['{enter}', 13, 13],
+        ['*', 42, 56],
+        ['+', 43, 187],
+        ['-', 45, 189],
+
       ]
 
       characters.forEach ([char, asciiCode, keyCode]) ->

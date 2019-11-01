@@ -14,7 +14,7 @@ exports['e2e plugins fails when spec does not exist 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: spec.js...                                                                      (1 of 1) 
+  Running:  spec.js                                                                         (1 of 1)
 
 Oops...we found an error preparing this test file:
 
@@ -33,23 +33,23 @@ Fix the error in your code and re-run your tests.
 
   (Results)
 
-  ┌─────────────────────────┐
-  │ Tests:        0         │
-  │ Passing:      0         │
-  │ Failing:      1         │
-  │ Pending:      0         │
-  │ Skipped:      0         │
-  │ Screenshots:  0         │
-  │ Video:        true      │
-  │ Duration:     X seconds │
-  │ Spec Ran:     spec.js   │
-  └─────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     spec.js                                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/non-existent-spec/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                         (X second)
 
 
 ====================================================================================================
@@ -57,11 +57,11 @@ Fix the error in your code and re-run your tests.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ spec.js                                   XX:XX        -        -        1        -        - │
+  │ ✖  spec.js                                  XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `

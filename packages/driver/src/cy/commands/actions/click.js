@@ -65,7 +65,7 @@ const formatMouseEvents = (events) => {
 module.exports = (Commands, Cypress, cy, state, config) => {
   const { mouse } = cy.devices
 
-  const mouseAction = (eventName, { subject, positionOrX, y, options, onReady, onTable }) => {
+  const mouseAction = (eventName, { subject, positionOrX, y, options, onReady, onTable, defaultOptions }) => {
     let position
     let x
 
@@ -83,6 +83,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       errorOnSelect: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
+      ...defaultOptions,
     })
 
     // throw if we're trying to click multiple elements
@@ -99,7 +100,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       if (options.log) {
         // figure out the options which actually change the behavior of clicks
-        deltaOptions = $utils.filterOutOptions(options)
+        deltaOptions = $utils.filterOutOptions(options, defaultOptions)
 
         options._log = Cypress.log({
           message: deltaOptions,
@@ -257,13 +258,12 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     },
 
     dblclick (subject, positionOrX, y, options = {}) {
-      // TODO: 4.0 make this false by default
-      options.multiple = true
-
       return mouseAction('dblclick', {
         y,
         subject,
         options,
+        // TODO: 4.0 make this false by default
+        defaultOptions: { multiple: true },
         positionOrX,
         onReady (fromElViewport, forceEl) {
           const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromElViewport, forceEl)

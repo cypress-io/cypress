@@ -22,6 +22,7 @@ const trash = require('../util/trash')
 const random = require('../util/random')
 const system = require('../util/system')
 const duration = require('../util/duration')
+const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
 const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
@@ -56,6 +57,16 @@ const getSymbol = function (num) {
   return logSymbols.success
 }
 
+const getWidth = (table, index) => {
+  // get the true width of a table's column,
+  // based off of calculated table options for that column
+  const columnWidth = table.options.colWidths[index]
+
+  if (columnWidth) {
+    return columnWidth - (table.options.style['padding-left'] + table.options.style['padding-right'])
+  }
+}
+
 const formatBrowser = (browser) => {
   // TODO: finish browser
   return _.compact([
@@ -65,13 +76,13 @@ const formatBrowser = (browser) => {
   ]).join(' ')
 }
 
-const formatFooterSummary = function (results) {
+const formatFooterSummary = (results) => {
   const { totalFailed, runs } = results
 
   // pass or fail color
   const c = totalFailed ? 'red' : 'green'
 
-  const phrase = (function () {
+  const phrase = (() => {
     // if we have any specs failing...
     if (!totalFailed) {
       return 'All specs passed!'
@@ -86,6 +97,7 @@ const formatFooterSummary = function (results) {
   })()
 
   return [
+    formatSymbolSummary(totalFailed),
     color(phrase, c),
     gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
@@ -96,20 +108,42 @@ const formatFooterSummary = function (results) {
   ]
 }
 
-const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }) => {
+const formatSymbolSummary = (failures) => {
+  return getSymbol(failures)
+}
+
+const formatPath = (name, n, colour = 'reset') => {
+  if (!name) return ''
+
+  const fakeCwdPath = env.get('FAKE_CWD_PATH')
+
+  if (fakeCwdPath && env.get('CYPRESS_ENV') === 'test') {
+    // if we're testing within Cypress, we want to strip out
+    // the current working directory before calculating the stdout tables
+    // this will keep our snapshots consistent everytime we run
+    const cwdPath = process.cwd()
+
+    name = name
+    .split(cwdPath)
+    .join(fakeCwdPath)
+  }
+
+  // add newLines at each n char and colorize the path
+  if (n) {
+    let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
+
+    return `${color(nameWithNewLines, colour)}`
+  }
+
+  return `${color(name, colour)}`
+}
+
+const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => {
   debug('formatting Node version. %o', { version: resolvedNodeVersion, path: resolvedNodePath })
 
   if (resolvedNodePath) {
-    return `v${resolvedNodeVersion} (${resolvedNodePath})`
+    return formatPath(`v${resolvedNodeVersion} (${resolvedNodePath})`, width)
   }
-}
-
-const formatSpecSummary = (name, failures) => {
-  return [
-    getSymbol(failures),
-    color(name, 'reset'),
-  ]
-  .join(' ')
 }
 
 const formatRecordParams = function (runUrl, parallel, group) {
@@ -120,25 +154,6 @@ const formatRecordParams = function (runUrl, parallel, group) {
 
     return `Group: ${group}, Parallel: ${Boolean(parallel)}`
   }
-}
-
-const formatSpecPattern = function (specPattern) {
-  if (specPattern) {
-    return specPattern.join(', ')
-  }
-}
-
-const formatSpecs = function (specs) {
-  const names = _.map(specs, 'name')
-
-  // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-  return [
-    `${names.length} found `,
-    gray('('),
-    gray(names.join(', ')),
-    gray(')'),
-  ]
-  .join('')
 }
 
 const displayRunStarting = function (options = {}) {
@@ -156,7 +171,8 @@ const displayRunStarting = function (options = {}) {
 
   console.log('')
 
-  // TODO: calculate this more intelligently after https://github.com/cypress-io/cypress/pull/5120 goes in
+  // if we show Node Version, then increase 1st column width
+  // to include wider 'Node Version:'
   const colWidths = config.resolvedNodePath ? [16, 84] : [12, 88]
 
   const table = terminal.table({
@@ -164,15 +180,39 @@ const displayRunStarting = function (options = {}) {
     type: 'outsideBorder',
   })
 
+  const formatSpecPattern = () => {
+    // foo.spec.js, bar.spec.js, baz.spec.js
+    // also inserts newlines at col width
+    if (specPattern) {
+      return formatPath(specPattern.join(', '), getWidth(table, 1))
+    }
+  }
+
+  const formatSpecs = (specs) => {
+    // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
+    const names = _.map(specs, 'name')
+    const specsTruncated = _.truncate(names.join(', '), { length: 250 })
+
+    const stringifiedSpecs = [
+      `${names.length} found `,
+      '(',
+      specsTruncated,
+      ')',
+    ]
+    .join('')
+
+    return formatPath(stringifiedSpecs, getWidth(table, 1))
+  }
+
   const data = _
   .chain([
     [gray('Cypress:'), pkg.version],
     [gray('Browser:'), formatBrowser(browser)],
-    [gray('Node Version:'), formatNodeVersion(config)],
+    [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
     [gray('Searched:'), formatSpecPattern(specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group)],
-    [gray('Run URL:'), runUrl],
+    [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
   ])
   .filter(_.property(1))
   .value()
@@ -190,17 +230,19 @@ const displaySpecHeader = function (name, curr, total, estimated) {
   const PADDING = 2
 
   const table = terminal.table({
-    colWidths: [80, 20],
-    colAligns: ['left', 'right'],
+    colWidths: [10, 70, 20],
+    colAligns: ['left', 'left', 'right'],
     type: 'pageDivider',
     style: {
       'padding-left': PADDING,
+      'padding-right': 0,
     },
   })
 
   table.push(['', ''])
   table.push([
-    `Running: ${gray(`${name}...`)}`,
+    'Running:',
+    `${formatPath(name, getWidth(table, 1), 'gray')}`,
     gray(`(${curr} of ${total})`),
   ])
 
@@ -243,15 +285,23 @@ const renderSummaryTable = (runUrl) => {
     })
 
     if (runs && runs.length) {
-      const head = ['  Spec', '', 'Tests', 'Passing', 'Failing', 'Pending', 'Skipped']
-      const colAligns = ['left', 'right', 'right', 'right', 'right', 'right', 'right']
-      const colWidths = [39, 11, 10, 10, 10, 10, 10]
+      const colAligns = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right']
+      const colWidths = [3, 41, 11, 9, 9, 9, 9, 9]
 
       const table1 = terminal.table({
         colAligns,
         colWidths,
         type: 'noBorder',
-        head: _.map(head, gray),
+        head: [
+          '',
+          gray('Spec'),
+          '',
+          gray('Tests'),
+          gray('Passing'),
+          gray('Failing'),
+          gray('Pending'),
+          gray('Skipped'),
+        ],
       })
 
       const table2 = terminal.table({
@@ -265,9 +315,6 @@ const renderSummaryTable = (runUrl) => {
         colWidths,
         type: 'noBorder',
         head: formatFooterSummary(results),
-        style: {
-          'padding-right': 2,
-        },
       })
 
       _.each(runs, (run) => {
@@ -276,7 +323,8 @@ const renderSummaryTable = (runUrl) => {
         const ms = duration.format(stats.wallClockDuration)
 
         return table2.push([
-          formatSpecSummary(spec.name, stats.failures),
+          formatSymbolSummary(stats.failures),
+          formatPath(spec.name, getWidth(table2, 1)),
           color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),
@@ -303,7 +351,7 @@ const renderSummaryTable = (runUrl) => {
         })
 
         table4.push(['', ''])
-        table4.push([`Recorded Run: ${gray(runUrl)}`])
+        table4.push([`Recorded Run: ${formatPath(runUrl, getWidth(table4, 0), 'gray')}`])
 
         console.log(terminal.renderTables(table4))
 
@@ -678,6 +726,7 @@ module.exports = {
     })
 
     const table = terminal.table({
+      colWidths: [14, 86],
       type: 'outsideBorder',
     })
 
@@ -691,7 +740,7 @@ module.exports = {
       ['Video:', results.video],
       ['Duration:', results.duration],
       estimated ? ['Estimated:', results.estimated] : undefined,
-      ['Spec Ran:', results.name],
+      ['Spec Ran:', formatPath(results.name, getWidth(table, 1), c)],
     ])
     .compact()
     .map((arr) => {
@@ -705,8 +754,7 @@ module.exports = {
 
     console.log('')
     console.log(table.toString())
-
-    return console.log('')
+    console.log('')
   },
 
   displayScreenshots (screenshots = []) {
@@ -716,17 +764,32 @@ module.exports = {
 
     console.log('')
 
-    const format = function (s) {
-      const dimensions = gray(`(${s.width}x${s.height})`)
-
-      return `  - ${s.path} ${dimensions}`
-    }
-
-    screenshots.forEach((screenshot) => {
-      console.log(format(screenshot))
+    const table = terminal.table({
+      colWidths: [3, 82, 15],
+      colAligns: ['left', 'left', 'right'],
+      type: 'noBorder',
+      style: {
+        'padding-right': 0,
+      },
+      chars: {
+        'left': ' ',
+        'right': '',
+      },
     })
 
-    return console.log('')
+    screenshots.forEach((screenshot) => {
+      const dimensions = gray(`(${screenshot.width}x${screenshot.height})`)
+
+      table.push([
+        '-',
+        formatPath(`${screenshot.path}`, getWidth(table, 1)),
+        gray(dimensions),
+      ])
+    })
+
+    console.log(table.toString())
+
+    console.log('')
   },
 
   postProcessRecording (end, name, cname, videoCompression, shouldUploadVideo) {
@@ -750,10 +813,26 @@ module.exports = {
 
       console.log('')
 
-      console.log(
-        gray('  - Started processing:  '),
-        chalk.cyan(`Compressing to ${videoCompression} CRF`)
-      )
+      const table = terminal.table({
+        colWidths: [3, 21, 76],
+        colAligns: ['left', 'left', 'left'],
+        type: 'noBorder',
+        style: {
+          'padding-right': 0,
+        },
+        chars: {
+          'left': ' ',
+          'right': '',
+        },
+      })
+
+      table.push([
+        gray('-'),
+        gray('Started processing:'),
+        chalk.cyan(`Compressing to ${videoCompression} CRF`),
+      ])
+
+      console.log(table.toString())
 
       const started = Date.now()
       let progress = Date.now()
@@ -764,13 +843,29 @@ module.exports = {
           const finished = Date.now() - started
           const dur = `(${humanTime.long(finished)})`
 
-          console.log(
-            gray('  - Finished processing: '),
-            chalk.cyan(name),
-            gray(dur)
-          )
+          const table = terminal.table({
+            colWidths: [3, 21, 61, 15],
+            colAligns: ['left', 'left', 'left', 'right'],
+            type: 'noBorder',
+            style: {
+              'padding-right': 0,
+            },
+            chars: {
+              'left': ' ',
+              'right': '',
+            },
+          })
 
-          return console.log('')
+          table.push([
+            gray('-'),
+            gray('Finished processing:'),
+            `${formatPath(name, getWidth(table, 2), 'cyan')}`,
+            gray(dur),
+          ])
+
+          console.log(table.toString())
+
+          console.log('')
         }
 
         if (Date.now() - progress > throttle) {
@@ -779,7 +874,7 @@ module.exports = {
           progress += throttle
           const percentage = `${Math.ceil(float * 100)}%`
 
-          return console.log('  - Compression progress: ', chalk.cyan(percentage))
+          console.log('    Compression progress: ', chalk.cyan(percentage))
         }
       }
 

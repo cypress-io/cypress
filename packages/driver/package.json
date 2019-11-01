@@ -58,6 +58,7 @@
     "sinon": "3.3.0",
     "source-map": "0.7.3",
     "stack-utils": "1.0.2",
+    "strict-cookie-parser": "3.1.0",
     "text-mask-addons": "3.8.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",

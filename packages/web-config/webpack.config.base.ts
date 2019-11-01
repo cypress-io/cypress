@@ -201,7 +201,7 @@ const getCommonConfig = () => {
           }),
         ]
       ),
-      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost' })] : []),
+      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })] : []),
     ],
 
     cache: true,

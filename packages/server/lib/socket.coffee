@@ -133,6 +133,8 @@ class Socket
 
     _.defaults options,
       socketId: null
+      onIncomingXhr: ->
+      onResetXhrServer: ->
       onSetRunnables: ->
       onMocha: ->
       onConnect: ->
@@ -299,6 +301,10 @@ class Socket
               options.onResolveUrl(url, headers, automationRequest, resolveOpts)
             when "http:request"
               options.onRequest(headers, automationRequest, args[0])
+            when "reset:xhr:server"
+              options.onResetXhrServer()
+            when "incoming:xhr"
+              options.onIncomingXhr(args[0], args[1])
             when "get:fixture"
               fixture.get(config.fixturesFolder, args[0], args[1])
             when "read:file"
@@ -350,6 +356,7 @@ class Socket
       runnerEvents.forEach (event) =>
         socket.on event, (data) =>
           @toReporter(event, data)
+
 
   end: ->
     @ended = true
