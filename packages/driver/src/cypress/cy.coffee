@@ -60,7 +60,7 @@ setTopOnError = (cy) ->
   if curCy
     curCy = cy
     return
-  
+
   curCy = cy
 
   onTopError = ->
@@ -76,7 +76,7 @@ setTopOnError = (cy) ->
     configurable: false
     enumerable: true
   })
-  
+
 
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
@@ -419,7 +419,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       Cypress.action("cy:command:start", command)
 
-      runCommand(command)
+
+      new Promise (resolve) ->
+        if (a = Cypress.env('DEBUG'))
+          return resolve(Cypress.backend('debug:command', command))
+        resolve()
+      .then ->
+        runCommand(command)
       .then ->
         ## each successful command invocation should
         ## always reset the timeout for the current runnable
@@ -1133,7 +1139,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           args: obj
         })
     })
-  
+
   setTopOnError(cy)
 
   ## make cy global in the specWindow
