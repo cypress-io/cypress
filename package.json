@@ -28,7 +28,7 @@
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
-    "postinstall": "patch-package",
+    "postinstall": "patch-package && yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.eslintrc .",
     "lint-all": "yarn lint-coffee && yarn lint",
