@@ -182,6 +182,5 @@ describe('test errors', function () {
       .get('.test-error-code-frame pre')
       .should('have.class', 'language-text')
     })
-
   })
 })
