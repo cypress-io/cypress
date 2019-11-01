@@ -3,7 +3,7 @@ import cdp from 'devtools-protocol'
 import _ from 'lodash'
 import tough from 'tough-cookie'
 
-const cors = require('../util/cors')
+// const cors = require('../util/cors')
 
 interface CyCookie {
   name: string
@@ -64,16 +64,16 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
 
     // @ts-ignore
     cookie.expires = cookie.expirationDate
-    if (!cookie.hostOnly && cookie.domain[0] !== '.') {
-      let parsedDomain = cors.parseDomain(cookie.domain)
+    // if (!cookie.hostOnly && cookie.domain[0] !== '.') {
+    //   let parsedDomain = cors.parseDomain(cookie.domain)
 
-      // normally, a non-hostOnly cookie should be prefixed with a .
-      // so if it's not a top-level domain (localhost, ...) or IP address
-      // prefix it with a . so it becomes a non-hostOnly cookie
-      if (parsedDomain && parsedDomain.tld !== cookie.domain) {
-        cookie.domain = `.${cookie.domain}`
-      }
-    }
+    //   // normally, a non-hostOnly cookie should be prefixed with a .
+    //   // so if it's not a top-level domain (localhost, ...) or IP address
+    //   // prefix it with a . so it becomes a non-hostOnly cookie
+    //   if (parsedDomain && parsedDomain.tld !== cookie.domain) {
+    //     cookie.domain = `.${cookie.domain}`
+    //   }
+    // }
 
     // not used by Chrome
     delete cookie.hostOnly
