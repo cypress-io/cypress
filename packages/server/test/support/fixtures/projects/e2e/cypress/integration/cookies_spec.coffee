@@ -6,11 +6,10 @@ otherHttpsUrl = Cypress.env('otherHttpsUrl')
 
 describe "cookies", ->
   before ->
-    ## assert we're running on expected baseurl,
-    ## otherwise these tests are useless
     if Cypress.env('noBaseUrl')
       return
 
+    ## assert we're running on expected baseurl
     expect(Cypress.env('baseUrl')).to.be.a('string')
     .and.have.length.gt(0)
     .and.eq(Cypress.config('baseUrl'))
@@ -164,22 +163,15 @@ describe "cookies", ->
     ].forEach ([protocol, altUrl]) =>
       it "can set cookies on way too many redirects with #{protocol} intermediary", ->
         n = 8
-        baseLoc = new Cypress.Location(Cypress.env('baseUrl'))
-        otherLoc = new Cypress.Location(altUrl)
-
-        expectedCookie = (loc, n, tag) =>
-          {
-            name: "name#{tag}#{n}"
-            value: "val#{tag}#{n}"
-            domain: if loc.remote.domain == 'localhost' then 'localhost' else ".#{loc.getSuperDomain()}"
-            httpOnly: false
-            secure: false
-          }
 
         cy.request("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
 
         cy.getCookies().then (cookies) ->
-          cy.task('console:log', 'baseUrl cookies:', cookies)
+          cy.task('console:log', "#{Cypress.env('baseUrl')} cookies:")
+          cy.task('console:log', cookies)
 
-        cy.getCookies({ domain: otherLoc.remote.domain }).then (cookies) ->
-          cy.task('console:log', 'altUrl cookies:', cookies)
+        altLoc = new Cypress.Location(altUrl)
+
+        cy.getCookies({ domain: altLoc.remote.domain }).then (cookies) ->
+          cy.task('console:log', "#{altUrl} cookies:")
+          cy.task('console:log', cookies)

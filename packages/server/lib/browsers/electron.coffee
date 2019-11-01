@@ -28,6 +28,8 @@ getAutomation = (win) ->
       debug('debugger: sending %s with params %o', message, data)
       Promise.promisify(win.webContents.debugger.sendCommand, {context: win.webContents.debugger})(message, data)
       .tap (res) ->
+        if res.data && res.data.length > 100
+          res.data = res.data.slice(0, 100) + ' [truncated]'
         debug('debugger: received response to %s: %o', message, res)
       .tapCatch (err) ->
         debug('debugger: received error on %s: %o', messsage, err)

@@ -97,8 +97,8 @@ if haveRoot
   httpPort = 80
   httpsPort = 443
 
-otherUrl = "http://quux.bar.net#{if haveRoot then '' else httpPort}"
-otherHttpsUrl = "http://quux.bar.net#{if haveRoot then '' else httpPort}"
+otherUrl = "http://quux.bar.net#{if haveRoot then '' else ":#{httpPort}"}"
+otherHttpsUrl = "http://quux.bar.net#{if haveRoot then '' else ":#{httpsPort}"}"
 
 describe "e2e cookies", ->
   e2e.setup({
