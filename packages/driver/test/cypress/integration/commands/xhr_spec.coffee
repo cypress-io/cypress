@@ -1426,6 +1426,29 @@ describe "src/cy/commands/xhr", ->
               }
             })
 
+    describe "response fixtures", ->
+      it "works if the JSON file is valid", ->
+        cy
+          .server()
+          .route({
+            method: 'POST',
+            url: '/test-xhr',
+            response: 'fixture:valid.json',
+          })
+          .get('#trigger-xhr')
+          .click()
+
+      it "works if the JSON file has content, null", ->
+        cy
+          .server()
+          .route({
+            method: 'POST',
+            url: '/test-xhr',
+            response: 'fixture:null.json',
+          })
+          .get('#trigger-xhr')
+          .click()
+
     describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)

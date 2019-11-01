@@ -16,5 +16,12 @@
     <div>
       Nested Find
     </div>
+    <button id="trigger-xhr">Trigger XHR</button>
+    <script>
+      $('#trigger-xhr').click(function(event) {
+        $.post('/test-xhr')
+        event.preventDefault()
+      })
+    </script>
   </body>
 </html>
