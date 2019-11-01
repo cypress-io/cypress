@@ -154,7 +154,7 @@ validationRules = {
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
-  testFiles: v.isString
+  testFiles: v.isStringOrArrayOfStrings
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber
   trashAssetsBeforeRuns: v.isBoolean

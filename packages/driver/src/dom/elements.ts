@@ -1,12 +1,12 @@
 // NOT patched jquery
 import $ from 'jquery'
-import * as $jquery from './jquery'
-import * as $window from './window'
-import * as $document from './document'
-import $utils from '../cypress/utils.coffee'
-import * as $selection from './selection'
 import _ from '../config/lodash'
+import $utils from '../cypress/utils.coffee'
+import * as $document from './document'
+import * as $jquery from './jquery'
+import * as $selection from './selection'
 import { parentHasDisplayNone } from './visibility'
+import * as $window from './window'
 
 const { wrap } = $jquery
 
@@ -487,7 +487,7 @@ const isW3CFocusable = (el) => {
 
 type JQueryOrEl<T extends HTMLElement> = JQuery<T> | T
 
-const isType = function (el: JQueryOrEl<HTMLElement>, type) {
+const isInputType = function (el: JQueryOrEl<HTMLElement>, type) {
   el = ([] as HTMLElement[]).concat($jquery.unwrap(el))[0]
 
   if (!isInput(el) && !isButton(el)) {
@@ -678,7 +678,7 @@ const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
   }
   const type = (type) => {
     if (isInput(el)) {
-      return isType(el, type)
+      return isInputType(el, type)
     }
 
     return false
@@ -710,7 +710,7 @@ const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
 
 const isInputAllowingImplicitFormSubmission = function ($el) {
   const type = (type) => {
-    return isType($el, type)
+    return isInputType($el, type)
   }
 
   // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
@@ -1088,8 +1088,7 @@ export {
   isInput,
   isIframe,
   isTextarea,
-  isType,
-  isAttrType,
+  isInputType,
   isFocused,
   isFocusedOrInFocused,
   isInputAllowingImplicitFormSubmission,

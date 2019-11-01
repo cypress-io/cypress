@@ -6,7 +6,7 @@ const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
-const $Keyboard = require('../../../cy/keyboard').default
+const $Keyboard = require('../../../cy/keyboard')
 const debug = require('debug')('cypress:driver:command:type')
 
 module.exports = function (Commands, Cypress, cy, state, config) {
@@ -41,10 +41,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return table[id]
         }
 
-        let obj
-
-        table[id] = (obj = {})
-        const modifiers = $Keyboard.modifiersToString($Keyboard.getActiveModifiers(state))
+        const obj = table[id] = {}
+        const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers(state))
 
         if (modifiers) {
           obj.modifiers = modifiers
@@ -52,6 +50,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         if (key) {
           obj.typed = key
+
           if (which) {
             obj.which = which
           }
@@ -132,8 +131,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         const $el = $dom.wrap(el)
 
         return (
-          ($dom.isSelector($el, 'input') && $dom.isType($el, 'submit')) ||
-          ($dom.isSelector($el, 'button') && !$dom.isType($el, 'button') && !$dom.isType($el, 'reset'))
+          ($dom.isSelector($el, 'input') && $dom.isInputType($el, 'submit')) ||
+          ($dom.isSelector($el, 'button') && !$dom.isInputType($el, 'button') && !$dom.isInputType($el, 'reset'))
         )
       })
     }
@@ -254,9 +253,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             if (typed === charsToType) {
               return $elements.setNativeProp(el, 'value', charsToType)
             }
-          } else {
-            return $selection.replaceSelectionContents(el, key)
           }
+
+          return $selection.replaceSelectionContents(el, key)
         },
 
         onAfterType () {
@@ -401,6 +400,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             force: true, // force the click, avoid waiting
             timeout: options.timeout,
             interval: options.interval,
+            errorOnSelect: false,
           })
           .then(() => {
             if (!options.force && $elements.getActiveElByDocument($elToClick[0].ownerDocument) === null) {
