@@ -180,12 +180,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           Subject: subject
       })
 
-    log = () -> 
-      return if options.log is false
-
     if not _.isString(str)
       $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
-        onFail: log
+        onFail: options._log
         args: { cmd: name }
       })
 
@@ -302,7 +299,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## else throw that prop isn't a function
       $utils.throwErrByPath("invoke.prop_not_a_function", {
-        onFail: log
+        onFail: options._log
         args: {
           prop: propAtLastPath
           type: $utils.stringifyFriendlyTypeof(value)
