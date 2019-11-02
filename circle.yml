@@ -20,17 +20,17 @@ defaults: &defaults
     LINES: 24
 
 executors:
-  # the Docker image with Cypress dependencies and Chrome browser
+  # the Docker image with Cypress dependencies
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.0.0-chrome73
+      - image: cypress/base:12.12.0
     environment:
       PLATFORM: linux
 
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/base:12.0.0
+      - image: cypress/base:12.12.0
         user: node
     environment:
       PLATFORM: linux
@@ -45,6 +45,16 @@ executors:
       PLATFORM: mac
 
 commands:
+  install-google-chrome:
+    description: Download and install Google Chrome (stable) and its dependencies
+    steps:
+      - run:
+          command: |
+            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+            echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
+            apt update
+            apt install -y google-chrome-stable
+            google-chrome -version
   run-e2e-tests:
     parameters:
       browser:
@@ -56,6 +66,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - install-google-chrome
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
@@ -249,8 +260,7 @@ jobs:
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
       # Install sub packages dependencies and build all sub packages via postinstall script
-      # try several times, because flaky NPM installs ...
-      - run: npm install || npm install
+      - run: npm install
       - run:
           name: Top level packages
           command: npm ls --depth=0 || true
@@ -329,6 +339,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-google-chrome
       - run: npm run all test-unit -- --package server
       - store_test_results:
           path: /tmp/cypress
@@ -350,6 +361,7 @@ jobs:
       steps:
       - attach_workspace:
           at: ~/
+      - install-google-chrome
       - run:
           command: npm run all test-performance -- --package server
       - store_test_results:
@@ -476,6 +488,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-google-chrome
       - run:
           command: npm start
           background: true
@@ -604,6 +617,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: $(npm bin)/print-arch
+      - run: 
+          name: Install zip
+          command: |
+            apt update
+            apt install zip -y
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
@@ -1227,3 +1245,4 @@ workflows:
     <<: *linux-workflow
   mac:
     <<: *mac-workflow
+    
