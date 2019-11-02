@@ -881,6 +881,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
+    when "FOLDER_NOT_ACCESSIBLE"
+      """
+      Folder #{arg1} is not writable.
+
+      Either enable write permission to this directory to enable screen shot and video collection.
+
+      Or ignore this warning if you do not need enable screen shot and video.
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)

@@ -115,7 +115,7 @@ module.exports = {
     .then(() => {
       // if it does also check that the projectRoot
       // directory is writable
-      return fs.accessAsync(projectRoot, fs.W_OK)
+      return fs.accessAsync(projectRoot, fs.constants.W_OK)
     }).catch({ code: 'ENOENT' }, () => {
       // cypress.json does not exist, we missing project
       log('cannot find file %s', file)
@@ -126,8 +126,9 @@ module.exports = {
         throw err
       }
 
+      throw err
       // else we cannot read due to folder permissions
-      return this._logReadErr(file, err)
+      // return errors.warning('FOLDER_NOT_ACCESSIBLE', projectRoot)
     })
   },
 
