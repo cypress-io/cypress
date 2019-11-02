@@ -21,8 +21,10 @@
 }
 
 .dropdown-menu {
+  @include themed {
+    background-color: themeVar('background');
+  }
   background-clip: padding-box;
-  background-color: #fff;
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 2px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
@@ -51,13 +53,16 @@
     &:hover,
     &:focus,
     &:active {
+      @include themed {
+        background-color: themeVar('actionBackground');
+      }
       cursor: pointer;
-      background-color: #f5f5f5;
-      color: #262626;
     }
 
     &>span, &>a {
-      color: #333;
+      @include themed {
+       color: themeVar('textHighContrast');
+      }
       cursor: pointer;
       display: block;
       font-weight: normal;

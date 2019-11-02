@@ -26,7 +26,7 @@
 
   h1 {
     @include themed {
-      color: themeVar('introH1');
+      color: themeVar('textHighContrast');
     }
     font-family: $font-title;
     font-weight: 400;
@@ -36,7 +36,7 @@
 
   &>p {
     @include themed {
-      color: themeVar('introP');
+      color: themeVar('textMidContrast');
     }
     margin: 10px 0;
     font-size: 14px;

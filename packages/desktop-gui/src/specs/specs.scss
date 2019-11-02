@@ -13,9 +13,12 @@ $max-nesting-level: 14;
   }
 
   header {
+    @include themed {
+      background-color: themeVar('tertiaryBackground');
+      border-color: themeVar('borderLowContrast');
+    }
     height: 42px;
-    background: #f5f5f5;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid
   }
 
   .search {
@@ -49,6 +52,9 @@ $max-nesting-level: 14;
     }
 
     .filter {
+      @include themed {
+        background-color: themeVar('tertiaryBackground');
+      }
       padding-left: 30px;
       padding-right: 25px;
       border-radius: 0;
@@ -57,14 +63,16 @@ $max-nesting-level: 14;
       width: 100%;
       height: 26px;
       line-height: 30px;
-      background-color: #f5f5f5;
       transition: border-color 0.25s ease;
 
       &:focus {
+        @include themed {
+          background-color: themeVar('tertiaryBackground');
+          border-color: themeVar('borderLowContrast');
+        }
         outline: none;
-        border-bottom: 2px solid #ddd;
+        border-bottom: 2px solid;
         box-shadow: none;
-        background-color: #f5f5f5;
       }
     }
   }
@@ -143,13 +151,17 @@ $max-nesting-level: 14;
 
     &.level-0 {
       >div>.folder-name {
+        @include themed {
+          background-color: themeVar('tertiaryBackground');
+          border-color: themeVar('borderLowContrast');
+          color: themeVar('textMidContrast');
+        }
+
         padding: 5px 20px;
-        background-color: #F9F9F9;
         font-weight: normal;
         text-transform: uppercase;
-        border-bottom: 1px solid #eee;
-        border-top: 1px solid #eee;
-        color: #777;
+        border-bottom: 1px solid;
+        border-top: 1px solid;
         line-height: 18px;
         font-family: $font-sans;
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import _ from 'lodash'
 
 class ThemeProvider {
@@ -48,12 +48,15 @@ const ThemeProviderInstance = new ThemeProvider()
 export default ThemeProviderInstance
 
 export const useTheme = () => {
-  const [theme, setTheme] = useState(ThemeProviderInstance.theme)
-
   useEffect(
-    () => ThemeProviderInstance.subscribe(setTheme),
+    () => {
+      ThemeProviderInstance.subscribe((theme) => {
+        document.body.classList.remove('theme-light')
+        document.body.classList.remove('theme-dark')
+        document.body.classList
+        .add(theme === 'dark' ? 'theme-dark' : 'theme-light')
+      })
+    },
     []
   )
-
-  return theme
 }

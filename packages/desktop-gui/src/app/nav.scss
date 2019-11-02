@@ -21,16 +21,21 @@
 }
 
 .navbar-default {
-  background-color:#ececec;
-  box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
-  border-color: #c8c8c8;
+  @include themed {
+    background-color: themeVar('secondaryBackground');
+    box-shadow: themeVar('boxShadowStrong');
+    border-color: themeVar('projectNavBorder');
+  }
+
   z-index: 10;
 
   .nav {
     > .open {
       > a, > a:hover {
-        background-color: #dedede;
-        color: #262626;
+        @include themed {
+          background-color: themeVar('tertiaryBackground');
+          color: themeVar('textHighContrast');
+        }
       }
     }
 
@@ -38,27 +43,36 @@
       > div,
       > a {
         font-size: 13px;
-        color: #444;
+        @include themed {
+          color: themeVar('textHighContrast');
+        }
         padding: 1px 20px 0 20px;
         line-height: 35px;
       }
 
       > a  {
         &:hover, &:focus {
+          @include themed {
+            background-color: themeVar('actionBackground');
+          }
+
           cursor: pointer;
-          background-color: #f3f3f3;
         }
 
         &.active {
-          background-color: #dedede;
-          color: #262626;
+          @include themed {
+            background-color: themeVar('tertiaryBackground');
+            color: themeVar('textHighContrast');
+          }
         }
 
         &.btn-link {
           padding: 0 5px;
 
           &:hover {
-            background-color:#ececec;
+            @include themed {
+              background-color: themeVar('secondaryBackground');
+            }
           }
         }
       }

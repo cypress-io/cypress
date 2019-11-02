@@ -33,6 +33,7 @@ class OnBoarding extends Component {
 
     return (
       <BootstrapModal
+        className='onboarding-modal'
         show={project.onBoardingModalOpen}
         onHide={closeModal}
         backdrop='static'
