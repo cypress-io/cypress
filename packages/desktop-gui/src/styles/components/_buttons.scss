@@ -12,3 +12,37 @@
     outline: 0
   }
 }
+
+.btn {
+  @include themed {
+    color: themeVar('btnContrast');
+  }
+}
+
+.btn-default {
+  @include themed {
+    background-color: themeVar('background');
+    border-color: themeVar('btnDefaultBorder');
+    color: themeVar('textHighContrast');
+  }
+
+  &:focus, &:active, &:hover {
+    @include themed {
+      background-color: themeVar('actionBackground');
+      border-color: themeVar('btnDefaultBorder');
+      color: themeVar('textHighContrast');
+    }
+  }
+}
+
+.btn-link {
+  @include themed {
+    color: themeVar('textLink');
+  }
+
+  &:focus, &:active, &:hover {
+    @include themed {
+      color: themeVar('textLinkAction');
+    }
+  }
+}

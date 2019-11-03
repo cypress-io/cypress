@@ -9,7 +9,9 @@
 
 .empty-no-api-server {
   em {
-    color: #333;
+    @include themed {
+      color: themeVar('textHighContrast')
+    }
     font-style: normal;
     font-family: $font-mono;
   }

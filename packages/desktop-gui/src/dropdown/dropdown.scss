@@ -23,11 +23,12 @@
 .dropdown-menu {
   @include themed {
     background-color: themeVar('background');
+    border-color: themeVar('borderLowContrast');
+    box-shadow: themeVar('boxShadowDropdown');
   }
   background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid;
   border-radius: 2px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
   font-size: 14px;
   display: none;
   float: left;

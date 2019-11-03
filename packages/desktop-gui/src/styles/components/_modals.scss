@@ -15,7 +15,9 @@
 }
 
 .modal-body.os-dialog {
-  background-color: #f2f2f2;
+  @include themed {
+    background-color: themeVar('background')
+  }
   border-radius: 10px;
   padding: 15px 30px;
 
@@ -24,7 +26,11 @@
   }
 
   hr {
-    border-top: 1px solid #c0c0bf;
+    @include themed {
+      border-color: themeVar('borderLowContrast')
+    }
+
+    border-top: 1px solid;
   }
 
   form .control-label {
@@ -37,8 +43,10 @@
 }
 
 .checkbox small {
+  @include themed {
+    color: themeVar('textMidContrast');
+  }
   font-size: 11px;
-  color: #888;
   clear: both;
   display: block;
 }

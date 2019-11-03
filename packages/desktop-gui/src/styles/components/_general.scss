@@ -1,6 +1,7 @@
 #app {
   @include themed {
-    background: themeVar('background');
+    color: themeVar('textHighContrast');
+    background-color: themeVar('background');
   };
   display: flex;
   flex-direction: column;
@@ -73,7 +74,9 @@
 }
 
 .fa.green {
-  color: #028863;
+  @include themed {
+    color: themeVar('iconGreen');
+  }
 }
 
 .fa.blue {
@@ -97,14 +100,18 @@ i.overLimit { color: #F5A327;}
 i.timedOut { color: #F5A327;}
 
 .form-horizontal {
-  margin-bottom: 25px;
+  @include themed {
+    border-color: themeVar('borderLowContrast');
+  }
 
-  background-color: #fafafa;
-  border: 1px solid #eee;
+  margin-bottom: 25px;
+  border: 1px solid;
   padding: 15px 25px;
 
   .empty-well {
-    background-color: white;
+    @include themed {
+      background-color: themeVar('secondaryBackground');
+    }
   }
 
   .btn-block {
@@ -139,8 +146,44 @@ pre.line-nums {
   }
 }
 
-.btn {
+a {
   @include themed {
-    color: themeVar('btnContrast')
+    color: themeVar('textLink')
   }
+
+  &:focus, &:active, &:hover {
+    @include themed {
+      color: themeVar('textLinkAction');
+    }
+  }
+}
+
+table {
+  > thead > tr > th,
+  > thead > tr > td,
+  > tbody > tr > th,
+  > tbody > tr > td,
+  > tfoot > tr > th,
+  > tfoot > tr > td {
+    @include themed {
+      border-color: themeVar('borderLowContrast')
+    }
+  }
+
+  > thead > tr > th { 
+    @include themed {
+      border-color: themeVar('borderLowContrast')
+    }
+  
+  }
+}
+
+.text-muted {
+  @include themed {
+    color: themeVar('textLowContrast');
+  }
+}
+
+.navbar {
+  border: none;
 }

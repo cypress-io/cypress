@@ -2,7 +2,9 @@
   text-align: center;
 
   p {
-    color: #888;
+    @include themed {
+      color: themeVar('textLowContrast');
+    }
     font-size: 14px;
     margin-bottom: 5px;
   }
@@ -30,13 +32,16 @@
 }
 
 .empty-well {
+  @include themed {
+    background-color: themeVar('secondaryBackground');
+    border-color: themeVar('borderLowContrast');
+  }
   padding: 25px 50px;
   margin: 30px;
   text-align: center;
   font-style: italic;
-  background-color: #f7f7f7;
   border-radius: 5px;
-  border: 1px dashed #ddd;
+  border: 1px dashed;
 
   code:hover {
     text-decoration: none !important;

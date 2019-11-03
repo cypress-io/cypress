@@ -65,8 +65,11 @@
   }
 
   .config-vars {
+    @include themed {
+      border-color: themeVar('borderLowContrast');
+    }
     font-size: 13px;
-    border: 1px solid #ddd;
+    border: 1px solid;
     border-radius: 3px;
     background-color: #252831;
     color: #eee;
@@ -159,7 +162,10 @@
     border-top: none;
 
     &:first-child {
-      border-top: 1px solid #eee;
+      @include themed {
+        border-color: themeVar('borderLowContrast');
+      }
+      border-top: 1px solid;
     }
   }
 
@@ -198,9 +204,12 @@
 }
 
 .config-table {
+  @include themed {
+    border-color: themeVar('borderLowContrast');
+  }
   margin: 10px 0;
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
 }
 
 .settings-record-key {

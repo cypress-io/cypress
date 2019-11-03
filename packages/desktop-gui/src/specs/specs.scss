@@ -29,16 +29,20 @@ $max-nesting-level: 14;
     width: calc(100% - 140px);
 
     label {
+      @include themed {
+        color: themeVar('textMidContrast');
+      }
       position: absolute;
       left: 22px;
       top: 47%;
       max-width: 100%;
-      color: #757575;
       transform: translate(0, -50%);
     }
 
     .clear-filter {
-      color: #b3b3b3;
+      @include themed {
+        color: themeVar('textLowContrast');
+      }
       display: none;
       position: absolute;
       right: 10px;
@@ -54,6 +58,7 @@ $max-nesting-level: 14;
     .filter {
       @include themed {
         background-color: themeVar('tertiaryBackground');
+        color: themeVar('textHighContrast');
       }
       padding-left: 30px;
       padding-right: 25px;
@@ -64,6 +69,12 @@ $max-nesting-level: 14;
       height: 26px;
       line-height: 30px;
       transition: border-color 0.25s ease;
+
+      &::placeholder {
+        @include themed {
+          color: themeVar('textLowContrast');
+        }
+      }
 
       &:focus {
         @include themed {
@@ -78,27 +89,31 @@ $max-nesting-level: 14;
   }
 
   .all-tests {
+    @include themed {
+      color: themeVar('textLink');
+    }
     position: relative;
     display: inline;
     font-size: 13px;
-    color: #637eb9;
     padding: 5px 10px;
 
     &:hover, &:focus {
-      color: #38589c;
+      @include themed {
+        color: themeVar('textLinkAction');
+      }
       text-decoration: none;
     }
 
     &.active {
+      @include themed {
+        color: themeVar('textHighContrast');
+      }
       pointer-events: none;
-      color: #4c4e63;
       text-decoration: none;
 
       &:hover {
         pointer-events: none;
-        color: #4c4e63;
         text-decoration: none;
-
       }
     }
 
@@ -143,10 +158,12 @@ $max-nesting-level: 14;
   }
 
   .folder {
+    @include themed {
+      color: themeVar('textMidContrast')
+    }
     cursor: pointer;
     font-weight: 500;
     font-size: 15px;
-    color: #636363;
     font-family: $font-sans;
 
     &.level-0 {
@@ -161,7 +178,6 @@ $max-nesting-level: 14;
         font-weight: normal;
         text-transform: uppercase;
         border-bottom: 1px solid;
-        border-top: 1px solid;
         line-height: 18px;
         font-family: $font-sans;
 
@@ -174,31 +190,35 @@ $max-nesting-level: 14;
   }
 
   .file > a {
+    @include themed {
+      color: themeVar('textLink');
+      border-color: themeVar('borderLowContrast');
+    }
     font-weight: 400;
-    border-bottom: 1px dotted #eeeeee;
+    border-bottom: 1px dotted;
     padding: 4px 0;
     font-family: $font-sans;
-    color: #637eb9;
     font-size: 15px;
 
     &.active {
+      @include themed {
+        color: themeVar('textHighContrast');
+        background-color: themeVar('tertiaryBackground');
+      }
       pointer-events: none;
-      background-color: #F5FBF7;
-      color: #4c4e63;
       text-decoration: none;
 
       &:hover {
         pointer-events: none;
-        background-color: #F5FBF7;
-        color: #4c4e63;
         text-decoration: none;
 
       }
     }
 
     &:hover, &:focus {
-      background-color: #f8f8f8;
-      color: #38589c;
+      @include themed {
+        background-color: themeVar('actionBackground');
+      }
       cursor: pointer;
       text-decoration: none;
     }
@@ -217,7 +237,6 @@ $max-nesting-level: 14;
     &>div:last-child {
       @include responsive-width(25%);
       text-align: right;
-      color: #bdc0c5;
     }
   }
 }

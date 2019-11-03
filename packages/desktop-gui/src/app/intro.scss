@@ -45,7 +45,6 @@
 
   pre {
     @include themed {
-      color: themeVar('introPreColor');
       background-color:  themeVar('introPreBack');
     }
     clear: both;
@@ -139,7 +138,7 @@
 
   h1 {
     @include themed {
-      border-color: themeVar('projectListBorder');
+      border-color: themeVar('borderMidContrast');
     }
     padding-bottom: 10px;
     border-bottom: 1px solid;
@@ -156,7 +155,7 @@
 
   li {
     @include themed {
-      border-color: themeVar('projectListBorder');
+      border-color: themeVar('borderMidContrast');
     }
     border-top: solid 1px;
     list-style: none;
@@ -203,7 +202,7 @@
 
   .project-name {
     @include themed {
-      color: themeVar('projectListName');
+      color: themeVar('textMidContrast');
     }
     font-size: 14px;
   }
@@ -214,14 +213,14 @@
     .project-name,
     .project-path {
       @include themed {
-        color: themeVar('projectListHover');
+        color: themeVar('textLink');
       }
     }
   }
 
   .project-path {
     @include themed {
-      color: themeVar('projectListPath');
+      color: themeVar('textLowContrast');
     }
     font-size: 12px;
     font-style: italic;

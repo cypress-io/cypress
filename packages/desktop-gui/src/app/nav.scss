@@ -24,7 +24,6 @@
   @include themed {
     background-color: themeVar('secondaryBackground');
     box-shadow: themeVar('boxShadowStrong');
-    border-color: themeVar('projectNavBorder');
   }
 
   z-index: 10;
@@ -61,7 +60,7 @@
 
         &.active {
           @include themed {
-            background-color: themeVar('tertiaryBackground');
+            background-color: themeVar('selectedBackground');
             color: themeVar('textHighContrast');
           }
         }
@@ -148,9 +147,9 @@
     > li > a,
     > li > span > a  {
       &:hover,
-      a:focus {
+      &:focus {
+        background-color: lighten(#1e2128, 10%);
         color: #fff;
-        background-color: #3b414a;
       }
     }
   }
