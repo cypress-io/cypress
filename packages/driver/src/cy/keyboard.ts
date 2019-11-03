@@ -237,7 +237,7 @@ const shouldIgnoreEvent = <
 }
 
 const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
-  if (!key.text) return true
+  if (!key.text) return false
 
   const bounds = $selection.getSelectionBounds(el)
   const noneSelected = bounds.start === bounds.end

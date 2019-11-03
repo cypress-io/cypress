@@ -30,5 +30,4 @@ describe "e2e xhr", ->
     spec: "xhr_spec.coffee"
     snapshot: true
     expectedExitCode: 0
-    useCli: true
   }

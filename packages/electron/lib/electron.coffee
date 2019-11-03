@@ -75,6 +75,10 @@ module.exports = {
         if opts.inspectBrk
           argv.unshift("--inspect-brk=5566")
 
+      ## max HTTP header size 8kb -> 1mb
+      ## https://github.com/cypress-io/cypress/issues/76
+      argv.unshift("--max-http-header-size=#{1024*1024}")
+
       debug("spawning %s with args", execPath, argv)
 
       if debug.enabled
